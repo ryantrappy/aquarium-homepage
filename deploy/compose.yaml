@@ -1,0 +1,24 @@
+services:
+  reef-control:
+    image: reef-control:local
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      REEF_CONFIG_PATH: /var/lib/reef-control/reef-config.json
+      REEF_PUBLIC_ORIGIN: https://aquarium.ryantr.app
+    ports:
+      - "127.0.0.1:3004:3000"
+    volumes:
+      - ${REEF_DATA_DIR:-../data}:/var/lib/reef-control

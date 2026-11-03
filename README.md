@@ -9,7 +9,9 @@ npm install
 npm run dev
 ```
 
-The app runs in the browser and keeps service settings in that browser's local storage. Settings are not sent to a server and do not sync to other browsers or devices. Use the app's JSON export and import to move a configuration between browsers.
+The app saves settings through its same-origin API to `.data/reef-config.json` on the Node server. A browser that can reach the same app instance sees the shared list. The first run serves three clearly labeled example shortcuts and does not probe their health. Existing browser-local settings are not copied automatically; use **Import list** in settings to migrate a previously exported JSON list.
+
+The persisted envelope is versioned and reef-only: `{ "version": 1, "mode": "reef", "services": [...] }`. The server validates every write, serializes writes, and checks revisions so one browser cannot silently overwrite another browser's newer settings. The JSON file is stored outside the public assets. For deployment, use the isolated Docker setup and existing reverse-proxy authentication described in [docs/deployment.md](docs/deployment.md).
 
 The initial shortcuts are labeled examples. Their links use `trappserv.er` with example ports; they are placeholders and do not indicate that those services exist or are online. The launcher does not check service health.
 
@@ -36,6 +38,8 @@ npm run typecheck
 npm test
 npm run build
 ```
+
+For a production Node build, `npm run build` uses the Nitro Vite plugin and `npm start` serves `.output/server/index.mjs`. See [deployment notes](docs/deployment.md) before exposing it on a network.
 
 ## Backlog
 

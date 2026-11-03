@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react'
 import { ZodError } from 'zod'
 import { REEF_FISH, getFishById } from '../lib/fish'
 import type { ServiceConfig, ServiceDraft } from '../lib/services'
@@ -7,13 +7,14 @@ import { CloseIcon } from './Icons'
 type ServiceManagerProps = {
   services: ServiceConfig[]
   onClose: () => void
-  onAdd: (draft: ServiceDraft) => void
-  onUpdate: (id: string, patch: Partial<ServiceDraft>) => void
-  onDelete: (id: string) => void
-  onImport: (json: string) => void
+  onAdd: (draft: ServiceDraft) => Promise<void>
+  onUpdate: (id: string, patch: Partial<ServiceDraft>) => Promise<void>
+  onDelete: (id: string) => Promise<void>
+  onImport: (json: string) => Promise<void>
   onExport: () => void
   loadError?: string
-  onReset: () => void
+  onRetryLoad: () => Promise<void>
+  onReset: () => Promise<void>
 }
 
 const blankDraft: ServiceDraft = { name: '', url: '', fishId: REEF_FISH[0].id }
@@ -35,7 +36,7 @@ function readableError(error: unknown) {
   return error instanceof Error ? error.message : 'The service list could not be saved.'
 }
 
-export function ServiceManager({ services, onClose, onAdd, onUpdate, onDelete, onImport, onExport, loadError, onReset }: ServiceManagerProps) {
+export function ServiceManager({ services, onClose, onAdd, onUpdate, onDelete, onImport, onExport, loadError, onRetryLoad, onReset }: ServiceManagerProps) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [draft, setDraft] = useState<ServiceDraft>(blankDraft)
   const [formError, setFormError] = useState('')
@@ -43,44 +44,134 @@ export function ServiceManager({ services, onClose, onAdd, onUpdate, onDelete, o
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [importText, setImportText] = useState('')
   const [showImport, setShowImport] = useState(false)
+  const [busy, setBusy] = useState<'save' | 'delete' | 'import' | 'reset' | 'retry' | null>(null)
   const nameInput = useRef<HTMLInputElement>(null)
+  const formErrorRef = useRef<HTMLParagraphElement>(null)
+  const focusAfterSaveRef = useRef<(() => HTMLElement | null) | null>(null)
+  const importTriggerRef = useRef<HTMLButtonElement>(null)
+  const removeButtonRefs = useRef(new Map<string, HTMLButtonElement>())
   const dialogRef = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
     const dialog = dialogRef.current
     if (dialog && !dialog.open) dialog.showModal()
+    nameInput.current?.focus()
     return () => { if (dialog?.open) dialog.close() }
   }, [])
-  useEffect(() => { nameInput.current?.focus() }, [editingId])
+
+  useLayoutEffect(() => {
+    if (busy !== null || !focusAfterSaveRef.current) return
+    const target = focusAfterSaveRef.current
+    focusAfterSaveRef.current = null
+    const element = target()
+    if (!element) return
+    element.scrollIntoView({ block: 'nearest' })
+    element.focus({ preventScroll: true })
+  }, [busy])
+
+  function scheduleFocus(target: () => HTMLElement | null) {
+    window.requestAnimationFrame(() => {
+      const element = target()
+      if (!element) return
+      element.scrollIntoView({ block: 'nearest' })
+      element.focus({ preventScroll: true })
+    })
+  }
+  function focusNameInput() { scheduleFocus(() => nameInput.current) }
+  function focusFormError() { scheduleFocus(() => formErrorRef.current) }
 
   function resetForm() { setEditingId(null); setDraft(blankDraft); setFormError('') }
   function beginEdit(service: ServiceConfig) {
     setEditingId(service.id)
     setDraft({ name: service.name, url: service.url, fishId: service.fishId })
     setFormError('')
+    focusNameInput()
   }
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setFormError('')
+    const wasEditing = Boolean(editingId)
+    let succeeded = false
+    setBusy('save')
     try {
-      if (editingId) onUpdate(editingId, draft)
-      else onAdd(draft)
+      if (editingId) await onUpdate(editingId, draft)
+      else await onAdd(draft)
       resetForm()
-      setNotice(editingId ? 'Service updated.' : 'Service added.')
+      succeeded = true
+      setNotice(wasEditing ? 'Service updated.' : 'Service added.')
     } catch (error) {
       setFormError(readableError(error))
+    } finally {
+      focusAfterSaveRef.current = () => succeeded ? nameInput.current : formErrorRef.current
+      setBusy(null)
     }
   }
-  function removeService(id: string) {
-    try { onDelete(id); setConfirmDelete(null); setNotice('Service removed.') }
-    catch (error) { setFormError(readableError(error)) }
+  async function removeService(id: string) {
+    setFormError('')
+    let succeeded = false
+    setBusy('delete')
+    try {
+      await onDelete(id)
+      setConfirmDelete(null)
+      succeeded = true
+      setNotice('Service removed.')
+    } catch (error) {
+      setFormError(readableError(error))
+    } finally {
+      setBusy(null)
+      scheduleFocus(() => succeeded ? nameInput.current : formErrorRef.current)
+    }
   }
-  function importList(event: FormEvent<HTMLFormElement>) {
+  async function importList(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setFormError('')
-    try { onImport(importText); setImportText(''); setShowImport(false); setNotice('Service list imported.') }
-    catch (error) { setFormError(readableError(error)) }
+    let succeeded = false
+    setBusy('import')
+    try {
+      await onImport(importText)
+      setImportText('')
+      setShowImport(false)
+      succeeded = true
+      setNotice('Service list imported.')
+    } catch (error) {
+      setFormError(readableError(error))
+    } finally {
+      setBusy(null)
+      scheduleFocus(() => succeeded ? importTriggerRef.current : formErrorRef.current)
+    }
   }
+  async function retryLoad() {
+    setFormError('')
+    let succeeded = false
+    setBusy('retry')
+    try {
+      await onRetryLoad()
+      succeeded = true
+    } catch (error) {
+      setFormError(readableError(error))
+    } finally {
+      setBusy(null)
+      scheduleFocus(() => succeeded ? nameInput.current : formErrorRef.current)
+    }
+  }
+  async function restoreExamples() {
+    setFormError('')
+    let succeeded = false
+    setBusy('reset')
+    try {
+      await onReset()
+      succeeded = true
+      setNotice('Example services restored.')
+    } catch (error) {
+      setFormError(readableError(error))
+    } finally {
+      setBusy(null)
+      scheduleFocus(() => succeeded ? nameInput.current : formErrorRef.current)
+    }
+  }
+
+  const formDisabled = Boolean(loadError) || busy !== null
+  const selectedFish = getFishById(draft.fishId) ?? REEF_FISH[0]
 
   return (
     <dialog ref={dialogRef} className="service-manager-dialog" aria-labelledby="manager-title" onCancel={(event) => { event.preventDefault(); onClose() }} onClick={(event) => { if (event.target === event.currentTarget) onClose() }}>
@@ -89,34 +180,63 @@ export function ServiceManager({ services, onClose, onAdd, onUpdate, onDelete, o
           <div><p className="manager-kicker">Reef keeper</p><h2 id="manager-title">Your services</h2></div>
           <button className="icon-button close-button" onClick={onClose} type="button" aria-label="Close service settings"><CloseIcon /></button>
         </header>
-        <p className="manager-intro">Choose a fish for every shortcut. Your list lives in this browser.</p>
-        {loadError && <div className="load-warning" role="alert"><div><strong>Saved settings need attention.</strong><span>{loadError}</span></div><button type="button" onClick={() => { try { onReset(); setNotice('Example services restored.') } catch (error) { setFormError(readableError(error)) } }}>Restore examples</button></div>}
-        {notice && <p className="manager-notice" role="status">{notice}</p>}
+        <p className="manager-intro">Choose a fish for every shortcut. Your list is shared across your devices.</p>
+        {loadError && <div className="load-warning" role="alert"><div><strong>Shared settings need attention.</strong><span>{loadError}</span></div><div className="load-actions"><button type="button" onClick={() => { void retryLoad() }} disabled={busy !== null}>{busy === 'retry' ? 'Retrying…' : 'Retry loading'}</button><button type="button" onClick={() => { void restoreExamples() }} disabled={busy !== null}>{busy === 'reset' ? 'Restoring…' : 'Restore examples'}</button></div></div>}
         <div className="manager-list">
           {services.map((service) => {
             const fish = getFishById(service.fishId)
             return <article className="managed-service" key={service.id}>
-              <span className={`managed-fish managed-${service.fishId}`}><img src={`/fish/${service.fishId}.webp`} alt="" /></span>
+              <span className={`managed-fish managed-${service.fishId}`}><img src={fish?.thumbnail} alt="" /></span>
               <div className="managed-details"><strong>{service.name}{service.isExample && <small>example</small>}</strong><span>{service.url}</span><em>{fish?.commonName}</em></div>
-              <div className="row-actions"><button type="button" onClick={() => beginEdit(service)} disabled={Boolean(loadError)}>Edit</button><button type="button" className="remove-action" onClick={() => setConfirmDelete(service.id)} disabled={Boolean(loadError)}>Remove</button></div>
-              {confirmDelete === service.id && <div className="delete-confirm"><span>Remove {service.name}?</span><button type="button" onClick={() => removeService(service.id)}>Remove</button><button type="button" onClick={() => setConfirmDelete(null)}>Keep</button></div>}
+              <div className="row-actions"><button type="button" onClick={() => beginEdit(service)} disabled={formDisabled} aria-label={`Edit ${service.name}`}>Edit</button><button ref={(element) => { if (element) removeButtonRefs.current.set(service.id, element); else removeButtonRefs.current.delete(service.id) }} type="button" className="remove-action" onClick={() => setConfirmDelete(service.id)} disabled={formDisabled} aria-label={`Remove ${service.name}`}>Remove</button></div>
+              {confirmDelete === service.id && <div className="delete-confirm"><span>Remove {service.name}?</span><button type="button" onClick={() => { void removeService(service.id) }} disabled={busy !== null}>{busy === 'delete' ? 'Removing…' : 'Remove'}</button><button type="button" onClick={() => { setConfirmDelete(null); scheduleFocus(() => removeButtonRefs.current.get(service.id) ?? null) }} disabled={busy !== null}>Keep</button></div>}
             </article>
           })}
           {!services.length && <p className="manager-empty">The reef is quiet. Add a service to give a fish somewhere to swim.</p>}
         </div>
-        <form className="service-form" onSubmit={submit}>
+        <form className="service-form" onSubmit={(event) => { void submit(event) }}>
           <h3>{editingId ? 'Edit service' : 'Add a service'}</h3>
-          <label>Service name<input ref={nameInput} value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} maxLength={80} placeholder="e.g. Home Assistant" required disabled={Boolean(loadError)} /></label>
-          <label>Web address<input type="url" value={draft.url} onChange={(e) => setDraft({ ...draft, url: e.target.value })} placeholder="http://trappserv.er:8123" required disabled={Boolean(loadError)} /></label>
-          <label>Fish<select value={draft.fishId} onChange={(e) => setDraft({ ...draft, fishId: e.target.value })} disabled={Boolean(loadError)}>{REEF_FISH.map((fish) => <option value={fish.id} key={fish.id}>{fish.commonName}</option>)}</select></label>
-          {formError && <p className="form-error" role="alert">{formError}</p>}
-          <div className="form-actions"><button type="button" className="quiet-button" onClick={resetForm}>{editingId ? 'Cancel edit' : 'Clear'}</button><button className="save-button" type="submit" disabled={Boolean(loadError)}>{editingId ? 'Save changes' : 'Add to the reef'}</button></div>
+          {notice && <p className="manager-notice" role="status" aria-live="polite">{notice}</p>}
+          {formError && <p ref={formErrorRef} className="form-error" role="alert" aria-live="assertive" tabIndex={-1}>{formError}</p>}
+          <label>Service name<input ref={nameInput} value={draft.name} onChange={(e) => { setDraft({ ...draft, name: e.target.value }); setFormError('') }} maxLength={80} placeholder="e.g. Home Assistant" required disabled={formDisabled} /></label>
+          <label>Web address<input type="url" value={draft.url} onChange={(e) => { setDraft({ ...draft, url: e.target.value }); setFormError('') }} placeholder="http://trappserv.er:8123" required disabled={formDisabled} /></label>
+          <fieldset className="fish-picker" disabled={formDisabled}>
+            <legend>Choose a fish</legend>
+            <div className="fish-picker-selected" aria-live="polite">
+              <img
+                src={selectedFish.thumbnail}
+                alt=""
+                aria-hidden="true"
+                onError={(event) => {
+                  event.currentTarget.hidden = true
+                }}
+                onLoad={(event) => { event.currentTarget.hidden = false }}
+              />
+              <span><strong>{selectedFish.commonName}</strong><em>{selectedFish.scientificName}</em></span>
+            </div>
+            <div className="fish-picker-options">
+              {REEF_FISH.map((fish) => <label className={`fish-picker-option${draft.fishId === fish.id ? ' is-selected' : ''}`} key={fish.id}>
+                <input type="radio" name="service-fish" value={fish.id} checked={draft.fishId === fish.id} required onChange={() => { setDraft({ ...draft, fishId: fish.id }); setFormError('') }} />
+                <img
+                  src={fish.thumbnail}
+                  alt=""
+                  aria-hidden="true"
+                  onError={(event) => {
+                    event.currentTarget.hidden = true
+                  }}
+                  onLoad={(event) => { event.currentTarget.hidden = false }}
+                />
+                <span><strong>{fish.commonName}</strong><em>{fish.scientificName}</em></span>
+              </label>)}
+            </div>
+          </fieldset>
+          <div className="form-actions"><button type="button" className="quiet-button" onClick={() => { resetForm(); focusNameInput() }} disabled={busy !== null}>{editingId ? 'Cancel edit' : 'Clear'}</button><button className="save-button" type="submit" disabled={formDisabled}>{busy === 'save' ? 'Saving…' : editingId ? 'Save changes' : 'Add to the reef'}</button></div>
         </form>
         <footer className="manager-footer">
-          <button type="button" className="text-action" onClick={() => { try { onExport(); setNotice('Service list downloaded.') } catch (error) { setFormError(readableError(error)) } }}>Export list</button>
-          <button type="button" className="text-action" onClick={() => { setShowImport(!showImport); setFormError('') }}>{showImport ? 'Close import' : 'Import list'}</button>
+          <button type="button" className="text-action" onClick={() => { try { onExport(); setNotice('Service list downloaded.') } catch (error) { setFormError(readableError(error)); focusFormError() } }} disabled={busy !== null}>Export list</button>
+          <button ref={importTriggerRef} type="button" className="text-action" onClick={() => { setShowImport(!showImport); setFormError('') }} disabled={busy !== null}>{showImport ? 'Close import' : 'Import list'}</button>
         </footer>
-        {showImport && <form className="import-form" onSubmit={importList}><label htmlFor="import-services">Paste a service list (JSON)</label><textarea id="import-services" value={importText} onChange={(e) => setImportText(e.target.value)} rows={5} placeholder='[{"id":"home-assistant","name":"Home Assistant","url":"http://trappserv.er:8123","fishId":"yellow-tang","isExample":false}]' required /><button type="submit" className="save-button">Import services</button></form>}
+        {showImport && <form className="import-form" onSubmit={(event) => { void importList(event) }}><label htmlFor="import-services">Paste a service list (JSON)</label><textarea id="import-services" value={importText} onChange={(e) => setImportText(e.target.value)} rows={5} placeholder='[{"id":"home-assistant","name":"Home Assistant","url":"http://trappserv.er:8123","fishId":"yellow-tang","isExample":false}]' required disabled={busy !== null} /><button type="submit" className="save-button" disabled={busy !== null}>{busy === 'import' ? 'Importing…' : 'Import services'}</button></form>}
       </section>
     </dialog>
   )

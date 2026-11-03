@@ -10,7 +10,7 @@ import { useServices } from '../lib/useServices'
 export const Route = createFileRoute('/')({ component: ReefHome })
 
 function ReefHome() {
-  const { services, loadError, addService, updateService, deleteService, importServices, resetServices } = useServices()
+  const { services, loadError, retryLoad, addService, updateService, deleteService, importServices, resetServices } = useServices()
   const [managerOpen, setManagerOpen] = useState(false)
   const [servicesOpen, setServicesOpen] = useState(false)
   const [paused, setPaused] = useState(false)
@@ -82,6 +82,7 @@ function ReefHome() {
         onImport={importServices}
         onExport={downloadServices}
         loadError={loadError}
+        onRetryLoad={retryLoad}
         onReset={resetServices}
       />}
     </main>

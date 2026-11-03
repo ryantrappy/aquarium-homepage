@@ -6,6 +6,8 @@ import {
   importServices,
   readServices,
   saveServices,
+  loadSharedConfig,
+  resetSharedConfig,
   addService,
   deleteService,
   updateService,
@@ -96,5 +98,37 @@ describe('service configuration', () => {
       setItem: () => { throw new Error('quota') },
     }
     expect(() => saveServices(EXAMPLE_SERVICES, failingStorage)).toThrow(/could not save/)
+  })
+
+  it('reports a shared-server network failure without pretending a save succeeded', async () => {
+    const originalFetch = globalThis.fetch
+    globalThis.fetch = async () => { throw new TypeError('offline') }
+    try {
+      await expect(loadSharedConfig()).rejects.toThrow(/draft stays on this screen/)
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+
+  it('sends invalid-file recovery only as an explicit reset request', async () => {
+    const originalFetch = globalThis.fetch
+    let requestBody: unknown
+    let requestHeaders: Headers | undefined
+    globalThis.fetch = async (_input, init) => {
+      requestBody = JSON.parse(String(init?.body))
+      requestHeaders = new Headers(init?.headers)
+      return Response.json({
+        config: { version: 1, mode: 'reef', services: EXAMPLE_SERVICES },
+        revision: 'reset-revision',
+      })
+    }
+    try {
+      const saved = await resetSharedConfig(undefined, true)
+      expect(saved.revision).toBe('reset-revision')
+      expect(requestBody).toEqual({ reset: true, repairInvalid: true })
+      expect(requestHeaders?.has('If-Match')).toBe(false)
+    } finally {
+      globalThis.fetch = originalFetch
+    }
   })
 })

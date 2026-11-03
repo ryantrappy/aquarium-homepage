@@ -34,3 +34,11 @@ export const serviceListSchema = z.array(serviceConfigSchema).superRefine((servi
 })
 
 export const serviceDraftSchema = serviceConfigSchema.omit({ id: true, isExample: true })
+
+export const sharedConfigSchema = z.object({
+  version: z.literal(1),
+  mode: z.literal('reef'),
+  services: serviceListSchema,
+}).strict()
+
+export type SharedConfig = z.infer<typeof sharedConfigSchema>
