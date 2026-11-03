@@ -1,11 +1,11 @@
 ---
 id: AQ-10
 title: Deploy the aquarium homepage to trappserv.er
-status: In Progress
+status: Done
 assignee:
   - '@Luna'
 created_date: '2026-11-03T04:12:00Z'
-updated_date: '2026-11-03T18:48:00Z'
+updated_date: '2026-11-03T20:27:00Z'
 labels: []
 dependencies:
   - AQ-9
@@ -24,32 +24,35 @@ The homelab launcher should ultimately be available from the Ubuntu homelab serv
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The application is deployed and reachable at the agreed URL on trappserv.er.
-- [ ] #2 Deployment and update steps are documented and repeatable.
-- [ ] #3 The deployed app can reach the configured shared storage service.
+- [x] #1 The application is deployed and reachable at the agreed URL on trappserv.er.
+- [x] #2 Deployment and update steps are documented and repeatable.
+- [x] #3 The deployed app can reach the configured shared storage service.
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Root agent has reviewed the completed work before the task is marked Done.
-- [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
+- [x] #1 Root agent has reviewed the completed work before the task is marked Done.
+- [x] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
 
 ## Implementation Plan
 
 <!-- SECTION:PLAN:BEGIN -->
-1. Deploy only a source archive made from the reviewed commit to /home/trappserver/apps/aquarium-homepage and keep shared JSON data under /home/trappserver/.local/share/reef-control.
-2. Build/run the Node 24 Compose service on loopback 127.0.0.1:3004 and verify /api/config plus revision-checked persistence across restart.
-3. Add the selected hostname using the existing Caddy/Authelia policy and Cloudflare DDNS-managed DNS pattern, with timestamped backups and no auth-policy weakening.
-4. Document live routes, source-archive update steps, and code rollback while preserving shared data.
-5. Verify public unauthenticated access is gated and leave authenticated browser-write verification pending root review.
+1. Keep the reviewed source archive at live SHA 6e5c30a and verify shared config persistence without changing service mappings.
+2. Restore and confirm the original three-example envelope and revision 0778042fed0e2065e9657b7209832a6b4820e7b4610b1e0e95d5dcd3e0e382b3.
+3. Apply the root-reviewed LAN-only Caddy handler with a timestamped backup; preserve all other routes and Authelia configuration.
+4. Verify the app and shared config on LAN without Authelia, deny public IPv4 requests, and record the direct public IPv6 test limitation.
+5. Document the live deployment and repeatable source-archive update/rollback steps; keep In Progress pending root review.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-Read-only host route audit (2026-11-03): Caddy is containerized as Compose project caddy-v2. Caddyfile path: /home/trappserver/Documents/caddy_v2/Caddyfile; Compose config: /etc/komodo/stacks/caddy-v2/compose.yaml. Caddy has wildcard site contexts for *.ryantr.app and *.ryantrapp.com, but uses explicit service handlers and returns 404 for unmatched hostnames. aquarium.ryantr.app has no A/AAAA answer through the LAN resolver or 1.1.1.1; wildcard DNS query also has no answer. A forced host/SNI request to Caddy returned 404; ha.ryantr.app returned 302 to auth.ryantr.app. Thus aquarium.ryantr.app is not ready under the condition of an existing wildcard DNS route; no hostname, DNS, or Caddy change made. Existing Authelia snippet is forward_auth to 127.0.0.1:9091 /api/authz/forward-auth; HA, Immich, Paperless, Tautulli, and Uptime handlers import it. Future host handler would need to import the same snippet and proxy to 127.0.0.1:3004 before the wildcard fallback, after root selects a URL.
-Deployment paths /opt/aquarium-homepage, /srv/aquarium-homepage, /var/lib/reef-control are absent. Docker 27.3.1, Compose 2.29.7, Buildx 0.17.1 available on Ubuntu 24.04.5 x86_64; root volume has 38 GB free (92% used). No remote build/deploy performed in this read-only preparation.
+Live deployment: reviewed source SHA 6e5c30a, Node 24 container, loopback host port 127.0.0.1:3004, shared data at /home/trappserver/.local/share/reef-control. Caddyfile is /home/trappserver/Documents/caddy_v2/Caddyfile. Aquarium route allows only remote peers in 192.168.1.0/24 to proxy to 127.0.0.1:3004; host-only fallback returns 403. It does not import Authelia. Caddy backup before route update: /home/trappserver/Documents/caddy_v2/Caddyfile.aquarium-20261103T195601Z.bak. Caddy v2.11.4 validation and reload succeeded; existing formatting warning only.
+
+UniFi local DNS entry aquarium.ryantr.app is a CNAME to trappserv.er (TTL 300); the gateway resolves it to A 192.168.1.236 and returns no public AAAA for the local name. Public Cloudflare DNS was not changed in the final LAN DNS fix. Root independently verified unauthenticated LAN homepage and same-origin /api/config return 200; config revision is the exact original three-example baseline 0778042fed0e2065e9657b7209832a6b4820e7b4610b1e0e95d5dcd3e0e382b3. Forced public IPv4 requests through Cloudflare return 403 for / and /api/config with no JSON. Direct public IPv6 HTTP testing remains unavailable from this Mac because it has no IPv6 connection.
+
+Authenticated Settings save/reload was verified earlier on SHA 6e5c30a; original IDs, names, URLs, fish IDs, and isExample flags were restored immediately. API save persistence across Compose restart was previously verified. docs/deployment.md records current route, storage, DNS behavior, backup, and repeatable source-archive update/rollback. Waiting root review; AQ-10 remains In Progress.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
@@ -135,4 +138,55 @@ created: 2026-11-03T18:48:00Z
 Status correction: AQ-10 is now In Progress after the first deployment. Documentation was rewritten around actual live state and the source-archive workflow; the server checkout has no Git metadata, so updates must not use git pull. Authenticated browser access remains explicitly unverified. No AQ-10 acceptance criteria were checked and the task remains open for root review.
 
 ---
+
+author: @root
+created: 2026-11-03T19:49:00Z
+
+---
+
+User reported that fish do not actually swim. Current 3D study only plays in-place body/fin cycles, and deployed6e5c30a is still the earlier scaffold. Keep lifelike travel/scene integration AQ12/AQ34 open; no completed-realism claim. User explicitly authorized removing Authelia for this internal-only aquarium route; public CF DNS presently exists, so LAN-only access enforcement is required alongside auth removal.
+
+---
+
+author: @Luna
+created: 2026-11-03T19:52:00Z
+
+---
+
+Prepared and validated one minimal LAN-only Caddy handler diff for root review. Candidate is not applied. AQ-10 remains In Progress.
+
+---
+
+author: @Luna
+created: 2026-11-03T19:57:00Z
+
+---
+
+Applied the root-approved LAN-only route. LAN page/API and public IPv4 denial checks passed; public IPv6 direct check is pending because this client cannot connect over IPv6. Baseline config hash remains unchanged. AQ-10 remains In Progress.
+
+---
+
+author: @root
+created: 2026-11-03T20:08:00Z
+
+---
+
+Root applied the previewed UniFi entry6aea3aedbf6cbddbb44f5b10 and then narrowed it from local A to local CNAME aquarium.ryantr.app->trappserv.er after confirming the A-only override still forwarded upstream IPv6 queries after TTL expiry. Current gateway192.168.1.1 now returns CNAME trappserv.er for CNAME/AAAA queries (no publicAAAA) and A192.168.1.236. Root independently verified LANHTTPS200 and forced publicCFconfig403, then opened a fresh unauthenticated IAB at the normal URL: homepage and same-origin API200 without Authelia; API revision remains the exact three-example baseline0778042fed0e2065e9657b7209832a6b4820e7b4610b1e0e95d5dcd3e0e382b3. Screenshot /tmp/aq-lan-without-authelia.png. Coverage and limitations: current-state UniFi static DNS available, original20records plus oneappentry; no pagination/limit/filter parameters; gatewayA/AAAA/CNAME resolution checked for thishostname only. No gateway/globalDNS settings, otherapprecords or Authelia policies changed. DirectHTTPoverpublicIPv6 remains untested because thisclient has no IPv6 connectivity; same peer-address route guard applies and localAAAA now stays internal. Root sourcearchive/build and sharedstorage verification remain as documented.
+
+---
+
+author: @root
+created: 2026-11-03T20:27:00Z
+
+---
+
+Root final review accepted deployment/update documentation, shared storage persistence and exact restored configuration, LAN CNAME resolution, fresh unauthenticated normal-URL browser access, and independently verified public IPv4 denial. The route-level Authelia removal is complete with LAN-only peer access; preexisting20DNSrecords compare unchanged and only one aquarium alias was added. Direct public IPv6 HTTP was unavailable on thisclient and is explicitly documented; no IPv6 exposure is inferred from a missing test, and the same Caddy peer guard applies. This closes deployment functionality only; the live source remains6e5c30a until a separately reviewed renderer milestone is deployed.
+
+---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Deployed the reviewed app at aquarium.ryantr.app behind LAN-only Caddy access, verified shared config persistence and the restored baseline, and documented archive-based updates/rollback. Public IPv4 requests are denied; direct IPv6 HTTP testing is unavailable from this Mac. Root review remains pending.
+<!-- SECTION:FINAL_SUMMARY:END -->

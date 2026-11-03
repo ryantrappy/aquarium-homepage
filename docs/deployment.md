@@ -9,12 +9,12 @@ The app is available at [https://aquarium.ryantr.app](https://aquarium.ryantr.ap
 - Shared config file: host `/home/trappserver/.local/share/reef-control/reef-config.json`, mounted in the container at `/var/lib/reef-control/reef-config.json`.
 - Published port: `127.0.0.1:3004` on the host to port `3000` in the container. Do not expose the app port directly.
 - Origin guard: `REEF_PUBLIC_ORIGIN=https://aquarium.ryantr.app`.
-- Public DNS: proxied Cloudflare CNAME `aquarium.ryantr.app` to `ryantr.app`, TTL Auto. The apex is managed by the existing Cloudflare DDNS service.
-- Access control: the Caddy handler imports the existing Authelia policy. The hostname is included in the existing `two_factor` rule; Authelia's default deny remains unchanged.
+- Public DNS: the existing proxied Cloudflare CNAME `aquarium.ryantr.app` to `ryantr.app` (TTL Auto) is unchanged; the apex is managed by Cloudflare DDNS. On the LAN, UniFi has a CNAME override from `aquarium.ryantr.app` to `trappserv.er` (TTL 300). The LAN resolver returns `192.168.1.236` for the target and no public AAAA for the aquarium hostname.
+- Access control: the aquarium Caddy route allows peers in `192.168.1.0/24` and returns 403 to all other peers. This route does not import Authelia; the Authelia configuration and all other routes remain unchanged.
 
-Unauthenticated HTTPS requests to both `/` and `/api/config` return a redirect to `auth.ryantr.app`. The unauthenticated API response is HTML and does not contain configuration JSON. Public HTTPS was verified through the Cloudflare edge. The local recursive resolver may continue returning a cached NXDOMAIN until its negative-cache TTL expires; authoritative A and public DoH A/AAAA answers resolve.
+The root verified a fresh unauthenticated LAN browser load of `/` and same-origin `/api/config`; both returned HTTP 200. Forced public IPv4 requests through both Cloudflare addresses returned 403 for `/` and `/api/config`, with no JSON body. Direct public IPv6 HTTP requests could not be tested from this Mac because it has no working IPv6 connection. The LAN resolver now returns no public AAAA for this hostname.
 
-An API save using the configured public HTTPS `Origin` succeeded against the loopback service and persisted across a Compose restart. The revision-guarded **Restore examples** action restored the original three example services afterward. An authenticated browser write through Authelia has not been verified; root review remains pending. Example service URLs remain examples until mappings are reviewed.
+An API save using the configured HTTPS `Origin` succeeded against the loopback service and persisted across a Compose restart. Before the LAN-only route was applied, an authenticated Settings edit was saved and verified after reload; the original three-example configuration was immediately restored, including its example flags. No service URLs or fish selections were changed. The current LAN API response matches baseline revision `0778042fed0e2065e9657b7209832a6b4820e7b4610b1e0e95d5dcd3e0e382b3`. Example service URLs remain examples until mappings are reviewed.
 
 ## Service configuration
 
@@ -73,31 +73,28 @@ REEF_DATA_DIR=/home/trappserver/.local/share/reef-control \
 
 If shared configuration itself needs recovery, make a timestamped, mode-`0600` backup of `reef-config.json` before restoring a known good copy. Do not roll back or remove shared data as part of a code rollback.
 
-## Caddy and Authelia configuration
+## Caddy access configuration
 
-The existing Caddyfile is `/home/trappserver/Documents/caddy_v2/Caddyfile`. It contains one exact `aquarium.ryantr.app` handler inside the `*.ryantr.app` site block; that handler imports `authelia` and proxies to `127.0.0.1:3004`. Caddy's active container is `caddy-v2-caddy-1`; its config path is `/etc/caddy/Caddyfile` inside the container. The active Authelia config is `/home/trappserver/Documents/authelia/config/configuration.yml`.
+The existing Caddyfile is `/home/trappserver/Documents/caddy_v2/Caddyfile`. The exact `aquarium.ryantr.app` handler inside the `*.ryantr.app` site block first matches `host aquarium.ryantr.app` plus `remote_ip 192.168.1.0/24` and proxies to `127.0.0.1:3004`; its host-only fallback returns 403. The aquarium handler does not import Authelia. Caddy's active container is `caddy-v2-caddy-1`; its config path is `/etc/caddy/Caddyfile` inside the container. The Authelia configuration and all other Caddy handlers/snippets were left unchanged.
 
-Backups created before these changes:
+Backups recorded during deployment and route updates:
 
-- Caddy: `/home/trappserver/Documents/caddy_v2/Caddyfile.pre-aquarium-20261103T134331Z`
-- Authelia: `/home/trappserver/Documents/authelia/config/configuration.yml.pre-aquarium-20261103T134649Z`
+- Initial Caddy setup: `/home/trappserver/Documents/caddy_v2/Caddyfile.pre-aquarium-20261103T134331Z`
+- Authelia setup: `/home/trappserver/Documents/authelia/config/configuration.yml.pre-aquarium-20261103T134649Z`
+- Caddy before applying the LAN-only route: `/home/trappserver/Documents/caddy_v2/Caddyfile.aquarium-20261103T195601Z.bak`
 
-Caddy validation succeeded and the handler was reloaded. Validation reported an existing formatting warning; the file was not reformatted. Authelia v4.39.28 validated the updated config successfully. Only the new hostname was appended to the existing `two_factor` domain list; the default-deny policy and all other domains were preserved. Only the Authelia container was restarted.
+The LAN-only Caddy candidate passed validation before application. The live Caddyfile validated and the handler reloaded successfully; Caddy reported its existing formatting warning and the file was not reformatted. The earlier Authelia setup changed only the existing `two_factor` domain list by adding this hostname; default deny and other domains were preserved. The later LAN-only route update did not change Authelia.
 
-To undo the proxy/auth configuration, restore the corresponding timestamped backup, validate it with the running service's documented command, and reload only that service:
+To restore the Caddyfile captured immediately before the LAN-only route change, then validate and reload Caddy:
 
 ```sh
-cp -p /home/trappserver/Documents/caddy_v2/Caddyfile.pre-aquarium-20261103T134331Z \
+cp -p /home/trappserver/Documents/caddy_v2/Caddyfile.aquarium-20261103T195601Z.bak \
   /home/trappserver/Documents/caddy_v2/Caddyfile
 docker exec caddy-v2-caddy-1 caddy validate --config /etc/caddy/Caddyfile
 docker exec caddy-v2-caddy-1 caddy reload --config /etc/caddy/Caddyfile
-cp -p /home/trappserver/Documents/authelia/config/configuration.yml.pre-aquarium-20261103T134649Z \
-  /home/trappserver/Documents/authelia/config/configuration.yml
-docker exec authelia authelia validate-config --config /config/configuration.yml
-docker restart authelia
 ```
 
-Do not replace the surrounding Caddy wildcard site, Authelia policy defaults, or other routes.
+This rollback restores the earlier Authelia-protected aquarium handler. Do not restore the Authelia configuration backup as part of this Caddy rollback; the LAN-only route update did not change Authelia. Do not replace the surrounding Caddy wildcard site, shared snippets, or other routes.
 
 ## Host inventory captured before deployment
 
