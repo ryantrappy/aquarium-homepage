@@ -1,0 +1,37 @@
+
+<!-- BACKLOG.MD GUIDELINES START -->
+<!-- backlog.md-instructions-version: 1.55.3 -->
+<CRITICAL_INSTRUCTION>
+
+## Backlog.md Workflow
+
+This project uses Backlog.md for task and project management.
+
+**At the beginning of each conversation in this project, run `backlog instructions overview` before answering or taking action. Re-read it only if you have not read it yet in the current conversation.**
+
+Use the overview to decide whether to search, read, create, or update Backlog tasks.
+
+Before task lifecycle actions, read the matching detailed guide:
+- `backlog instructions task-creation` before creating or splitting tasks
+- `backlog instructions task-execution` before planning, changing status or assignee, adding a plan or implementation notes, or implementing task work
+- `backlog instructions task-finalization` before checking acceptance criteria, writing final summaries, or moving tasks to terminal statuses
+
+Use `backlog <command> --help` before running unfamiliar commands. Help shows options, fields, and examples.
+
+Do not edit Backlog task, draft, document, decision, or milestone markdown files directly. Use the `backlog` CLI so metadata, relationships, and history stay consistent.
+
+</CRITICAL_INSTRUCTION>
+<!-- BACKLOG.MD GUIDELINES END -->
+
+## Aquarium Homepage project guidance
+
+- Read `docs/requirements.md` for the product goals and agreed scope.
+- Use Backlog.md tasks as the durable work queue; create and update tasks with the CLI, not by editing task Markdown directly.
+- Default to Luna with high reasoning effort for routine implementation; the root agent may select a stronger model for demanding work. Root review is required before any task is marked Done.
+- Use Backlog.md as the iteration channel. The root agent records review findings on the active task with CLI comments or notes, and assigns the next iteration. Implementing agents read those entries, address them, and respond on the task until root review is satisfied. Before handoff, the implementing agent checks only acceptance criteria they verified and records objective evidence. Root performs the final review and marks Done only after the agent checks and all review feedback are complete. Track deferred, distinct work in separate tasks; keep routine fixes as feedback on the current task.
+- Primary project goal: create a photorealistic, living reef aquarium with realistic fish swimming through almost the entire main view and serving as clickable links to configured services. This is the main success criterion; refine fish realism and the aquarium experience ahead of secondary dashboard or navigation UI.
+- Use a sharp, front-on view of the water portion of a real reef tank with clear perspective, deep focus, live rock, coral, and sand. Do not use a blurry background or open-ocean vignette. Remove the page header, marketing title, and persistent service list from the main view; show the list only in a modal opened from a deliberate, compact Services button. Keep Pause and Settings compact and aquarium-themed.
+- Keep responsive browser verification focused on two viewports only: 402×874 CSS pixels as the iPhone 18 Pro proxy (inferred by dividing Apple's 1206×2622 display resolution by 3) and 1440×900 for a normal laptop. Do not add or repeat a broad phone/tablet/device matrix unless the user asks; prior size measurements and review comments remain historical records.
+- The OpenPencil design is an editable starting baseline and can evolve substantially. Current translating fish cutouts are scaffold only; do not describe them as completed lifelike animation. A still sprite sliding through the tank does not satisfy the realistic-fish goal.
+- Preserve practical baseline behavior inside the aquarium experience: pause motion and settings must remain available and work. Aquarium telemetry may show read-only CPU temperature, disk capacity, and network traffic when configured; never invent live values or present them as service health monitoring.
+- Do not add service health monitoring; it was not requested.
