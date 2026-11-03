@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Controlled fish engine study</title>
+  <style>
+    body { margin: 0; color: white; background: #183b48; font: 14px system-ui; }
+    aside { position: absolute; z-index: 1; top: 1rem; left: 1rem; max-width: 32rem; background: #102b37e8; padding: .8rem; border-radius: .5rem; }
+    button, select { font: inherit; padding: .4rem; } canvas { display: block; width: 100vw; height: 100vh; }
+    @media (max-width: 599px) { aside { max-height: 21vh; overflow-y: auto; font-size: 12px; } aside p { margin: .4rem 0; } }
+  </style>
+</head>
+<body>
+  <aside>
+    <details><summary>Controlled engine study — inspect limits</summary>
+      <p>Same licensed fish and VIVID REALITY reef scan LOD in every engine. Fish fidelity remains work in progress. Gray PBR control normalizes exposure. Camera and two directional lights match; this is not the finished habitat, optics or full-school benchmark.</p>
+    </details>
+    <label>Engine <select id="engine"><option value="three">Three.js</option><option value="babylon">Babylon.js</option><option value="playcanvas">PlayCanvas</option></select></label>
+    <button id="pause" type="button">Pause motion</button>
+    <button id="turn" type="button">Turn fish 45°</button>
+    <label><input id="reef" type="checkbox" checked> Reef geometry</label>
+    <label><input id="blocker" type="checkbox"> Gray control</label>
+    <p id="status" role="status">Loading…</p>
+    <p id="selection" role="status">Select a fish or the blocker. Nothing opens.</p>
+    <small id="metrics">Frame timing not sampled yet.</small>
+  </aside>
+  <canvas id="view"></canvas>
+  <script type="module" src="./engine-study.ts"></script>
+</body>
+</html>

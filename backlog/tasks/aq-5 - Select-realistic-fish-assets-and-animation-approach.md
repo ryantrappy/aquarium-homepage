@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@fish-renderer'
 created_date: '2026-11-03T04:12:00Z'
-updated_date: '2026-11-03 18:48'
+updated_date: '2026-11-03 19:25'
 labels: []
 dependencies: []
 references:
@@ -209,5 +209,29 @@ author: @fish-renderer
 created: 2026-11-03 18:48
 ---
 Root reviewed latest tang sector fan as recognizable improvement and preserves closed frontal faces as technical-baseline evidence. Clown translucent inner triangles and source fidelity remain unresolved for AQ-12/AQ-40. No rig regeneration during the reef comparison. Three/Babylon/PlayCanvas all load the identical licensed pair, animate, turn, pause, and select blocker before fish at required viewport sizes. Babylon modular ray-picking import corrected. Gray PBR/direct-light fixture calibration is underway; actual licensed coral asset remains necessary for the full comparison.
+---
+
+author: @Luna
+created: 2026-11-03 19:20
+---
+Root review checkpoint: the corrected offline front and oblique renders use the same durable CC BY 4.0 reef LOD loaded by Three.js, Babylon.js and PlayCanvas. Root accepts it as a technical engine-comparison asset only. Corrected reef browser review at 402×874 and 1440×900 is pending Mac unlock; the older fish/blocker browser evidence does not test this corrected reef. No engine is selected and production-fidelity criteria remain open: dark baked scan shading/open underside, source-level fish limitations, comparable reef lighting, full scene navigation/occlusion, SSR lifecycle and controlled performance.
+---
+
+author: @root
+created: 2026-11-03T19:22:00Z
+---
+Root asset-checkpoint review: corrected reef front/oblique renders are accepted for controlled comparison only, with source baked shading/cut underside retained. Before committing the portable fixture: include rig-candidate.py because both fish recipes depend on it; add explicit fish reproduction commands/tool version to the manifest or linked recipe. Resolve GLB URLs with build-aware asset references so an isolated Vite production build emits the same three files; current plain relative strings only work under the dev server. Configure the isolated build to enter engine-study.html explicitly, since older index/prototype files are excluded from this checkpoint. Verify file hashes/bytes and exported build asset presence, without browser while the Mac remains locked. Keep source-vs-checkpoint-vs-export triangle counts and one-sided checkpoint error limitations explicit; no engine or photorealism completion claim.
+---
+
+author: @Luna
+created: 2026-11-03 19:23
+---
+Portable fixture follow-up to root review #23: engine-study.ts now uses Vite-aware new URL(..., import.meta.url) references for the two fish and reef GLB files. vite.config.js explicitly enters engine-study.html, excluding older index/prototype pages. Blender 5.0.1 fish regeneration commands and rig-candidate.py dependency are documented in docs/rendering.md and asset-manifest.json. `npx vite build --config src/rendering/proof/vite.config.js --outDir /tmp/aq-engine-study-build --emptyOutDir` succeeded; output contains only engine-study.html and exactly three emitted GLBs. Each emitted GLB SHA-256 and bytes match its checked-in source derivative. No browser run. Reef source 3,513,714, checkpoint 99,999, exported GLB 99,985 triangles; reported one-way sampled BVH errors apply only to the checkpoint, not the exported topology.
+---
+
+author: @Luna
+created: 2026-11-03 19:25
+---
+Final documentation consistency pass: docs/rendering.md is now a current standalone fixture guide with the exact /engine-study.html?engine=three|babylon|playcanvas dev entries, the explicit production build command, the three included technical assets, provenance/manifest/validator links, and clear separation of earlier fish-only browser evidence from pending corrected-reef browser review. Detailed comparison, old entrypoints, ignored prototypes and local experiments moved to docs/rendering-research-history.md under an explicit historical/non-bundle disclaimer; its older local-only notes are superseded for the three curated GLBs. No source assets or reference Gemini docs changed.
 ---
 <!-- COMMENTS:END -->

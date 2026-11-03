@@ -1,0 +1,6 @@
+# Local-only evaluation candidates: do not distribute without verified provenance.
+candidate-*.glb
+# Controlled study candidates with recorded CC BY 4.0 provenance.
+!candidate-real-clown.glb
+!candidate-real-tang.glb
+!candidate-reef.glb

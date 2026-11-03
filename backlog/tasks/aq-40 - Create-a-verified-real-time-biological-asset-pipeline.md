@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-03 12:33'
-updated_date: '2026-11-03 19:03'
+updated_date: '2026-11-03 19:20'
 labels: []
 dependencies:
   - AQ-5
@@ -51,5 +51,11 @@ author: @Luna
 created: 2026-11-03 19:03
 ---
 Read-only pipeline audit (no renderer files changed). Good provenance is recorded for the two Sketchfab CC BY 4.0 fish and the reef scan: creator/source/license, source SHA-256, and modification notes are present in ASSET_NOTICES.md. Concrete reproducibility gaps: (1) candidate-real-clown.glb and candidate-real-tang.glb are ignored symlinks to /tmp/aq-authored-clown.glb and /tmp/aq-authored-tang.glb; they exist only on this machine, so a clean checkout cannot run the viewer or validator. The downloaded source GLBs are external as well: hashes and source links are recorded, but there is no checked-in acquisition/checksum step or durable source/output artifact location. (2) The fish rig script preserves the downloaded textures and adds approximate rigs/geometry, but does not bake textures. The original modeling scripts are separate prototypes: the clown uses a supplied raster skin and exports with animation disabled; the tang is solid-color material, also with animation disabled. This does not demonstrate the requested geometry/material/rig/texture-bake export pipeline. (3) Source triangle/texture metadata and validator results are documented, but output GLB byte sizes and before/after geometry/texture budgets are not preserved in the repo; validation reports live under /tmp. The reef notice says derivative counts/error/size are in docs/rendering.md, but that document currently has no reef derivative metrics. prepare-reef.py prints triangles, sampled geometric error, bounds, and texture dimensions but no output hash or file size. (4) Recorded technical risks remain: clown normal maps lack exported tangents and source shading is baked; the tang required authored pectoral geometry because the source has no discernible independent pectorals; the reef scan has baked underwater lighting, open edges/underside, and downsampled texture detail. Suggested repeatable checkpoint: a source/output manifest with exact acquisition hashes, Blender/tool versions, arguments, generated hashes/sizes/triangle and texture counts, and validation report stored with the licensed artifact outputs. AQ-5 engine selection and production selection remain pending.
+---
+
+author: @Luna
+created: 2026-11-03 19:20
+---
+Durable asset checkpoint: tracked CC BY 4.0 fish and reef derivatives are regular files; source/output SHA-256, byte sizes, geometry/image counts, reef recipe and Khronos validator report are in src/rendering/proof/asset-manifest.json and validation-report.json. Reef export repair omitted unused tangents after diagnosis found zero tangent vectors (not normals); checkpoint mesh had no zero-area faces and no topology, normal, UV or material changes were made. Root reviewed offline front/oblique views and accepts the scan only for technical comparison. The 244 MB originals remain external; the committed-size derivatives let the fixtures load without source acquisition. Corrected reef browser review at 402×874/1440×900 is pending Mac unlock. Texture baking pipeline and production asset quality are not established; task remains open.
 ---
 <!-- COMMENTS:END -->
