@@ -5,10 +5,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-03 04:37'
-updated_date: '2026-11-03 04:41'
-labels:
-  - reef-fish
-  - animation
+labels: []
 dependencies:
   - AQ-12
 references:
@@ -29,15 +26,9 @@ Roster ID: `royal-gramma`. Implement this fish as an independently reviewable sp
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The rendered fish visibly matches the Royal gramma (Gramma loreto) visual baseline (adult purple forebody and yellow rear half), checked against the species references linked on this task.
-- [ ] #2 Its species-specific behavior is visible: hover outside a crevice, reorient head-up or head-down relative to the rock, occasionally swim belly-up under an overhang, make a compact inspection loop, and return to the same refuge.
-- [ ] #3 Real-species video review confirms visible body and fin articulation appropriate to this fish, plausible turns, and any natural hovering or pauses; rigid sprite sliding without articulated fish motion does not count.
-- [ ] #4 Roster ID `royal-gramma` is available as a fish choice for new and existing services and maps to the correct fish, readable label, and service link; the fish occupies its described habitat position and stays within the aquarium.
-- [ ] #5 Shared pause, stopping when the page is hidden, and reduced-motion behavior work for this fish without breaking its service link.
+- [ ] #1 The rendered fish visibly matches the adult Royal gramma baseline (Gramma loreto) and its diagnostic traits above, reviewed against the linked species references.
+- [ ] #2 Its characteristic motion is visibly distinct and follows this task's behavior brief: hover just outside a crevice, reorient head-up or head-down against the rock plane and occasionally swim inverted, make a compact inspection loop, then return to the same refuge.
+- [ ] #3 Swimming shows coordinated body deformation, fin and tail propulsion, and biologically plausible turns rather than rigid image translation; compare motion with available real-species reference clips during review.
+- [ ] #4 The fish uses its reef placement and shelter/foraging pattern described above, remains within the aquarium, and retains its correct service assignment, readable label, and usable click target.
+- [ ] #5 Global pause, hidden-page stopping, and reduced-motion behavior remain supported for this fish without breaking its service link.
 <!-- AC:END -->
-
-## Definition of Done
-<!-- DOD:BEGIN -->
-- [ ] #1 Root agent reviewed the completed work before marking the task Done.
-- [ ] #2 Implementation follows project policy in AGENTS.md: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
-<!-- DOD:END -->

@@ -35,3 +35,4 @@ Do not edit Backlog task, draft, document, decision, or milestone markdown files
 - The OpenPencil design is an editable starting baseline and can evolve substantially. Current translating fish cutouts are scaffold only; do not describe them as completed lifelike animation. A still sprite sliding through the tank does not satisfy the realistic-fish goal.
 - Preserve practical baseline behavior inside the aquarium experience: pause motion and settings must remain available and work. Aquarium telemetry may show read-only CPU temperature, disk capacity, and network traffic when configured; never invent live values or present them as service health monitoring.
 - Do not add service health monitoring; it was not requested.
+- If there are tasks in the agent_scratch.md file look at them and execute them as if they were sent directly to you from the user.

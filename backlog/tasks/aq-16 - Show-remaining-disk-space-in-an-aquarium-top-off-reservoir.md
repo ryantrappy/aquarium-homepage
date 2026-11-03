@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-03T04:25:00Z'
-updated_date: '2026-11-03T04:26:00Z'
+updated_date: '2026-11-03T19:11:00Z'
 labels: []
 dependencies: []
 references:
@@ -39,3 +39,23 @@ Add an aquarium top-off reservoir whose level represents actual remaining disk c
 - [ ] #1 Luna completes the task with high reasoning effort.
 - [ ] #2 Root agent reviews the completed result before the task is marked Done.
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Read-only source inventory on trappserv.er (2026-11-03): findmnt and df are available. Mounted local block filesystems include the root LVM ext4 volume (also shown as a duplicate /usr/share/hunspell submount), NVMe boot/EFI partitions, and mounted SATA ext3/ext4 data volumes under /media/internal; pseudo filesystems, snap loop images, Docker overlay mounts, and network namespace mounts are also visible and must be excluded. AQ16 adapter proposal: build candidates from the host mount table and block-device identity; count each eligible filesystem/device once (dedupe source/major:minor, normalize LVM subvolume suffixes), exclude pseudo/loop/overlay/snap/boot-only scopes as agreed, and obtain byte free/total via statfs/df on explicit read-only mount paths. Aggregate as sum(free)/sum(total), label the chosen scope, surface inaccessible/stale data. Avoid exposing a broad host-root mount just to inspect usage; make the required disk mount paths explicit and read-only. No mount or server config was changed.
+<!-- SECTION:NOTES:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+created: 2026-11-03T19:11:00Z
+
+---
+
+Read-only inventory/source proposal on trappserv.er (2026-11-03 19:10 UTC): `findmnt`/`lsblk` and `df -B1 -T` show nine mounted data filesystems on distinct whole disks (`/media/internal/...`, `/dev/sda1` through `/dev/sdj1` with sdf unused for data); sizes round to 2, 3, 4, 6, 12, and 14 TB classes. Current free-space examples range from about 0.25 GB on `/media/internal/threeTB` (reported 100% used) to 6.4 TB on `/media/internal/twelveTb`. Root is a 488 GB ext4 LVM filesystem on the system NVMe, with about 39.7 GB free; `/boot` and `/boot/efi` are separate system partitions and should not be offered as data disks. `/var/snap/firefox/common/host-hunspell` resolves to the same root LVM major:minor and source subdirectory as `/`, so it must not be counted twice. Loop/snap, pseudo, swap, Docker overlay/bridge mounts are not capacity candidates.
+
+Proposed next integration (not implemented): provide explicit read-only binds for chosen filesystem paths, including a non-root directory on the root filesystem if root capacity is offered; do not bind `/` or broad `/media/internal` just for statfs. Keep a stable mount-ID/label per configured scope, dedupe by filesystem source plus major:minor (and normalize bind/subvolume paths), obtain byte totals/free via statfs for each unique eligible mounted filesystem, and aggregate summed free / summed total. Keep boot/EFI, swap, loops, pseudo filesystems, and container mounts out of selection. No host mount or server config was changed.
+
+---
+<!-- COMMENTS:END -->

@@ -6,8 +6,8 @@ title: >-
 status: To Do
 assignee:
   - '@Luna'
-created_date: '2026-11-03 04:37'
-updated_date: '2026-11-03 04:41'
+created_date: 2026-11-03 04:37
+updated_date: '2026-11-03T12:39:00Z'
 labels:
   - reef-fish
   - animation
@@ -16,9 +16,11 @@ dependencies:
 references:
   - >-
     https://baliwildlife.com/encyclopedia/marine-life/ray-finned-fishes/blennies/tailspot-blenny-ecsenius-stigmatura/
+  - AQ-45
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
+  - docs/fish-behavior-design.md
 priority: medium
 type: enhancement
 ordinal: 29000
@@ -44,3 +46,16 @@ Roster ID: `tailspot-blenny`. Implement this fish as an independently reviewable
 - [ ] #1 Root agent reviewed the completed work before marking the task Done.
 - [ ] #2 Implementation follows project policy in AGENTS.md: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @root
+created: 2026-11-03T12:39:00Z
+
+---
+
+Use the reviewed behavior brief to treat rock-perching as a useful staging interpretation for this sheltered-reef blenny, not a sand-burrow behavior. Shared anchor interaction work is AQ-45.
+
+---
+<!-- COMMENTS:END -->

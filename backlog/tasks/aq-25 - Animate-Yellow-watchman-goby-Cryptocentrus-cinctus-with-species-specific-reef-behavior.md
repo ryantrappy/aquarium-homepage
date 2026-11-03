@@ -6,8 +6,8 @@ title: >-
 status: To Do
 assignee:
   - '@Luna'
-created_date: '2026-11-03 04:37'
-updated_date: '2026-11-03 04:41'
+created_date: 2026-11-03 04:37
+updated_date: '2026-11-03T12:39:00Z'
 labels:
   - reef-fish
   - animation
@@ -18,9 +18,11 @@ references:
     https://australian.museum/learn/animals/fishes/yellow-shrimpgoby-cryptocentrus-cinctus/
   - >-
     https://lifg.australian.museum/Group.html?groupId=BDBaE9qK&hierarchyId=CEJQQmVx
+  - AQ-45
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
+  - docs/fish-behavior-design.md
 priority: medium
 type: enhancement
 ordinal: 27000
@@ -46,3 +48,16 @@ Roster ID: `yellow-watchman-goby`. Implement this fish as an independently revie
 - [ ] #1 Root agent reviewed the completed work before marking the task Done.
 - [ ] #2 Implementation follows project policy in AGENTS.md: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @root
+created: 2026-11-03T12:39:00Z
+
+---
+
+Use the reviewed behavior brief to keep this sand-burrow sentry distinct from firefish hovering above the entrance and tailspot blenny near rock. Shared anchor interaction work is AQ-45.
+
+---
+<!-- COMMENTS:END -->

@@ -6,20 +6,25 @@ title: >-
 status: To Do
 assignee:
   - '@Luna'
-created_date: '2026-11-03 04:37'
-updated_date: '2026-11-03 04:41'
+created_date: 2026-11-03 04:37
+updated_date: '2026-11-03T12:39:00Z'
 labels:
   - reef-fish
   - animation
 dependencies:
   - AQ-12
 references:
-  - 'https://www.fishbase.se/summary/Amphiprion-ocellaris'
+  - https://www.fishbase.se/summary/Amphiprion-ocellaris
   - >-
     https://www.montereybayaquarium.org/animals-the-ocean/animals-a-to-z/clownfish
+  - https://pmc.ncbi.nlm.nih.gov/articles/PMC6850181/
+  - >-
+    https://www.aquariumofpacific.org/onlinelearningcenter/species/clown_anemonefish
+  - AQ-45
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
+  - docs/fish-behavior-design.md
 priority: medium
 type: enhancement
 ordinal: 20000
@@ -45,3 +50,16 @@ Roster ID: `ocellaris-clownfish`. Implement this fish as an independently review
 - [ ] #1 Root agent reviewed the completed work before marking the task Done.
 - [ ] #2 Implementation follows project policy in AGENTS.md: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @root
+created: 2026-11-03T12:39:00Z
+
+---
+
+Reviewed host evidence clarifies that this fish uses a compatible host anemone (not Acropora); represent a soft home region and natural tentacle overlap rather than a hard biological leash. Shared anchor implementation is tracked in AQ-45.
+
+---
+<!-- COMMENTS:END -->

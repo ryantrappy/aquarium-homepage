@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-03T04:25:00Z'
-updated_date: '2026-11-03T04:39:00Z'
+updated_date: '2026-11-03T13:56:00Z'
 labels: []
 dependencies: []
 references:
@@ -13,6 +13,7 @@ references:
 documentation:
   - docs/requirements.md
   - docs/design-principles.md
+  - docs/gemini-research-links.md
 priority: high
 type: feature
 ordinal: 14000
@@ -66,6 +67,15 @@ created: 2026-11-03T04:31:00Z
 ---
 
 Root asset review: the new reef-tank-front.webp reads as a straight-on glass tank with crisp coral/live rock, a clean sand bed, visible water surface and no room/cabinet or baked-in fish. It is a suitable environment for this iteration. Integration review must preserve this clarity: no dark marketing scrim, blur, oversized text, permanent header or dock. On the reef must open only from a small Services button in a named native modal; verify Escape, focus return, search, service launch and transition to settings. Record broader body/fin/tail lifelike animation as still pending AQ-12.
+
+---
+
+author: @root
+created: 2026-11-03T13:56:00Z
+
+---
+
+Tank-scene references extracted from the Gemini conversation are collected in docs/gemini-research-links.md. Treat them as visual research links, not verified tank specifications or permission to reuse images/video.
 
 ---
 <!-- COMMENTS:END -->

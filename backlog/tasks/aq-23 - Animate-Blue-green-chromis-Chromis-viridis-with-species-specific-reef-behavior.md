@@ -6,18 +6,20 @@ title: >-
 status: To Do
 assignee:
   - '@Luna'
-created_date: '2026-11-03 04:37'
-updated_date: '2026-11-03 04:41'
+created_date: 2026-11-03 04:37
+updated_date: '2026-11-03T12:39:00Z'
 labels:
   - reef-fish
   - animation
 dependencies:
   - AQ-12
 references:
-  - 'https://aquarium.org/animals/blue-green-chromis/'
+  - https://aquarium.org/animals/blue-green-chromis/
+  - AQ-41
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
+  - docs/fish-behavior-design.md
 priority: medium
 type: enhancement
 ordinal: 25000
@@ -43,3 +45,16 @@ Roster ID: `blue-green-chromis`. Implement this fish as an independently reviewa
 - [ ] #1 Root agent reviewed the completed work before marking the task Done.
 - [ ] #2 Implementation follows project policy in AGENTS.md: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @root
+created: 2026-11-03T12:39:00Z
+
+---
+
+For this school-specific behavior, keep the disturbance cue scoped to the blue-green chromis group and its compatible branching-coral refuge. A single AQ-13 service activation affects only that selected fish, not the whole aquarium.
+
+---
+<!-- COMMENTS:END -->
