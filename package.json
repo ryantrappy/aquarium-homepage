@@ -9,6 +9,7 @@
     "test": "vitest run",
     "backlog": "backlog",
     "backlog:board": "backlog board",
+    "behavior:demo": "node scripts/behavior-runtime-demo.mjs",
     "start": "node .output/server/index.mjs"
   },
   "dependencies": {

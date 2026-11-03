@@ -1,0 +1,307 @@
+import { getSpeciesBehaviorProfile, type HabitatAnchor, type SpeciesBehaviorId } from '../lib/fish-behavior'
+import type { NavigationRequest } from './behavior-runtime'
+
+export type Vec3 = Readonly<{ x: number; y: number; z: number }>
+export type AxisAlignedBox = Readonly<{ min: Vec3; max: Vec3 }>
+
+export type SolidObstacleVolume = {
+  id: string
+  bounds: AxisAlignedBox
+}
+
+/** Positions are supplied by a scene adapter; this module does not invent reef locations. */
+export type HabitatAnchorLocation = {
+  id: string
+  anchor: HabitatAnchor
+  position: Vec3
+  compatibleSpecies?: readonly SpeciesBehaviorId[]
+}
+
+export type ResolveHabitatRouteInput = {
+  request: NavigationRequest
+  start: Vec3
+  waterBounds: AxisAlignedBox
+  obstacles: readonly SolidObstacleVolume[]
+  anchorLocations: readonly HabitatAnchorLocation[]
+  fishClearanceRadius: number
+}
+
+export type HabitatRouteResult =
+  | {
+      status: 'route'
+      instanceId: string
+      generation: number
+      speciesId: string
+      anchor: HabitatAnchor
+      locationId: string
+      path: readonly Vec3[]
+      length: number
+    }
+  | {
+      status: 'blocked' | 'unavailable'
+      instanceId: string
+      generation: number
+      speciesId: string
+      anchor: HabitatAnchor
+    }
+
+const MAX_OBSTACLE_VOLUMES = 32
+const MAX_ANCHOR_LOCATIONS = 128
+const CORNER_CLEARANCE = 1e-4
+const COORDINATE_EPSILON = 1e-9
+
+function finiteVec(point: Vec3): boolean {
+  return Number.isFinite(point.x) && Number.isFinite(point.y) && Number.isFinite(point.z)
+}
+
+function validateBox(box: AxisAlignedBox, label: string) {
+  if (!finiteVec(box.min) || !finiteVec(box.max)) throw new RangeError(`${label} must use finite 3D coordinates.`)
+  if (!(box.min.x < box.max.x && box.min.y < box.max.y && box.min.z < box.max.z)) {
+    throw new RangeError(`${label} must have positive width, height, and depth.`)
+  }
+}
+
+function validateInput(input: ResolveHabitatRouteInput) {
+  const { request, start, waterBounds, obstacles, anchorLocations, fishClearanceRadius } = input
+  if (!request.instanceId.trim() || !Number.isSafeInteger(request.generation) || request.generation < 0) {
+    throw new RangeError('Navigation request requires a non-empty instance ID and non-negative safe generation.')
+  }
+  if (!finiteVec(start)) throw new RangeError('Fish start position must use finite 3D coordinates.')
+  if (!Number.isFinite(fishClearanceRadius) || fishClearanceRadius < 0) {
+    throw new RangeError('Fish clearance radius must be finite and non-negative.')
+  }
+  validateBox(waterBounds, 'Water bounds')
+  if (obstacles.length > MAX_OBSTACLE_VOLUMES) throw new RangeError(`Navigation supports at most ${MAX_OBSTACLE_VOLUMES} obstacle volumes per request.`)
+  if (anchorLocations.length > MAX_ANCHOR_LOCATIONS) throw new RangeError(`Navigation supports at most ${MAX_ANCHOR_LOCATIONS} anchor locations per request.`)
+  const obstacleIds = new Set<string>()
+  for (const obstacle of obstacles) {
+    if (!obstacle.id.trim() || obstacleIds.has(obstacle.id)) throw new RangeError('Obstacle IDs must be non-empty and unique per request.')
+    obstacleIds.add(obstacle.id)
+    validateBox(obstacle.bounds, `Obstacle ${obstacle.id}`)
+  }
+  const anchorIds = new Set<string>()
+  for (const location of anchorLocations) {
+    if (!location.id.trim() || anchorIds.has(location.id)) throw new RangeError('Anchor location IDs must be non-empty and unique per request.')
+    anchorIds.add(location.id)
+    if (!finiteVec(location.position)) throw new RangeError(`Anchor location ${location.id} must use finite 3D coordinates.`)
+  }
+}
+
+function strictPointInside(point: Vec3, box: AxisAlignedBox): boolean {
+  return point.x > box.min.x && point.x < box.max.x
+    && point.y > box.min.y && point.y < box.max.y
+    && point.z > box.min.z && point.z < box.max.z
+}
+
+function inflate(box: AxisAlignedBox, radius: number): AxisAlignedBox {
+  return {
+    min: { x: box.min.x - radius, y: box.min.y - radius, z: box.min.z - radius },
+    max: { x: box.max.x + radius, y: box.max.y + radius, z: box.max.z + radius },
+  }
+}
+
+function safePoint(point: Vec3, waterBounds: AxisAlignedBox, clearanceRadius: number, obstacles: readonly AxisAlignedBox[]): boolean {
+  if (point.x < waterBounds.min.x + clearanceRadius || point.x > waterBounds.max.x - clearanceRadius
+    || point.y < waterBounds.min.y + clearanceRadius || point.y > waterBounds.max.y - clearanceRadius
+    || point.z < waterBounds.min.z + clearanceRadius || point.z > waterBounds.max.z - clearanceRadius) return false
+  return obstacles.every((obstacle) => !strictPointInside(point, obstacle))
+}
+
+/** True when the segment crosses an obstacle interior; tangential contact along a face is allowed. */
+function segmentHitsBoxInterior(start: Vec3, end: Vec3, box: AxisAlignedBox): boolean {
+  const delta = { x: end.x - start.x, y: end.y - start.y, z: end.z - start.z }
+  let enter = 0
+  let leave = 1
+  for (const axis of ['x', 'y', 'z'] as const) {
+    const origin = start[axis]
+    const direction = delta[axis]
+    const minimum = box.min[axis]
+    const maximum = box.max[axis]
+    if (Math.abs(direction) <= COORDINATE_EPSILON) {
+      if (origin <= minimum || origin >= maximum) return false
+      continue
+    }
+    const first = (minimum - origin) / direction
+    const second = (maximum - origin) / direction
+    enter = Math.max(enter, Math.min(first, second))
+    leave = Math.min(leave, Math.max(first, second))
+    if (enter >= leave) return false
+  }
+  const sampleAt = (Math.max(enter, 0) + Math.min(leave, 1)) / 2
+  if (!(sampleAt > 0 && sampleAt < 1)) return false
+  const sample = {
+    x: start.x + delta.x * sampleAt,
+    y: start.y + delta.y * sampleAt,
+    z: start.z + delta.z * sampleAt,
+  }
+  return strictPointInside(sample, box)
+}
+
+function segmentClear(start: Vec3, end: Vec3, obstacles: readonly AxisAlignedBox[]): boolean {
+  return obstacles.every((obstacle) => !segmentHitsBoxInterior(start, end, obstacle))
+}
+
+function distance(a: Vec3, b: Vec3): number {
+  const x = a.x - b.x
+  const y = a.y - b.y
+  const z = a.z - b.z
+  return Math.hypot(x, y, z)
+}
+
+function obstacleCorners(obstacles: readonly AxisAlignedBox[], waterBounds: AxisAlignedBox, clearanceRadius: number): Vec3[] {
+  const corners: Vec3[] = []
+  const safeMin = {
+    x: waterBounds.min.x + clearanceRadius,
+    y: waterBounds.min.y + clearanceRadius,
+    z: waterBounds.min.z + clearanceRadius,
+  }
+  const safeMax = {
+    x: waterBounds.max.x - clearanceRadius,
+    y: waterBounds.max.y - clearanceRadius,
+    z: waterBounds.max.z - clearanceRadius,
+  }
+  const clampToWater = (value: number, axis: 'x' | 'y' | 'z') => Math.min(safeMax[axis], Math.max(safeMin[axis], value))
+  const seen = new Set<string>()
+  for (const obstacle of obstacles) {
+    const xs = [obstacle.min.x - CORNER_CLEARANCE, obstacle.max.x + CORNER_CLEARANCE]
+    const ys = [obstacle.min.y - CORNER_CLEARANCE, obstacle.max.y + CORNER_CLEARANCE]
+    const zs = [obstacle.min.z - CORNER_CLEARANCE, obstacle.max.z + CORNER_CLEARANCE]
+    for (const x of xs) for (const y of ys) for (const z of zs) {
+      // Clip boundary-spanning obstacle corners to the safe tank volume. The
+      // resulting edge/face points let the graph route around a different,
+      // still-open axis when the original 3D corners lie outside the tank.
+      const corner = {
+        x: clampToWater(x, 'x'),
+        y: clampToWater(y, 'y'),
+        z: clampToWater(z, 'z'),
+      }
+      const key = `${corner.x},${corner.y},${corner.z}`
+      if (safePoint(corner, waterBounds, clearanceRadius, obstacles) && !seen.has(key)) {
+        corners.push(corner)
+        seen.add(key)
+      }
+    }
+  }
+  return corners
+}
+
+type GraphEdge = { node: number; length: number }
+
+function buildVisibilityGraph(points: readonly Vec3[], obstacles: readonly AxisAlignedBox[]): GraphEdge[][] {
+  const graph = points.map(() => [] as GraphEdge[])
+  for (let first = 0; first < points.length; first += 1) {
+    for (let second = first + 1; second < points.length; second += 1) {
+      if (!segmentClear(points[first], points[second], obstacles)) continue
+      const length = distance(points[first], points[second])
+      graph[first].push({ node: second, length })
+      graph[second].push({ node: first, length })
+    }
+  }
+  return graph
+}
+
+function shortestPaths(graph: readonly GraphEdge[][], startNode: number) {
+  const distances = graph.map(() => Number.POSITIVE_INFINITY)
+  const previous = graph.map(() => -1)
+  const visited = graph.map(() => false)
+  distances[startNode] = 0
+  for (let count = 0; count < graph.length; count += 1) {
+    let current = -1
+    for (let candidate = 0; candidate < graph.length; candidate += 1) {
+      if (!visited[candidate] && (current === -1 || distances[candidate] < distances[current])) current = candidate
+    }
+    if (current === -1 || !Number.isFinite(distances[current])) break
+    visited[current] = true
+    for (const edge of graph[current]) {
+      const possible = distances[current] + edge.length
+      if (!visited[edge.node] && possible < distances[edge.node]) {
+        distances[edge.node] = possible
+        previous[edge.node] = current
+      }
+    }
+  }
+  return { distances, previous }
+}
+
+function pathToNode(previous: readonly number[], node: number): number[] {
+  const path = [node]
+  while (previous[path[0]] >= 0) path.unshift(previous[path[0]])
+  return path
+}
+
+function requestedStateAnchor(request: NavigationRequest): HabitatAnchor | undefined {
+  const profile = getSpeciesBehaviorProfile(request.speciesId)
+  const stateConfig = profile?.states[request.state]
+  if (!profile || !stateConfig || !profile.anchors.includes(request.anchor)) return undefined
+  const target = 'destination' in stateConfig ? stateConfig.destination : stateConfig.anchor
+  return target === request.anchor ? target : undefined
+}
+
+function resultBase(request: NavigationRequest) {
+  return {
+    instanceId: request.instanceId,
+    generation: request.generation,
+    speciesId: request.speciesId,
+    anchor: request.anchor,
+  }
+}
+
+/** Resolve a typed profile request through caller-supplied tank bounds, anchors, and solid obstacle volumes. */
+export function resolveHabitatRoute(input: ResolveHabitatRouteInput): HabitatRouteResult {
+  validateInput(input)
+  const { request, start, waterBounds, obstacles, anchorLocations, fishClearanceRadius } = input
+  const profile = getSpeciesBehaviorProfile(request.speciesId)
+  if (!profile || !requestedStateAnchor(request)) return { ...resultBase(request), status: 'unavailable' }
+
+  const candidates = anchorLocations
+    .filter((location) => location.anchor === request.anchor
+      && (!location.compatibleSpecies || location.compatibleSpecies.includes(profile.speciesId)))
+    .slice()
+    .sort((a, b) => a.id.localeCompare(b.id))
+  if (candidates.length === 0) return { ...resultBase(request), status: 'unavailable' }
+
+  const expandedObstacles = obstacles.map((obstacle) => inflate(obstacle.bounds, fishClearanceRadius))
+  for (const [index, obstacle] of expandedObstacles.entries()) validateBox(obstacle, `Clearance-expanded obstacle ${obstacles[index].id}`)
+  const safeBounds = {
+    min: {
+      x: waterBounds.min.x + fishClearanceRadius,
+      y: waterBounds.min.y + fishClearanceRadius,
+      z: waterBounds.min.z + fishClearanceRadius,
+    },
+    max: {
+      x: waterBounds.max.x - fishClearanceRadius,
+      y: waterBounds.max.y - fishClearanceRadius,
+      z: waterBounds.max.z - fishClearanceRadius,
+    },
+  }
+  if (!finiteVec(safeBounds.min) || !finiteVec(safeBounds.max)) throw new RangeError('Fish clearance exceeds finite tank bounds.')
+  if (!safePoint(start, waterBounds, fishClearanceRadius, expandedObstacles)) {
+    return { ...resultBase(request), status: 'blocked' }
+  }
+  const reachableCandidates = candidates.filter((candidate) => safePoint(candidate.position, waterBounds, fishClearanceRadius, expandedObstacles))
+  if (reachableCandidates.length === 0) return { ...resultBase(request), status: 'blocked' }
+
+  const startNode = 0
+  const corners = obstacleCorners(expandedObstacles, waterBounds, fishClearanceRadius)
+  const points = [start, ...corners, ...reachableCandidates.map((candidate) => candidate.position)]
+  const anchorNodeById = new Map<string, number>()
+  reachableCandidates.forEach((candidate, index) => anchorNodeById.set(candidate.id, 1 + corners.length + index))
+  const graph = buildVisibilityGraph(points, expandedObstacles)
+  const { distances, previous } = shortestPaths(graph, startNode)
+
+  let best: { candidate: HabitatAnchorLocation; node: number; length: number } | undefined
+  for (const candidate of reachableCandidates) {
+    const node = anchorNodeById.get(candidate.id)!
+    const length = distances[node]
+    if (Number.isFinite(length) && (!best || length < best.length)) best = { candidate, node, length }
+  }
+  if (!best) return { ...resultBase(request), status: 'blocked' }
+  const path = pathToNode(previous, best.node).map((node) => points[node])
+  return {
+    ...resultBase(request),
+    status: 'route',
+    locationId: best.candidate.id,
+    path: path.map((point) => ({ ...point })),
+    length: best.length,
+  }
+}

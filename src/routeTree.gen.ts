@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiConfigRouteImport } from './routes/api/config'
+import { Route as ApiTelemetryCpuTemperatureRouteImport } from './routes/api/telemetry/cpu-temperature'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,41 @@ const ApiConfigRoute = ApiConfigRouteImport.update({
   path: '/api/config',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTelemetryCpuTemperatureRoute =
+  ApiTelemetryCpuTemperatureRouteImport.update({
+    id: '/api/telemetry/cpu-temperature',
+    path: '/api/telemetry/cpu-temperature',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/config': typeof ApiConfigRoute
+  '/api/telemetry/cpu-temperature': typeof ApiTelemetryCpuTemperatureRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/config': typeof ApiConfigRoute
+  '/api/telemetry/cpu-temperature': typeof ApiTelemetryCpuTemperatureRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/config': typeof ApiConfigRoute
+  '/api/telemetry/cpu-temperature': typeof ApiTelemetryCpuTemperatureRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/config'
+  fullPaths: '/' | '/api/config' | '/api/telemetry/cpu-temperature'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/config'
-  id: '__root__' | '/' | '/api/config'
+  to: '/' | '/api/config' | '/api/telemetry/cpu-temperature'
+  id: '__root__' | '/' | '/api/config' | '/api/telemetry/cpu-temperature'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiConfigRoute: typeof ApiConfigRoute
+  ApiTelemetryCpuTemperatureRoute: typeof ApiTelemetryCpuTemperatureRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +76,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiConfigRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/telemetry/cpu-temperature': {
+      id: '/api/telemetry/cpu-temperature'
+      path: '/api/telemetry/cpu-temperature'
+      fullPath: '/api/telemetry/cpu-temperature'
+      preLoaderRoute: typeof ApiTelemetryCpuTemperatureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiConfigRoute: ApiConfigRoute,
+  ApiTelemetryCpuTemperatureRoute: ApiTelemetryCpuTemperatureRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
