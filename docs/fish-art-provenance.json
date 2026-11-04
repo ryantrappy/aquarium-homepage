@@ -1,0 +1,379 @@
+{
+  "schema_version": 1,
+  "purpose": "Provenance for current aquarium fish art. New transparent PNGs were root-approved for static preview use; earlier undocumented versions are removed from current public distribution.",
+  "asset_policy": "Project-original imagegen outputs, or exact documented CC0/CC BY 4.0. No third-party image was used as an input for these four generated candidates.",
+  "known_imagegen_webp_canonicals": [
+    {
+      "species_id": "ocellaris-clownfish",
+      "path": "public/fish/ocellaris-clownfish.webp",
+      "sha256": "8774ba735b49332272b8238f3a473eda3f49c26e3c97747e3d8f6822a6dd296b",
+      "bytes": 26732,
+      "dimensions_px": [
+        600,
+        300
+      ],
+      "generation_date": "2026-11-02",
+      "generation_method": "OpenAI built-in ImageGen, as recorded in linked project docs",
+      "history_record": "docs/design.md; docs/fish-assets.md",
+      "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
+      "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
+      "status": "frozen tracked WebP canonical output"
+    },
+    {
+      "species_id": "yellow-tang",
+      "path": "public/fish/yellow-tang.webp",
+      "sha256": "d2c3f30de04b944eeadc90c87bb4033962c3c0fb141c81e9c1074af6fc6173f2",
+      "bytes": 28458,
+      "dimensions_px": [
+        600,
+        400
+      ],
+      "generation_date": "2026-11-02",
+      "generation_method": "OpenAI built-in ImageGen, as recorded in linked project docs",
+      "history_record": "docs/design.md; docs/fish-assets.md",
+      "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
+      "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
+      "status": "frozen tracked WebP canonical output"
+    },
+    {
+      "species_id": "royal-gramma",
+      "path": "public/fish/royal-gramma.webp",
+      "sha256": "6468d83b7dea24495b6611eb59e7f59d500ddf9aa1139bbd5f16dd0870a173eb",
+      "bytes": 45184,
+      "dimensions_px": [
+        600,
+        300
+      ],
+      "generation_date": "2026-11-02",
+      "generation_method": "OpenAI built-in ImageGen, as recorded in linked project docs",
+      "history_record": "docs/design.md; docs/fish-assets.md",
+      "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
+      "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
+      "status": "frozen tracked WebP canonical output"
+    },
+    {
+      "species_id": "blue-tang",
+      "path": "public/fish/blue-tang.webp",
+      "sha256": "990ac30a977540e7c3758e630a76bb893ad1632cc21628d70ce00bec0d6f6dc9",
+      "bytes": 28896,
+      "dimensions_px": [
+        600,
+        279
+      ],
+      "generation_date": "2026-11-02",
+      "generation_method": "OpenAI built-in ImageGen, as recorded in linked project docs",
+      "history_record": "docs/design.md; docs/fish-assets.md",
+      "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
+      "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
+      "status": "frozen tracked WebP canonical output"
+    },
+    {
+      "species_id": "banggai-cardinalfish",
+      "path": "public/fish/banggai-cardinalfish.webp",
+      "sha256": "aa55d8932eecab5e7d4c9d49958aef9bbdf110b75fa54849e10872bd9d9bd08c",
+      "bytes": 45118,
+      "dimensions_px": [
+        600,
+        400
+      ],
+      "generation_date": "2026-11-02",
+      "generation_method": "OpenAI built-in ImageGen, as recorded in linked project docs",
+      "history_record": "docs/design.md; docs/fish-assets.md",
+      "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
+      "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
+      "status": "frozen tracked WebP canonical output"
+    },
+    {
+      "species_id": "tailspot-blenny",
+      "path": "public/fish/tailspot-blenny.webp",
+      "sha256": "1618139f0b2f9c21f3cbdfd511ed0999f0d3f7e3f8d6b025a931d6b91c12586b",
+      "bytes": 35322,
+      "dimensions_px": [
+        600,
+        200
+      ],
+      "generation_date": "2026-11-03",
+      "generation_method": "OpenAI built-in ImageGen, as recorded in linked project docs",
+      "history_record": "docs/fish-assets.md",
+      "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
+      "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
+      "status": "frozen tracked WebP canonical output"
+    },
+    {
+      "species_id": "six-line-wrasse",
+      "path": "public/fish/six-line-wrasse.webp",
+      "sha256": "2efa2d58e31d0f1ceff1a1177237f47656eb5ce73f0cc496fc1665b22e2291ba",
+      "bytes": 39278,
+      "dimensions_px": [
+        600,
+        300
+      ],
+      "generation_date": "2026-11-03",
+      "generation_method": "OpenAI built-in ImageGen, as recorded in linked project docs",
+      "history_record": "docs/fish-assets.md",
+      "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
+      "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
+      "status": "frozen tracked WebP canonical output"
+    },
+    {
+      "species_id": "mccoskers-flasher-wrasse",
+      "path": "public/fish/mccoskers-flasher-wrasse.webp",
+      "sha256": "0ee5ed5cc892a9b40f5574466ee5c14e2f3339da0baae92d27b32778aff19fee",
+      "bytes": 51398,
+      "dimensions_px": [
+        600,
+        300
+      ],
+      "generation_date": "2026-11-03",
+      "generation_method": "OpenAI built-in ImageGen, as recorded in linked project docs",
+      "history_record": "docs/fish-assets.md",
+      "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
+      "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
+      "status": "frozen tracked WebP canonical output"
+    },
+    {
+      "species_id": "lyretail-anthias",
+      "path": "public/fish/lyretail-anthias.webp",
+      "sha256": "a7a2eecaa5d7529f632fae76efa86a059e8c857817aeb489b62d1fbd99baed05",
+      "bytes": 37162,
+      "dimensions_px": [
+        600,
+        300
+      ],
+      "generation_date": "2026-11-03",
+      "generation_method": "OpenAI built-in ImageGen, as recorded in linked project docs",
+      "history_record": "docs/fish-assets.md",
+      "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
+      "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
+      "status": "frozen tracked WebP canonical output"
+    },
+    {
+      "species_id": "flame-angelfish",
+      "path": "public/fish/flame-angelfish.webp",
+      "sha256": "d208dbbf1c13302661d764e72f50e087a9d8256f1f766b35a789d235993e1016",
+      "bytes": 59464,
+      "dimensions_px": [
+        600,
+        400
+      ],
+      "generation_date": "2026-11-03",
+      "generation_method": "OpenAI built-in ImageGen, as recorded in linked project docs",
+      "history_record": "docs/fish-assets.md",
+      "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
+      "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
+      "status": "frozen tracked WebP canonical output"
+    },
+    {
+      "species_id": "copperband-butterflyfish",
+      "path": "public/fish/copperband-butterflyfish.webp",
+      "sha256": "4b3b4ca06d6c9563029c74723a245b286b533711cc952bdb51560d4e66fc4617",
+      "bytes": 65764,
+      "dimensions_px": [
+        600,
+        400
+      ],
+      "generation_date": "2026-11-03",
+      "generation_method": "OpenAI built-in ImageGen, as recorded in linked project docs",
+      "history_record": "docs/fish-assets.md",
+      "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
+      "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
+      "status": "frozen tracked WebP canonical output"
+    }
+  ],
+  "legacy_unverified_webp": [
+    {
+      "species_id": "blue-green-chromis",
+      "path": "public/fish/blue-green-chromis.webp",
+      "sha256": "91aaaeb0b4a67ea6dc6b0e7041e7f36ae22eae480cdfe013fc5946e0e02ff5f6",
+      "bytes": 41416,
+      "dimensions_px": [
+        600,
+        300
+      ],
+      "history_record": "docs/fish-assets.md says this asset pre-existed interrupted AQ-33 and was visually reviewed",
+      "source_or_license": "unverified in the available project record",
+      "generation_method": "unknown; do not infer ImageGen",
+      "status": "removed from current public distribution after root approved the v2 replacement on 2026-11-04; prior bytes remain recoverable from Git history and hash is retained for audit"
+    },
+    {
+      "species_id": "firefish",
+      "path": "public/fish/firefish.webp",
+      "sha256": "8c5cca5de882321d5535c53ddeb7e8137d6701e7183bbf1ae515ed2ae3e0675d",
+      "bytes": 25886,
+      "dimensions_px": [
+        600,
+        300
+      ],
+      "history_record": "docs/fish-assets.md says this asset pre-existed interrupted AQ-33 and was visually reviewed",
+      "source_or_license": "unverified in the available project record",
+      "generation_method": "unknown; do not infer ImageGen",
+      "status": "removed from current public distribution after root approved the v2 replacement on 2026-11-04; prior bytes remain recoverable from Git history and hash is retained for audit"
+    },
+    {
+      "species_id": "yellow-watchman-goby",
+      "path": "public/fish/yellow-watchman-goby.webp",
+      "sha256": "192dae0971df14f608aa3b1d5ae9cfab63532a3946902c091d639b099d68024f",
+      "bytes": 24588,
+      "dimensions_px": [
+        600,
+        200
+      ],
+      "history_record": "docs/fish-assets.md says this asset pre-existed interrupted AQ-33 and was visually reviewed",
+      "source_or_license": "unverified in the available project record",
+      "generation_method": "unknown; do not infer ImageGen",
+      "status": "removed from current public distribution after root approved the v2 replacement on 2026-11-04; prior bytes remain recoverable from Git history and hash is retained for audit"
+    },
+    {
+      "species_id": "mandarin-dragonet",
+      "path": "public/fish/mandarin-dragonet.webp",
+      "sha256": "0cd64228e2d881aae870cc1b73ef229bf7646452f6e3ab6c6338d44ead047918",
+      "bytes": 50708,
+      "dimensions_px": [
+        600,
+        300
+      ],
+      "history_record": "docs/fish-assets.md says this asset pre-existed interrupted AQ-33 and was visually reviewed",
+      "source_or_license": "unverified in the available project record",
+      "generation_method": "unknown; do not infer ImageGen",
+      "status": "removed from current public distribution after root approved the v2 replacement on 2026-11-04; prior bytes remain recoverable from Git history and hash is retained for audit"
+    }
+  ],
+  "new_generated_png_candidates": [
+    {
+      "species_id": "blue-green-chromis",
+      "path": "public/fish/blue-green-chromis-v2.png",
+      "generation_date": "2026-11-04",
+      "tool_mode": "built-in image_gen tool; no CLI/API fallback",
+      "source_path": "/Users/ryantrapp/.codex/generated_images/01a1a16d-77f6-78f1-9a39-69c95fec7a08/exec-ed90d047-ac41-4fa3-b84e-13a1999535cc.png",
+      "copied_byte_for_byte_from_source": true,
+      "prompt": "Use case: photorealistic-natural. Asset type: transparent species cutout for a reef-aquarium fish catalog and in-scene preview. Subject: one adult blue-green chromis (Chromis viridis), with a slender compressed blue-green body, subtle realistic scale texture, translucent fins, and a clearly forked tail. Composition: clean full-body lateral side profile, entire body and every fin visible with generous transparent padding, fish facing right. Lighting: neutral soft reef light with natural blue-green iridescence and no dramatic color cast. Background: genuinely transparent. Constraints: one fish only; correct chromis anatomy; no coral, water, rocks, sand, ground plane, cast shadow, text, border, logo, or watermark.",
+      "sha256": "31939430c0dfe6ae121424af0092e96097874a3699fe688d40afd727560aaac6",
+      "bytes": 1812655,
+      "dimensions_px": [
+        1774,
+        887
+      ],
+      "format": "PNG",
+      "mode": "RGBA",
+      "alpha_channel_present": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "status": "root-approved project-original static preview art; active catalog path; not a final photorealistic or animated fish asset",
+      "maximum_alpha_at_canvas_edge": 1,
+      "edge_pixels_alpha_over_128": 0
+    },
+    {
+      "species_id": "firefish",
+      "path": "public/fish/firefish-v2.png",
+      "generation_date": "2026-11-04",
+      "tool_mode": "built-in image_gen tool; no CLI/API fallback",
+      "source_path": "/Users/ryantrapp/.codex/generated_images/01a1a16d-77f6-78f1-9a39-69c95fec7a08/exec-78287e05-4382-4d46-9c83-0dbfc76cc4f3.png",
+      "copied_byte_for_byte_from_source": true,
+      "prompt": "Use case: photorealistic-natural. Asset type: transparent species cutout for a reef-aquarium fish catalog and in-scene preview. Subject: one adult firefish / fire dartfish (Nemateleotris magnifica), slender with a pale white-to-cream front fading into a vivid red-orange rear, long first dorsal ray, remaining dorsal fin clearly visible, and a rounded tail. Composition: clean full-body lateral side profile, entire body and every fin visible with generous transparent padding, fish facing right. Lighting: neutral soft reef light, natural coloration, true anatomical proportions. Background: genuinely transparent. Constraints: one fish only; accurate species traits; no burrow, coral, water, rocks, sand, ground plane, cast shadow, text, border, logo, or watermark.",
+      "sha256": "93f6a96800535b28a58424bab7e7dbc4b4da2d41e12b76c1d3ed17e3258f21f9",
+      "bytes": 1177946,
+      "dimensions_px": [
+        2172,
+        724
+      ],
+      "format": "PNG",
+      "mode": "RGBA",
+      "alpha_channel_present": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "status": "root-approved project-original static preview art; active catalog path; not a final photorealistic or animated fish asset",
+      "maximum_alpha_at_canvas_edge": 1,
+      "edge_pixels_alpha_over_128": 0
+    },
+    {
+      "species_id": "yellow-watchman-goby",
+      "path": "public/fish/yellow-watchman-goby-v2.png",
+      "generation_date": "2026-11-04",
+      "tool_mode": "built-in image_gen tool; no CLI/API fallback",
+      "source_path": "/Users/ryantrapp/.codex/generated_images/01a1a16d-77f6-78f1-9a39-69c95fec7a08/exec-9fcb5b72-c00e-4017-8429-49997071456f.png",
+      "copied_byte_for_byte_from_source": true,
+      "prompt": "Use case: photorealistic-natural. Asset type: transparent species cutout for a reef-aquarium fish catalog and in-scene preview. Subject: one adult yellow watchman goby / yellow shrimpgoby (Cryptocentrus cinctus), compact yellow body, pale blue-white spots across the head and upper body, prominent alert eyes, and recognizable goby dorsal and pectoral fins. Composition: clean full-body lateral side profile, entire body and every fin visible with generous transparent padding, fish facing right. Lighting: neutral soft reef light, natural scales and fin detail, no exaggerated glow. Background: genuinely transparent. Constraints: one fish only; show the yellow form; no shrimp, burrow, coral, water, rocks, sand, ground plane, cast shadow, text, border, logo, or watermark.",
+      "sha256": "fd9ead29aa551ccf9d112229f3e83b8a1bc77553abb1577f5142e1ebce31654b",
+      "bytes": 1680633,
+      "dimensions_px": [
+        2172,
+        724
+      ],
+      "format": "PNG",
+      "mode": "RGBA",
+      "alpha_channel_present": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "status": "root-approved project-original static preview art; active catalog path; not a final photorealistic or animated fish asset",
+      "maximum_alpha_at_canvas_edge": 1,
+      "edge_pixels_alpha_over_128": 0
+    },
+    {
+      "species_id": "mandarin-dragonet",
+      "path": "public/fish/mandarin-dragonet-v2.png",
+      "generation_date": "2026-11-04",
+      "tool_mode": "built-in image_gen tool; no CLI/API fallback",
+      "source_path": "/Users/ryantrapp/.codex/generated_images/01a1a16d-77f6-78f1-9a39-69c95fec7a08/exec-aa45aac8-7173-4a1f-8a27-370c252d3a69.png",
+      "copied_byte_for_byte_from_source": true,
+      "prompt": "Use case: photorealistic-natural. Asset type: transparent species cutout for a reef-aquarium fish catalog and in-scene preview. Subject: one adult male mandarin dragonet (Synchiropus splendidus), low elongated body with vivid orange coloring and curved turquoise-green bands edged in black, blue-edged fins, and the male's extended first dorsal ray. Composition: clean full-body lateral side profile, entire fish and every fin visible with generous transparent padding, fish facing right. Lighting: neutral soft reef light, crisp natural surface detail, saturated but biologically credible color. Background: genuinely transparent. Constraints: one fish only; correct dragonet body and fin arrangement; no coral, water, rocks, sand, ground plane, cast shadow, text, border, logo, or watermark.",
+      "sha256": "4925ea0909c63cde2ea6142a1ce9b0f37f5871dd50a442819ed47f39c0c9507a",
+      "bytes": 1774829,
+      "dimensions_px": [
+        1881,
+        836
+      ],
+      "format": "PNG",
+      "mode": "RGBA",
+      "alpha_channel_present": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "status": "root-approved project-original static preview art; active catalog path; not a final photorealistic or animated fish asset",
+      "maximum_alpha_at_canvas_edge": 4,
+      "edge_pixels_alpha_over_128": 0
+    }
+  ],
+  "notes": [
+    "For the 11 frozen WebPs, the project docs record generation dates and built-in ImageGen use, but exact prompts and original raw PNG paths are not present in this manifest; do not invent them. The tracked WebPs and hashes identify the delivered canonical files.",
+    "The four legacy WebPs were removed only after root approved the v2 static preview replacements; their origin remains unverified and the prior hashes/history are retained here.",
+    "The new PNGs are retained unchanged at their generated dimensions; alpha is preserved. No crop, resize, edit, or re-encode was applied. The root-reviewed PNGs are static preview art, not final photorealistic or animated assets.",
+    "The generated PNGs total 6,446,063 bytes and have widths from 1,774 to 2,172 pixels. No mobile transfer/performance optimization or measurement is claimed."
+  ],
+  "new_png_total_bytes": 6446063,
+  "environment_images": [
+    {
+      "path": "public/reef-tank-front.webp",
+      "status": "active CSS fallback behind the Three.js canvas; use referenced in src/styles/aquarium.css",
+      "sha256": "708e163fd4dd8081c734f6233881132f84f3b3f1030f2c675bb4ef3ab2fa3991",
+      "bytes": 344452,
+      "dimensions_px": [
+        1600,
+        901
+      ],
+      "source": "project-original OpenAI built-in ImageGen output, 2026-11-02, as recorded in docs/design.md",
+      "license": "original project artwork; no copied source photograph",
+      "attribution": "no third-party attribution required",
+      "source_notes": "A supplied aquarium photo was used only as broad composition reference; tank, coral arrangement, equipment, and surroundings were not reproduced. Exact source PNG path and full prompt are not retained in the current project record; the tracked WebP is the frozen delivered source."
+    },
+    {
+      "path": "public/reef-background.webp",
+      "status": "removed from current public distribution 2026-11-04 after confirming no source-code import/reference",
+      "sha256": "53d4b5e2c60c438a82ebd6fbc7720bb226b00ba4a13bba009dd130cf7c5437fb",
+      "bytes": 218354,
+      "dimensions_px": [
+        1920,
+        960
+      ],
+      "source": "unknown in retained project history",
+      "license": "unverified; not asserted",
+      "history": "docs/design.md only describes it as the prior background retained during design review. Removed because no current code references it; the deletion is recoverable from Git history."
+    }
+  ]
+}

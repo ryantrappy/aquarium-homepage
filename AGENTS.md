@@ -21,7 +21,12 @@ Use `backlog <command> --help` before running unfamiliar commands. Help shows op
 Do not edit Backlog task, draft, document, decision, or milestone markdown files directly. Use the `backlog` CLI so metadata, relationships, and history stay consistent.
 
 </CRITICAL_INSTRUCTION>
+
 <!-- BACKLOG.MD GUIDELINES END -->
+
+## Current project handoff
+
+After reading all of `AGENTS.md` and its policies, read [`AGENT_TASKS.md`](AGENT_TASKS.md) for the current checkpoint and restart path. Backlog remains authoritative for acceptance criteria. Refresh the master at reviewed milestones or agent handoff, and have Root verify its facts before committing.
 
 ## Aquarium Homepage project guidance
 

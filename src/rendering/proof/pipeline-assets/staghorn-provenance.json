@@ -1,5 +1,5 @@
 {
-  "purpose": "Durable AQ40 supplementary technical review specimens; browser QA pending; unapproved final art or main content",
+  "purpose": "Durable AQ40 supplementary technical review specimens; bounded technical browser QA accepted at 1440x900 and 402x874; unapproved final art or main content",
   "source": {
     "creator": "PixForge (@pixforge.id)",
     "url": "https://sketchfab.com/3d-models/staghorn-coral-ede640745c16457a9345ef1fa9e8d4d4",
@@ -165,5 +165,37 @@
     "POSITION": 0.0,
     "NORMAL": 0.0032113194465637207,
     "TEXCOORD_0": 0.0
+  },
+  "browserReview": {
+    "status": "accepted-bounded-technical-capability",
+    "reviewer": "root",
+    "evidence": "AQ40 comment29 native Chrome review",
+    "viewportsCss": [
+      [
+        1440,
+        900
+      ],
+      [
+        402,
+        874
+      ]
+    ],
+    "checked": [
+      "rock and coral front/oblique",
+      "pause/resume light sweep",
+      "actual normal/AO states and glTF bindings",
+      "shader-derived tangent frame without shader failure",
+      "responsive fit and live drawing-area dimensions"
+    ],
+    "limits": [
+      "Not a physical-phone or performance benchmark",
+      "Final art and main-scene content remain unapproved"
+    ],
+    "localCaptures": [
+      "/tmp/aq40-rock-laptop.png",
+      "/tmp/aq40-coral-laptop.png",
+      "/tmp/aq40-rock-phone.png",
+      "/tmp/aq40-coral-phone.png"
+    ]
   }
 }

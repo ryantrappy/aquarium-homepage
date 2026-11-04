@@ -219,5 +219,37 @@
     "Original procedural specimen demonstrates a bounded bake/export path, not finished live-rock art.",
     "AO is exported as glTF occlusionTexture in the packed ORM image red channel; the specimen has no coral COLOR_0 mask.",
     "No tangent-space normal texture is included in this specimen; the licensed Staghorn normal reprojection is a separate proof."
-  ]
+  ],
+  "browserReview": {
+    "status": "accepted-bounded-technical-capability",
+    "reviewer": "root",
+    "evidence": "AQ40 comment29 native Chrome review",
+    "viewportsCss": [
+      [
+        1440,
+        900
+      ],
+      [
+        402,
+        874
+      ]
+    ],
+    "checked": [
+      "rock and coral front/oblique",
+      "pause/resume light sweep",
+      "actual normal/AO states and glTF bindings",
+      "shader-derived tangent frame without shader failure",
+      "responsive fit and live drawing-area dimensions"
+    ],
+    "limits": [
+      "Not a physical-phone or performance benchmark",
+      "Final art and main-scene content remain unapproved"
+    ],
+    "localCaptures": [
+      "/tmp/aq40-rock-laptop.png",
+      "/tmp/aq40-coral-laptop.png",
+      "/tmp/aq40-rock-phone.png",
+      "/tmp/aq40-coral-phone.png"
+    ]
+  }
 }

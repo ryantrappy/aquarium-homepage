@@ -26,8 +26,8 @@ const manifestSchema = z.object({
 }).strict()
 type Specimen = z.infer<typeof manifestSchema>['specimens'][number]
 type Choice = { specimen: Specimen; bakedUrl: string; referenceUrl?: string; provenanceUrl?: string; validationUrl?: string }
-// Root-curated technical review specimens. Browser QA remains pending; none
-// are promoted final artwork or imported by the production aquarium.
+// Root-curated specimens passed bounded technical browser QA. None are
+// approved final artwork or imported by the production aquarium.
 const assetUrls: Record<string, string> = { 'original-rock-bake.glb': rockUrl, 'staghorn-unbaked-lod.glb': staghornReferenceUrl, 'staghorn-normal-baked.glb': staghornBakedUrl }
 const reports: Record<string, { provenanceUrl: string; validationUrl: string }> = {
   'original-rock': { provenanceUrl: rockProvenanceUrl, validationUrl: rockValidationUrl },
@@ -52,6 +52,7 @@ const provenanceLink = document.querySelector<HTMLAnchorElement>('#provenance')!
 const validationLink = document.querySelector<HTMLAnchorElement>('#validation')!
 let renderer: THREE.WebGLRenderer | undefined
 let disposed = false, version = 0, paused = matchMedia('(prefers-reduced-motion: reduce)').matches
+let loadedStatus: string | undefined
 let last: number | undefined, lightPhase = 0, oblique = false
 let choices: typeof curated = [], roots: THREE.Object3D[] = [], mixers: THREE.AnimationMixer[] = []
 let bounds = new THREE.Box3(), fitCenter = new THREE.Vector3(), fitSize = new THREE.Vector3(.1, .1, .1)
@@ -168,10 +169,12 @@ function fit() {
     camera.position.copy(fitCenter).add(new THREE.Vector3(...(oblique ? [1, .38, 1.4] : [0, .08, 1.7]) as [number, number, number]).normalize().multiplyScalar(distance))
     camera.lookAt(fitCenter); camera.updateProjectionMatrix()
   })
+  if (loadedStatus) status.textContent = `${loadedStatus} · ${width}×${height} drawing area · DPR 1`
 }
 
 async function loadChoice(index: number) {
   const request = ++version, choice = choices[index]
+  loadedStatus = undefined
   status.classList.remove('error'); status.textContent = `Loading ${choice.specimen.label}…`
   const loader = new GLTFLoader()
   const loaded = await Promise.allSettled([loader.loadAsync(choice.bakedUrl), choice.referenceUrl ? loader.loadAsync(choice.referenceUrl) : Promise.resolve(undefined)])
@@ -221,13 +224,13 @@ async function loadChoice(index: number) {
     else link.removeAttribute('href')
   }
   notes.textContent = `${choice.specimen.notes} Matched fit, cameras, neutral room environment, lights and exposure. Only explicitly marked coral raw masks bypass display color; other COLOR_0 is preserved. No coral sway/fluorescence or final habitat claim.`
-  status.textContent = `${choice.specimen.label} loaded · display ${fitSize.toArray().map(value => value.toFixed(4)).join(' × ')} ${displayUnit} · ${viewport.clientWidth}×${viewport.clientHeight} drawing area · DPR 1`
+  loadedStatus = `${choice.specimen.label} loaded · display ${fitSize.toArray().map(value => value.toFixed(4)).join(' × ')} ${displayUnit}`
   normal.disabled = ![...originals.values()].some(maps => maps.normal)
   ao.disabled = ![...originals.values()].some(maps => maps.ao)
   updateMaps(); fit()
 }
 
-function fail(error: unknown) { console.error(error); status.classList.add('error'); status.textContent = `Pipeline proof unavailable: ${String(error)}` }
+function fail(error: unknown) { loadedStatus = undefined; console.error(error); status.classList.add('error'); status.textContent = `Pipeline proof unavailable: ${String(error)}` }
 async function start() {
   if (new URLSearchParams(location.search).get('review') === 'local') {
     const response = await fetch('/pipeline-review/manifest.json', { cache: 'no-store' })
@@ -239,7 +242,7 @@ async function start() {
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
   renderer.setPixelRatio(1); renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1
-  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap
   const room = new RoomEnvironment(), pmrem = new THREE.PMREMGenerator(renderer)
   environment = pmrem.fromScene(room, .04); room.dispose(); pmrem.dispose()
   scenes.forEach(scene => {

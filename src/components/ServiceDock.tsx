@@ -30,7 +30,7 @@ export function ServiceDock({ services }: ServiceDockProps) {
             const fish = getFishById(service.fishId)
             if (!fish) return null
             return <li key={service.id}><a className="service-link" href={service.url} target="_blank" rel="noreferrer">
-              <span className={`dock-fish dock-${fish.id}`} aria-hidden="true"><img src={`/fish/${fish.id}.webp`} alt="" /></span>
+              <span className={`dock-fish dock-${fish.id}`} aria-hidden="true"><img src={fish.thumbnail} alt="" /></span>
               <span className="service-text"><span className="service-name">{service.name}{service.isExample && <small>example</small>}</span><span className="service-species">{fish.commonName}</span></span>
               <span className="service-open" aria-hidden="true">↗</span>
             </a></li>

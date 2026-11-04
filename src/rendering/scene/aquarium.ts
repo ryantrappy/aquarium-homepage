@@ -114,9 +114,14 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
         const model = clone(base.scene); root.add(model); model.scale.setScalar(service.fishId === 'yellow-tang' ? .48 : .42)
         mixer = new THREE.AnimationMixer(model); base.animations.forEach(clip => mixer!.clipAction(clip).play()); mixer.setTime((seedForId(service.id) % 1500) / 1000)
       } else {
-        const texture = new THREE.TextureLoader().load(`/fish/${service.fishId}.webp`, loadedTexture => {
+        const texture = new THREE.TextureLoader().load(species.thumbnail, loadedTexture => {
           if (disposed || failed || !ownedSprites.includes(sprite)) return
-          try { spriteMasks.set(sprite, { texture: loadedTexture, pixels: readArtworkAlpha(loadedTexture.image as HTMLImageElement) }) }
+          const image = loadedTexture.image as HTMLImageElement
+          const imageWidth = image.naturalWidth, imageHeight = image.naturalHeight
+          if (Number.isFinite(imageWidth) && Number.isFinite(imageHeight) && imageWidth > 0 && imageHeight > 0) {
+            sprite.scale.y = (.95 / .62) * (imageHeight / imageWidth)
+          }
+          try { spriteMasks.set(sprite, { texture: loadedTexture, pixels: readArtworkAlpha(image) }) }
           catch (error) { console.warn('Fish artwork alpha unavailable', error) }
           if (!document.hidden) render(0, true)
         }); texture.colorSpace = THREE.SRGBColorSpace

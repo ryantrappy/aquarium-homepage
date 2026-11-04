@@ -3,7 +3,7 @@
 These notices cover the original three separately verified source models used
 by the controlled engine study and current main technical baseline. Separate
 AQ40 material-proof specimens have their own [review notices](pipeline-assets/ASSET_NOTICES.md);
-they are study-only, browser QA is pending, and they are not main-aquarium art.
+they passed bounded technical browser QA, remain study-only, and are not main-aquarium art.
 Neither set clears rights for the older, ignored LasquetiSpice/Microsoft/PixCap
 investigation or implies creator endorsement.
 

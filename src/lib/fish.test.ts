@@ -11,7 +11,7 @@ describe('reef fish catalog', () => {
     for (const fish of REEF_FISH) {
       expect(fish.commonName).not.toBe('')
       expect(fish.scientificName).not.toBe('')
-      expect(fish.thumbnail).toBe(`/fish/${fish.id}.webp`)
+      expect(fish.thumbnail).toMatch(/^\/fish\/[\w-]+\.(?:webp|png)$/)
       expect(existsSync(resolve(process.cwd(), 'public', fish.thumbnail.slice(1)))).toBe(true)
       expect(getFishById(fish.id)).toBe(fish)
     }

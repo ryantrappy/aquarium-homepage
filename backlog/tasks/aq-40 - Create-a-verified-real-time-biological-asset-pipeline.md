@@ -1,11 +1,11 @@
 ---
 id: AQ-40
 title: Create a verified real-time biological asset pipeline
-status: In Progress
+status: Done
 assignee:
   - '@render-integration'
 created_date: 2026-11-03 12:33
-updated_date: '2026-11-04T07:18:00Z'
+updated_date: '2026-11-04T14:42:00Z'
 labels: []
 dependencies:
   - AQ-5
@@ -31,23 +31,27 @@ Fish and corals need anatomically credible, reusable assets with provenance and 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Document source and license, attribution requirements, source files, and reproducible export process for every production biological asset.
-- [ ] #2 Establish and demonstrate a Blender-to-glTF pipeline for geometry, materials, rigs and texture baking using an appropriately licensed or original specimen.
-- [ ] #3 Measure before-and-after geometry, texture and transfer costs; test optimization choices and visual quality in the selected renderer at both target viewports.
+- [x] #1 Document source and license, attribution requirements, source files, and reproducible export process for every production biological asset.
+- [x] #2 Establish and demonstrate a Blender-to-glTF pipeline for geometry, materials, rigs and texture baking using an appropriately licensed or original specimen.
+- [x] #3 Measure before-and-after geometry, texture and transfer costs; test optimization choices and visual quality in the selected renderer at both target viewports.
 <!-- AC:END -->
 
 ## Implementation Plan
 
 <!-- SECTION:PLAN:BEGIN -->
 1. Contract slice (@render-integration): document canonical meters/glTF Y-up/local origins, identity roots, the coral-only raw COLOR_0 schema, placement-socket declarations and cave-preserving collision evidence; add pure metadata/array validation and malformed-input tests. Main stays in legacy coordinates until AQ14.4. 2. Original rock bake proof (@catalog): deterministic original high/low porous rock, UV-map and bake base color, roughness and separate glTF occlusion texture; emit conforming extras and record generator/seed/source/output hashes and actual map pointers. 3. Licensed coral normal proof (@storage): bake high-to-low Staghorn tangent normals, inspect exported normalTexture/tangents, retain exact CC BY4.0 provenance; do not claim completed coral masks/art from a normal proof. 4. Existing licensed fish rigs provide separate rig/animation export evidence; no fish art/rig promotion here. 5. Record before/after geometry, textures, bytes, tool versions, commands and Khronos validation; root inspects selected-Three proof at both agreed viewports. 6. Root reviews contract, bake evidence and visual limits before acceptance checks/Done or main integration.
+
+7. Close the current preview provenance gap: four original, versioned transparent PNG replacements with retained source/prompt/hash records; centralize all image consumers on catalog thumbnail paths; remove unverified public assets only after root visual review; verify current inventory and targeted image-picker behavior.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-The contract slice is a pure offline inspection validator, not a GLB loader or raycast/visual certificate. Probe-report declarations do not independently establish support, conservative proxy coverage or cave clearance. Main renderer and proof assets are unchanged by this slice.
+Pipeline capability and current asset provenance are verified. The typed inspection contract is offline consistency validation only; it does not load GLBs, certify surface probes, install coral shaders or prove geometry/anatomy. Original rock bake, licensed coral normal bake and pinned fish skin/clip exports demonstrate distinct capabilities. Normal-baked coral omits TANGENT and retains the Khronos generated-tangent-space portability warning; physical source calibration and material-normal contribution remain unverified. Root reviewed the selected Three.js specimen comparisons at 1440x900 and 402x874 CSS pixels; final biological art is not approved.
 
-Observed bake result is a bounded capability proof, not a production acceptance. A singular UV loop produced one zero tangent on initial tangent export; review export omitted TANGENT and yields the Khronos warning recorded in comment #15. Selected Three.js must be reviewed to confirm generated TBN behavior before use. Source coordinates have no documented physical calibration; report them as source-coordinate units only. Normal bake did not materially remove facets at 30k triangles.
+Current distribution inventory covers the three main technical GLBs, original CSS fallback, eleven frozen documented original WebPs and four new original transparent PNG previews. Exact new prompts, canonical source paths, hashes, dimensions, alpha and unchanged publication steps are in docs/fish-art-provenance.json. Historical raw PNGs/prompts for older canonical art are not reconstructed. Four unverified preview WebPs and the unused unverified old background were removed; the production build returns 404 for all five paths. New PNGs total 6,446,063 bytes; no performance/optimization claim.
+
+All thumbnail consumers now read the catalog path; fallback plane height follows the loaded image aspect ratio without altering root motion, GLB mapping or native URLs. Root verified 104 tests, typecheck, main production build, both agreed emulated viewports, temporary Firefish add/thumbnail/body link opening a real new tab, and removal restoring the exact original config body and ETag. Retained three example shortcuts and resumed motion. Found a separate focused-fish aria-hidden warning on viewport changes; tracked in AQ50, not hidden as passed accessibility. No deployment.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
@@ -315,4 +319,103 @@ created: 2026-11-04T07:18:00Z
 Root clean-source verification passed: exported the exact staged Git tree into an isolated directory and built the proof using only archived source plus the existing installed dependencies. Both HTML entries and all three curated GLBs emitted; each emitted GLB is byte-identical to its archived source. No untracked prototype, external source model or /tmp review specimen was needed. This verifies bundling, not browser rendering. Typecheck passed separately. Commit remains a pending-browser-review technical checkpoint; no deployment.
 
 ---
+
+author: @render-integration
+created: 2026-11-04 13:26
+
+---
+
+Root native-Chrome feedback: pipeline console had favicon.ico404 and installed Three0.187 warning that PCFSoftShadowMap is removed/falls back to PCFShadowMap. Confirmed installed WebGLShadowMap source and surgically changed fixture to supported PCFShadowMap; added inline data favicon. Typecheck and whitespace checks pass. No build/server or main edits; other fixture art/logic held while root performs the two-viewport QA.
+
+---
+
+author: @render-integration
+created: 2026-11-04 13:33
+
+---
+
+Root responsive QA found stale status drawing-area dimensions after viewport resize or expanding/collapsing details. Surgical fixture fix: loaded-status prefix is retained separately and fit()/ResizeObserver emits current canvas area dimensions; loading and error transitions clear that prefix so resize cannot overwrite those states. No UI redesign/tests/main edits/build/server. Typecheck and whitespace checks pass; root browser verification pending.
+
+---
+
+author: root
+created: 2026-11-04T13:39:00Z
+
+---
+
+Root browser gate completed through native Chrome despite the browser-host API remaining unavailable. Used DevTools Responsive at exactly 1440×900 and 402×874 CSS pixels; screenshots are 2× captures while the study WebGL renderer stays DPR 1. Inspected both rock and coral comparisons from front/oblique, pause/resume light sweep, actual normal/AO checkbox states and raw map bindings. Models load and fit at both sizes; coral derivative tangent frame renders without shader failure. Visible baked detail survives export; neither specimen is approved as final biological art. Rock remains a smooth faceted pebble, coral retains coarse pointed branches and a detached chip; normal baking does not repair silhouette. Captures: /tmp/aq40-rock-laptop.png, /tmp/aq40-coral-laptop.png, /tmp/aq40-rock-phone.png, /tmp/aq40-coral-phone.png. Found and fixed fixture-only removed PCFSoftShadowMap fallback warning, favicon404 and stale drawing-area status on resize/details changes; no main renderer change. Latest phone render reports live 402×634 drawing area for coral and 402×648 for rock. No visible application errors after the fixes; this was functional/appearance review, not a performance benchmark or physical iPhone test. Accept AQ40 AC3 as pipeline capability evidence only. Final provenance inventory and worker AC1/AC2 audit remain before root Done; AQ42/foundation art goals stay open.
+
+---
+
+author: @catalog
+created: 2026-11-04T13:41:00Z
+
+---
+
+## Main-scene provenance inventory audit (2026-11-04)
+
+Added a current-use inventory to `docs/asset-pipeline-proof.md`, following the actual `aquarium.ts` URLs and `TextureLoader` fallback. The scene loads the two tracked fish GLBs (clownfish and yellow tang) plus the tracked technical reef scan; all are regular files whose SHA-256 values match `asset-manifest.json`. Their creators, CC BY 4.0 terms, attribution/modification notices, source hashes, and baseline export recipes are linked in `ASSET_NOTICES.md` and the manifest. No other GLB/model import is present in the current scene code.
+
+The other 13 roster fish are matching `public/fish/<stable-id>.webp` unrigged preview planes; all 15 WebPs are also the picker thumbnails and are mapped in `docs/fish-assets.md`. Three fallback outputs have documented 2026-11-02 ImageGen provenance, six have documented 2026-11-03 ImageGen provenance, and the clown/tang images from the first batch are thumbnails while their scene models use the GLBs. Four inherited AQ-33 fallback WebPs (`blue-green-chromis`, `firefish`, `yellow-watchman-goby`, `mandarin-dragonet`) have only an inherited/visually-reviewed note. Their source, license and generation method are not established; I did not assume ImageGen. The thumbnail WebPs are tracked, but source rasters/prompts and exact per-image conversion commands are not retained for every asset.
+
+No additional paid or marketplace model is loaded by the current scene; however, the four inherited preview images still lack adequate source/license evidence. AQ-40 AC #1 remains unchecked. Root’s native-Chrome browser review of the technical proof at both target viewports is now recorded in the proof doc based on comment #29; I did not conduct that browser review. No task status or other AC check changed.
+
+---
+
+author: @render-integration
+created: 2026-11-04 13:43
+
+---
+
+AC2 verified as bounded exported-pipeline capability across the root-approved original/licensed specimens. Original procedural rock demonstrates high/low geometry, UV/PBR baseColor+packed ORM baking, meter/identity-root extras and glTF export; its actual curated inspectionRecord passes validateAssetContract now, and Khronos report has zero issues. CC BY4.0 PixForge specimen demonstrates the direct high-to-low NORMAL bake/export path, with the one derivative-tangent-space warning explicitly retained. Existing pinned CC BY4.0 clown/tang GLBs each contain one skin and one animation, with JOINTS_0/WEIGHTS_0 on2/7 exported primitives respectively; their load/articulation pipeline was exercised in the accepted controlled/main technical baseline. Root AQ40#29 now supplies actual selected-Three two-viewport map/shader review, not code-presence evidence. This proves pipeline capability, not final art, all-species rig fidelity, coral raw masks or cross-engine tangent portability. Updated fixture/curated notes to accepted bounded technical QA, preserved all3GLB hashes, added local-only screenshot links/evidence to pipeline-assets README; typecheck/diff pass. AC1 remains catalog-owned with unresolved source provenance noted; no Done/finalization by worker.
+
+---
+
+author: root
+created: 2026-11-04T13:48:00Z
+
+---
+
+AC1 audit found four inherited AQ33 preview WebPs without documented source/license/method. Replace only these with new original ImageGen transparent PNG artwork, retain unchanged canonical PNG sources with prompts and hashes, and use versioned filenames. All consumers must read fish.thumbnail so the new formats resolve consistently; stable species IDs, GLB mapping and native URLs stay intact. Preserve the eleven documented original WebPs as frozen canonical sources with measured hashes and honest historical limits. After root visual approval, remove the four unverified files from public bundling, verify the current asset inventory and relevant picker/renderer regressions, then finish AC1. These are static previews, never final articulated fish.
+
+---
+
+author: @catalog
+created: 2026-11-04T13:57:00Z
+
+---
+
+## Fish and environment provenance reconciliation complete (2026-11-04)
+
+Updated `docs/asset-pipeline-proof.md`, `docs/fish-assets.md`, and new `docs/fish-art-provenance.json`. Main imports are documented as two CC BY 4.0 rigged fish GLBs and the CC BY 4.0 VIVID REALITY reef scan, with creator credits, source URLs/hashes, derivative hashes, and baseline recipes in `ASSET_NOTICES.md`/`asset-manifest.json`. Current scene code loads no other model. `reef-tank-front.webp` is documented as an original 2026-11-02 built-in ImageGen CSS fallback (source history and output hash recorded; exact original PNG path/full prompt were not retained). The prior `reef-background.webp` had no code import and its source/license were not established; it was removed from public distribution and its prior hash/history are recorded.
+
+Storage switched all consumers to `fish.thumbnail` and the four approved v2 preview PNG paths. Root reviewed all four, approving static preview use only. The four PNGs are copied byte-for-byte from built-in ImageGen outputs, retain real alpha, and their exact prompts, saved source paths, output paths, date, dimensions, bytes, and SHA-256 values are in `fish-art-provenance.json`. The 11 documented ImageGen WebPs remain frozen canonical files with per-file hashes and recorded dates/source-history; their older raw PNG paths and exact prompts are explicitly not reconstructed. The four inherited WebPs with unverified provenance were removed from current distribution only after the replacements were approved; their hashes and unknown-origin history remain documented. No additional paid/marketplace model is loaded.
+
+The new PNGs total 6,446,063 bytes (about 6.45 MB) and are 1,774–2,172px wide. They are unresized source outputs; no mobile performance or optimization claim is made. AC #1 is checked based on the current-asset source, license, attribution and source-file inventory being documented; the static generated thumbnails are treated as frozen source outputs where earlier generation inputs were not retained. No claim of finished photorealistic fish/coral art. Root owns task Done.
+
+---
+
+author: @render-integration
+created: 2026-11-04 13:59
+
+---
+
+Root final runtime review found main fallback previews all used the same0.95x0.62 plane regardless of source image ratio, vertically stretching new3:1 Firefish/Goby artwork. Surgical aquarium.ts fix in the successful TextureLoader callback: preserve0.95 world width and adjust only sprite child Y scale from loaded naturalWidth/naturalHeight, after existing disposed/failed/ownership guard and positive finite dimension checks. Root movement/reflection, native URLs, UV/alpha picking and habitat/GLBs remain unchanged. Typecheck/whitespace checks pass; no mirrored-formula tests, server/build/commit. Root will manually verify temporary Firefish at1440x900/402x874 before final runtime acceptance.
+
+---
+
+author: root
+created: 2026-11-04T14:42:00Z
+
+---
+
+Root verified the exact staged checkpoint in an isolated Git-tree archive: both the main production build and two-entry proof build passed using archived source plus installed dependencies. All four published PNGs were byte-identical to the canonical sources; all three proof GLBs emitted byte-identically; removed unverified previews were absent from clean output. This supplements the 104-test/typecheck and native two-viewport checks. No deployment. The master handoff is AQ49; the remaining focused-fish visibility warning is AQ50.
+
+---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Established reproducible original/licensed Blender-to-glTF material/normal bake and fish rig export proofs, durable review assets, raw-mask/unit/socket/proxy contracts, and a complete current visual provenance inventory. Replaced four undocumented previews with original transparent PNG sources, removed unverified public files, and made all preview consumers honor catalog paths and natural image proportions. Root validated 104 tests, typecheck, production/proof builds, selected-Three review at 1440x900 / 402x874, and native temporary Firefish save/open/remove with exact baseline restoration. This completes the bounded asset pipeline, not final photorealistic art; coral tangent portability/source calibration, modular habitat and roster fidelity remain their own tasks. AQ50 tracks the newly observed focused-link visibility warning. No deployment.
+<!-- SECTION:FINAL_SUMMARY:END -->

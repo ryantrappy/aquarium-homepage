@@ -1,6 +1,6 @@
 # AQ40 technical review asset notices
 
-These specimens are unapproved for final aquarium art. Root browser QA is pending. Attribution does not imply creator endorsement.
+Root accepted these specimens for bounded technical pipeline capability at 1440×900 and 402×874 CSS pixels. They remain unapproved for final aquarium art or main-scene use. Attribution does not imply creator endorsement.
 
 ## Original porous-rock bake probe
 

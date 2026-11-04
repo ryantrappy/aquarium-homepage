@@ -105,7 +105,7 @@ describe('ServiceManager fish picker', () => {
     await act(async () => { preview.dispatchEvent(new Event('error')) })
 
     expect(preview.hidden).toBe(true)
-    expect(preview.getAttribute('src')).toBe('/fish/firefish.webp')
+    expect(preview.getAttribute('src')).toBe('/fish/firefish-v2.png')
     expect(view.querySelector('.fish-picker-selected strong')?.textContent).toBe('Firefish')
     expect(view.querySelector<HTMLInputElement>('input[type="radio"][value="firefish"]')?.checked).toBe(true)
   })
