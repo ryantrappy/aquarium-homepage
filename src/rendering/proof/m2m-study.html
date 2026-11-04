@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mesh2Motion binding study</title>
+  <style>
+    body { margin: 0; background: #183b48; color: white; font: 14px system-ui; }
+    aside { position: absolute; top: 1rem; left: 1rem; max-width: 30rem; z-index: 1; padding: .8rem; background: #102b37e8; border-radius: .5rem; }
+    button { font: inherit; padding: .4rem .7rem; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <aside>
+    <strong>Mesh2Motion: unadjusted shark rig on a CC0 clownfish</strong>
+    <p>Workflow test only, not a production fish. Drag to orbit and inspect the body, eyes, mouth and fins. The reference mesh is stylized; the skeleton was not fitted to its anatomy.</p>
+    <button type="button">Pause motion</button>
+    <p id="status" role="status">Loading local export…</p>
+  </aside>
+  <script type="module" src="./m2m-study.ts"></script>
+</body>
+</html>

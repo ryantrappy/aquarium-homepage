@@ -17,6 +17,7 @@ references:
   - AQ-35
   - AQ-36
 documentation:
+  - docs/fish-turning-and-maneuvering-plan.md
   - docs/requirements.md
   - docs/design-principles.md
   - docs/fish-behavior-design.md

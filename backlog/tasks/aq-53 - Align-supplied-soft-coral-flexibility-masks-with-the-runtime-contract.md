@@ -5,6 +5,7 @@ status: To Do
 assignee:
   - '@gemini'
 created_date: '2026-11-04 19:05'
+updated_date: '2026-11-04 19:23'
 labels:
   - modeling
 dependencies:
@@ -33,3 +34,13 @@ Read-only preflight found torch, hammer and anemone crowns authored with COLOR_0
 - [ ] #2 Rigid skeleton and pinned bases retain zero flexibility; masks remain finite, in range and matched to exported POSITION counts after quantization.
 - [ ] #3 Updated hashes, provenance and reproducible mask inspection identify the encoding consumed by the renderer without using mask RGB or AO alpha as display color or opacity.
 <!-- AC:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: root
+created: 2026-11-04 19:23
+---
+Additional functional review note for acceptance evidence: package_modular_corals.mjs decodeColor0Values currently forces rigid R to zero in the inspection array and clamps/rounds channels without altering or re-reading actual exported values. Current independently read rigid values were zero, so this is not evidence that current rigid assets are wrong. When verifying AC2, inspect actual GLB attributes rather than trusting sanitized report arrays; do not let the report hide invalid future exports.
+---
+<!-- COMMENTS:END -->

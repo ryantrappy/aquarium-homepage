@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Two-fish candidate inspection</title>
+  <style>
+    body { margin: 0; background: #183b48; color: white; font: 14px system-ui; }
+    aside { position: absolute; top: 1rem; left: 1rem; max-width: 32rem; z-index: 1; padding: .8rem; background: #102b37e8; border-radius: .5rem; }
+    button { font: inherit; padding: .4rem .7rem; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <aside>
+    <strong>Two-fish anatomy and experimental rig study</strong>
+    <p>CC BY source meshes; locally generated provisional rigs. Drag to orbit. Tang pectoral membranes are an experimental addition. Auto turn is an inspection motion, not a species behavior. Inspect seams, front views, fins and deformation before acceptance.</p>
+    <button type="button">Pause motion</button> <button id="turn" type="button">Turn fish 45°</button> <button id="auto-turn" type="button" aria-pressed="false">Auto turn off</button>
+    <p id="status" role="status">Loading local exports…</p>
+  </aside>
+  <script type="module" src="./candidate-study.ts"></script>
+</body>
+</html>

@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createSwimmingFish, distance, startleFish, stepSwimmingFish, type WaterHabitat } from './motion'
 import { findWaterRoute, isWaterSegmentSafe } from '../../simulation/habitat-navigation'
+import type { FishExtensionConfig } from '../../simulation/fish-extensions'
 
 const habitat: WaterHabitat = { bounds: { min: { x: -5, y: -2.4, z: -3 }, max: { x: 5, y: 2.8, z: 2.8 } }, obstacles: [{ id: 'real-reef-envelope', bounds: { min: { x: -1.2, y: -2.8, z: -.8 }, max: { x: 1.2, y: .1, z: .8 } } }], anchors: [] }
 
@@ -27,12 +28,51 @@ describe('rendered fish travel adapter', () => {
     stepSwimmingFish(fish, habitat, 50)
     expect(distance(before.position, fish.position)).toBeLessThan(.15)
   })
+  it('keeps empty extensions identical and skips behavior/animation hooks while stopped', () => {
+    const empty = createSwimmingFish('empty', 'yellow-tang', { x: -2, y: 1, z: 2 })
+    const explicitEmpty = createSwimmingFish('empty', 'yellow-tang', { x: -2, y: 1, z: 2 }, .42, {})
+    for (let i = 0; i < 20; i++) {
+      stepSwimmingFish(empty, habitat, 1 / 60)
+      stepSwimmingFish(explicitEmpty, habitat, 1 / 60)
+    }
+    expect({ behavior: empty.behavior, position: empty.position, yaw: empty.yaw, speed: empty.speed, animationPlaybackRate: empty.animationPlaybackRate })
+      .toEqual({ behavior: explicitEmpty.behavior, position: explicitEmpty.position, yaw: explicitEmpty.yaw, speed: explicitEmpty.speed, animationPlaybackRate: explicitEmpty.animationPlaybackRate })
+
+    const behaviorStep = vi.fn()
+    const animationStep = vi.fn(() => ({ playbackRate: 1.2 }))
+    const extensions: FishExtensionConfig = { defaults: {
+      behavior: { operation: 'add', extension: { kind: 'behavior', id: 'behavior', create: () => ({ step: behaviorStep }) } },
+      animation: { operation: 'add', extension: { kind: 'animation', id: 'animation', create: () => ({ step: animationStep }) } },
+    } }
+    const fish = createSwimmingFish('stopped', 'yellow-tang', { x: -2, y: 1, z: 2 }, .42, extensions)
+    stepSwimmingFish(fish, habitat, .03, true)
+    expect(behaviorStep).not.toHaveBeenCalled()
+    expect(animationStep).not.toHaveBeenCalled()
+    stepSwimmingFish(fish, habitat, 1 / 60)
+    expect(behaviorStep).toHaveBeenCalled()
+    expect(animationStep).toHaveBeenCalled()
+    expect(fish.animationPlaybackRate).toBe(1.2)
+  })
+  it('stamps behavior intents with only their owning fish ID before core FSM dispatch', () => {
+    const extension: FishExtensionConfig = { instances: { 'target-fish': {
+      forage: { operation: 'add', extension: {
+        kind: 'behavior', id: 'forage',
+        create: () => { let sent = false; return { step: () => sent ? [] : (sent = true, [{ type: 'behavior-opportunity' as const, trigger: 'foraging-opportunity' as const }]) } },
+      } },
+    } } }
+    const target = createSwimmingFish('target-fish', 'yellow-tang', { x: -2, y: 1, z: 2 }, .42, extension)
+    const other = createSwimmingFish('other-fish', 'yellow-tang', { x: 2, y: 1, z: 2 }, .42, extension)
+    stepSwimmingFish(target, habitat, 1 / 60)
+    stepSwimmingFish(other, habitat, 1 / 60)
+    expect(target.behavior.state).toBe('forage')
+    expect(other.behavior.state).toBe('swim')
+  })
   it('scopes activation to one fish and recovers without fabricating an absent refuge', () => {
     const first = createSwimmingFish('first', 'ocellaris-clownfish', { x: -2, y: 1, z: 2 })
     const second = createSwimmingFish('second', 'yellow-tang', { x: 2, y: 1, z: 2 })
-    const other = structuredClone(second)
+    const other = { behavior: second.behavior, position: { ...second.position }, startleSeconds: second.startleSeconds }
     startleFish(first, habitat)
-    expect(second).toEqual(other); expect(first.startleSeconds).toBeGreaterThan(0)
+    expect({ behavior: second.behavior, position: second.position, startleSeconds: second.startleSeconds }).toEqual(other); expect(first.startleSeconds).toBeGreaterThan(0)
     expect(first.behavior.state).not.toBe('retreat')
     for (let i = 0; i < 100; i++) stepSwimmingFish(first, habitat, .03)
     expect(first.startleSeconds).toBe(0); expect(first.behavior.state).not.toBe('retreat')

@@ -1,11 +1,11 @@
 ---
-id: AQ-49
+id: AQ-54
 title: Maintain a master agent handoff and restart guide
 status: Done
 assignee:
   - '@storage'
 created_date: '2026-11-04T13:56:00Z'
-updated_date: '2026-11-04T14:38:00Z'
+updated_date: '2026-11-04 19:29'
 labels: []
 dependencies: []
 documentation:
@@ -43,6 +43,8 @@ Storage writes the master and AGENTS pointer from actual source/tasks. Root revi
 Created repo-root AGENT_TASKS.md as a compact restart guide and added its pointer immediately after the Backlog instruction block in AGENTS.md without changing project policies. It links requirements, scratch notes, active tasks and asset evidence; records the current AQ-40 checked ACs and open provenance audit, uncommitted fish-provenance/thumb changes, approved static previews, AQ-14.3 dependency gate, ownership, exact target viewports, safe local checks and last-observed ports/PIDs with an explicit transient warning. Preserved the example-config caveat and unrelated worktree-preservation rule. Root review requested before any status/AC transition.
 
 Addressed Root review comment #1: corrected AQ-40 to all three ACs checked with status still In Progress pending Root main output build and Firefish runtime QA; marked intentional four legacy WebP and unused reef-background removals as in-scope and provenance-recorded. Corrected listener roles (PID 11418 node .output/server/index.mjs on 5173; PID 14378 proof Vite on 5189), added root-reported transient session hints and warning that running output may predate Git source. Added repo path, main branch, public origin and trappserv.er host; recorded bounded-frame-clock, species-identity, catalog-thumbnail aspect/alpha picking, raw coral mask handling, legacy coordinates and height-column cave limitations. Recast worker roles as last-assigned, with most source work held and reconfirmation required. Kept docs/deployment 2.md and old prototypes as unrelated material. Updated AGENTS pointer to require reading all policies before master. Checked AQ-49 AC #1-#3 only; Root review of AC #4 and finalization remain pending.
+
+2026-11-04 identifier repair: Backlog doctor rekeyed this completed master-handoff task from AQ49 to AQ54 after a concurrent biomechanical-turning task reused AQ49. The historical Implementation Notes reference to AQ49 refers to this master-handoff task, now AQ54. AQ49 now identifies biomechanical turning. No acceptance status or implementation evidence changed.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

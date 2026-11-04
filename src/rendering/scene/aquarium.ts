@@ -6,6 +6,7 @@ import { getFishById } from '../../lib/fish'
 import { instantiateReefHabitat } from './habitat'
 import reefHabitat from './reef-habitat.json'
 import { createSwimmingFish, seedForId, startleFish, stepSwimmingFish, type SwimmingFish, type WaterHabitat } from './motion'
+import { EMPTY_FISH_EXTENSIONS, type FishExtensionConfig } from '../../simulation/fish-extensions'
 import { consumeFrameSteps, createFrameClock, SIMULATION_STEP_SECONDS, suspendFrameClock } from './clock'
 import { nearestVisibleIntersection, readArtworkAlpha, type SpriteMasks } from './alpha-picking'
 import { applyFishLinkVisibility } from './fish-link-focus'
@@ -34,7 +35,7 @@ function disposeTree(root: THREE.Object3D) {
   textures.forEach(value => { value.dispose(); if (typeof ImageBitmap !== 'undefined' && value.source.data instanceof ImageBitmap) value.source.data.close() })
 }
 
-export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, initialServices: ServiceConfig[], initialPaused: boolean, status: (status: SceneStatus) => void, focusFallback: () => HTMLElement | null = () => null): AquariumController {
+export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, initialServices: ServiceConfig[], initialPaused: boolean, status: (status: SceneStatus) => void, focusFallback: () => HTMLElement | null = () => null, fishExtensions: FishExtensionConfig = EMPTY_FISH_EXTENSIONS): AquariumController {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' })
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5)); renderer.outputColorSpace = THREE.SRGBColorSpace
   const scene = new THREE.Scene(); scene.background = new THREE.Color('#155c73'); scene.fog = new THREE.Fog('#155c73', 15, 32)
@@ -95,7 +96,7 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
     hitMeshes.push(sand)
   }
   function removeFish() {
-    fish.forEach(item => { scene.remove(item.root); item.mixer?.stopAllAction(); item.mixer?.uncacheRoot(item.mixer.getRoot()); item.root.traverse(object => { if (object instanceof THREE.SkinnedMesh) object.skeleton.dispose() }) })
+    fish.forEach(item => { item.motion.extensions.dispose(); scene.remove(item.root); item.mixer?.stopAllAction(); item.mixer?.uncacheRoot(item.mixer.getRoot()); item.root.traverse(object => { if (object instanceof THREE.SkinnedMesh) object.skeleton.dispose() }) })
     ownedSprites.forEach(sprite => { disposeTree(sprite) }); ownedSprites.length = 0; fish = []
   }
   function rebuildFish() {
@@ -127,7 +128,7 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
       const span = habitat.bounds.max.x - habitat.bounds.min.x
       const x = width < 600 ? [-.3, .3, 0][i % 3] : ((i % 3) - 1) * Math.min(span * .26, 2.7)
       const y = (width < 600 ? [1.25, .55, 1.95][i % 3] : 1.45) - Math.floor(i / 3) * .7
-      const motion = createSwimmingFish(service.id, service.fishId, { x, y: Math.max(.3, y), z: 1.8 + (i % 2) * .2 }, .5)
+      const motion = createSwimmingFish(service.id, service.fishId, { x, y: Math.max(.3, y), z: 1.8 + (i % 2) * .2 }, .5, fishExtensions)
       root.position.set(motion.position.x, motion.position.y, motion.position.z); scene.add(root)
       root.traverse(object => { if (object instanceof THREE.Mesh) { object.userData.serviceId = service.id; hitMeshes.push(object) } })
       const anchor = anchors.get(service.id); if (anchor) anchor.title = `${service.name} · ${species.commonName}${fallback ? ' · artwork preview' : ''}`
@@ -156,7 +157,7 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
       if (!focused) item.releasedFocus = false
       const stopped = paused || document.hidden || (focused && !item.releasedFocus)
       stepSwimmingFish(item.motion, habitat, SIMULATION_STEP_SECONDS, stopped)
-      if (!stopped) item.mixer?.update(SIMULATION_STEP_SECONDS * (.55 + Math.min(1.7, item.motion.speed * 2.2)))
+      if (!stopped) item.mixer?.update(SIMULATION_STEP_SECONDS * (.55 + Math.min(1.7, item.motion.speed * 2.2)) * item.motion.animationPlaybackRate)
     }
     for (const item of fish) {
       const pose = item.motion; item.root.position.set(pose.position.x, pose.position.y, pose.position.z)

@@ -1,5 +1,6 @@
 import { getSpeciesBehaviorProfile, type HabitatAnchor } from '../../lib/fish-behavior'
 import { advanceFishBehavior, createFishBehaviorInstance, dispatchBehaviorEvent, getNavigationRequest, reportNavigationOutcome, type FishBehaviorInstance } from '../../simulation/behavior-runtime'
+import { createFishExtensionRuntime, EMPTY_FISH_EXTENSIONS, type FishExtensionConfig, type FishExtensionSnapshot } from '../../simulation/fish-extensions'
 import { findWaterRoute, isWaterSegmentSafe, resolveHabitatRoute, type AxisAlignedBox, type HabitatAnchorLocation, type SolidObstacleVolume, type Vec3 } from '../../simulation/habitat-navigation'
 import { simulationSubsteps } from './clock'
 
@@ -9,18 +10,29 @@ export type SwimmingFish = {
   yaw: number; pitch: number; bank: number; speed: number; clearance: number
   route: readonly Vec3[]; waypoint: number; random: number; startleSeconds: number
   routeGeneration: number; targetWait: number; navigationAnchor?: HabitatAnchor
+  extensions: ReturnType<typeof createFishExtensionRuntime>; animationPlaybackRate: number
 }
 export const distance = (a: Vec3, b: Vec3) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z)
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
 export function seedForId(id: string) { let seed = 2166136261; for (const char of id) seed = Math.imul(seed ^ char.charCodeAt(0), 16777619); return seed >>> 0 }
 function random(fish: SwimmingFish) { fish.random = (Math.imul(fish.random, 1664525) + 1013904223) >>> 0; return fish.random / 4294967296 }
 function routeInput(fish: SwimmingFish, habitat: WaterHabitat, target: Vec3) { return { start: fish.position, target, waterBounds: habitat.bounds, obstacles: habitat.obstacles, fishClearanceRadius: fish.clearance } }
-export function createSwimmingFish(id: string, speciesId: string, position: Vec3, clearance = .42): SwimmingFish {
+function extensionSnapshot(fish: SwimmingFish): FishExtensionSnapshot {
+  return Object.freeze({
+    instanceId: fish.id, speciesId: fish.speciesId, state: fish.behavior.state,
+    position: Object.freeze({ ...fish.position }), yaw: fish.yaw, pitch: fish.pitch, bank: fish.bank, speed: fish.speed,
+  })
+}
+export function createSwimmingFish(id: string, speciesId: string, position: Vec3, clearance = .42, extensions: FishExtensionConfig = EMPTY_FISH_EXTENSIONS): SwimmingFish {
   let behavior = createFishBehaviorInstance(id, speciesId, seedForId(id))
   // Begin at a cruising phase of the existing state machine, rather than making
   // every newly loaded service wait through the same idle window.
   for (let i = 0; behavior.state === 'idle' && i < 130; i++) behavior = advanceFishBehavior(behavior, .25)
-  return { id, speciesId, behavior, position: { ...position }, yaw: Math.PI / 2, pitch: 0, bank: 0, speed: 0, clearance, route: [], waypoint: 1, random: seedForId(id), startleSeconds: 0, routeGeneration: -1, targetWait: 0 }
+  const initialSnapshot: FishExtensionSnapshot = Object.freeze({
+    instanceId: id, speciesId, state: behavior.state, position: Object.freeze({ ...position }),
+    yaw: Math.PI / 2, pitch: 0, bank: 0, speed: 0,
+  })
+  return { id, speciesId, behavior, position: { ...position }, yaw: Math.PI / 2, pitch: 0, bank: 0, speed: 0, clearance, route: [], waypoint: 1, random: seedForId(id), startleSeconds: 0, routeGeneration: -1, targetWait: 0, extensions: createFishExtensionRuntime(extensions, initialSnapshot), animationPlaybackRate: 1 }
 }
 export function startleFish(fish: SwimmingFish, habitat: WaterHabitat) {
   const candidate = dispatchBehaviorEvent(fish.behavior, { type: 'fish-activation', instanceId: fish.id, trigger: fish.speciesId === 'yellow-tang' ? 'high-effort-cue' : 'threat-cue' })
@@ -53,7 +65,12 @@ function plan(fish: SwimmingFish, habitat: WaterHabitat) {
 }
 export function stepSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, elapsed: number, stopped = false) {
   if (stopped) return
-  for (const dt of simulationSubsteps(elapsed)) integrateSwimmingFish(fish, habitat, dt)
+  for (const dt of simulationSubsteps(elapsed)) {
+    integrateSwimmingFish(fish, habitat, dt)
+    const result = fish.extensions.step(extensionSnapshot(fish), dt, true)
+    fish.animationPlaybackRate = result.playbackRate
+    for (const intent of result.behaviorIntents) fish.behavior = dispatchBehaviorEvent(fish.behavior, { ...intent, instanceId: fish.id })
+  }
 }
 function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: number) {
   fish.behavior = advanceFishBehavior(fish.behavior, dt)

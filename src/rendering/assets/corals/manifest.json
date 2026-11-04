@@ -1,0 +1,455 @@
+{
+  "schema": "modular-coral-and-rock-manifest-v1",
+  "contractSchema": "reef-asset-v1",
+  "note": "All 8 modular coral colonies and 2 bare live-rock island foundations are contract-validated (validateAssetContract) and ready to be used in the project for AQ-42, AQ-14.3, and AQ-14.4.",
+  "assets": [
+    {
+      "id": "coral-euphyllia-torch",
+      "file": "coral-euphyllia-torch.glb",
+      "path": "src/rendering/assets/corals/coral-euphyllia-torch.glb",
+      "inspectionReport": "src/rendering/assets/corals/coral-euphyllia-torch-inspection.json",
+      "kind": "coral",
+      "archetype": "tentaculate-lps",
+      "species": "Euphyllia glabrescens (Gold / Neon-Green Tip Torch Coral)",
+      "sha256": "6bc38ed7c54e7adfe5a547bc69ec84887b167977661d5ea5fb39de766a084ee9",
+      "bytes": 2175012,
+      "triangles": 26232,
+      "dimensionsM": [
+        0.266886,
+        0.176692,
+        0.24078
+      ],
+      "boundsM": {
+        "min": [
+          -0.132205,
+          -0.006925,
+          -0.116481
+        ],
+        "max": [
+          0.134681,
+          0.169767,
+          0.124299
+        ]
+      },
+      "primitives": [
+        {
+          "id": "euphyllia_polyp_crown",
+          "role": "coral-soft",
+          "vertexCount": 16160,
+          "maskSchema": "coral-raw-masks-v1"
+        },
+        {
+          "id": "euphyllia_skeleton",
+          "role": "coral-rigid",
+          "vertexCount": 2037,
+          "maskSchema": "coral-raw-masks-v1"
+        }
+      ],
+      "socketCount": 0,
+      "generator": "src/rendering/modeling/build_euphyllia_torch.py",
+      "generatorSha256": "22dead90e203938ff9832e3436029815accef08c4435af214725a8a4d1bc1890",
+      "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_euphyllia_torch.py -- /tmp/coral-models/coral-euphyllia-torch",
+      "contractValidated": true,
+      "status": "ready-for-project-integration"
+    },
+    {
+      "id": "coral-acropora-table",
+      "file": "coral-acropora-table.glb",
+      "path": "src/rendering/assets/corals/coral-acropora-table.glb",
+      "inspectionReport": "src/rendering/assets/corals/coral-acropora-table-inspection.json",
+      "kind": "coral",
+      "archetype": "branching-sps",
+      "species": "Acropora hyacinthus / millepora (Corymbose Table SPS Colony)",
+      "sha256": "4d527743036e7f0e99a1c78531e6c34e85d62e055f03dc1e31bae8abe9a809d9",
+      "bytes": 2236728,
+      "triangles": 34176,
+      "dimensionsM": [
+        0.222955,
+        0.172899,
+        0.15577
+      ],
+      "boundsM": {
+        "min": [
+          -0.108608,
+          -0.004,
+          -0.079315
+        ],
+        "max": [
+          0.114347,
+          0.168899,
+          0.076455
+        ]
+      },
+      "primitives": [
+        {
+          "id": "acropora_table_colony",
+          "role": "coral-rigid",
+          "vertexCount": 26665,
+          "maskSchema": "coral-raw-masks-v1"
+        }
+      ],
+      "socketCount": 0,
+      "generator": "src/rendering/modeling/build_acropora_table.py",
+      "generatorSha256": "9054c28e53a29b6e06d4f7704de45b9bf04bee2df26678df1fcbfc31ce77fc4a",
+      "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_acropora_table.py -- /tmp/coral-models/coral-acropora-table",
+      "contractValidated": true,
+      "status": "ready-for-project-integration"
+    },
+    {
+      "id": "coral-acropora-staghorn",
+      "file": "coral-acropora-staghorn.glb",
+      "path": "src/rendering/assets/corals/coral-acropora-staghorn.glb",
+      "inspectionReport": "src/rendering/assets/corals/coral-acropora-staghorn-inspection.json",
+      "kind": "coral",
+      "archetype": "branching-sps",
+      "species": "Acropora formosa / cervicornis (Upright Arborescent Staghorn SPS Colony)",
+      "sha256": "0a4d8c3007c88602946a8526464a864aa9a16cd1a2c60c5d67ca5354ca8b678e",
+      "bytes": 1582656,
+      "triangles": 23648,
+      "dimensionsM": [
+        0.174569,
+        0.221055,
+        0.194178
+      ],
+      "boundsM": {
+        "min": [
+          -0.097636,
+          -0.003,
+          -0.09834
+        ],
+        "max": [
+          0.076933,
+          0.218055,
+          0.095838
+        ]
+      },
+      "primitives": [
+        {
+          "id": "acropora_staghorn_colony",
+          "role": "coral-rigid",
+          "vertexCount": 18693,
+          "maskSchema": "coral-raw-masks-v1"
+        }
+      ],
+      "socketCount": 0,
+      "generator": "src/rendering/modeling/build_acropora_staghorn.py",
+      "generatorSha256": "731556132ea0e5969fb929d093024a1661f79954d722a70330529a6e7cb6e7e7",
+      "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_acropora_staghorn.py -- /tmp/coral-models/coral-acropora-staghorn",
+      "contractValidated": true,
+      "status": "ready-for-project-integration"
+    },
+    {
+      "id": "coral-montipora-plate",
+      "file": "coral-montipora-plate.glb",
+      "path": "src/rendering/assets/corals/coral-montipora-plate.glb",
+      "inspectionReport": "src/rendering/assets/corals/coral-montipora-plate-inspection.json",
+      "kind": "coral",
+      "archetype": "plating-sps",
+      "species": "Montipora capricornis (Scrolling Whorl Plate SPS Colony)",
+      "sha256": "c34ef2dc59cf23966bf4b1438e8099ce3a764fc34b68d848c3150b64397e93f8",
+      "bytes": 666680,
+      "triangles": 4560,
+      "dimensionsM": [
+        0.230366,
+        0.097057,
+        0.240706
+      ],
+      "boundsM": {
+        "min": [
+          -0.105315,
+          -0.004,
+          -0.117088
+        ],
+        "max": [
+          0.125051,
+          0.093057,
+          0.123618
+        ]
+      },
+      "primitives": [
+        {
+          "id": "montipora_plate_colony",
+          "role": "coral-rigid",
+          "vertexCount": 2830,
+          "maskSchema": "coral-raw-masks-v1"
+        }
+      ],
+      "socketCount": 0,
+      "generator": "src/rendering/modeling/build_montipora_plate.py",
+      "generatorSha256": "2c4c23dff6467f692cafb0ddc10e4796463df2da91121ade5c943502e2ef0d67",
+      "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_montipora_plate.py -- /tmp/coral-models/coral-montipora-plate",
+      "contractValidated": true,
+      "status": "ready-for-project-integration"
+    },
+    {
+      "id": "coral-brain-diploria",
+      "file": "coral-brain-diploria.glb",
+      "path": "src/rendering/assets/corals/coral-brain-diploria.glb",
+      "inspectionReport": "src/rendering/assets/corals/coral-brain-diploria-inspection.json",
+      "kind": "coral",
+      "archetype": "mounded-lps",
+      "species": "Diploria / Symphyllia (Meandroid Labyrinth Brain Coral)",
+      "sha256": "90cd837a1272677800607a978b8c00435706778a7f54c1f0b1edb1e69c5e5262",
+      "bytes": 1408776,
+      "triangles": 12544,
+      "dimensionsM": [
+        0.255711,
+        0.082151,
+        0.234336
+      ],
+      "boundsM": {
+        "min": [
+          -0.123577,
+          -0.003,
+          -0.110758
+        ],
+        "max": [
+          0.132134,
+          0.079151,
+          0.123578
+        ]
+      },
+      "primitives": [
+        {
+          "id": "diploria_brain_colony",
+          "role": "coral-soft",
+          "vertexCount": 6609,
+          "maskSchema": "coral-raw-masks-v1"
+        }
+      ],
+      "socketCount": 0,
+      "generator": "src/rendering/modeling/build_brain_coral.py",
+      "generatorSha256": "cae87445cb6cd2f279abc1f0727e9bc1cc55b5d85c9bfd689e045e5bef7c1ba7",
+      "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_brain_coral.py -- /tmp/coral-models/coral-brain-diploria",
+      "contractValidated": true,
+      "status": "ready-for-project-integration"
+    },
+    {
+      "id": "coral-anemone-bta",
+      "file": "coral-anemone-bta.glb",
+      "path": "src/rendering/assets/corals/coral-anemone-bta.glb",
+      "inspectionReport": "src/rendering/assets/corals/coral-anemone-bta-inspection.json",
+      "kind": "coral",
+      "archetype": "host-anemone",
+      "species": "Entacmaea quadricolor (Rose / Sunburst Bubble-Tip Host Anemone)",
+      "sha256": "aa350c4f9ad92154f4f468d8df8600f42eaf907fd984943a767d89bdf957a10f",
+      "bytes": 1160328,
+      "triangles": 17800,
+      "dimensionsM": [
+        0.306876,
+        0.143025,
+        0.326378
+      ],
+      "boundsM": {
+        "min": [
+          -0.155955,
+          -0.018,
+          -0.173631
+        ],
+        "max": [
+          0.150921,
+          0.125025,
+          0.152747
+        ]
+      },
+      "primitives": [
+        {
+          "id": "anemone_column_disc",
+          "role": "coral-soft",
+          "vertexCount": 376,
+          "maskSchema": "coral-raw-masks-v1"
+        },
+        {
+          "id": "anemone_tentacle_crown",
+          "role": "coral-soft",
+          "vertexCount": 10452,
+          "maskSchema": "coral-raw-masks-v1"
+        }
+      ],
+      "socketCount": 0,
+      "generator": "src/rendering/modeling/build_bubble_tip_anemone.py",
+      "generatorSha256": "0e8059d38c86ddb00b8cdc2860245d896531c23c2ff86b84fb57ffcb60f59cc5",
+      "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_bubble_tip_anemone.py -- /tmp/coral-models/coral-anemone-bta",
+      "contractValidated": true,
+      "status": "ready-for-project-integration"
+    },
+    {
+      "id": "coral-euphyllia-hammer",
+      "file": "coral-euphyllia-hammer.glb",
+      "path": "src/rendering/assets/corals/coral-euphyllia-hammer.glb",
+      "inspectionReport": "src/rendering/assets/corals/coral-euphyllia-hammer-inspection.json",
+      "kind": "coral",
+      "archetype": "tentaculate-lps",
+      "species": "Euphyllia ancora / parancora (Bi-Color Anchor / Hammer Coral)",
+      "sha256": "fd125b7391035a1a3c840cd5e2053c5f0c97937c8106db9a4ff027fb64a743b4",
+      "bytes": 1741436,
+      "triangles": 24112,
+      "dimensionsM": [
+        0.2027,
+        0.151071,
+        0.178175
+      ],
+      "boundsM": {
+        "min": [
+          -0.100851,
+          -0.004,
+          -0.088167
+        ],
+        "max": [
+          0.101849,
+          0.147071,
+          0.090008
+        ]
+      },
+      "primitives": [
+        {
+          "id": "euphyllia_hammer_polyp_crown",
+          "role": "coral-soft",
+          "vertexCount": 15232,
+          "maskSchema": "coral-raw-masks-v1"
+        },
+        {
+          "id": "euphyllia_hammer_skeleton",
+          "role": "coral-rigid",
+          "vertexCount": 1538,
+          "maskSchema": "coral-raw-masks-v1"
+        }
+      ],
+      "socketCount": 0,
+      "generator": "src/rendering/modeling/build_euphyllia_hammer.py",
+      "generatorSha256": "ce38a994e1fe18d07cdeb476b7078e78bf46d3aa5eb856b4deab29db1f0d4384",
+      "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_euphyllia_hammer.py -- /tmp/coral-models/coral-euphyllia-hammer",
+      "contractValidated": true,
+      "status": "ready-for-project-integration"
+    },
+    {
+      "id": "coral-zoanthid-mat",
+      "file": "coral-zoanthid-mat.glb",
+      "path": "src/rendering/assets/corals/coral-zoanthid-mat.glb",
+      "inspectionReport": "src/rendering/assets/corals/coral-zoanthid-mat-inspection.json",
+      "kind": "coral",
+      "archetype": "zoanthid-mat",
+      "species": "Zoanthus sp. (Encrusting Colonial Button Polyp Cluster)",
+      "sha256": "4cbe8c1e0626c19065527ea874b8f96459a741c717cd12238b3871292c8b899d",
+      "bytes": 874704,
+      "triangles": 18600,
+      "dimensionsM": [
+        0.244454,
+        0.042375,
+        0.17366
+      ],
+      "boundsM": {
+        "min": [
+          -0.117175,
+          -0.003,
+          -0.08051
+        ],
+        "max": [
+          0.127279,
+          0.039375,
+          0.09315
+        ]
+      },
+      "primitives": [
+        {
+          "id": "zoanthid_button_cluster",
+          "role": "coral-soft",
+          "vertexCount": 10543,
+          "maskSchema": "coral-raw-masks-v1"
+        }
+      ],
+      "socketCount": 0,
+      "generator": "src/rendering/modeling/build_zoanthid_mat.py",
+      "generatorSha256": "f711f4bd52353c0bddf62a432d177df97527c0417e61acfbc12bb7b848b4e474",
+      "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_zoanthid_mat.py -- /tmp/coral-models/coral-zoanthid-mat",
+      "contractValidated": true,
+      "status": "ready-for-project-integration"
+    },
+    {
+      "id": "live-rock-island-left",
+      "file": "live-rock-island-left.glb",
+      "path": "src/rendering/assets/corals/live-rock-island-left.glb",
+      "inspectionReport": "src/rendering/assets/corals/live-rock-island-left-inspection.json",
+      "kind": "rock",
+      "archetype": "rock-foundation",
+      "species": "Aragonite Live-Rock Left Arched Bommie Foundation with Coral Mount Sockets",
+      "sha256": "bc055e316fd131cfd8d777e5eaed297507a37d76a6dd72d800485b2661d8a449",
+      "bytes": 1693520,
+      "triangles": 16384,
+      "dimensionsM": [
+        0.832538,
+        0.514632,
+        0.402919
+      ],
+      "boundsM": {
+        "min": [
+          -0.37686,
+          -0.012,
+          -0.192026
+        ],
+        "max": [
+          0.455678,
+          0.502632,
+          0.210893
+        ]
+      },
+      "primitives": [
+        {
+          "id": "live_rock_island_left",
+          "role": "rock",
+          "vertexCount": 8512,
+          "maskSchema": null
+        }
+      ],
+      "socketCount": 12,
+      "generator": "src/rendering/modeling/build_live_rock_islands.py",
+      "generatorSha256": "16d071eebe461f4989e5181ba8f3fe2782ffa7933e9f59d585a3ca7e914f96fa",
+      "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_live_rock_islands.py -- /tmp/coral-models left",
+      "contractValidated": true,
+      "status": "ready-for-project-integration"
+    },
+    {
+      "id": "live-rock-island-right",
+      "file": "live-rock-island-right.glb",
+      "path": "src/rendering/assets/corals/live-rock-island-right.glb",
+      "inspectionReport": "src/rendering/assets/corals/live-rock-island-right-inspection.json",
+      "kind": "rock",
+      "archetype": "rock-foundation",
+      "species": "Aragonite Live-Rock Right Terraced Shelf Foundation with Coral Mount Sockets",
+      "sha256": "bd7df7adaa1fd5792846813648acca15990b27d9ee43d01375cb8990bcf5b034",
+      "bytes": 1693156,
+      "triangles": 16384,
+      "dimensionsM": [
+        0.783125,
+        0.39461,
+        0.349255
+      ],
+      "boundsM": {
+        "min": [
+          -0.36379,
+          -0.012,
+          -0.170418
+        ],
+        "max": [
+          0.419335,
+          0.38261,
+          0.178837
+        ]
+      },
+      "primitives": [
+        {
+          "id": "live_rock_island_right",
+          "role": "rock",
+          "vertexCount": 8512,
+          "maskSchema": null
+        }
+      ],
+      "socketCount": 11,
+      "generator": "src/rendering/modeling/build_live_rock_islands.py",
+      "generatorSha256": "16d071eebe461f4989e5181ba8f3fe2782ffa7933e9f59d585a3ca7e914f96fa",
+      "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_live_rock_islands.py -- /tmp/coral-models right",
+      "contractValidated": true,
+      "status": "ready-for-project-integration"
+    }
+  ]
+}

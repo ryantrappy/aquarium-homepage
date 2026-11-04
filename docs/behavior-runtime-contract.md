@@ -18,6 +18,38 @@ Current profile-state mapping to adapter intent is `idle` → hold, `swim` → t
 
 AQ-34 owns real anchor resolution, obstacle avoidance, and path movement. This module exposes the boundary for that integration but does not claim those scene behaviors are implemented.
 
+## Optional per-fish extension scaffold (AQ-55)
+
+`src/simulation/fish-extensions.ts` adds an optional typed extension layer around the existing FSM and renderer. `EMPTY_FISH_EXTENSIONS` is the default registry and contains no hooks. The app currently registers no behavior or animation content, so this scaffold by itself does not add or change a fish behavior.
+
+An extension has a stable name and a `kind` of `behavior` or `animation`. Its `create(snapshot)` factory is called once per fish instance and returns a private controller; the controller may keep closure state and can release it from `dispose()`. Fish removal calls disposal once. Callbacks receive a frozen, detached snapshot of scalar fish state and a bounded simulation delta, never a mutable fish object, route, DOM element, or Three.js object.
+
+Registry layers resolve in this order: shared `defaults`, the selected `species`, then the fish `instanceId`. Each layer declares explicit operations by extension name:
+
+```ts
+const extensions: FishExtensionConfig = {
+  defaults: {
+    pace: { operation: 'add', extension: myAnimationExtension },
+  },
+  species: {
+    'yellow-tang': {
+      pace: { operation: 'replace', extension: tangPaceExtension },
+    },
+  },
+  instances: {
+    'fish-7': {
+      pace: { operation: 'disable' },
+    },
+  },
+}
+```
+
+`add` requires that name to be absent; `replace` requires it to exist and keeps the name; `disable` removes it. A later layer may add a disabled name again. Invalid implicit adds/replacements throw instead of silently changing precedence. Entries run in extension-name order for deterministic results.
+
+Behavior callbacks can request only fish-scoped existing FSM cues (threat, high effort, forage opportunity, or display opportunity). The adapter stamps the owning instance ID, then existing profile transitions decide whether the cue is eligible. Extensions cannot request group/environment events, select anchors, create routes, teleport fish, alter service links, or write pose state. Animation callbacks may return only a finite `playbackRate` multiplier from `0.25` to `2`; the renderer applies it to its existing animation mixer update. Both hook kinds run only after the scene's existing pause, hidden-page, focus, and reduced-motion gates allow a simulation step. Service links continue to navigate immediately through the existing native anchors.
+
+To opt into a registry in a host that owns scene setup, pass it as the final optional `fishExtensions` argument to `createAquarium(...)` (or the fifth argument to `createSwimmingFish(...)` in a motion adapter). Omitting the argument uses the empty registry. Defining a scaffold extension demonstrates a registration capability only; species-specific lifelike behavior, turning, or new animation content still requires separate implementation and review.
+
 ## Deterministic profile demo
 
 Run `npm run behavior:demo` to print a developer-only trace for an ocellaris clownfish, yellow watchman goby, mandarin dragonet, blue-green chromis, and yellow tang. It lists timed state/event changes, requested anchors, and sampled/tuned speed values. The demo uses the independent runtime and a deterministic simulated navigation-arrival response; it does not create rendered fish or demonstrate locomotion fidelity.
