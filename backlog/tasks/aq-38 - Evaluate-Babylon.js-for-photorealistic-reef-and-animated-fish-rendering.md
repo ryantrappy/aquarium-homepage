@@ -1,27 +1,27 @@
 ---
 id: AQ-38
 title: Evaluate Babylon.js for photorealistic reef and animated fish rendering
-status: In Progress
+status: Done
 assignee:
   - '@fish-renderer'
 created_date: '2026-11-03T04:49:00Z'
-updated_date: '2026-11-03 19:01'
+updated_date: '2026-11-04T02:41:00Z'
 labels: []
 dependencies: []
 references:
-  - 'https://www.babylonjs.com/'
+  - https://www.babylonjs.com/
   - >-
     https://doc.babylonjs.com/features/featuresDeepDive/animation/animationRetargeting
   - >-
     https://doc.babylonjs.com/features/featuresDeepDive/postProcesses/IBLShadowsRenderingPipeline/
-  - 'https://doc.babylonjs.com/features/featuresDeepDive/importers/glTF'
-  - 'https://doc.babylonjs.com/lite/typedoc/functions/createNavMesh'
+  - https://doc.babylonjs.com/features/featuresDeepDive/importers/glTF
+  - https://doc.babylonjs.com/lite/typedoc/functions/createNavMesh
   - AQ-5
   - AQ-34
   - AQ-35
   - AQ-37
-  - 'https://playcanvas.com/'
-  - 'https://threejs.org/'
+  - https://playcanvas.com/
+  - https://threejs.org/
 documentation:
   - docs/requirements.md
   - docs/design-principles.md
@@ -40,19 +40,19 @@ Evaluate Babylon.js as one candidate renderer feeding AQ-5, the central engine/a
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Babylon.js is evaluated against AQ-5's renderer candidate and the existing implementation using the same controlled fish and reef assets, with an inspectable isolated proof/review artifact.
-- [ ] #2 The review records evidence and limits for reef PBR materials, lighting, caustics, water clarity, depth occlusion, and fish realism; engine feature claims are not treated as proof that the output is photorealistic.
-- [ ] #3 The proof evaluates full body, fin, and caudal motion using skeletal/skinned animation, morph targets, or procedural deformation as appropriate; glTF/GLB loading and Mesh2Motion export compatibility; and integration with AQ-35 species behavior profiles without conflating behavior paths with deformation clips.
-- [ ] #4 Fish obstacle avoidance and navigation to typed habitat anchors are tested or bounded with explicit evidence; the review does not presume that surface navmesh navigation solves free-swimming 3D movement.
-- [ ] #5 Service link picking respects occluders, and React/TanStack Start TypeScript integration addresses component lifecycle, SSR, and browser-only canvas creation.
-- [ ] #6 Performance evidence is reported at only 402x874 and 1440x900, and the final recommendation says adopt, adapt, reject, or keep the current approach with rationale and limitations.
-- [ ] #7 The task makes a candidate-engine recommendation only; no production renderer migration is performed as part of this investigation.
+- [x] #1 Babylon.js is evaluated against AQ-5's renderer candidate and the existing implementation using the same controlled fish and reef assets, with an inspectable isolated proof/review artifact.
+- [x] #2 The review records evidence and limits for reef PBR materials, lighting, caustics, water clarity, depth occlusion, and fish realism; engine feature claims are not treated as proof that the output is photorealistic.
+- [x] #3 The proof evaluates full body, fin, and caudal motion using skeletal/skinned animation, morph targets, or procedural deformation as appropriate; glTF/GLB loading and Mesh2Motion export compatibility; and integration with AQ-35 species behavior profiles without conflating behavior paths with deformation clips.
+- [x] #4 Fish obstacle avoidance and navigation to typed habitat anchors are tested or bounded with explicit evidence; the review does not presume that surface navmesh navigation solves free-swimming 3D movement.
+- [x] #5 Service link picking respects occluders, and React/TanStack Start TypeScript integration addresses component lifecycle, SSR, and browser-only canvas creation.
+- [x] #6 Performance evidence is reported at only 402x874 and 1440x900, and the final recommendation says adopt, adapt, reject, or keep the current approach with rationale and limitations.
+- [x] #7 The task makes a candidate-engine recommendation only; no production renderer migration is performed as part of this investigation.
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Root agent reviews the completed work before the task is marked Done.
-- [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
+- [x] #1 Root agent reviews the completed work before the task is marked Done.
+- [x] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -67,6 +67,10 @@ Evaluate Babylon.js as one candidate renderer feeding AQ-5, the central engine/a
 
 <!-- SECTION:NOTES:BEGIN -->
 Controlled technical baseline now loads the same licensed two-species rigs in all three engines; source GLBs unchanged. Actual IAB1440x900/402x874 checks pass loading, motion, 45-degree turns, pause freezes and primitive nearest-occluder picking. Repeat Babylon pause after unexpected page reset passed. Current direct-light gray-PBR fixture matches Three/Babylon mean linear0.23974; PlayCanvas exposure0.30 measures0.23717 (~1.1% lower), upper/lower fixture patches within~5%. Added explicit client-only React/TanStack Start lifecycle and independent behavior/navigation plan in docs/rendering.md. Actual CC BY4.0 VIVID REALITY reef scan downloaded officially by root;100k/1K shared LOD processing underway. Mac locked: no further browser work until user confirms unlock. No engine fidelity winner, final performance result or production migration claimed.
+
+Same-reef browser comparison completed by root in hidden IAB at 1440×900 and 402×874 for Three.js, Babylon.js and PlayCanvas. All used the same two fish and corrected reef GLBs; pause/turn and actual-reef occlusion picking behaved consistently. Frame intervals/draw calls are desktop-host measurements and not GPU or physical-phone benchmarks. Babylon GLTF/animation/picking/instrumentation APIs work, but showed no measured fidelity or interval advantage over Three.js. Recommendation: keep Babylon compatible but do not select it for a project production migration; AQ-5 recommends Three.js as next integration candidate for TypeScript/React project fit. Caustics/water clarity, AQ-34 scene route integration, AQ-35 renderer adapter, accessible service links and SPA/SSR lifecycle implementation remain follow-ups; no production migration. ACs 1,2,4,5,6,7 verified; AC3 remains unchecked because full species-behavior/profile integration and finished articulated motion were not demonstrated in this engine proof. Root review required; task remains In Progress.
+
+AC3 evaluated and verified as a bounded candidate-engine investigation: Babylon rendered the same licensed two-species skeletal GLBs with visible body/fin/caudal clips in the controlled actual-reef proof at both target viewports. AQ37 supplied an exact licensed Mesh2Motion export/load compatibility trial in selected Three.js, with explicitly distorted/unfitted stylized output and no realistic tang/all-roster transfer claim. Subsequent main Three integration consumes AQ35 profiles/AQ44 per-instance state and independent AQ34 paths separately from deformation clips, demonstrating the intended engine-independent boundary; this is not a Babylon production profile adapter or migration. Root main94tests/typecheck/build and browser motion/link/alpha checks support the selected pipeline capacity. docs/rendering.md distinguishes these tested scopes and remaining fidelity/interaction limits. All research ACs now checked; leave status/DOD/Done to root.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
@@ -116,4 +120,37 @@ created: 2026-11-03T18:34:00Z
 Publicly accessible previews can guide engine research when a model cannot be tested. Use comparable accessible licensed assets for controlled engine tests; record the listing as reference-only and do not infer reuse rights from viewing it.
 
 ---
+
+author: @Luna
+created: 2026-11-03 19:59
+
+---
+
+Root completed the six corrected-reef browser cases. Babylon passed compatibility, identical pause/turn and real coral occlusion picking at both target viewports, with 25 draw calls and host interval medians/p95 of 16.9/24.9 ms laptop and 16.6/21.5 ms phone-emulated. The compared frames were visually comparable; no photoreal or performance winner. Keep Babylon a compatible candidate; recommend Three.js for the next integration candidate on project-fit grounds. No production migration. Verified ACs #1, #2, #4, #5, #6, #7 only; #3 remains open. Root review still required.
+
+---
+
+author: @render-integration
+created: 2026-11-04 02:35
+
+---
+
+AC3 checked from combined evaluated engine/GLB animation proof, explicitly limited Mesh2Motion trial and selected-main profile/path/clip separation. No claim that Mesh2Motion successfully fits contrasting realistic fish or that Babylon has a production behavior adapter. Recommendation remains keep Babylon compatible, select Three on project fit; root retains finalization.
+
+---
+
+author: root
+created: 2026-11-04T02:41:00Z
+
+---
+
+Root accepts the bounded Three.js engine/pipeline recommendation after controlled six engine/viewport cases and actual main integration. Articulated body/fin/tail clips, distinct profile-driven paths/turns, lighting/depth, native navigation and corrected alpha picking demonstrate pipeline capacity. All three engines work with the same assets; no fidelity/performance winner is claimed. Main integration remains separate AQ12/AQ34 work. Mesh2Motion evidence is a stylized unfitted Three export/load trial, not successful transfer across the realistic roster. Species fidelity, living coral, optics, habitat interactions and full-roster performance remain open.
+
+---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Selected Three.js on React/Vite/TanStack Start integration fit after comparing identical licensed animated fish and reef assets in Three.js, Babylon.js and PlayCanvas at both target viewports. Main integration demonstrates the chosen pipeline capacity; final photorealism and complete species/habitat behavior remain separate implementation tasks.
+<!-- SECTION:FINAL_SUMMARY:END -->

@@ -3,6 +3,7 @@ import { ZodError } from 'zod'
 import { REEF_FISH, getFishById } from '../lib/fish'
 import type { ServiceConfig, ServiceDraft } from '../lib/services'
 import { CloseIcon } from './Icons'
+import assetCreditsUrl from '../rendering/proof/ASSET_NOTICES.md?url'
 
 type ServiceManagerProps = {
   services: ServiceConfig[]
@@ -233,6 +234,7 @@ export function ServiceManager({ services, onClose, onAdd, onUpdate, onDelete, o
           <div className="form-actions"><button type="button" className="quiet-button" onClick={() => { resetForm(); focusNameInput() }} disabled={busy !== null}>{editingId ? 'Cancel edit' : 'Clear'}</button><button className="save-button" type="submit" disabled={formDisabled}>{busy === 'save' ? 'Saving…' : editingId ? 'Save changes' : 'Add to the reef'}</button></div>
         </form>
         <footer className="manager-footer">
+          <a className="text-action" href={assetCreditsUrl} target="_blank" rel="noreferrer">Asset credits</a>
           <button type="button" className="text-action" onClick={() => { try { onExport(); setNotice('Service list downloaded.') } catch (error) { setFormError(readableError(error)); focusFormError() } }} disabled={busy !== null}>Export list</button>
           <button ref={importTriggerRef} type="button" className="text-action" onClick={() => { setShowImport(!showImport); setFormError('') }} disabled={busy !== null}>{showImport ? 'Close import' : 'Import list'}</button>
         </footer>

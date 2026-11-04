@@ -305,3 +305,34 @@ export function resolveHabitatRoute(input: ResolveHabitatRouteInput): HabitatRou
     length: best.length,
   }
 }
+
+/** Free-water routing has no semantic anchor and never fabricates habitat. */
+export type WaterRouteInput = {
+  start: Vec3
+  target: Vec3
+  waterBounds: AxisAlignedBox
+  obstacles: readonly SolidObstacleVolume[]
+  fishClearanceRadius: number
+}
+
+export function isWaterSegmentSafe(input: WaterRouteInput): boolean {
+  validateBox(input.waterBounds, 'Water bounds')
+  if (!finiteVec(input.start) || !finiteVec(input.target) || !Number.isFinite(input.fishClearanceRadius) || input.fishClearanceRadius < 0) throw new RangeError('Water route requires finite points and non-negative clearance.')
+  if (input.obstacles.length > MAX_OBSTACLE_VOLUMES) throw new RangeError('Too many obstacle volumes.')
+  input.obstacles.forEach(obstacle => validateBox(obstacle.bounds, 'Obstacle'))
+  const expanded = input.obstacles.map(obstacle => inflate(obstacle.bounds, input.fishClearanceRadius))
+  return safePoint(input.start, input.waterBounds, input.fishClearanceRadius, expanded)
+    && safePoint(input.target, input.waterBounds, input.fishClearanceRadius, expanded)
+    && segmentClear(input.start, input.target, expanded)
+}
+
+export function findWaterRoute(input: WaterRouteInput): readonly Vec3[] | undefined {
+  if (isWaterSegmentSafe(input)) return [{ ...input.start }, { ...input.target }]
+  const expanded = input.obstacles.map(obstacle => inflate(obstacle.bounds, input.fishClearanceRadius))
+  if (!safePoint(input.start, input.waterBounds, input.fishClearanceRadius, expanded)
+    || !safePoint(input.target, input.waterBounds, input.fishClearanceRadius, expanded)) return undefined
+  const points = [input.start, ...obstacleCorners(expanded, input.waterBounds, input.fishClearanceRadius), input.target]
+  const { distances, previous } = shortestPaths(buildVisibilityGraph(points, expanded), 0)
+  const target = points.length - 1
+  return Number.isFinite(distances[target]) ? pathToNode(previous, target).map(index => ({ ...points[index] })) : undefined
+}

@@ -1,11 +1,11 @@
 ---
 id: AQ-13
 title: Startle a fish when its service link is activated
-status: To Do
+status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-03T04:15:00Z'
-updated_date: '2026-11-03T12:39:00Z'
+updated_date: '2026-11-04T02:25:00Z'
 labels: []
 dependencies:
   - AQ-12
@@ -45,6 +45,24 @@ created: 2026-11-03T12:39:00Z
 ---
 
 AQ-44 now tracks the per-fish state/event runtime this startle behavior can consume. Preserve the AQ-13 requirement that only the activated fish responds and its service opens immediately; group/environment events remain explicit and separate.
+
+---
+
+author: @Luna
+created: 2026-11-03T20:30:00Z
+
+---
+
+Focused read-only activation/accessibility review (2026-11-03) found no concrete immediate-navigation or reduced-motion regression. Native anchors retain target=_blank; accepted clicks call activate synchronously without awaiting, and default is prevented only for a ready-scene pointer hit rejected by the visible-fish raycast. Keyboard/name activation uses the visible-link check without requiring pointer coordinates. When paused by user/system reduced-motion, activate() returns before startle and the synchronous acknowledged class provides non-spatial feedback while the anchor still navigates. Current animation loop respects pause/hidden state. No source changes made and no AQ-13 acceptance criteria checked.
+
+---
+
+author: root
+created: 2026-11-04T02:25:00Z
+
+---
+
+Root main-browser integration check: native body pointer activation requests Home Assistant blank-target URL immediately (Page.windowOpen userGesture=true), keyboard Enter does the same, and only activated anchor receives acknowledgment. Activated focused fish continues moving afterwards, avoiding focus suppressing startle. Paused positions remain identical; reduced-motion preference stops motion; GPU loss switches to usable native-link fallback. Per-species realistic startle/body fidelity remains unaccepted; AQ48 now tracks improved custom rigs. Alpha-aware picking blocker remains on AQ34, so ACs stay open pending correction and final review.
 
 ---
 <!-- COMMENTS:END -->

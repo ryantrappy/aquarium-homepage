@@ -1,0 +1,394 @@
+{
+  "schemaVersion": 1,
+  "source": "src/rendering/proof/candidate-reef.glb",
+  "sha256": "b8ad404d0caca115f22153d7d97642415412f4527391a7285da7fba190001a86",
+  "method": "4x4 columns covering real triangle bounds; lower upward-facing substrate ray hits. Anchor Y stores the conservative surface height without fish clearance. No refuge/host/perch/burrow inferred.",
+  "obstacles": [
+    {
+      "id": "source-0",
+      "bounds": {
+        "min": {
+          "x": -0.8939016461372375,
+          "y": -1,
+          "z": -1
+        },
+        "max": {
+          "x": -0.44695083796977997,
+          "y": 0.015430405139923095,
+          "z": -0.5
+        }
+      }
+    },
+    {
+      "id": "source-1",
+      "bounds": {
+        "min": {
+          "x": -0.8939016461372375,
+          "y": -1,
+          "z": -0.5
+        },
+        "max": {
+          "x": -0.44695083796977997,
+          "y": 0.18633623361587526,
+          "z": 0
+        }
+      }
+    },
+    {
+      "id": "source-2",
+      "bounds": {
+        "min": {
+          "x": -0.8939016461372375,
+          "y": -1,
+          "z": 0
+        },
+        "max": {
+          "x": -0.44695083796977997,
+          "y": 0.23238052368164064,
+          "z": 0.5
+        }
+      }
+    },
+    {
+      "id": "source-3",
+      "bounds": {
+        "min": {
+          "x": -0.8939016461372375,
+          "y": -1,
+          "z": 0.5
+        },
+        "max": {
+          "x": -0.44695083796977997,
+          "y": -0.01653383731842041,
+          "z": 1
+        }
+      }
+    },
+    {
+      "id": "source-4",
+      "bounds": {
+        "min": {
+          "x": -0.44695083796977997,
+          "y": -1,
+          "z": -1
+        },
+        "max": {
+          "x": -2.9802322387695312e-8,
+          "y": 0.03543396234512329,
+          "z": -0.5
+        }
+      }
+    },
+    {
+      "id": "source-5",
+      "bounds": {
+        "min": {
+          "x": -0.44695083796977997,
+          "y": -1,
+          "z": -0.5
+        },
+        "max": {
+          "x": -2.9802322387695312e-8,
+          "y": 0.4417411530017853,
+          "z": 0
+        }
+      }
+    },
+    {
+      "id": "source-6",
+      "bounds": {
+        "min": {
+          "x": -0.44695083796977997,
+          "y": -1,
+          "z": 0
+        },
+        "max": {
+          "x": -2.9802322387695312e-8,
+          "y": 0.4703127884864807,
+          "z": 0.5
+        }
+      }
+    },
+    {
+      "id": "source-7",
+      "bounds": {
+        "min": {
+          "x": -0.44695083796977997,
+          "y": -1,
+          "z": 0.5
+        },
+        "max": {
+          "x": -2.9802322387695312e-8,
+          "y": 0.44167058110237123,
+          "z": 1
+        }
+      }
+    },
+    {
+      "id": "source-8",
+      "bounds": {
+        "min": {
+          "x": -2.9802322387695312e-8,
+          "y": -1,
+          "z": -1
+        },
+        "max": {
+          "x": 0.4469507783651352,
+          "y": 0.23053295850753786,
+          "z": -0.5
+        }
+      }
+    },
+    {
+      "id": "source-9",
+      "bounds": {
+        "min": {
+          "x": -2.9802322387695312e-8,
+          "y": -1,
+          "z": -0.5
+        },
+        "max": {
+          "x": 0.4469507783651352,
+          "y": 0.45179270148277284,
+          "z": 0
+        }
+      }
+    },
+    {
+      "id": "source-10",
+      "bounds": {
+        "min": {
+          "x": -2.9802322387695312e-8,
+          "y": -1,
+          "z": 0
+        },
+        "max": {
+          "x": 0.4469507783651352,
+          "y": 0.45179270148277284,
+          "z": 0.5
+        }
+      }
+    },
+    {
+      "id": "source-11",
+      "bounds": {
+        "min": {
+          "x": -2.9802322387695312e-8,
+          "y": -1,
+          "z": 0.5
+        },
+        "max": {
+          "x": 0.4469507783651352,
+          "y": 0.4422618293762207,
+          "z": 1
+        }
+      }
+    },
+    {
+      "id": "source-12",
+      "bounds": {
+        "min": {
+          "x": 0.4469507783651352,
+          "y": -1,
+          "z": -1
+        },
+        "max": {
+          "x": 0.8939015865325928,
+          "y": 0.20564176082611085,
+          "z": -0.5
+        }
+      }
+    },
+    {
+      "id": "source-13",
+      "bounds": {
+        "min": {
+          "x": 0.4469507783651352,
+          "y": -1,
+          "z": -0.5
+        },
+        "max": {
+          "x": 0.8939015865325928,
+          "y": 0.3879684352874756,
+          "z": 0
+        }
+      }
+    },
+    {
+      "id": "source-14",
+      "bounds": {
+        "min": {
+          "x": 0.4469507783651352,
+          "y": -1,
+          "z": 0
+        },
+        "max": {
+          "x": 0.8939015865325928,
+          "y": 0.29964192152023317,
+          "z": 0.5
+        }
+      }
+    },
+    {
+      "id": "source-15",
+      "bounds": {
+        "min": {
+          "x": 0.4469507783651352,
+          "y": -1,
+          "z": 0.5
+        },
+        "max": {
+          "x": 0.8939015865325928,
+          "y": -0.0748398756980896,
+          "z": 1
+        }
+      }
+    }
+  ],
+  "anchors": [
+    {
+      "id": "source-substrate-0",
+      "anchor": "grazingSurface",
+      "compatibleSpecies": [
+        "yellow-tang"
+      ],
+      "position": {
+        "x": -0.6704262420535088,
+        "y": 0.015430405139923109,
+        "z": -0.75
+      }
+    },
+    {
+      "id": "source-substrate-1",
+      "anchor": "grazingSurface",
+      "compatibleSpecies": [
+        "yellow-tang"
+      ],
+      "position": {
+        "x": -0.6704262420535088,
+        "y": 0.18633623361587526,
+        "z": -0.25
+      }
+    },
+    {
+      "id": "source-substrate-2",
+      "anchor": "grazingSurface",
+      "compatibleSpecies": [
+        "yellow-tang"
+      ],
+      "position": {
+        "x": -0.6704262420535088,
+        "y": 0.23238052368164064,
+        "z": 0.25
+      }
+    },
+    {
+      "id": "source-substrate-3",
+      "anchor": "grazingSurface",
+      "compatibleSpecies": [
+        "yellow-tang"
+      ],
+      "position": {
+        "x": -0.6704262420535088,
+        "y": -0.016533837318420397,
+        "z": 0.75
+      }
+    },
+    {
+      "id": "source-substrate-6",
+      "anchor": "grazingSurface",
+      "compatibleSpecies": [
+        "yellow-tang"
+      ],
+      "position": {
+        "x": -0.22347543388605118,
+        "y": 0.4703127884864806,
+        "z": 0.25
+      }
+    },
+    {
+      "id": "source-substrate-7",
+      "anchor": "grazingSurface",
+      "compatibleSpecies": [
+        "yellow-tang"
+      ],
+      "position": {
+        "x": -0.22347543388605118,
+        "y": 0.44167058110237123,
+        "z": 0.75
+      }
+    },
+    {
+      "id": "source-substrate-9",
+      "anchor": "grazingSurface",
+      "compatibleSpecies": [
+        "yellow-tang"
+      ],
+      "position": {
+        "x": 0.2234753742814064,
+        "y": 0.45179270148277284,
+        "z": -0.25
+      }
+    },
+    {
+      "id": "source-substrate-11",
+      "anchor": "grazingSurface",
+      "compatibleSpecies": [
+        "yellow-tang"
+      ],
+      "position": {
+        "x": 0.2234753742814064,
+        "y": 0.4422618293762207,
+        "z": 0.75
+      }
+    },
+    {
+      "id": "source-substrate-12",
+      "anchor": "grazingSurface",
+      "compatibleSpecies": [
+        "yellow-tang"
+      ],
+      "position": {
+        "x": 0.670426182448864,
+        "y": 0.20564176082611085,
+        "z": -0.75
+      }
+    },
+    {
+      "id": "source-substrate-13",
+      "anchor": "grazingSurface",
+      "compatibleSpecies": [
+        "yellow-tang"
+      ],
+      "position": {
+        "x": 0.670426182448864,
+        "y": 0.3879684352874756,
+        "z": -0.25
+      }
+    },
+    {
+      "id": "source-substrate-14",
+      "anchor": "grazingSurface",
+      "compatibleSpecies": [
+        "yellow-tang"
+      ],
+      "position": {
+        "x": 0.670426182448864,
+        "y": 0.29964192152023317,
+        "z": 0.25
+      }
+    },
+    {
+      "id": "source-substrate-15",
+      "anchor": "grazingSurface",
+      "compatibleSpecies": [
+        "yellow-tang"
+      ],
+      "position": {
+        "x": 0.670426182448864,
+        "y": -0.07483987569808959,
+        "z": 0.75
+      }
+    }
+  ]
+}
