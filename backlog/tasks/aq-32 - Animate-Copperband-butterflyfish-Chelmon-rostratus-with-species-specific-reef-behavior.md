@@ -6,8 +6,8 @@ title: >-
 status: To Do
 assignee:
   - '@Luna'
-created_date: '2026-11-03 04:37'
-updated_date: '2026-11-03 04:41'
+created_date: 2026-11-03 04:37
+updated_date: '2026-11-04T02:31:00Z'
 labels:
   - reef-fish
   - animation
@@ -16,10 +16,12 @@ dependencies:
 references:
   - >-
     https://zoo.ch/en/conservation/animal-and-plant-encyclopedia/copperband-butterflyfish
-  - 'https://dwazoo.com/animal/copperband-butterflyfish/'
+  - https://dwazoo.com/animal/copperband-butterflyfish/
+  - https://www.youtube.com/watch?v=W32sNeT1qbk&t=35s
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
+  - docs/open-source-asset-and-motion-research.md
 priority: medium
 type: enhancement
 ordinal: 34000
@@ -45,3 +47,16 @@ Roster ID: `copperband-butterflyfish`. Implement this fish as an independently r
 - [ ] #1 Root agent reviewed the completed work before marking the task Done.
 - [ ] #2 Implementation follows project policy in AGENTS.md: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @Luna
+created: 2026-11-04T02:31:00Z
+
+---
+
+Added candidate video references and the research index. The video clip species and timestamps are still unverified; do not count these references as satisfying the video-review acceptance criterion.
+
+---
+<!-- COMMENTS:END -->

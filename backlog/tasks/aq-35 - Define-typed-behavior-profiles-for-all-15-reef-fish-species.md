@@ -5,17 +5,19 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-03T04:47:00Z'
-updated_date: '2026-11-03T18:49:00Z'
+updated_date: '2026-11-04T02:31:00Z'
 labels: []
 dependencies: []
 references:
   - docs/reef-fish-roster.md
+  - docs/open-source-asset-and-motion-research.md
 documentation:
   - docs/requirements.md
   - docs/design-principles.md
   - docs/reef-fish-roster.md
   - docs/fish-behavior-design.md
   - docs/gemini-research-links.md
+  - docs/open-source-asset-and-motion-research.md
 priority: high
 type: enhancement
 ordinal: 37000
@@ -135,6 +137,15 @@ created: 2026-11-03T18:49:00Z
 ---
 
 Root reviewed the stable-ID profiles, corrected distinctness validator, focused rejection tests and deterministic runtime trace. Profile configuration/source inference contract is accepted as a foundation. Runtime now consumes profiles and emits different timed states, cues, anchors and speed values for five species, but no rendered navigation is demonstrated yet; leave movement/demo integration AC3 and AC5 pending the real 3D scene.
+
+---
+
+author: @Luna
+created: 2026-11-04T02:31:00Z
+
+---
+
+Linked the candidate video-reference index for the full roster. Clip species and timestamps remain unverified; no video-review criterion is satisfied by these links alone.
 
 ---
 <!-- COMMENTS:END -->

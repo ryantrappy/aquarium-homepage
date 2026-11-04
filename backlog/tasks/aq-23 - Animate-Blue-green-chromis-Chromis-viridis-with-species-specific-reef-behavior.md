@@ -7,7 +7,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: 2026-11-03 04:37
-updated_date: '2026-11-03T12:39:00Z'
+updated_date: '2026-11-04T02:31:00Z'
 labels:
   - reef-fish
   - animation
@@ -16,10 +16,13 @@ dependencies:
 references:
   - https://aquarium.org/animals/blue-green-chromis/
   - AQ-41
+  - https://www.youtube.com/watch?v=5PkiUZdKrSY&t=5s
+  - https://www.youtube.com/watch?v=Ig9cTBsg2CI&t=0s
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
   - docs/fish-behavior-design.md
+  - docs/open-source-asset-and-motion-research.md
 priority: medium
 type: enhancement
 ordinal: 25000
@@ -55,6 +58,15 @@ created: 2026-11-03T12:39:00Z
 ---
 
 For this school-specific behavior, keep the disturbance cue scoped to the blue-green chromis group and its compatible branching-coral refuge. A single AQ-13 service activation affects only that selected fish, not the whole aquarium.
+
+---
+
+author: @Luna
+created: 2026-11-04T02:31:00Z
+
+---
+
+Added candidate video references and the research index. The video clip species and timestamps are still unverified; do not count these references as satisfying the video-review acceptance criterion.
 
 ---
 <!-- COMMENTS:END -->

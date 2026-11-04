@@ -4,19 +4,24 @@ title: Animate Yellow tang (Zebrasoma flavescens) with species-specific reef beh
 status: To Do
 assignee:
   - '@Luna'
-created_date: '2026-11-03 04:37'
-updated_date: '2026-11-03 04:41'
+created_date: 2026-11-03 04:37
+updated_date: '2026-11-04T02:31:00Z'
 labels:
   - reef-fish
   - animation
 dependencies:
   - AQ-12
 references:
-  - 'https://aquarium.org/animals/yellow-tang/'
-  - 'https://pmc.ncbi.nlm.nih.gov/articles/PMC12602642/'
+  - https://aquarium.org/animals/yellow-tang/
+  - https://pmc.ncbi.nlm.nih.gov/articles/PMC12602642/
+  - https://www.youtube.com/watch?v=CIMmr-PKn_M&t=30s
+  - https://www.youtube.com/watch?v=c2vSKErCqTM&t=0s
+  - https://www.youtube.com/watch?v=siSZkVow48Q&t=20s
+  - https://www.youtube.com/watch?v=fIiOV0jpDlE&t=13s
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
+  - docs/open-source-asset-and-motion-research.md
 priority: medium
 type: enhancement
 ordinal: 21000
@@ -42,3 +47,16 @@ Roster ID: `yellow-tang`. Implement this fish as an independently reviewable spe
 - [ ] #1 Root agent reviewed the completed work before marking the task Done.
 - [ ] #2 Implementation follows project policy in AGENTS.md: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @Luna
+created: 2026-11-04T02:31:00Z
+
+---
+
+Added candidate video references and the research index. The video clip species and timestamps are still unverified; do not count these references as satisfying the video-review acceptance criterion.
+
+---
+<!-- COMMENTS:END -->

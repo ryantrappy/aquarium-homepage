@@ -7,7 +7,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: 2026-11-03 04:37
-updated_date: '2026-11-03T12:39:00Z'
+updated_date: '2026-11-04T02:31:00Z'
 labels:
   - reef-fish
   - animation
@@ -17,10 +17,13 @@ references:
   - >-
     https://baliwildlife.com/encyclopedia/marine-life/ray-finned-fishes/blennies/tailspot-blenny-ecsenius-stigmatura/
   - AQ-45
+  - https://www.youtube.com/watch?v=2hL5ojGRuQc&t=30s
+  - https://www.youtube.com/watch?v=K0_8PBYciJ0&t=0s
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
   - docs/fish-behavior-design.md
+  - docs/open-source-asset-and-motion-research.md
 priority: medium
 type: enhancement
 ordinal: 29000
@@ -56,6 +59,15 @@ created: 2026-11-03T12:39:00Z
 ---
 
 Use the reviewed behavior brief to treat rock-perching as a useful staging interpretation for this sheltered-reef blenny, not a sand-burrow behavior. Shared anchor interaction work is AQ-45.
+
+---
+
+author: @Luna
+created: 2026-11-04T02:31:00Z
+
+---
+
+Added candidate video references and the research index. The video clip species and timestamps are still unverified; do not count these references as satisfying the video-review acceptance criterion.
 
 ---
 <!-- COMMENTS:END -->

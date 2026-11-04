@@ -7,7 +7,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: 2026-11-03 04:37
-updated_date: '2026-11-03T12:39:00Z'
+updated_date: '2026-11-04T02:31:00Z'
 labels:
   - reef-fish
   - animation
@@ -21,10 +21,15 @@ references:
   - >-
     https://www.aquariumofpacific.org/onlinelearningcenter/species/clown_anemonefish
   - AQ-45
+  - https://www.youtube.com/watch?v=MUMX7u7v2uY&t=11s
+  - https://www.youtube.com/watch?v=mw-2yWO6WLY&t=7s
+  - https://www.youtube.com/watch?v=n_L9ev92miU&t=0s
+  - https://www.youtube.com/watch?v=dQUe6zCkI0w&t=10s
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
   - docs/fish-behavior-design.md
+  - docs/open-source-asset-and-motion-research.md
 priority: medium
 type: enhancement
 ordinal: 20000
@@ -60,6 +65,15 @@ created: 2026-11-03T12:39:00Z
 ---
 
 Reviewed host evidence clarifies that this fish uses a compatible host anemone (not Acropora); represent a soft home region and natural tentacle overlap rather than a hard biological leash. Shared anchor implementation is tracked in AQ-45.
+
+---
+
+author: @Luna
+created: 2026-11-04T02:31:00Z
+
+---
+
+Added candidate video references and the research index. The video clip species and timestamps are still unverified; do not count these references as satisfying the video-review acceptance criterion.
 
 ---
 <!-- COMMENTS:END -->

@@ -6,7 +6,12 @@ The primary goal is a photorealistic, living reef aquarium: realistic fish shoul
 
 ## Prototype status and success criterion
 
-The existing OpenPencil file is an editable starting point, not a fixed final composition. The design can change substantially as the aquarium is refined. The current translating fish cutouts are scaffolding only; they do not yet achieve the main goal of photorealistic fish with lifelike swimming. A finished implementation must show fish as living animals through body, fin, and tail movement, species-aware turns and speed, and convincing integration with the water and lighting. Moving a still sprite across the tank does not count as completed lifelike animation.
+The OpenPencil file remains an editable starting point. The app now has a technical 3D scene with moving fish and depth-aware reef geometry, but that integration is still under visual and behavior review and does not yet establish the photorealistic, lifelike result that defines success. A finished implementation must show fish as living animals through articulated body, fin, and tail movement, species-aware turns and speed, and convincing integration with water and lighting. A still sprite sliding through the tank does not count as completed lifelike animation.
+
+## Asset and delivery policy
+
+- Keep visual asset acquisition at **$0**. Use only exact assets with a verified `CC0` or `CC BY 4.0` license, or assets made specifically for this project. Record attribution for `CC BY 4.0` assets. Do not use paid assets or `NC`/`ND` assets unless the user explicitly changes this policy; a free download alone does not establish usable rights.
+- Work local-first. Root may commit and push reviewed milestones; the user handles deployment. Do not deploy from an agent session or schedule incremental server deployments; verify the work locally and hand off deployment steps.
 
 ## First-pass requirements
 
@@ -82,7 +87,7 @@ These are biological and visual references, not permission to reuse their photog
 - Conduct a thorough keyboard, focus, screen-reader, and reduced-motion accessibility audit and polish pass.
 - Refine and verify the layout at the two target viewports in the [responsive verification scope](#responsive-verification-scope) (AQ-7).
 - Finalize service mappings with the user.
-- Add shared configuration storage and deploy the app to the Ubuntu homelab server at `trappserv.er`.
+- Keep future changes local-first. Root may commit and push reviewed milestones; the user handles deployment after reviewing the locally working result.
 - Add explicit link hotspots to aquarium decor.
 - Refine the main aquarium scene around the primary success criterion above (AQ-14).
 - Add the configurable, read-only CPU-temperature heater thermometer, disk-space top-off reservoir, and network-rate pump indicator.

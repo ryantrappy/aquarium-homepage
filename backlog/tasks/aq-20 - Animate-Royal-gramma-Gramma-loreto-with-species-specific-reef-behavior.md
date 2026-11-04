@@ -4,15 +4,19 @@ title: Animate Royal gramma (Gramma loreto) with species-specific reef behavior
 status: To Do
 assignee:
   - '@Luna'
-created_date: '2026-11-03 04:37'
+created_date: 2026-11-03 04:37
+updated_date: '2026-11-04T02:31:00Z'
 labels: []
 dependencies:
   - AQ-12
 references:
-  - 'https://www.saltcorner.com/AquariumLibrary/browsespecies.php?CritterID=195'
+  - https://www.saltcorner.com/AquariumLibrary/browsespecies.php?CritterID=195
+  - https://www.youtube.com/watch?v=ILqLqAAEGLc&t=60s
+  - https://www.youtube.com/watch?v=FJOreYB0Knk&t=0s
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
+  - docs/open-source-asset-and-motion-research.md
 priority: medium
 type: enhancement
 ordinal: 22000
@@ -32,3 +36,16 @@ Roster ID: `royal-gramma`. Implement this fish as an independently reviewable sp
 - [ ] #4 The fish uses its reef placement and shelter/foraging pattern described above, remains within the aquarium, and retains its correct service assignment, readable label, and usable click target.
 - [ ] #5 Global pause, hidden-page stopping, and reduced-motion behavior remain supported for this fish without breaking its service link.
 <!-- AC:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @Luna
+created: 2026-11-04T02:31:00Z
+
+---
+
+Added candidate video references and the research index. The video clip species and timestamps are still unverified; do not count these references as satisfying the video-review acceptance criterion.
+
+---
+<!-- COMMENTS:END -->

@@ -7,7 +7,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: 2026-11-03 04:37
-updated_date: '2026-11-03T12:39:00Z'
+updated_date: '2026-11-04T02:31:00Z'
 labels:
   - reef-fish
   - animation
@@ -19,10 +19,13 @@ references:
   - >-
     https://lifg.australian.museum/Group.html?groupId=BDBaE9qK&hierarchyId=CEJQQmVx
   - AQ-45
+  - https://www.youtube.com/watch?v=Sbdm-LApMdg&t=0s
+  - https://www.youtube.com/watch?v=vHaQdhewngI&t=0s
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
   - docs/fish-behavior-design.md
+  - docs/open-source-asset-and-motion-research.md
 priority: medium
 type: enhancement
 ordinal: 27000
@@ -58,6 +61,15 @@ created: 2026-11-03T12:39:00Z
 ---
 
 Use the reviewed behavior brief to keep this sand-burrow sentry distinct from firefish hovering above the entrance and tailspot blenny near rock. Shared anchor interaction work is AQ-45.
+
+---
+
+author: @Luna
+created: 2026-11-04T02:31:00Z
+
+---
+
+Added candidate video references and the research index. The video clip species and timestamps are still unverified; do not count these references as satisfying the video-review acceptance criterion.
 
 ---
 <!-- COMMENTS:END -->

@@ -6,18 +6,21 @@ title: >-
 status: To Do
 assignee:
   - '@Luna'
-created_date: '2026-11-03 04:37'
-updated_date: '2026-11-03 04:41'
+created_date: 2026-11-03 04:37
+updated_date: '2026-11-04T02:31:00Z'
 labels:
   - reef-fish
   - animation
 dependencies:
   - AQ-12
 references:
-  - 'https://aquarium.org/animals/banggai-cardinalfish/'
+  - https://aquarium.org/animals/banggai-cardinalfish/
+  - https://www.youtube.com/watch?v=3qOfVLtuEWY&t=0s
+  - https://www.youtube.com/watch?v=_Uxl7noP_3A&t=0s
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
+  - docs/open-source-asset-and-motion-research.md
 priority: medium
 type: enhancement
 ordinal: 24000
@@ -43,3 +46,16 @@ Roster ID: `banggai-cardinalfish`. Implement this fish as an independently revie
 - [ ] #1 Root agent reviewed the completed work before marking the task Done.
 - [ ] #2 Implementation follows project policy in AGENTS.md: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @Luna
+created: 2026-11-04T02:31:00Z
+
+---
+
+Added candidate video references and the research index. The video clip species and timestamps are still unverified; do not count these references as satisfying the video-review acceptance criterion.
+
+---
+<!-- COMMENTS:END -->

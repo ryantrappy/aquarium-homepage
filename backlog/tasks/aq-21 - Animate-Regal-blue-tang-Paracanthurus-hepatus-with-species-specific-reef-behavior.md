@@ -6,21 +6,23 @@ title: >-
 status: To Do
 assignee:
   - '@Luna'
-created_date: '2026-11-03 04:37'
-updated_date: '2026-11-03 04:41'
+created_date: 2026-11-03 04:37
+updated_date: '2026-11-04T02:31:00Z'
 labels:
   - reef-fish
   - animation
 dependencies:
   - AQ-12
 references:
-  - 'https://aquarium.org/animals/blue-tang/'
+  - https://aquarium.org/animals/blue-tang/
   - >-
     https://australian.museum/learn/animals/fishes/blue-tang-paracanthurus-hepatus/
-  - 'https://www.marinespecies.org/aphia.php?id=219676&p=taxdetails'
+  - https://www.marinespecies.org/aphia.php?id=219676&p=taxdetails
+  - https://www.youtube.com/watch?v=azxKu-FJhyQ&t=38s
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
+  - docs/open-source-asset-and-motion-research.md
 priority: medium
 type: enhancement
 ordinal: 23000
@@ -46,3 +48,16 @@ Roster ID: `blue-tang`. Implement this fish as an independently reviewable speci
 - [ ] #1 Root agent reviewed the completed work before marking the task Done.
 - [ ] #2 Implementation follows project policy in AGENTS.md: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @Luna
+created: 2026-11-04T02:31:00Z
+
+---
+
+Added candidate video references and the research index. The video clip species and timestamps are still unverified; do not count these references as satisfying the video-review acceptance criterion.
+
+---
+<!-- COMMENTS:END -->

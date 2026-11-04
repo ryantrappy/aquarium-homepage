@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: 2026-11-03 04:37
-updated_date: '2026-11-03T12:39:00Z'
+updated_date: '2026-11-04T02:31:00Z'
 labels:
   - reef-fish
   - animation
@@ -14,10 +14,12 @@ dependencies:
 references:
   - https://www.fao.org/fishery/docs/CDrom/bobp/cd1/Bobp/Publns/MAG/021.pdf
   - AQ-45
+  - https://www.youtube.com/watch?v=HKvHrVIDGjY&t=11s
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
   - docs/fish-behavior-design.md
+  - docs/open-source-asset-and-motion-research.md
 priority: medium
 type: enhancement
 ordinal: 26000
@@ -53,6 +55,15 @@ created: 2026-11-03T12:39:00Z
 ---
 
 Use the reviewed behavior brief to distinguish firefish hovering above a sand-burrow entrance from the goby's entrance lookout; shared anchor interaction work is AQ-45.
+
+---
+
+author: @Luna
+created: 2026-11-04T02:31:00Z
+
+---
+
+Added candidate video references and the research index. The video clip species and timestamps are still unverified; do not count these references as satisfying the video-review acceptance criterion.
 
 ---
 <!-- COMMENTS:END -->

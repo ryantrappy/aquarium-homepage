@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: 2026-11-03 12:33
-updated_date: '2026-11-03T12:39:00Z'
+updated_date: '2026-11-04T02:32:00Z'
 labels: []
 dependencies:
   - AQ-12
@@ -14,8 +14,14 @@ dependencies:
 references:
   - docs/gemini_planning.md
   - docs/reef_aquarium_all_code.md
+  - docs/open-source-asset-and-motion-research.md
+  - https://pmc.ncbi.nlm.nih.gov/articles/PMC5047653/
+  - https://pmc.ncbi.nlm.nih.gov/articles/PMC9339911/
+  - https://fishesofaustralia.net.au/home/species/4402
+  - https://academic.oup.com/beheco/article-abstract/16/3/521/189890
 documentation:
   - docs/fish-behavior-design.md
+  - docs/open-source-asset-and-motion-research.md
 priority: medium
 type: enhancement
 ordinal: 43000
@@ -44,6 +50,15 @@ created: 2026-11-03T12:39:00Z
 ---
 
 Reviewed behavior guidance supports AQ-41's existing schooling/navigation scope. Keep group steering limited to profile-supported species and compatible refuges; don't interpret AQ-13's single-fish service click or ordinary proximity as a threat cue for other fish.
+
+---
+
+author: @Luna
+created: 2026-11-04T02:32:00Z
+
+---
+
+Research doc now distinguishes documented social patterns (Chromis shoals, Anthias aggregations/harems, group-living Banggai cardinalfish) and retracts the “only two group” claim. The <0.05 ms/frame spatial-index estimate was unmeasured and is withdrawn; benchmark before selecting an optimization.
 
 ---
 <!-- COMMENTS:END -->

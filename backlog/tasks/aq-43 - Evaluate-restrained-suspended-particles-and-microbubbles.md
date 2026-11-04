@@ -4,7 +4,8 @@ title: Evaluate restrained suspended particles and microbubbles
 status: To Do
 assignee:
   - '@Luna'
-created_date: '2026-11-03 12:34'
+created_date: 2026-11-03 12:34
+updated_date: '2026-11-04T02:32:00Z'
 labels: []
 dependencies:
   - AQ-34
@@ -12,6 +13,9 @@ dependencies:
 references:
   - docs/gemini_planning.md
   - docs/reef_aquarium_all_code.md
+  - docs/open-source-asset-and-motion-research.md
+documentation:
+  - docs/open-source-asset-and-motion-research.md
 priority: low
 type: enhancement
 ordinal: 45000
@@ -29,3 +33,16 @@ The planning reference suggests marine snow and microbubbles carried by water fl
 - [ ] #2 Implement any selected effect with bounded resource use and working pause and reduced-motion behavior.
 - [ ] #3 Review fish visibility and performance at 402x874 and 1440x900.
 <!-- AC:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @Luna
+created: 2026-11-04T02:32:00Z
+
+---
+
+Research doc treats particle counts, pixel sizes, opacity, and gyre motion as artistic parameters; prior numeric marine-snow/copepod density claims were unmeasured. No natural particle-density claim is made.
+
+---
+<!-- COMMENTS:END -->
