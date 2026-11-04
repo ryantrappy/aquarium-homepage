@@ -12,9 +12,9 @@ references:
   - docs/design.md
 documentation:
   - docs/requirements.md
-priority: medium
+priority: low
 type: feature
-ordinal: 17000
+ordinal: 42000
 ---
 
 ## Description

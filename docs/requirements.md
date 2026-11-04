@@ -13,6 +13,12 @@ The OpenPencil file remains an editable starting point. The app now has a techni
 - Keep visual asset acquisition at **$0**. Use only exact assets with a verified `CC0` or `CC BY 4.0` license, or assets made specifically for this project. Record attribution for `CC BY 4.0` assets. Do not use paid assets or `NC`/`ND` assets unless the user explicitly changes this policy; a free download alone does not establish usable rights.
 - Work local-first. Root may commit and push reviewed milestones; the user handles deployment. Do not deploy from an agent session or schedule incremental server deployments; verify the work locally and hand off deployment steps.
 
+## Modular reef direction
+
+Replace the fused, stretched reef scan with bare live-rock foundations and separately authored coral colonies mounted on supported named sockets. Follow the Backlog priority/dependency order: AQ-40 asset pipeline, AQ-14.3 foundations, AQ-42 coral modules, AQ-14.4 assembly, then final scene/navigation and species refinement. Keep rejected scan-cleanup attempts as research history.
+
+Use [the modular authoring specification](modular-coral-and-live-rock-spec.md) with [the implementation asset contract](asset-contract.md). New assets use canonical meters, Y-up export and applied unit-scale roots; coral masks stay separate from display color/opacity. Real cave voids, coral attachment and species habitat require geometry/clearance evidence. Numeric art parameters in the reference are starting proposals, not universal biological measurements.
+
 ## First-pass requirements
 
 - Use Vite, React, TypeScript, and TanStack Start.

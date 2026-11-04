@@ -33,7 +33,7 @@ documentation:
   - docs/reef-fish-roster.md
 priority: high
 type: enhancement
-ordinal: 47000
+ordinal: 19000
 ---
 
 ## Description

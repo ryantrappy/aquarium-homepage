@@ -7,7 +7,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: 2026-11-03 04:37
-updated_date: '2026-11-04T02:31:00Z'
+updated_date: '2026-11-04T02:53:00Z'
 labels:
   - reef-fish
   - animation
@@ -30,9 +30,9 @@ documentation:
   - docs/requirements.md
   - docs/fish-behavior-design.md
   - docs/open-source-asset-and-motion-research.md
-priority: medium
+priority: high
 type: enhancement
-ordinal: 20000
+ordinal: 22000
 ---
 
 ## Description
@@ -74,6 +74,15 @@ created: 2026-11-04T02:31:00Z
 ---
 
 Added candidate video references and the research index. The video clip species and timestamps are still unverified; do not count these references as satisfying the video-review acceptance criterion.
+
+---
+
+author: root
+created: 2026-11-04T02:53:00Z
+
+---
+
+Root limited primary-footage check: https://www.youtube.com/watch?v=MUMX7u7v2uY loads as CLOWNFISH and Anemone by Ocean Pictures, duration1:59, creator describes a family filmed in Thailand. Browser playback actually works; visible still at0:11 shows orange three-bar anemonefish amongst anemone tentacles, and at~0:32 a wider anemone/fish view. This confirms a usable generic clownfish/anemone visual lead, not measured fin Hz/roll/C-start timing or independently established Amphiprion ocellaris identification. Do not restore the old numerical motion claims or mark species-reference AC3 based on this limited check.
 
 ---
 <!-- COMMENTS:END -->

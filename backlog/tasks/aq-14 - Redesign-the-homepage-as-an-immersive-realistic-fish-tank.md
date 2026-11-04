@@ -16,7 +16,7 @@ documentation:
   - docs/gemini-research-links.md
 priority: high
 type: feature
-ordinal: 14000
+ordinal: 21000
 ---
 
 ## Description

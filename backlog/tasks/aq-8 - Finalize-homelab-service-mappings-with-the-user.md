@@ -10,9 +10,9 @@ labels: []
 dependencies: []
 documentation:
   - docs/requirements.md
-priority: medium
+priority: low
 type: task
-ordinal: 8000
+ordinal: 45000
 ---
 
 ## Description

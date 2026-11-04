@@ -22,7 +22,7 @@ documentation:
   - docs/fish-behavior-design.md
 priority: high
 type: enhancement
-ordinal: 12000
+ordinal: 20000
 ---
 
 ## Description

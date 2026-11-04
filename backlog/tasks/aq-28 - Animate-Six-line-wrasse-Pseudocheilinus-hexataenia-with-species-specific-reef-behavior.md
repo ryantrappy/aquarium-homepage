@@ -23,7 +23,7 @@ documentation:
   - docs/open-source-asset-and-motion-research.md
 priority: medium
 type: enhancement
-ordinal: 30000
+ordinal: 34000
 ---
 
 ## Description

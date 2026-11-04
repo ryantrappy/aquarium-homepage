@@ -18,7 +18,7 @@ documentation:
   - docs/fish-behavior-design.md
 priority: medium
 type: enhancement
-ordinal: 13000
+ordinal: 26000
 ---
 
 ## Description

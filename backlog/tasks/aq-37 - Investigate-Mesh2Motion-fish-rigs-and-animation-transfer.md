@@ -19,9 +19,9 @@ documentation:
   - docs/design-principles.md
   - docs/reef-fish-roster.md
   - docs/gemini-research-links.md
-priority: medium
+priority: low
 type: spike
-ordinal: 39000
+ordinal: 46000
 ---
 
 ## Description

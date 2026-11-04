@@ -5,10 +5,11 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-03T04:46:00Z'
-updated_date: '2026-11-04T02:43:00Z'
+updated_date: '2026-11-04T06:25:00Z'
 labels: []
 dependencies:
   - AQ-5
+  - AQ-14.4
 documentation:
   - docs/requirements.md
   - docs/design-principles.md
@@ -17,7 +18,7 @@ documentation:
   - docs/habitat-navigation-core-contract.md
 priority: high
 type: feature
-ordinal: 36000
+ordinal: 15000
 ---
 
 ## Description
@@ -174,6 +175,15 @@ created: 2026-11-04T02:43:00Z
 ---
 
 Root final functional baseline review: repaired production build passes94tests/typecheck/build; main fish travel and pause freezes positions, reduced-motion freezes positions with one selected non-spatial acknowledgment and native_blank event, exact Settings temporary-add/reload/remove restores original3exampleconfig and ETag0778042fed0e2065e9657b7209832a6b4820e7b4610b1e0e95d5dcd3e0e382b3. Empty preview margin(670,271) now produces no navigation; visiblebody(720,235) requests correct JellyfinURL. Contextloss exposes usable native fallback; phoneSettings fits374x846at(14,14) in402x874. Hidden-state behavior is source+clocktested, not a deliberate browser visibility transition. Normal isolated-cache Vite dev restart now hydrates and renders without console errors; this does not establish the old cache conflict as sole prior cause. Main geometry remains a technical rough/dead scan and only2riggedfish; actual habitat interaction demonstration, fullrosterrealism and finalgeometryquality remain open. Accept this as reviewed functional milestone only, no deployment.
+
+---
+
+author: root
+created: 2026-11-04T06:25:00Z
+
+---
+
+Existing navigation core remains valid staged work. Final modular scene/depth/anchor acceptance follows AQ14.4 assembly per the user sequence.
 
 ---
 <!-- COMMENTS:END -->

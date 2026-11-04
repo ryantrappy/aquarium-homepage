@@ -20,10 +20,11 @@ references:
   - >-
     https://research.engr.oregonstate.edu/parrish/index-refraction-seawater-and-freshwater-function-wavelength-and-temperature
 documentation:
+  - docs/modular-coral-and-live-rock-spec.md
   - docs/open-source-asset-and-motion-research.md
-priority: medium
+priority: high
 type: enhancement
-ordinal: 41000
+ordinal: 24000
 ---
 
 ## Description
