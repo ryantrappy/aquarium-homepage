@@ -19,3 +19,9 @@ This version tests a planar mounting disk using 5 mm sample spacing, a 2 mm cont
 This is functional tooling, not visual model approval or a fish habitat generator. Gemini owns visual modeling. Route model issues through Backlog tasks labeled `modeling`; preserve the supplied visual design when making any necessary functional pipeline changes. No main-scene asset promotion follows from a passing schema or this standalone report.
 
 The existing packaging script's assumed support allowances remain unverified until the active pipeline consumes measured evidence. AQ-52 stays open until that replacement and Root review are complete.
+
+## Reviewed export snapshot
+
+Root ran the geometry checks against the two supplied foundation exports. The [left report](asset-evidence/aq52-left-socket-report.json) rejects 12 of 12 socket intents after 2,383 footprint samples; the [right report](asset-evidence/aq52-right-socket-report.json) rejects 11 of 11 after 2,164 samples. Every socket origin touches the exported rock, but all fail orientation and planar-footprint checks under the settings above. Eleven per island also intersect the clearance cylinder.
+
+These hash-pinned reports preserve the requested intents and actual measurements. They are conservative mounting-readiness results for those exact exports, not visual model rejection, a whole-colony fit check or a claim about a newer Gemini revision. Re-run the tool on updated exports. No model was edited and no socket was promoted for runtime use.

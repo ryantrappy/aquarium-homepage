@@ -44,7 +44,9 @@ const extensions: FishExtensionConfig = {
 }
 ```
 
-`add` requires that name to be absent; `replace` requires it to exist and keeps the name; `disable` removes it. A later layer may add a disabled name again. Invalid implicit adds/replacements throw instead of silently changing precedence. Entries run in extension-name order for deterministic results.
+`add` requires that name to be absent; `replace` requires it to exist and keeps the name; `disable` removes it. A later layer may add a disabled name again. Invalid implicit adds/replacements throw instead of silently changing precedence. Entries run in locale-independent extension-name order for deterministic results.
+
+Each runtime is bound to its initial fish and species IDs; a mismatched step snapshot is rejected. It copies and freezes snapshots even if the host passes mutable data. If setup fails, already-created controllers are disposed. Teardown attempts every controller and is idempotent even after errors; the scene reports teardown errors after releasing its fish resources.
 
 Behavior callbacks can request only fish-scoped existing FSM cues (threat, high effort, forage opportunity, or display opportunity). The adapter stamps the owning instance ID, then existing profile transitions decide whether the cue is eligible. Extensions cannot request group/environment events, select anchors, create routes, teleport fish, alter service links, or write pose state. Animation callbacks may return only a finite `playbackRate` multiplier from `0.25` to `2`; the renderer applies it to its existing animation mixer update. Both hook kinds run only after the scene's existing pause, hidden-page, focus, and reduced-motion gates allow a simulation step. Service links continue to navigate immediately through the existing native anchors.
 

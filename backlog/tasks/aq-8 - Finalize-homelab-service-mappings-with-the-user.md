@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-03T04:12:00Z'
-updated_date: '2026-11-03 13:19'
+updated_date: '2026-11-04 19:54'
 labels: []
 dependencies: []
 documentation:
@@ -53,5 +53,11 @@ author: @Luna
 created: 2026-11-03 13:19
 ---
 User preference recorded: keep the clearly labeled example shortcuts for now; do not replace them with the observed Caddy route candidates. Final service URL and fish/object mappings remain deferred for user review.
+---
+
+author: root
+created: 2026-11-04 19:54
+---
+Newest scratch request is tracked separately as AQ56: test only a few documented service destinations before changing any others. Connected Mintlify overview.mdx provides Home Assistant and Paperless candidates; local HTTP observations are401/403 access responses, with native aquarium verification pending unavailable CUA. This does not approve the final roster or make inactive/retired documented services working defaults. Existing configuration remains unchanged.
 ---
 <!-- COMMENTS:END -->

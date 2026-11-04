@@ -95,15 +95,37 @@ export function resolveFishExtensions(
   applyLayer(resolved, config.defaults, 'default')
   applyLayer(resolved, config.species?.[speciesId], `species ${speciesId}`)
   applyLayer(resolved, config.instances?.[instanceId], `instance ${instanceId}`)
-  return [...resolved.values()].sort((a, b) => a.id.localeCompare(b.id))
+  return [...resolved.values()].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
 }
 
-function validateSnapshot(snapshot: FishExtensionSnapshot) {
-  if (!snapshot.instanceId.trim()) throw new TypeError('Fish extension instance ID must be non-empty.')
+function detachSnapshot(snapshot: FishExtensionSnapshot): FishExtensionSnapshot {
+  if (typeof snapshot.instanceId !== 'string' || !snapshot.instanceId.trim()) throw new TypeError('Fish extension instance ID must be non-empty.')
+  if (typeof snapshot.speciesId !== 'string' || !snapshot.speciesId.trim()) throw new TypeError('Fish extension species ID must be non-empty.')
   if (!Number.isFinite(snapshot.position.x) || !Number.isFinite(snapshot.position.y) || !Number.isFinite(snapshot.position.z) ||
       !Number.isFinite(snapshot.yaw) || !Number.isFinite(snapshot.pitch) || !Number.isFinite(snapshot.bank) || !Number.isFinite(snapshot.speed)) {
     throw new RangeError('Fish extension snapshot values must be finite.')
   }
+  return Object.freeze({
+    instanceId: snapshot.instanceId,
+    speciesId: snapshot.speciesId,
+    state: snapshot.state,
+    position: Object.freeze({ x: snapshot.position.x, y: snapshot.position.y, z: snapshot.position.z }),
+    yaw: snapshot.yaw,
+    pitch: snapshot.pitch,
+    bank: snapshot.bank,
+    speed: snapshot.speed,
+  })
+}
+
+type DisposableController = { dispose?(): void }
+
+function disposeControllers(controllers: readonly DisposableController[]) {
+  const errors: unknown[] = []
+  for (const controller of controllers) {
+    try { controller.dispose?.() }
+    catch (error) { errors.push(error) }
+  }
+  return errors
 }
 
 function validateBehaviorIntent(intent: FishBehaviorIntent) {
@@ -123,13 +145,29 @@ export function createFishExtensionRuntime(
   config: FishExtensionConfig,
   initialSnapshot: FishExtensionSnapshot,
 ) {
-  validateSnapshot(initialSnapshot)
-  const extensions = resolveFishExtensions(config, initialSnapshot.speciesId as SpeciesBehaviorId, initialSnapshot.instanceId)
+  const fish = detachSnapshot(initialSnapshot)
+  const extensions = resolveFishExtensions(config, fish.speciesId as SpeciesBehaviorId, fish.instanceId)
   const behaviorInstances: FishBehaviorExtensionInstance[] = []
   const animationInstances: FishAnimationExtensionInstance[] = []
-  for (const extension of extensions) {
-    if (extension.kind === 'behavior') behaviorInstances.push(extension.create(initialSnapshot))
-    else animationInstances.push(extension.create(initialSnapshot))
+  const controllers: DisposableController[] = []
+  try {
+    for (const extension of extensions) {
+      if (extension.kind === 'behavior') {
+        const instance = extension.create(fish)
+        behaviorInstances.push(instance)
+        controllers.push(instance)
+      } else {
+        const instance = extension.create(fish)
+        animationInstances.push(instance)
+        controllers.push(instance)
+      }
+    }
+  } catch (error) {
+    const cleanupErrors = disposeControllers(controllers)
+    if (cleanupErrors.length) {
+      throw new AggregateError([error, ...cleanupErrors], 'Fish extension setup failed and controller cleanup also failed.', { cause: error })
+    }
+    throw error
   }
   let disposed = false
 
@@ -137,18 +175,21 @@ export function createFishExtensionRuntime(
     step(snapshot: FishExtensionSnapshot, elapsedSeconds: number, motionAllowed: boolean) {
       if (disposed) throw new Error('Fish extension runtime has been disposed.')
       if (!Number.isFinite(elapsedSeconds) || elapsedSeconds < 0) throw new RangeError('Extension elapsed time must be finite and non-negative.')
+      const currentFish = detachSnapshot(snapshot)
+      if (currentFish.instanceId !== fish.instanceId || currentFish.speciesId !== fish.speciesId) {
+        throw new TypeError('Fish extension step snapshot must match its initial instance ID and species ID.')
+      }
       if (!motionAllowed || elapsedSeconds === 0) return { behaviorIntents: [] as FishBehaviorIntent[], playbackRate: 1 }
-      validateSnapshot(snapshot)
       const behaviorIntents: FishBehaviorIntent[] = []
       for (const instance of behaviorInstances) {
-        for (const intent of instance.step(snapshot, elapsedSeconds) ?? []) {
+        for (const intent of instance.step(currentFish, elapsedSeconds) ?? []) {
           validateBehaviorIntent(intent)
           behaviorIntents.push(intent)
         }
       }
       let playbackRate = 1
       for (const instance of animationInstances) {
-        const intent = instance.step(snapshot, elapsedSeconds)
+        const intent = instance.step(currentFish, elapsedSeconds)
         if (intent?.playbackRate !== undefined) {
           validatePlaybackRate(intent.playbackRate)
           playbackRate *= intent.playbackRate
@@ -159,7 +200,8 @@ export function createFishExtensionRuntime(
     dispose() {
       if (disposed) return
       disposed = true
-      for (const instance of [...behaviorInstances, ...animationInstances]) instance.dispose?.()
+      const errors = disposeControllers(controllers)
+      if (errors.length) throw new AggregateError(errors, 'One or more fish extension controllers failed to dispose.')
     },
   }
 }

@@ -96,8 +96,13 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
     hitMeshes.push(sand)
   }
   function removeFish() {
-    fish.forEach(item => { item.motion.extensions.dispose(); scene.remove(item.root); item.mixer?.stopAllAction(); item.mixer?.uncacheRoot(item.mixer.getRoot()); item.root.traverse(object => { if (object instanceof THREE.SkinnedMesh) object.skeleton.dispose() }) })
+    const extensionErrors: unknown[] = []
+    fish.forEach(item => {
+      try { item.motion.extensions.dispose() } catch (error) { extensionErrors.push(error) }
+      scene.remove(item.root); item.mixer?.stopAllAction(); item.mixer?.uncacheRoot(item.mixer.getRoot()); item.root.traverse(object => { if (object instanceof THREE.SkinnedMesh) object.skeleton.dispose() })
+    })
     ownedSprites.forEach(sprite => { disposeTree(sprite) }); ownedSprites.length = 0; fish = []
+    if (extensionErrors.length) console.error('Fish extension cleanup failed', new AggregateError(extensionErrors, 'Fish extension cleanup failed'))
   }
   function rebuildFish() {
     removeFish(); if (!loaded || disposed) return

@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { consumeFrameSteps, createFrameClock, MAX_FRAME_SECONDS, SIMULATION_STEP_SECONDS, suspendFrameClock } from './clock'
-import { createSwimmingFish, startleFish, stepSwimmingFish, type WaterHabitat } from './motion'
+import { createSwimmingFish, startleFish, stepSwimmingFish, type SwimmingFish, type WaterHabitat } from './motion'
 
 const water: WaterHabitat = { bounds: { min: { x: -5, y: -2, z: -4 }, max: { x: 5, y: 3, z: 3 } }, obstacles: [], anchors: [] }
+function motionState(fish: SwimmingFish) {
+  const { extensions, ...state } = fish
+  return structuredClone(state)
+}
 
 describe('scene simulation clock', () => {
   it('accepts first rAF older than a synchronous performance.now and ignores invalid/backward samples', () => {
@@ -18,12 +22,12 @@ describe('scene simulation clock', () => {
     const clock = createFrameClock(), fish = createSwimmingFish('resize-resume', 'yellow-tang', { x: 0, y: 1, z: 2 })
     consumeFrameSteps(clock, 1000)
     expect(consumeFrameSteps(clock, 1010)).toBe(0)
-    const before = structuredClone(fish)
+    const before = motionState(fish)
     stepSwimmingFish(fish, water, 0) // resize/manual draw
-    expect(fish).toEqual(before)
+    expect(motionState(fish)).toEqual(before)
     suspendFrameClock(clock)
     stepSwimmingFish(fish, water, 50, true)
-    expect(fish).toEqual(before)
+    expect(motionState(fish)).toEqual(before)
     expect(clock.accumulatorSeconds).toBeCloseTo(.01)
     expect(consumeFrameSteps(clock, 900000)).toBe(0)
     expect(consumeFrameSteps(clock, 900010)).toBe(1)
@@ -36,14 +40,14 @@ describe('scene simulation clock', () => {
     expect(count * SIMULATION_STEP_SECONDS).toBeCloseTo(MAX_FRAME_SECONDS)
     expect(consumeFrameSteps(clock, 11017)).toBe(1)
     const long = createSwimmingFish('long-frame', 'yellow-tang', { x: 0, y: 1, z: 2 })
-    const fixed = structuredClone(long)
+    const fixed = createSwimmingFish('long-frame', 'yellow-tang', { x: 0, y: 1, z: 2 })
     startleFish(long, water); startleFish(fixed, water)
     stepSwimmingFish(long, water, 10)
     for (let i = 0; i < count; i++) stepSwimmingFish(fixed, water, SIMULATION_STEP_SECONDS)
-    expect(long).toEqual(fixed)
+    expect(motionState(long)).toEqual(motionState(fixed))
     expect(long.startleSeconds).toBeCloseTo(.95 - MAX_FRAME_SECONDS)
-    const before = structuredClone(long)
+    const before = motionState(long)
     for (const elapsed of [-.01, NaN, Infinity]) stepSwimmingFish(long, water, elapsed)
-    expect(long).toEqual(before)
+    expect(motionState(long)).toEqual(before)
   })
 })
