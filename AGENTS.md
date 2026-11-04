@@ -42,4 +42,5 @@ After reading all of `AGENTS.md` and its policies, read [`AGENT_TASKS.md`](AGENT
 - Do not add service health monitoring; it was not requested.
 - Work locally until the aquarium works and looks right. Commit and push reviewed milestones; the user will handle deployment after pushes. Do not perform incremental server deployments.
 - Asset budget is $0. Bundle only verified CC0, CC-BY 4.0, or custom-made visual assets; exclude paid, noncommercial, and no-derivatives assets. Keep attribution and derivative provenance with each imported asset. Software dependencies retain their own compatible open-source licenses.
+- Modeling is owned exclusively by the Gemini agent the user manages. Use its models supplied under `src/rendering/`; do not delegate model creation or modify its model assets, modeling generators, or packaging scripts. Codex agents handle integration, renderer behavior, read-only asset validation, and testing. Record asset findings for the user-managed modeling workflow.
 - If there are tasks in the agent_scratch.md file look at them and execute them as if they were sent directly to you from the user.
