@@ -1,6 +1,8 @@
-"""Experimental, approximate fish rig for inspection, not production animation.
+"""Experimental, approximate fish rigs for inspection, not production animation.
 
 Run with Blender: blender -b --python rig-candidate.py -- input.glb output.glb clown|tang
+``clown`` and ``tang`` remain the supported CLI names. The four family profiles
+are documented below; only clown and tang have source meshes for validation.
 The two known source meshes are normalized to Blender's Y axis (head at -Y).
 This script does not modify the source file or author any texture pixels.
 """
@@ -14,6 +16,50 @@ from mathutils.bvhtree import BVHTree
 source, output, species = sys.argv[sys.argv.index('--') + 1:]
 if species not in ('clown', 'tang'):
     raise ValueError('Expected clown or tang')
+
+# This table records the parameterized family split, while deliberately
+# refusing to imply that a family is anatomically validated without a matching
+# licensed mesh. Do not instantiate the two provisional profiles using a
+# nonmatching fish just to exercise their numbers.
+RIG_ARCHETYPES = {
+    'subcarangiform_schooler': {
+        'status': 'exercised technical candidate on clownfish mesh; root visual acceptance pending',
+        'flex_start_y': -.27,
+        'flex_end_y': .98,
+        'max_joint_degrees': [0, 0, 1.0, 1.5, 2.0, 3.5],
+        'pectoral_sweep_degrees': 16,
+        'phase_lag_per_joint': .38,
+    },
+    'labriform_rigid_disc': {
+        'status': 'exercised technical candidate on yellow tang mesh; root visual acceptance pending',
+        'flex_start_y': .58,
+        'flex_end_y': .98,
+        'max_joint_degrees': [0, 0, 0, 2, 5, 7],
+        'pectoral_sweep_degrees': 15,
+        'phase_lag_per_joint': .30,
+    },
+    'banner_hoverer': {
+        'status': 'unexercised provisional profile; no matching source mesh available',
+        'flex_start_y': .72,
+        'flex_end_y': .98,
+        'max_joint_degrees': [0, 0, 0, 0, 1, 2],
+        'pectoral_sweep_degrees': 24,
+        'phase_lag_per_joint': .18,
+    },
+    'benthic_percher_dragonet': {
+        'status': 'unexercised provisional profile; no matching source mesh available',
+        'flex_start_y': .82,
+        'flex_end_y': .98,
+        'max_joint_degrees': [0, 0, 0, 0, 1, 2],
+        'pectoral_sweep_degrees': 30,
+        'phase_lag_per_joint': .14,
+    },
+}
+species_archetype = {
+    'clown': 'subcarangiform_schooler',
+    'tang': 'labriform_rigid_disc',
+}[species]
+profile = RIG_ARCHETYPES[species_archetype]
 bpy.ops.object.select_all(action='SELECT')
 bpy.ops.object.delete(use_global=False)
 bpy.ops.import_scene.gltf(filepath=source)
@@ -100,17 +146,39 @@ for side, sign in [('L', 1), ('R', -1)]:
     bone.parent = spines[1]
 bpy.ops.object.mode_set(mode='OBJECT')
 
-# Linear blend along the spine; an intentionally conservative local pectoral
-# weight is spatially restricted. Weight quality must be visually checked.
+# Smooth position ramp maps vertices to adjacent spine groups; an intentionally
+# conservative local pectoral weight is spatially restricted. Weight quality
+# must be visually checked.
 centers = [(ends[i] + ends[i + 1]) / 2 for i in range(len(ends) - 1)]
+
+def smoothstep(value):
+    value = max(0.0, min(1.0, value))
+    return value * value * (3.0 - 2.0 * value)
+
 def spine_weights(y):
-    if y <= centers[0]: return [(0, 1.0)]
-    if y >= centers[-1]: return [(len(centers) - 1, 1.0)]
-    for i in range(len(centers) - 1):
-        if centers[i] <= y <= centers[i + 1]:
-            t = (y - centers[i]) / (centers[i + 1] - centers[i])
-            return [(i, 1 - t), (i + 1, t)]
-    raise ValueError('Could not assign spine weight')
+    # Keep the clownfish head/trunk on the first fixed joint, then use a
+    # smooth posterior ramp. The low-angle ramp avoids the large cumulative
+    # rotations that made the body bands visibly shear in the old profile.
+    if species == 'clown':
+        if y <= profile['flex_start_y']:
+            return [(0, 1.0)]
+        progress = smoothstep((y - profile['flex_start_y']) / (profile['flex_end_y'] - profile['flex_start_y']))
+        position = 1.0 + progress * (len(centers) - 2)
+    else:
+        # The tang trunk, dorsal sail and anal sail share a rigid segment.
+        # Axial weights ramp from normalized Y=.58 through 1.0, the posterior
+        # 21% of the full normalized [-1, 1] body axis.
+        if y <= profile['flex_start_y']:
+            return [(0, 1.0)]
+        progress = smoothstep((y - profile['flex_start_y']) / (profile['flex_end_y'] - profile['flex_start_y']))
+        position = 3.0 + progress * (len(centers) - 4)
+    position = max(0.0, min(len(centers) - 1.0, position))
+    lower = int(position)
+    upper = min(len(centers) - 1, lower + 1)
+    blend = position - lower
+    if lower == upper or blend <= 1e-8:
+        return [(lower, 1.0)]
+    return [(lower, 1.0 - blend), (upper, blend)]
 
 for obj in meshes:
     groups = [obj.vertex_groups.new(name=f'spine_{i}') for i in range(len(centers))]
@@ -163,8 +231,10 @@ if species == 'tang':
         modifier = gill.modifiers.new('Experimental armature', 'ARMATURE'); modifier.object = rig
         gill.parent = rig
 
-    # The source has no discernible pectoral fins. Add simple, thin curved
-    # volume as an explicitly authored proxy; it needs anatomical/art review.
+    # The source has no discernible pectoral fins. Add a thin fan in the
+    # lateral X/Z plane as an explicitly authored proxy; it needs
+    # anatomical/art review. The earlier Y/Z-plane version was almost edge-on
+    # in front views and projected as a line in oblique renders.
     fin_material = bpy.data.materials.new('Experimental translucent tang fin')
     fin_material.use_nodes = True
     shader = fin_material.node_tree.nodes.get('Principled BSDF')
@@ -187,11 +257,11 @@ if species == 'tang':
             for row in range(rows + 1):
                 t = .015 + .985 * row / rows
                 for i in range(radial + 1):
-                    angle = -.35 + 1.45 * i / radial
+                    angle = -.95 + 1.9 * i / radial
                     reach = .78 + .22 * math.sin(math.pi * i / radial)
-                    x = sign * (.148 + .045 * t + .008 * math.sin(math.pi * t)) + surface * .0015 * (1 - .9 * t)
-                    y = -.47 + .39 * t * math.cos(angle) * reach
-                    z = -.14 + .42 * t * math.sin(angle) * reach
+                    x = sign * (.148 + .34 * t * reach) + .008 * math.sin(math.pi * t)
+                    y = -.47 + .24 * t * math.sin(angle) * reach + surface * .0015 * (1 - .9 * t)
+                    z = -.14 + .23 * t * math.cos(angle) * reach
                     verts.append((x, y, z))
         layer = (rows + 1) * (radial + 1)
         for s in range(2):
@@ -208,15 +278,15 @@ if species == 'tang':
         membrane_faces = len(faces)
         # Fine tapered strips sit just outside the membrane as visible fin rays.
         for i in range(1, radial):
-            angle = -.35 + 1.45 * i / radial
+            angle = -.95 + 1.9 * i / radial
             reach = .78 + .22 * math.sin(math.pi * i / radial)
             start = len(verts)
             for t in (.04, .35, .7, .98):
                 for direction in (-1, 1):
                     a = angle + direction * .02 * (1 - t)
-                    x = sign * (.148 + .045 * t + .008 * math.sin(math.pi * t) + .002)
-                    y = -.47 + .39 * t * math.cos(a) * reach
-                    z = -.14 + .42 * t * math.sin(a) * reach
+                    x = sign * (.148 + .34 * t * reach + .008 * math.sin(math.pi * t) + .002)
+                    y = -.47 + .24 * t * math.sin(a) * reach
+                    z = -.14 + .23 * t * math.cos(a) * reach
                     verts.append((x, y, z))
             for row in range(3):
                 j = start + row * 2
@@ -237,6 +307,8 @@ if species == 'tang':
         fin.parent = rig
 
 scene = bpy.context.scene
+scene['rig_archetype'] = species_archetype
+scene['rig_archetype_status'] = profile['status']
 scene.render.fps = 24
 scene.frame_start, scene.frame_end = 1, 49
 for pose in rig.pose.bones:
@@ -245,16 +317,16 @@ for frame in range(1, 50, 2):
     phase = 2 * math.pi * (frame - 1) / 48
     for i in range(len(centers)):
         pose = rig.pose.bones[f'spine_{i}']
-        amplitudes = [0, .8, 2.5, 5, 9, 13] if species == 'clown' else [0, .5, 1.5, 3, 5, 8]
-        amplitude = amplitudes[i] * math.pi / 180
-        pose.rotation_euler.z = amplitude * math.sin(phase - i * .38)
+        amplitude = profile['max_joint_degrees'][i] * math.pi / 180
+        pose.rotation_euler.z = amplitude * math.sin(phase - i * profile['phase_lag_per_joint'])
         pose.keyframe_insert(data_path='rotation_euler', frame=frame, group=pose.name)
     for side, sign in [('L', 1), ('R', -1)]:
         pose = rig.pose.bones['pectoral_' + side]
-        pose.rotation_euler.z = sign * (.30 if species == 'tang' else .36) * math.sin(phase * 2)
+        sweep = profile['pectoral_sweep_degrees'] * math.pi / 180
+        pose.rotation_euler.z = sign * sweep * math.sin(phase * 2)
         pose.keyframe_insert(data_path='rotation_euler', frame=frame, group=pose.name)
 if rig.animation_data and rig.animation_data.action:
-    rig.animation_data.action.name = 'Experimental swim'
+    rig.animation_data.action.name = 'Experimental ' + species_archetype + ' swim'
 scene.frame_set(1)
 bpy.context.view_layer.update()
 for obj in [rig, *meshes]:

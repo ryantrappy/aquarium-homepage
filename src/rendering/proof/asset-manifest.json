@@ -49,9 +49,16 @@
       },
       "recipe": {
         "blender": "5.0.1",
-        "script": "src/rendering/proof/rig-candidate.py",
-        "command": "blender -b --python src/rendering/proof/rig-candidate.py -- /path/to/clownfish.glb src/rendering/proof/candidate-real-clown.glb clown",
-        "source_hash_check": "Verify source SHA-256 fe29d2a82a62bd5a92d2669332c7a157810d063972a5124f7ccada6d998af547 before regeneration."
+        "script": "git revision 6545f60:src/rendering/proof/rig-candidate.py",
+        "script_revision": "6545f60",
+        "command": "git show 6545f60:src/rendering/proof/rig-candidate.py > /tmp/rig-candidate-6545f60.py && blender -b --python /tmp/rig-candidate-6545f60.py -- /path/to/clownfish.glb src/rendering/proof/candidate-real-clown.glb clown",
+        "source_hash_check": "Verify source SHA-256 fe29d2a82a62bd5a92d2669332c7a157810d063972a5124f7ccada6d998af547 before regeneration.",
+        "output_hash_check": "The command above reproduces SHA-256 9beebbfe33e9e4459702e1aba6ad2df6f7309aca854f3bb5d1b88a36ca9444a6 and 5973300 bytes. Verified with Blender 5.0.1 on 2026-11-03."
+      },
+      "experimental_profile_recipe": {
+        "script": "src/rendering/proof/rig-candidate.py (experimental profiles; not the pinned baseline recipe)",
+        "command": "blender -b --python src/rendering/proof/rig-candidate.py -- /path/to/clownfish.glb /tmp/aq48-improved-clown.glb clown",
+        "status": "Review-only, unpromoted AQ-48 experiment; output hash differs from the manifest derivative."
       }
     },
     {
@@ -81,9 +88,16 @@
       },
       "recipe": {
         "blender": "5.0.1",
-        "script": "src/rendering/proof/rig-candidate.py",
-        "command": "blender -b --python src/rendering/proof/rig-candidate.py -- /path/to/yellow-tang.glb src/rendering/proof/candidate-real-tang.glb tang",
-        "source_hash_check": "Verify source SHA-256 25723490457b49858bc167208229570bff793bced8f2ecfc94c4f9d5084a2720 before regeneration."
+        "script": "git revision 6545f60:src/rendering/proof/rig-candidate.py",
+        "script_revision": "6545f60",
+        "command": "git show 6545f60:src/rendering/proof/rig-candidate.py > /tmp/rig-candidate-6545f60.py && blender -b --python /tmp/rig-candidate-6545f60.py -- /path/to/oxidane_-_yellow_tang.glb src/rendering/proof/candidate-real-tang.glb tang",
+        "source_hash_check": "Verify source SHA-256 25723490457b49858bc167208229570bff793bced8f2ecfc94c4f9d5084a2720 before regeneration.",
+        "output_hash_check": "The command above reproduces SHA-256 44d28509f62de1eec2a9644fea1a6ce5c79d642997b3487aa0e21d6069f76f5b and 1316848 bytes. Verified with Blender 5.0.1 on 2026-11-03."
+      },
+      "experimental_profile_recipe": {
+        "script": "src/rendering/proof/rig-candidate.py (experimental profiles; not the pinned baseline recipe)",
+        "command": "blender -b --python src/rendering/proof/rig-candidate.py -- /path/to/oxidane_-_yellow_tang.glb /tmp/aq48-improved-tang.glb tang",
+        "status": "Review-only, unpromoted AQ-48 experiment; output hash differs from the manifest derivative."
       }
     },
     {
