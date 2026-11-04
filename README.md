@@ -11,7 +11,7 @@ npm run dev
 
 The app saves settings through its same-origin API to `.data/reef-config.json` on the Node server. A browser that can reach the same app instance sees the shared list. The first run serves three clearly labeled example shortcuts and does not probe their health. Existing browser-local settings are not copied automatically; use **Import list** in settings to migrate a previously exported JSON list.
 
-The persisted envelope is versioned and reef-only: `{ "version": 1, "mode": "reef", "services": [...] }`. The server validates every write, serializes writes, and checks revisions so one browser cannot silently overwrite another browser's newer settings. The JSON file is stored outside the public assets. For deployment, use the isolated Docker setup and existing reverse-proxy authentication described in [docs/deployment.md](docs/deployment.md).
+The persisted envelope is versioned and reef-only: `{ "version": 1, "mode": "reef", "services": [...] }`. The server validates every write, serializes writes, and checks revisions so one browser cannot silently overwrite another browser's newer settings. The JSON file is stored outside the public assets. For deployment, see the isolated Docker setup and LAN-only reverse proxy described in [docs/deployment.md](docs/deployment.md).
 
 The initial shortcuts are labeled examples. Their links use `trappserv.er` with example ports; they are placeholders and do not indicate that those services exist or are online. The launcher does not check service health.
 
@@ -43,4 +43,4 @@ For a production Node build, `npm run build` uses the Nitro Vite plugin and `npm
 
 ## Backlog
 
-Project work is tracked in `backlog/` with the Backlog.md CLI. At the start of a work session, read the workflow overview with `npm run backlog -- instructions overview`. List open tasks with `npm run backlog -- task list --plain`, inspect one with `npm run backlog -- task view AQ-2 --plain`, and use `npm run backlog -- task edit ...` to update status, plans, notes, or acceptance criteria. Start with AQ-1/2/3 for the first-pass app; AQ-4 onward are follow-up work. Delegate implementation to Luna with high reasoning effort and mark tasks Done only after root review.
+Project work is tracked in `backlog/` with the Backlog.md CLI. At the start of a work session, read all of [AGENTS.md](AGENTS.md), then [AGENT_TASKS.md](AGENT_TASKS.md) for the current checkpoint and task order. The active Backlog task is authoritative for its scope and acceptance criteria. Use `npm run backlog -- instructions overview`, `npm run backlog -- task list --plain`, `npm run backlog -- task view AQ-50 --plain`, and `npm run backlog -- task edit ...` to inspect or update work. Follow the dependency order in [AGENT_TASKS.md](AGENT_TASKS.md); mark tasks Done only after root review.
