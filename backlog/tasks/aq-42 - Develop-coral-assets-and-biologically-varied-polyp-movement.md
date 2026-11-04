@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: 2026-11-03 12:34
-updated_date: '2026-11-04T06:25:00Z'
+updated_date: '2026-11-04T06:43:00Z'
 labels: []
 dependencies:
   - AQ-40
@@ -48,6 +48,12 @@ The reference distinguishes hard branching SPS structure from soft LPS tissue an
 
 6. Evaluate whether high-to-low tangent-space normal reprojection from the approved 1.95M-face source to the existing 30k smooth LOD improves surface shading without enlarging geometry. Preserve source color/UV/material map roles, use a conservative bounds-derived cage/ray distance, check adjacent-branch bleed and validator, and keep the result review-only.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Cross-reference the AQ-40 bounded 30k PixForge normal bake in comment #15. This does not close AQ-42; selected-Three proof, masks/contract and requested biological/visual criteria remain pending.
+<!-- SECTION:NOTES:END -->
 
 ## Comments
 
@@ -180,6 +186,15 @@ created: 2026-11-04T06:25:00Z
 ---
 
 Aligned with user priority order: standalone coral authoring follows the pipeline and bare foundation, then assembly. Removed broad AQ34 prerequisite to avoid requiring completed main habitat before its modular assets exist; its integration checks remain AQ14.4/AQ34.
+
+---
+
+author: @storage
+created: 2026-11-04T06:43:00Z
+
+---
+
+AQ-42 step 6 also produced the bounded high-to-low normal-map review candidate described in AQ-40 comment #15; these are linked research outputs, not independent evidence of the coral asset acceptance criteria. Source and 30k smooth LOD are the same already reviewed PixForge staghorn. The baked 30k candidate preserves silhouette, UV/baseColor and normalTexture role; without a TANGENT accessor, Khronos reports 0 errors and the expected generated-tangent-space portability warning. Source/low/baked neutral side and oblique renders show no material silhouette/faceting improvement at this geometry budget. No calibrated physical units, exact-species claim, modular coral masks, runtime promotion, or AC check. Retain for selected-Three fixture review only.
 
 ---
 <!-- COMMENTS:END -->

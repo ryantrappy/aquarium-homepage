@@ -1,10 +1,13 @@
 # Licensed rendering-study assets
 
-These notices cover the three separately verified source models used by the
-controlled engine study. They do not clear rights for the older, ignored
-LasquetiSpice/Microsoft/PixCap investigation or imply creator endorsement.
+These notices cover the original three separately verified source models used
+by the controlled engine study and current main technical baseline. Separate
+AQ40 material-proof specimens have their own [review notices](pipeline-assets/ASSET_NOTICES.md);
+they are study-only, browser QA is pending, and they are not main-aquarium art.
+Neither set clears rights for the older, ignored LasquetiSpice/Microsoft/PixCap
+investigation or implies creator endorsement.
 
-All three sources were obtained through Sketchfab's official signed-in download
+The original three engine-study sources were obtained through Sketchfab's official signed-in download
 flow. The listings and source API license records specify
 [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/).
 Retain creator credit, source and license links, and the modification notices
@@ -21,10 +24,10 @@ not accepted final biological artwork.
 - Changes: normalized orientation/scale; added an approximate axial/pectoral
   skeleton, weights and swim clip; assigned provisional translucency to selected
   outer fin faces. Original texture pixels retained. See `rig-candidate.py`.
-- Reproduction: Blender 5.0.1, `blender -b --python
-  src/rendering/proof/rig-candidate.py -- /path/to/clownfish.glb
-  src/rendering/proof/candidate-real-clown.glb clown` (verify the external
-  source hash above first).
+- Reproduction: Blender 5.0.1 and the exact pinned recipe in
+  `asset-manifest.json`, using `rig-candidate.py` from revision `6545f60`.
+  Verify the external source hash above first. The current experimental script
+  is not the byte-reproducing baseline recipe.
 - Limits: baked shading, absent exported tangents, coarse fin attachments and
   angular translucent inner triangles; no independent mouth/eye/gill animation.
 
@@ -40,10 +43,10 @@ not accepted final biological artwork.
   membranes/rays and a static operculum outline. These additions are project
   experiments, not original creator geometry. Original texture pixels retained.
   See `rig-candidate.py`.
-- Reproduction: Blender 5.0.1, `blender -b --python
-  src/rendering/proof/rig-candidate.py -- /path/to/yellow-tang.glb
-  src/rendering/proof/candidate-real-tang.glb tang` (verify the external source
-  hash above first).
+- Reproduction: Blender 5.0.1 and the exact pinned recipe in
+  `asset-manifest.json`, using `rig-candidate.py` from revision `6545f60`.
+  Verify the external source hash above first. The current experimental script
+  is not the byte-reproducing baseline recipe.
 - Limits: source baked shading, approximate fan shape/weights, no independent
   mouth/eye/gill articulation or validated species-specific locomotion.
 

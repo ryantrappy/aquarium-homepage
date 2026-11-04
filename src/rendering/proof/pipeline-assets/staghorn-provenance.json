@@ -1,0 +1,169 @@
+{
+  "purpose": "Durable AQ40 supplementary technical review specimens; browser QA pending; unapproved final art or main content",
+  "source": {
+    "creator": "PixForge (@pixforge.id)",
+    "url": "https://sketchfab.com/3d-models/staghorn-coral-ede640745c16457a9345ef1fa9e8d4d4",
+    "license": "CC-BY-4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "historicalExternalPath": "/Users/ryantrapp/Downloads/staghorn_coral.glb",
+    "sha256": "96a57944bc5c68b6e2a8244b10a83d16aff1a761cdabbf5379e2a36169ccda55",
+    "bytes": 93766820,
+    "meshes": 18,
+    "triangles": 1945640,
+    "redistributed": false,
+    "listingClaims": {
+      "aiLabel": "Generated with AI",
+      "taxonDescription": "Acropora sp.",
+      "evidence": "Prior official-listing review recorded on AQ42 comment1, 2026-11-03; latest recheck blocked. These are listing claims, not independently established taxonomy/living-coral provenance."
+    }
+  },
+  "derivatives": [
+    {
+      "file": "staghorn-unbaked-lod.glb",
+      "sha256": "6f90a78ddf5df726f9fd466df4e709eb3eca6780fde2c0a5891f1560263eaec2",
+      "bytes": 13257016,
+      "triangles": 30000,
+      "vertices": 43122,
+      "rawBounds": {
+        "min": [
+          -0.43493765592575073,
+          -0.35303524136543274,
+          -0.4917330741882324
+        ],
+        "max": [
+          0.4372371733188629,
+          0.3525157570838928,
+          0.4863422214984894
+        ]
+      },
+      "attributes": [
+        "POSITION",
+        "NORMAL",
+        "TEXCOORD_0",
+        "TANGENT"
+      ],
+      "attributeSha256": {
+        "POSITION": "b76c99ad07b2855c214c559719fdb56209155aebcdf486c30e110b25f93b6b76",
+        "NORMAL": "04ca19d86f106180386c99490d4616f8c38c7f4dc14f799e5cbfc6756f65bd42",
+        "TEXCOORD_0": "fc25be70bb739a7954e94a8dc00b14bf2d75e3a8df037770dac56cbbf250415c",
+        "TANGENT": "45a34f850350b94de7c1bcb0dcf55298c79ce57e7e098ab938f78e8afc2201ae"
+      },
+      "indicesSha256": "14ef40b94d1da38194f65569d867f3c4157eb270a8613a013e6c2b09c41632a4",
+      "materials": [
+        {
+          "doubleSided": true,
+          "name": "mat0",
+          "normalTexture": {
+            "index": 0
+          },
+          "pbrMetallicRoughness": {
+            "baseColorTexture": {
+              "index": 1
+            },
+            "metallicFactor": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "staghorn-normal-baked.glb",
+      "sha256": "576aea21f0f2e8d191f6c5e1d572e9a1e5d82de87188dd4d6224403ac7519be7",
+      "bytes": 13340472,
+      "triangles": 30000,
+      "vertices": 43124,
+      "rawBounds": {
+        "min": [
+          -0.43493765592575073,
+          -0.35303524136543274,
+          -0.4917330741882324
+        ],
+        "max": [
+          0.4372371733188629,
+          0.3525157570838928,
+          0.4863422214984894
+        ]
+      },
+      "attributes": [
+        "POSITION",
+        "NORMAL",
+        "TEXCOORD_0"
+      ],
+      "attributeSha256": {
+        "POSITION": "7063095c550e709af204572f3ce61d0e67c57325c4d0c9b992e13fa309f77942",
+        "NORMAL": "b7238055cc752cf21af7211bbaec41bfbee958d592d7addc10977fd8da202783",
+        "TEXCOORD_0": "f7a93f1a292f25c2862beb4417bc1a2c7a6c325bd41dede39b90dac1de1712a9"
+      },
+      "indicesSha256": "e8bf6a1aec882be05996a8ba4682ae38941db52e45238895eea6445d2f64fc5f",
+      "materials": [
+        {
+          "doubleSided": true,
+          "name": "mat0.001",
+          "normalTexture": {
+            "index": 0
+          },
+          "pbrMetallicRoughness": {
+            "baseColorTexture": {
+              "index": 1
+            },
+            "metallicFactor": 0
+          }
+        }
+      ]
+    }
+  ],
+  "commonGeometryAccessorsByteIdentical": false,
+  "reviewPlacement": {
+    "uniformScale": 0.2556040430654893,
+    "longestDimensionM": 0.25,
+    "kind": "chosen review design scale only",
+    "sourcePhysicalScaleVerified": false,
+    "assetContractValidated": false
+  },
+  "recipe": {
+    "blender": "5.0.1",
+    "threads": 4,
+    "prepareScript": "src/rendering/proof/prepare-staghorn.py",
+    "prepareSha256": "d84dff3dc02cdef68e6e2156717ccdd9dff249aeed884b07bb9bf3baad2268b9",
+    "prepareCommand": "blender --threads 4 -b --python src/rendering/proof/prepare-staghorn.py -- /path/to/staghorn_coral.glb /tmp/aq42-pixforge-staghorn-30k-smooth.glb --triangles 30000 --smooth-normals",
+    "bakeScript": "src/rendering/proof/bake-staghorn-normal.py",
+    "bakeSha256": "0aa25ce2f137381a47358fb8859add2b98fe63c9b6e0b60d1ce0dd2cb4f27ffc",
+    "bakeCommand": "blender --threads 4 -b --python src/rendering/proof/bake-staghorn-normal.py -- /path/to/staghorn_coral.glb /tmp/aq40-rebuild-chain/staghorn-30k-smooth-direct.glb /tmp/aq40-final-staghorn-rebuild-20261104/staghorn-normal-baked-no-tangents.glb /tmp/aq40-final-staghorn-rebuild-20261104/staghorn-normal.png",
+    "prepareCommandStatus": "Storage fresh-run verification confirmed the direct HIGH-to-smooth command reproduces the staged smooth LOD byte-for-byte.",
+    "bakeCommandStatus": "One fresh full direct-recipe execution produced the curated candidate at the recorded hash. No second full-bake determinism repeat was performed or claimed.",
+    "prepareOutputByteReproductionVerified": true,
+    "expectedPrepareOutputSha256": "6f90a78ddf5df726f9fd466df4e709eb3eca6780fde2c0a5891f1560263eaec2",
+    "artifactMethod": "Fresh full current no-TANGENT bake script executed from the pinned high source and the directly reproduced smooth LOD; no baked checkpoint re-export used for this curated candidate.",
+    "directRecipeExecutedFromPinnedHighAndReproducedLow": true,
+    "observedDirectRecipeOutputSha256": "576aea21f0f2e8d191f6c5e1d572e9a1e5d82de87188dd4d6224403ac7519be7",
+    "repeatFullBakeByteDeterminismTested": false,
+    "normalPngSha256": "59b86363e6e60078418aa6728f3695f90106e83d571eb6bf404c7aea19afb4bd",
+    "normalPngBytes": 4531641,
+    "supersededArtifact": {
+      "sha256": "30b1faa77617c0ddd3c6eea4f233ddbb3f100cb553cd3fe79c323add5132ea6e",
+      "method": "Historical baked-checkpoint no-TANGENT re-export; no longer curated",
+      "bytes": 13340520,
+      "vertices": 43125
+    },
+    "embeddedImagePayloadsIdenticalToSupersededArtifact": true
+  },
+  "modifications": [
+    "Join source meshes and reduce to 30000-triangle LOD while retaining UV/baseColor",
+    "Rebuild smooth normals and mechanically downscale 4096 maps to 2048",
+    "Replace low material normal map with 2048x2048 high-to-low tangent-space bake",
+    "Omit TANGENT on baked GLB after singular loop; selected Three.js shader derives tangent frame from UVs"
+  ],
+  "limits": [
+    "Reference already has source normalTexture and exported TANGENT; comparison includes changed normal map and tangent-frame path, not a no-normal control",
+    "High source normal map was connected during bake, but its contribution to Cycles NORMAL output is unverified",
+    "One Khronos MESH_PRIMITIVE_GENERATED_TANGENT_SPACE portability warning remains on baked GLB",
+    "No physical source calibration, reefAsset extras or COLOR_0 coral mask contract",
+    "No recolor, exact taxonomic species assertion or final coral art/motion claim",
+    "Exported accessor vertex counts differ (43122 reference, 43124 baked); raw accessor/index buffers are not byte-identical. Expanded triangle-order comparison is recorded separately."
+  ],
+  "validationReport": "staghorn-validation.json",
+  "expandedTriangleOrderedMaxComponentDifference": {
+    "POSITION": 0.0,
+    "NORMAL": 0.0032113194465637207,
+    "TEXCOORD_0": 0.0
+  }
+}

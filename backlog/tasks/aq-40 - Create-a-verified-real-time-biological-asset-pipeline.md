@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@render-integration'
 created_date: 2026-11-03 12:33
-updated_date: '2026-11-04T06:29:00Z'
+updated_date: '2026-11-04T07:18:00Z'
 labels: []
 dependencies:
   - AQ-5
@@ -17,6 +17,7 @@ documentation:
   - docs/gemini-research-links.md
   - docs/open-source-asset-and-motion-research.md
   - docs/asset-contract.md
+  - docs/asset-pipeline-proof.md
 priority: high
 type: task
 ordinal: 11000
@@ -45,6 +46,8 @@ Fish and corals need anatomically credible, reusable assets with provenance and 
 
 <!-- SECTION:NOTES:BEGIN -->
 The contract slice is a pure offline inspection validator, not a GLB loader or raycast/visual certificate. Probe-report declarations do not independently establish support, conservative proxy coverage or cave clearance. Main renderer and proof assets are unchanged by this slice.
+
+Observed bake result is a bounded capability proof, not a production acceptance. A singular UV loop produced one zero tangent on initial tangent export; review export omitted TANGENT and yields the Khronos warning recorded in comment #15. Selected Three.js must be reviewed to confirm generated TBN behavior before use. Source coordinates have no documented physical calibration; report them as source-coordinate units only. Normal bake did not materially remove facets at 30k triangles.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
@@ -171,6 +174,145 @@ created: 2026-11-04T06:29:00Z
 ---
 
 Root reviewed the schema/docs/source and independently ran the full104-test suite successfully. Accept the typed meter/up-axis/material-mask/socket/proxy inspection foundation as a staged component. It deliberately does not read GLB truth, prove surface clearance, install a shader adapter or establish visual quality; actual exported bake examples, measured maps and browser review remain open before AQ40 Done.
+
+---
+
+author: @catalog
+created: 2026-11-04T06:39:00Z
+
+---
+
+## Original procedural rock bake proof (2026-11-04)
+
+Built an original porous-rock high/low proof with Blender 5.0.1 using `src/rendering/proof/build-original-rock-bake.py` (`--threads 4`). It demonstrates UV unwrap, 1024px Cycles DIFFUSE color-only base-color bake, EMIT roughness bake, AO bake, and GLB ORM channel packing. Roughness emission ramp is copied from the procedural source ramp. No external model was used.
+
+Review files are outside git in `/tmp/aq40-pipeline-review/`: low GLB, saved source `.blend`, `provenance.json`, Khronos report, and rebuild README. Generator SHA-256 `51a93421db94cad48f54f35dd14566cfe04dd15cf27044895ea77c31f447082d`; source blend SHA-256 `96884463c712155a1bd664ef46a2378163876fd16ee7f546ac323e2893a6a7f8`; GLB SHA-256 `279464c29f93b6ba50257a4ec53a08a8c0ba46b8e52df7a63a8bac134e057b86` (1,295,124 bytes).
+
+Parsed export evidence: 320 triangles, 281 POSITION vertices after UV seam splits, measured bounds dimensions 0.408800 × 0.243664 × 0.299843 m, root translation zero/rotation identity/scale one, primitive extras `porous-rock`/`rock`. BaseColor references image 1 (1024² PNG). Both metallicRoughness and occlusion reference image 0 (1024² PNG); exporter packed AO in R, roughness in G, metallic in B with metallicFactor 0. No normalTexture and no COLOR_0. Khronos glTF Validator 2.0.0-dev.3.10: 0 errors, warnings, infos, or hints. Shared `validateAssetContract` accepted the actual inspection record.
+
+Limitations: procedural test geometry is not production live-rock art; no sockets, collision proxies, coral masks, or normal map are claimed. Blender logged a multiple-image sampler warning during ORM export; the final GLB pointers and channels were parsed and validated. Root/renderer still need the selected-Three visual checks at 402×874 and 1440×900 before this bake evidence can close its acceptance criterion.
+
+---
+
+author: @storage
+created: 2026-11-04T06:42:00Z
+
+---
+
+Bounded PixForge staghorn bake proof, Blender 5.0.1, four threads; review-only outputs remain in /tmp. Pinned high input SHA-256 96a57944bc5c68b6e2a8244b10a83d16aff1a761cdabbf5379e2a36169ccda55, 1,945,640 triangles, 93,766,820 bytes; existing smooth LOD SHA-256 6f90a78ddf5df726f9fd466df4e709eb3eca6780fde2c0a5891f1560263eaec2, 30,000 triangles, 13,257,016 bytes. Selected-to-active tangent-space NORMAL bake at 2048², 8px EXTEND margin, no cage, max ray distance 0.007835694 source-coordinate units (0.8% of 0.97946 max AABB extent); source high normal-map node remained connected, low UVMap/baseColor/geometry preserved. Bake PNG /tmp/aq40-pixforge-staghorn-30k-normal.png: SHA-256 59b86363e6e60078418aa6728f3695f90106e83d571eb6bf404c7aea19afb4bd, 4,531,641 bytes, Non-Color. Initial export with tangents had one zero-length tangent at one singular UV loop; the input smooth LOD itself validates clean. Per root review, one re-export omitted TANGENT so selected Three.js may derive tangent space from UVs. Candidate /tmp/aq40-pixforge-staghorn-30k-normal-baked-no-tangents.glb: SHA-256 30b1faa77617c0ddd3c6eea4f233ddbb3f100cb553cd3fe79c323add5132ea6e, 13,340,520 bytes, 30,000 triangles, attrs NORMAL/POSITION/TEXCOORD_0, normalTexture index 0/baseColorTexture index 1. Khronos Validator 2.0.0-dev.3.10: 0 errors, 1 warning (MESH_PRIMITIVE_GENERATED_TANGENT_SPACE: runtime-generated tangent space may be non-portable). Matched neutral outputs: /tmp/aq40-high-side.png, /tmp/aq40-low-side.png, /tmp/aq40-baked-side.png and corresponding -oblique.png. The bake preserves appearance/map roles but does not materially improve observed branch faceting or silhouette; no verified physical calibration exists, so bounds/ray are source-coordinate units, not meters. Source normal-map remained connected during bake but bake input from material normal is not independently established. This is pipeline capability evidence only; no modular COLOR_0, contract validation, production promotion, AQ AC check, or final visual acceptance.
+
+---
+
+author: @render-integration
+created: 2026-11-04 06:43
+
+---
+
+Selected-Three browser fixture source is ready for root server/QA: src/rendering/proof/pipeline-study.html + pipeline-study.ts, explicit proof Vite entry. No server/build started by worker. Dev-only /pipeline-review mount serves only manifest.json and lowercase GLB basenames from the realpath-confined /tmp/aq40-pipeline-review directory; no outside symlink targets or source .blend files, and no temporary artifacts copied into builds. Explicit ?review=local enables temporary review; curated default remains empty until approved durable assets exist. Validated canonical-meter original rock bake is staged. Matched neutral room environment/lights/camera/exposure, front/oblique and Pause light sweep, normal/AO toggles on baked side, actual loaded role counts and raw glTF map pointers. Typecheck/config syntax/whitespace checks pass. No main renderer/rig/GLB promotion. Source-coordinate coral normal proof is awaiting root choice of an explicit review design scale or source-unit labels; physical scale is unverified.
+
+---
+
+author: @render-integration
+created: 2026-11-04 06:45
+
+---
+
+Both validated review specimens are staged for root-owned browser QA at pipeline-study.html?review=local. Rock is canonical-meter original bake; coral is repaired no-TANGENT normal proof paired with matching unbaked low mesh only. Coral source units are uncalibrated: approved uniform REVIEW multiplier 0.2556040430654893 gives a chosen 0.25m longest display dimension on both, with actual raw source bounds separately reported. Coral baked SHA256 30b1faa77617c0ddd3c6eea4f233ddbb3f100cb553cd3fe79c323add5132ea6e; reference 6f90a78ddf5df726f9fd466df4e709eb3eca6780fde2c0a5891f1560263eaec2. Expected generated-tangent-space portability warning disclosed; no full coral unit/mask/asset-contract/art claim. Typecheck/config syntax/diff checks pass; worker started no server/build. Fixture curated default remains empty until durable artifacts are root-approved; no production/main edits.
+
+---
+
+author: root
+created: 2026-11-04T06:54:00Z
+
+---
+
+Root review continuation: browser access host is unavailable and native Chrome reports cgWindowNotFound; two-viewport selected-Three acceptance remains pending, not waived. HTTP review fixture serves expected HTML/manifest/GLB and rejects source blend, arbitrary JSON and POST requests. Root independently parsed coral GLBs: embedded base-color payload is byte-identical, normal payload equals the recorded baked PNG, and 30k triangle POSITION/UV multisets match at 1e-6 source-coordinate rounding. Exported vertex counts differ 43122→43125 and some NORMAL values change, so storage is quantifying shading-basis differences before a preservation claim. Catalog is correcting the high-rock polygon-vs-triangle measurement and repeating the corrected recipe. Preserve final study specimens/reports as durable technical-review artifacts, without main promotion or AQ40 completion. Foundations stay behind the pipeline gate.
+
+---
+
+author: @catalog
+created: 2026-11-04T06:55:00Z
+
+---
+
+## Rock bake reproducibility and triangle-count correction (2026-11-04)
+
+Repeated the pinned recipe in fresh directories with Blender 5.0.1 and `--threads 4`. The pre-correction repeat `/tmp/aq40-repeat-20261104/original-rock-bake.glb` was byte-identical to the original review GLB: SHA-256 `279464c29f93b6ba50257a4ec53a08a8c0ba46b8e52df7a63a8bac134e057b86`, 1,295,124 bytes. This exposed a metric-labeling error: Blender `len(mesh.polygons)` for the subdivided high source is 3,840 quad faces, which triangulate to 7,680 loop triangles. The prior comment/report’s 3,840 “high source triangles” was incorrect.
+
+Corrected `build-original-rock-bake.py` to use `calc_loop_triangles()` for high and low triangle counts and record polygon counts separately. High source is 7,680 triangles / 3,840 quads; low target is 320 triangles / 320 faces; exported GLB is 320 triangles / 281 POSITION vertices. Corrected generator SHA-256 `525f445620b5b6b1d754820674aaacdfebe7c7e602047952b4ca2b36311d5a7b`. Corrected output at `/tmp/aq40-corrected-repeat-20261104/original-rock-bake.glb` is 1,295,156 bytes, SHA-256 `a2b599bd97be2603e7f03c540f3343322b3bfc41c1b7280dab4e4347a28485f6`. A second corrected rerun in `/tmp/aq40-corrected-repeat-check-20261104/` produced the exact same GLB hash and byte count.
+
+Compared with the earlier review GLB, corrected output geometry (positions, indices, 320 triangles), both embedded PNGs, bounds/root transform, map bindings and material channel roles are unchanged; both PNG SHA-256 values match exactly. The GLB hash/size changed because extras now pin the corrected generator SHA and recipe text. BaseColor remains image 1; metallicRoughness and occlusion remain image 0 (AO R, roughness G, metallic B); no normal texture or COLOR_0. Corrected inspection passes shared `validateAssetContract`; Khronos Validator 2.0.0-dev.3.10 reports zero issues.
+
+The saved `.blend` byte hash varies between output paths/runs, so only the GLB was byte-reproducibility-checked. Existing review-directory artifacts were left untouched. The corrected GLB/report/validator are under `/tmp/aq40-corrected-repeat-20261104/`. No viewport claims or AC checks are added; root visual review remains pending.
+
+---
+
+author: @catalog
+created: 2026-11-04T07:01:00Z
+
+---
+
+## Final seed-pinned rock bake and neutral views (2026-11-04)
+
+Applied root’s determinism correction: the previous script recorded `SEED=7319` without assigning it to Cycles. It now sets `scene.cycles.seed = 7319`, `scene.cycles.use_animated_seed = false`, and records `samples=16` in the recipe/report. A fresh final build and a second fresh rerun both produced the same GLB SHA-256 `9959640beeae110ade6dca6a858ca87c568c62458139592ebeee342d1f1936b9` (1,295,952 bytes). Generator SHA-256 `39036ed42bd7968985f21399f1e15b8516a17e4b72c8d0b381b7168e5fa3e636`.
+
+Final task directory `/tmp/aq40-final-repro-20261104/` contains the GLB, exact source `.blend`, provenance JSON and Khronos validator report. Correct counts: high source 7,680 loop triangles / 3,840 quad polygons; low and exported 320 triangles / 320 polygons; exported 281 POSITION vertices. Dimensions remain 0.408800 × 0.243664 × 0.299843 m; root is identity. Final embedded images: packed ORM image 0, 529,229 bytes, SHA-256 `0d5be0fcb9f828a527419c185850cd9c547b7bd92b1592d6fc1e758d928c8952`; baseColor image 1, 753,273 bytes, SHA-256 `798944b076a43164cb089aa76dfb412260b8187c67b1b90c611d1ba87e7cbef3`. AO uses R, roughness G, metallic B with metallicFactor 0; no normalTexture or COLOR_0. Inspection contract passes; Khronos Validator 2.0.0-dev.3.10 reports zero issues.
+
+Neutral Blender views rendered with the existing `render-model-views.py` at 800×600, 24 Cycles samples, four threads: `/tmp/aq40-final-repro-20261104/corrected-rock-front.png` and `corrected-rock-oblique.png`. Matching procedural high-source views using the same neutral camera/lights: `procedural-source-front.png` and `procedural-source-oblique.png`. Root’s offline front review accepts this as a material-bake specimen only and notes its rounded pebble silhouette lacks pore openings, so it is unsuitable as final bare live-rock art. This source quality limit is recorded; no art iteration or browser claim added. Browser QA remains pending.
+
+---
+
+author: @render-integration
+created: 2026-11-04 07:05
+
+---
+
+Durable TECHNICAL REVIEW checkpoint ready for root-owned build, with browser QA pending: pipeline-study HTML/TS, explicit proof Vite entry, direct ?url imports of exactly 3 GLBs plus notices/provenance/validator reports under pipeline-assets. Final seed-pinned rock hash9959640beeae110ade6dca6a858ca87c568c62458139592ebeee342d1f1936b9; coral unbaked6f90a78ddf5df726f9fd466df4e709eb3eca6780fde2c0a5891f1560263eaec2; normal-baked30b1faa77617c0ddd3c6eea4f233ddbb3f100cb553cd3fe79c323add5132ea6e. Source review fixed marked-only raw-mask bypass, preservation of imported display COLOR_0, detached material retirement, optional-map/mixer/image/skeleton/shadow disposal, bfcache/reload handling and honest unit labels. Typecheck/config syntax/whitespace checks pass; no server/build run. Coral reference includes its source normalTexture and TANGENT; baked omits TANGENT and has 3 additional seam vertices. Expanded triangle POSITION/UV values match exactly; NORMAL max component difference0.003201901912689209 is recorded, so no sole-normal-bake attribution claim. Direct HIGH-to-smooth preparation now verified byte-identical by storage; current baked artifact still comes from the observed checkpoint re-export, pending requested fresh full-bake comparison. No main content/art promotion, AC checks or Done.
+
+---
+
+author: @render-integration
+created: 2026-11-04 07:11
+
+---
+
+Root-selected fresh direct-recipe coral candidate now replaces the historical checkpoint re-export under the same curated filename staghorn-normal-baked.glb. SHA256576aea21f0f2e8d191f6c5e1d572e9a1e5d82de87188dd4d6224403ac7519be7, 13,340,472 bytes, 30,000 triangles, 43,124 accessor vertices; attrs POSITION/NORMAL/TEXCOORD_0. Matching combined validator copied: reference0issues, fresh candidate0errors/1generated-tangent-space portability warning. Embedded image payloads match the superseded artifact byte-for-byte; expanded triangle positions/UVs match reference exactly, normal max component difference0.0032113194465637207 recorded. Provenance now records actual fresh full-script method from pinned high+directly reproduced low; one full direct execution observed, no second full-bake determinism repeat claimed. Historical30b1 checkpoint hash explicitly superseded. Only baked GLB plus its provenance/validation changed; reference/rock hashes verified unchanged. Typecheck and diff checks pass. No server/build/main changes, no AC/Done; browser QA pending.
+
+---
+
+author: @render-integration
+created: 2026-11-04 07:11
+
+---
+
+Validator packaging clarification: the supplied fresh validation.json compared fresh output against the historical checkpoint, despite its handoff description. Curated staghorn-validation.json now explicitly contains the existing official unbaked-reference report (6f90..., zero issues) and the fresh-output report (576aea..., zero errors/one expected warning), preserving report contents. No historical checkpoint report remains in the curated validation set.
+
+---
+
+author: root
+created: 2026-11-04T07:14:00Z
+
+---
+
+Root accepts this as a durable technical-review checkpoint only. Independently inspected final rock/source front+oblique offline renders: baked material survives export, but rounded faceted pebble is unsuitable final live rock. Corrected high count7680 loop triangles and actual Cycles seed7319 are now reproducible; contract inspection passes. Independently parsed fresh coral576aea21 export:13340472B,30000triangles,43124POSITIONvertices, NORMAL/POSITION/TEXCOORD0 and normalTexture present. Reference6f90 and rock995964 unchanged. Full typecheck and isolated two-entry proof build pass; all three review GLBs emit byte-identically to curated originals. Default curated /pipeline-study.html is authoritative; ?review=local remains historical/temporary opt-in. Browser host remains unavailable and native Chrome has no controllable window, so 1440x900/402x874 Three review and portability/appearance remain unverified. No AC checked or Done; no main asset/scene promotion or deployment. AQ14.3 plan now explicitly starts after this gate and retains rejected scan cleanup only as history.
+
+---
+
+author: root
+created: 2026-11-04T07:16:00Z
+
+---
+
+Final storage handoff synchronized by root after the worker CLI append hit a shell parse error: the fresh direct script export supersedes the older 30b1 checkpoint re-export. Curated output SHA-256 is 576aea21f0f2e8d191f6c5e1d572e9a1e5d82de87188dd4d6224403ac7519be7, 13,340,472 bytes, 30,000 triangles and 43,124 exported vertices. One full fresh bake succeeded using the directly reproduced 6f90 smooth LOD; this is not a repeated fresh-bake byte-determinism claim. Embedded base-color and baked-normal payloads match the earlier proof exactly; actual fresh Khronos report has zero errors and one generated-tangent-space warning. The bundled reference and fresh reports match their actual GLBs. Durable commands, measurements and limits are in docs/asset-pipeline-proof.md. Browser review remains pending; all workers have stopped writing and no acceptance criterion or task status was changed.
+
+---
+
+author: root
+created: 2026-11-04T07:18:00Z
+
+---
+
+Root clean-source verification passed: exported the exact staged Git tree into an isolated directory and built the proof using only archived source plus the existing installed dependencies. Both HTML entries and all three curated GLBs emitted; each emitted GLB is byte-identical to its archived source. No untracked prototype, external source model or /tmp review specimen was needed. This verifies bundling, not browser rendering. Typecheck passed separately. Commit remains a pending-browser-review technical checkpoint; no deployment.
 
 ---
 <!-- COMMENTS:END -->

@@ -30,11 +30,11 @@ npx vite --config src/rendering/proof/vite.config.js
 
 Open one of these pages; select a different engine from the page menu or change the query parameter:
 
-- `http://127.0.0.1:5188/engine-study.html?engine=three`
-- `http://127.0.0.1:5188/engine-study.html?engine=babylon`
-- `http://127.0.0.1:5188/engine-study.html?engine=playcanvas`
+- `http://127.0.0.1:5189/engine-study.html?engine=three`
+- `http://127.0.0.1:5189/engine-study.html?engine=babylon`
+- `http://127.0.0.1:5189/engine-study.html?engine=playcanvas`
 
-The isolated Vite config explicitly builds `engine-study.html`; it excludes the older `index.html` and prototype entry pages. The fixture needs only the checked-in files `candidate-real-clown.glb`, `candidate-real-tang.glb`, and `candidate-reef.glb`. The engine loader uses build-aware asset URLs so dev and production builds load the same files.
+The isolated Vite config builds both `engine-study.html` and `pipeline-study.html`; it excludes the older `index.html` and prototype entry pages. The engine comparison continues to load `candidate-real-clown.glb`, `candidate-real-tang.glb`, and `candidate-reef.glb`. The separate pipeline page loads the three curated technical review specimens; its purpose, assets, and limits are documented in [the AQ-40 asset pipeline proof](asset-pipeline-proof.md). The engine loader uses build-aware asset URLs so dev and production builds load the same files.
 
 To build the standalone production fixture:
 

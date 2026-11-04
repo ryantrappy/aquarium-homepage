@@ -1,0 +1,148 @@
+{
+  "validator": "2.0.0-dev.3.10",
+  "reports": [
+    {
+      "file": "/tmp/aq40-pipeline-review/staghorn-unbaked-lod.glb",
+      "sha256": "6f90a78ddf5df726f9fd466df4e709eb3eca6780fde2c0a5891f1560263eaec2",
+      "report": {
+        "uri": "/tmp/aq40-pipeline-review/staghorn-unbaked-lod.glb",
+        "mimeType": "model/gltf-binary",
+        "validatorVersion": "2.0.0-dev.3.10",
+        "validatedAt": "2026-11-04T06:55:27.709Z",
+        "issues": {
+          "numErrors": 0,
+          "numWarnings": 0,
+          "numInfos": 0,
+          "numHints": 0,
+          "messages": [],
+          "truncated": false
+        },
+        "info": {
+          "version": "2.0",
+          "generator": "Khronos glTF Blender I/O v5.0.21",
+          "resources": [
+            {
+              "pointer": "/buffers/0",
+              "mimeType": "application/gltf-buffer",
+              "storage": "glb",
+              "byteLength": 13255280
+            },
+            {
+              "pointer": "/images/0",
+              "mimeType": "image/png",
+              "storage": "buffer-view",
+              "image": {
+                "width": 2048,
+                "height": 2048,
+                "format": "rgb",
+                "primaries": "srgb",
+                "transfer": "srgb",
+                "bits": 8
+              }
+            },
+            {
+              "pointer": "/images/1",
+              "mimeType": "image/png",
+              "storage": "buffer-view",
+              "image": {
+                "width": 2048,
+                "height": 2048,
+                "format": "rgb",
+                "primaries": "srgb",
+                "transfer": "srgb",
+                "bits": 8
+              }
+            }
+          ],
+          "animationCount": 0,
+          "materialCount": 1,
+          "hasMorphTargets": false,
+          "hasSkins": false,
+          "hasTextures": true,
+          "hasDefaultScene": true,
+          "drawCallCount": 1,
+          "totalVertexCount": 43122,
+          "totalTriangleCount": 30000,
+          "maxUVs": 1,
+          "maxInfluences": 0,
+          "maxAttributes": 4
+        }
+      }
+    },
+    {
+      "file": "/tmp/aq40-final-staghorn-rebuild-20261104/staghorn-normal-baked-no-tangents.glb",
+      "sha256": "576aea21f0f2e8d191f6c5e1d572e9a1e5d82de87188dd4d6224403ac7519be7",
+      "report": {
+        "uri": "/tmp/aq40-final-staghorn-rebuild-20261104/staghorn-normal-baked-no-tangents.glb",
+        "mimeType": "model/gltf-binary",
+        "validatorVersion": "2.0.0-dev.3.10",
+        "validatedAt": "2026-11-04T07:08:01.197Z",
+        "issues": {
+          "numErrors": 0,
+          "numWarnings": 1,
+          "numInfos": 0,
+          "numHints": 0,
+          "messages": [
+            {
+              "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+              "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+              "severity": 1,
+              "pointer": "/meshes/0/primitives/0/material"
+            }
+          ],
+          "truncated": false
+        },
+        "info": {
+          "version": "2.0",
+          "generator": "Khronos glTF Blender I/O v5.0.21",
+          "resources": [
+            {
+              "pointer": "/buffers/0",
+              "mimeType": "application/gltf-buffer",
+              "storage": "glb",
+              "byteLength": 13338868
+            },
+            {
+              "pointer": "/images/0",
+              "mimeType": "image/png",
+              "storage": "buffer-view",
+              "image": {
+                "width": 2048,
+                "height": 2048,
+                "format": "rgb",
+                "primaries": "srgb",
+                "transfer": "srgb",
+                "bits": 8
+              }
+            },
+            {
+              "pointer": "/images/1",
+              "mimeType": "image/png",
+              "storage": "buffer-view",
+              "image": {
+                "width": 2048,
+                "height": 2048,
+                "format": "rgb",
+                "primaries": "srgb",
+                "transfer": "srgb",
+                "bits": 8
+              }
+            }
+          ],
+          "animationCount": 0,
+          "materialCount": 1,
+          "hasMorphTargets": false,
+          "hasSkins": false,
+          "hasTextures": true,
+          "hasDefaultScene": true,
+          "drawCallCount": 1,
+          "totalVertexCount": 43124,
+          "totalTriangleCount": 30000,
+          "maxUVs": 1,
+          "maxInfluences": 0,
+          "maxAttributes": 3
+        }
+      }
+    }
+  ]
+}

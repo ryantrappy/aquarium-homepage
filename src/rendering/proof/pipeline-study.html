@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AQ40 material pipeline review</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; height: 100dvh; display: grid; grid-template-rows: auto 1fr; color: #eaf1f5; background: #17212a; font: 14px system-ui; }
+    header { padding: 10px 14px; max-height: 31dvh; overflow: auto; background: #101820; }
+    h1 { font-size: 16px; margin: 0 0 6px; } a { color: #9be5f4; display: inline-flex; align-items: center; min-height: 44px; margin-right: 12px; }
+    a[hidden] { display: none; }
+    p { margin: 5px 0; } button, select { min-height: 44px; font: inherit; padding: 7px 10px; }
+    button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid #73d9ef; outline-offset: 2px; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+    label { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; }
+    main { position: relative; min-height: 0; }
+    canvas { width: 100%; height: 100%; display: block; }
+    .caption { position: absolute; top: 9px; left: 9px; max-width: calc(50% - 18px); padding: 5px 8px; background: #101820da; pointer-events: none; }
+    #right-label { left: calc(50% + 9px); }
+    #map-details { white-space: pre-wrap; font: 12px ui-monospace, monospace; }
+    #status.error { color: #ffb5a7; }
+    @media (max-width: 599px) {
+      body { font-size: 12px; } header { padding: 8px; }
+      h1 { font-size: 14px; }.controls { gap: 2px 7px; }
+      .caption { max-width: calc(100% - 18px); } #right-label { left: 9px; top: calc(50% + 9px); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>AQ40 — isolated material/export review</h1>
+    <div class="controls">
+      <label>Specimen <select id="specimen" disabled></select></label>
+      <button id="pause" type="button">Pause light sweep</button>
+      <button id="front" type="button">Front</button>
+      <button id="oblique" type="button">Oblique</button>
+      <label><input id="normal" type="checkbox" checked> Baked normal</label>
+      <label><input id="ao" type="checkbox" checked> Baked AO</label>
+    </div>
+    <p id="status" role="status">Loading technical review specimens · browser QA pending · not final aquarium art.</p>
+    <details><summary>Map bindings and review limits</summary><p id="notes">Matched camera, neutral lights and exposure; unit declarations are checked separately. This is not the aquarium or proof of final biological realism.</p><a id="notices" target="_blank" rel="noreferrer">Asset notices</a><a id="provenance" target="_blank" rel="noreferrer" hidden>Provenance</a><a id="validation" target="_blank" rel="noreferrer" hidden>Validator reports</a><div id="map-details"></div></details>
+  </header>
+  <main id="viewport">
+    <canvas id="view" aria-label="Two matched Three.js specimen views"></canvas>
+    <div id="left-label" class="caption">Reference</div><div id="right-label" class="caption">Baked</div>
+  </main>
+  <script type="module" src="./pipeline-study.ts"></script>
+</body>
+</html>

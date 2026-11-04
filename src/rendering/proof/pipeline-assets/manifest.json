@@ -1,0 +1,20 @@
+{
+  "schema": "aq40-pipeline-review-v1",
+  "specimens": [
+    {
+      "id": "original-rock",
+      "label": "Original porous-rock material bake",
+      "baked": "original-rock-bake.glb",
+      "notes": "Original deterministic rock bake proof: base color plus packed AO/roughness/metallic. No normal map. Left is a texture-map-free control of the same low mesh, not the procedural high source. Not final live-rock art. Root browser QA pending."
+    },
+    {
+      "id": "staghorn-normal",
+      "label": "Staghorn normal-map pipeline proof",
+      "baked": "staghorn-normal-baked.glb",
+      "reference": "staghorn-unbaked-lod.glb",
+      "referenceLabel": "Matching LOD with source normal map",
+      "reviewScale": 0.2556040430654893,
+      "notes": "Supplementary normal-bake proof only. Reference retains its source normalTexture and exported tangents; baked side replaces the normalTexture and derives tangent space from UVs. This is not a no-normal reference or a high-source geometry comparison. Both use identical REVIEW-only design scaling to 0.25 m longest dimension; source physical size unverified, not asset-contract validated. Generated-tangent-space portability warning retained. Full coral masks/art fidelity remain AQ42; browser QA pending."
+    }
+  ]
+}

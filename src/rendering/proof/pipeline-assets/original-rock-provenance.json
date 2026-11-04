@@ -1,0 +1,223 @@
+{
+  "generator": "build-original-rock-bake.py",
+  "generatorSha256": "39036ed42bd7968985f21399f1e15b8516a17e4b72c8d0b381b7168e5fa3e636",
+  "seed": 7319,
+  "cyclesSettings": {
+    "seed": 7319,
+    "animatedSeed": false,
+    "samples": 16
+  },
+  "blenderVersion": "5.0.1",
+  "sourceBlend": "/tmp/aq40-final-repro-20261104/original-rock-source.blend",
+  "sourceBlendBytes": 1637346,
+  "sourceBlendSha256": "aa7f3d4689fc0ed66475402641eab9a0ba895de683c2279359c4433571bad18f",
+  "outputGlb": "/tmp/aq40-final-repro-20261104/original-rock-bake.glb",
+  "outputBytes": 1295952,
+  "outputSha256": "9959640beeae110ade6dca6a858ca87c568c62458139592ebeee342d1f1936b9",
+  "highSourceTriangles": 7680,
+  "highSourcePolygons": 3840,
+  "lowTargetTriangles": 320,
+  "lowTargetPolygons": 320,
+  "glbTriangles": 320,
+  "boundsM": {
+    "min": [
+      -0.193154,
+      -0.116562,
+      -0.150049
+    ],
+    "max": [
+      0.215646,
+      0.127102,
+      0.149794
+    ]
+  },
+  "rootTransform": {
+    "translation": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "rootExtras": {
+    "reefAsset": {
+      "schema": "reef-asset-v1",
+      "id": "original-rock-bake-probe",
+      "kind": "rock",
+      "units": "meter",
+      "upAxis": "+Y",
+      "origin": "local",
+      "dimensionsM": [
+        0.4087999761104584,
+        0.24366410076618195,
+        0.29984310269355774
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "39036ed42bd7968985f21399f1e15b8516a17e4b72c8d0b381b7168e5fa3e636",
+        "recipe": "Blender 5.0.1; build-original-rock-bake.py; Cycles seed=7319, animated seed=false, samples=16; measured dimensionsM=[0.4087999761104584, 0.24366410076618195, 0.29984310269355774]; low=Icosphere-3 (320 triangles); high=low+Subdivision-2+Clouds-Displace-0.006 (7680 triangles); bake=1024px DIFFUSE-color/EMIT-roughness/AO; glTF GLB Y-up exporter once",
+        "attribution": "Original project test geometry and baked PBR materials; no imported source art."
+      }
+    },
+    "reefPrimitive": {
+      "id": "porous-rock",
+      "role": "rock"
+    }
+  },
+  "primitiveExtras": {
+    "id": "porous-rock",
+    "role": "rock"
+  },
+  "inspectionRecord": {
+    "extras": {
+      "reefAsset": {
+        "schema": "reef-asset-v1",
+        "id": "original-rock-bake-probe",
+        "kind": "rock",
+        "units": "meter",
+        "upAxis": "+Y",
+        "origin": "local",
+        "dimensionsM": [
+          0.4087999761104584,
+          0.24366410076618195,
+          0.29984310269355774
+        ],
+        "provenance": {
+          "license": "original",
+          "creator": "Aquarium project",
+          "sourceSha256": "39036ed42bd7968985f21399f1e15b8516a17e4b72c8d0b381b7168e5fa3e636",
+          "recipe": "Blender 5.0.1; build-original-rock-bake.py; Cycles seed=7319, animated seed=false, samples=16; measured dimensionsM=[0.4087999761104584, 0.24366410076618195, 0.29984310269355774]; low=Icosphere-3 (320 triangles); high=low+Subdivision-2+Clouds-Displace-0.006 (7680 triangles); bake=1024px DIFFUSE-color/EMIT-roughness/AO; glTF GLB Y-up exporter once",
+          "attribution": "Original project test geometry and baked PBR materials; no imported source art."
+        }
+      }
+    },
+    "rootTransform": {
+      "translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "boundsM": {
+      "min": [
+        -0.193154,
+        -0.116562,
+        -0.150049
+      ],
+      "max": [
+        0.215646,
+        0.127102,
+        0.149794
+      ]
+    },
+    "primitives": [
+      {
+        "id": "porous-rock",
+        "role": "rock",
+        "vertexCount": 281,
+        "boundsM": {
+          "min": [
+            -0.193154,
+            -0.116562,
+            -0.150049
+          ],
+          "max": [
+            0.215646,
+            0.127102,
+            0.149794
+          ]
+        },
+        "material": {
+          "vertexColors": false,
+          "vertexAlpha": false,
+          "aoSource": "texture"
+        }
+      }
+    ],
+    "sockets": [],
+    "collisionParts": []
+  },
+  "textureChannels": {
+    "occlusionTexture": "R",
+    "metallicRoughnessTexture": {
+      "roughness": "G",
+      "metallic": "B"
+    },
+    "metallicFactor": 0
+  },
+  "materialMaps": {
+    "baseColor": {
+      "textureIndex": 1,
+      "imageIndex": 1,
+      "imageName": "rock_baseColor_1k",
+      "uri": null,
+      "mimeType": "image/png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "byteLength": 753273,
+      "texCoord": 0
+    },
+    "roughnessMetallic": {
+      "textureIndex": 0,
+      "imageIndex": 0,
+      "imageName": "rock_occlusion_1k-rock_roughness_1k",
+      "uri": null,
+      "mimeType": "image/png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "byteLength": 529229,
+      "texCoord": 0
+    },
+    "occlusion": {
+      "textureIndex": 0,
+      "imageIndex": 0,
+      "imageName": "rock_occlusion_1k-rock_roughness_1k",
+      "uri": null,
+      "mimeType": "image/png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "byteLength": 529229,
+      "texCoord": 0
+    }
+  },
+  "mapRoles": {
+    "baseColor": "Cycles DIFFUSE bake, color pass only; procedural original aragonite ramp",
+    "roughness": "Cycles EMIT bake of procedural scalar roughness field; Non-Color data",
+    "occlusion": "Cycles AO bake in Non-Color; glTF exporter packs AO into ORM image R, roughness in G, metallic in B"
+  },
+  "sockets": [],
+  "collisionParts": [],
+  "limitations": [
+    "Original procedural specimen demonstrates a bounded bake/export path, not finished live-rock art.",
+    "AO is exported as glTF occlusionTexture in the packed ORM image red channel; the specimen has no coral COLOR_0 mask.",
+    "No tangent-space normal texture is included in this specimen; the licensed Staghorn normal reprojection is a separate proof."
+  ]
+}
