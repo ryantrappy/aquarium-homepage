@@ -6,11 +6,12 @@ assignee:
   - '@gemini'
   - '@root'
 created_date: '2026-11-03 12:34'
-updated_date: '2026-11-04 19:01'
+updated_date: '2026-11-04 19:05'
 labels: []
 dependencies:
-  - AQ-40
   - AQ-14.3
+  - AQ-40
+  - AQ-53
 references:
   - docs/gemini_planning.md
   - docs/reef_aquarium_all_code.md
@@ -41,11 +42,11 @@ The reference distinguishes hard branching SPS structure from soft LPS tissue an
 ## Implementation Plan
 
 <!-- SECTION:PLAN:BEGIN -->
-1. Gemini, managed by the user, owns model creation, asset metadata and packaging. Codex consumes the supplied src/rendering assets and never edits or generates models. Historical PixForge bake studies remain research only.
-2. Codex performs read-only exact-export preflight and records current hash-pinned constraints: mask encoding, primitive roles, transforms and PBR/AO slots. Send findings through Backlog for the user-managed modeling workflow.
-3. After the foundation readiness gate, implement the Three.js raw-mask adapter against the supplied export: keep COLOR_0 separate from display color/opacity, agree raw versus authored flexibility weighting to avoid applying the exponent twice, and bind contact AO explicitly.
-4. Add shared flow-driven soft-tissue motion with stable rigid skeletons, bounded time, pause and reduced-motion behavior. Keep all asset bytes unchanged.
-5. Root verifies actual appearance, occlusion and responsive performance at 1440x900 and 402x874 before completion or AQ14.4 scene promotion.
+1. Prefer user-managed Gemini for visual modeling and consume supplied src/rendering assets. Codex may make necessary functional changes while preserving visual design and avoiding concurrent edits. Route model issues through modeling-tagged tasks.
+2. AQ53 routes flexibility-mask encoding alignment to Gemini. Codex validates current exact exports and binds the documented encoding without applying the exponent twice.
+3. After the foundation readiness gate, implement the Three.js raw-mask adapter with COLOR_0 separate from display color/opacity and explicit contact AO.
+4. Integrate shared flow-driven tissue motion with stable rigid skeletons, bounded time, pause and reduced-motion behavior.
+5. Root verifies actual appearance, occlusion and responsive performance at 1440x900 and 402x874 before completion or scene promotion.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -169,5 +170,11 @@ author: @focus_review
 created: 2026-11-04 19:00
 ---
 Read-only preflight (2026-11-04; dependency AQ-14.3 still In Progress; no AC/status/integration change): inspected all eight supplied coral GLBs, manifests/inspection records, raw COLOR_0 accessors and generators. GLB byte lengths/SHA-256 match manifest for all eight; generator SHA matches local generator and in-band sourceSha256; reported identity root transform, meter/+Y metadata and primitive role extras are present. COLOR_0 is normalized U16 VEC4 and count matches POSITION on every primitive; decoded masks are in [0,1], rigid R is 0, brain R max is 0.04518 (quantized). Concrete contract gap: torch, hammer and anemone crown generators store h^1.8 in R, although the contract requires raw flexibility height and runtime applies pow(R,1.8) once; these three would be exponentiated twice by that adapter. Modeling ownership stays with Gemini; this is a preflight finding, no asset/generator edits requested here. PBR baseColor/normal/MR slots are embedded (512px images); *_orm is wired as metallicRoughnessTexture but materials do not declare occlusionTexture, so its AO channel is not exposed to standard glTF consumers. COLOR_0 A remains the contract AO path but requires the custom raw-mask shader/vertex-color bypass before rendering. Khronos validator was unavailable on PATH or in local node modules, so I did not claim Khronos validation. No visual/art or scene acceptance; use only after AQ-14.3 foundation gate and later selected-Three review.
+---
+
+author: root
+created: 2026-11-04 19:05
+---
+Latest user policy permits necessary functional model/pipeline edits by Codex while Gemini handles visual modeling. AQ53 is the new modeling-tagged task assigned @gemini for the identified flexibility-encoding mismatch. Existing AO-slot findings remain a renderer integration constraint; no unsupported claim that a model change is required.
 ---
 <!-- COMMENTS:END -->
