@@ -8,6 +8,7 @@ import reefHabitat from './reef-habitat.json'
 import { createSwimmingFish, seedForId, startleFish, stepSwimmingFish, type SwimmingFish, type WaterHabitat } from './motion'
 import { consumeFrameSteps, createFrameClock, SIMULATION_STEP_SECONDS, suspendFrameClock } from './clock'
 import { nearestVisibleIntersection, readArtworkAlpha, type SpriteMasks } from './alpha-picking'
+import { applyFishLinkVisibility } from './fish-link-focus'
 
 const modelUrls: Record<string, string> = {
   'ocellaris-clownfish': new URL('../proof/candidate-real-clown.glb', import.meta.url).href,
@@ -33,7 +34,7 @@ function disposeTree(root: THREE.Object3D) {
   textures.forEach(value => { value.dispose(); if (typeof ImageBitmap !== 'undefined' && value.source.data instanceof ImageBitmap) value.source.data.close() })
 }
 
-export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, initialServices: ServiceConfig[], initialPaused: boolean, status: (status: SceneStatus) => void): AquariumController {
+export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, initialServices: ServiceConfig[], initialPaused: boolean, status: (status: SceneStatus) => void, focusFallback: () => HTMLElement | null = () => null): AquariumController {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' })
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5)); renderer.outputColorSpace = THREE.SRGBColorSpace
   const scene = new THREE.Scene(); scene.background = new THREE.Color('#155c73'); scene.fog = new THREE.Fog('#155c73', 15, 32)
@@ -71,14 +72,9 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
     }
     item.visible = visible
     if (item.anchor) {
-      // Keep the transparent body target available for tiny exposed portions;
-      // exact pointer picking rejects covered areas and resolves overlapping
-      // DOM rectangles to the actually visible fish. Hide only the label/tab.
-      item.anchor.style.visibility = 'visible'; item.anchor.tabIndex = visible ? 0 : -1
-      item.anchor.dataset.occluded = String(!visible)
-      item.anchor.setAttribute('aria-hidden', String(!visible))
-      const label = item.anchor.querySelector<HTMLElement>('.fish-name')
-      if (label) label.style.visibility = visible ? 'visible' : 'hidden'
+      // A retained focused label is still an exposed native control even if
+      // its mesh is covered. Pointer bodies keep using nearest() separately.
+      return applyFishLinkVisibility(item.anchor, visible, focusFallback())
     }
     return visible
   }
@@ -142,13 +138,16 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   function positionLabels(force = false) {
     for (const item of fish) {
       const anchor = item.anchor; if (!anchor) continue
+      // Resolve focused exposure before moving its DOM target. If no control
+      // can receive focus, keep its last visible label position for now.
+      if (force || anchor.contains(document.activeElement)) updateVisibility(item)
+      if (!item.visible && anchor.contains(document.activeElement)) continue
       projected.copy(item.root.position).project(camera)
       const x = (projected.x + 1) * width / 2, y = (1 - projected.y) * height / 2
       const pixels = height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * (camera.position.z - item.root.position.z))
       const linkWidth = Math.max(44, pixels * 1.1), linkHeight = Math.max(44, pixels * .78)
       anchor.style.transform = `translate3d(${x - linkWidth / 2}px,${y - linkHeight / 2}px,0)`; anchor.style.width = `${linkWidth}px`; anchor.style.height = `${linkHeight}px`
       anchor.style.zIndex = String(Math.round((item.root.position.z + 10) * 100))
-      if (force) updateVisibility(item)
     }
   }
   function render(steps: number, forceLabels = false) {
@@ -164,8 +163,9 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
       if (item.fallback) { item.root.rotation.set(0, 0, 0); item.root.scale.x = Math.sin(pose.yaw) < 0 ? -1 : 1 }
       else { item.root.rotation.set(pose.pitch, pose.yaw, pose.bank, 'YXZ') }
     }
-    scene.updateMatrixWorld(true); renderer.render(scene, camera)
+    scene.updateMatrixWorld(true)
     labelClock += steps * SIMULATION_STEP_SECONDS; positionLabels(forceLabels || labelClock > .24); if (labelClock > .24) labelClock = 0
+    renderer.render(scene, camera)
   }
   function tick(now: number) { const steps = consumeFrameSteps(clock, now); if (steps) render(steps) }
   function syncLoop() {

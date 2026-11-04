@@ -1,22 +1,22 @@
-import { useEffect, useRef, useState, type MouseEvent } from 'react'
+import { useEffect, useRef, useState, type MouseEvent, type RefObject } from 'react'
 import type { ServiceConfig } from '../lib/services'
 import { getFishById } from '../lib/fish'
 import { FishFigure } from './FishFigure'
 import type { AquariumController, SceneStatus } from '../rendering/scene/aquarium'
 
-type AquariumSceneProps = { services: ServiceConfig[]; paused: boolean }
+type AquariumSceneProps = { services: ServiceConfig[]; paused: boolean; focusFallbackRef?: RefObject<HTMLElement | null> }
 
-export function AquariumScene({ services, paused }: AquariumSceneProps) {
+export function AquariumScene({ services, paused, focusFallbackRef }: AquariumSceneProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null), overlayRef = useRef<HTMLDivElement>(null)
   const controller = useRef<AquariumController | undefined>(undefined)
-  const current = useRef({ services, paused }); current.current = { services, paused }
+  const current = useRef({ services, paused, focusFallbackRef }); current.current = { services, paused, focusFallbackRef }
   const [status, setStatus] = useState<SceneStatus>('loading')
   const acknowledgments = useRef(new Set<ReturnType<typeof setTimeout>>())
   useEffect(() => {
     let cancelled = false
     void import('../rendering/scene/aquarium').then(({ createAquarium }) => {
       if (cancelled || !canvasRef.current || !overlayRef.current) return
-      controller.current = createAquarium(canvasRef.current, overlayRef.current, current.current.services, current.current.paused, value => { if (!cancelled) setStatus(value) })
+      controller.current = createAquarium(canvasRef.current, overlayRef.current, current.current.services, current.current.paused, value => { if (!cancelled) setStatus(value) }, () => current.current.focusFallbackRef?.current ?? null)
     }).catch(error => { console.error('Aquarium renderer unavailable', error); if (!cancelled) setStatus('failed') })
     return () => { cancelled = true; controller.current?.dispose(); controller.current = undefined; acknowledgments.current.forEach(clearTimeout); acknowledgments.current.clear() }
   }, [])

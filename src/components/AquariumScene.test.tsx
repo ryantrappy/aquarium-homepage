@@ -5,11 +5,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AquariumScene } from './AquariumScene'
 import type { ServiceConfig } from '../lib/services'
 import type { Window as HappyWindow } from 'happy-dom'
+import { applyFishLinkVisibility } from '../rendering/scene/fish-link-focus'
 
 const mock = vi.hoisted(() => ({
   update: vi.fn(), activate: vi.fn(), serviceAt: vi.fn<(x: number, y: number) => string | undefined>(), canActivate: vi.fn(() => true), dispose: vi.fn(),
 }))
-vi.mock('../rendering/scene/aquarium', () => ({ createAquarium: (_canvas: unknown, _overlay: unknown, _services: unknown, _paused: unknown, status: (value: string) => void) => { status('ready'); return mock } }))
+const focusHandoff = vi.hoisted(() => ({ get: undefined as (() => HTMLElement | null) | undefined }))
+vi.mock('../rendering/scene/aquarium', () => ({ createAquarium: (_canvas: unknown, _overlay: unknown, _services: unknown, _paused: unknown, status: (value: string) => void, fallback: () => HTMLElement | null) => { focusHandoff.get = fallback; status('ready'); return mock } }))
 const services: ServiceConfig[] = [
   { id: 'clown', fishId: 'ocellaris-clownfish', name: 'Home', url: 'https://home.example.test', isExample: false },
   { id: 'tang', fishId: 'yellow-tang', name: 'Photos', url: 'https://photos.example.test', isExample: false },
@@ -32,6 +34,32 @@ function pointerClick(target: Element, button = 0) {
   target.dispatchEvent(event); return event
 }
 describe('native fish links with geometry picking', () => {
+  it('resolves the current real Services control for a renderer focus handoff', async () => {
+    const getFallback = focusHandoff.get!
+    expect(getFallback()).toBeNull()
+    const servicesControl = document.createElement('button'); servicesControl.textContent = 'Services'; document.body.append(servicesControl)
+    try {
+      const ref = { current: servicesControl }
+      await act(async () => { root.render(<AquariumScene services={services} paused focusFallbackRef={ref} />) })
+      expect(getFallback()).toBe(servicesControl)
+      anchor('clown').focus()
+      applyFishLinkVisibility(anchor('clown'), false, getFallback())
+      expect(document.activeElement).toBe(servicesControl)
+      expect(anchor('clown').getAttribute('aria-hidden')).toBe('true')
+    } finally { servicesControl.remove() }
+  })
+  it('keeps a retained focused label keyboard-activatable when no fallback can receive focus', async () => {
+    anchor('clown').focus()
+    mock.canActivate.mockImplementation(() => applyFishLinkVisibility(anchor('clown'), false, null))
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true, detail: 0 })
+    await act(async () => { anchor('clown').dispatchEvent(event) })
+    expect(event.defaultPrevented).toBe(false)
+    expect(document.activeElement).toBe(anchor('clown'))
+    expect(anchor('clown').getAttribute('aria-hidden')).toBe('false')
+    expect(mock.activate).toHaveBeenCalledExactlyOnceWith('clown')
+    expect(anchor('clown').href).toBe(services[0].url + '/')
+    expect(anchor('clown').target).toBe('_blank')
+  })
   it('retains the visible fish URL and native default action when DOM rectangles overlap', async () => {
     mock.serviceAt.mockReturnValue('tang')
     let event!: MouseEvent, hrefAtDefault = ''
