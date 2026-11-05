@@ -12,8 +12,8 @@ Downstream: docs/README.md
 -->
 
 > [!WARNING]
-> **Archived Historical Draft**  
-> This document preserves earlier deployment planning and read-only discovery notes.  
+> **Archived Historical Draft**
+> This document preserves earlier deployment planning and read-only discovery notes.
 > The canonical and active operational runbook is located at: [`docs/deployment.md`](../deployment.md).
 
 ## Current deployment shape
