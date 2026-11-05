@@ -44,5 +44,16 @@
     "Finite interaction samples do not validate final fish appearance, lifelike gait or animated clearance.",
     "Browser source includes preserved concurrent supplied/splat model URL additions; these assets are excluded from this commit.",
     "Camera-plane edge cases are automated tests, not forced mutations of the live production scene."
+  ],
+  "captureCorrection": "Initial screenshot API returned clipped JPEGs despite .png filenames. Replaced with format-checked full-size PNG via CDP Page.captureScreenshot, exact clip scale1 and Emulation metric scale1. CSS/interaction evidence unchanged. New scene captures use reviewed isolated AQ66 production snapshot, excluding concurrent model URL promotions.",
+  "captureDimensions": [
+    [
+      1440,
+      900
+    ],
+    [
+      402,
+      874
+    ]
   ]
 }

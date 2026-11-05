@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@link-interaction'
 created_date: '2026-11-05 18:32'
-updated_date: '2026-11-05 21:04'
+updated_date: '2026-11-05 21:18'
 labels: []
 dependencies: []
 references:
@@ -47,6 +47,8 @@ Pointer picking on swimming fish frequently fails because DOM anchor position up
 2026-11-05 @link-interaction handoff: confirmed the claimed 240ms transform throttle is false in current source: positionLabels executes each render; only visibility raycasts are throttled. Added camera-space projection helper rejecting behind/on-camera, near/far-clipped and nonfinite coordinates before CSS mutation; invalid labels use existing AQ-50 focus handoff and retain last valid focused position when fallback cannot accept focus. Native overlap target href now persists without 0ms timer while a context menu may remain open, and each subsequent action resolves its own service afresh. Focused verification: AquariumScene, fish-link-projection, fish-link-focus and alpha-picking suites, 23 tests/4 files passed; typecheck passed. Unit/DOM evidence covers 30-second context href persistence, subsequent keyboard and pointer target reset, native default prevention behavior, middle click, exact alpha/occlusion and existing focus contracts. Root owns browser review for full interactive criterion acceptance; no AC/status completion claimed by this worker.
 
 2026-11-05 Root independent review:18 focused tests pass, isolated reviewed-source typecheck and production build pass. Native Chrome1440x900/402x874 scale1: all5 link transforms changed on every one of23 consecutive sampled frame intervals with finite >=44px bounds; sampled body clicks opened native tabs without lag misses, overlapping rectangles resolved the foreground service. Native delayed context Open Link opened Komodo; DOM overlap regression retains chosen URL for30seconds and re-resolves the following keyboard/pointer action. Phone pause stable12frames/resume moves, Settings fits/no horizontal overflow. Camera depth tests cover on/behind/near/far/nonfinite and rotated camera, existing AQ50 focus/keyboard contracts pass. Evidence and limits:docs/asset-evidence/aq63/review.json plus two screenshots. Preserved concurrent splat/model URL changes are excluded from this task commit. No final art/scene acceptance. Preexisting PCFSoftShadowMap warning persists; no captured errors.
+
+Root evidence correction2026-11-05: screenshot API returned clipped JPEG bytes despite .png filenames. Replaced both illustrative screenshots with validated PNG signature/IHDR1440x900 and402x874 exact scale1 CDP captures from the reviewed isolated AQ66 production snapshot. Original DOM viewport/frame measurements and interaction tests remain valid; art remains unaccepted. See captureCorrection in review.json.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
