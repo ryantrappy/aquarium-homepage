@@ -1,11 +1,11 @@
 ---
 id: AQ-37
 title: Investigate Mesh2Motion fish rigs and animation transfer
-status: In Progress
+status: Done
 assignee:
   - '@m2m-review'
 created_date: '2026-11-03T04:47:00Z'
-updated_date: '2026-11-05 13:09'
+updated_date: '2026-11-05 20:58'
 labels:
   - good-for-parallel-work
   - gemini-research
@@ -46,8 +46,8 @@ Investigate whether Mesh2Motion can improve the aquarium fish animation workflow
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Root agent reviews the completed work before the task is marked Done.
-- [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
+- [x] #1 Root agent reviews the completed work before the task is marked Done.
+- [x] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -59,6 +59,8 @@ Investigate whether Mesh2Motion can improve the aquarium fish animation workflow
 4. Write docs/mesh2motion-review.md with exact hashes, commands, licenses, the contrasting-shape assessment, current-versus-historical proof status, comparison to AQ-36/current profile-driven approach, recommendation and limitations. Leave production files untouched and task In Progress for Root review.
 
 Additional bounded validation: if the official browser app is reachable without any local build/server, copy the CC BY 4.0 candidate tang derivative to `/private/tmp/aq37-m2m-tang/input-tang.glb`, attempt a temporary Fish bind/preview there, and record the actual UI outcome. Do not submit/publish the asset or modify checked-in GLBs; if the browser flow cannot run in scope, retain the explicit no-tang-bind limitation.
+
+Root final review: reproduce pinned source/target inventory, correct unsupported quantitative and binding predictions, verify the roster comparison against current profiles, then finalize only the bounded research result using historical export/load evidence. Interactive tang binding remains an explicitly optional follow-up, not a successful proof.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -81,6 +83,8 @@ Offline source inspection only: Mesh2Motion app repository currently maps Fish t
 Root continuation2026-11-04: independently checked official site/licenses and opened liveapp git:b04ee333b-release (full b04ee333b18bc72780ab13f653f5deb7c440f5a0), distinct from pinned metadata-study revision. Currentofficial StepLoadModel source confirms FileReader.readAsDataURL thenGLTFLoader. Repeated supported waitForEvent(filechooser)/setFiles on licensed /private/tmp tang copy: Chrome denied file-URL access before submission; nativepicker fallback had no usablewindow. No file processed or extension permission changed. User informed of precise required browserextension setting; other backlogwork continues. Tangbind/turn evidence remains open; do not inferquality from0literalbone-name matches.
 
 2026-11-05 (@gemini): Completed quantitative contrasting-shape (yellow-tang disc vs. ocellaris-clownfish/royal-gramma fusiform) and 15-species retargetability assessment in docs/mesh2motion-review.md across all 8 local fish GLBs and Mesh2Motion WeightCalculator.ts. All 5 ACs are now supported by objective source/geometry evidence and ready for Root review.
+
+2026-11-05 Root final review and independent @link_interaction review reproduced the exact b6dc8faa source/target inventory (SHA72631572ab7792aa21cdcc6581333eb5ad06c73462cc705ad0b54d77d88adf33). Source licenses, 33-joint/99-channel rig and both target hashes match. Corrected unsupported extents and hypothetical bind/shearing assertions; all15 gait rows independently match current profiles. AC2 is a bounded contrasting-shape/retargetability assessment with explicit unknowns, not a successful tang bind. AC3 uses historical Root-observed CC0 clown export/load proof and preserves missing artifact limitation. Documentation relative links and scoped diff check pass; no runtime/asset edits.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
@@ -133,4 +137,16 @@ created: 2026-11-05 03:37
 ---
 Follow-up for Root: I attempted the official Mesh2Motion tang file chooser with the sample copied under `/private/tmp/aq37-m2m-tang/`. The app's pinned source reads selected files locally via `FileReader`, but Chrome blocked the chooser operation because the extension lacks file-URL access; I stopped without changing browser settings. AC2 remains unchecked because no tang bind or turn playback could be inspected. The docs now separate this blocked attempt from the source-level direct-retarget mismatch and historical clown proof.
 ---
+
+author: @root
+created: 2026-11-05 20:56
+---
+Root review found incorrect current tang/clown extents and untested assertions that a hypothetical Mesh2Motion bind shears specific fin vertices. Correct these to reproducible geometry and explicitly untested risks before finalization; direct-name mismatch alone cannot prove binding quality.
+---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Root and independent review accepted the bounded Mesh2Motion study: pinned source/licenses and reproducible rig/weight/geometry inventory, historical CC0 clown Three.js export/load proof, all15 current gait comparison, and selective-adaptation recommendation with explicit tang-binding and reproducibility limits. Corrected unsupported quantitative/deformation claims. No production model or workflow promotion.
+<!-- SECTION:FINAL_SUMMARY:END -->

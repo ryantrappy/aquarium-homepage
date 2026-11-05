@@ -19,7 +19,7 @@ Downstream: None
 > - **Backlog Reference**: `AQ-37`
 > - **Summary**: Feasibility review of Mesh2Motion automatic rig transfer, identifying bone hierarchy incompatibilities with 8-bone reef rigs and Chrome file-URL security sandbox blocks.
 
-**Status:** research result for Root review; this does not promote a model or change the production animation workflow.
+**Status:** Root-reviewed bounded research result; this does not promote a model or change the production animation workflow.
 
 ## Decision
 
@@ -91,18 +91,33 @@ This review did **not** execute Mesh2Motion's interactive bind/paint/export step
 
 One shark-derived Fish template cannot be treated as a validated common reef-fish rig. Current reference profiles include subcarangiform clown/gramma, rigid-disc labriform tangs, banner-hovering cardinalfish, benthic dragonet, burrow-associated fish, near-cover wrasses, and other distinct patterns. The specific trial covers only one stylized clown. It says nothing about independent dorsal/anal fin behavior, pectoral-driven labriform propulsion, hovering banners, benthic stop-start gait, or refuge turns across all 15. Per-species skeleton/clip mappings and profile-driven path/turn behavior remain necessary even if the app becomes a rig-authoring aid.
 
-### Quantitative contrasting-shape & 15-species retargetability matrix (AQ-37 AC #2)
+### Reproduced contrasting-shape assessment and roster limits
 
-An offline geometric and skin-weight comparison across all eight local fish GLBs (`candidate-real-tang.glb`, `candidate-real-clown.glb`, and the six supplied `src/rendering/assets/fish/fish-*.glb` assets) against Mesh2Motion's `WeightCalculator.ts` nearest-bone-midpoint algorithm and 33-joint `shark` skeleton establishes the exact structural limits across contrasting reef morphologies:
+Root reran the inventory on 2026-11-05 against the exact pinned checkout and unchanged target hashes above. The combined POSITION accessor bounds (all primitives) are tang `[0.389205, 1.257885, 1.985423]` and clown `[0.574294, 0.997380, 2.000000]`. Their height/length ratios are respectively `0.634` and `0.499`. These are exported local-space bounds, including fins; they are not measurements of body anatomy or a newly bound Mesh2Motion output. Earlier different extent values and assertions of specific dorsal/anal vertex assignments were unsupported and are withdrawn.
 
-1. **Laterally compressed disc vs. fusiform body deformation**:
-   - `candidate-real-tang.glb` (4,653 vertices, extents `[0.320, 1.448, 1.985]`, height-to-length ratio `0.729`, width-to-height ratio `0.221`) and `fish-yellow-tang.glb` (height-to-length `0.761`, width-to-height `0.203`) are tall, laterally compressed discs with continuous dorsal and anal sails spanning >70% of body height.
-   - Under Mesh2Motion's `WeightCalculator.ts` (which binds each vertex to the nearest bone midpoint without a dorsal/anal fin partition), vertices on the upper dorsal sail and lower anal sail lie closest to the axial `tail_1`–`tail_5` midpoints. When `Swim Horizontal` applies anguilliform/carangiform lateral yaw across the 8-segment tail chain, the entire dorsal and anal sail plane shears laterally instead of remaining a rigid disc propelled by pectoral rowing (`labriform_rigid_disc`).
-   - By contrast, fusiform subcarangiform swimmers (`candidate-real-clown.glb` height-to-length `0.485`; `fish-ocellaris-clownfish.glb` `0.473`; `fish-royal-gramma.glb` `0.365`) concentrate mass near the midline, where a progressive axial wave (`spine_1..spine_4/5`) is biomechanically appropriate.
-2. **15-species roster retargetability breakdown**:
-   - **Subcarangiform schoolers/station-keepers (6 species: `ocellaris-clownfish`, `royal-gramma`, `blue-green-chromis`, `lyretail-anthias`, `firefish`, `tailspot-blenny`)**: Compatible with a 5-to-6 bone axial chain plus `pectoral_L`/`pectoral_R`, provided anterior head/trunk yaw is damped and turn curvature is applied post-mixer (`src/rendering/scene/fish-turning.ts`).
-   - **Labriform rigid-disc & cruiser swimmers (5 species: `yellow-tang`, `blue-tang`, `six-line-wrasse`, `mccoskers-flasher-wrasse`, `flame-angelfish`, `copperband-butterflyfish`)**: Incompatible with full-body shark undulation; require anterior spine joints (`spine_0..spine_2`) locked against lateral shear during turns and primary propulsion driven by `pectoral_L`/`pectoral_R` rowing.
-   - **Banner hoverers & benthic dragonets/gobies (3 species: `banggai-cardinalfish`, `mandarin-dragonet`, `yellow-watchman-goby`)**: Incompatible with continuous shark swimming; require independent high-frequency pectoral flutter (`mandarin-dragonet`), motionless banner hold (`banggai-cardinalfish`), or benthic perching and backward burrow retreat (`yellow-watchman-goby`).
+The pinned `WeightCalculator.ts` computes nearest eligible bone-midpoint assignments, skipping root/leaf bones and applying a Human-specific positional exception. That establishes a generic assignment algorithm, not its result after fitting the Fish skeleton to either sample. A tall tang sail could receive unsuitable axial weights, but actual assignments and shearing remain untested risks. No source inspection can establish that a manual fit succeeds or fails without running that fit.
+
+The current 15 stable species profiles require the following distinct runtime staging. This mapping is read from `src/lib/fish-behavior.ts`, not inferred from the Mesh2Motion template or presented as biological validation:
+
+| Species | Current profile gait | Transfer question left for species authoring |
+| --- | --- | --- |
+| Ocellaris clownfish | fin-hover | Preserve restrained anterior body and independent fin control; historical default bind failed visible fin/tail quality. |
+| Yellow tang | pectoral-cruise | Fit the tall compressed body and keep pectoral propulsion independent of axial undulation. |
+| Royal gramma | fin-hover | Map short axial chain and independent station-keeping fins. |
+| Blue tang | pectoral-cruise | Preserve disc shape while supporting separate higher-effort body/caudal movement. |
+| Banggai cardinalfish | fin-hover | Preserve extended fin silhouette through hovering and turns. |
+| Blue-green chromis | school-hover | Keep local gait separate from independently controlled schooling paths. |
+| Firefish | sand-burrow-hover | Support restrained hovering and separately driven refuge darts. |
+| Yellow watchman goby | sand-burrow-hover | Support bottom-associated holds and refuge transitions. |
+| Mandarin dragonet | substrate-stop-start | Support stop-start movement and independent pectoral activity. |
+| Tailspot blenny | near-rock-darts | Support short near-cover movements without continuous shark travel. |
+| Six-line wrasse | sinuous-cover-search | Fit its own axial/fin motion while navigation searches cover. |
+| McCosker's flasher wrasse | reef-slope-patrol | Preserve distinct fin outline during patrols and maneuvers. |
+| Lyretail anthias | loose-group-cruise | Keep local gait independent of group/path state. |
+| Flame angelfish | compact-reef-orbit | Validate compressed-body and paired-fin behavior in compact turns. |
+| Copperband butterflyfish | crevice-inspection | Preserve extended snout/fin silhouette during controlled inspection turns. |
+
+The Fish template and horizontal clip supply joint handles and a cycle; they do not implement these profile states, paths, anchor choices or species-specific turns. Only the clown has an observed Mesh2Motion bind/export/load proof. For the remaining species, this is a scope/compatibility assessment with explicit unknowns, not a successful retarget or animation acceptance.
 
 ## Comparison with AQ-36 and the current approach
 
