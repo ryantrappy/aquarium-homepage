@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-05 03:13'
-updated_date: '2026-11-05 13:51'
+updated_date: '2026-11-05 21:39'
 labels:
   - modeling
 dependencies: []
@@ -64,6 +64,8 @@ Root-approved functional AQ59 texture-pipeline iteration. Before editing, snapsh
 Measured canonical dimensions left1.011278212 x.398000007 x.536800712m; right.966448754 x.347999996 x.511544228m. Both mesh query builds ready:24572triangles,12288exact-position-welded vertices,1closed component,8191BVHnodes; no degenerate/duplicate/open/nonmanifold/inconsistent edges or vertices detected. Independent Blender geometry review with1e-7m weld also finds0boundary/nonmanifoldedges. Neither check certifies exhaustive self-intersections. Actual packaged inspection collisionParts remain[]; no metadata installed. Fixed axis x0,y.08m,z[-.36,.36] mesh capsule radii.02/.04/.06m clear on left using defaults (.06=499nodevisits/804triangleTests); corresponding right paths block. Front-depth lane (-.56,.30,.24) to(.56,.30,.24),r.02 clears both. Blender left cave horizontal ray at y.08 shows1mm-grid interval[-.073,.074]m; independent121samples at5mmstep yield minsurfaceclearance.067689478m and conservativecontinuouslowerbound.065189478m. External sand excluded. These are fixed technical probes, not animated fish envelopes.
 Twelve exact1000x750 Cycles24sample renders exist at renders/{left,right}-{front,oblique,top,closeup,neutral-front,neutral-oblique}.png. Front/oblique/closeup include temporary review floor at exact exported minY=-.012m; source geometry unchanged. Copied render_root_review.py uses white inspection lights and exact imported PBR; neutral comparisons replace materials only in memory. Original view script/render logs retained. Existing Blender jobs checked before launch; both owned renders completed normally with exit0, no unknown process restart.
 Reviewer observation requiring Root visual decision: both current textured front/oblique images still show conspicuous vertical stretched/wavy gray-purple streaks and broad flat truncated platform/summit silhouettes; clay oblique confirms smooth steep-sided truncated masses. Useful real arch/ground contact retained, but technical passes do not establish natural porous carbonate/coralline art or satisfy AC1/AC3. Root must inspect the exact images; no visual acceptance/Done or AC changes made. No repository source/model/generator/packager/coral/renderer/inspection edits. Historical AQ58 fixture remains unchanged at77fd00de0c9cceacd0d1219b101b12793619e53eef5b16a8430acfee23991612.
+
+2026-11-05 Root gate refresh: runtime live-rock/coral shading and measured AO improvements are functional code reviews, not acceptance of rock silhouette/material art. Preserve supplied geometry, real arch and measured mounts. AQ59 stays open for a Gemini-authored model iteration addressing the previously reviewed flat summit/mesa and natural-surface criteria, with exact exported front/oblique evidence and current provenance/socket/clearance checks. Current scene screenshots in AQ63/66 are interaction illustrations, not final scene or candidate art approvals.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
