@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 import { BoxGeometry } from 'three'
 import { createSwimmingFish, distance, startleFish, stepSwimmingFish, type WaterHabitat } from './motion'
+import { instantiateModularReefHabitat } from './reef-assembly'
+import { fishClearanceRadius } from './fish-scale'
+import { findSafeFishSpawn } from './fish-spawn'
+import { EXAMPLE_SERVICES } from '../../lib/services'
 import { findWaterRoute, isWaterSegmentSafe } from '../../simulation/habitat-navigation'
 import { buildMeshCollider } from '../../simulation/mesh-collision'
 import { createMeshClearanceQuery } from '../../simulation/mesh-habitat'
@@ -114,6 +118,69 @@ describe('rendered fish travel adapter', () => {
     expect(route.length).toBeGreaterThan(2)
     for (let i = 1; i < route.length; i++) expect(isWaterSegmentSafe({ ...input, start: route[i - 1], target: route[i] })).toBe(true)
     expect(findWaterRoute({ ...input, start: { x: 0, y: -1, z: 0 } })).toBeUndefined()
+  })
+  it('backs off after failed narrow-tank target searches and retries after the wait', () => {
+    const narrowBounds = { min: { x: -1.05, y: -2.4, z: -3 }, max: { x: 1.05, y: 2.8, z: 2.8 } }
+    const blocked: WaterHabitat = {
+      bounds: narrowBounds,
+      obstacles: [{ id: 'wedged-rock', bounds: { min: { x: -.2, y: .8, z: .5 }, max: { x: .2, y: 1.8, z: 1.5 } } }],
+      anchors: [],
+    }
+    const fish = createSwimmingFish('narrow-backoff', 'blue-tang', { x: 0, y: 1.25, z: 1 }, .77)
+    stepSwimmingFish(fish, blocked, 1 / 60)
+    expect(fish.route).toEqual([])
+    expect(fish.targetWait).toBeGreaterThan(0.5)
+
+    const randomAfterFailure = fish.random
+    for (let frame = 0; frame < 20; frame++) stepSwimmingFish(fish, blocked, 1 / 60)
+    expect(fish.random).toBe(randomAfterFailure)
+    expect(fish.targetWait).toBeGreaterThan(0.2)
+
+    for (let frame = 0; frame < 30; frame++) stepSwimmingFish(fish, blocked, 1 / 60)
+    expect(fish.random).not.toBe(randomAfterFailure)
+    expect(fish.targetWait).toBeGreaterThan(0.5)
+  })
+  it('keeps an adult blue tang moving through the open upper lane at the 402px proxy width', () => {
+    const narrow: WaterHabitat = {
+      bounds: { min: { x: -1.05, y: -2.4, z: -3 }, max: { x: 1.05, y: 2.8, z: 2.8 } },
+      obstacles: [{ id: 'central-rock', bounds: { min: { x: -.35, y: -2.8, z: -3 }, max: { x: .35, y: .18, z: 2.8 } } }],
+      anchors: [],
+    }
+    const fish = createSwimmingFish('narrow-blue-tang', 'blue-tang', { x: 0, y: 1.45, z: 1.8 }, .77)
+    let traveled = 0
+    for (let frame = 0; frame < 1200; frame++) {
+      const before = { ...fish.position }
+      stepSwimmingFish(fish, narrow, 1 / 30)
+      expect(isWaterSegmentSafe({ start: before, target: fish.position, waterBounds: narrow.bounds, obstacles: narrow.obstacles, fishClearanceRadius: fish.clearance })).toBe(true)
+      traveled += distance(before, fish.position)
+    }
+    expect(traveled).toBeGreaterThan(1.5)
+    expect(fish.speed).toBeGreaterThan(0)
+  })
+  it('keeps all five configured services safe and moving in the exact 402px modular habitat', () => {
+    const aspect = 402 / 874
+    const halfWidth = (9 - 2.8) * Math.tan(21 * Math.PI / 180) * aspect * .96
+    const bounds = { min: { x: -halfWidth, y: -2.25, z: -4.6 }, max: { x: halfWidth, y: 2.8, z: 2.8 } }
+    const reef = instantiateModularReefHabitat('left', 3.4, { x: -.15, y: -2.70, z: -1.35 }, 'reef-0', .06)
+    const narrow: WaterHabitat = { bounds, obstacles: reef.obstacles, anchors: reef.anchors }
+
+    EXAMPLE_SERVICES.forEach((service, index) => {
+      const preferredX = [-.3, .3, 0][index % 3]
+      const preferredY = Math.max(.3, [1.25, .55, 1.95][index % 3] - Math.floor(index / 3) * .7)
+      const preferred = { x: preferredX, y: preferredY, z: 1.8 + (index % 2) * .2 }
+      const clearance = fishClearanceRadius(service.fishId)
+      const spawn = findSafeFishSpawn(preferred, bounds, reef.obstacles, clearance)
+      expect(spawn, `${service.name} must get a collision-safe mobile spawn`).toBeDefined()
+      const fish = createSwimmingFish(service.id, service.fishId, spawn!, clearance)
+      let traveled = 0
+      for (let frame = 0; frame < 1200; frame++) {
+        const before = { ...fish.position }
+        stepSwimmingFish(fish, narrow, 1 / 30)
+        expect(isWaterSegmentSafe({ start: before, target: fish.position, waterBounds: bounds, obstacles: reef.obstacles, fishClearanceRadius: clearance }), `${service.name} frame ${frame}`).toBe(true)
+        traveled += distance(before, fish.position)
+      }
+      expect(traveled, `${service.name} should keep navigating instead of wedging`).toBeGreaterThan(.5)
+    })
   })
   it('uses the exact 3D capsule query to route below an overhang and guards every movement segment', () => {
     const query = collisionQuery(), calls: Array<{ start: { x: number; y: number; z: number }; end: { x: number; y: number; z: number }; radius: number }> = []

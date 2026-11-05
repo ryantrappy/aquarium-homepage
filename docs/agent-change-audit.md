@@ -1,5 +1,24 @@
 # Parallel-agent change audit — 2026-11-04
 
+<!-- AGENT_DOC_METADATA
+Category: Evidence / Audit
+Status: Complete
+Authority: Evidentiary Audit Record
+Backlog: AQ-57
+Owner: @root
+Updated: 2026-11-05
+Upstream: AGENTS.md, AGENT_TASKS.md
+Downstream: None
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Multi-Agent Governance & Change Audit
+> - **Status**: Complete / Historical Audit
+> - **Authority**: Evidentiary Record
+> - **Backlog Reference**: `AQ-57`
+> - **Summary**: Formal Root audit reconciling concurrent agent modifications against reviewed commit `5031ca1`, cataloging quarantined code, reverted collision claims, and retained candidates.
+
 Root audit: AQ-57. Comparison baseline: `5031ca1` on `main`.
 
 The active scene, motion adapter/tests, habitat derivation/data and habitat build script already matched the reviewed baseline when this audit began. The experimental modular promotion, rock wallpaper/glow and procedural fin overlays had been reverted by the other workflow. Root confirmed that equality and kept the baseline; the rejected experiment was not restored. This is a working technical baseline, not a completed photorealistic aquarium.

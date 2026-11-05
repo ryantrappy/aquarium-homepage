@@ -7,13 +7,13 @@ import { createCpuTemperatureGetHandler, createCpuTemperatureHandlers } from './
 
 const roots: string[] = []
 
-async function makeSource() {
+async function makeSource({ chip = 'coretemp', label = 'Package id 0' }: { chip?: string; label?: string } = {}) {
   const rootPath = await mkdtemp(join(tmpdir(), 'reef-cpu-temperature-route-'))
   roots.push(rootPath)
   const hwmonPath = join(rootPath, 'hwmon', 'hwmon4')
   await mkdir(hwmonPath, { recursive: true })
-  await writeFile(join(hwmonPath, 'name'), 'coretemp\n')
-  await writeFile(join(hwmonPath, 'temp1_label'), 'Package id 0\n')
+  await writeFile(join(hwmonPath, 'name'), `${chip}\n`)
+  await writeFile(join(hwmonPath, 'temp1_label'), `${label}\n`)
   await writeFile(join(hwmonPath, 'temp1_input'), '44750\n')
   await writeFile(join(hwmonPath, 'temp2_label'), 'Core 0\n')
   await writeFile(join(hwmonPath, 'temp2_input'), '46125\n')
@@ -65,6 +65,18 @@ describe('CPU temperature API handler', () => {
         unit: '°C',
         observedAt: '2027-01-15T08:00:00.000Z',
         ageMs: 0,
+      },
+    })
+  })
+
+  it('returns AMD sensor descriptors and readings through the API handler', async () => {
+    const handler = createCpuTemperatureGetHandler(await makeSource({ chip: 'zenpower', label: 'Tdie' }))
+    const response = await handler({ request: new Request('http://reef-control/api/telemetry/cpu-temperature?sensorId=zenpower.0%3Atdie') })
+    await expect(response.json()).resolves.toEqual({
+      sensors: [{ id: 'zenpower.0:tdie', chip: 'zenpower', label: 'Tdie', unit: '°C' }],
+      reading: {
+        status: 'fresh', sensorId: 'zenpower.0:tdie', chip: 'zenpower', label: 'Tdie', value: 44.75,
+        unit: '°C', observedAt: '2027-01-15T08:00:00.000Z', ageMs: 0,
       },
     })
   })

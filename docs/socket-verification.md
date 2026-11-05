@@ -1,5 +1,24 @@
 # Exported rock socket verification
 
+<!-- AGENT_DOC_METADATA
+Category: Operations / Verification Tooling
+Status: Canonical / Active
+Authority: Operational Verification Specification
+Backlog: AQ-52, AQ-52.1
+Owner: @asset_validation
+Updated: 2026-11-05
+Upstream: docs/asset-contract.md, docs/modular-coral-and-live-rock-spec.md
+Downstream: scripts/check-socket-reports.mjs, src/rendering/assets/socket-report-freshness.test.ts
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Verification Tooling & Geometry Audit
+> - **Status**: Canonical / Active
+> - **Authority**: Operational Tooling
+> - **Backlog Reference**: `AQ-52`
+> - **Summary**: Offline geometry inspection tool (`inspect-rock-sockets.ts`) verifying rock surface contact, mounting disk orientation, and clearance cylinders for coral placement.
+
 AQ-52 adds an offline geometry check for the supplied Gemini rock assets. A socket name or a schema-valid inspection record is placement intent; it does not establish rock contact, support or clearance. This tool reads the exported GLB rather than accepting support radii from the existing packaging report.
 
 From the repository root, with Node 26:

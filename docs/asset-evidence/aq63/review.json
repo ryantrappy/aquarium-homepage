@@ -1,0 +1,59 @@
+{
+  "task": "AQ-63",
+  "reviewer": "Root",
+  "date": "2026-11-05",
+  "authority": "Objective bounded interaction evidence; no scene or visual asset acceptance",
+  "viewports": [
+    [
+      1440,
+      900
+    ],
+    [
+      402,
+      874
+    ]
+  ],
+  "devicePixelRatio": 1,
+  "automated": {
+    "command": "npx vitest run src/components/AquariumScene.test.tsx src/rendering/scene/fish-link-projection.test.ts src/rendering/scene/fish-link-focus.test.ts --maxWorkers=2",
+    "passedTests": 18,
+    "typecheck": "passed in isolated reviewed source copy",
+    "build": "passed in /tmp/aquarium-root-milestone-20261105; log /tmp/aq63-root-build.log"
+  },
+  "browser": {
+    "url": "http://127.0.0.1:5193/",
+    "laptopFrameSample": {
+      "frames": 24,
+      "services": 5,
+      "consecutiveChangedTransformsPerService": 23,
+      "finiteBoundsAtLeast44px": true
+    },
+    "phoneHorizontalOverflow": false,
+    "nativeBodyActivations": [
+      "Ombi opened Ombi login on laptop",
+      "Paperless opened Paperless auth redirect on phone",
+      "four further phone body-rectangle clicks all opened a native tab; overlapping rectangles correctly resolved foreground fish rather than the rectangle owner"
+    ],
+    "nativeContext": "Native Open Link in New Tab selected after menu observation opened Komodo login; overlap 30-second URL stability and next-action retargeting covered by DOM regression",
+    "phonePause": "12 sampled frames had identical transforms while paused; resume restored motion",
+    "cameraGuard": "Real PerspectiveCamera behavior tests reject behind/on-camera, near/far and nonfinite poses, including rotated camera",
+    "focus": "Existing focus handoff/retention and native keyboard/middle-click tests pass",
+    "console": "No captured errors; preexisting PCFSoftShadowMap removal warning remains"
+  },
+  "limits": [
+    "Finite interaction samples do not validate final fish appearance, lifelike gait or animated clearance.",
+    "Browser source includes preserved concurrent supplied/splat model URL additions; these assets are excluded from this commit.",
+    "Camera-plane edge cases are automated tests, not forced mutations of the live production scene."
+  ],
+  "captureCorrection": "Initial screenshot API returned clipped JPEGs despite .png filenames. Replaced with format-checked full-size PNG via CDP Page.captureScreenshot, exact clip scale1 and Emulation metric scale1. CSS/interaction evidence unchanged. New scene captures use reviewed isolated AQ66 production snapshot, excluding concurrent model URL promotions.",
+  "captureDimensions": [
+    [
+      1440,
+      900
+    ],
+    [
+      402,
+      874
+    ]
+  ]
+}

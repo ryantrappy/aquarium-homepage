@@ -1,5 +1,24 @@
 # Reef fish roster target
 
+<!-- AGENT_DOC_METADATA
+Category: Specification / Biological Roster
+Status: Canonical / Active
+Authority: Binding Biological Roster Specification
+Backlog: AQ-35, AQ-18, AQ-19, AQ-20, AQ-21, AQ-22, AQ-23, AQ-24, AQ-25, AQ-26, AQ-27, AQ-28, AQ-29, AQ-30, AQ-31, AQ-32
+Owner: @behavior_profiles
+Updated: 2026-11-05
+Upstream: docs/requirements.md, docs/fish-behavior-design.md
+Downstream: docs/fish-scale-reference.md, src/lib/fish.ts, src/lib/fish-behavior.ts
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Biological Roster & Species Specification
+> - **Status**: Canonical / Active
+> - **Authority**: Binding Specification
+> - **Backlog Reference**: `AQ-35`
+> - **Summary**: Target 15-species biological catalog, appearance briefs, natural habitat profiles, and species-specific animation inferences.
+
 This is the supported target roster for the reef aquarium, not a statement that all fish are implemented. The app currently has five catalog entries; the first five IDs below preserve those existing IDs. Treat each species as its own future animation task. Do not consider a still image sliding through the scene to be a finished fish animation.
 
 ## How to use these briefs

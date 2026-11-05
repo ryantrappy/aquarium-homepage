@@ -1,12 +1,12 @@
 ---
 id: AQ-52
 title: Replace assumed coral socket support with measured export evidence
-status: In Progress
+status: Done
 assignee:
   - '@gemini'
-  - '@focus_review'
+  - '@asset-validation'
 created_date: '2026-11-04 19:04'
-updated_date: '2026-11-04 19:37'
+updated_date: '2026-11-05 04:22'
 labels:
   - modeling
 dependencies:
@@ -30,9 +30,9 @@ The supplied packager copies socket transforms as support points and calculates 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Available sockets have reproducible support, footprint and clearance measurements against exact exported geometry, with an external report pinned to its hash.
-- [ ] #2 Socket positions meet contact tolerance and local up matches measured normal; unsupported sockets are unavailable rather than given passing measurements.
-- [ ] #3 Metadata no longer labels synthetic allowances as performed probes, and verified records pass the asset contract without implying fish habitat from socket names.
+- [x] #1 Available sockets have reproducible support, footprint and clearance measurements against exact exported geometry, with an external report pinned to its hash.
+- [x] #2 Socket positions meet contact tolerance and local up matches measured normal; unsupported sockets are unavailable rather than given passing measurements.
+- [x] #3 Metadata no longer labels synthetic allowances as performed probes, and verified records pass the asset contract without implying fish habitat from socket names.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -45,12 +45,27 @@ The supplied packager copies socket transforms as support points and calculates 
 5. Complete task only when actual measurement replaces synthetic evidence in the active pipeline and all criteria are objectively verified. Independent tooling alone is a partial milestone, not Done.
 
 Root owns the standalone CLI and documentation; @focus_review owns the pure inspection API and geometry/parser regressions. No shared file edits.
+
+2026-11-04 independent completion review: rerun reviewed inspectRockSockets on pinned current exports, compare regenerated measurements to packaged records/reports, exercise meaningful parser/geometry regressions, inspect active packager fail-closed adoption, then report verified AC evidence to Root without editing models or packaging.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 Root accepted the independent inspector/CLI slice after reviewing code, fixing a degenerate rotation regression to tilt an offset socket and its shelf, and passing all 9 geometry/parser tests. The exact supplied left/right GLBs were rerun with the reviewed CLI: 0/12 and 0/11 supported under the explicit planar-footprint settings; 2383 and 2164 footprint samples respectively. All centers contact geometry (distance 0), but all up-normal/footprint checks reject; clearance rejects 11 per island. Geometric normals are facet-sensitive at shared-vertex ties, so this is conservative readiness evidence, not visual model rejection or a whole-colony certificate. Hashes remain left bc055e316fd131cfd8d777e5eaed297507a37d76a6dd72d800485b2661d8a449 and right bd7df7adaa1fd5792846813648acca15990b27d9ee43d01375cb8990bcf5b034. Reviewed reports: /tmp/aq52-root-left-reviewed.json and /tmp/aq52-root-right-reviewed.json. CLI help/invalid-argument/refused-overwrite checks behaved correctly. No GLB/generator/packager edits, no acceptance criteria checked, no scene promotion. Active packaging still uses synthetic allowances; AQ52 remains In Progress pending measured pipeline adoption and model/intent readiness.
+
+Reviewed exact-export evidence is now preserved in docs/asset-evidence/aq52-left-socket-report.json and aq52-right-socket-report.json, with portable report references and source hashes. docs/socket-verification.md documents command exit behavior, sample/cylinder settings, facet sensitivity, whole-colony limits and current rejections. This is a reviewed functional tooling milestone only; no AC or Done because packaging adoption/model-intent readiness remains outstanding.
+
+2026-11-04 (@gemini):
+- Sculpted coplanar horizontal mounting pads (r_pad = footprintRadiusM + 0.016 m) and clear cylinders (r_clear = clearanceRadiusM + 0.018 m) into both live-rock-island-left.glb and live-rock-island-right.glb in src/rendering/modeling/build_live_rock_islands.py, and placed each socket_* Empty at the interior centroid of the center flat pad triangle with identity rotation (up = [0, 1, 0] in glTF).
+- Updated src/rendering/modeling/package_modular_corals.mjs to replace synthetic surface-probes-v1 allowances with real measured geometry inspection via inspectRockSockets() from src/rendering/assets/socket-inspector.ts.
+- Packaging now writes hash-pinned external socket reports (src/rendering/assets/corals/live-rock-island-{left,right}-socket-report.json), populates inspectionRecord.sockets exclusively from socketReport.supportedSockets, and fails closed if any socket is rejected.
+- Regenerated docs/asset-evidence/aq52-left-socket-report.json and docs/asset-evidence/aq52-right-socket-report.json using node src/rendering/assets/inspect-rock-sockets.ts:
+  * live-rock-island-left.glb (sha256: 2f90be064f3f5b15291dffd25a3ea00ec3ad3f212e8e232814daba8f456cfd6c): 12 supported, 0 rejected (all 12 sockets achieve socketToSurfaceDistanceM = 0, upNormalVectorDifference = 0, footprintFailedSamples = 0, blockerTriangleCount = 0).
+  * live-rock-island-right.glb (sha256: 68337f7733b782f374efa0ea051138344a17fe6139be14ab4efa95f34eb2d4d6): 11 supported, 0 rejected (all 11 sockets achieve socketToSurfaceDistanceM = 0, upNormalVectorDifference = 0, footprintFailedSamples = 0, blockerTriangleCount = 0).
+- Verified npx vitest run src/rendering/assets/contract.test.ts src/rendering/assets/socket-inspector.test.ts passes (2 files, 19 tests passed).
+
+Root final support review2026-11-04: independently reran read-only checker against current exact left2f90be.../right68337f... exports and both packaged/docs reports;12left/11right supported,0rejected, all exact report data reproduce after report-path normalization only. Read packager: synthetic allowances removed; actualinspectRockSockets measurements consumed and rejection fails packaging. All16inspection records passcontract. Support/normal/contact/cylinder results are finite-resolution measurements with documented limits, not proof of final colonyfit or fishhabitat. Prior19inspector/contract and6freshness tests are covered in reviewed176-test checkpoint. Root reviewed technicalrepair; assets/coralpipeline nowread-only for the user-managed otheragent. No scene promotion; art/collision remainseparategates.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
@@ -94,3 +109,9 @@ created: 2026-11-04 19:35
 Correction to #4 plus requested regressions: fixed the far-wall fixture to the exact radial-plane case [5,.01,0, 6,.3,0, 5,.3,0]; added an internal unsupported annulus while the socket center remains supported; added parent Y-rotation coverage. Targeted suite: 1 file, 9 tests passed. npm run typecheck currently fails in staged src/simulation/fish-extensions.test.ts lines 88-89 because test operation is inferred as string instead of add/replace; errors are outside this slice. No status or AC changes.
 ---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Accepted measured socket evidence replacing synthetic allowances. Root reproduced12left/11right supports, exact-hash report freshness and contract validity; unsupported exports failclosed. Colonyfit, art and fish/navigation approval remain separate.
+<!-- SECTION:FINAL_SUMMARY:END -->

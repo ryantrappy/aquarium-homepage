@@ -1,5 +1,21 @@
 # Deployment and homelab discovery
 
+<!-- AGENT_DOC_METADATA
+Category: Archive / Historical Draft
+Status: Superseded
+Authority: Historical Reference (Superseded by docs/deployment.md)
+Backlog: AQ-10
+Owner: @root
+Updated: 2026-11-05
+Upstream: docs/deployment.md
+Downstream: None
+-->
+
+> [!WARNING]
+> **Superseded Document**  
+> This document represents an earlier historical draft and preliminary discovery notes for Nitro container deployment.  
+> The canonical and active operational runbook is located at: [`docs/deployment.md`](deployment.md).
+
 ## Current deployment shape
 
 TanStack Start's current Node guidance uses Nitro. The project pins `nitro@3.0.261102-rc`, builds the Node server to `.output/server/index.mjs`, and starts it with `npm start`. The official guides describe Nitro as the Node deployment layer and show the same build output and start command ([TanStack hosting](https://tanstack.com/start/latest/docs/framework/react/guide/hosting), [server routes](https://tanstack.com/start/latest/docs/framework/react/guide/server-routes)). Nitro is still evolving, so keep its version locked and verify a build before updating it.

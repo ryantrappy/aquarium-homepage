@@ -1,0 +1,62 @@
+[
+  {
+    "path": "src/rendering/modeling/build_live_rock_islands.py",
+    "sha256": "3508cc39e15bb594a19d8774dbaff1f10dc675aa124e510d363d1c28c15009cc",
+    "bytes": 35383
+  },
+  {
+    "path": "src/rendering/assets/corals/manifest.json",
+    "sha256": "6cab6a72c3dedaee2824155ae452793de90ed7fda4e596f7ccdc767ade983af4",
+    "bytes": 15412
+  },
+  {
+    "path": "docs/asset-evidence/aq57/render_exact.py",
+    "sha256": "ec69356d0e4401ae487dad9fa4f00d014fe1206941af96e07e93f903a0e1517a",
+    "bytes": 6290
+  },
+  {
+    "path": "docs/asset-evidence/aq57/review_geometry.py",
+    "sha256": "5db04b2af65f8e1cbbaf74b93e8423fb4e10e569b5f755b6b76ee234e2c5e77e",
+    "bytes": 2496
+  },
+  {
+    "path": "src/rendering/assets/corals/live-rock-island-left.glb",
+    "sha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+    "bytes": 2125240
+  },
+  {
+    "path": "src/rendering/assets/corals/live-rock-island-left-inspection.json",
+    "sha256": "6dba297c2f0388bc03326e6e0d78b6c7638f1f6bc6570065355cc182240df073",
+    "bytes": 13987
+  },
+  {
+    "path": "src/rendering/assets/corals/live-rock-island-left-socket-report.json",
+    "sha256": "f3ec095a5bd5e5a814f505f14c1e19b18564d1333b6e792e59737acc465df999",
+    "bytes": 32086
+  },
+  {
+    "path": "docs/asset-evidence/aq52-left-socket-report.json",
+    "sha256": "f3ec095a5bd5e5a814f505f14c1e19b18564d1333b6e792e59737acc465df999",
+    "bytes": 32086
+  },
+  {
+    "path": "src/rendering/assets/corals/live-rock-island-right.glb",
+    "sha256": "ab7b756344c6a0a879d254b6ca06a20c63c4246b0a19b76394cc532c61abfbee",
+    "bytes": 2104916
+  },
+  {
+    "path": "src/rendering/assets/corals/live-rock-island-right-inspection.json",
+    "sha256": "01c3037e182ccd938ac6d8e96bd221652d3cfc7272a808139d314e3fcd1556b0",
+    "bytes": 12928
+  },
+  {
+    "path": "src/rendering/assets/corals/live-rock-island-right-socket-report.json",
+    "sha256": "9074c80b6f64b08ff5adced475ec76f481793e347d4887514b6c48aaed924240",
+    "bytes": 29479
+  },
+  {
+    "path": "docs/asset-evidence/aq52-right-socket-report.json",
+    "sha256": "9074c80b6f64b08ff5adced475ec76f481793e347d4887514b6c48aaed924240",
+    "bytes": 29479
+  }
+]

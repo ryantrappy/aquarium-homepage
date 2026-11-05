@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-03T12:38:00Z'
-updated_date: '2026-11-03T12:39:00Z'
+updated_date: '2026-11-05 13:09'
 labels: []
 dependencies:
   - AQ-34
@@ -14,13 +14,13 @@ dependencies:
 references:
   - docs/fish-behavior-design.md
   - docs/reef-fish-roster.md
-  - https://pmc.ncbi.nlm.nih.gov/articles/PMC6850181/
+  - 'https://pmc.ncbi.nlm.nih.gov/articles/PMC6850181/'
   - >-
     https://www.aquariumofpacific.org/onlinelearningcenter/species/clown_anemonefish
-  - https://www.fao.org/fishery/docs/CDrom/bobp/cd1/Bobp/Publns/MAG/021.pdf
+  - 'https://www.fao.org/fishery/docs/CDrom/bobp/cd1/Bobp/Publns/MAG/021.pdf'
   - >-
     https://australian.museum/learn/animals/fishes/yellow-shrimpgoby-cryptocentrus-cinctus/
-  - https://nrm-fishbaselinux01.nrm.se/Ecology/Ecsenius_stigmatura
+  - 'https://nrm-fishbaselinux01.nrm.se/Ecology/Ecsenius_stigmatura'
   - AQ-18
   - AQ-19
   - AQ-24
@@ -58,3 +58,21 @@ AQ-34 provides typed 3D habitat locations and AQ-35 describes which locations ea
 - [ ] #1 Root agent reviews the completed work before the task is marked Done.
 - [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-11-05 (@gemini):
+- Fixed the yellow-tang grazingSurface clearance failure reported in Root comment #1 in src/rendering/scene/habitat.ts: instantiateReefHabitat() and deriveReefHabitat() now compute anchorClearanceOffset(anchor.compatibleSpecies) = max(MIN_FISH_CLEARANCE, ...compatibleSpecies.map(fishClearanceRadius)) + 0.03 (0.60 scene units for yellow-tang radius 0.57 instead of hard-coded 0.53), restoring reachable grazing routes at both 402x874 mobile and 1440x900 desktop placements (verified in src/rendering/scene/habitat.test.ts).
+- Implemented src/rendering/scene/habitat-anchor-interactions.ts and src/rendering/scene/habitat-anchor-interactions.test.ts covering profile-compatible anchor filtering (never substituting branchingCoralShelter/Acropora for hostAnemone), ocellaris-clownfish soft-home anemone station-keeping, firefish burrow hover/head-first bolt vs. yellow-watchman-goby benthic lookout/backward retreat, tailspot-blenny rock perching, and substrate grazing/foraging with collision-checked target resolution and pause/reduced-motion gating.
+<!-- SECTION:NOTES:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: root
+created: 2026-11-05 13:09
+---
+Root independent validation of scratch audit4.8 confirms current yellow-tang grazing failure: radius.57 legacy scene units exceeds fixed.53 substrate offset; all12phone/24laptop grazing targets failclearance (prior radius.5 yielded1/12 and3/24). Blue tang is not grazing-compatible and is not the correct example. Resolve semantic anchor clearance from actual geometry and explicit fish envelope under existingAC4/5 and AQ34AC3/6; no invented host/refuge from socketnames. Repro:/tmp/aq58-audit-claims.test.ts.
+---
+<!-- COMMENTS:END -->

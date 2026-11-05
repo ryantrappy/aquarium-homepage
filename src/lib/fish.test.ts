@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs'
+import { existsSync, statSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { getFishById, REEF_FISH } from './fish'
@@ -11,8 +11,9 @@ describe('reef fish catalog', () => {
     for (const fish of REEF_FISH) {
       expect(fish.commonName).not.toBe('')
       expect(fish.scientificName).not.toBe('')
-      expect(fish.thumbnail).toMatch(/^\/fish\/[\w-]+\.(?:webp|png)$/)
+      expect(fish.thumbnail).toMatch(/^\/fish\/[\w-]+\.webp$/)
       expect(existsSync(resolve(process.cwd(), 'public', fish.thumbnail.slice(1)))).toBe(true)
+      expect(statSync(resolve(process.cwd(), 'public', fish.thumbnail.slice(1))).size).toBeLessThan(75 * 1024)
       expect(getFishById(fish.id)).toBe(fish)
     }
   })

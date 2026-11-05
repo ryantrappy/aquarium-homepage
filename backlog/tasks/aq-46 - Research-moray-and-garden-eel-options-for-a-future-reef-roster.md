@@ -5,16 +5,17 @@ status: Done
 assignee:
   - '@Luna'
 created_date: '2026-11-03T12:38:00Z'
-updated_date: '2026-11-03T19:15:00Z'
-labels: []
+updated_date: '2026-11-05 13:09'
+labels:
+  - gemini-research
 dependencies: []
 references:
   - docs/fish-behavior-design.md
-  - https://pubmed.ncbi.nlm.nih.gov/15107438/
-  - https://www.flaquarium.org/explore/habitats/shorelines/garden-eel/
+  - 'https://pubmed.ncbi.nlm.nih.gov/15107438/'
+  - 'https://www.flaquarium.org/explore/habitats/shorelines/garden-eel/'
   - >-
     https://www.calacademy.org/learn-explore/creature-closeups/spotted-garden-eel
-  - https://www.flaquarium.org/explore/habitats/coral-reefs/moray-eel/
+  - 'https://www.flaquarium.org/explore/habitats/coral-reefs/moray-eel/'
 documentation:
   - docs/fish-behavior-design.md
   - docs/reef-fish-roster.md

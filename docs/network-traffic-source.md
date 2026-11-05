@@ -1,10 +1,29 @@
 # Network traffic sampler contract
 
+<!-- AGENT_DOC_METADATA
+Category: Specification / Telemetry Contract
+Status: Canonical / Active
+Authority: Binding Telemetry Contract
+Backlog: AQ-17, AQ-17.1, AQ-68
+Owner: @root
+Updated: 2026-11-05
+Upstream: docs/requirements.md
+Downstream: src/server/network-traffic.ts, src/routes/api/telemetry/network-traffic.ts
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Hardware Telemetry Specification / Network Sampler
+> - **Status**: Canonical / Active
+> - **Authority**: Binding Contract
+> - **Backlog Reference**: `AQ-17`, `AQ-17.1`
+> - **Summary**: Server-side network telemetry sampler specification, rate calculations from `rx_bytes`/`tx_bytes`, strict path safety, monotonic time deltas, and honest `unavailable`/`stale` semantics without simulated values.
+
 `createNetworkTrafficStore` accepts a trusted server-side list of sources. Each entry has a stable `id`, display `label`, and absolute `statsRootPath`. The client may request a source by ID; it cannot supply a filesystem path. `getSources()` returns only IDs and labels.
 
 For a selected source, the sampler reads decimal `rx_bytes` and `tx_bytes` files beneath that configured root. It computes ingress and egress independently in bytes per second (`B/s`) using exact unsigned 64-bit counter deltas and monotonic elapsed time. Wall-clock time is used only for the `observedAt` timestamp. Concurrent requests for the same source share one in-flight sample. A short result cache limits reads to at most once per `minimumSampleIntervalMs` (default 250 ms), which must be no more than half the stale window; cached successful readings report their increasing monotonic age. Source descriptors and returned readings are copies, so caller mutation cannot change trusted configuration or internal samples.
 
-The first valid counter pair establishes a baseline and returns `unavailable`; repeated calls during the minimum interval share that warm-up response without replacing the baseline. A later pair is needed to calculate rates. Counter reset, malformed or unreadable counters, nonpositive or nonfinite elapsed time, and sample gaps beyond the configured freshness window do not produce a fresh rate. When a prior successful reading exists, those conditions return that last value as `stale` with its age when monotonic time can be measured; otherwise they return `unavailable`. A reset or overlong interval establishes a new baseline for a later sample. No traffic values are fabricated.
+The first valid counter pair establishes a baseline and returns `unavailable`; repeated calls during the minimum interval share that warm-up response without replacing the baseline. A later pair is needed to calculate rates. The default maximum interval is 90 seconds, allowing a 60-second client poll plus up to 30 seconds of scheduling/read latency; an explicit source setting may choose another window. Rates are averages over the actual monotonic sample interval, not instantaneous readings. Counter reset, malformed or unreadable counters, nonpositive or nonfinite elapsed time, and sample gaps beyond the configured freshness window do not produce a fresh rate. When a prior successful reading exists, those conditions return that last value as `stale` with its age when monotonic time can be measured; otherwise they return `unavailable`. A reset or overlong interval establishes a new baseline for a later sample. No traffic values are fabricated.
 
 The same-origin `GET /api/telemetry/network-traffic?sourceId=...` route returns `{ sources, reading }` with `Cache-Control: no-store`. Descriptors contain IDs and labels, never source filesystem paths. Omitting the ID selects the first configured source; unknown or empty IDs return an unavailable reading. The first sample remains unavailable until the sampler has a valid interval.
 

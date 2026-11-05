@@ -2,6 +2,22 @@
 # Photorealistic WebGPU Reef Aquarium
 ## Consolidated Technical Specification, Mathematics, and Implementation Reasoning
 
+<!-- AGENT_DOC_METADATA
+Category: Archive / Planning Logs
+Status: Archived
+Authority: Historical Reference
+Backlog: None
+Owner: @gemini
+Updated: 2026-11-05
+Upstream: None
+Downstream: None
+-->
+
+> [!WARNING]
+> **Archived Planning Log**  
+> This file is a historical consolidated technical design document from an external Gemini planning session.  
+> It contains rich biological and mathematical rationale, but is non-binding exploratory reference material.
+
 **Source:** Gemini conversation, "Photorealistic WebGPU Reef Aquarium Engine"  
 **Purpose:** Build a highly realistic, interactive 3D coral reef aquarium in a web browser using open-source technologies.
 

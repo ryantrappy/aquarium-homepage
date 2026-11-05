@@ -1,5 +1,23 @@
 # Aquarium Homepage requirements
 
+<!-- AGENT_DOC_METADATA
+Category: Governance / Requirements
+Status: Canonical / Active
+Authority: Binding Product Specification
+Backlog: AQ-1, AQ-2, AQ-14
+Owner: @root
+Updated: 2026-11-05
+Upstream: AGENTS.md
+Downstream: All technical tasks and specifications
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Governance / Requirements
+> - **Status**: Canonical / Active
+> - **Authority**: Binding Product Goal
+> - **Summary**: Primary product requirements, success criteria (photorealistic living reef aquarium, realistic swimming, clickable service links), asset licensing policies ($0, CC0/CC-BY 4.0), and non-goals.
+
 ## Product goal
 
 The primary goal is a photorealistic, living reef aquarium: realistic fish should fill almost the entire main view and serve as clickable links to configured homelab services. Service navigation and configuration should support that aquarium experience while staying visually unobtrusive.

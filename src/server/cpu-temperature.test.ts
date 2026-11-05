@@ -55,6 +55,18 @@ describe('CPU temperature source', () => {
     })
   })
 
+  it.each([
+    { chip: 'k10temp', label: 'Tctl', id: 'k10temp.0:tctl' },
+    { chip: 'k10temp', label: 'Tdie', id: 'k10temp.0:tdie' },
+    { chip: 'zenpower', label: 'Tdie', id: 'zenpower.0:tdie' },
+  ])('discovers AMD $chip $label temperature sensor', async ({ chip, label, id }) => {
+    const sensor = await makeSensor({ chip, label, value: '52875' })
+    const store = createCpuTemperatureStore({ rootPath: sensor.rootPath, now: () => 1_800_000_000_000 })
+
+    expect(await store.getSensors()).toEqual([{ id, chip, label, unit: '°C' }])
+    expect(await store.read(id)).toMatchObject({ status: 'fresh', sensorId: id, chip, label, value: 52.875, unit: '°C' })
+  })
+
   it('returns a stale last-known measurement with age when the source stops reading', async () => {
     const sensor = await makeSensor({ value: '43125' })
     let clock = 1_800_000_000_000

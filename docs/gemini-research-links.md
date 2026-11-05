@@ -1,5 +1,24 @@
 # Gemini research link handoff
 
+<!-- AGENT_DOC_METADATA
+Category: Research / Bibliography
+Status: Active
+Authority: Informational Reference
+Backlog: AQ-5
+Owner: @gemini
+Updated: 2026-11-05
+Upstream: docs/open-source-asset-and-motion-research.md
+Downstream: None
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Research Bibliography & Source Links
+> - **Status**: Active / Informational
+> - **Authority**: Informational Reference
+> - **Backlog Reference**: `AQ-5`
+> - **Summary**: Curated inventory of external links, video timestamps, and model listings extracted from shared Gemini conversations.
+
 This document records links extracted from the shared Gemini conversation and the small number of separate listing checks reported by root. It is a source handoff for the aquarium investigations, not a validation of every claim in that conversation. No budget is selected and no purchase is authorized by this research. It does not add species to the supported roster, establish asset reuse rights, or select an implementation.
 
 ## When a model is paid or inaccessible

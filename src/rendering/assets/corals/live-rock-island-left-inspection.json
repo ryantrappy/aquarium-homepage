@@ -8,14 +8,14 @@
       "upAxis": "+Y",
       "origin": "local",
       "dimensionsM": [
-        0.832538,
-        0.514632,
-        0.402919
+        1.011278,
+        0.398,
+        0.536801
       ],
       "provenance": {
         "license": "original",
         "creator": "Aquarium project",
-        "sourceSha256": "16d071eebe461f4989e5181ba8f3fe2782ffa7933e9f59d585a3ca7e914f96fa",
+        "sourceSha256": "3508cc39e15bb594a19d8774dbaff1f10dc675aa124e510d363d1c28c15009cc",
         "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_live_rock_islands.py -- /tmp/coral-models left",
         "attribution": "Original procedural Blender 5.0.1 rock asset (Aragonite Live-Rock Left Arched Bommie Foundation with Coral Mount Sockets) with embedded PBR textures."
       }
@@ -41,31 +41,31 @@
   },
   "boundsM": {
     "min": [
-      -0.37686,
+      -0.495452,
       -0.012,
-      -0.192026
+      -0.271264
     ],
     "max": [
-      0.455678,
-      0.502632,
-      0.210893
+      0.515826,
+      0.386,
+      0.265537
     ]
   },
   "primitives": [
     {
       "id": "live_rock_island_left",
       "role": "rock",
-      "vertexCount": 8512,
+      "vertexCount": 12604,
       "boundsM": {
         "min": [
-          -0.37686,
+          -0.495452,
           -0.012,
-          -0.192026
+          -0.271264
         ],
         "max": [
-          0.455678,
-          0.502632,
-          0.210893
+          0.515826,
+          0.386,
+          0.265537
         ]
       },
       "material": {
@@ -82,40 +82,40 @@
       "parentMesh": "live_rock_island_left",
       "archetype": "host-anemone",
       "positionM": [
-        0.080421,
-        0.445609,
-        0.016313
+        0.03591227903962135,
+        0.23600000143051147,
+        0.014666666276752949
       ],
       "normal": [
-        0.042997,
-        0.985451,
-        0.164432
+        0,
+        0.9999999999999999,
+        0
       ],
       "rotation": [
-        0.081273,
-        -0.052191,
-        -0.02587,
-        0.994988
+        0,
+        0,
+        0,
+        1
       ],
       "footprintRadiusM": 0.038,
       "clearanceRadiusM": 0.085,
       "support": {
         "pointM": [
-          0.080421,
-          0.445609,
-          0.016313
+          0.03591227903962135,
+          0.23600000143051147,
+          0.014666666276752949
         ],
         "normal": [
-          0.042997,
-          0.985451,
-          0.164432
+          0,
+          0.9999999999999999,
+          0
         ],
-        "supportedRadiusM": 0.05,
-        "freeRadiusM": 0.11,
+        "supportedRadiusM": 0.038,
+        "freeRadiusM": 0.085,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "bc055e316fd131cfd8d777e5eaed297507a37d76a6dd72d800485b2661d8a449",
-          "report": "src/rendering/assets/corals/live-rock-island-left-inspection.json"
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "src/rendering/assets/corals/live-rock-island-left-socket-report.json"
         }
       }
     },
@@ -125,40 +125,40 @@
       "parentMesh": "live_rock_island_left",
       "archetype": "mounded-lps",
       "positionM": [
-        -0.219534,
-        0.231313,
-        0.067491
+        -0.31209129095077515,
+        0.11800000071525574,
+        0.15603458881378174
       ],
       "normal": [
-        -0.033732,
-        0.997402,
-        0.063649
+        0,
+        1,
+        0
       ],
       "rotation": [
-        0.030951,
-        0.050546,
-        0.018466,
-        0.998071
+        0,
+        0,
+        0,
+        1
       ],
       "footprintRadiusM": 0.045,
       "clearanceRadiusM": 0.075,
       "support": {
         "pointM": [
-          -0.219534,
-          0.231313,
-          0.067491
+          -0.31209129095077515,
+          0.11800000071525574,
+          0.15603458881378174
         ],
         "normal": [
-          -0.033732,
-          0.997402,
-          0.063649
+          0,
+          1,
+          0
         ],
-        "supportedRadiusM": 0.057,
-        "freeRadiusM": 0.1,
+        "supportedRadiusM": 0.045,
+        "freeRadiusM": 0.075,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "bc055e316fd131cfd8d777e5eaed297507a37d76a6dd72d800485b2661d8a449",
-          "report": "src/rendering/assets/corals/live-rock-island-left-inspection.json"
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "src/rendering/assets/corals/live-rock-island-left-socket-report.json"
         }
       }
     },
@@ -168,40 +168,40 @@
       "parentMesh": "live_rock_island_left",
       "archetype": "mounded-lps",
       "positionM": [
-        0.196653,
-        0.322268,
-        0.058681
+        0.2776613235473633,
+        0.09600000083446503,
+        0.1576288342475891
       ],
       "normal": [
-        0.043653,
-        0.996953,
-        0.064644
+        0,
+        0.9999999999999999,
+        0
       ],
       "rotation": [
-        0.031197,
-        -0.05069,
-        -0.023456,
-        0.997951
+        0,
+        0,
+        0,
+        1
       ],
       "footprintRadiusM": 0.045,
       "clearanceRadiusM": 0.075,
       "support": {
         "pointM": [
-          0.196653,
-          0.322268,
-          0.058681
+          0.2776613235473633,
+          0.09600000083446503,
+          0.1576288342475891
         ],
         "normal": [
-          0.043653,
-          0.996953,
-          0.064644
+          0,
+          0.9999999999999999,
+          0
         ],
-        "supportedRadiusM": 0.057,
-        "freeRadiusM": 0.1,
+        "supportedRadiusM": 0.045,
+        "freeRadiusM": 0.075,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "bc055e316fd131cfd8d777e5eaed297507a37d76a6dd72d800485b2661d8a449",
-          "report": "src/rendering/assets/corals/live-rock-island-left-inspection.json"
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "src/rendering/assets/corals/live-rock-island-left-socket-report.json"
         }
       }
     },
@@ -211,40 +211,40 @@
       "parentMesh": "live_rock_island_left",
       "archetype": "tentaculate-lps",
       "positionM": [
-        -0.139195,
-        0.445738,
-        0.046241
+        -0.24323074519634247,
+        0.2160000056028366,
+        0.014550874941051006
       ],
       "normal": [
-        -0.045151,
-        0.988434,
-        0.144773
+        0,
+        0.9999999999999999,
+        0
       ],
       "rotation": [
-        0.071319,
-        0.05193,
-        0.026391,
-        0.995751
+        0,
+        0,
+        0,
+        1
       ],
       "footprintRadiusM": 0.03,
       "clearanceRadiusM": 0.075,
       "support": {
         "pointM": [
-          -0.139195,
-          0.445738,
-          0.046241
+          -0.24323074519634247,
+          0.2160000056028366,
+          0.014550874941051006
         ],
         "normal": [
-          -0.045151,
-          0.988434,
-          0.144773
+          0,
+          0.9999999999999999,
+          0
         ],
-        "supportedRadiusM": 0.042,
-        "freeRadiusM": 0.1,
+        "supportedRadiusM": 0.03,
+        "freeRadiusM": 0.075,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "bc055e316fd131cfd8d777e5eaed297507a37d76a6dd72d800485b2661d8a449",
-          "report": "src/rendering/assets/corals/live-rock-island-left-inspection.json"
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "src/rendering/assets/corals/live-rock-island-left-socket-report.json"
         }
       }
     },
@@ -254,40 +254,40 @@
       "parentMesh": "live_rock_island_left",
       "archetype": "tentaculate-lps",
       "positionM": [
-        0.121861,
-        0.462787,
-        0.006092
+        0.24673360586166382,
+        0.25600001215934753,
+        0.009388045407831669
       ],
       "normal": [
-        0.066993,
-        0.989633,
-        0.127035
+        0,
+        1,
+        0
       ],
       "rotation": [
-        0.061836,
-        -0.052244,
-        -0.036873,
-        0.996036
+        0,
+        0,
+        0,
+        1
       ],
       "footprintRadiusM": 0.03,
       "clearanceRadiusM": 0.075,
       "support": {
         "pointM": [
-          0.121861,
-          0.462787,
-          0.006092
+          0.24673360586166382,
+          0.25600001215934753,
+          0.009388045407831669
         ],
         "normal": [
-          0.066993,
-          0.989633,
-          0.127035
+          0,
+          1,
+          0
         ],
-        "supportedRadiusM": 0.042,
-        "freeRadiusM": 0.1,
+        "supportedRadiusM": 0.03,
+        "freeRadiusM": 0.075,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "bc055e316fd131cfd8d777e5eaed297507a37d76a6dd72d800485b2661d8a449",
-          "report": "src/rendering/assets/corals/live-rock-island-left-inspection.json"
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "src/rendering/assets/corals/live-rock-island-left-socket-report.json"
         }
       }
     },
@@ -297,40 +297,40 @@
       "parentMesh": "live_rock_island_left",
       "archetype": "tentaculate-lps",
       "positionM": [
-        -0.018679,
-        0.434341,
-        0.049301
+        -0.0952456146478653,
+        0.23600000143051147,
+        0.02266666665673256
       ],
       "normal": [
         0,
-        0.990216,
-        0.139543
+        1,
+        0
       ],
       "rotation": [
-        0.069943,
         0,
         0,
-        0.997551
+        0,
+        1
       ],
       "footprintRadiusM": 0.03,
       "clearanceRadiusM": 0.075,
       "support": {
         "pointM": [
-          -0.018679,
-          0.434341,
-          0.049301
+          -0.0952456146478653,
+          0.23600000143051147,
+          0.02266666665673256
         ],
         "normal": [
           0,
-          0.990216,
-          0.139543
+          1,
+          0
         ],
-        "supportedRadiusM": 0.042,
-        "freeRadiusM": 0.1,
+        "supportedRadiusM": 0.03,
+        "freeRadiusM": 0.075,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "bc055e316fd131cfd8d777e5eaed297507a37d76a6dd72d800485b2661d8a449",
-          "report": "src/rendering/assets/corals/live-rock-island-left-inspection.json"
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "src/rendering/assets/corals/live-rock-island-left-socket-report.json"
         }
       }
     },
@@ -340,40 +340,40 @@
       "parentMesh": "live_rock_island_left",
       "archetype": "plating-sps",
       "positionM": [
-        -0.155357,
-        0.435962,
-        0.023817
+        -0.34569770097732544,
+        0.2680000066757202,
+        -0.09484626352787018
       ],
       "normal": [
-        -0.081653,
-        0.991822,
-        0.098091
+        0,
+        1,
+        0
       ],
       "rotation": [
-        0.044725,
-        0.101618,
-        0.045702,
-        0.992766
+        0,
+        0,
+        0,
+        1
       ],
       "footprintRadiusM": 0.032,
       "clearanceRadiusM": 0.08,
       "support": {
         "pointM": [
-          -0.155357,
-          0.435962,
-          0.023817
+          -0.34569770097732544,
+          0.2680000066757202,
+          -0.09484626352787018
         ],
         "normal": [
-          -0.081653,
-          0.991822,
-          0.098091
+          0,
+          1,
+          0
         ],
-        "supportedRadiusM": 0.044,
-        "freeRadiusM": 0.105,
+        "supportedRadiusM": 0.032,
+        "freeRadiusM": 0.08,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "bc055e316fd131cfd8d777e5eaed297507a37d76a6dd72d800485b2661d8a449",
-          "report": "src/rendering/assets/corals/live-rock-island-left-inspection.json"
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "src/rendering/assets/corals/live-rock-island-left-socket-report.json"
         }
       }
     },
@@ -383,40 +383,40 @@
       "parentMesh": "live_rock_island_left",
       "archetype": "plating-sps",
       "positionM": [
-        0.141913,
-        0.480967,
-        -0.023681
+        0.34326252341270447,
+        0.20399999618530273,
+        -0.09602948278188705
       ],
       "normal": [
-        0.081653,
-        0.991822,
-        0.098091
+        0,
+        0.9999999999999999,
+        0
       ],
       "rotation": [
-        0.044725,
-        -0.101618,
-        -0.045702,
-        0.992766
+        0,
+        0,
+        0,
+        1
       ],
       "footprintRadiusM": 0.032,
       "clearanceRadiusM": 0.08,
       "support": {
         "pointM": [
-          0.141913,
-          0.480967,
-          -0.023681
+          0.34326252341270447,
+          0.20399999618530273,
+          -0.09602948278188705
         ],
         "normal": [
-          0.081653,
-          0.991822,
-          0.098091
+          0,
+          0.9999999999999999,
+          0
         ],
-        "supportedRadiusM": 0.044,
-        "freeRadiusM": 0.105,
+        "supportedRadiusM": 0.032,
+        "freeRadiusM": 0.08,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "bc055e316fd131cfd8d777e5eaed297507a37d76a6dd72d800485b2661d8a449",
-          "report": "src/rendering/assets/corals/live-rock-island-left-inspection.json"
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "src/rendering/assets/corals/live-rock-island-left-socket-report.json"
         }
       }
     },
@@ -426,40 +426,40 @@
       "parentMesh": "live_rock_island_left",
       "archetype": "zoanthid-mat",
       "positionM": [
-        -0.047902,
-        0.42684,
-        0.060618
+        -0.1817210167646408,
+        0.11800000071525574,
+        0.1686696857213974
       ],
       "normal": [
         0,
-        0.996802,
-        0.079914
+        1,
+        0
       ],
       "rotation": [
-        0.039989,
         0,
         0,
-        0.9992
+        0,
+        1
       ],
       "footprintRadiusM": 0.04,
       "clearanceRadiusM": 0.07,
       "support": {
         "pointM": [
-          -0.047902,
-          0.42684,
-          0.060618
+          -0.1817210167646408,
+          0.11800000071525574,
+          0.1686696857213974
         ],
         "normal": [
           0,
-          0.996802,
-          0.079914
+          1,
+          0
         ],
-        "supportedRadiusM": 0.052,
-        "freeRadiusM": 0.095,
+        "supportedRadiusM": 0.04,
+        "freeRadiusM": 0.07,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "bc055e316fd131cfd8d777e5eaed297507a37d76a6dd72d800485b2661d8a449",
-          "report": "src/rendering/assets/corals/live-rock-island-left-inspection.json"
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "src/rendering/assets/corals/live-rock-island-left-socket-report.json"
         }
       }
     },
@@ -469,40 +469,40 @@
       "parentMesh": "live_rock_island_left",
       "archetype": "branching-sps",
       "positionM": [
-        -0.04,
-        0.469,
-        -0.01
+        -0.15163661539554596,
+        0.38600000739097595,
+        -0.14551040530204773
       ],
       "normal": [
-        0.039862,
-        0.996004,
-        0.079914
+        0,
+        1,
+        0
       ],
       "rotation": [
-        0.039981,
-        -0.0008,
-        -0.019983,
-        0.999
+        0,
+        0,
+        0,
+        1
       ],
       "footprintRadiusM": 0.035,
       "clearanceRadiusM": 0.085,
       "support": {
         "pointM": [
-          -0.04,
-          0.469,
-          -0.01
+          -0.15163661539554596,
+          0.38600000739097595,
+          -0.14551040530204773
         ],
         "normal": [
-          0.039862,
-          0.996004,
-          0.079914
+          0,
+          1,
+          0
         ],
-        "supportedRadiusM": 0.047,
-        "freeRadiusM": 0.11,
+        "supportedRadiusM": 0.035,
+        "freeRadiusM": 0.085,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "bc055e316fd131cfd8d777e5eaed297507a37d76a6dd72d800485b2661d8a449",
-          "report": "src/rendering/assets/corals/live-rock-island-left-inspection.json"
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "src/rendering/assets/corals/live-rock-island-left-socket-report.json"
         }
       }
     },
@@ -512,40 +512,40 @@
       "parentMesh": "live_rock_island_left",
       "archetype": "branching-sps",
       "positionM": [
-        -0.110122,
-        0.454564,
-        0.010623
+        0.017224883660674095,
+        0.3479999899864197,
+        -0.1650913655757904
       ],
       "normal": [
-        -0.066993,
-        0.989633,
-        0.127035
+        0,
+        1,
+        0
       ],
       "rotation": [
-        0.061836,
-        0.052244,
-        0.036873,
-        0.996036
+        0,
+        0,
+        0,
+        1
       ],
       "footprintRadiusM": 0.035,
       "clearanceRadiusM": 0.085,
       "support": {
         "pointM": [
-          -0.110122,
-          0.454564,
-          0.010623
+          0.017224883660674095,
+          0.3479999899864197,
+          -0.1650913655757904
         ],
         "normal": [
-          -0.066993,
-          0.989633,
-          0.127035
+          0,
+          1,
+          0
         ],
-        "supportedRadiusM": 0.047,
-        "freeRadiusM": 0.11,
+        "supportedRadiusM": 0.035,
+        "freeRadiusM": 0.085,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "bc055e316fd131cfd8d777e5eaed297507a37d76a6dd72d800485b2661d8a449",
-          "report": "src/rendering/assets/corals/live-rock-island-left-inspection.json"
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "src/rendering/assets/corals/live-rock-island-left-socket-report.json"
         }
       }
     },
@@ -555,40 +555,40 @@
       "parentMesh": "live_rock_island_left",
       "archetype": "branching-sps",
       "positionM": [
-        0.045218,
-        0.478444,
-        -0.018492
+        0.16659396886825562,
+        0.3720000088214874,
+        -0.13694052398204803
       ],
       "normal": [
-        0.069152,
-        0.991822,
-        0.107273
+        0,
+        1,
+        0
       ],
       "rotation": [
-        0.051873,
-        -0.051873,
-        -0.037394,
-        0.996604
+        0,
+        0,
+        0,
+        1
       ],
       "footprintRadiusM": 0.035,
       "clearanceRadiusM": 0.085,
       "support": {
         "pointM": [
-          0.045218,
-          0.478444,
-          -0.018492
+          0.16659396886825562,
+          0.3720000088214874,
+          -0.13694052398204803
         ],
         "normal": [
-          0.069152,
-          0.991822,
-          0.107273
+          0,
+          1,
+          0
         ],
-        "supportedRadiusM": 0.047,
-        "freeRadiusM": 0.11,
+        "supportedRadiusM": 0.035,
+        "freeRadiusM": 0.085,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "bc055e316fd131cfd8d777e5eaed297507a37d76a6dd72d800485b2661d8a449",
-          "report": "src/rendering/assets/corals/live-rock-island-left-inspection.json"
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "src/rendering/assets/corals/live-rock-island-left-socket-report.json"
         }
       }
     }

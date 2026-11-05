@@ -1,5 +1,24 @@
 # Modular asset contract
 
+<!-- AGENT_DOC_METADATA
+Category: Specification / Contract
+Status: Canonical / Active
+Authority: Binding Technical Contract
+Backlog: AQ-40, AQ-14.3, AQ-42, AQ-14.4
+Owner: @asset_validation
+Updated: 2026-11-05
+Upstream: docs/requirements.md, docs/modular-coral-and-live-rock-spec.md
+Downstream: src/rendering/assets/contract.ts, src/rendering/modeling/*.py, src/rendering/modeling/package_modular_corals.mjs
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Technical Specification / Asset Contract
+> - **Status**: Canonical / Active
+> - **Authority**: Binding Contract
+> - **Backlog Reference**: `AQ-40`
+> - **Summary**: Canonical coordinate system (+Y up, meters, applied unit roots), `COLOR_0` raw linear vertex flexibility masks, and glTF extras inspection metadata contract (`reef-asset-v1`).
+
 AQ-40 defines the inspection/export contract below. It is separate from visual acceptance and does not promote the rejected fused reef scan or its cleanup variants. The existing main renderer keeps its legacy coordinates until AQ-14.4 assembles the modular tank.
 
 ## Coordinates and scale

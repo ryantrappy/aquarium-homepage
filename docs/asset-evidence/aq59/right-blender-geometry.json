@@ -1,0 +1,68 @@
+{
+  "source": "/tmp/aq59-root-review-20261105/src/rendering/assets/corals/live-rock-island-right.glb",
+  "sourceSha256": "ab7b756344c6a0a879d254b6ca06a20c63c4246b0a19b76394cc532c61abfbee",
+  "topologyAfterPositionWeldToleranceM": 1e-07,
+  "meshes": [
+    {
+      "name": "Live_Rock_Island_Right",
+      "verticesBeforeWeld": 12604,
+      "verticesAfterWeld": 12288,
+      "triangles": 24572,
+      "boundaryEdges": 0,
+      "nonmanifoldEdges": 0,
+      "eulerCharacteristic": 2
+    }
+  ],
+  "caveRows": [
+    {
+      "heightM": 0.002,
+      "clearWidthIntervalAt1mmResolutionM": null
+    },
+    {
+      "heightM": 0.04,
+      "clearWidthIntervalAt1mmResolutionM": null
+    },
+    {
+      "heightM": 0.08,
+      "clearWidthIntervalAt1mmResolutionM": null
+    },
+    {
+      "heightM": 0.12,
+      "clearWidthIntervalAt1mmResolutionM": null
+    },
+    {
+      "heightM": 0.16,
+      "clearWidthIntervalAt1mmResolutionM": null
+    },
+    {
+      "heightM": 0.175,
+      "clearWidthIntervalAt1mmResolutionM": null
+    }
+  ],
+  "axisPath": {
+    "xM": 0,
+    "heightM": 0.08,
+    "frontToBackM": [
+      -0.3,
+      0.3
+    ],
+    "stepM": 0.005,
+    "sampleCount": 121,
+    "rayBlocked": true,
+    "minimumSurfaceDistanceAtSamplesM": 0.0008131088106893003,
+    "conservativeContinuousSurfaceClearanceM": -0.0016868911893106998,
+    "note": "Distance-to-surface is 1-Lipschitz; subtract half the 5mm sampling step for this straight axis path. External sand is not included."
+  },
+  "boundsBlender": {
+    "min": [
+      -0.4678885042667389,
+      -0.26017624139785767,
+      -0.012000000104308128
+    ],
+    "max": [
+      0.49856024980545044,
+      0.25136798620224,
+      0.335999995470047
+    ]
+  }
+}

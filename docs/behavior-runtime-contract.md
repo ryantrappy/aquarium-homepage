@@ -1,5 +1,24 @@
 # Fish behavior runtime contract
 
+<!-- AGENT_DOC_METADATA
+Category: Specification / Behavioral Contract
+Status: Canonical / Active
+Authority: Binding Behavioral State Machine Contract
+Backlog: AQ-44, AQ-35, AQ-34, AQ-13
+Owner: @behavior_profiles
+Updated: 2026-11-05
+Upstream: docs/fish-behavior-design.md, docs/reef-fish-roster.md
+Downstream: src/simulation/behavior-runtime.ts, src/simulation/behavior-runtime.test.ts, src/lib/fish-behavior.ts
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Behavioral Specification / Contract
+> - **Status**: Canonical / Active
+> - **Authority**: Binding Contract
+> - **Backlog Reference**: `AQ-44`
+> - **Summary**: Engine-independent behavior state machine specification, tick determinism (1/30s fixed steps), event scoping, life-stage gating, and navigation adapter interface boundaries.
+
 `src/simulation/behavior-runtime.ts` is an engine-independent AQ-44 slice. It consumes the immutable species profiles from `src/lib/fish-behavior.ts` and stores state, timer, seed, target anchor, and deterministic tuning on each fish instance. The runtime does not own mesh deformation, locomotion, service launching, or scene lifecycle.
 
 ## Time and state

@@ -1,8 +1,10 @@
-import { describe, expect, it } from 'vitest'
-import { validateWriteOrigin } from './config'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { createConfigAnyHandler, Route, validateWriteOrigin } from './config'
+
+afterEach(() => vi.unstubAllEnvs())
 
 describe('config write origin guard', () => {
-  it('allows same-origin and non-browser requests without an Origin header', () => {
+  it('allows matching-origin and non-browser requests in development', () => {
     expect(validateWriteOrigin(new Request('https://reef.example/api/config', {
       method: 'PUT', headers: { Origin: 'https://reef.example', 'Sec-Fetch-Site': 'same-origin' },
     }))).toBeUndefined()
@@ -40,5 +42,32 @@ describe('config write origin guard', () => {
     expect(validateWriteOrigin(new Request('https://reef.example/api/config', {
       method: 'POST', headers: { 'Sec-Fetch-Site': 'cross-site' },
     }))).toMatch(/Cross-origin/)
+  })
+
+  it('requires same-origin evidence for production writes when browser headers are omitted', () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    vi.stubEnv('REEF_PUBLIC_ORIGIN', 'https://reef.example')
+
+    expect(validateWriteOrigin(new Request('https://reef.example/api/config', { method: 'PUT' }))).toMatch(/same-origin/)
+    expect(validateWriteOrigin(new Request('https://reef.example/api/config', {
+      method: 'POST', headers: { 'Sec-Fetch-Site': 'same-origin' },
+    }))).toBeUndefined()
+    expect(validateWriteOrigin(new Request('http://reef-control:3000/api/config', {
+      method: 'PUT', headers: { Origin: 'https://reef.example' },
+    }))).toBeUndefined()
+  })
+})
+
+describe('config unsupported method handler', () => {
+  it('registers ANY and returns a standard 405 response without invoking config handlers', async () => {
+    const handlers = Route.options.server?.handlers ?? {}
+    expect(Object.keys(handlers).sort()).toEqual(['ANY', 'GET', 'POST', 'PUT'])
+
+    const response = await createConfigAnyHandler()({
+      request: new Request('https://reef.example/api/config', { method: 'PATCH' }),
+    })
+    expect(response.status).toBe(405)
+    expect(response.headers.get('Allow')).toBe('GET, HEAD, PUT, POST')
+    await expect(response.json()).resolves.toEqual({ error: 'Method not allowed.' })
   })
 })

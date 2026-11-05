@@ -6,7 +6,7 @@ assignee:
   - '@gemini'
   - '@root'
 created_date: '2026-11-03 12:34'
-updated_date: '2026-11-04 19:05'
+updated_date: '2026-11-05 04:18'
 labels: []
 dependencies:
   - AQ-14.3
@@ -176,5 +176,11 @@ author: root
 created: 2026-11-04 19:05
 ---
 Latest user policy permits necessary functional model/pipeline edits by Codex while Gemini handles visual modeling. AQ53 is the new modeling-tagged task assigned @gemini for the identified flexibility-encoding mismatch. Existing AO-slot findings remain a renderer integration constraint; no unsupported claim that a model change is required.
+---
+
+author: @root
+created: 2026-11-05 04:18
+---
+User steering2026-11-04: another agent is actively working on the coral portion. Root reserves coral assets/generators/materials/packager/manifests/README/rendering for that agent, holds coral changes out of commits and makes no further edits there during ownership. Codex workers continue independent telemetry/profile verification and read-only pinned ROCK collision tooling. New export hashes invalidate prior validation; recheck before any future integration. Root retains final review/Done.
 ---
 <!-- COMMENTS:END -->

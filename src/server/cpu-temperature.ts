@@ -2,10 +2,11 @@ import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 export const DEFAULT_CPU_TEMPERATURE_SENSOR_ID = 'coretemp.0:package-id-0'
+export type CpuTemperatureChip = 'coretemp' | 'k10temp' | 'zenpower'
 
 export type CpuTemperatureSensor = {
   id: string
-  chip: 'coretemp'
+  chip: CpuTemperatureChip
   label: string
   unit: '°C'
 }
@@ -14,7 +15,7 @@ export type CpuTemperatureReading =
   | {
       status: 'fresh' | 'stale'
       sensorId: string
-      chip: 'coretemp'
+      chip: CpuTemperatureChip
       label: string
       value: number
       unit: '°C'
@@ -38,6 +39,7 @@ type LastSuccessfulSample = {
   value: number
   observedAtMs: number
   label: string
+  chip: CpuTemperatureChip
 }
 
 type CpuTemperatureStoreOptions = {
@@ -49,14 +51,16 @@ const packageLabel = /^Package id (\d+)$/i
 const coreLabel = /^Core (\d+)$/i
 const hwmonDirectory = /^hwmon\d+$/
 const temperatureLabelFile = /^temp(\d+)_label$/
-const stableSensorId = /^coretemp\.0:(?:package-id-\d+|core-\d+)$/
+const stableSensorId = /^(?:coretemp\.0:(?:package-id-\d+|core-\d+)|(?:k10temp|zenpower)\.0:t(?:ctl|die))$/
+const supportedChips = new Set<CpuTemperatureChip>(['coretemp', 'k10temp', 'zenpower'])
 
 function stableLabelId(label: string) {
   return label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
-function isSupportedLabel(label: string) {
-  return packageLabel.test(label) || coreLabel.test(label)
+function isSupportedLabel(chip: CpuTemperatureChip, label: string) {
+  if (chip === 'coretemp') return packageLabel.test(label) || coreLabel.test(label)
+  return /^T(?:ctl|die)$/i.test(label)
 }
 
 export function createCpuTemperatureStore({ rootPath, now = Date.now }: CpuTemperatureStoreOptions) {
@@ -74,11 +78,12 @@ export function createCpuTemperatureStore({ rootPath, now = Date.now }: CpuTempe
     for (const entry of hwmonEntries) {
       if (!entry.isDirectory() || !hwmonDirectory.test(entry.name)) continue
       const hwmonPath = join(rootPath, 'hwmon', entry.name)
-      let chip: string
+      let chip: CpuTemperatureChip
       let files: string[]
       try {
-        chip = (await readFile(join(hwmonPath, 'name'), 'utf8')).trim()
-        if (chip !== 'coretemp') continue
+        const chipName = (await readFile(join(hwmonPath, 'name'), 'utf8')).trim()
+        if (!supportedChips.has(chipName as CpuTemperatureChip)) continue
+        chip = chipName as CpuTemperatureChip
         files = await readdir(hwmonPath)
       } catch {
         continue
@@ -90,10 +95,10 @@ export function createCpuTemperatureStore({ rootPath, now = Date.now }: CpuTempe
         const labelPath = join(hwmonPath, file)
         try {
           const label = (await readFile(labelPath, 'utf8')).trim()
-          if (!isSupportedLabel(label)) continue
-          const id = `coretemp.0:${stableLabelId(label)}`
+          if (!isSupportedLabel(chip, label)) continue
+          const id = `${chip}.0:${stableLabelId(label)}`
           sensors.push({
-            descriptor: { id, chip: 'coretemp', label, unit: '°C' },
+            descriptor: { id, chip, label, unit: '°C' },
             inputPath: join(hwmonPath, `temp${match[1]}_input`),
           })
         } catch {
@@ -131,7 +136,7 @@ export function createCpuTemperatureStore({ rootPath, now = Date.now }: CpuTempe
 
     const observedAtMs = now()
     const value = milliCelsius / 1000
-    lastSamples.set(sensorId, { value, observedAtMs, label: sensor.descriptor.label })
+    lastSamples.set(sensorId, { value, observedAtMs, label: sensor.descriptor.label, chip: sensor.descriptor.chip })
     return {
       status: 'fresh',
       sensorId,
@@ -152,7 +157,7 @@ export function createCpuTemperatureStore({ rootPath, now = Date.now }: CpuTempe
     return {
       status: 'stale',
       sensorId,
-      chip: 'coretemp',
+      chip: previous.chip,
       label: previous.label,
       value: previous.value,
       unit: '°C',

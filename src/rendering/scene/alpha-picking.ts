@@ -1,13 +1,45 @@
 import * as THREE from 'three'
+import { applyFishLinkVisibility } from './fish-link-focus'
 
 export type AlphaMask = { width: number; height: number; alpha: Uint8Array }
 export type MaskedTexture = { texture: THREE.Texture; pixels?: AlphaMask }
 export type SpriteMasks = WeakMap<THREE.Object3D, MaskedTexture>
 
+/** Remove a failed preview from picking while exposing its native service label. */
+export function handleArtworkTextureFailure(
+  sprite: THREE.Mesh,
+  texture: THREE.Texture,
+  hitMeshes: THREE.Object3D[],
+  masks: SpriteMasks,
+  anchor?: HTMLAnchorElement,
+): void {
+  sprite.visible = false
+  sprite.parent?.remove(sprite)
+  for (let index = hitMeshes.length - 1; index >= 0; index--) {
+    if (hitMeshes[index] === sprite) hitMeshes.splice(index, 1)
+  }
+  masks.delete(sprite)
+  texture.dispose()
+  if (anchor) {
+    applyFishLinkVisibility(anchor, true, null)
+    anchor.dataset.artworkError = 'true'
+  }
+}
+
+/** Upper bound for alpha-picking canvas dimensions, independent of source resolution. */
+export const MAX_ALPHA_MASK_DIMENSION = 512
+
+/** Preserve image proportions while bounding canvas and retained alpha allocations. */
+export function alphaMaskDimensions(width: number, height: number): { width: number; height: number } {
+  if (!(width > 0) || !(height > 0)) throw new Error('Fish artwork has no decoded pixels.')
+  const scale = Math.min(1, MAX_ALPHA_MASK_DIMENSION / Math.max(width, height))
+  return { width: Math.max(1, Math.round(width * scale)), height: Math.max(1, Math.round(height * scale)) }
+}
+
 /** Decode once per loaded artwork, rather than reading a canvas on every ray. */
 export function readArtworkAlpha(image: HTMLImageElement): AlphaMask {
-  const width = image.naturalWidth || image.width, height = image.naturalHeight || image.height
-  if (!width || !height) throw new Error('Fish artwork has no decoded pixels.')
+  const dimensions = alphaMaskDimensions(image.naturalWidth || image.width, image.naturalHeight || image.height)
+  const { width, height } = dimensions
   const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height
   const context = canvas.getContext('2d', { willReadFrequently: true })
   if (!context) throw new Error('Fish artwork alpha could not be read.')

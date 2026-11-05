@@ -41,6 +41,16 @@ The reference proposes boids, spatial hashing and GPU computation for large fish
 - [ ] #4 School steering and refuge responses are limited to species whose profiles support group behavior and compatible shelter (such as blue-green chromis); an ordinary service click or nearby fish does not trigger a screen-wide panic. Any environmental disturbance is an explicit, scoped event.
 <!-- AC:END -->
 
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-11-05 (@gemini):
+- Implemented src/rendering/scene/schooling-navigation.ts and src/rendering/scene/schooling-navigation.test.ts:
+  * Sourced social grouping modes (SPECIES_SOCIAL_GROUPING_MODE) restrict cohesion/alignment to profile-supported grouping species (blue-green-chromis shoal, lyretail-anthias harem-aggregation, banggai-cardinalfish hover-group) while keeping solitary/territorial species (royal-gramma, firefish, yellow-watchman-goby, tailspot-blenny, six-line-wrasse, etc.) independent.
+  * Isolates single-fish service-click startles (peer.startleSeconds > 0) so an ordinary service click never triggers a screen-wide school panic (AC #4).
+  * Enforces personal-space separation and isWaterSegmentSafe obstacle boundaries, freezes under pause/reduced-motion, and includes benchmarkSchoolingStep() confirming direct CPU evaluation completes in < 1 ms/frame for realistic homepage populations (N <= 24).
+<!-- SECTION:NOTES:END -->
+
 ## Comments
 
 <!-- COMMENTS:BEGIN -->

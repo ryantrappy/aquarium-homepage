@@ -71,7 +71,7 @@ describe('native fish links with geometry picking', () => {
     expect(mock.activate).toHaveBeenCalledExactlyOnceWith('tang')
     expect(document.activeElement).toBe(anchor('tang'))
     expect(anchor('tang').classList.contains('is-acknowledged')).toBe(true)
-    await vi.waitFor(() => expect(anchor('clown').href).toBe(services[0].url + '/'))
+    expect(anchor('clown').href).toBe(services[1].url + '/')
   })
   it('blocks covered body points even though a transparent target rectangle is present', async () => {
     mock.serviceAt.mockReturnValue(undefined)
@@ -95,6 +95,34 @@ describe('native fish links with geometry picking', () => {
     mock.serviceAt.mockReturnValue('tang'); let event!: MouseEvent
     await act(async () => { event = pointerClick(anchor('clown'), 1) })
     expect(event.defaultPrevented).toBe(false); expect(mock.activate).toHaveBeenCalledExactlyOnceWith('tang')
+  })
+  it('keeps a native context-menu URL stable after timers and resolves the next keyboard action afresh', async () => {
+    vi.useFakeTimers()
+    try {
+      mock.serviceAt.mockReturnValue('tang')
+      const context = new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: 150, clientY: 200 })
+      await act(async () => { anchor('clown').dispatchEvent(context) })
+      expect(context.defaultPrevented).toBe(false)
+      expect(anchor('clown').href).toBe(services[1].url + '/')
+      await act(async () => { vi.advanceTimersByTime(30_000) })
+      expect(anchor('clown').href).toBe(services[1].url + '/')
+      expect(mock.activate).not.toHaveBeenCalled()
+      const keyboard = new MouseEvent('click', { bubbles: true, cancelable: true, detail: 0 })
+      await act(async () => { anchor('clown').dispatchEvent(keyboard) })
+      expect(keyboard.defaultPrevented).toBe(false)
+      expect(anchor('clown').href).toBe(services[0].url + '/')
+      expect(mock.activate).toHaveBeenCalledExactlyOnceWith('clown')
+    } finally { vi.useRealTimers() }
+  })
+  it('re-picks the target after a context menu instead of reusing its borrowed URL', async () => {
+    mock.serviceAt.mockReturnValue('tang')
+    await act(async () => { anchor('clown').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: 150, clientY: 200 })) })
+    mock.serviceAt.mockReturnValue('clown')
+    let event!: MouseEvent
+    await act(async () => { event = pointerClick(anchor('clown')) })
+    expect(event.defaultPrevented).toBe(false)
+    expect(anchor('clown').href).toBe(services[0].url + '/')
+    expect(mock.activate).toHaveBeenCalledExactlyOnceWith('clown')
   })
   it('does not expose a native link context menu through foreground reef', async () => {
     mock.serviceAt.mockReturnValue(undefined)

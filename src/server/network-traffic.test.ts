@@ -70,6 +70,51 @@ describe('network traffic source', () => {
     })
   })
 
+  it('calculates truthful rates across repeated client polls at 60.25 seconds', async () => {
+    const { source, statsRootPath } = await makeSource()
+    let elapsed = 0
+    const store = createNetworkTrafficStore({ sources: [source], elapsedNow: () => elapsed })
+    expect((await store.read(source.id)).status).toBe('unavailable')
+
+    await setCounters(statsRootPath, '7025', '14050')
+    elapsed = 60_250
+    expect(await store.read(source.id)).toMatchObject({
+      status: 'fresh',
+      ingressBytesPerSecond: 100,
+      egressBytesPerSecond: 200,
+      ageMs: 0,
+    })
+
+    await setCounters(statsRootPath, '13050', '26100')
+    elapsed = 120_500
+    expect(await store.read(source.id)).toMatchObject({
+      status: 'fresh',
+      ingressBytesPerSecond: 100,
+      egressBytesPerSecond: 200,
+      ageMs: 0,
+    })
+  })
+
+  it('rebases without publishing an over-limit default-window rate', async () => {
+    const { source, statsRootPath } = await makeSource()
+    let elapsed = 0
+    const store = createNetworkTrafficStore({ sources: [source], elapsedNow: () => elapsed })
+    await store.read(source.id)
+
+    await setCounters(statsRootPath, '10000', '20000')
+    elapsed = 90_001
+    expect(await store.read(source.id)).toMatchObject({
+      status: 'unavailable',
+      message: 'The traffic sample interval was too long; a new baseline was recorded.',
+    })
+
+    await setCounters(statsRootPath, '10100', '20200')
+    elapsed = 91_001
+    expect(await store.read(source.id)).toMatchObject({
+      status: 'fresh', ingressBytesPerSecond: 100, egressBytesPerSecond: 200, ageMs: 0,
+    })
+  })
+
   it('preserves the warm-up baseline and returns a cached rate with truthful age', async () => {
     const { source, statsRootPath } = await makeSource()
     let elapsed = 0

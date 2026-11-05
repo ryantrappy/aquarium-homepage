@@ -1,0 +1,80 @@
+{
+  "extras": {
+    "reefAsset": {
+      "schema": "reef-asset-v1",
+      "id": "fish-mandarin-dragonet",
+      "kind": "fish",
+      "units": "meter",
+      "upAxis": "+Y",
+      "origin": "local",
+      "dimensionsM": [
+        0.035142,
+        0.04049,
+        0.075044
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "7b446be469adf26399a45c6d034c49ffb1d3706024cc5c43505759f5f829604d",
+        "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_mandarin_dragonet.py -- /tmp/fish-models/fish-mandarin-dragonet",
+        "attribution": "Original procedural Blender 5.0.1 rigged and animated fish asset (Synchiropus splendidus (Mandarin Dragonet)) with embedded 1024x1024 PBR textures."
+      }
+    }
+  },
+  "rootTransform": {
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "boundsM": {
+    "min": [
+      -0.017571,
+      -0.015187,
+      -0.037044
+    ],
+    "max": [
+      0.017571,
+      0.025303,
+      0.038
+    ]
+  },
+  "primitives": [
+    {
+      "id": "mandarin_dragonet_body",
+      "role": "fish",
+      "vertexCount": 7912,
+      "boundsM": {
+        "min": [
+          -0.017571,
+          -0.015187,
+          -0.037044
+        ],
+        "max": [
+          0.017571,
+          0.025303,
+          0.038
+        ]
+      },
+      "material": {
+        "vertexColors": false,
+        "vertexAlpha": false,
+        "aoSource": "texture"
+      }
+    }
+  ],
+  "sockets": [],
+  "collisionParts": []
+}

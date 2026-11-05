@@ -1,5 +1,13 @@
 import * as THREE from 'three'
 import type { HabitatAnchorLocation, SolidObstacleVolume, Vec3 } from '../../simulation/habitat-navigation'
+import { MIN_FISH_CLEARANCE, fishClearanceRadius } from './fish-scale'
+
+function anchorClearanceOffset(compatibleSpecies?: readonly string[]): number {
+  const maxRadius = compatibleSpecies?.length
+    ? Math.max(MIN_FISH_CLEARANCE, ...compatibleSpecies.map(id => fishClearanceRadius(id)))
+    : MIN_FISH_CLEARANCE
+  return maxRadius + .03
+}
 
 /** Transform offline-derived source geometry data; no triangle scans at mount. */
 export function instantiateReefHabitat(source: { obstacles: readonly SolidObstacleVolume[]; anchors: readonly HabitatAnchorLocation[] }, scale: Vec3, position: Vec3, floor: number, prefix: string, yaw = 0) {
@@ -10,7 +18,14 @@ export function instantiateReefHabitat(source: { obstacles: readonly SolidObstac
       for (const x of [obstacle.bounds.min.x, obstacle.bounds.max.x]) for (const y of [obstacle.bounds.min.y, obstacle.bounds.max.y]) for (const z of [obstacle.bounds.min.z, obstacle.bounds.max.z]) corners.push(transform({ x, y, z }))
       return { id: `${prefix}-${obstacle.id}`, bounds: { min: { x: Math.min(...corners.map(p => p.x)), y: floor, z: Math.min(...corners.map(p => p.z)) }, max: { x: Math.max(...corners.map(p => p.x)), y: Math.max(...corners.map(p => p.y)), z: Math.max(...corners.map(p => p.z)) } } }
     }),
-    anchors: source.anchors.map(anchor => ({ ...anchor, id: `${prefix}-${anchor.id}`, position: { ...transform(anchor.position), y: anchor.position.y * scale.y + position.y + .53 } })),
+    anchors: source.anchors.map(anchor => ({
+      ...anchor,
+      id: `${prefix}-${anchor.id}`,
+      position: {
+        ...transform(anchor.position),
+        y: anchor.position.y * scale.y + position.y + anchorClearanceOffset(anchor.compatibleSpecies),
+      },
+    })),
   }
 }
 
@@ -39,6 +54,8 @@ export function deriveReefHabitat(reef: THREE.Object3D, floor: number, prefix: s
   })
   const obstacles: SolidObstacleVolume[] = [], anchors: HabitatAnchorLocation[] = []
   const ray = new THREE.Raycaster(), normal = new THREE.Vector3(), normalMatrix = new THREE.Matrix3()
+  const compatibleSpecies = ['yellow-tang'] as const
+  const clearanceOffset = anchorClearanceOffset(compatibleSpecies)
   tops.forEach((top, index) => {
     if (!Number.isFinite(top) || top <= floor) return
     const x = Math.floor(index / cells), z = index % cells
@@ -52,7 +69,7 @@ export function deriveReefHabitat(reef: THREE.Object3D, floor: number, prefix: s
     if (!hit?.face || hit.point.y > bounds.max.y - .25) return
     normal.copy(hit.face.normal).applyNormalMatrix(normalMatrix.getNormalMatrix(hit.object.matrixWorld))
     if (normal.y < .7) return
-    anchors.push({ id: `${prefix}-substrate-${index}`, anchor: 'grazingSurface', compatibleSpecies: ['yellow-tang'], position: { x: hit.point.x, y: Math.max(hit.point.y, max.y) + .53, z: hit.point.z } })
+    anchors.push({ id: `${prefix}-substrate-${index}`, anchor: 'grazingSurface', compatibleSpecies: [...compatibleSpecies], position: { x: hit.point.x, y: Math.max(hit.point.y, max.y) + clearanceOffset, z: hit.point.z } })
   })
   return { obstacles, anchors, meshes }
 }

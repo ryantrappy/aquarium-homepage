@@ -1,0 +1,1302 @@
+{
+  "schema": "socket-support-inspection-v1",
+  "assetId": "live-rock-island-left",
+  "sourceSha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+  "method": {
+    "contactToleranceM": 0.002,
+    "upNormalVectorTolerance": 0.002,
+    "footprintSampleSpacingM": 0.005,
+    "footprintSampleCount": 2383,
+    "footprintNormalMaxAngleDeg": 30,
+    "clearanceEnvelope": {
+      "shape": "oriented-cylinder",
+      "radiusM": "requested reefSocket.clearanceRadiusM",
+      "heightM": "same as radius",
+      "baseOffsetM": 0.002
+    },
+    "limitations": [
+      "Socket local/world basis must remain unit-scale and orthogonal; footprint and clearance radii are interpreted in exported asset meters.",
+      "Contact normal uses the geometric normal of the nearest triangle; at shared-vertex ties it is facet-sensitive and may select one of several incident faces.",
+      "Footprint support is a finite radial sample lattice at the reported spacing, not a continuous disk certificate.",
+      "Clearance checks only intersection with an oriented rock-space cylinder; it does not prove whole-colony fit, fish passage or biological suitability.",
+      "Only the default glTF scene and embedded, uncompressed TRIANGLES geometry are inspected."
+    ]
+  },
+  "supportedSockets": [
+    {
+      "name": "socket_anemone_crevice_01",
+      "role": "coral-mount",
+      "parentMesh": "live_rock_island_left",
+      "archetype": "host-anemone",
+      "positionM": [
+        0.03591227903962135,
+        0.23600000143051147,
+        0.014666666276752949
+      ],
+      "normal": [
+        0,
+        0.9999999999999999,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "footprintRadiusM": 0.038,
+      "clearanceRadiusM": 0.085,
+      "support": {
+        "pointM": [
+          0.03591227903962135,
+          0.23600000143051147,
+          0.014666666276752949
+        ],
+        "normal": [
+          0,
+          0.9999999999999999,
+          0
+        ],
+        "supportedRadiusM": 0.038,
+        "freeRadiusM": 0.085,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "<pinned-root-review>"
+        }
+      }
+    },
+    {
+      "name": "socket_brain_apron_01",
+      "role": "coral-mount",
+      "parentMesh": "live_rock_island_left",
+      "archetype": "mounded-lps",
+      "positionM": [
+        -0.31209129095077515,
+        0.11800000071525574,
+        0.15603458881378174
+      ],
+      "normal": [
+        0,
+        1,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "footprintRadiusM": 0.045,
+      "clearanceRadiusM": 0.075,
+      "support": {
+        "pointM": [
+          -0.31209129095077515,
+          0.11800000071525574,
+          0.15603458881378174
+        ],
+        "normal": [
+          0,
+          1,
+          0
+        ],
+        "supportedRadiusM": 0.045,
+        "freeRadiusM": 0.075,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "<pinned-root-review>"
+        }
+      }
+    },
+    {
+      "name": "socket_brain_apron_02",
+      "role": "coral-mount",
+      "parentMesh": "live_rock_island_left",
+      "archetype": "mounded-lps",
+      "positionM": [
+        0.2776613235473633,
+        0.09600000083446503,
+        0.1576288342475891
+      ],
+      "normal": [
+        0,
+        0.9999999999999999,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "footprintRadiusM": 0.045,
+      "clearanceRadiusM": 0.075,
+      "support": {
+        "pointM": [
+          0.2776613235473633,
+          0.09600000083446503,
+          0.1576288342475891
+        ],
+        "normal": [
+          0,
+          0.9999999999999999,
+          0
+        ],
+        "supportedRadiusM": 0.045,
+        "freeRadiusM": 0.075,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "<pinned-root-review>"
+        }
+      }
+    },
+    {
+      "name": "socket_lps_mid_01",
+      "role": "coral-mount",
+      "parentMesh": "live_rock_island_left",
+      "archetype": "tentaculate-lps",
+      "positionM": [
+        -0.24323074519634247,
+        0.2160000056028366,
+        0.014550874941051006
+      ],
+      "normal": [
+        0,
+        0.9999999999999999,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "footprintRadiusM": 0.03,
+      "clearanceRadiusM": 0.075,
+      "support": {
+        "pointM": [
+          -0.24323074519634247,
+          0.2160000056028366,
+          0.014550874941051006
+        ],
+        "normal": [
+          0,
+          0.9999999999999999,
+          0
+        ],
+        "supportedRadiusM": 0.03,
+        "freeRadiusM": 0.075,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "<pinned-root-review>"
+        }
+      }
+    },
+    {
+      "name": "socket_lps_mid_02",
+      "role": "coral-mount",
+      "parentMesh": "live_rock_island_left",
+      "archetype": "tentaculate-lps",
+      "positionM": [
+        0.24673360586166382,
+        0.25600001215934753,
+        0.009388045407831669
+      ],
+      "normal": [
+        0,
+        1,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "footprintRadiusM": 0.03,
+      "clearanceRadiusM": 0.075,
+      "support": {
+        "pointM": [
+          0.24673360586166382,
+          0.25600001215934753,
+          0.009388045407831669
+        ],
+        "normal": [
+          0,
+          1,
+          0
+        ],
+        "supportedRadiusM": 0.03,
+        "freeRadiusM": 0.075,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "<pinned-root-review>"
+        }
+      }
+    },
+    {
+      "name": "socket_lps_mid_03",
+      "role": "coral-mount",
+      "parentMesh": "live_rock_island_left",
+      "archetype": "tentaculate-lps",
+      "positionM": [
+        -0.0952456146478653,
+        0.23600000143051147,
+        0.02266666665673256
+      ],
+      "normal": [
+        0,
+        1,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "footprintRadiusM": 0.03,
+      "clearanceRadiusM": 0.075,
+      "support": {
+        "pointM": [
+          -0.0952456146478653,
+          0.23600000143051147,
+          0.02266666665673256
+        ],
+        "normal": [
+          0,
+          1,
+          0
+        ],
+        "supportedRadiusM": 0.03,
+        "freeRadiusM": 0.075,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "<pinned-root-review>"
+        }
+      }
+    },
+    {
+      "name": "socket_plate_ledge_01",
+      "role": "coral-mount",
+      "parentMesh": "live_rock_island_left",
+      "archetype": "plating-sps",
+      "positionM": [
+        -0.34569770097732544,
+        0.2680000066757202,
+        -0.09484626352787018
+      ],
+      "normal": [
+        0,
+        1,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "footprintRadiusM": 0.032,
+      "clearanceRadiusM": 0.08,
+      "support": {
+        "pointM": [
+          -0.34569770097732544,
+          0.2680000066757202,
+          -0.09484626352787018
+        ],
+        "normal": [
+          0,
+          1,
+          0
+        ],
+        "supportedRadiusM": 0.032,
+        "freeRadiusM": 0.08,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "<pinned-root-review>"
+        }
+      }
+    },
+    {
+      "name": "socket_plate_ledge_02",
+      "role": "coral-mount",
+      "parentMesh": "live_rock_island_left",
+      "archetype": "plating-sps",
+      "positionM": [
+        0.34326252341270447,
+        0.20399999618530273,
+        -0.09602948278188705
+      ],
+      "normal": [
+        0,
+        0.9999999999999999,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "footprintRadiusM": 0.032,
+      "clearanceRadiusM": 0.08,
+      "support": {
+        "pointM": [
+          0.34326252341270447,
+          0.20399999618530273,
+          -0.09602948278188705
+        ],
+        "normal": [
+          0,
+          0.9999999999999999,
+          0
+        ],
+        "supportedRadiusM": 0.032,
+        "freeRadiusM": 0.08,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "<pinned-root-review>"
+        }
+      }
+    },
+    {
+      "name": "socket_soft_mat_01",
+      "role": "coral-mount",
+      "parentMesh": "live_rock_island_left",
+      "archetype": "zoanthid-mat",
+      "positionM": [
+        -0.1817210167646408,
+        0.11800000071525574,
+        0.1686696857213974
+      ],
+      "normal": [
+        0,
+        1,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "footprintRadiusM": 0.04,
+      "clearanceRadiusM": 0.07,
+      "support": {
+        "pointM": [
+          -0.1817210167646408,
+          0.11800000071525574,
+          0.1686696857213974
+        ],
+        "normal": [
+          0,
+          1,
+          0
+        ],
+        "supportedRadiusM": 0.04,
+        "freeRadiusM": 0.07,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "<pinned-root-review>"
+        }
+      }
+    },
+    {
+      "name": "socket_sps_crest_01",
+      "role": "coral-mount",
+      "parentMesh": "live_rock_island_left",
+      "archetype": "branching-sps",
+      "positionM": [
+        -0.15163661539554596,
+        0.38600000739097595,
+        -0.14551040530204773
+      ],
+      "normal": [
+        0,
+        1,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "footprintRadiusM": 0.035,
+      "clearanceRadiusM": 0.085,
+      "support": {
+        "pointM": [
+          -0.15163661539554596,
+          0.38600000739097595,
+          -0.14551040530204773
+        ],
+        "normal": [
+          0,
+          1,
+          0
+        ],
+        "supportedRadiusM": 0.035,
+        "freeRadiusM": 0.085,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "<pinned-root-review>"
+        }
+      }
+    },
+    {
+      "name": "socket_sps_crest_02",
+      "role": "coral-mount",
+      "parentMesh": "live_rock_island_left",
+      "archetype": "branching-sps",
+      "positionM": [
+        0.017224883660674095,
+        0.3479999899864197,
+        -0.1650913655757904
+      ],
+      "normal": [
+        0,
+        1,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "footprintRadiusM": 0.035,
+      "clearanceRadiusM": 0.085,
+      "support": {
+        "pointM": [
+          0.017224883660674095,
+          0.3479999899864197,
+          -0.1650913655757904
+        ],
+        "normal": [
+          0,
+          1,
+          0
+        ],
+        "supportedRadiusM": 0.035,
+        "freeRadiusM": 0.085,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "<pinned-root-review>"
+        }
+      }
+    },
+    {
+      "name": "socket_sps_crest_03",
+      "role": "coral-mount",
+      "parentMesh": "live_rock_island_left",
+      "archetype": "branching-sps",
+      "positionM": [
+        0.16659396886825562,
+        0.3720000088214874,
+        -0.13694052398204803
+      ],
+      "normal": [
+        0,
+        1,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "footprintRadiusM": 0.035,
+      "clearanceRadiusM": 0.085,
+      "support": {
+        "pointM": [
+          0.16659396886825562,
+          0.3720000088214874,
+          -0.13694052398204803
+        ],
+        "normal": [
+          0,
+          1,
+          0
+        ],
+        "supportedRadiusM": 0.035,
+        "freeRadiusM": 0.085,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "report": "<pinned-root-review>"
+        }
+      }
+    }
+  ],
+  "measurements": [
+    {
+      "nodeIndex": 0,
+      "name": "socket_anemone_crevice_01",
+      "supported": true,
+      "data": {
+        "sourceNode": 0,
+        "socketToSurfaceDistanceM": 0,
+        "measuredPointM": [
+          0.03591227903962135,
+          0.23600000143051147,
+          0.014666666276752949
+        ],
+        "measuredSurfaceNormal": [
+          0,
+          0.9999999999999999,
+          0
+        ],
+        "nearestTriangleIndex": 6485,
+        "upNormalVectorDifference": 1.1102230246251565e-16,
+        "footprintSampleSpacingM": 0.005,
+        "originalIntent": {
+          "role": "coral-mount",
+          "parentMesh": "live_rock_island_left",
+          "archetype": "host-anemone",
+          "footprintRadiusM": 0.038,
+          "clearanceRadiusM": 0.085
+        },
+        "rawSocketTransform": {
+          "translation": [
+            0.03591227903962135,
+            0.23600000143051147,
+            0.014666666276752949
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "worldSocketUp": [
+          0,
+          1,
+          0
+        ],
+        "footprintSamples": 219,
+        "footprintFailedSamples": 0,
+        "footprintMaxSlopeDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": 0.085,
+          "heightM": 0.085,
+          "baseOffsetM": 0.002,
+          "blockerTriangleCount": 0,
+          "blockers": []
+        }
+      }
+    },
+    {
+      "nodeIndex": 1,
+      "name": "socket_brain_apron_01",
+      "supported": true,
+      "data": {
+        "sourceNode": 1,
+        "socketToSurfaceDistanceM": 0,
+        "measuredPointM": [
+          -0.31209129095077515,
+          0.11800000071525574,
+          0.15603458881378174
+        ],
+        "measuredSurfaceNormal": [
+          0,
+          1,
+          0
+        ],
+        "nearestTriangleIndex": 1915,
+        "upNormalVectorDifference": 0,
+        "footprintSampleSpacingM": 0.005,
+        "originalIntent": {
+          "role": "coral-mount",
+          "parentMesh": "live_rock_island_left",
+          "archetype": "mounded-lps",
+          "footprintRadiusM": 0.045,
+          "clearanceRadiusM": 0.075
+        },
+        "rawSocketTransform": {
+          "translation": [
+            -0.31209129095077515,
+            0.11800000071525574,
+            0.15603458881378174
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "worldSocketUp": [
+          0,
+          1,
+          0
+        ],
+        "footprintSamples": 289,
+        "footprintFailedSamples": 0,
+        "footprintMaxSlopeDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": 0.075,
+          "heightM": 0.075,
+          "baseOffsetM": 0.002,
+          "blockerTriangleCount": 0,
+          "blockers": []
+        }
+      }
+    },
+    {
+      "nodeIndex": 2,
+      "name": "socket_brain_apron_02",
+      "supported": true,
+      "data": {
+        "sourceNode": 2,
+        "socketToSurfaceDistanceM": 0,
+        "measuredPointM": [
+          0.2776613235473633,
+          0.09600000083446503,
+          0.1576288342475891
+        ],
+        "measuredSurfaceNormal": [
+          0,
+          0.9999999999999999,
+          0
+        ],
+        "nearestTriangleIndex": 9725,
+        "upNormalVectorDifference": 1.1102230246251565e-16,
+        "footprintSampleSpacingM": 0.005,
+        "originalIntent": {
+          "role": "coral-mount",
+          "parentMesh": "live_rock_island_left",
+          "archetype": "mounded-lps",
+          "footprintRadiusM": 0.045,
+          "clearanceRadiusM": 0.075
+        },
+        "rawSocketTransform": {
+          "translation": [
+            0.2776613235473633,
+            0.09600000083446503,
+            0.1576288342475891
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "worldSocketUp": [
+          0,
+          1,
+          0
+        ],
+        "footprintSamples": 289,
+        "footprintFailedSamples": 0,
+        "footprintMaxSlopeDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": 0.075,
+          "heightM": 0.075,
+          "baseOffsetM": 0.002,
+          "blockerTriangleCount": 0,
+          "blockers": []
+        }
+      }
+    },
+    {
+      "nodeIndex": 3,
+      "name": "socket_lps_mid_01",
+      "supported": true,
+      "data": {
+        "sourceNode": 3,
+        "socketToSurfaceDistanceM": 0,
+        "measuredPointM": [
+          -0.24323074519634247,
+          0.2160000056028366,
+          0.014550874941051006
+        ],
+        "measuredSurfaceNormal": [
+          0,
+          0.9999999999999999,
+          0
+        ],
+        "nearestTriangleIndex": 2705,
+        "upNormalVectorDifference": 1.1102230246251565e-16,
+        "footprintSampleSpacingM": 0.005,
+        "originalIntent": {
+          "role": "coral-mount",
+          "parentMesh": "live_rock_island_left",
+          "archetype": "tentaculate-lps",
+          "footprintRadiusM": 0.03,
+          "clearanceRadiusM": 0.075
+        },
+        "rawSocketTransform": {
+          "translation": [
+            -0.24323074519634247,
+            0.2160000056028366,
+            0.014550874941051006
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "worldSocketUp": [
+          0,
+          1,
+          0
+        ],
+        "footprintSamples": 137,
+        "footprintFailedSamples": 0,
+        "footprintMaxSlopeDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": 0.075,
+          "heightM": 0.075,
+          "baseOffsetM": 0.002,
+          "blockerTriangleCount": 0,
+          "blockers": []
+        }
+      }
+    },
+    {
+      "nodeIndex": 4,
+      "name": "socket_lps_mid_02",
+      "supported": true,
+      "data": {
+        "sourceNode": 4,
+        "socketToSurfaceDistanceM": 0,
+        "measuredPointM": [
+          0.24673360586166382,
+          0.25600001215934753,
+          0.009388045407831669
+        ],
+        "measuredSurfaceNormal": [
+          0,
+          1,
+          0
+        ],
+        "nearestTriangleIndex": 9258,
+        "upNormalVectorDifference": 0,
+        "footprintSampleSpacingM": 0.005,
+        "originalIntent": {
+          "role": "coral-mount",
+          "parentMesh": "live_rock_island_left",
+          "archetype": "tentaculate-lps",
+          "footprintRadiusM": 0.03,
+          "clearanceRadiusM": 0.075
+        },
+        "rawSocketTransform": {
+          "translation": [
+            0.24673360586166382,
+            0.25600001215934753,
+            0.009388045407831669
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "worldSocketUp": [
+          0,
+          1,
+          0
+        ],
+        "footprintSamples": 137,
+        "footprintFailedSamples": 0,
+        "footprintMaxSlopeDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": 0.075,
+          "heightM": 0.075,
+          "baseOffsetM": 0.002,
+          "blockerTriangleCount": 0,
+          "blockers": []
+        }
+      }
+    },
+    {
+      "nodeIndex": 5,
+      "name": "socket_lps_mid_03",
+      "supported": true,
+      "data": {
+        "sourceNode": 5,
+        "socketToSurfaceDistanceM": 0,
+        "measuredPointM": [
+          -0.0952456146478653,
+          0.23600000143051147,
+          0.02266666665673256
+        ],
+        "measuredSurfaceNormal": [
+          0,
+          1,
+          0
+        ],
+        "nearestTriangleIndex": 4719,
+        "upNormalVectorDifference": 0,
+        "footprintSampleSpacingM": 0.005,
+        "originalIntent": {
+          "role": "coral-mount",
+          "parentMesh": "live_rock_island_left",
+          "archetype": "tentaculate-lps",
+          "footprintRadiusM": 0.03,
+          "clearanceRadiusM": 0.075
+        },
+        "rawSocketTransform": {
+          "translation": [
+            -0.0952456146478653,
+            0.23600000143051147,
+            0.02266666665673256
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "worldSocketUp": [
+          0,
+          1,
+          0
+        ],
+        "footprintSamples": 137,
+        "footprintFailedSamples": 0,
+        "footprintMaxSlopeDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": 0.075,
+          "heightM": 0.075,
+          "baseOffsetM": 0.002,
+          "blockerTriangleCount": 0,
+          "blockers": []
+        }
+      }
+    },
+    {
+      "nodeIndex": 6,
+      "name": "socket_plate_ledge_01",
+      "supported": true,
+      "data": {
+        "sourceNode": 6,
+        "socketToSurfaceDistanceM": 0,
+        "measuredPointM": [
+          -0.34569770097732544,
+          0.2680000066757202,
+          -0.09484626352787018
+        ],
+        "measuredSurfaceNormal": [
+          0,
+          1,
+          0
+        ],
+        "nearestTriangleIndex": 1346,
+        "upNormalVectorDifference": 0,
+        "footprintSampleSpacingM": 0.005,
+        "originalIntent": {
+          "role": "coral-mount",
+          "parentMesh": "live_rock_island_left",
+          "archetype": "plating-sps",
+          "footprintRadiusM": 0.032,
+          "clearanceRadiusM": 0.08
+        },
+        "rawSocketTransform": {
+          "translation": [
+            -0.34569770097732544,
+            0.2680000066757202,
+            -0.09484626352787018
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "worldSocketUp": [
+          0,
+          1,
+          0
+        ],
+        "footprintSamples": 167,
+        "footprintFailedSamples": 0,
+        "footprintMaxSlopeDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": 0.08,
+          "heightM": 0.08,
+          "baseOffsetM": 0.002,
+          "blockerTriangleCount": 0,
+          "blockers": []
+        }
+      }
+    },
+    {
+      "nodeIndex": 7,
+      "name": "socket_plate_ledge_02",
+      "supported": true,
+      "data": {
+        "sourceNode": 7,
+        "socketToSurfaceDistanceM": 0,
+        "measuredPointM": [
+          0.34326252341270447,
+          0.20399999618530273,
+          -0.09602948278188705
+        ],
+        "measuredSurfaceNormal": [
+          0,
+          0.9999999999999999,
+          0
+        ],
+        "nearestTriangleIndex": 10924,
+        "upNormalVectorDifference": 1.1102230246251565e-16,
+        "footprintSampleSpacingM": 0.005,
+        "originalIntent": {
+          "role": "coral-mount",
+          "parentMesh": "live_rock_island_left",
+          "archetype": "plating-sps",
+          "footprintRadiusM": 0.032,
+          "clearanceRadiusM": 0.08
+        },
+        "rawSocketTransform": {
+          "translation": [
+            0.34326252341270447,
+            0.20399999618530273,
+            -0.09602948278188705
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "worldSocketUp": [
+          0,
+          1,
+          0
+        ],
+        "footprintSamples": 167,
+        "footprintFailedSamples": 0,
+        "footprintMaxSlopeDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": 0.08,
+          "heightM": 0.08,
+          "baseOffsetM": 0.002,
+          "blockerTriangleCount": 0,
+          "blockers": []
+        }
+      }
+    },
+    {
+      "nodeIndex": 8,
+      "name": "socket_soft_mat_01",
+      "supported": true,
+      "data": {
+        "sourceNode": 8,
+        "socketToSurfaceDistanceM": 0,
+        "measuredPointM": [
+          -0.1817210167646408,
+          0.11800000071525574,
+          0.1686696857213974
+        ],
+        "measuredSurfaceNormal": [
+          0,
+          1,
+          0
+        ],
+        "nearestTriangleIndex": 3549,
+        "upNormalVectorDifference": 0,
+        "footprintSampleSpacingM": 0.005,
+        "originalIntent": {
+          "role": "coral-mount",
+          "parentMesh": "live_rock_island_left",
+          "archetype": "zoanthid-mat",
+          "footprintRadiusM": 0.04,
+          "clearanceRadiusM": 0.07
+        },
+        "rawSocketTransform": {
+          "translation": [
+            -0.1817210167646408,
+            0.11800000071525574,
+            0.1686696857213974
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "worldSocketUp": [
+          0,
+          1,
+          0
+        ],
+        "footprintSamples": 232,
+        "footprintFailedSamples": 0,
+        "footprintMaxSlopeDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": 0.07,
+          "heightM": 0.07,
+          "baseOffsetM": 0.002,
+          "blockerTriangleCount": 0,
+          "blockers": []
+        }
+      }
+    },
+    {
+      "nodeIndex": 9,
+      "name": "socket_sps_crest_01",
+      "supported": true,
+      "data": {
+        "sourceNode": 9,
+        "socketToSurfaceDistanceM": 0,
+        "measuredPointM": [
+          -0.15163661539554596,
+          0.38600000739097595,
+          -0.14551040530204773
+        ],
+        "measuredSurfaceNormal": [
+          0,
+          1,
+          0
+        ],
+        "nearestTriangleIndex": 4005,
+        "upNormalVectorDifference": 0,
+        "footprintSampleSpacingM": 0.005,
+        "originalIntent": {
+          "role": "coral-mount",
+          "parentMesh": "live_rock_island_left",
+          "archetype": "branching-sps",
+          "footprintRadiusM": 0.035,
+          "clearanceRadiusM": 0.085
+        },
+        "rawSocketTransform": {
+          "translation": [
+            -0.15163661539554596,
+            0.38600000739097595,
+            -0.14551040530204773
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "worldSocketUp": [
+          0,
+          1,
+          0
+        ],
+        "footprintSamples": 203,
+        "footprintFailedSamples": 0,
+        "footprintMaxSlopeDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": 0.085,
+          "heightM": 0.085,
+          "baseOffsetM": 0.002,
+          "blockerTriangleCount": 0,
+          "blockers": []
+        }
+      }
+    },
+    {
+      "nodeIndex": 10,
+      "name": "socket_sps_crest_02",
+      "supported": true,
+      "data": {
+        "sourceNode": 10,
+        "socketToSurfaceDistanceM": 0,
+        "measuredPointM": [
+          0.017224883660674095,
+          0.3479999899864197,
+          -0.1650913655757904
+        ],
+        "measuredSurfaceNormal": [
+          0,
+          1,
+          0
+        ],
+        "nearestTriangleIndex": 6283,
+        "upNormalVectorDifference": 0,
+        "footprintSampleSpacingM": 0.005,
+        "originalIntent": {
+          "role": "coral-mount",
+          "parentMesh": "live_rock_island_left",
+          "archetype": "branching-sps",
+          "footprintRadiusM": 0.035,
+          "clearanceRadiusM": 0.085
+        },
+        "rawSocketTransform": {
+          "translation": [
+            0.017224883660674095,
+            0.3479999899864197,
+            -0.1650913655757904
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "worldSocketUp": [
+          0,
+          1,
+          0
+        ],
+        "footprintSamples": 203,
+        "footprintFailedSamples": 0,
+        "footprintMaxSlopeDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": 0.085,
+          "heightM": 0.085,
+          "baseOffsetM": 0.002,
+          "blockerTriangleCount": 0,
+          "blockers": []
+        }
+      }
+    },
+    {
+      "nodeIndex": 11,
+      "name": "socket_sps_crest_03",
+      "supported": true,
+      "data": {
+        "sourceNode": 11,
+        "socketToSurfaceDistanceM": 0,
+        "measuredPointM": [
+          0.16659396886825562,
+          0.3720000088214874,
+          -0.13694052398204803
+        ],
+        "measuredSurfaceNormal": [
+          0,
+          1,
+          0
+        ],
+        "nearestTriangleIndex": 8287,
+        "upNormalVectorDifference": 0,
+        "footprintSampleSpacingM": 0.005,
+        "originalIntent": {
+          "role": "coral-mount",
+          "parentMesh": "live_rock_island_left",
+          "archetype": "branching-sps",
+          "footprintRadiusM": 0.035,
+          "clearanceRadiusM": 0.085
+        },
+        "rawSocketTransform": {
+          "translation": [
+            0.16659396886825562,
+            0.3720000088214874,
+            -0.13694052398204803
+          ],
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "worldSocketUp": [
+          0,
+          1,
+          0
+        ],
+        "footprintSamples": 203,
+        "footprintFailedSamples": 0,
+        "footprintMaxSlopeDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": 0.085,
+          "heightM": 0.085,
+          "baseOffsetM": 0.002,
+          "blockerTriangleCount": 0,
+          "blockers": []
+        }
+      }
+    }
+  ],
+  "rejectedSockets": []
+}

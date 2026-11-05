@@ -4,6 +4,14 @@ import { createFishExtensionRuntime, EMPTY_FISH_EXTENSIONS, type FishExtensionCo
 import { findWaterRoute, isWaterSegmentSafe, resolveHabitatRoute, type AxisAlignedBox, type HabitatAnchorLocation, type SolidObstacleVolume, type Vec3 } from '../../simulation/habitat-navigation'
 import { findMeshRoute, type CapsuleClearanceQuery, type MeshNavigationBudget, type MeshNavigationWorkBudget, type MeshNavigationWorkReport } from '../../simulation/mesh-navigation'
 import { simulationSubsteps } from './clock'
+import {
+  SHARP_TURN_THRESHOLD_RAD,
+  computeCurvilinearStepVector,
+  computeLookaheadTarget,
+  evaluateTurnSpeedFactor,
+  stepFishTurnKinematics,
+  type FishTurnKinematics,
+} from './fish-turning'
 
 export type MeshNavigationConfig = {
   /** World positions, bounds and collider queries share meter units in mesh mode. */
@@ -20,6 +28,7 @@ export type SwimmingFish = {
   route: readonly Vec3[]; waypoint: number; random: number; startleSeconds: number
   routeGeneration: number; targetWait: number; navigationAnchor?: HabitatAnchor
   extensions: ReturnType<typeof createFishExtensionRuntime>; animationPlaybackRate: number
+  turnKinematics: FishTurnKinematics
   /** Explicit world-meter query radius; legacy `clearance` is not metric. */
   collisionRadiusM?: number
 }
@@ -79,7 +88,23 @@ export function createSwimmingFish(id: string, speciesId: string, position: Vec3
     instanceId: id, speciesId, state: behavior.state, position: Object.freeze({ ...position }),
     yaw: Math.PI / 2, pitch: 0, bank: 0, speed: 0,
   })
-  return { id, speciesId, behavior, position: { ...position }, yaw: Math.PI / 2, pitch: 0, bank: 0, speed: 0, clearance, collisionRadiusM: collision.collisionRadiusM, route: [], waypoint: 1, random: seedForId(id), startleSeconds: 0, routeGeneration: -1, targetWait: 0, extensions: createFishExtensionRuntime(extensions, initialSnapshot), animationPlaybackRate: 1 }
+  return {
+    id, speciesId, behavior, position: { ...position }, yaw: Math.PI / 2, pitch: 0, bank: 0, speed: 0, clearance,
+    route: [], waypoint: 1, random: seedForId(id), startleSeconds: 0, routeGeneration: -1, targetWait: 0,
+    extensions: createFishExtensionRuntime(extensions, initialSnapshot), animationPlaybackRate: 1,
+    collisionRadiusM: collision.collisionRadiusM,
+    turnKinematics: {
+      yawRateRadPerSec: 0,
+      smoothedYawRate: 0,
+      turnCurvature: 0,
+      turnCurvatureDelayed: 0,
+      turnPhase: 0,
+      maneuverStage: 'none',
+      exitStrokeSeconds: 0,
+      speed: 0,
+      startleSeconds: 0,
+    },
+  }
 }
 export function startleFish(fish: SwimmingFish, habitat: WaterHabitat) {
   const candidate = dispatchBehaviorEvent(fish.behavior, { type: 'fish-activation', instanceId: fish.id, trigger: fish.speciesId === 'yellow-tang' ? 'high-effort-cue' : 'threat-cue' })
@@ -216,21 +241,15 @@ export function stepSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, elap
   }
 }
 function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: number) {
-  // A configured mesh mode is fail-closed. Clear stale routes before they can
-  // trigger the legacy near-waypoint arrival path without a valid metric query.
+  // Configured mesh mode is fail-closed. Invalidate stale routes before they
+  // can trigger arrival or movement through a legacy AABB fallback.
   if (habitat.meshNavigation !== undefined && !validMeshNavigation(fish, habitat)) {
     if (fish.navigationAnchor) fish.behavior = reportNavigationOutcome(fish.behavior, fish.routeGeneration, fish.navigationAnchor, 'unavailable')
-    fish.route = []
-    fish.speed = 0
-    fish.targetWait = .7
-    fish.navigationAnchor = undefined
+    fish.route = []; fish.speed = 0; fish.targetWait = .7; fish.navigationAnchor = undefined
   }
   if (habitat.meshNavigation !== undefined && validMeshNavigation(fish, habitat) && !insideMeshWater(fish, habitat, fish.position)) {
     if (fish.navigationAnchor) fish.behavior = reportNavigationOutcome(fish.behavior, fish.routeGeneration, fish.navigationAnchor, 'blocked')
-    fish.route = []
-    fish.speed = 0
-    fish.targetWait = .7
-    fish.navigationAnchor = undefined
+    fish.route = []; fish.speed = 0; fish.targetWait = .7; fish.navigationAnchor = undefined
   }
   fish.behavior = advanceFishBehavior(fish.behavior, dt)
   const profile = getSpeciesBehaviorProfile(fish.speciesId)!
@@ -241,46 +260,78 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   const request = getNavigationRequest(fish.behavior)
   if (request && request.generation !== fish.routeGeneration && fish.startleSeconds <= 0) fish.route = []
   if ((!fish.route.length || fish.waypoint >= fish.route.length) && fish.targetWait <= 0) plan(fish, habitat)
-  const target = fish.route[fish.waypoint]
-  if (!target) { fish.speed *= Math.exp(-dt * 4); return }
-  const dx = target.x - fish.position.x, dy = target.y - fish.position.y, dz = target.z - fish.position.z, remaining = Math.hypot(dx, dy, dz)
-  if (remaining < .025 && (habitat.meshNavigation === undefined || remaining <= .015 * dt + 1e-12)) {
+  const rawTarget = fish.route[fish.waypoint]
+  if (!rawTarget) {
+    fish.speed *= Math.exp(-dt * 4)
+    fish.turnKinematics = stepFishTurnKinematics(fish.turnKinematics, 0, dt, fish.speed, fish.startleSeconds, 0)
+    return
+  }
+  const rawDx = rawTarget.x - fish.position.x, rawDy = rawTarget.y - fish.position.y, rawDz = rawTarget.z - fish.position.z, rawRemaining = Math.hypot(rawDx, rawDy, rawDz)
+  const turnWaypointReady = rawRemaining < .025 || (fish.waypoint + 1 < fish.route.length && rawRemaining < .18)
+  const meshWaypointWithinSubstep = habitat.meshNavigation === undefined || rawRemaining <= .015 * dt + 1e-12
+  if (turnWaypointReady && meshWaypointWithinSubstep) {
     if (habitat.meshNavigation !== undefined) {
-      const clearance = movementSafety(fish, habitat, target)
+      const clearance = movementSafety(fish, habitat, rawTarget)
       if (clearance !== 'clear') {
         fish.route = []; fish.speed = 0; fish.targetWait = clearance === 'blocked' ? .2 : .7
         if (fish.navigationAnchor) {
           fish.behavior = reportNavigationOutcome(fish.behavior, fish.routeGeneration, fish.navigationAnchor, clearance)
           fish.navigationAnchor = undefined
         }
+        fish.turnKinematics = stepFishTurnKinematics(fish.turnKinematics, 0, dt, fish.speed, fish.startleSeconds, 0)
         return
       }
-      fish.position = { ...target }
+      fish.position = { ...rawTarget }
     }
     fish.waypoint++
     if (fish.waypoint >= fish.route.length && fish.navigationAnchor) {
       fish.behavior = reportNavigationOutcome(fish.behavior, fish.routeGeneration, fish.navigationAnchor, 'arrived'); fish.navigationAnchor = undefined; fish.targetWait = 1.2
     }
+    fish.turnKinematics = stepFishTurnKinematics(fish.turnKinematics, 0, dt, fish.speed, fish.startleSeconds, 0)
     return
   }
+  const steerTarget = computeLookaheadTarget(fish.position, fish.route, fish.waypoint) ?? rawTarget
+  const dx = steerTarget.x - fish.position.x, dy = steerTarget.y - fish.position.y, dz = steerTarget.z - fish.position.z, remaining = Math.hypot(dx, dy, dz)
   const heading = Math.atan2(dx, dz), delta = Math.atan2(Math.sin(heading - fish.yaw), Math.cos(heading - fish.yaw))
-  const maxTurn = fish.behavior.variation.turnDegreesPerSecond * Math.PI / 180 * (fish.startleSeconds > 0 ? 3 : 1) * dt
+  const sharpTurnBoost = Math.abs(delta) >= SHARP_TURN_THRESHOLD_RAD ? 1.65 : 1.0
+  const proximityTurnBoost = rawRemaining < 0.35 ? 2.2 : 1.0
+  const maxTurn = fish.behavior.variation.turnDegreesPerSecond * Math.PI / 180 * (fish.startleSeconds > 0 ? 3 : sharpTurnBoost * proximityTurnBoost) * dt
   const turn = clamp(delta, -maxTurn, maxTurn); fish.yaw += turn
-  fish.pitch += (clamp(-Math.atan2(dy, Math.hypot(dx, dz)), -.28, .28) - fish.pitch) * Math.min(1, dt * 3)
+  const desiredPitch = clamp(-Math.atan2(dy, Math.hypot(dx, dz)), -.28, .28)
+  fish.pitch += (desiredPitch - fish.pitch) * Math.min(1, dt * (rawRemaining < 0.45 ? 10 : 4))
   fish.bank += (clamp(-turn / dt * .12, -.18, .18) - fish.bank) * Math.min(1, dt * 4)
+
+  fish.turnKinematics = stepFishTurnKinematics(fish.turnKinematics, turn, dt, fish.speed, fish.startleSeconds, delta)
   const multiplier = profile.states[fish.behavior.state]?.speedMultiplier ?? 1
   const cruise = fish.behavior.variation.cruiseSpeedTankWidthsPerSecond * (habitat.bounds.max.x - habitat.bounds.min.x)
   const effort = fish.startleSeconds > 0 ? 2.8 : multiplier
-  const wanted = cruise * effort * Math.max(.08, Math.cos(delta)) * Math.min(1, remaining / .22)
-  fish.speed += (wanted - fish.speed) * Math.min(1, dt * (fish.startleSeconds > 0 ? 8 : 2.5))
-  const travel = Math.min(remaining, Math.max(.015, fish.speed) * dt)
-  const next = { x: fish.position.x + dx / remaining * travel, y: fish.position.y + dy / remaining * travel, z: fish.position.z + dz / remaining * travel }
-  const clearance = movementSafety(fish, habitat, next)
-  if (clearance === 'clear') fish.position = next
-  else {
-    fish.route = []; fish.speed = 0; fish.targetWait = clearance === 'blocked' ? .2 : .7
+  const turnSpeedFactor = evaluateTurnSpeedFactor(delta, fish.startleSeconds, fish.turnKinematics.maneuverStage)
+  const wanted = cruise * effort * turnSpeedFactor * Math.min(1, rawRemaining / .22)
+  fish.speed += (wanted - fish.speed) * Math.min(1, dt * (fish.startleSeconds > 0 ? 8 : 3.2))
+
+  const travel = Math.min(rawRemaining, Math.max(.015, fish.speed) * dt)
+  const chordDir = { x: rawDx / rawRemaining, y: rawDy / rawRemaining, z: rawDz / rawRemaining }
+  const stepVec = computeCurvilinearStepVector(fish.yaw, fish.pitch, chordDir, delta, travel, rawRemaining)
+  const headingNext = { x: fish.position.x + stepVec.x, y: fish.position.y + stepVec.y, z: fish.position.z + stepVec.z }
+  const chordNext = { x: fish.position.x + chordDir.x * travel, y: fish.position.y + chordDir.y * travel, z: fish.position.z + chordDir.z * travel }
+  const headingSafety = movementSafety(fish, habitat, headingNext)
+  const chordSafety = movementSafety(fish, habitat, chordNext)
+  if (habitat.meshNavigation !== undefined && rawRemaining < .18 && chordSafety === 'clear') {
+    // Close mesh waypoints use the verified route chord so curvature steering
+    // cannot asymptotically orbit the target without ever completing it.
+    fish.yaw = heading
+    fish.pitch = desiredPitch
+    fish.position = chordNext
+  } else if (headingSafety === 'clear') fish.position = headingNext
+  else if (chordSafety === 'clear') {
+    fish.yaw = heading
+    fish.pitch = desiredPitch
+    fish.position = chordNext
+  } else {
+    const failure = headingSafety === 'unavailable' || chordSafety === 'unavailable' ? 'unavailable' : 'blocked'
+    fish.route = []; fish.speed = 0; fish.targetWait = failure === 'blocked' ? .2 : .7
     if (fish.navigationAnchor) {
-      fish.behavior = reportNavigationOutcome(fish.behavior, fish.routeGeneration, fish.navigationAnchor, clearance)
+      fish.behavior = reportNavigationOutcome(fish.behavior, fish.routeGeneration, fish.navigationAnchor, failure)
       fish.navigationAnchor = undefined
     }
   }

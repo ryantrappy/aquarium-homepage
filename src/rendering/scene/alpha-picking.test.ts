@@ -1,6 +1,7 @@
+// @vitest-environment happy-dom
 import * as THREE from 'three'
-import { describe, expect, it } from 'vitest'
-import { nearestVisibleIntersection, textureAlphaAt, type AlphaMask, type SpriteMasks } from './alpha-picking'
+import { describe, expect, it, vi } from 'vitest'
+import { alphaMaskDimensions, handleArtworkTextureFailure, MAX_ALPHA_MASK_DIMENSION, nearestVisibleIntersection, readArtworkAlpha, textureAlphaAt, type AlphaMask, type SpriteMasks } from './alpha-picking'
 
 function fixture() {
   const texture = new THREE.Texture(); texture.magFilter = THREE.NearestFilter
@@ -18,6 +19,46 @@ function fixture() {
 }
 
 describe('preview texture-alpha picking', () => {
+  it('removes a failed sprite from picking and exposes its native service label', () => {
+    const parent = new THREE.Group(), sprite = new THREE.Mesh(new THREE.PlaneGeometry(), new THREE.MeshBasicMaterial())
+    parent.add(sprite)
+    const texture = new THREE.Texture(), hitMeshes: THREE.Object3D[] = [sprite, sprite], masks: SpriteMasks = new WeakMap()
+    masks.set(sprite, { texture, pixels: { width: 1, height: 1, alpha: new Uint8Array([255]) } })
+    const anchor = document.createElement('a')
+    anchor.innerHTML = '<span class="fish-name">Paperless</span>'
+    document.body.append(anchor)
+    const dispose = vi.spyOn(texture, 'dispose')
+    handleArtworkTextureFailure(sprite, texture, hitMeshes, masks, anchor)
+    expect(parent.children).not.toContain(sprite)
+    expect(hitMeshes).toEqual([])
+    expect(masks.get(sprite)).toBeUndefined()
+    expect(dispose).toHaveBeenCalledOnce()
+    expect(anchor.style.visibility).toBe('visible')
+    expect(anchor.tabIndex).toBe(0)
+    expect(anchor.getAttribute('aria-hidden')).toBe('false')
+    expect(anchor.dataset.occluded).toBe('false')
+    expect(anchor.dataset.artworkError).toBe('true')
+    expect(anchor.querySelector<HTMLElement>('.fish-name')?.style.visibility).toBe('visible')
+    anchor.remove()
+  })
+
+  it('bounds alpha decode buffers to proportionally downscaled dimensions', () => {
+    expect(alphaMaskDimensions(2048, 2048)).toEqual({ width: 512, height: 512 })
+    expect(alphaMaskDimensions(2172, 724)).toEqual({ width: 512, height: 171 })
+    expect(alphaMaskDimensions(600, 400)).toEqual({ width: 512, height: 341 })
+    expect(alphaMaskDimensions(1, 2)).toEqual({ width: 1, height: 2 })
+    const drawImage = vi.fn()
+    const getImageData = vi.fn((_: number, __: number, width: number, height: number) => ({ data: new Uint8ClampedArray(width * height * 4) }))
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({ drawImage, getImageData } as unknown as CanvasRenderingContext2D)
+    const image = document.createElement('img')
+    Object.defineProperties(image, { naturalWidth: { value: 2172 }, naturalHeight: { value: 724 } })
+    const mask = readArtworkAlpha(image)
+    expect(drawImage).toHaveBeenCalledWith(image, 0, 0, 512, 171)
+    expect(getImageData).toHaveBeenCalledWith(0, 0, 512, 171)
+    expect(mask.alpha).toHaveLength(512 * 171)
+    expect(Math.max(mask.width, mask.height)).toBeLessThanOrEqual(MAX_ALPHA_MASK_DIMENSION)
+    vi.restoreAllMocks()
+  })
   it('rejects empty-water corners and selects the real fish behind a transparent preview', () => {
     const { preview, fish, hit } = fixture()
     expect(hit(-.5, .5, [preview])).toBeUndefined()

@@ -134,10 +134,10 @@ scene.collection.objects.link(camera)
 scene.camera = camera
 
 views = [
-    ('front',   (0.0, -1.0, 0.12), 1.25),
-    ('oblique', (0.82, -0.78, 0.48), 1.28),
+    ('front',   (0.0, -1.0, 0.02), 1.22),
+    ('oblique', (0.72, -0.82, 0.32), 1.26),
     ('top',     (0.0, -0.08, 1.0), 1.25),
-    ('closeup', (0.45, -0.88, 0.28), 0.68),
+    ('closeup', (0.18, -0.98, 0.04), 0.72),
 ]
 for label, direction, scale_mult in views:
     camera_data.ortho_scale = extent * scale_mult

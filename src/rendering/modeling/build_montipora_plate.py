@@ -337,7 +337,7 @@ def build_montipora_mesh(mat):
     for li, uv in enumerate(loop_uvs):
         uv_layer.data[li].uv = uv
 
-    color_attr = mesh.color_attributes.new(name='COLOR_0', type='BYTE_COLOR', domain='CORNER')
+    color_attr = mesh.color_attributes.new(name='COLOR_0', type='FLOAT_COLOR', domain='CORNER')
     mesh.color_attributes.active_color = color_attr
     mesh.color_attributes.render_color_index = 0
     for li, rgba in enumerate(loop_colors):
