@@ -89,6 +89,23 @@ describe('network traffic API handler', () => {
     expect(store.getSources()).toEqual(trustedSourcesBefore)
   })
 
+  it('forwards a fresh reading when client polling pauses for 60.25 seconds', async () => {
+    const source = await makeSource()
+    let elapsed = 0
+    const store = createNetworkTrafficStore({ sources: [source], elapsedNow: () => elapsed })
+    const handler = createNetworkTrafficGetHandler(store)
+    await handler({ request: request(source.id) })
+
+    await setCounters(source.statsRootPath, '7025', '14050')
+    elapsed = 60_250
+    const response = await handler({ request: request(source.id) })
+    await expect(response.json()).resolves.toMatchObject({
+      reading: {
+        status: 'fresh', ingressBytesPerSecond: 100, egressBytesPerSecond: 200, unit: 'B/s', ageMs: 0,
+      },
+    })
+  })
+
   it('returns stale sampler data honestly after the configured source becomes unreadable', async () => {
     const source = await makeSource()
     let elapsed = 0

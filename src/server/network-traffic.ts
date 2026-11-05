@@ -76,7 +76,8 @@ export function createNetworkTrafficStore({
   sources,
   elapsedNow = () => performance.now(),
   wallNow = Date.now,
-  staleAfterMs = 15_000,
+  // Leave 30 seconds of scheduling/wakeup jitter beyond a one-minute poll interval.
+  staleAfterMs = 90_000,
   minimumSampleIntervalMs = Math.min(250, staleAfterMs / 2),
 }: NetworkTrafficStoreOptions) {
   if (!Number.isFinite(staleAfterMs) || staleAfterMs <= 0) {

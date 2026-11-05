@@ -4,7 +4,7 @@
 Category: Operations / Runbook
 Status: Canonical / Active
 Authority: Operational Runbook
-Backlog: AQ-10, AQ-9
+Backlog: AQ-10, AQ-9, AQ-68
 Owner: @root
 Updated: 2026-11-05
 Upstream: AGENTS.md, AGENT_TASKS.md
@@ -37,7 +37,7 @@ An API save using the configured HTTPS `Origin` succeeded against the loopback s
 
 ## Service configuration
 
-The app reads and writes the versioned reef envelope through `/api/config`. Saves and the explicit **Restore examples** action use a revision check; a stale client receives `409 Conflict`. Cross-origin writes are rejected. Writes use a temporary file and atomic rename. The data directory is separate from the application source, so code updates and rollbacks must preserve it.
+The app reads and writes the versioned reef envelope through `/api/config`. Saves and the explicit **Restore examples** action use a revision check; a stale client receives `409 Conflict`. Cross-origin writes are rejected. In production, a mutating request must include a matching Origin or Sec-Fetch-Site: same-origin; headerless CLI writes receive 403. Unsupported methods receive 405 with Allow: GET, HEAD, PUT, POST. Writes use a temporary file and atomic rename. The data directory is separate from the application source, so code updates and rollbacks must preserve it.
 
 Older browser-local service lists are imported explicitly: export the old list as JSON and choose **Import list** in the app. Imports accept the old service array and the current versioned envelope. App exports download the current shared list as JSON.
 
@@ -121,7 +121,7 @@ Read-only inventory on 2026-11-03 found Ubuntu 24.04.5, Docker 27.3.1, Compose 2
 
 ## Prepared CPU temperature source (not deployed)
 
-The reviewed live deployment at commit `6e5c30a` does not include the CPU temperature API or host sensor mount. The current source Compose file prepares a narrow, read-only bind of `/sys/devices/platform/coretemp.0` to `/run/host-sensors/coretemp.0`, with `REEF_CPU_HWMON_ROOT=/run/host-sensors/coretemp.0`. The backend discovers `hwmon*` entries whose `name` is `coretemp`, then reads supported `temp*_label` / matching `temp*_input` pairs such as `Package id 0`; it exposes a stable `coretemp.0:package-id-0` default sensor ID. If the configured path, chip, label, or input is missing or unreadable, the reading is unavailable (or marked stale only when an earlier successful sample exists). It does not substitute a fabricated temperature. The aquarium scene heater indicator has not been implemented, and this source has not been mounted or deployed on `trappserv.er`.
+The reviewed live deployment at commit `6e5c30a` does not include the CPU temperature API or host sensor mount. The current source Compose file prepares a narrow, read-only bind of `/sys/devices/platform/coretemp.0` to `/run/host-sensors/coretemp.0`, with `REEF_CPU_HWMON_ROOT=/run/host-sensors/coretemp.0`. The backend supports trusted `hwmon*` roots with chip names `coretemp`, `k10temp` or `zenpower`; the prepared default mount remains Intel-specific and has not been changed. AMD roots must be configured explicitly when the user deploys. It reads supported `temp*_label` / matching `temp*_input` pairs such as `Package id 0`/`Core N` for coretemp or `Tctl`/`Tdie` for AMD drivers, with chip-specific stable IDs; it exposes a stable `coretemp.0:package-id-0` default sensor ID. If the configured path, chip, label, or input is missing or unreadable, the reading is unavailable (or marked stale only when an earlier successful sample exists). It does not substitute a fabricated temperature. The aquarium scene heater indicator has not been implemented, and this source has not been mounted or deployed on `trappserv.er`.
 
 ## Docker build and configuration reference
 

@@ -75,9 +75,17 @@ export const Route = createFileRoute('/api/config')({
           return Response.json({ error: messageFor(error) }, { status: 503, headers: { 'Cache-Control': 'no-store' } })
         }
       },
+      ANY: createConfigAnyHandler(),
     },
   },
 })
+
+export function createConfigAnyHandler() {
+  return async (_context: { request: Request }) => Response.json(
+    { error: 'Method not allowed.' },
+    { status: 405, headers: { Allow: 'GET, HEAD, PUT, POST', 'Cache-Control': 'no-store' } },
+  )
+}
 
 export function validateWriteOrigin(request: Request, configuredPublicOrigin = process.env.REEF_PUBLIC_ORIGIN): string | undefined {
   const fetchSite = request.headers.get('Sec-Fetch-Site')?.toLowerCase()
@@ -93,6 +101,8 @@ export function validateWriteOrigin(request: Request, configuredPublicOrigin = p
     } catch {
       return 'The configuration request has an invalid origin.'
     }
+  } else if (process.env.NODE_ENV === 'production' && fetchSite !== 'same-origin') {
+    return 'A same-origin request header is required for configuration writes.'
   }
 }
 
