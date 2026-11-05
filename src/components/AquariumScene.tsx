@@ -24,6 +24,9 @@ export function AquariumScene({ services, paused, focusFallbackRef }: AquariumSc
   useEffect(() => { if (status !== 'ready') overlayRef.current?.querySelectorAll<HTMLAnchorElement>('a').forEach(anchor => { anchor.tabIndex = 0; anchor.removeAttribute('aria-hidden'); delete anchor.dataset.occluded }) }, [status])
 
   function nativeTarget(event: MouseEvent<HTMLAnchorElement>, service: ServiceConfig) {
+    // Every new action resolves its own target. A previous native context menu
+    // may have borrowed this overlapping rectangle for a different fish.
+    event.currentTarget.href = service.url
     const keyboard = event.type === 'contextmenu' ? event.clientX === 0 && event.clientY === 0 : event.detail === 0
     const keyboardOrLabel = keyboard || (event.target instanceof Element && Boolean(event.target.closest('.fish-name')))
     let selected = service
@@ -42,9 +45,10 @@ export function AquariumScene({ services, paused, focusFallbackRef }: AquariumSc
       // An overlapping rectangle may belong to another fish. Let this same
       // native click open the visible fish's actual URL, retaining modifiers
       // and target behavior; no synthetic click/window.open or animation wait.
+      // The native menu can read the live href after this event returns. Keep
+      // it stable until the next action resolves a fresh target; a timer would
+      // race Open Link / Copy Link while the menu is still open.
       clickedAnchor.href = selected.url
-      const restore = setTimeout(() => { clickedAnchor.href = service.url; acknowledgments.current.delete(restore) }, 0)
-      acknowledgments.current.add(restore)
     }
     return selected
   }

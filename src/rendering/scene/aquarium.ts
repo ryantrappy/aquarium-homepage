@@ -25,6 +25,7 @@ import { EMPTY_FISH_EXTENSIONS, type FishExtensionConfig } from '../../simulatio
 import { consumeFrameSteps, createFrameClock, SIMULATION_STEP_SECONDS, suspendFrameClock } from './clock'
 import { nearestVisibleIntersection, readArtworkAlpha, type SpriteMasks } from './alpha-picking'
 import { applyFishLinkVisibility } from './fish-link-focus'
+import { projectFishLinkBounds } from './fish-link-projection'
 
 const modelUrls: Record<string, string> = {
   'ocellaris-clownfish': new URL('../proof/candidate-real-clown.glb', import.meta.url).href,
@@ -248,7 +249,7 @@ diffuseColor.rgb = waterCol;
     let visible = false
     for (const [localY, localZ] of [[0, 0], [0, .31], [0, -.31], [.13, 0], [-.13, 0]]) {
       sample.set(item.fallback ? localZ : 0, localY, item.fallback ? 0 : localZ).applyMatrix4(item.root.matrixWorld).project(camera)
-      if (Math.abs(sample.x) > .96 || Math.abs(sample.y) > .94 || sample.z > 1) continue
+      if (!Number.isFinite(sample.x) || !Number.isFinite(sample.y) || !Number.isFinite(sample.z) || Math.abs(sample.x) > .96 || Math.abs(sample.y) > .94 || sample.z < -1 || sample.z > 1) continue
       if (nearest(rect.left + (sample.x + 1) * width / 2, rect.top + (1 - sample.y) * height / 2) === item.service.id) { visible = true; break }
     }
     item.visible = visible
@@ -384,16 +385,20 @@ diffuseColor.rgb = waterCol;
   function positionLabels(force = false) {
     for (const item of fish) {
       const anchor = item.anchor; if (!anchor) continue
+      const bounds = projectFishLinkBounds(item.root.position, camera, width, height, fishRenderLength(item.service.fishId), projected)
+      if (!bounds) {
+        item.visible = false
+        // Preserve AQ-50's focus handoff before hiding an invalid projection.
+        // If no fallback accepts focus, retain the last valid label position.
+        if (!applyFishLinkVisibility(anchor, false, focusFallback())) anchor.style.visibility = 'hidden'
+        continue
+      }
       // Resolve focused exposure before moving its DOM target. If no control
       // can receive focus, keep its last visible label position for now.
       if (force || anchor.contains(document.activeElement)) updateVisibility(item)
       if (!item.visible && anchor.contains(document.activeElement)) continue
-      projected.copy(item.root.position).project(camera)
-      const x = (projected.x + 1) * width / 2, y = (1 - projected.y) * height / 2
-      const pixels = height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * (camera.position.z - item.root.position.z))
-      const bodyLength = fishRenderLength(item.service.fishId)
-      const linkWidth = Math.max(44, pixels * Math.max(.55, bodyLength * 1.15)), linkHeight = Math.max(44, pixels * Math.max(.42, bodyLength * .78))
-      anchor.style.transform = `translate3d(${x - linkWidth / 2}px,${y - linkHeight / 2}px,0)`; anchor.style.width = `${linkWidth}px`; anchor.style.height = `${linkHeight}px`
+      anchor.style.visibility = 'visible'
+      anchor.style.transform = `translate3d(${bounds.x}px,${bounds.y}px,0)`; anchor.style.width = `${bounds.width}px`; anchor.style.height = `${bounds.height}px`
       anchor.style.zIndex = String(Math.round((item.root.position.z + 10) * 100))
     }
   }
