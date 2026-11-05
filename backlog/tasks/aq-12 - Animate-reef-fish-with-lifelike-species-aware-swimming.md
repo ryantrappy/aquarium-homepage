@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@render-integration'
 created_date: '2026-11-03T04:15:00Z'
-updated_date: '2026-11-05 14:15'
+updated_date: '2026-11-05 21:39'
 labels: []
 dependencies:
   - AQ-5
@@ -48,6 +48,12 @@ The aquarium will succeed when fish look like living reef animals swimming throu
 
 2026-11-05 bounded supplied-fish visual review (read-only): hash-pin the exact canonical clown, yellow tang, blue tang, royal gramma, and Banggai GLBs under `src/rendering/assets/fish`; verify manifest/inspection provenance, meter units, +Y up, and +Z swim extent. Use existing Blender 5.0.1 glTF import only in `/tmp/aq12-fish-review-20261105`. Render all five under one neutral studio setup at side and oblique views at two selected points in each active clip, using explicit target adult lengths from AQ-60/`docs/fish-scale-reference.md` in meters. Compare old active clown/tang candidates at matching target physical lengths if import is practical. Return actual visible shape/fin differences and limits; no asset edits, scene integration, visual acceptance, or task closure.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-11-05 Root preservation audit: current uncommitted nine splat-fish GLBs/script and13modelURL/axis additions are preserved and excluded from reviewed commits. No per-asset manifest/notices accompany the nine-file folder at this checkpoint; generator references candidate-real-clown.glb as a donor. Before any production promotion, document exactly which donor data is reused and carry applicable derivative attribution/provenance plus objective source/art/rig validation. Finite player-load compatibility cannot establish license/art/realistic-animation acceptance. Do not replace or regenerate these supplied candidates from Codex.
+<!-- SECTION:NOTES:END -->
 
 ## Comments
 
