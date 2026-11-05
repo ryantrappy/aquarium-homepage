@@ -1,12 +1,12 @@
 ---
 id: AQ-53
 title: Align supplied soft-coral flexibility masks with the runtime contract
-status: In Progress
+status: Done
 assignee:
   - '@gemini'
   - '@asset-validation'
 created_date: '2026-11-04 19:05'
-updated_date: '2026-11-05 14:20'
+updated_date: '2026-11-05 23:47'
 labels:
   - modeling
 dependencies:
@@ -32,7 +32,7 @@ Read-only preflight found torch, hammer and anemone crowns authored with COLOR_0
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Exported mask encoding and declared contract agree, with the flexibility exponent applied exactly once across authoring and runtime.
+- [x] #1 Exported mask encoding and declared contract agree, with the flexibility exponent applied exactly once across authoring and runtime.
 - [x] #2 Rigid skeleton and pinned bases retain zero flexibility; masks remain finite, in range and matched to exported POSITION counts after quantization.
 - [x] #3 Updated hashes, provenance and reproducible mask inspection identify the encoding consumed by the renderer without using mask RGB or AO alpha as display color or opacity.
 <!-- AC:END -->
@@ -77,6 +77,8 @@ Independent AQ57 raw-mask evidence completion (2026-11-04): all8 current coral G
 Additional per-vertex check passes: all16160 torch crown,15232 hammer crown and10452 anemone crown exported vertices match their independently UV-identified source h values (including source-specific proximal/distal cap UV exceptions), within half U16 quantization; this is stronger than checking only distinct R levels. Both README Python reproduction snippets executed successfully; all25 pinned GLB/generator files remain unchanged. Root review and AC1 runtime boundary remain open.
 
 Root leaves AC1 reopened pending actual GPU surface/depth consumption evidence after fixing conditional depth-shader scope. Authoring/raw-mask binary evidence and focused CPU/template tests remain valid. Prior all-checked state was not Root-finalized.
+
+Root final verification2026-11-05: independently decoded all8 current coral GLBs, exact inspection masks and POSITION counts, finite[0,1] channels, all rigid R=0, and matching generator provenance hashes. Re-ran indexed-cap/linear-height reproduction: all six proximal selections R0 and all crown vertices linear within halfU16 quantum. Root and independent reviewer each pass6 coral-material tests using actual Three standard/depth templates; the same single pow(rawR,1.8) displacement path serves both. Actual standalone GPU proof compiles12programs and all four temporal comparisons pass at1440x900 and402x874 DPR1. Report/signed source hashes and exact PNGs: docs/asset-evidence/aq53/review.json. Pixel hashes are functional, not numeric exponent or isolated-shadow measurement. Production displaced culling/final art/assembly remain separate AQ42/AQ14.4 scope.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
@@ -99,4 +101,24 @@ created: 2026-11-05 14:20
 ---
 Root found an actual depth-shader defect in the supplied adapter: coral sway declarations were injected at beginnormal_vertex, which Three depth.glsl wraps in USE_DISPLACEMENTMAP, while the adapter supplies no displacementMap. begin_vertex therefore referenced missing coralSway/coralFlex variables in shadow rendering. Moved shared calculations into main() before conditional chunks; surface-only normal adjustment remains at beginnormal_vertex. Replaced simplified mock templates in regression with actual Three standard/depth ShaderLib templates and verifies declaration scope. Five focused tests/typecheck pass. Added standalone exact-source GPU proof with surface/shadow materials and deterministic motion/pause/reduced/rigid pixel comparisons; native browser connection interrupted before GPU evidence, so no GPU success or final acceptance claimed.
 ---
+
+author: @Luna
+created: 2026-11-05 23:45
+---
+Independent read-only AQ-53 runtime-mask review (2026-11-05):
+
+- Reproduced the focused CPU regression: `npm exec vitest -- run --maxWorkers=2 src/rendering/scene/coral-material.test.ts` — 1 file, 6 tests passed (432 ms). It checks the soft `R^1.8` CPU reference at R=.5/.44, rigid zero, pause/reduced motion, all 8 inspection records, raw RGBA is not used as display RGB/opacity, and shader injection against the installed Three `ShaderLib.standard` and `ShaderLib.depth` templates.
+- Source semantics agree with coral-raw-masks-v1. The adapter reads `color.r` as raw/clamped R and has one `pow(coralRawR, 1.8)` in its shared vertex-injection path. It sets vertexColors=false, transparent=false, opacity=1; writes fragment alpha=1; and uses COLOR_0.a only for contact AO. The same begin-main declaration and begin_vertex displacement are injected into surface and depth shaders; only surface gets the approximate normal adjustment, and the depth branch returns before fragment edits. Moving shared declarations ahead of the depth template's conditional displacement-map normal block addresses the previously reported missing-variable compile defect. The test asserts one surface occurrence and checks the depth occurrence/placement; because both call the same injector, the depth path also receives that single expression.
+- Recommendation on the probe question: a separate GPU numerical readback of R^1.8 is not necessary to establish AC #1's exact-once contract. The raw-mask export evidence plus the single shared source expression, CPU reference checks, actual Three-template mutation test, and real GPU compile/render establish the formula and its use. The existing pixel comparisons must not be described as numerical exponent validation; they test temporal behavior only. A numeric GPU probe would be appropriate only if claiming GPU-evaluated values match the CPU curve within an error tolerance.
+- Root's two-viewport run is present in `/tmp/aq53-root-browser-20261105.json`. Both 1440x900 and 402x874 at DPR 1 report exact source hashes for torch/brain/staghorn, 12 compiled programs, `motionChangesPixels=true`, `pauseStable=true`, `reducedMotionStable=true`, `rigidStable=true`, and the same fixed 480x320 target hashes. Exact source hashes match the current GLBs. Reproduction: `npm exec vite -- --config /tmp/aq53-specific-vite.config.mjs --host 127.0.0.1 --port 5197 --strictPort`, open `http://127.0.0.1:5197/coral-mask-study.html`, wait for “Surface and shadow materials ready”, click “Run GPU comparisons”, then read the JSON from `output[role=status]`. Repeat at the two task viewports. The report is a hash-based functional comparison, not a numeric probe or a depth-only pixel assertion.
+- Hashes reviewed: coral-material.ts `bf5f5162…`; coral-material.test.ts `9142ffc8…`; coral-mask-study.ts `41416820…`; study HTML `648defec…`; Three ShaderLib.js `6e7bd913…`; exact study GLBs torch `e2672924…`, brain `904f471b…`, staghorn `62978183…`. Focused checks and Root browser evidence agree with these exact sources.
+
+Remaining scope: the standalone page disables frustum culling, while production reef assembly installs the material/depth pair without expanding displaced geometry bounds; bounds/culling and visual normal quality still need separate acceptance. The phone screenshot crops the isolated specimens at the sides; this is not full-scene responsive or art acceptance. I made no source edits and did not check acceptance criteria or change task status; Root retains the final AC decision.
+---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Root accepted raw-mask export/runtime agreement after eight exact binary and source-height checks, shared actual-template/CPU tests, independent review and native GPU surface/shadow proof at both target sizes. All3criteria verified. No models/generators modified; art and assembled-scene gates remain open.
+<!-- SECTION:FINAL_SUMMARY:END -->
