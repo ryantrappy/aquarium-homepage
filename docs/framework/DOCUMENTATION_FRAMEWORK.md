@@ -49,7 +49,7 @@ Every document in the repository belongs to exactly one Tier and Category:
 | **Tier 4** | **Audits & Verification Evidence** | **Evidentiary** | Objective validation reports, test fixtures, hash inventories, accessibility reviews, and change logs. | `docs/asset-evidence/*`, `docs/accessibility-audit.md`, `docs/agent-change-audit.md`, `docs/service-mapping-review.md` |
 | **Tier 5** | **Operations & Runbooks** | **Operational** | Deployment procedures, server environments, host configurations, and local test harness guides. | `docs/deployment.md`, `docs/socket-verification.md` |
 | **Tier 6** | **Research Spikes & Investigations** | **Informational** | Engine evaluations, benchmark tests, external reference reviews, literature surveys. Non-binding. | `docs/sketchfab-motion-review.md`, `docs/mesh2motion-review.md`, `docs/open-source-asset-and-motion-research.md` |
-| **Tier 7** | **Historical Archives & Superseded Drafts** | **Historical** | Past proposals, superseded UI designs, unverified AI chat dumps, obsolete prototypes. Retained for audit only. | `docs/design.md`, `docs/deployment 2.md`, `docs/gemini_planning.md`, `docs/reef_aquarium_all_code.md` |
+| **Tier 7** | **Historical Archives & Superseded Drafts** | **Historical** | Past proposals, superseded UI designs, unverified AI chat dumps, obsolete prototypes. Retained for audit only. | `docs/design.md`, `docs/archive/deployment-2.md`, `docs/gemini_planning.md`, `docs/reef_aquarium_all_code.md` |
 
 ---
 

@@ -38,7 +38,7 @@ Find the authoritative documents for your task area:
 | **Homelab Services & Links** | [`service-mapping-review.md`](service-mapping-review.md) | [`requirements.md`](requirements.md) | Backlog `AQ-8` / `AQ-56` |
 | **Read-Only Telemetry (Hardware)**| [`network-traffic-source.md`](network-traffic-source.md) | Server endpoints (`src/routes/api/telemetry/`) | `src/server/disk-capacity-math.test.ts` |
 | **Accessibility & Controls** | [`accessibility-audit.md`](accessibility-audit.md) | [`design-principles.md`](design-principles.md) | Backlog `AQ-6` / `AQ-50`  [AQ-63 interaction proof](asset-evidence/aq63/review.json) |
-| **Deployment & Production** | [`deployment.md`](deployment.md) | [`deployment 2.md`](deployment%202.md) *(Historical)* | Docker / Node 24 on `trappserv.er` |
+| **Deployment & Production** | [`deployment.md`](deployment.md) | [`deployment-2.md`](archive/deployment-2.md) *(Historical)* | Docker / Node 24 on `trappserv.er` |
 | **Documentation Standards** | [`framework/DOCUMENTATION_FRAMEWORK.md`](framework/DOCUMENTATION_FRAMEWORK.md)| [`framework/TEMPLATE.md`](framework/TEMPLATE.md) | Backlog `AQ-61` |
 
 ---
@@ -126,7 +126,7 @@ Directory of project documentation and verification evidence:
 | Document | Status | Authority | Successor | Scope / Purpose |
 |---|---|---|---|---|
 | [`design.md`](design.md) | **Superseded** | Historical | [`requirements.md`](requirements.md) | Early 2026-11-02 dashboard cards layout. Retained for historical context. |
-| [`deployment 2.md`](deployment%202.md) | **Superseded** | Historical | [`deployment.md`](deployment.md) | Nitro/Node 24 preliminary hosting research draft. |
+| [`deployment-2.md`](archive/deployment-2.md) | **Archived** | Historical | [`deployment.md`](deployment.md) | Nitro/Node 24 preliminary hosting research and read-only discovery draft; content retained from the former `deployment 2.md` path. |
 | [`rendering-research-history.md`](rendering-research-history.md) | **Archived** | Historical | [`rendering.md`](rendering.md) | Historical multi-engine spike notes and early asset experiments. |
 | [`reef_aquarium_all_code.md`](reef_aquarium_all_code.md) | **Archived** | Unverified | None | Raw monolithic code dump from external Gemini interaction. |
 | [`gemini_planning.md`](gemini_planning.md) | **Archived** | Historical | None | Unedited conversation log from external Gemini planning session. |
