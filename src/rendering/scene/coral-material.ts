@@ -315,7 +315,8 @@ float coralNoise3D(vec3 p) {
     `#include <color_fragment>
 // COLOR_0 is a raw 4-channel mask (coral-raw-masks-v1), never display RGB or opacity.
 diffuseColor.a = 1.0;
-float coralContactAo = mix(0.28, 1.0, clamp(vCoralMask.a, 0.0, 1.0));
+float coralMaskAlpha = clamp(vCoralMask.a, 0.0, 1.0);
+float coralContactAo = mix(0.28, 1.0, coralMaskAlpha);
 float coralTipMask = clamp(vCoralMask.g, 0.0, 1.0);
 float coralHeightMask = clamp(max(vCoralMask.r, smoothstep(0.005, 0.12, vCoralLocalPos.y)), 0.0, 1.0);
 
@@ -325,7 +326,7 @@ float polypHighlight = smoothstep(0.46, 0.78, polypDots);
 
 // Soft, cohesive tissue gradient (avoids harsh dark-bottom/white-tip crayon contrast)
 float texLuma = dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114));
-vec3 naturalGrad = mix(uPaletteCrevice, uPaletteBase, smoothstep(0.02, 0.34, coralHeightMask * 0.55 + coralContactAo * 0.45));
+vec3 naturalGrad = mix(uPaletteCrevice, uPaletteBase, smoothstep(0.02, 0.34, coralHeightMask * 0.55 + coralMaskAlpha * 0.45));
 naturalGrad = mix(naturalGrad, uPaletteTip, smoothstep(0.22, 0.92, coralTipMask * 0.65 + polypHighlight * 0.35));
 naturalGrad *= (0.86 + 0.22 * texLuma + 0.16 * (polypHighlight - 0.4));
 diffuseColor.rgb = mix(diffuseColor.rgb, naturalGrad, clamp(uPaletteRegrade, 0.0, 1.0));
@@ -333,7 +334,6 @@ diffuseColor.rgb = mix(diffuseColor.rgb, naturalGrad, clamp(uPaletteRegrade, 0.0
 // Blend basal attachment seamlessly into deep actinic indigo rock shadow so no dark saucer rim is visible
 float rockBaseBlend = smoothstep(0.001, 0.018, vCoralLocalPos.y);
 diffuseColor.rgb = mix(vec3(0.14, 0.12, 0.24), diffuseColor.rgb, rockBaseBlend);
-diffuseColor.rgb *= mix(0.62, 1.0, clamp(vCoralMask.a, 0.0, 1.0));
 `,
   )
 
@@ -365,14 +365,14 @@ normal = normalize(normal - vec3(px - p0, py - p0, pz - p0) * 0.28);
 reflectedLight.indirectDiffuse *= coralContactAo;
 reflectedLight.indirectSpecular *= coralContactAo * 0.35;
 reflectedLight.directSpecular *= 0.28;
-reflectedLight.directDiffuse *= mix(0.72, 1.0, coralContactAo);
+reflectedLight.directDiffuse *= coralContactAo;
 
 // Restrained upward-facing reef caustic shimmer (AQ-14.2)
 float cTime = uTime * uMotionScale;
 float cWave1 = sin(cTime * 1.38 + vCoralWorldPos.x * 2.1 + vCoralWorldPos.z * 1.7);
 float cWave2 = cos(cTime * 2.32 - vCoralWorldPos.x * 1.6 + vCoralWorldPos.z * 2.3);
 float causticBand = smoothstep(0.15, 0.88, 0.5 + 0.25 * (cWave1 + cWave2)) * max(0.0, normal.y);
-reflectedLight.directDiffuse *= (1.0 + 0.16 * causticBand * coralContactAo);
+reflectedLight.directDiffuse *= (1.0 + 0.16 * causticBand);
 
 float coralRim = pow(1.0 - clamp(dot(normal, normalize(vCoralViewDir)), 0.0, 1.0), 1.85);
 vec3 coralSss = diffuseColor.rgb * (0.45 + 0.55 * coralTipMask) * coralRim * uSubsurfaceStrength * coralContactAo;

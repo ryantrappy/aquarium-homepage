@@ -491,6 +491,62 @@ describe('biomechanical fish turning and curvilinear spine bending (AQ-49)', () 
     }
   })
 
+  it('keeps applying residual pectoral flare and pitch after spine bend falls below its cutoff', () => {
+    const root = new THREE.Group()
+    const spine: THREE.Object3D[] = []
+    for (let index = 0; index < 6; index++) {
+      const joint = new THREE.Object3D()
+      joint.name = `spine_${index}`
+      if (index > 0) spine[index - 1].add(joint)
+      else root.add(joint)
+      spine.push(joint)
+    }
+    const left = new THREE.Object3D()
+    left.name = 'pectoral_L'
+    const right = new THREE.Object3D()
+    right.name = 'pectoral_R'
+    root.add(left, right)
+    const rig = bindFishTurningRig(root, 'yellow-tang')
+    for (const curvature of [0.06, 0.002, 0.000021]) {
+      const recovering: FishTurnKinematics = {
+        yawRateRadPerSec: curvature,
+        smoothedYawRate: curvature,
+        turnCurvature: curvature,
+        turnCurvatureDelayed: curvature,
+        turnPhase: 0.2,
+        maneuverStage: 'none',
+        exitStrokeSeconds: 0,
+        speed: 0.4,
+        startleSeconds: 0,
+      }
+      const angles = evaluateSpineTurnAngles(rig.spineJoints.length, recovering, rig.archetype)
+      if (curvature === 0.000021) {
+        expect(angles.spineBendRad.every(angle => Math.abs(angle) <= 1e-5)).toBe(true)
+      }
+      expect(Math.abs(angles.pectoralLeftFlareRad)).toBeGreaterThan(1e-5)
+      expect(Math.abs(angles.pectoralLeftPitchRad)).toBeGreaterThan(0)
+
+      // Aquarium animation updates restore the clip pose before the overlay.
+      for (const joint of [...rig.spineJoints, rig.pectoralLeft!, rig.pectoralRight!]) joint.quaternion.identity()
+      applyFishTurningRigOverlay(rig, recovering)
+      expect(rig.pectoralLeft!.quaternion.equals(new THREE.Quaternion())).toBe(false)
+    }
+    const settled: FishTurnKinematics = {
+      yawRateRadPerSec: 0,
+      smoothedYawRate: 0,
+      turnCurvature: 0,
+      turnCurvatureDelayed: 0,
+      turnPhase: 0.2,
+      maneuverStage: 'none',
+      exitStrokeSeconds: 0,
+      speed: 0.4,
+      startleSeconds: 0,
+    }
+    rig.pectoralLeft!.quaternion.identity()
+    applyFishTurningRigOverlay(rig, settled)
+    expect(rig.pectoralLeft!.quaternion.equals(new THREE.Quaternion())).toBe(true)
+  })
+
   it('foreshortens fallback 2D sprites smoothly across yaw transitions instead of popping between -1 and +1', () => {
     expect(evaluateSpriteTurnScaleX(Math.PI / 2)).toBeCloseTo(1.0, 6)
     expect(evaluateSpriteTurnScaleX(-Math.PI / 2)).toBeCloseTo(-1.0, 6)

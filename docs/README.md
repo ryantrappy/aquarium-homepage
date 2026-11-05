@@ -4,7 +4,7 @@
 Category: Governance / Hub
 Status: Canonical / Active
 Authority: Binding Single Source of Documentation Truth
-Backlog: AQ-61
+Backlog: AQ-61, AQ-63, AQ-65, AQ-66
 Owner: @documentation
 Updated: 2026-11-05
 Upstream: AGENTS.md, AGENT_TASKS.md, docs/requirements.md, docs/framework/DOCUMENTATION_FRAMEWORK.md
@@ -34,10 +34,10 @@ Find the authoritative documents for your task area:
 | **Biological Asset Pipeline** | [`asset-contract.md`](asset-contract.md) | [`open-source-asset-and-motion-research.md`](open-source-asset-and-motion-research.md) | [`asset-pipeline-proof.md`](asset-pipeline-proof.md), [`asset-evidence/aq57/`](asset-evidence/aq57/) |
 | **Fish Roster & Adult Scaling** | [`fish-scale-reference.md`](fish-scale-reference.md) | [`reef-fish-roster.md`](reef-fish-roster.md) | `src/rendering/scene/fish-scale.test.ts` |
 | **Modular Corals & Rock Sockets**| [`modular-coral-and-live-rock-spec.md`](modular-coral-and-live-rock-spec.md)| [`socket-verification.md`](socket-verification.md) | [`asset-evidence/aq52-left-socket-report.json`](asset-evidence/aq52-left-socket-report.json) |
-| **2D Thumbnails & Cutouts** | [`fish-assets.md`](fish-assets.md) | [`fish-art-provenance.json`](fish-art-provenance.json) | `public/fish-art-provenance.json` |
+| **2D Thumbnails & Cutouts** | [`fish-assets.md`](fish-assets.md) | [`fish-art-provenance.json`](fish-art-provenance.json) | `public/fish-art-provenance.json`  [AQ-66 thumbnail proof](asset-evidence/aq66/review.json) |
 | **Homelab Services & Links** | [`service-mapping-review.md`](service-mapping-review.md) | [`requirements.md`](requirements.md) | Backlog `AQ-8` / `AQ-56` |
 | **Read-Only Telemetry (Hardware)**| [`network-traffic-source.md`](network-traffic-source.md) | Server endpoints (`src/routes/api/telemetry/`) | `src/server/disk-capacity-math.test.ts` |
-| **Accessibility & Controls** | [`accessibility-audit.md`](accessibility-audit.md) | [`design-principles.md`](design-principles.md) | Backlog `AQ-6` / `AQ-50` |
+| **Accessibility & Controls** | [`accessibility-audit.md`](accessibility-audit.md) | [`design-principles.md`](design-principles.md) | Backlog `AQ-6` / `AQ-50`  [AQ-63 interaction proof](asset-evidence/aq63/review.json) |
 | **Deployment & Production** | [`deployment.md`](deployment.md) | [`deployment 2.md`](deployment%202.md) *(Historical)* | Docker / Node 24 on `trappserv.er` |
 | **Documentation Standards** | [`framework/DOCUMENTATION_FRAMEWORK.md`](framework/DOCUMENTATION_FRAMEWORK.md)| [`framework/TEMPLATE.md`](framework/TEMPLATE.md) | Backlog `AQ-61` |
 
@@ -45,7 +45,7 @@ Find the authoritative documents for your task area:
 
 ## 2. Master Document Directory
 
-An exhaustive directory of all 34 documentation and evidence files in the project:
+Directory of project documentation and verification evidence:
 
 ### Tier 1: Core Governance & Active Checkpoints (Binding)
 | Document | Status | Authority | Scope / Purpose |
@@ -83,6 +83,7 @@ An exhaustive directory of all 34 documentation and evidence files in the projec
 |---|---|---|---|---|
 | [`code-review-findings.md`](code-review-findings.md) | **Active** | Evidentiary | `AQ-61` | Comprehensive codebase audit: runtime picking desync, mobile memory allocations, narrow-viewport navigation locks. |
 | [`agent-change-audit.md`](agent-change-audit.md) | **Complete** | Evidentiary | `AQ-57` | Root audit of concurrent agent changes, rejected runtime experiments, and baseline restoration. |
+| [AQ-65 GPU attenuation proof](asset-evidence/aq65/gpu-ao-review.json) | **Complete** | Evidentiary | AQ-65 | Actual shader float readpixels match the CPU curve; bounded turn/pitch recovery tests. |
 | [AQ-66 thumbnail evidence](asset-evidence/aq66/review.json) | **Complete** | Evidentiary | AQ-66 | Optimized image metrics, preserved PNG originals and native failed-artwork recovery proof. |
 | [`asset-evidence/aq63/review.json`](asset-evidence/aq63/review.json) | **Complete** | Evidentiary | `AQ-63` | Root interaction tests, native browser observations and two viewport screenshots; no scene/art acceptance. |
 | [`accessibility-audit.md`](accessibility-audit.md) | **Active** | Evidentiary | `AQ-6`, `AQ-50` | WCAG / keyboard navigation audit, focus trapping, reduced motion behavior, dual viewport checks. |

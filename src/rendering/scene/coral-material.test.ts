@@ -56,7 +56,14 @@ describe('coral-raw-masks-v1 material and shader adapter (AQ-53 / AQ-42)', () =>
     expect(mockShader.vertexShader).toContain('pow(coralRawR, 1.8)')
     expect(mockShader.vertexShader.match(/pow\s*\(\s*coralRawR\s*,\s*1\.8\s*\)/g)).toHaveLength(1)
     expect(mockShader.fragmentShader).toContain('diffuseColor.a = 1.0;')
-    expect(mockShader.fragmentShader).toContain('coralContactAo')
+    expect(mockShader.fragmentShader).toContain('float coralContactAo = mix(0.28, 1.0, coralMaskAlpha);')
+    expect(mockShader.fragmentShader).toContain('reflectedLight.indirectDiffuse *= coralContactAo;')
+    expect(mockShader.fragmentShader).toContain('reflectedLight.directDiffuse *= coralContactAo;')
+    expect(mockShader.fragmentShader).not.toContain('diffuseColor.rgb *= mix(0.62, 1.0')
+    expect(mockShader.fragmentShader).not.toContain('reflectedLight.directDiffuse *= mix(0.72, 1.0, coralContactAo)')
+    for (const [name, uniform] of Object.entries(binding.uniforms)) {
+      expect(mockShader.uniforms[name]).toBe(uniform)
+    }
 
     const mockDepthShader: THREE.WebGLProgramParametersWithUniforms = {
       uniforms: {},
@@ -129,6 +136,7 @@ describe('coral-raw-masks-v1 material and shader adapter (AQ-53 / AQ-42)', () =>
     expect(reducedMotionDisp.dz).toBe(0)
 
     expect(evaluateCoralContactAoFactor(0)).toBeCloseTo(0.28, 6)
+    expect(evaluateCoralContactAoFactor(0.5)).toBeCloseTo(0.64, 6)
     expect(evaluateCoralContactAoFactor(1)).toBeCloseTo(1.0, 6)
   })
 

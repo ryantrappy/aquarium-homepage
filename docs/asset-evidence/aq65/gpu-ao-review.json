@@ -1,0 +1,78 @@
+{
+  "baseline": 0.09408881515264512,
+  "maxError": 2.6923470231032812e-08,
+  "method": "actual unmodified coral material, ambient-only diffuse, floating linear render target, palette/fluorescence/subsurface/motion disabled",
+  "values": [
+    {
+      "alpha": 0,
+      "error": 1.1086134732440913e-08,
+      "expected": 0.28,
+      "ratio": 0.28000001108613476,
+      "rgb": [
+        0.026344869285821915,
+        0.026344869285821915,
+        0.026344869285821915
+      ]
+    },
+    {
+      "alpha": 0.25,
+      "error": 1.583733533205844e-09,
+      "expected": 0.46,
+      "ratio": 0.4599999984162665,
+      "rgb": [
+        0.04328085482120514,
+        0.04328085482120514,
+        0.04328085482120514
+      ]
+    },
+    {
+      "alpha": 0.5,
+      "error": 1.4253601854363753e-08,
+      "expected": 0.64,
+      "ratio": 0.6399999857463982,
+      "rgb": [
+        0.06021684035658837,
+        0.06021684035658837,
+        0.06021684035658837
+      ]
+    },
+    {
+      "alpha": 0.75,
+      "error": 2.6923470231032812e-08,
+      "expected": 0.8200000000000001,
+      "ratio": 0.8199999730765298,
+      "rgb": [
+        0.07715282589197159,
+        0.07715282589197159,
+        0.07715282589197159
+      ]
+    },
+    {
+      "alpha": 1,
+      "error": 0,
+      "expected": 1,
+      "ratio": 1,
+      "rgb": [
+        0.09408881515264512,
+        0.09408881515264512,
+        0.09408881515264512
+      ]
+    }
+  ],
+  "task": "AQ-65",
+  "reviewer": "Root",
+  "date": "2026-11-05",
+  "shaderSourceSha256": "bf5f5162bc1426fe2822e9c3e199c968196210ea0e87271c94ae364b1df61100",
+  "limits": [
+    "Actual unmodified shader with ambient diffuse isolated; not full-scene/art acceptance.",
+    "Run gpu-ao-proof.js through local Vite-origin DevTools Runtime.evaluate with awaitPromise:true; renderer/targets are disposed without scene mutations."
+  ],
+  "tests": {
+    "isolatedFocused": 41,
+    "files": 4,
+    "typecheck": "pass",
+    "productionBuild": "pass",
+    "scope": "Includes independent player7 plus AQ65 module34 tests."
+  },
+  "motion": "Safe boundary pivot; rate-limited metric pitch through vertical routes; query-checked close intermediate points without positional snaps; final-anchor arrival remains within bounded substep."
+}
