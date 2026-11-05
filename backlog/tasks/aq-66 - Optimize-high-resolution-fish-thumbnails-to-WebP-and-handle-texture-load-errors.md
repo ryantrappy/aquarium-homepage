@@ -7,7 +7,7 @@ status: Done
 assignee:
   - '@Luna'
 created_date: '2026-11-05 18:32'
-updated_date: '2026-11-05 21:12'
+updated_date: '2026-11-05 21:18'
 labels: []
 dependencies: []
 references:
@@ -55,6 +55,8 @@ Four species in public/fish/ (blue-green chromis, firefish, mandarin dragonet, a
 2026-11-05 progress: converted the four source PNGs to alpha-preserving 600px WebP (24,990–57,184 bytes each), archived originals byte-for-byte at docs/asset-evidence/aq66/originals/, updated hashes/catalog/docs, and recorded all 15 measured alpha-visible width fractions in the provenance manifest. Alpha masks are proportionally downscaled to a maximum 512px dimension (worst-case canvas 1 MiB RGBA plus 256 KiB retained alpha). Failed texture recovery removes the sprite from scene and hit list, releases its mask/texture, and exposes the native label; focused test covers helper behavior. Verified: 6 files / 33 tests passed (asset contract, manifest checker, catalog, scale, alpha picking, ServiceManager); npm run typecheck and git diff --check pass. Criteria 1,2,3,4,6 have objective evidence. Criterion 5 remains unchecked pending Root review of TextureLoader callback integration; no task completion, staging, or commit by this worker.
 
 2026-11-05 Root independent acceptance: dwebp PAM decoding reproduces all15 alpha-visible width fractions; every WebP under75000bytes (max65764), total630998bytes. Four archived PNGs match Git original SHA256 byte-for-byte. Isolated reviewed snapshot excluding concurrent modelURL/axis and later player/shader work passes43files/372tests with bounded2workers and30second geometry/CLI fixture allowance, typecheck and production build. Native production5194 at402x874 scale1: blocking blue-tang.webp leaves scene ready and exposes Ombi native label/tabIndex0/aria-hiddenfalse with explicit thumbnail-unavailable accessible name/title; Enter opens real Ombi login. Unblocking/reload yields decoded positive-width images for all15 picker species. Temporary block/cache/viewport restored and tabs closed. Evidence:docs/asset-evidence/aq66/review.json and thumbnail-failure-phone.png. Root required iteration fixed initially hidden failed-image link; no final fish-art/animation acceptance.
+
+Root screenshot correction2026-11-05: replaced clipped JPEG returned by generic screenshot API with actual402x874 PNG (signature and IHDR verified), captured via CDP exact clip/metric scale1 after awaiting the real failed-thumbnail label. Temporary block/cache/metrics cleared and own tab closed. Runtime keyboard activation evidence unchanged; captureCorrection documents the replacement.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

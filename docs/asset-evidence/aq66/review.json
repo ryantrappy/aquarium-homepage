@@ -39,5 +39,12 @@
   "limits": [
     "Static thumbnails are recognition art, not lifelike fish animation.",
     "No Gemini 3D models, rig visuals or concurrent model URL/axis promotion accepted."
+  ],
+  "captureCorrection": "Initial screenshot API returned clipped JPEGs despite .png filenames. Replaced with format-checked full-size PNG via CDP Page.captureScreenshot, exact clip scale1 and Emulation metric scale1. CSS/interaction evidence unchanged. New scene captures use reviewed isolated AQ66 production snapshot, excluding concurrent model URL promotions.",
+  "captureDimensions": [
+    [
+      402,
+      874
+    ]
   ]
 }
