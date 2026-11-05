@@ -15,6 +15,13 @@ export type VerifiedSocket = {
   support: { pointM: Vec3; normal: Vec3; supportedRadiusM: number; freeRadiusM: number; evidence: { method: 'surface-probes-v1'; geometrySha256: string; report: string } }
 }
 
+export type RockCollisionGeometry = {
+  assetId: string
+  sourceSha256: string
+  boundsM: { min: Vec3; max: Vec3 }
+  triangles: Array<{ meshId: string; index: number; a: Vec3; b: Vec3; c: Vec3 }>
+}
+
 export type SocketInspectionReport = {
   schema: 'socket-support-inspection-v1'
   assetId: string | null
@@ -231,6 +238,47 @@ function parseGlb(bytes: Uint8Array) {
 }
 
 function rawTransform(node: any): RawTransform { return node.matrix ? { matrix: [...node.matrix] } : { translation: [...(node.translation ?? [0, 0, 0])], rotation: [...(node.rotation ?? [0, 0, 0, 1])], scale: [...(node.scale ?? [1, 1, 1]) ] } }
+
+/** Narrow read-only collision scope. Parsing, transforms and socket behavior stay unchanged. */
+export function readRockCollisionGeometry(bytes: Uint8Array): RockCollisionGeometry {
+  const parsed = parseGlb(bytes)
+  const buffer = Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength)
+  if (buffer.readUInt32LE(16) !== 0x4e4f534a) fail('collision inspection requires the JSON chunk first')
+  const doc = JSON.parse(buffer.toString('utf8', 20, 20 + buffer.readUInt32LE(12)).trim())
+  const roots = doc.scenes[doc.scene ?? 0].nodes
+  if (roots.length !== 1) fail('collision inspection requires one canonical rock root')
+  const root = doc.nodes[roots[0]], metadata = root.extras?.reefAsset
+  if (metadata?.schema !== 'reef-asset-v1' || metadata.kind !== 'rock' || typeof metadata.id !== 'string' || !/^[a-z][a-z0-9_-]*$/.test(metadata.id)
+    || metadata.units !== 'meter' || metadata.upAxis !== '+Y' || metadata.origin !== 'local') fail('collision root must declare reef-asset-v1 rock, meter, +Y and local origin')
+  let meshCount = 0, assetCount = 0, expectedTriangles = 0
+  const visit = (index: number, socketAncestor = false) => {
+    const node = doc.nodes[index]
+    if (node.extensions?.EXT_mesh_gpu_instancing) fail('collision inspection does not support GPU-instanced geometry')
+    if (node.extras?.reefAsset) assetCount++
+    const socket = node.name?.startsWith('socket_') || node.extras?.reefSocket
+    if (!socket && localMatrix(node).some((value, i) => value !== identity()[i])) fail('collision inspection does not support transformed geometry scopes')
+    if (node.mesh !== undefined) {
+      if (socket || socketAncestor) fail('collision inspection does not support geometry inside socket hierarchies')
+      meshCount++
+      for (const primitive of doc.meshes[node.mesh].primitives) {
+        if (primitive.extensions && Object.keys(primitive.extensions).length) fail('collision inspection does not support primitive extensions')
+        expectedTriangles += doc.accessors[primitive.indices ?? primitive.attributes.POSITION].count / 3
+      }
+    }
+    for (const child of node.children ?? []) visit(child, socketAncestor || Boolean(socket))
+  }
+  visit(roots[0])
+  if (assetCount !== 1 || meshCount !== 1) fail('collision inspection requires one asset and one active mesh; instances are unsupported')
+  if (expectedTriangles !== parsed.triangles.length) fail('collision inspection rejects skipped degenerate triangles')
+  if (!parsed.triangles.length || parsed.triangles.some(triangle => triangle.role !== 'rock')) fail('collision inspection requires nonempty rock-only triangles')
+  if (new Set(parsed.triangles.map(triangle => triangle.meshId)).size !== 1) fail('collision inspection requires one rock primitive identity')
+  const boundsM = boundsFor(parsed.triangles)
+  if (!finiteVec(metadata.dimensionsM, 3) || metadata.dimensionsM.some((value: number, i: number) => value <= 0 || Math.abs(value - (boundsM.max[i] - boundsM.min[i])) > 1e-5)) fail('collision root dimensions differ from actual meter geometry')
+  return {
+    assetId: metadata.id, sourceSha256: createHash('sha256').update(bytes).digest('hex'), boundsM,
+    triangles: parsed.triangles.map(({ meshId, index, a, b, c }) => ({ meshId, index, a: [...a], b: [...b], c: [...c] })),
+  }
+}
 
 function boundsFor(tris: Triangle[]): { min: Vec3; max: Vec3 } {
   const min: Vec3 = [Infinity, Infinity, Infinity], max: Vec3 = [-Infinity, -Infinity, -Infinity]

@@ -1,5 +1,24 @@
 # Habitat navigation core contract
 
+<!-- AGENT_DOC_METADATA
+Category: Specification / Navigation Contract
+Status: Canonical / Active
+Authority: Binding Navigation Interface Contract
+Backlog: AQ-34, AQ-45, AQ-44
+Owner: @behavior_profiles
+Updated: 2026-11-05
+Upstream: docs/behavior-runtime-contract.md, docs/modular-coral-and-live-rock-spec.md
+Downstream: src/simulation/habitat-navigation.ts, src/simulation/habitat-navigation.test.ts, src/simulation/mesh-habitat.ts
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Navigation Specification / Contract
+> - **Status**: Canonical / Active
+> - **Authority**: Binding Contract
+> - **Backlog Reference**: `AQ-34`, `AQ-45`
+> - **Summary**: 3D route planning, obstacle visibility graph, semantic anchor routing (crevices, caves, substrate), and deterministic Dijkstra path generation without navmesh assumptions.
+
 `src/simulation/habitat-navigation.ts` is the engine-independent AQ-34 route-planning slice. It consumes the semantic `NavigationRequest` emitted by the behavior runtime and returns either a route or a stable `blocked` / `unavailable` result. The route planner never changes fish position, advances a fish, or assumes a navmesh.
 
 ## Inputs supplied by the scene adapter
@@ -19,4 +38,8 @@ The scene adapter advances along returned points using its selected engine. It r
 
 ## Current limits
 
-This core uses conservative axis-aligned obstacle volumes and a 3D visibility graph. It does not model mesh triangles, dynamic obstacles, fish-to-fish avoidance, renderer occlusion, or fish deformation. AQ-5 still selects the rendering engine, so no production reef geometry or browser demonstration is wired here. Scene integration and viewport checks remain pending.
+This legacy core uses axis-aligned obstacle volumes and a 3D visibility graph. Its coordinates and edge tests include depth, but the active scene's source adapter fills coarse columns down to sand. Those filled columns erase overhangs and caves. The AQ58 horizontal-band experiment also extrudes boxes through full depth, so it is comparison evidence rather than the final representation.
+
+AQ5 selected Three.js, and the technical scene consumes this core for planning and movement checks. That integration does not complete AQ34's final reef, interaction or visual acceptance. AQ58 is now developing continuous swept-sphere queries against actual mesh triangles and bounded three-dimensional routing. The replacement must preserve water gaps in every direction and reject contact, solid interiors and indeterminate checks. Both planning and each movement check must use the same collision source; changing only the planner would leave a conflicting runtime predicate.
+
+The new work stays within AQ58/AQ34 rather than opening another spike. Source transforms, canonical units, physically calibrated fish envelopes, bounded search cost and actual scene/occlusion evidence remain explicit review gates. Dynamic obstacles, fish-to-fish avoidance and deformation-aware envelopes are not provided by this legacy box core.

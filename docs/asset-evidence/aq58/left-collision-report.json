@@ -1,0 +1,250 @@
+{
+  "schema": "rock-collision-review-v1",
+  "assetId": "live-rock-island-left",
+  "sourceSha256": "2f90be064f3f5b15291dffd25a3ea00ec3ad3f212e8e232814daba8f456cfd6c",
+  "boundsM": {
+    "min": [
+      -0.47622182965278625,
+      -0.012000000104308128,
+      -0.2589026093482971
+    ],
+    "max": [
+      0.4865860044956207,
+      0.375,
+      0.25920674204826355
+    ]
+  },
+  "method": {
+    "name": "horizontal-band-exterior-prisms-v1",
+    "maxParts": 16,
+    "globalAssembledPartLimit": 32,
+    "minBandHeightM": 0.002,
+    "gapInsetM": 0.000001,
+    "axisX": 0,
+    "heightM": 0.08,
+    "probeAxisWithinSourceXY": true,
+    "probeRadiiM": [
+      0.02,
+      0.04,
+      0.06
+    ],
+    "probeInterpretation": "Fixed technical probes, not species or animated-fish envelopes",
+    "numericalAreaFloorM2": 1e-24,
+    "capsuleSafetyMarginM": 0.000001,
+    "sweptCubeContact": "closed-contact-is-unsafe; capsule-margin-also-required",
+    "maximumSourceTriangles": 100000,
+    "maximumCoordinateMagnitudeM": 1000,
+    "exhaustiveSelfIntersectionCheck": false
+  },
+  "topology": {
+    "exactPositionWeld": true,
+    "vertices": 12288,
+    "triangles": 24572,
+    "boundaryEdges": 0,
+    "nonManifoldEdges": 0,
+    "inconsistentEdges": 0,
+    "nonManifoldVertices": 0,
+    "degenerateTriangles": 0,
+    "duplicateFaces": 0,
+    "connectedComponents": 1,
+    "valid": true,
+    "exhaustiveSelfIntersectionCheck": false
+  },
+  "promotionStatus": "unavailable-pending-root-and-scene-review",
+  "status": "validated-offline",
+  "reason": "Independent surface/prism checks pass; Root and actual-scene review remain required",
+  "stoppedBy": "probe-targets-satisfied",
+  "bands": [
+    {
+      "low": -0.012000000104308128,
+      "high": 0.03637499990873039
+    },
+    {
+      "low": 0.03637499990873039,
+      "high": 0.0847499999217689
+    },
+    {
+      "low": 0.0847499999217689,
+      "high": 0.13312499993480742
+    },
+    {
+      "low": 0.13312499993480742,
+      "high": 0.18149999994784594
+    },
+    {
+      "low": 0.18149999994784594,
+      "high": 0.375
+    }
+  ],
+  "candidateParts": [
+    {
+      "id": "rock-part-01",
+      "boundsM": {
+        "min": [
+          -0.47622182965278625,
+          -0.012000000104308128,
+          -0.2589026093482971
+        ],
+        "max": [
+          -0.0893163956828735,
+          0.03637499990873039,
+          0.25920674204826355
+        ]
+      }
+    },
+    {
+      "id": "rock-part-02",
+      "boundsM": {
+        "min": [
+          0.08945269893102839,
+          -0.012000000104308128,
+          -0.2589026093482971
+        ],
+        "max": [
+          0.4865860044956207,
+          0.03637499990873039,
+          0.25920674204826355
+        ]
+      }
+    },
+    {
+      "id": "rock-part-03",
+      "boundsM": {
+        "min": [
+          -0.47622182965278625,
+          0.03637499990873039,
+          -0.2589026093482971
+        ],
+        "max": [
+          -0.07011978025380013,
+          0.0847499999217689,
+          0.25920674204826355
+        ]
+      }
+    },
+    {
+      "id": "rock-part-04",
+      "boundsM": {
+        "min": [
+          0.07022391234422695,
+          0.03637499990873039,
+          -0.2589026093482971
+        ],
+        "max": [
+          0.4865860044956207,
+          0.0847499999217689,
+          0.25920674204826355
+        ]
+      }
+    },
+    {
+      "id": "rock-part-05",
+      "boundsM": {
+        "min": [
+          -0.47622182965278625,
+          0.0847499999217689,
+          -0.2589026093482971
+        ],
+        "max": [
+          -0.04744898390182884,
+          0.13312499993480742,
+          0.25920674204826355
+        ]
+      }
+    },
+    {
+      "id": "rock-part-06",
+      "boundsM": {
+        "min": [
+          0.048062216625937335,
+          0.0847499999217689,
+          -0.2589026093482971
+        ],
+        "max": [
+          0.4865860044956207,
+          0.13312499993480742,
+          0.25920674204826355
+        ]
+      }
+    },
+    {
+      "id": "rock-part-07",
+      "boundsM": {
+        "min": [
+          -0.47622182965278625,
+          0.13312499993480742,
+          -0.2589026093482971
+        ],
+        "max": [
+          0.4865860044956207,
+          0.375,
+          0.25920674204826355
+        ]
+      }
+    }
+  ],
+  "coverage": {
+    "surfaceCovered": true,
+    "uncoveredTriangles": 0,
+    "uncoveredExamples": [],
+    "fullDepthPrismComplement": true,
+    "omittedPrisms": 3,
+    "boundaryCrossingPrisms": 0,
+    "exteriorPrismEndExtensionM": 0.000001,
+    "exteriorConnectedComplement": true,
+    "solidCoverageArgument": "Within the measured envelope, every omitted open prism continues along Z to known exterior beyond both source bounds. No boundary triangle enters its interior; a bounded closed-solid interpretation therefore cannot occupy it. This is conditional on the reported topology and does not certify absence of mesh self-intersections."
+  },
+  "probes": [
+    {
+      "radiusM": 0.02,
+      "startM": [
+        0,
+        0.08,
+        -0.3589026093482971
+      ],
+      "endM": [
+        0,
+        0.08,
+        0.3592067420482635
+      ],
+      "minimumMeshDistanceM": 0.06634181669905997,
+      "exactMeshCapsuleSafe": true,
+      "exactMeshSweptCubeSafe": true,
+      "currentCubeInflatedAabbRouteSafe": true
+    },
+    {
+      "radiusM": 0.04,
+      "startM": [
+        0,
+        0.08,
+        -0.3589026093482971
+      ],
+      "endM": [
+        0,
+        0.08,
+        0.3592067420482635
+      ],
+      "minimumMeshDistanceM": 0.06634181669905997,
+      "exactMeshCapsuleSafe": true,
+      "exactMeshSweptCubeSafe": true,
+      "currentCubeInflatedAabbRouteSafe": true
+    },
+    {
+      "radiusM": 0.06,
+      "startM": [
+        0,
+        0.08,
+        -0.3589026093482971
+      ],
+      "endM": [
+        0,
+        0.08,
+        0.3592067420482635
+      ],
+      "minimumMeshDistanceM": 0.06634181669905997,
+      "exactMeshCapsuleSafe": true,
+      "exactMeshSweptCubeSafe": false,
+      "currentCubeInflatedAabbRouteSafe": false
+    }
+  ]
+}

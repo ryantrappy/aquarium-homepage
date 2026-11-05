@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>3D collision review</title>
+  <style>
+    html,body{margin:0;height:100%;background:#173e49;color:#fff;font:14px system-ui,sans-serif}canvas{display:block;width:100%;height:100%}
+    aside{position:absolute;top:12px;left:12px;right:12px;max-width:570px;padding:12px;background:#092b36e8;border-radius:8px}
+    h1{font-size:17px;margin:0 0 6px}p{margin:6px 0;line-height:1.4}fieldset{display:flex;flex-wrap:wrap;gap:8px;border:0;padding:6px 0;margin:0}
+    button,select{font:inherit;padding:6px;color:#fff;background:#164957;border:1px solid #90b9c2;border-radius:4px}output{display:block;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
+  </style>
+</head>
+<body>
+  <canvas aria-label="Interactive exact rock geometry with a technical clearance probe"></canvas>
+  <aside>
+    <h1>3D collision review</h1>
+    <p>Exact exported rock geometry with a neutral review material. The sphere is a technical clearance probe. Drag to inspect depth; scroll to zoom.</p>
+    <fieldset aria-label="Probe settings">
+      <select id="radius" aria-label="Probe radius"><option value="0.02">20 mm radius</option><option value="0.04" selected>40 mm radius</option><option value="0.06">60 mm radius</option><option value="0.07">70 mm radius</option></select>
+      <select id="route" aria-label="Route"><option value="cave">Through cave</option><option value="diagonal">Around rock in 3D</option></select>
+      <button id="run" disabled>Check route</button><button id="pause">Pause probe</button>
+    </fieldset>
+    <output role="status" aria-live="polite">Loading source geometry…</output>
+  </aside>
+  <script type="module" src="./collision-study.ts"></script>
+</body>
+</html>
