@@ -100,6 +100,56 @@ function inflate(box: AxisAlignedBox, radius: number): AxisAlignedBox {
   }
 }
 
+type ExpandedObstacleCacheEntry = {
+  sourceVolumes: readonly SolidObstacleVolume[]
+  bounds: readonly number[]
+  expanded: readonly AxisAlignedBox[]
+}
+
+// Obstacle arrays are stable for a mounted habitat. Keep one expanded-box
+// array per clearance radius and source array so movement checks can reuse the
+// same geometry. Snapshot primitive bounds as well as object references to
+// invalidate correctly if a caller mutates a habitat in place.
+const expandedObstacleCache = new WeakMap<readonly SolidObstacleVolume[], Map<number, ExpandedObstacleCacheEntry>>()
+
+/** Returns cached clearance-inflated boxes, refreshing when source geometry changes. */
+export function getClearanceExpandedObstacles(
+  obstacles: readonly SolidObstacleVolume[],
+  clearanceRadius: number,
+): readonly AxisAlignedBox[] {
+  if (!Number.isFinite(clearanceRadius) || clearanceRadius < 0) throw new RangeError('Obstacle clearance must be finite and non-negative.')
+  let byRadius = expandedObstacleCache.get(obstacles)
+  if (!byRadius) {
+    byRadius = new Map()
+    expandedObstacleCache.set(obstacles, byRadius)
+  }
+
+  const cached = byRadius.get(clearanceRadius)
+  let unchanged = Boolean(cached && cached.sourceVolumes.length === obstacles.length)
+  if (unchanged && cached) {
+    for (let index = 0; index < obstacles.length; index += 1) {
+      const bounds = obstacles[index].bounds
+      const offset = index * 6
+      if (cached.sourceVolumes[index] !== obstacles[index]
+        || cached.bounds[offset] !== bounds.min.x || cached.bounds[offset + 1] !== bounds.min.y || cached.bounds[offset + 2] !== bounds.min.z
+        || cached.bounds[offset + 3] !== bounds.max.x || cached.bounds[offset + 4] !== bounds.max.y || cached.bounds[offset + 5] !== bounds.max.z) {
+        unchanged = false
+        break
+      }
+    }
+  }
+  if (unchanged && cached) return cached.expanded
+
+  const bounds: number[] = []
+  const expanded = Object.freeze(obstacles.map(({ bounds: sourceBounds }) => {
+    bounds.push(sourceBounds.min.x, sourceBounds.min.y, sourceBounds.min.z, sourceBounds.max.x, sourceBounds.max.y, sourceBounds.max.z)
+    const box = inflate(sourceBounds, clearanceRadius)
+    return Object.freeze({ min: Object.freeze(box.min), max: Object.freeze(box.max) })
+  }))
+  byRadius.set(clearanceRadius, { sourceVolumes: obstacles.slice(), bounds: Object.freeze(bounds), expanded })
+  return expanded
+}
+
 function safePoint(point: Vec3, waterBounds: AxisAlignedBox, clearanceRadius: number, obstacles: readonly AxisAlignedBox[]): boolean {
   if (point.x < waterBounds.min.x + clearanceRadius || point.x > waterBounds.max.x - clearanceRadius
     || point.y < waterBounds.min.y + clearanceRadius || point.y > waterBounds.max.y - clearanceRadius
@@ -260,7 +310,7 @@ export function resolveHabitatRoute(input: ResolveHabitatRouteInput): HabitatRou
     .sort((a, b) => a.id.localeCompare(b.id))
   if (candidates.length === 0) return { ...resultBase(request), status: 'unavailable' }
 
-  const expandedObstacles = obstacles.map((obstacle) => inflate(obstacle.bounds, fishClearanceRadius))
+  const expandedObstacles = getClearanceExpandedObstacles(obstacles, fishClearanceRadius)
   for (const [index, obstacle] of expandedObstacles.entries()) validateBox(obstacle, `Clearance-expanded obstacle ${obstacles[index].id}`)
   const safeBounds = {
     min: {
@@ -320,7 +370,7 @@ export function isWaterSegmentSafe(input: WaterRouteInput): boolean {
   if (!finiteVec(input.start) || !finiteVec(input.target) || !Number.isFinite(input.fishClearanceRadius) || input.fishClearanceRadius < 0) throw new RangeError('Water route requires finite points and non-negative clearance.')
   if (input.obstacles.length > MAX_OBSTACLE_VOLUMES) throw new RangeError('Too many obstacle volumes.')
   input.obstacles.forEach(obstacle => validateBox(obstacle.bounds, 'Obstacle'))
-  const expanded = input.obstacles.map(obstacle => inflate(obstacle.bounds, input.fishClearanceRadius))
+  const expanded = getClearanceExpandedObstacles(input.obstacles, input.fishClearanceRadius)
   return safePoint(input.start, input.waterBounds, input.fishClearanceRadius, expanded)
     && safePoint(input.target, input.waterBounds, input.fishClearanceRadius, expanded)
     && segmentClear(input.start, input.target, expanded)
@@ -328,7 +378,7 @@ export function isWaterSegmentSafe(input: WaterRouteInput): boolean {
 
 export function findWaterRoute(input: WaterRouteInput): readonly Vec3[] | undefined {
   if (isWaterSegmentSafe(input)) return [{ ...input.start }, { ...input.target }]
-  const expanded = input.obstacles.map(obstacle => inflate(obstacle.bounds, input.fishClearanceRadius))
+  const expanded = getClearanceExpandedObstacles(input.obstacles, input.fishClearanceRadius)
   if (!safePoint(input.start, input.waterBounds, input.fishClearanceRadius, expanded)
     || !safePoint(input.target, input.waterBounds, input.fishClearanceRadius, expanded)) return undefined
   const points = [input.start, ...obstacleCorners(expanded, input.waterBounds, input.fishClearanceRadius), input.target]

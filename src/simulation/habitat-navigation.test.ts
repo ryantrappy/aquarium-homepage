@@ -6,6 +6,8 @@ import {
   reportNavigationOutcome,
 } from './behavior-runtime'
 import {
+  getClearanceExpandedObstacles,
+  isWaterSegmentSafe,
   resolveHabitatRoute,
   type AxisAlignedBox,
   type HabitatAnchorLocation,
@@ -21,6 +23,33 @@ function request() {
 }
 
 describe('3D habitat navigation core', () => {
+  it('reuses inflated obstacle geometry per habitat and clearance, invalidating changed inputs', () => {
+    const obstacles = [{ id: 'rock', bounds: { min: { x: 2, y: 2, z: 2 }, max: { x: 3, y: 3, z: 3 } } }]
+    const first = getClearanceExpandedObstacles(obstacles, 0.5)
+
+    expect(getClearanceExpandedObstacles(obstacles, 0.5)).toBe(first)
+    expect(first[0].min).toEqual({ x: 1.5, y: 1.5, z: 1.5 })
+    expect(Object.isFrozen(first)).toBe(true)
+    expect(Object.isFrozen(first[0].min)).toBe(true)
+    const otherClearance = getClearanceExpandedObstacles(obstacles, 0.75)
+    expect(otherClearance).not.toBe(first)
+    expect(getClearanceExpandedObstacles(obstacles, 0.75)).toBe(otherClearance)
+
+    obstacles[0].bounds.min.x = 2.2
+    const afterMutation = getClearanceExpandedObstacles(obstacles, 0.5)
+    expect(afterMutation).not.toBe(first)
+    expect(afterMutation[0].min.x).toBeCloseTo(1.7, 12)
+    expect(getClearanceExpandedObstacles(obstacles, 0.5)).toBe(afterMutation)
+
+    const replacement = [{ id: 'replacement', bounds: { min: { x: 6, y: 2, z: 2 }, max: { x: 7, y: 3, z: 3 } } }]
+    expect(getClearanceExpandedObstacles(replacement, 0.5)).not.toBe(afterMutation)
+    expect(() => isWaterSegmentSafe({
+      start, target: host.position, waterBounds: bounds,
+      obstacles: [{ id: 'invalid', bounds: { min: { x: 4, y: 2, z: 2 }, max: { x: 3, y: 3, z: 3 } } }],
+      fishClearanceRadius: 0.5,
+    })).toThrow(RangeError)
+  })
+
   it('routes around an inflated 3D obstacle with fish clearance', () => {
     const result = resolveHabitatRoute({
       request: request(),

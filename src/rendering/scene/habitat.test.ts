@@ -39,6 +39,9 @@ describe('actual reef triangle envelopes', () => {
       'reef-0',
       0.08,
     )
+    const grazingAnchor = mobile.anchors.find(anchor => anchor.anchor === 'grazingSurface')!
+    const sourceAnchor = reefHabitat.anchors.find(anchor => `reef-0-${anchor.id}` === grazingAnchor.id)!
+    expect(grazingAnchor.position.y - (sourceAnchor.position.y * 5 - 1.65)).toBeCloseTo(clearance + .03, 6)
     const mobileRoute = resolveHabitatRoute({
       request: { instanceId: 'tang-mobile', speciesId: 'yellow-tang', state: 'forage', anchor: 'grazingSurface', cue: 'foraging-opportunity', generation: 1 },
       start: { x: 0, y: 1.25, z: 1.8 },
