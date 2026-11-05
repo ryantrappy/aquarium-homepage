@@ -1,9 +1,9 @@
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createCpuTemperatureStore } from '../../../server/cpu-temperature'
-import { createCpuTemperatureGetHandler } from './cpu-temperature'
+import { createCpuTemperatureGetHandler, createCpuTemperatureHandlers } from './cpu-temperature'
 
 const roots: string[] = []
 
@@ -25,6 +25,26 @@ afterEach(async () => {
 })
 
 describe('CPU temperature API handler', () => {
+  it('exposes GET and ANY only, leaving HEAD to the framework GET fallback', async () => {
+    const handlers = createCpuTemperatureHandlers(await makeSource())
+    expect(Object.keys(handlers).sort()).toEqual(['ANY', 'GET'])
+  })
+
+  it.each(['POST', 'PUT', 'DELETE'])('rejects %s with 405 without reading sensors', async (method) => {
+    const store = await makeSource()
+    const read = vi.spyOn(store, 'read')
+    const getSensors = vi.spyOn(store, 'getSensors')
+    const handlers = createCpuTemperatureHandlers(store)
+    const response = await handlers.ANY({ request: new Request('http://reef-control/api/telemetry/cpu-temperature', { method }) })
+
+    expect(response.status).toBe(405)
+    expect(response.headers.get('Allow')).toBe('GET, HEAD')
+    expect(response.headers.get('Cache-Control')).toBe('no-store')
+    await expect(response.json()).resolves.toEqual({ message: 'Method not allowed.' })
+    expect(read).not.toHaveBeenCalled()
+    expect(getSensors).not.toHaveBeenCalled()
+  })
+
   it('returns discovered sensors and the selected live measurement without caching', async () => {
     const handler = createCpuTemperatureGetHandler(await makeSource())
     const response = await handler({ request: new Request('http://reef-control/api/telemetry/cpu-temperature?sensorId=coretemp.0%3Acore-0') })

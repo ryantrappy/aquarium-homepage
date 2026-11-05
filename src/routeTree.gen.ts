@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiConfigRouteImport } from './routes/api/config'
 import { Route as ApiTelemetryCpuTemperatureRouteImport } from './routes/api/telemetry/cpu-temperature'
+import { Route as ApiTelemetryNetworkTrafficRouteImport } from './routes/api/telemetry/network-traffic'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,35 +30,58 @@ const ApiTelemetryCpuTemperatureRoute =
     path: '/api/telemetry/cpu-temperature',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiTelemetryNetworkTrafficRoute =
+  ApiTelemetryNetworkTrafficRouteImport.update({
+    id: '/api/telemetry/network-traffic',
+    path: '/api/telemetry/network-traffic',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/config': typeof ApiConfigRoute
   '/api/telemetry/cpu-temperature': typeof ApiTelemetryCpuTemperatureRoute
+  '/api/telemetry/network-traffic': typeof ApiTelemetryNetworkTrafficRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/config': typeof ApiConfigRoute
   '/api/telemetry/cpu-temperature': typeof ApiTelemetryCpuTemperatureRoute
+  '/api/telemetry/network-traffic': typeof ApiTelemetryNetworkTrafficRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/config': typeof ApiConfigRoute
   '/api/telemetry/cpu-temperature': typeof ApiTelemetryCpuTemperatureRoute
+  '/api/telemetry/network-traffic': typeof ApiTelemetryNetworkTrafficRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/config' | '/api/telemetry/cpu-temperature'
+  fullPaths:
+    | '/'
+    | '/api/config'
+    | '/api/telemetry/cpu-temperature'
+    | '/api/telemetry/network-traffic'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/config' | '/api/telemetry/cpu-temperature'
-  id: '__root__' | '/' | '/api/config' | '/api/telemetry/cpu-temperature'
+  to:
+    | '/'
+    | '/api/config'
+    | '/api/telemetry/cpu-temperature'
+    | '/api/telemetry/network-traffic'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/config'
+    | '/api/telemetry/cpu-temperature'
+    | '/api/telemetry/network-traffic'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiConfigRoute: typeof ApiConfigRoute
   ApiTelemetryCpuTemperatureRoute: typeof ApiTelemetryCpuTemperatureRoute
+  ApiTelemetryNetworkTrafficRoute: typeof ApiTelemetryNetworkTrafficRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -83,6 +107,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTelemetryCpuTemperatureRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/telemetry/network-traffic': {
+      id: '/api/telemetry/network-traffic'
+      path: '/api/telemetry/network-traffic'
+      fullPath: '/api/telemetry/network-traffic'
+      preLoaderRoute: typeof ApiTelemetryNetworkTrafficRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -90,16 +121,20 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiConfigRoute: ApiConfigRoute,
   ApiTelemetryCpuTemperatureRoute: ApiTelemetryCpuTemperatureRoute,
+  ApiTelemetryNetworkTrafficRoute: ApiTelemetryNetworkTrafficRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
+
 import type { createStart } from '@tanstack/react-start'
+
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
+
     router: Awaited<ReturnType<typeof getRouter>>
   }
 }

@@ -6,28 +6,42 @@ export type { SharedConfig }
 
 export const SERVICE_STORAGE_KEY = 'reef-control.services.v1'
 
-// These sample links are placeholders on the user's homelab, not health checks.
+// User-confirmed starter links. Inclusion does not indicate reachability or health.
 export const EXAMPLE_SERVICES: ServiceConfig[] = [
   {
-    id: 'example-home-assistant',
-    name: 'Home Assistant',
-    url: 'http://trappserv.er:8123',
-    fishId: 'ocellaris-clownfish',
-    isExample: true,
-  },
-  {
-    id: 'example-jellyfin',
-    name: 'Jellyfin',
-    url: 'http://trappserv.er:8096',
-    fishId: 'blue-tang',
-    isExample: true,
-  },
-  {
-    id: 'example-immich',
-    name: 'Immich',
-    url: 'http://trappserv.er:2283',
+    id: 'komodo',
+    name: 'Komodo',
+    url: 'https://komodo.ryantr.app',
     fishId: 'yellow-tang',
-    isExample: true,
+    isExample: false,
+  },
+  {
+    id: 'watchmybirds',
+    name: 'WatchMyBirds',
+    url: 'https://watchmybirds.ryantr.app',
+    fishId: 'banggai-cardinalfish',
+    isExample: false,
+  },
+  {
+    id: 'paperless',
+    name: 'Paperless',
+    url: 'https://paperless.ryantr.app',
+    fishId: 'royal-gramma',
+    isExample: false,
+  },
+  {
+    id: 'home-assistant',
+    name: 'Home Assistant',
+    url: 'https://ha.ryantr.app',
+    fishId: 'ocellaris-clownfish',
+    isExample: false,
+  },
+  {
+    id: 'ombi',
+    name: 'Ombi',
+    url: 'https://ombi.ryantr.app',
+    fishId: 'blue-tang',
+    isExample: false,
   },
 ]
 

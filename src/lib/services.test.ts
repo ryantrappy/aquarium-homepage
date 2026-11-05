@@ -28,10 +28,16 @@ class MemoryStorage implements StorageLike {
 }
 
 describe('service configuration', () => {
-  it('uses clearly marked example entries when storage has no saved list', () => {
+  it('uses the confirmed starter roster when storage has no saved list', () => {
     expect(readServices(new MemoryStorage())).toEqual(EXAMPLE_SERVICES)
-    expect(EXAMPLE_SERVICES.every((service) => service.isExample)).toBe(true)
-    expect(EXAMPLE_SERVICES.every((service) => service.url.includes('trappserv.er:'))).toBe(true)
+    expect(EXAMPLE_SERVICES.every((service) => !service.isExample)).toBe(true)
+    expect(EXAMPLE_SERVICES.map(({ name, url, fishId }) => ({ name, url, fishId }))).toEqual([
+      { name: 'Komodo', url: 'https://komodo.ryantr.app', fishId: 'yellow-tang' },
+      { name: 'WatchMyBirds', url: 'https://watchmybirds.ryantr.app', fishId: 'banggai-cardinalfish' },
+      { name: 'Paperless', url: 'https://paperless.ryantr.app', fishId: 'royal-gramma' },
+      { name: 'Home Assistant', url: 'https://ha.ryantr.app', fishId: 'ocellaris-clownfish' },
+      { name: 'Ombi', url: 'https://ombi.ryantr.app', fishId: 'blue-tang' },
+    ])
   })
 
   it('accepts absolute http and https URLs and rejects unsafe schemes and credentials', () => {

@@ -129,6 +129,14 @@ type DeepReadonly<T> = T extends readonly unknown[]
     ? { readonly [Key in keyof T]: DeepReadonly<T[Key]> }
     : T
 
+function deepFreeze<T>(value: T): DeepReadonly<T> {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    Object.freeze(value)
+    for (const child of Object.values(value as Record<string, unknown>)) deepFreeze(child)
+  }
+  return value as DeepReadonly<T>
+}
+
 const rangeSchema = z.tuple([z.number().finite(), z.number().finite()]).refine(([min, max]) => min >= 0 && min < max)
 const durationRangeSchema = rangeSchema.refine(([, max]) => max <= 30)
 const speedRangeSchema = z.tuple([z.number().finite().positive(), z.number().finite().positive()])
@@ -452,7 +460,7 @@ const profiles = {
   },
 } as const satisfies Record<SpeciesBehaviorId, SpeciesBehaviorProfile>
 
-export const SPECIES_BEHAVIOR_PROFILES: DeepReadonly<Record<SpeciesBehaviorId, SpeciesBehaviorProfile>> = profiles
+export const SPECIES_BEHAVIOR_PROFILES = deepFreeze(profiles)
 
 export type FishBehaviorSample = {
   cruiseSpeedTankWidthsPerSecond: number

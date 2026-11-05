@@ -16,6 +16,15 @@ describe('reef fish behavior profiles', () => {
     expect(validateSpeciesBehaviorProfiles()).toEqual({ success: true })
   })
 
+  it('freezes the shared profile map and nested profile data at runtime', () => {
+    const profile = SPECIES_BEHAVIOR_PROFILES['yellow-tang']
+
+    expect(Object.isFrozen(SPECIES_BEHAVIOR_PROFILES)).toBe(true)
+    expect(Object.isFrozen(profile)).toBe(true)
+    expect(Object.isFrozen(profile.locomotion.speedTankWidthsPerSecond)).toBe(true)
+    expect(Object.isFrozen(profile.transitions[0])).toBe(true)
+  })
+
   it('keeps unsupported states and anchors out of profiles', () => {
     const cardinalfish = getSpeciesBehaviorProfile('banggai-cardinalfish')
     const dragonet = getSpeciesBehaviorProfile('mandarin-dragonet')
