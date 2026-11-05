@@ -42,12 +42,24 @@ export const SPRITE_PLANE_WIDTH = .95
 
 /**
  * Fraction of each fallback artwork's width covered by the fish (alpha > 0.2),
- * measured from public/fish/*.webp. Unknown artwork assumes it fills the plane.
+ * measured from the canonical public/fish/*.webp pixels. Unknown artwork assumes it fills the plane.
  */
 export const SPRITE_ARTWORK_LENGTH_FRACTION: Readonly<Record<string, number>> = Object.freeze({
-  'banggai-cardinalfish': .92,
+  'ocellaris-clownfish': .975,
+  'yellow-tang': .923333,
+  'blue-tang': .981667,
   'royal-gramma': .96,
-  'blue-tang': .9817,
+  'banggai-cardinalfish': .92,
+  'blue-green-chromis': .96,
+  firefish: .806667,
+  'yellow-watchman-goby': .903333,
+  'mandarin-dragonet': .963333,
+  'tailspot-blenny': .96,
+  'six-line-wrasse': .906667,
+  'mccoskers-flasher-wrasse': .918333,
+  'lyretail-anthias': .951667,
+  'flame-angelfish': .953333,
+  'copperband-butterflyfish': .983333,
 })
 
 const FALLBACK_LENGTH_INCHES = 3

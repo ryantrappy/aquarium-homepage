@@ -23,7 +23,7 @@ import { SPRITE_PLANE_WIDTH, fishClearanceRadius, fishModelScale, fishRenderLeng
 import { canRunFishSceneLoop, findSafeFishSpawn, fishSceneStatus, isSafeFishPosition } from './fish-spawn'
 import { EMPTY_FISH_EXTENSIONS, type FishExtensionConfig } from '../../simulation/fish-extensions'
 import { consumeFrameSteps, createFrameClock, SIMULATION_STEP_SECONDS, suspendFrameClock } from './clock'
-import { nearestVisibleIntersection, readArtworkAlpha, type SpriteMasks } from './alpha-picking'
+import { handleArtworkTextureFailure, nearestVisibleIntersection, readArtworkAlpha, type SpriteMasks } from './alpha-picking'
 import { applyFishLinkVisibility } from './fish-link-focus'
 import { projectFishLinkBounds } from './fish-link-projection'
 
@@ -239,6 +239,7 @@ diffuseColor.rgb = waterCol;
   const ray = new THREE.Raycaster(), projected = new THREE.Vector3(), sample = new THREE.Vector3(), hitMeshes: THREE.Object3D[] = []
   const ownedSprites: THREE.Mesh[] = []
   const spriteMasks: SpriteMasks = new WeakMap()
+  const unavailableArtwork = new Set<string>()
   function nearest(x: number, y: number) {
     const box = canvas.getBoundingClientRect()
     ray.setFromCamera(new THREE.Vector2((x - box.left) / box.width * 2 - 1, 1 - (y - box.top) / box.height * 2), camera)
@@ -246,8 +247,9 @@ diffuseColor.rgb = waterCol;
   }
   function updateVisibility(item: Inhabitant) {
     const rect = canvas.getBoundingClientRect()
-    let visible = false
-    for (const [localY, localZ] of [[0, 0], [0, .31], [0, -.31], [.13, 0], [-.13, 0]]) {
+    const artworkUnavailable = unavailableArtwork.has(item.service.id)
+    let visible = artworkUnavailable && Boolean(projectFishLinkBounds(item.root.position, camera, width, height, fishRenderLength(item.service.fishId), projected))
+    if (!visible && !artworkUnavailable) for (const [localY, localZ] of [[0, 0], [0, .31], [0, -.31], [.13, 0], [-.13, 0]]) {
       sample.set(item.fallback ? localZ : 0, localY, item.fallback ? 0 : localZ).applyMatrix4(item.root.matrixWorld).project(camera)
       if (!Number.isFinite(sample.x) || !Number.isFinite(sample.y) || !Number.isFinite(sample.z) || Math.abs(sample.x) > .96 || Math.abs(sample.y) > .94 || sample.z < -1 || sample.z > 1) continue
       if (nearest(rect.left + (sample.x + 1) * width / 2, rect.top + (1 - sample.y) * height / 2) === item.service.id) { visible = true; break }
@@ -321,6 +323,15 @@ diffuseColor.rgb = waterCol;
       try { item.motion.extensions.dispose() } catch (error) { extensionErrors.push(error) }
       scene.remove(item.root); item.mixer?.stopAllAction(); item.mixer?.uncacheRoot(item.mixer.getRoot()); item.root.traverse(object => { if (object instanceof THREE.SkinnedMesh) object.skeleton.dispose() })
     })
+    fish.forEach(item => {
+      const anchor = item.anchor
+      if (!anchor) return
+      anchor.removeAttribute('data-artwork-error')
+      const species = getFishById(item.service.fishId)
+      anchor.title = `${item.service.name} · ${species?.commonName ?? 'reef fish'}${item.fallback ? ' · artwork preview' : ''}`
+      anchor.setAttribute('aria-label', `Open ${item.service.name} in a new tab`)
+    })
+    unavailableArtwork.clear()
     ownedSprites.forEach(sprite => { disposeTree(sprite) }); ownedSprites.length = 0; fish = []
     if (extensionErrors.length) console.error('Fish extension cleanup failed', new AggregateError(extensionErrors, 'Fish extension cleanup failed'))
   }
@@ -366,6 +377,17 @@ diffuseColor.rgb = waterCol;
           }
           try { spriteMasks.set(sprite, { texture: loadedTexture, pixels: readArtworkAlpha(image) }) }
           catch (error) { console.warn('Fish artwork alpha unavailable', error) }
+          if (!document.hidden) render(0, true)
+        }, undefined, error => {
+          if (disposed || !ownedSprites.includes(sprite)) return
+          unavailableArtwork.add(service.id)
+          const anchor = anchors.get(service.id)
+          handleArtworkTextureFailure(sprite, texture, hitMeshes, spriteMasks, anchor)
+          if (anchor) {
+            anchor.title = `${service.name} · ${species.commonName} · thumbnail unavailable`
+            anchor.setAttribute('aria-label', `Open ${service.name} in a new tab; fish thumbnail unavailable`)
+          }
+          console.warn('Fish thumbnail failed to load; native service label remains available', species.thumbnail, error)
           if (!document.hidden) render(0, true)
         }); texture.colorSpace = THREE.SRGBColorSpace
         const sprite = new THREE.Mesh(new THREE.PlaneGeometry(SPRITE_PLANE_WIDTH, .62), new THREE.MeshBasicMaterial({ map: texture, transparent: true, alphaTest: .2, depthWrite: true, side: THREE.DoubleSide }))

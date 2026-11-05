@@ -4,7 +4,7 @@
 Category: Evidence / Verification
 Status: Active
 Authority: Evidentiary Record
-Backlog: AQ-40
+Backlog: AQ-40, AQ-66
 Owner: @root
 Updated: 2026-11-05
 Upstream: docs/asset-contract.md
@@ -107,6 +107,6 @@ The 11 remaining WebPs are recognition art, not rigged models. For the 13 in-sce
 
 - Documented OpenAI ImageGen outputs from 2026-11-02: `royal-gramma`, `blue-tang`, and `banggai-cardinalfish`. The clownfish and yellow-tang WebPs from the same batch are picker thumbnails; their in-scene views use the GLBs above. See [design.md](design.md) and [fish-assets.md](fish-assets.md).
 - Documented OpenAI ImageGen outputs from 2026-11-03: `tailspot-blenny`, `six-line-wrasse`, `mccoskers-flasher-wrasse`, `lyretail-anthias`, `flame-angelfish`, and `copperband-butterflyfish`. See [fish-assets.md](fish-assets.md) for the intended adult/sex-specific visual baselines.
-- Root-approved original ImageGen PNGs from 2026-11-04: `blue-green-chromis`, `firefish`, `yellow-watchman-goby`, and `mandarin-dragonet`. Exact prompts, generated source paths, copied output paths, alpha, dimensions, byte sizes and SHA-256 hashes are in [`fish-art-provenance.json`](fish-art-provenance.json). The original built-in PNGs are active as unchanged project assets and remain static preview art, not final photorealistic or animated fish. Their combined size is 6,446,063 bytes, with widths from 1,774 to 2,172 pixels; no mobile transfer/performance optimization is claimed.
+- Root-approved original ImageGen PNG sources from 2026-11-04: `blue-green-chromis`, `firefish`, `yellow-watchman-goby`, and `mandarin-dragonet`. Exact prompts, generated source paths, archived originals, optimized active WebP paths, alpha, dimensions, byte sizes and SHA-256 hashes are in [`fish-art-provenance.json`](fish-art-provenance.json). Originals remain unchanged under `docs/asset-evidence/aq66/originals/`; their alpha-preserving WebP derivatives are the active static preview art, not final photorealistic or animated fish. All active fish thumbnails are WebP under 75 KB.
 
 `fish-assets.md` documents the 11 frozen WebP outputs, their ImageGen history, and the catalog mapping; their earlier raw PNG paths and exact prompts are not retained, so none are invented here. The four inherited, unverified WebPs were removed from current public distribution after the replacements were approved; their historical hashes and unknown-origin status remain in [`fish-art-provenance.json`](fish-art-provenance.json). `reef-background.webp` was also removed after code search found no active import; its only retained history calls it a prior design background and does not establish source or license (hash and dimensions are recorded in the fish-art provenance manifest). No additional paid or marketplace GLB is loaded by the current scene. This inventory records the current exact visual files and available source/licensing records; root owns final task completion.

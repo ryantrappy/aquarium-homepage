@@ -83,6 +83,7 @@ An exhaustive directory of all 34 documentation and evidence files in the projec
 |---|---|---|---|---|
 | [`code-review-findings.md`](code-review-findings.md) | **Active** | Evidentiary | `AQ-61` | Comprehensive codebase audit: runtime picking desync, mobile memory allocations, narrow-viewport navigation locks. |
 | [`agent-change-audit.md`](agent-change-audit.md) | **Complete** | Evidentiary | `AQ-57` | Root audit of concurrent agent changes, rejected runtime experiments, and baseline restoration. |
+| [AQ-66 thumbnail evidence](asset-evidence/aq66/review.json) | **Complete** | Evidentiary | AQ-66 | Optimized image metrics, preserved PNG originals and native failed-artwork recovery proof. |
 | [`asset-evidence/aq63/review.json`](asset-evidence/aq63/review.json) | **Complete** | Evidentiary | `AQ-63` | Root interaction tests, native browser observations and two viewport screenshots; no scene/art acceptance. |
 | [`accessibility-audit.md`](accessibility-audit.md) | **Active** | Evidentiary | `AQ-6`, `AQ-50` | WCAG / keyboard navigation audit, focus trapping, reduced motion behavior, dual viewport checks. |
 | [`service-mapping-review.md`](service-mapping-review.md) | **Complete** | Evidentiary | `AQ-8`, `AQ-56` | Verified starter homelab roster: Komodo, WatchMyBirds, Paperless, Home Assistant, Ombi. |

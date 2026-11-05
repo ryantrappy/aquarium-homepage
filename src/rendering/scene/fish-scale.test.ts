@@ -66,6 +66,23 @@ describe('true relative fish sizing', () => {
     expect(rendered('blue-tang') / clown).toBeCloseTo(3, 1)
   })
 
+  it('has a measured alpha-width fraction for every catalog thumbnail', () => {
+    expect(Object.keys(SPRITE_ARTWORK_LENGTH_FRACTION).sort()).toEqual(fishData.map(fish => fish.id).sort())
+    const provenance = JSON.parse(readFileSync(resolve(root, 'docs/fish-art-provenance.json'), 'utf8')) as {
+      known_imagegen_webp_canonicals: { species_id: string; alpha_visible_width_fraction: number }[]
+      new_generated_png_candidates: { species_id: string; alpha_visible_width_fraction: number }[]
+    }
+    const recordedFractions = new Map([
+      ...provenance.known_imagegen_webp_canonicals,
+      ...provenance.new_generated_png_candidates,
+    ].map(item => [item.species_id, item.alpha_visible_width_fraction]))
+    for (const fish of fishData) {
+      expect(SPRITE_ARTWORK_LENGTH_FRACTION[fish.id], fish.id).toBeGreaterThan(0)
+      expect(SPRITE_ARTWORK_LENGTH_FRACTION[fish.id], fish.id).toBeLessThanOrEqual(1)
+      expect(SPRITE_ARTWORK_LENGTH_FRACTION[fish.id], fish.id).toBe(recordedFractions.get(fish.id))
+    }
+  })
+
   it('keeps collision envelopes covering each body and never below the previous radius', () => {
     for (const fish of fishData) {
       const radius = fishClearanceRadius(fish.id)

@@ -1,0 +1,43 @@
+{
+  "task": "AQ-66",
+  "reviewer": "Root",
+  "date": "2026-11-05",
+  "thumbnails": {
+    "activeCount": 15,
+    "format": "WebP",
+    "maximumBytes": 65764,
+    "totalBytes": 630998,
+    "sourcePngBytesPreserved": 6446063,
+    "independentVerification": "dwebp -pam decode; alpha>51 visible-column extents match all15 recorded fractions to1e-6; archived4PNG SHA256 matches Git originals"
+  },
+  "alphaPicking": {
+    "maximumDimension": 512,
+    "maximumRgbaBytes": 1048576,
+    "maximumRetainedAlphaBytes": 262144
+  },
+  "verification": {
+    "isolatedSnapshot": "/tmp/aquarium-root-milestone-20261105",
+    "fullTestCommand": "npx vitest run --maxWorkers=2 --testTimeout=30000 --hookTimeout=30000 --reporter=dot",
+    "files": 43,
+    "testsPassed": 372,
+    "typecheck": "passed",
+    "productionBuild": "passed",
+    "notes": "Longer allowance covers real socket geometry and multi-process CLI fixtures; initial default5second fixture timeouts were reproduced before this change."
+  },
+  "browser": {
+    "build": "isolated production5194; concurrent modelURL/axis promotions excluded",
+    "viewport": [
+      402,
+      874
+    ],
+    "devicePixelRatio": 1,
+    "failureInjection": "temporary CDP Network.setBlockedURLs blue-tang.webp; restored afterward",
+    "failureResult": "Scene ready; failed sprite removed from geometry/masks/picking; native Ombi label visible, tabIndex0, aria-hidden false, thumbnail-unavailable accessible name/title; Enter opened actual Ombi login in new tab",
+    "restoredCatalog": "after unblocking/reload, all15 unique picker thumbnail images decoded with positive naturalWidth",
+    "cleanup": "network block/cache override removed, viewport reset and own tabs closed"
+  },
+  "limits": [
+    "Static thumbnails are recognition art, not lifelike fish animation.",
+    "No Gemini 3D models, rig visuals or concurrent model URL/axis promotion accepted."
+  ]
+}

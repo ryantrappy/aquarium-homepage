@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "purpose": "Provenance for current aquarium fish art. New transparent PNGs were root-approved for static preview use; earlier undocumented versions are removed from current public distribution.",
+  "purpose": "Provenance for current aquarium fish art. Current thumbnails are alpha-preserving WebP; four high-resolution project-original PNG sources are archived outside public distribution.",
   "asset_policy": "Project-original imagegen outputs, or exact documented CC0/CC BY 4.0. No third-party image was used as an input for these four generated candidates.",
   "known_imagegen_webp_canonicals": [
     {
@@ -17,7 +17,8 @@
       "history_record": "docs/design.md; docs/fish-assets.md",
       "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
       "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
-      "status": "frozen tracked WebP canonical output"
+      "status": "frozen tracked WebP canonical output",
+      "alpha_visible_width_fraction": 0.975
     },
     {
       "species_id": "yellow-tang",
@@ -33,7 +34,8 @@
       "history_record": "docs/design.md; docs/fish-assets.md",
       "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
       "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
-      "status": "frozen tracked WebP canonical output"
+      "status": "frozen tracked WebP canonical output",
+      "alpha_visible_width_fraction": 0.923333
     },
     {
       "species_id": "royal-gramma",
@@ -49,7 +51,8 @@
       "history_record": "docs/design.md; docs/fish-assets.md",
       "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
       "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
-      "status": "frozen tracked WebP canonical output"
+      "status": "frozen tracked WebP canonical output",
+      "alpha_visible_width_fraction": 0.96
     },
     {
       "species_id": "blue-tang",
@@ -65,7 +68,8 @@
       "history_record": "docs/design.md; docs/fish-assets.md",
       "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
       "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
-      "status": "frozen tracked WebP canonical output"
+      "status": "frozen tracked WebP canonical output",
+      "alpha_visible_width_fraction": 0.981667
     },
     {
       "species_id": "banggai-cardinalfish",
@@ -81,7 +85,8 @@
       "history_record": "docs/design.md; docs/fish-assets.md",
       "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
       "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
-      "status": "frozen tracked WebP canonical output"
+      "status": "frozen tracked WebP canonical output",
+      "alpha_visible_width_fraction": 0.92
     },
     {
       "species_id": "tailspot-blenny",
@@ -97,7 +102,8 @@
       "history_record": "docs/fish-assets.md",
       "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
       "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
-      "status": "frozen tracked WebP canonical output"
+      "status": "frozen tracked WebP canonical output",
+      "alpha_visible_width_fraction": 0.96
     },
     {
       "species_id": "six-line-wrasse",
@@ -113,7 +119,8 @@
       "history_record": "docs/fish-assets.md",
       "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
       "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
-      "status": "frozen tracked WebP canonical output"
+      "status": "frozen tracked WebP canonical output",
+      "alpha_visible_width_fraction": 0.906667
     },
     {
       "species_id": "mccoskers-flasher-wrasse",
@@ -129,7 +136,8 @@
       "history_record": "docs/fish-assets.md",
       "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
       "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
-      "status": "frozen tracked WebP canonical output"
+      "status": "frozen tracked WebP canonical output",
+      "alpha_visible_width_fraction": 0.918333
     },
     {
       "species_id": "lyretail-anthias",
@@ -145,7 +153,8 @@
       "history_record": "docs/fish-assets.md",
       "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
       "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
-      "status": "frozen tracked WebP canonical output"
+      "status": "frozen tracked WebP canonical output",
+      "alpha_visible_width_fraction": 0.951667
     },
     {
       "species_id": "flame-angelfish",
@@ -161,7 +170,8 @@
       "history_record": "docs/fish-assets.md",
       "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
       "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
-      "status": "frozen tracked WebP canonical output"
+      "status": "frozen tracked WebP canonical output",
+      "alpha_visible_width_fraction": 0.953333
     },
     {
       "species_id": "copperband-butterflyfish",
@@ -177,7 +187,8 @@
       "history_record": "docs/fish-assets.md",
       "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
       "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
-      "status": "frozen tracked WebP canonical output"
+      "status": "frozen tracked WebP canonical output",
+      "alpha_visible_width_fraction": 0.983333
     }
   ],
   "legacy_unverified_webp": [
@@ -241,7 +252,6 @@
   "new_generated_png_candidates": [
     {
       "species_id": "blue-green-chromis",
-      "path": "public/fish/blue-green-chromis-v2.png",
       "generation_date": "2026-11-04",
       "tool_mode": "built-in image_gen tool; no CLI/API fallback",
       "source_path": "/Users/ryantrapp/.codex/generated_images/01a1a16d-77f6-78f1-9a39-69c95fec7a08/exec-ed90d047-ac41-4fa3-b84e-13a1999535cc.png",
@@ -253,20 +263,34 @@
         1774,
         887
       ],
-      "format": "PNG",
+      "format": "PNG (archived original source)",
       "mode": "RGBA",
       "alpha_channel_present": true,
       "alpha_extrema": [
         0,
         255
       ],
-      "status": "root-approved project-original static preview art; active catalog path; not a final photorealistic or animated fish asset",
+      "status": "root-approved project-original static preview source preserved byte-for-byte; optimized active WebP derivative recorded below; not a final photorealistic or animated fish asset",
       "maximum_alpha_at_canvas_edge": 1,
-      "edge_pixels_alpha_over_128": 0
+      "edge_pixels_alpha_over_128": 0,
+      "original_active_path_before_aq66": "public/fish/blue-green-chromis-v2.png",
+      "archived_original_path": "docs/asset-evidence/aq66/originals/blue-green-chromis-v2.png",
+      "path": "docs/asset-evidence/aq66/originals/blue-green-chromis-v2.png",
+      "alpha_visible_width_fraction": 0.96,
+      "optimized_webp": {
+        "path": "public/fish/blue-green-chromis.webp",
+        "sha256": "1990dc99a1424e4cda5cccbd7508dbe4959718b5d5dcc0939b4e8b5401cb3049",
+        "bytes": 54148,
+        "dimensions_px": [
+          600,
+          300
+        ],
+        "encoder": "cwebp -resize 600 0 -q 90 -alpha_q 100 -m 6 -metadata none",
+        "alpha_preserved": true
+      }
     },
     {
       "species_id": "firefish",
-      "path": "public/fish/firefish-v2.png",
       "generation_date": "2026-11-04",
       "tool_mode": "built-in image_gen tool; no CLI/API fallback",
       "source_path": "/Users/ryantrapp/.codex/generated_images/01a1a16d-77f6-78f1-9a39-69c95fec7a08/exec-78287e05-4382-4d46-9c83-0dbfc76cc4f3.png",
@@ -278,20 +302,34 @@
         2172,
         724
       ],
-      "format": "PNG",
+      "format": "PNG (archived original source)",
       "mode": "RGBA",
       "alpha_channel_present": true,
       "alpha_extrema": [
         0,
         255
       ],
-      "status": "root-approved project-original static preview art; active catalog path; not a final photorealistic or animated fish asset",
+      "status": "root-approved project-original static preview source preserved byte-for-byte; optimized active WebP derivative recorded below; not a final photorealistic or animated fish asset",
       "maximum_alpha_at_canvas_edge": 1,
-      "edge_pixels_alpha_over_128": 0
+      "edge_pixels_alpha_over_128": 0,
+      "original_active_path_before_aq66": "public/fish/firefish-v2.png",
+      "archived_original_path": "docs/asset-evidence/aq66/originals/firefish-v2.png",
+      "path": "docs/asset-evidence/aq66/originals/firefish-v2.png",
+      "alpha_visible_width_fraction": 0.806667,
+      "optimized_webp": {
+        "path": "public/fish/firefish.webp",
+        "sha256": "140493a6432d43544380a4036cc9b2f0429e551193339ede6dc9e73b9115b19f",
+        "bytes": 24990,
+        "dimensions_px": [
+          600,
+          200
+        ],
+        "encoder": "cwebp -resize 600 0 -q 90 -alpha_q 100 -m 6 -metadata none",
+        "alpha_preserved": true
+      }
     },
     {
       "species_id": "yellow-watchman-goby",
-      "path": "public/fish/yellow-watchman-goby-v2.png",
       "generation_date": "2026-11-04",
       "tool_mode": "built-in image_gen tool; no CLI/API fallback",
       "source_path": "/Users/ryantrapp/.codex/generated_images/01a1a16d-77f6-78f1-9a39-69c95fec7a08/exec-9fcb5b72-c00e-4017-8429-49997071456f.png",
@@ -303,20 +341,34 @@
         2172,
         724
       ],
-      "format": "PNG",
+      "format": "PNG (archived original source)",
       "mode": "RGBA",
       "alpha_channel_present": true,
       "alpha_extrema": [
         0,
         255
       ],
-      "status": "root-approved project-original static preview art; active catalog path; not a final photorealistic or animated fish asset",
+      "status": "root-approved project-original static preview source preserved byte-for-byte; optimized active WebP derivative recorded below; not a final photorealistic or animated fish asset",
       "maximum_alpha_at_canvas_edge": 1,
-      "edge_pixels_alpha_over_128": 0
+      "edge_pixels_alpha_over_128": 0,
+      "original_active_path_before_aq66": "public/fish/yellow-watchman-goby-v2.png",
+      "archived_original_path": "docs/asset-evidence/aq66/originals/yellow-watchman-goby-v2.png",
+      "path": "docs/asset-evidence/aq66/originals/yellow-watchman-goby-v2.png",
+      "alpha_visible_width_fraction": 0.903333,
+      "optimized_webp": {
+        "path": "public/fish/yellow-watchman-goby.webp",
+        "sha256": "0e7df7f47f1faa06c98987fd4645707126a8cba4845f8dd0dbbd245bb687a96d",
+        "bytes": 31900,
+        "dimensions_px": [
+          600,
+          200
+        ],
+        "encoder": "cwebp -resize 600 0 -q 90 -alpha_q 100 -m 6 -metadata none",
+        "alpha_preserved": true
+      }
     },
     {
       "species_id": "mandarin-dragonet",
-      "path": "public/fish/mandarin-dragonet-v2.png",
       "generation_date": "2026-11-04",
       "tool_mode": "built-in image_gen tool; no CLI/API fallback",
       "source_path": "/Users/ryantrapp/.codex/generated_images/01a1a16d-77f6-78f1-9a39-69c95fec7a08/exec-aa45aac8-7173-4a1f-8a27-370c252d3a69.png",
@@ -328,25 +380,40 @@
         1881,
         836
       ],
-      "format": "PNG",
+      "format": "PNG (archived original source)",
       "mode": "RGBA",
       "alpha_channel_present": true,
       "alpha_extrema": [
         0,
         255
       ],
-      "status": "root-approved project-original static preview art; active catalog path; not a final photorealistic or animated fish asset",
+      "status": "root-approved project-original static preview source preserved byte-for-byte; optimized active WebP derivative recorded below; not a final photorealistic or animated fish asset",
       "maximum_alpha_at_canvas_edge": 4,
-      "edge_pixels_alpha_over_128": 0
+      "edge_pixels_alpha_over_128": 0,
+      "original_active_path_before_aq66": "public/fish/mandarin-dragonet-v2.png",
+      "archived_original_path": "docs/asset-evidence/aq66/originals/mandarin-dragonet-v2.png",
+      "path": "docs/asset-evidence/aq66/originals/mandarin-dragonet-v2.png",
+      "alpha_visible_width_fraction": 0.963333,
+      "optimized_webp": {
+        "path": "public/fish/mandarin-dragonet.webp",
+        "sha256": "ef713d31215feb75f3c857c32ddbf47be767b84966f4219a94e358fecdbe2274",
+        "bytes": 57184,
+        "dimensions_px": [
+          600,
+          267
+        ],
+        "encoder": "cwebp -resize 600 0 -q 90 -alpha_q 100 -m 6 -metadata none",
+        "alpha_preserved": true
+      }
     }
   ],
   "notes": [
-    "For the 11 frozen WebPs, the project docs record generation dates and built-in ImageGen use, but exact prompts and original raw PNG paths are not present in this manifest; do not invent them. The tracked WebPs and hashes identify the delivered canonical files.",
-    "The four legacy WebPs were removed only after root approved the v2 static preview replacements; their origin remains unverified and the prior hashes/history are retained here.",
-    "The new PNGs are retained unchanged at their generated dimensions; alpha is preserved. No crop, resize, edit, or re-encode was applied. The root-reviewed PNGs are static preview art, not final photorealistic or animated assets.",
-    "The generated PNGs total 6,446,063 bytes and have widths from 1,774 to 2,172 pixels. No mobile transfer/performance optimization or measurement is claimed."
+    "For the 11 earlier frozen WebPs, the project docs record generation dates and built-in ImageGen use, but exact prompts and original raw PNG paths are not present in this manifest; do not invent them. The tracked WebPs and hashes identify the delivered canonical files.",
+    "The four legacy WebPs were removed only after root approved the v2 static preview replacements; their origin remains unverified and the prior hashes/history are retained for audit.",
+    "The four root-approved generated PNG sources are preserved byte-for-byte under docs/asset-evidence/aq66/originals/. Optimized active WebP derivatives are 600 pixels wide, alpha-preserving, and each under 75 KB; the exact derivative hashes, dimensions, and encoder settings are recorded alongside each original.",
+    "Every canonical WebP records measured fish-width fraction at alpha > 0.2. Fractions are the horizontal alpha-visible bounding-box width divided by image width, measured from decoded canonical pixels.",
+    "The generated source PNGs remain static preview art, not final photorealistic or animated fish assets."
   ],
-  "new_png_total_bytes": 6446063,
   "environment_images": [
     {
       "path": "public/reef-tank-front.webp",
@@ -375,5 +442,7 @@
       "license": "unverified; not asserted",
       "history": "docs/design.md only describes it as the prior background retained during design review. Removed because no current code references it; the deletion is recoverable from Git history."
     }
-  ]
+  ],
+  "archived_original_png_total_bytes": 6446063,
+  "active_fish_thumbnail_total_bytes": 630998
 }
