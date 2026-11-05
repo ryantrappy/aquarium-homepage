@@ -1,0 +1,396 @@
+[
+  {
+    "side": "left",
+    "sourceSha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+    "sourceBytes": 2125240,
+    "generatorSha256": "3508cc39e15bb594a19d8774dbaff1f10dc675aa124e510d363d1c28c15009cc",
+    "provenance": {
+      "license": "original",
+      "creator": "Aquarium project",
+      "sourceSha256": "3508cc39e15bb594a19d8774dbaff1f10dc675aa124e510d363d1c28c15009cc",
+      "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_live_rock_islands.py -- /tmp/coral-models left",
+      "attribution": "Original procedural Blender 5.0.1 rock asset (Aragonite Live-Rock Left Arched Bommie Foundation with Coral Mount Sockets) with embedded PBR textures."
+    },
+    "rootTransform": {
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "boundsM": {
+      "min": [
+        -0.4954521656036377,
+        -0.012000000104308128,
+        -0.27126404643058777
+      ],
+      "max": [
+        0.5158260464668274,
+        0.38600000739097595,
+        0.26553666591644287
+      ]
+    },
+    "dimensionsM": [
+      1.011278212070465,
+      0.3980000074952841,
+      0.5368007123470306
+    ],
+    "declaredDimensionsM": [
+      1.011278,
+      0.398,
+      0.536801
+    ],
+    "triangles": 24572,
+    "collisionParts": [],
+    "meshBuild": {
+      "status": "ready",
+      "diagnostics": {
+        "triangles": 24572,
+        "vertices": 12288,
+        "components": 1,
+        "boundaryEdges": 0,
+        "nonManifoldEdges": 0,
+        "nonManifoldVertices": 0,
+        "inconsistentEdges": 0,
+        "duplicateFaces": 0,
+        "degenerateFaces": 0,
+        "buildWork": 2249810,
+        "bvhNodes": 8191,
+        "selfIntersectionCheck": "not-performed",
+        "solidInterpretation": "conditional-closed-oriented-manifold; union-of-components",
+        "sourceHashVerification": "caller-provenance-only"
+      },
+      "buildMs": 322.46970799999997
+    },
+    "probes": [
+      {
+        "kind": "fixed-axis-through",
+        "radiusM": 0.02,
+        "start": [
+          0,
+          0.08,
+          -0.36
+        ],
+        "end": [
+          0,
+          0.08,
+          0.36
+        ],
+        "result": {
+          "status": "clear",
+          "reason": "boundary-and-interior-clear",
+          "sourceId": "live-rock-island-left",
+          "sourceSha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "work": {
+            "nodeVisits": 59,
+            "triangleTests": 0
+          }
+        }
+      },
+      {
+        "kind": "fixed-axis-through",
+        "radiusM": 0.04,
+        "start": [
+          0,
+          0.08,
+          -0.36
+        ],
+        "end": [
+          0,
+          0.08,
+          0.36
+        ],
+        "result": {
+          "status": "clear",
+          "reason": "boundary-and-interior-clear",
+          "sourceId": "live-rock-island-left",
+          "sourceSha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "work": {
+            "nodeVisits": 173,
+            "triangleTests": 6
+          }
+        }
+      },
+      {
+        "kind": "fixed-axis-through",
+        "radiusM": 0.06,
+        "start": [
+          0,
+          0.08,
+          -0.36
+        ],
+        "end": [
+          0,
+          0.08,
+          0.36
+        ],
+        "result": {
+          "status": "clear",
+          "reason": "boundary-and-interior-clear",
+          "sourceId": "live-rock-island-left",
+          "sourceSha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "work": {
+            "nodeVisits": 499,
+            "triangleTests": 804
+          }
+        }
+      },
+      {
+        "kind": "front-depth-water",
+        "radiusM": 0.02,
+        "start": [
+          -0.56,
+          0.3,
+          0.24
+        ],
+        "end": [
+          0.56,
+          0.3,
+          0.24
+        ],
+        "result": {
+          "status": "clear",
+          "reason": "boundary-and-interior-clear",
+          "sourceId": "live-rock-island-left",
+          "sourceSha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
+          "work": {
+            "nodeVisits": 11,
+            "triangleTests": 0
+          }
+        }
+      }
+    ],
+    "sockets": {
+      "supported": 12,
+      "rejected": 0,
+      "method": {
+        "contactToleranceM": 0.002,
+        "upNormalVectorTolerance": 0.002,
+        "footprintSampleSpacingM": 0.005,
+        "footprintSampleCount": 2383,
+        "footprintNormalMaxAngleDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": "requested reefSocket.clearanceRadiusM",
+          "heightM": "same as radius",
+          "baseOffsetM": 0.002
+        },
+        "limitations": [
+          "Socket local/world basis must remain unit-scale and orthogonal; footprint and clearance radii are interpreted in exported asset meters.",
+          "Contact normal uses the geometric normal of the nearest triangle; at shared-vertex ties it is facet-sensitive and may select one of several incident faces.",
+          "Footprint support is a finite radial sample lattice at the reported spacing, not a continuous disk certificate.",
+          "Clearance checks only intersection with an oriented rock-space cylinder; it does not prove whole-colony fit, fish passage or biological suitability.",
+          "Only the default glTF scene and embedded, uncompressed TRIANGLES geometry are inspected."
+        ]
+      }
+    }
+  },
+  {
+    "side": "right",
+    "sourceSha256": "ab7b756344c6a0a879d254b6ca06a20c63c4246b0a19b76394cc532c61abfbee",
+    "sourceBytes": 2104916,
+    "generatorSha256": "3508cc39e15bb594a19d8774dbaff1f10dc675aa124e510d363d1c28c15009cc",
+    "provenance": {
+      "license": "original",
+      "creator": "Aquarium project",
+      "sourceSha256": "3508cc39e15bb594a19d8774dbaff1f10dc675aa124e510d363d1c28c15009cc",
+      "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_live_rock_islands.py -- /tmp/coral-models right",
+      "attribution": "Original procedural Blender 5.0.1 rock asset (Aragonite Live-Rock Right Terraced Shelf Foundation with Coral Mount Sockets) with embedded PBR textures."
+    },
+    "rootTransform": {
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "boundsM": {
+      "min": [
+        -0.4678885042667389,
+        -0.012000000104308128,
+        -0.25136798620224
+      ],
+      "max": [
+        0.49856024980545044,
+        0.335999995470047,
+        0.26017624139785767
+      ]
+    },
+    "dimensionsM": [
+      0.9664487540721893,
+      0.3479999955743551,
+      0.5115442276000977
+    ],
+    "declaredDimensionsM": [
+      0.966449,
+      0.348,
+      0.511544
+    ],
+    "triangles": 24572,
+    "collisionParts": [],
+    "meshBuild": {
+      "status": "ready",
+      "diagnostics": {
+        "triangles": 24572,
+        "vertices": 12288,
+        "components": 1,
+        "boundaryEdges": 0,
+        "nonManifoldEdges": 0,
+        "nonManifoldVertices": 0,
+        "inconsistentEdges": 0,
+        "duplicateFaces": 0,
+        "degenerateFaces": 0,
+        "buildWork": 2211039,
+        "bvhNodes": 8191,
+        "selfIntersectionCheck": "not-performed",
+        "solidInterpretation": "conditional-closed-oriented-manifold; union-of-components",
+        "sourceHashVerification": "caller-provenance-only"
+      },
+      "buildMs": 296.34129099999996
+    },
+    "probes": [
+      {
+        "kind": "fixed-axis-through",
+        "radiusM": 0.02,
+        "start": [
+          0,
+          0.08,
+          -0.36
+        ],
+        "end": [
+          0,
+          0.08,
+          0.36
+        ],
+        "result": {
+          "status": "blocked",
+          "reason": "surface-contact",
+          "sourceId": "live-rock-island-right",
+          "sourceSha256": "ab7b756344c6a0a879d254b6ca06a20c63c4246b0a19b76394cc532c61abfbee",
+          "work": {
+            "nodeVisits": 25,
+            "triangleTests": 6
+          }
+        }
+      },
+      {
+        "kind": "fixed-axis-through",
+        "radiusM": 0.04,
+        "start": [
+          0,
+          0.08,
+          -0.36
+        ],
+        "end": [
+          0,
+          0.08,
+          0.36
+        ],
+        "result": {
+          "status": "blocked",
+          "reason": "surface-contact",
+          "sourceId": "live-rock-island-right",
+          "sourceSha256": "ab7b756344c6a0a879d254b6ca06a20c63c4246b0a19b76394cc532c61abfbee",
+          "work": {
+            "nodeVisits": 25,
+            "triangleTests": 4
+          }
+        }
+      },
+      {
+        "kind": "fixed-axis-through",
+        "radiusM": 0.06,
+        "start": [
+          0,
+          0.08,
+          -0.36
+        ],
+        "end": [
+          0,
+          0.08,
+          0.36
+        ],
+        "result": {
+          "status": "blocked",
+          "reason": "surface-contact",
+          "sourceId": "live-rock-island-right",
+          "sourceSha256": "ab7b756344c6a0a879d254b6ca06a20c63c4246b0a19b76394cc532c61abfbee",
+          "work": {
+            "nodeVisits": 35,
+            "triangleTests": 19
+          }
+        }
+      },
+      {
+        "kind": "front-depth-water",
+        "radiusM": 0.02,
+        "start": [
+          -0.56,
+          0.3,
+          0.24
+        ],
+        "end": [
+          0.56,
+          0.3,
+          0.24
+        ],
+        "result": {
+          "status": "clear",
+          "reason": "boundary-and-interior-clear",
+          "sourceId": "live-rock-island-right",
+          "sourceSha256": "ab7b756344c6a0a879d254b6ca06a20c63c4246b0a19b76394cc532c61abfbee",
+          "work": {
+            "nodeVisits": 11,
+            "triangleTests": 0
+          }
+        }
+      }
+    ],
+    "sockets": {
+      "supported": 11,
+      "rejected": 0,
+      "method": {
+        "contactToleranceM": 0.002,
+        "upNormalVectorTolerance": 0.002,
+        "footprintSampleSpacingM": 0.005,
+        "footprintSampleCount": 2164,
+        "footprintNormalMaxAngleDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": "requested reefSocket.clearanceRadiusM",
+          "heightM": "same as radius",
+          "baseOffsetM": 0.002
+        },
+        "limitations": [
+          "Socket local/world basis must remain unit-scale and orthogonal; footprint and clearance radii are interpreted in exported asset meters.",
+          "Contact normal uses the geometric normal of the nearest triangle; at shared-vertex ties it is facet-sensitive and may select one of several incident faces.",
+          "Footprint support is a finite radial sample lattice at the reported spacing, not a continuous disk certificate.",
+          "Clearance checks only intersection with an oriented rock-space cylinder; it does not prove whole-colony fit, fish passage or biological suitability.",
+          "Only the default glTF scene and embedded, uncompressed TRIANGLES geometry are inspected."
+        ]
+      }
+    }
+  }
+]

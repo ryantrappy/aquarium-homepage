@@ -1,5 +1,24 @@
 # Service mapping review
 
+<!-- AGENT_DOC_METADATA
+Category: Evidence / Verification
+Status: Canonical / Complete
+Authority: Evidentiary Record
+Backlog: AQ-8, AQ-8.1, AQ-56
+Owner: @root
+Updated: 2026-11-05
+Upstream: AGENT_TASKS.md, docs/requirements.md
+Downstream: src/lib/fish.ts, default and local configuration presets
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Homelab Service Verification Evidence
+> - **Status**: Canonical / Complete
+> - **Authority**: Evidentiary Record
+> - **Backlog Reference**: `AQ-8`, `AQ-8.1`, `AQ-56`
+> - **Summary**: Confirmed starter homelab roster (Komodo, WatchMyBirds, Paperless, Home Assistant, Ombi), mapped species, URLs, and native browser verification observations.
+
 **Starter roster confirmed on 2026-11-04 (America/Chicago): Komodo, WatchMyBirds, Paperless, Home Assistant and Ombi.** The final choices below supersede the earlier undecided roster. Source documentation and user confirmation establish the destinations; they do not establish application reachability or health. The AQ56 observations below remain bounded historical results.
 
 ## Source and scope

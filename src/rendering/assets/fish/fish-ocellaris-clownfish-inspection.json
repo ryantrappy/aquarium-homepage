@@ -1,0 +1,80 @@
+{
+  "extras": {
+    "reefAsset": {
+      "schema": "reef-asset-v1",
+      "id": "fish-ocellaris-clownfish",
+      "kind": "fish",
+      "units": "meter",
+      "upAxis": "+Y",
+      "origin": "local",
+      "dimensionsM": [
+        0.035934,
+        0.052625,
+        0.107098
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "0c5c1bbb1e5fe0d6f98fe6a2766a2a0d807986abe01a1065ba55577438fb34b3",
+        "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_clownfish.py -- /tmp/fish-models/fish-ocellaris-clownfish",
+        "attribution": "Original procedural Blender 5.0.1 rigged and animated fish asset (Amphiprion ocellaris (Ocellaris Clownfish)) with embedded 1024x1024 PBR textures."
+      }
+    }
+  },
+  "rootTransform": {
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "boundsM": {
+    "min": [
+      -0.017967,
+      -0.025511,
+      -0.053098
+    ],
+    "max": [
+      0.017967,
+      0.027114,
+      0.054
+    ]
+  },
+  "primitives": [
+    {
+      "id": "ocellaris_clownfish_body",
+      "role": "fish",
+      "vertexCount": 8444,
+      "boundsM": {
+        "min": [
+          -0.017967,
+          -0.025511,
+          -0.053098
+        ],
+        "max": [
+          0.017967,
+          0.027114,
+          0.054
+        ]
+      },
+      "material": {
+        "vertexColors": false,
+        "vertexAlpha": false,
+        "aoSource": "texture"
+      }
+    }
+  ],
+  "sockets": [],
+  "collisionParts": []
+}

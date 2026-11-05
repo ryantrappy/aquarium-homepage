@@ -3,9 +3,18 @@ import { GLTFLoader, type GLTF } from 'three/addons/loaders/GLTFLoader.js'
 import { clone } from 'three/addons/utils/SkeletonUtils.js'
 import type { ServiceConfig } from '../../lib/services'
 import { getFishById } from '../../lib/fish'
-import { instantiateReefHabitat } from './habitat'
-import reefHabitat from './reef-habitat.json'
+import {
+  DEFAULT_LEFT_ISLAND_MOUNTS,
+  DEFAULT_RIGHT_ISLAND_MOUNTS,
+  LIVE_ROCK_ISLAND_URLS,
+  MODULAR_CORAL_ASSET_URLS,
+  assembleCoralsOnRockSockets,
+  instantiateModularReefHabitat,
+} from './reef-assembly'
 import { createSwimmingFish, seedForId, startleFish, stepSwimmingFish, type SwimmingFish, type WaterHabitat } from './motion'
+import { applyFishTurningRigOverlay, bindFishTurningRig, evaluateSpriteTurnScaleX, type FishTurningRig } from './fish-turning'
+import { SPRITE_PLANE_WIDTH, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale } from './fish-scale'
+import { canRunFishSceneLoop, findSafeFishSpawn, fishSceneStatus, isSafeFishPosition } from './fish-spawn'
 import { EMPTY_FISH_EXTENSIONS, type FishExtensionConfig } from '../../simulation/fish-extensions'
 import { consumeFrameSteps, createFrameClock, SIMULATION_STEP_SECONDS, suspendFrameClock } from './clock'
 import { nearestVisibleIntersection, readArtworkAlpha, type SpriteMasks } from './alpha-picking'
@@ -15,10 +24,9 @@ const modelUrls: Record<string, string> = {
   'ocellaris-clownfish': new URL('../proof/candidate-real-clown.glb', import.meta.url).href,
   'yellow-tang': new URL('../proof/candidate-real-tang.glb', import.meta.url).href,
 }
-const reefUrl = new URL('../proof/candidate-reef.glb', import.meta.url).href
 export type SceneStatus = 'loading' | 'ready' | 'failed'
 export type AquariumController = { update(services: ServiceConfig[], paused: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void }
-type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; mixer?: THREE.AnimationMixer; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean }
+type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; mixer?: THREE.AnimationMixer; turningRig?: FishTurningRig; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean }
 
 function disposeTree(root: THREE.Object3D) {
   const geometries = new Set<THREE.BufferGeometry>(), materials = new Set<THREE.Material>(), textures = new Set<THREE.Texture>()
@@ -49,11 +57,15 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   sandGeometry.computeVertexNormals()
   const sand = new THREE.Mesh(sandGeometry, new THREE.MeshStandardMaterial({ map: sandTexture, roughness: 1 })); sand.rotation.x = -Math.PI / 2; sand.position.y = -2.8; scene.add(sand)
   const rear = new THREE.Mesh(new THREE.PlaneGeometry(32, 14), new THREE.MeshStandardMaterial({ color: '#115469', roughness: 1 })); rear.position.set(0, 0, -5.5); scene.add(rear)
-  const abort = new AbortController(), loader = new GLTFLoader(), modelBases = new Map<string, GLTF>(), reefs: THREE.Object3D[] = []
-  let disposed = false, failed = false, loaded = false, paused = initialPaused, services = initialServices, fish: Inhabitant[] = [], reefBase: GLTF | undefined
+  const abort = new AbortController(), loader = new GLTFLoader(), modelBases = new Map<string, GLTF>(), coralTemplates = new Map<string, THREE.Object3D>(), reefs: THREE.Object3D[] = []
+  let rockIslandLeftBase: GLTF | undefined, rockIslandRightBase: GLTF | undefined
+  let reefControllers: Array<ReturnType<typeof assembleCoralsOnRockSockets>> = []
+  let coralElapsedSec = 0
+  const reducedMotionQuery = typeof window !== 'undefined' && typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-reduced-motion: reduce)') : null
+  let disposed = false, failed = false, loaded = false, paused = initialPaused, services = initialServices, fish: Inhabitant[] = []
   const loadedAssets = new Set<GLTF>()
   let habitat: WaterHabitat = { bounds: { min: { x: -4, y: -2.25, z: -4.6 }, max: { x: 4, y: 2.8, z: 2.8 } }, obstacles: [], anchors: [] }
-  let width = 1, height = 1, labelClock = 0
+  let width = 1, height = 1, labelClock = 0, spawnUnavailable = false
   const clock = createFrameClock()
   const ray = new THREE.Raycaster(), projected = new THREE.Vector3(), sample = new THREE.Vector3(), hitMeshes: THREE.Object3D[] = []
   const ownedSprites: THREE.Mesh[] = []
@@ -81,16 +93,55 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   }
   function rebuildHabitat() {
     reefs.forEach(reef => { scene.remove(reef) }); reefs.length = 0; hitMeshes.length = 0
-    habitat.obstacles = []; habitat.anchors = []
-    if (!reefBase) return
+    reefControllers = []; habitat.obstacles = []; habitat.anchors = []
+    if (!rockIslandLeftBase || !rockIslandRightBase || coralTemplates.size === 0) return
+    const reducedMotion = Boolean(reducedMotionQuery?.matches)
     const placements = width < 600
-      ? [{ position: { x: -.4, y: -1.65, z: -1.1 }, scale: { x: 3.6, y: 5, z: 1.4 }, yaw: .08 }]
-      : [{ position: { x: -3.2, y: -1.62, z: -1.1 }, scale: { x: 4.6, y: 6.2, z: 1.8 }, yaw: .1 }, { position: { x: 3.4, y: -2.09, z: -.9 }, scale: { x: 3.4, y: 4.6, z: 1.5 }, yaw: -.18 }]
+      ? [
+          {
+            islandKind: 'left' as const,
+            rockScene: rockIslandLeftBase.scene,
+            mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
+            position: { x: -0.15, y: -2.72, z: -1.1 },
+            uniformScale: 3.2,
+            yaw: 0.06,
+          },
+        ]
+      : [
+          {
+            islandKind: 'left' as const,
+            rockScene: rockIslandLeftBase.scene,
+            mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
+            position: { x: -2.65, y: -2.72, z: -1.1 },
+            uniformScale: 4.2,
+            yaw: 0.08,
+          },
+          {
+            islandKind: 'right' as const,
+            rockScene: rockIslandRightBase.scene,
+            mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+            position: { x: 2.65, y: -2.72, z: -0.95 },
+            uniformScale: 4.0,
+            yaw: -0.12,
+          },
+        ]
     for (const [i, placement] of placements.entries()) {
-      const { position, scale, yaw } = placement
-      const reef = reefBase.scene.clone(true); reef.scale.set(scale.x, scale.y, scale.z); reef.position.set(position.x, position.y, position.z); reef.rotation.y = yaw; scene.add(reef); reefs.push(reef)
-      const result = instantiateReefHabitat(reefHabitat as Parameters<typeof instantiateReefHabitat>[0], scale, position, sand.position.y + .06, `reef-${i}`, yaw)
-      habitat.obstacles.push(...result.obstacles); habitat.anchors.push(...result.anchors)
+      const { islandKind, rockScene, mounts, position, uniformScale, yaw } = placement
+      const reef = rockScene.clone(true)
+      const assembled = assembleCoralsOnRockSockets(reef, coralTemplates, mounts, {
+        paused: paused || document.hidden,
+        reducedMotion,
+      })
+      reefControllers.push(assembled)
+      reef.scale.setScalar(uniformScale)
+      reef.position.set(position.x, position.y, position.z)
+      reef.rotation.y = yaw
+      scene.add(reef)
+      reefs.push(reef)
+
+      const result = instantiateModularReefHabitat(islandKind, uniformScale, position, `reef-${i}`, yaw)
+      habitat.obstacles.push(...result.obstacles)
+      habitat.anchors.push(...result.anchors)
       reef.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) })
     }
     hitMeshes.push(sand)
@@ -104,42 +155,63 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
     ownedSprites.forEach(sprite => { disposeTree(sprite) }); ownedSprites.length = 0; fish = []
     if (extensionErrors.length) console.error('Fish extension cleanup failed', new AggregateError(extensionErrors, 'Fish extension cleanup failed'))
   }
-  function rebuildFish() {
-    removeFish(); if (!loaded || disposed) return
+  function rebuildFish(): boolean | undefined {
+    removeFish(); if (!loaded || disposed) return undefined
     hitMeshes.splice(0); reefs.forEach(reef => reef.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) })); hitMeshes.push(sand)
     const anchors = new Map(Array.from(overlay.querySelectorAll<HTMLAnchorElement>('a[data-service-id]')).map(anchor => [anchor.dataset.serviceId!, anchor]))
+    const spawnPlans = services.map((service, i) => {
+      const species = getFishById(service.fishId); if (!species) return undefined
+      const span = habitat.bounds.max.x - habitat.bounds.min.x
+      const x = width < 600 ? [-.3, .3, 0][i % 3] : ((i % 3) - 1) * Math.min(span * .26, 2.7)
+      const y = (width < 600 ? [1.25, .55, 1.95][i % 3] : 1.45) - Math.floor(i / 3) * .7
+      const clearance = fishClearanceRadius(service.fishId)
+      const preferred = { x, y: Math.max(.3, y), z: 1.8 + (i % 2) * .2 }
+      return { species, clearance, position: findSafeFishSpawn(preferred, habitat.bounds, habitat.obstacles, clearance) }
+    })
+    if (spawnPlans.some(plan => plan !== undefined && plan.position === undefined)) {
+      // The React-owned native service links remain in the visible fallback layout.
+      // Never create an unsafe fish or shrink its model/radius to make it fit.
+      spawnUnavailable = true
+      syncLoop()
+      return false
+    }
+    spawnUnavailable = false
     services.forEach((service, i) => {
-      const species = getFishById(service.fishId); if (!species) return
+      const spawn = spawnPlans[i]; if (!spawn) return
+      const { species, clearance, position } = spawn
       const root = new THREE.Group(), base = modelBases.get(service.fishId), fallback = !base
       let mixer: THREE.AnimationMixer | undefined
+      let turningRig: FishTurningRig | undefined
       if (base) {
-        const model = clone(base.scene); root.add(model); model.scale.setScalar(service.fishId === 'yellow-tang' ? .48 : .42)
+        const model = clone(base.scene); root.add(model); model.scale.setScalar(fishModelScale(service.fishId))
+        turningRig = bindFishTurningRig(model, service.fishId)
         mixer = new THREE.AnimationMixer(model); base.animations.forEach(clip => mixer!.clipAction(clip).play()); mixer.setTime((seedForId(service.id) % 1500) / 1000)
       } else {
+        const spriteScale = fishSpriteScale(service.fishId)
         const texture = new THREE.TextureLoader().load(species.thumbnail, loadedTexture => {
           if (disposed || failed || !ownedSprites.includes(sprite)) return
           const image = loadedTexture.image as HTMLImageElement
           const imageWidth = image.naturalWidth, imageHeight = image.naturalHeight
           if (Number.isFinite(imageWidth) && Number.isFinite(imageHeight) && imageWidth > 0 && imageHeight > 0) {
-            sprite.scale.y = (.95 / .62) * (imageHeight / imageWidth)
+            sprite.scale.set(spriteScale, spriteScale * (SPRITE_PLANE_WIDTH / .62) * (imageHeight / imageWidth), 1)
           }
           try { spriteMasks.set(sprite, { texture: loadedTexture, pixels: readArtworkAlpha(image) }) }
           catch (error) { console.warn('Fish artwork alpha unavailable', error) }
           if (!document.hidden) render(0, true)
         }); texture.colorSpace = THREE.SRGBColorSpace
-        const sprite = new THREE.Mesh(new THREE.PlaneGeometry(.95, .62), new THREE.MeshBasicMaterial({ map: texture, transparent: true, alphaTest: .2, depthWrite: true, side: THREE.DoubleSide })); root.add(sprite); ownedSprites.push(sprite)
+        const sprite = new THREE.Mesh(new THREE.PlaneGeometry(SPRITE_PLANE_WIDTH, .62), new THREE.MeshBasicMaterial({ map: texture, transparent: true, alphaTest: .2, depthWrite: true, side: THREE.DoubleSide }))
+        sprite.scale.set(spriteScale, spriteScale, 1)
+        root.add(sprite); ownedSprites.push(sprite)
         spriteMasks.set(sprite, { texture }) // pending/failed masks never claim opaque pixels
       }
-      const span = habitat.bounds.max.x - habitat.bounds.min.x
-      const x = width < 600 ? [-.3, .3, 0][i % 3] : ((i % 3) - 1) * Math.min(span * .26, 2.7)
-      const y = (width < 600 ? [1.25, .55, 1.95][i % 3] : 1.45) - Math.floor(i / 3) * .7
-      const motion = createSwimmingFish(service.id, service.fishId, { x, y: Math.max(.3, y), z: 1.8 + (i % 2) * .2 }, .5, fishExtensions)
+      const motion = createSwimmingFish(service.id, service.fishId, position!, clearance, fishExtensions)
       root.position.set(motion.position.x, motion.position.y, motion.position.z); scene.add(root)
       root.traverse(object => { if (object instanceof THREE.Mesh) { object.userData.serviceId = service.id; hitMeshes.push(object) } })
       const anchor = anchors.get(service.id); if (anchor) anchor.title = `${service.name} · ${species.commonName}${fallback ? ' · artwork preview' : ''}`
-      fish.push({ service, root, motion, mixer, anchor, visible: false, fallback, releasedFocus: false })
+      fish.push({ service, root, motion, mixer, turningRig, anchor, visible: false, fallback, releasedFocus: false })
     })
     render(0, true)
+    return true
   }
   function positionLabels(force = false) {
     for (const item of fish) {
@@ -151,22 +223,34 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
       projected.copy(item.root.position).project(camera)
       const x = (projected.x + 1) * width / 2, y = (1 - projected.y) * height / 2
       const pixels = height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * (camera.position.z - item.root.position.z))
-      const linkWidth = Math.max(44, pixels * 1.1), linkHeight = Math.max(44, pixels * .78)
+      const bodyLength = fishRenderLength(item.service.fishId)
+      const linkWidth = Math.max(44, pixels * Math.max(.55, bodyLength * 1.15)), linkHeight = Math.max(44, pixels * Math.max(.42, bodyLength * .78))
       anchor.style.transform = `translate3d(${x - linkWidth / 2}px,${y - linkHeight / 2}px,0)`; anchor.style.width = `${linkWidth}px`; anchor.style.height = `${linkHeight}px`
       anchor.style.zIndex = String(Math.round((item.root.position.z + 10) * 100))
     }
   }
   function render(steps: number, forceLabels = false) {
+    const habitatStopped = paused || document.hidden
+    const reducedMotion = Boolean(reducedMotionQuery?.matches)
+    if (!habitatStopped && !reducedMotion && steps > 0) {
+      coralElapsedSec = (coralElapsedSec + steps * SIMULATION_STEP_SECONDS) % 3600
+    }
+    for (const controller of reefControllers) {
+      controller.update(coralElapsedSec, habitatStopped, reducedMotion)
+    }
     for (let step = 0; step < steps; step++) for (const item of fish) {
       const focused = document.activeElement === item.anchor
       if (!focused) item.releasedFocus = false
       const stopped = paused || document.hidden || (focused && !item.releasedFocus)
       stepSwimmingFish(item.motion, habitat, SIMULATION_STEP_SECONDS, stopped)
-      if (!stopped) item.mixer?.update(SIMULATION_STEP_SECONDS * (.55 + Math.min(1.7, item.motion.speed * 2.2)) * item.motion.animationPlaybackRate)
+      if (!stopped) {
+        item.mixer?.update(SIMULATION_STEP_SECONDS * (.55 + Math.min(1.7, item.motion.speed * 2.2)) * item.motion.animationPlaybackRate)
+        if (item.turningRig) applyFishTurningRigOverlay(item.turningRig, item.motion.turnKinematics, stopped)
+      }
     }
     for (const item of fish) {
       const pose = item.motion; item.root.position.set(pose.position.x, pose.position.y, pose.position.z)
-      if (item.fallback) { item.root.rotation.set(0, 0, 0); item.root.scale.x = Math.sin(pose.yaw) < 0 ? -1 : 1 }
+      if (item.fallback) { item.root.rotation.set(0, 0, 0); item.root.scale.x = evaluateSpriteTurnScaleX(pose.yaw) }
       else { item.root.rotation.set(pose.pitch, pose.yaw, pose.bank, 'YXZ') }
     }
     scene.updateMatrixWorld(true)
@@ -177,21 +261,32 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   function syncLoop() {
     if (disposed || failed) return
     suspendFrameClock(clock)
-    if (paused || document.hidden) { renderer.setAnimationLoop(null); if (!document.hidden) render(0, true) }
+    if (!canRunFishSceneLoop(paused, document.hidden, spawnUnavailable)) {
+      renderer.setAnimationLoop(null)
+      if (!document.hidden && !spawnUnavailable) render(0, true)
+    }
     else renderer.setAnimationLoop(tick)
   }
   let narrow = false
   function resize() {
     if (disposed || failed) return
-    width = Math.max(1, canvas.parentElement!.clientWidth); height = Math.max(1, canvas.parentElement!.clientHeight)
+    const nextWidth = Math.max(1, canvas.parentElement!.clientWidth), nextHeight = Math.max(1, canvas.parentElement!.clientHeight)
+    const sizeChanged = width !== nextWidth || height !== nextHeight
+    width = nextWidth; height = nextHeight
     camera.aspect = width / height; camera.updateProjectionMatrix(); renderer.setSize(width, height, false)
     // The nearest fish depth controls the safe horizontal envelope, so depth
     // changes cannot send an otherwise in-bounds fish beyond the view edge.
     const halfWidth = Math.min(5.0, (camera.position.z - 2.8) * Math.tan(THREE.MathUtils.degToRad(21)) * camera.aspect * .96)
     habitat.bounds = { min: { x: -halfWidth, y: -2.25, z: -4.6 }, max: { x: halfWidth, y: 2.8, z: 2.8 } }
     const newNarrow = width < 600
-    if (loaded && (narrow !== newNarrow || fish.some(item => Math.abs(item.motion.position.x) > halfWidth - .5))) { narrow = newNarrow; rebuildHabitat(); rebuildFish() }
-    render(0, true)
+    const recoveringFromUnavailableSpawn = spawnUnavailable
+    let rebuildSucceeded: boolean | undefined
+    if (loaded && (narrow !== newNarrow || (spawnUnavailable && sizeChanged) || fish.some(item => !isSafeFishPosition(item.motion.position, item.motion.clearance, habitat.bounds, habitat.obstacles)))) {
+      narrow = newNarrow; rebuildHabitat(); rebuildSucceeded = rebuildFish()
+      if (rebuildSucceeded !== undefined) status(fishSceneStatus(!rebuildSucceeded))
+    }
+    if (recoveringFromUnavailableSpawn && rebuildSucceeded === true) syncLoop()
+    if (!spawnUnavailable) render(0, true)
   }
   const observer = new ResizeObserver(resize); observer.observe(canvas.parentElement!); resize()
   document.addEventListener('visibilitychange', syncLoop, { signal: abort.signal })
@@ -203,15 +298,35 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
       else loadedAssets.add(model)
       return model
     }
-    const [reef, ...models] = await Promise.all([load(reefUrl), ...Object.values(modelUrls).map(load)])
+    const coralIds = Object.keys(MODULAR_CORAL_ASSET_URLS)
+    const fishIds = Object.keys(modelUrls)
+    const [rockLeft, rockRight, ...restModels] = await Promise.all([
+      load(LIVE_ROCK_ISLAND_URLS.left),
+      load(LIVE_ROCK_ISLAND_URLS.right),
+      ...coralIds.map(id => load(MODULAR_CORAL_ASSET_URLS[id])),
+      ...fishIds.map(id => load(modelUrls[id])),
+    ])
     if (disposed || failed) return
-    reefBase = reef; Object.keys(modelUrls).forEach((id, i) => modelBases.set(id, models[i]))
-    loaded = true; narrow = width < 600; rebuildHabitat(); rebuildFish(); status('ready'); syncLoop()
+    rockIslandLeftBase = rockLeft
+    rockIslandRightBase = rockRight
+    coralIds.forEach((id, i) => coralTemplates.set(id, restModels[i].scene))
+    fishIds.forEach((id, i) => modelBases.set(id, restModels[coralIds.length + i]))
+    loaded = true; narrow = width < 600; rebuildHabitat()
+    const initialSpawnSucceeded = rebuildFish() === true
+    status(fishSceneStatus(!initialSpawnSucceeded))
+    syncLoop()
   }
   void initialize().catch(error => { console.error('Aquarium assets could not load', error); failed = true; loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); if (!disposed) { renderer.setAnimationLoop(null); status('failed') } })
   syncLoop()
   return {
-    update(next, stopped) { const changed = JSON.stringify(next) !== JSON.stringify(services); services = next; paused = stopped; if (changed) rebuildFish(); syncLoop() },
+    update(next, stopped) {
+      const changed = JSON.stringify(next) !== JSON.stringify(services); services = next; paused = stopped
+      if (changed) {
+        const rebuilt = rebuildFish()
+        if (rebuilt !== undefined) status(fishSceneStatus(!rebuilt))
+      }
+      syncLoop()
+    },
     activate(id) { const item = fish.find(item => item.service.id === id); if (!item || paused || document.hidden) return; item.releasedFocus = true; startleFish(item.motion, habitat) },
     serviceAt: nearest,
     canActivate(id, x, y) { const item = fish.find(item => item.service.id === id); return Boolean(item && (x === undefined || y === undefined ? updateVisibility(item) : nearest(x, y) === id)) },

@@ -1,5 +1,24 @@
 # Aquarium accessibility audit
 
+<!-- AGENT_DOC_METADATA
+Category: Evidence / Accessibility Audit
+Status: Canonical / Active
+Authority: Evidentiary Audit Record
+Backlog: AQ-6, AQ-50
+Owner: @root
+Updated: 2026-11-05
+Upstream: docs/requirements.md, docs/design-principles.md
+Downstream: src/components/*, src/rendering/scene/fish-link-focus.ts
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Accessibility & WCAG Audit
+> - **Status**: Canonical / Active
+> - **Authority**: Evidentiary Record
+> - **Backlog Reference**: `AQ-6`, `AQ-50`
+> - **Summary**: Keyboard navigation, focus order, modal dialog semantics, touch target sizing (>=44px), reduced-motion behavior, and dual-viewport verification (1440x900 and 402x874).
+
 Audit scope is keyboard access, focus order and return behavior, accessible names, settings-dialog semantics, and reduced-motion behavior. Responsive checks are limited to the agreed 402×874 and 1440×900 viewports.
 
 ## Findings and changes

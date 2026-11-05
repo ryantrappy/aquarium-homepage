@@ -1,5 +1,21 @@
 # Photorealistic Reef Aquarium — Source Code
 
+<!-- AGENT_DOC_METADATA
+Category: Archive / Code Dump
+Status: Archived
+Authority: Unverified External Reference
+Backlog: None
+Owner: @gemini
+Updated: 2026-11-05
+Upstream: None
+Downstream: None
+-->
+
+> [!WARNING]
+> **Archived Code Reference**  
+> This file is a raw consolidated code dump from external Gemini modeling/shader responses.  
+> It is **unverified reference material** and is not linked directly to production builds.
+
 > From the final consolidated Gemini response. Code is unverified. Earlier revisions are not duplicated.
 
 ## src/shaders/aquariumOptics.js

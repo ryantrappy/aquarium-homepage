@@ -1,0 +1,80 @@
+{
+  "extras": {
+    "reefAsset": {
+      "schema": "reef-asset-v1",
+      "id": "fish-royal-gramma",
+      "kind": "fish",
+      "units": "meter",
+      "upAxis": "+Y",
+      "origin": "local",
+      "dimensionsM": [
+        0.023242,
+        0.041018,
+        0.082187
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "766d78efd961ccfbff03cd9cd46139423f9dd3e12507d28503bcad7ae3eabb7f",
+        "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_royal_gramma.py -- /tmp/fish-models/fish-royal-gramma",
+        "attribution": "Original procedural Blender 5.0.1 rigged and animated fish asset (Gramma loreto (Royal Gramma / Fairy Basslet)) with embedded 1024x1024 PBR textures."
+      }
+    }
+  },
+  "rootTransform": {
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "boundsM": {
+    "min": [
+      -0.011621,
+      -0.023029,
+      -0.038187
+    ],
+    "max": [
+      0.011621,
+      0.017989,
+      0.044
+    ]
+  },
+  "primitives": [
+    {
+      "id": "royal_gramma_body",
+      "role": "fish",
+      "vertexCount": 7732,
+      "boundsM": {
+        "min": [
+          -0.011621,
+          -0.023029,
+          -0.038187
+        ],
+        "max": [
+          0.011621,
+          0.017989,
+          0.044
+        ]
+      },
+      "material": {
+        "vertexColors": false,
+        "vertexAlpha": false,
+        "aoSource": "texture"
+      }
+    }
+  ],
+  "sockets": [],
+  "collisionParts": []
+}

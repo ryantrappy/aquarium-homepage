@@ -1,5 +1,24 @@
 # Modular Live Rock & Realistic Coral Authoring Specification
 
+<!-- AGENT_DOC_METADATA
+Category: Specification / Asset Design
+Status: Canonical / Active
+Authority: Binding Asset Authoring Specification
+Backlog: AQ-14, AQ-14.2, AQ-14.3, AQ-34, AQ-39, AQ-42
+Owner: @gemini
+Updated: 2026-11-05
+Upstream: docs/requirements.md, docs/asset-contract.md
+Downstream: src/rendering/modeling/build_*.py, src/rendering/assets/corals/*
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Asset Specification & Biological Design
+> - **Status**: Canonical / Active
+> - **Authority**: Binding Specification
+> - **Backlog Reference**: `AQ-14.3`, `AQ-42`
+> - **Summary**: Detailed geometric, material, shader, and socket authoring instructions for 8 modular coral archetypes and 2 live-rock base foundations (left pass-through cave, right tiered shelf).
+
 _Date: 2026-11-03_  
 _Scope: Concrete geometric, material, shader, and placement instructions for replacing the monolithic stretched reef scan (`candidate-reef.glb`) with separate live-rock structures and modular, biologically accurate coral colonies (`AQ-14`, `AQ-14.2`, `AQ-14.3`, `AQ-34`, `AQ-39`, `AQ-42`)._
 

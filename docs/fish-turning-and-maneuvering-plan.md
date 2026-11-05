@@ -1,5 +1,24 @@
 # Biomechanical Fish Turning & Direction-Change Plan (`AQ-49` / `AQ-12`)
 
+<!-- AGENT_DOC_METADATA
+Category: Architecture / Motion Plan
+Status: Active
+Authority: Active Implementation Plan
+Backlog: AQ-49, AQ-12
+Owner: @behavior_profiles
+Updated: 2026-11-05
+Upstream: docs/behavior-runtime-contract.md, docs/fish-behavior-design.md
+Downstream: src/rendering/scene/motion.ts, src/rendering/scene/aquarium.ts, src/simulation/*
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Biomechanics & Motion Plan
+> - **Status**: Active Implementation Specification
+> - **Authority**: Active Plan
+> - **Backlog Reference**: `AQ-49`, `AQ-12`
+> - **Summary**: Biomechanical mathematical models for reef fish turning: Hermite spline spine bending, yawRate momentum damping, banking roll dynamics, and asymmetric pectoral fin modulation.
+
 _Date: 2026-11-04_  
 _Scope: Root-cause analysis of current fish turning artifacts in `src/rendering/scene/motion.ts` and `src/rendering/scene/aquarium.ts`, peer-reviewed biomechanical turning models for reef fishes, and a concrete implementation plan (`AQ-49`)._
 

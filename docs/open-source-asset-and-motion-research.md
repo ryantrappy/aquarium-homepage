@@ -1,5 +1,24 @@
 # Open-Source Fish Asset, Motion & Reef Tank Reference Guide ($0 Budget)
 
+<!-- AGENT_DOC_METADATA
+Category: Research / Asset Survey
+Status: Complete
+Authority: Informational Research Guide
+Backlog: AQ-5, AQ-40
+Owner: @root
+Updated: 2026-11-05
+Upstream: docs/requirements.md, docs/design-principles.md
+Downstream: docs/asset-contract.md, src/rendering/proof/ASSET_NOTICES.md
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Research Spike & Open-Source Asset Survey
+> - **Status**: Complete / Informational
+> - **Authority**: Informational Reference
+> - **Backlog Reference**: `AQ-5`, `AQ-40`
+> - **Summary**: Comprehensive survey of open-source CC0 and CC-BY 4.0 3D fish models, video references, and aquarium references adhering to the zero-dollar asset budget.
+
 _Initial compilation: 2026-03-31. Verification annotations: 2026-11-03._  
 _Scope: asset leads, candidate fish video links, reef-tank visual references, and bounded technical notes for `AQ-5`, `AQ-14`, `AQ-18`–`AQ-32`, `AQ-34`, `AQ-35`, `AQ-37`, `AQ-38`, `AQ-39`, `AQ-40`, `AQ-41`, `AQ-42`, and `AQ-43`._
 

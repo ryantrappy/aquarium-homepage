@@ -1,5 +1,24 @@
 # Animated aquarium reference review
 
+<!-- AGENT_DOC_METADATA
+Category: Research / Reference Review
+Status: Complete
+Authority: Informational Spike Review
+Backlog: AQ-36
+Owner: @root
+Updated: 2026-11-05
+Upstream: docs/open-source-asset-and-motion-research.md
+Downstream: docs/fish-turning-and-maneuvering-plan.md
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Animation Reference Review Spike
+> - **Status**: Complete / Informational
+> - **Authority**: Informational Review
+> - **Backlog Reference**: `AQ-36`
+> - **Summary**: Observational analysis of Adam Prejean's Sketchfab 3D animated aquarium, evaluating articulated caudal movement, independent pectoral fin paddling, and user-attention poses.
+
 Reviewed in the actual Sketchfab viewer on November 3, 2026: [Virtual Aquarium ALL Fish Animated](https://sketchfab.com/3d-models/virtual-aquarium-all-fish-animated-8de6bc7d49c64649910a199e7405ecb6), by **Adam Prejean (@adamprejean)**, published July 6, 2022. This is an animation reference, not a project asset. No model download, reuse permission, or match to our 15-species catalog was established.
 
 ## Direct observations

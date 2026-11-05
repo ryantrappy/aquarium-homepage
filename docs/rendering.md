@@ -1,5 +1,24 @@
 # Rendering study and main scene
 
+<!-- AGENT_DOC_METADATA
+Category: Architecture / Rendering
+Status: Active
+Authority: Active Architectural Specification
+Backlog: AQ-5, AQ-38, AQ-12, AQ-34, AQ-13
+Owner: @root
+Updated: 2026-11-05
+Upstream: docs/requirements.md, docs/design-principles.md
+Downstream: src/rendering/scene/aquarium.ts, src/components/AquariumScene.tsx, src/rendering/proof/*
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: 3D Architecture & Rendering Engine Baseline
+> - **Status**: Active Technical Baseline
+> - **Authority**: Active Specification
+> - **Backlog Reference**: `AQ-5`, `AQ-38`, `AQ-12`
+> - **Summary**: Three.js engine selection, scene lifecycle, bounded rAF clock, alpha-aware raycasting/picking, and baseline test evidence.
+
 Three.js is selected for the first main-scene integration. The application now has the technical baseline described below. The separate `engine-study.html` fixture compares Three.js, Babylon.js and PlayCanvas with the same two animated fish and reef LOD; that fixture reports targets without opening services. Its results and limitations remain separate from main-page evidence.
 
 Root finalized AQ-5 and AQ-38 as **bounded research investigations**. The fixture alone was insufficient for AQ-5 AC #3; root accepted the subsequent main integration's pipeline-capacity evidence separately. This does not complete photorealism, final swimming quality or the 15-species roster.

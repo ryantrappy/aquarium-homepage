@@ -230,7 +230,7 @@ def create_mesh_with_attributes(name, verts, faces, loop_uvs, loop_colors, mat):
     for li, uv in enumerate(loop_uvs):
         uv_layer.data[li].uv = uv
 
-    color_attr = mesh.color_attributes.new(name='COLOR_0', type='BYTE_COLOR', domain='CORNER')
+    color_attr = mesh.color_attributes.new(name='COLOR_0', type='FLOAT_COLOR', domain='CORNER')
     mesh.color_attributes.active_color = color_attr
     mesh.color_attributes.render_color_index = 0
     for li, rgba in enumerate(loop_colors):
@@ -407,12 +407,12 @@ def build_tentacle_crown_mesh(mat):
 
                 rad_h = bta_radius_profile(h, stalk_r)
 
-                # Standardized COLOR_0 contract (Spec Section 4.1 & 4.6):
-                # R = flexibilityMask = h^1.8
+                # Standardized COLOR_0 contract (coral-raw-masks-v1, docs/asset-contract.md):
+                # R = raw flexibility height h in [0, 1] (runtime applies pow(R, 1.8) once)
                 # G = growthTipOrPolypMask (marks the sub-terminal bubble bulb and tip, h >= 0.62)
                 # B = phaseSeed
                 # A = contactAO
-                flex_r = h ** 1.8
+                flex_r = h
                 bulb_g = smoothstep(0.58, 0.72, h)
                 ao_a = lerp(0.22, 1.0, smoothstep(0.0, 0.58, h))
                 rgba = (flex_r, bulb_g, phase_seed, ao_a)

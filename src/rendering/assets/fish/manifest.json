@@ -1,0 +1,331 @@
+{
+  "schema": "modular-fish-manifest-v1",
+  "contractSchema": "reef-asset-v1",
+  "note": "Six supplied rigged fish candidates pass the offline contract; anatomy, clip composition and runtime integration require separate Root review.",
+  "assets": [
+    {
+      "id": "fish-ocellaris-clownfish",
+      "fishSpeciesId": "ocellaris-clownfish",
+      "file": "fish-ocellaris-clownfish.glb",
+      "path": "src/rendering/assets/fish/fish-ocellaris-clownfish.glb",
+      "inspectionReport": "src/rendering/assets/fish/fish-ocellaris-clownfish-inspection.json",
+      "kind": "fish",
+      "rigArchetype": "subcarangiform_schooler",
+      "species": "Amphiprion ocellaris (Ocellaris Clownfish)",
+      "sha256": "af02b28c26be3ad268849fa089387055afcb62c034ac940a2501a4fa48fad29f",
+      "bytes": 1378876,
+      "triangles": 16534,
+      "dimensionsM": [
+        0.035934,
+        0.052625,
+        0.107098
+      ],
+      "boundsM": {
+        "min": [
+          -0.017967,
+          -0.025511,
+          -0.053098
+        ],
+        "max": [
+          0.017967,
+          0.027114,
+          0.054
+        ]
+      },
+      "joints": [
+        "spine_0",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "spine_4",
+        "pectoral_L",
+        "pectoral_R"
+      ],
+      "animations": [
+        "clownfish_subcarangiform_swim"
+      ],
+      "primitives": [
+        {
+          "id": "ocellaris_clownfish_body",
+          "role": "fish",
+          "vertexCount": 8444
+        }
+      ],
+      "generator": "src/rendering/modeling/build_clownfish.py",
+      "generatorSha256": "0c5c1bbb1e5fe0d6f98fe6a2766a2a0d807986abe01a1065ba55577438fb34b3",
+      "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_clownfish.py -- /tmp/fish-models/fish-ocellaris-clownfish",
+      "contractValidated": true,
+      "status": "candidate-awaiting-root-review"
+    },
+    {
+      "id": "fish-yellow-tang",
+      "fishSpeciesId": "yellow-tang",
+      "file": "fish-yellow-tang.glb",
+      "path": "src/rendering/assets/fish/fish-yellow-tang.glb",
+      "inspectionReport": "src/rendering/assets/fish/fish-yellow-tang-inspection.json",
+      "kind": "fish",
+      "rigArchetype": "labriform_rigid_disc",
+      "species": "Zebrasoma flavescens (Yellow Tang)",
+      "sha256": "a1a1ae0207ec0e2ee13da5de0443a8dc168b65866bf9d448e5ea870e26d815d2",
+      "bytes": 1320464,
+      "triangles": 17226,
+      "dimensionsM": [
+        0.037058,
+        0.13075,
+        0.144611
+      ],
+      "boundsM": {
+        "min": [
+          -0.018529,
+          -0.060871,
+          -0.066611
+        ],
+        "max": [
+          0.018529,
+          0.069879,
+          0.078
+        ]
+      },
+      "joints": [
+        "spine_0",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "spine_4",
+        "pectoral_L",
+        "pectoral_R"
+      ],
+      "animations": [
+        "yellow_tang_labriform_swim"
+      ],
+      "primitives": [
+        {
+          "id": "yellow_tang_body",
+          "role": "fish",
+          "vertexCount": 8804
+        }
+      ],
+      "generator": "src/rendering/modeling/build_yellow_tang.py",
+      "generatorSha256": "6d52de0d90ab6e79a2a4c96f655857bc2a7c932b66f2cef78caa621aa184d640",
+      "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_yellow_tang.py -- /tmp/fish-models/fish-yellow-tang",
+      "contractValidated": true,
+      "status": "candidate-awaiting-root-review"
+    },
+    {
+      "id": "fish-blue-tang",
+      "fishSpeciesId": "blue-tang",
+      "file": "fish-blue-tang.glb",
+      "path": "src/rendering/assets/fish/fish-blue-tang.glb",
+      "inspectionReport": "src/rendering/assets/fish/fish-blue-tang-inspection.json",
+      "kind": "fish",
+      "rigArchetype": "labriform_cruiser",
+      "species": "Paracanthurus hepatus (Regal Blue Tang / Palette Surgeonfish)",
+      "sha256": "41eabfb7ec26b308ad0255566fb9962cc2930b1b295120fec2993bbe4fc60ba4",
+      "bytes": 1264264,
+      "triangles": 16866,
+      "dimensionsM": [
+        0.036794,
+        0.084766,
+        0.152686
+      ],
+      "boundsM": {
+        "min": [
+          -0.018397,
+          -0.041827,
+          -0.070686
+        ],
+        "max": [
+          0.018397,
+          0.042939,
+          0.082
+        ]
+      },
+      "joints": [
+        "spine_0",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "spine_4",
+        "pectoral_L",
+        "pectoral_R"
+      ],
+      "animations": [
+        "blue_tang_labriform_swim"
+      ],
+      "primitives": [
+        {
+          "id": "blue_tang_body",
+          "role": "fish",
+          "vertexCount": 8620
+        }
+      ],
+      "generator": "src/rendering/modeling/build_blue_tang.py",
+      "generatorSha256": "aaf49407602a72fc1909900e252ebbb9f60e4447ed0e75da0378727ac6652b67",
+      "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_blue_tang.py -- /tmp/fish-models/fish-blue-tang",
+      "contractValidated": true,
+      "status": "candidate-awaiting-root-review"
+    },
+    {
+      "id": "fish-royal-gramma",
+      "fishSpeciesId": "royal-gramma",
+      "file": "fish-royal-gramma.glb",
+      "path": "src/rendering/assets/fish/fish-royal-gramma.glb",
+      "inspectionReport": "src/rendering/assets/fish/fish-royal-gramma-inspection.json",
+      "kind": "fish",
+      "rigArchetype": "subcarangiform_schooler",
+      "species": "Gramma loreto (Royal Gramma / Fairy Basslet)",
+      "sha256": "1d629137b3fde0e85519d8cdda51edd2e94ec7dcb98e5ec1c0558e4e57d2e87d",
+      "bytes": 1284704,
+      "triangles": 15118,
+      "dimensionsM": [
+        0.023242,
+        0.041018,
+        0.082187
+      ],
+      "boundsM": {
+        "min": [
+          -0.011621,
+          -0.023029,
+          -0.038187
+        ],
+        "max": [
+          0.011621,
+          0.017989,
+          0.044
+        ]
+      },
+      "joints": [
+        "spine_0",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "spine_4",
+        "pectoral_L",
+        "pectoral_R"
+      ],
+      "animations": [
+        "royal_gramma_subcarangiform_swim"
+      ],
+      "primitives": [
+        {
+          "id": "royal_gramma_body",
+          "role": "fish",
+          "vertexCount": 7732
+        }
+      ],
+      "generator": "src/rendering/modeling/build_royal_gramma.py",
+      "generatorSha256": "766d78efd961ccfbff03cd9cd46139423f9dd3e12507d28503bcad7ae3eabb7f",
+      "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_royal_gramma.py -- /tmp/fish-models/fish-royal-gramma",
+      "contractValidated": true,
+      "status": "candidate-awaiting-root-review"
+    },
+    {
+      "id": "fish-banggai-cardinalfish",
+      "fishSpeciesId": "banggai-cardinalfish",
+      "file": "fish-banggai-cardinalfish.glb",
+      "path": "src/rendering/assets/fish/fish-banggai-cardinalfish.glb",
+      "inspectionReport": "src/rendering/assets/fish/fish-banggai-cardinalfish-inspection.json",
+      "kind": "fish",
+      "rigArchetype": "banner_hoverer",
+      "species": "Pterapogon kauderni (Banggai Cardinalfish)",
+      "sha256": "f927e8f163f95a11e924e304ba3280718c4ba43074da211afd761e618dcab1fe",
+      "bytes": 1432684,
+      "triangles": 15692,
+      "dimensionsM": [
+        0.025292,
+        0.076705,
+        0.082699
+      ],
+      "boundsM": {
+        "min": [
+          -0.012646,
+          -0.036584,
+          -0.040699
+        ],
+        "max": [
+          0.012646,
+          0.040121,
+          0.042
+        ]
+      },
+      "joints": [
+        "spine_0",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "spine_4",
+        "pectoral_L",
+        "pectoral_R"
+      ],
+      "animations": [
+        "banggai_banner_hover_swim"
+      ],
+      "primitives": [
+        {
+          "id": "banggai_cardinalfish_body",
+          "role": "fish",
+          "vertexCount": 8024
+        }
+      ],
+      "generator": "src/rendering/modeling/build_banggai_cardinalfish.py",
+      "generatorSha256": "ea8cbb55574a1d015b79fa3ec560efba0bb4fff155de5e272696c79ec4ce3e2d",
+      "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_banggai_cardinalfish.py -- /tmp/fish-models/fish-banggai-cardinalfish",
+      "contractValidated": true,
+      "status": "candidate-awaiting-root-review"
+    },
+    {
+      "id": "fish-mandarin-dragonet",
+      "fishSpeciesId": "mandarin-dragonet",
+      "file": "fish-mandarin-dragonet.glb",
+      "path": "src/rendering/assets/fish/fish-mandarin-dragonet.glb",
+      "inspectionReport": "src/rendering/assets/fish/fish-mandarin-dragonet-inspection.json",
+      "kind": "fish",
+      "rigArchetype": "benthic_percher_dragonet",
+      "species": "Synchiropus splendidus (Mandarin Dragonet)",
+      "sha256": "3adb30c2a5c88d1a8ac3a336446d1341641762c01c19dace6f5b95310cffc52e",
+      "bytes": 1377868,
+      "triangles": 15460,
+      "dimensionsM": [
+        0.035142,
+        0.04049,
+        0.075044
+      ],
+      "boundsM": {
+        "min": [
+          -0.017571,
+          -0.015187,
+          -0.037044
+        ],
+        "max": [
+          0.017571,
+          0.025303,
+          0.038
+        ]
+      },
+      "joints": [
+        "spine_0",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "spine_4",
+        "pectoral_L",
+        "pectoral_R"
+      ],
+      "animations": [
+        "mandarin_dragonet_hover_swim"
+      ],
+      "primitives": [
+        {
+          "id": "mandarin_dragonet_body",
+          "role": "fish",
+          "vertexCount": 7912
+        }
+      ],
+      "generator": "src/rendering/modeling/build_mandarin_dragonet.py",
+      "generatorSha256": "7b446be469adf26399a45c6d034c49ffb1d3706024cc5c43505759f5f829604d",
+      "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_mandarin_dragonet.py -- /tmp/fish-models/fish-mandarin-dragonet",
+      "contractValidated": true,
+      "status": "candidate-awaiting-root-review"
+    }
+  ]
+}

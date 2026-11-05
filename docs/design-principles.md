@@ -1,5 +1,24 @@
 # Aquarium design principles
 
+<!-- AGENT_DOC_METADATA
+Category: Governance / Design Principles
+Status: Canonical / Active
+Authority: Binding Aesthetic & Architectural Guidance
+Backlog: AQ-14, AQ-14.1, AQ-12
+Owner: @root
+Updated: 2026-11-05
+Upstream: AGENTS.md, docs/requirements.md
+Downstream: All 3D scene, shader, and UI implementations
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Design Guidance & Visual Principles
+> - **Status**: Canonical / Active
+> - **Authority**: Binding Guidance
+> - **Backlog Reference**: `AQ-14`
+> - **Summary**: Architectural principles for realistic tank depth, crisp live rock/coral/sand habitat, living fish motion, unobtrusive controls, and $0 CC0/CC-BY 4.0 asset constraints.
+
 ## Primary goal
 
 Make the homepage feel like a photorealistic, living reef aquarium. Realistic fish should fill almost the entire main view and act as the clickable links to configured homelab services. The aquarium and fish experience is the project's main success criterion.

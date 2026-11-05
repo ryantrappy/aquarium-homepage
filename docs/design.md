@@ -1,5 +1,21 @@
 # Reef Control design notes
 
+<!-- AGENT_DOC_METADATA
+Category: Archive / Design Notes
+Status: Superseded
+Authority: Historical Reference (Superseded by docs/requirements.md & docs/design-principles.md)
+Backlog: AQ-2, AQ-14
+Owner: @root
+Updated: 2026-11-05
+Upstream: docs/requirements.md
+Downstream: None
+-->
+
+> [!WARNING]
+> **Superseded Document**  
+> The early two-panel dashboard layout described in this note is superseded by the living photorealistic reef aquarium direction.  
+> Refer to [`docs/requirements.md`](requirements.md) and [`docs/design-principles.md`](design-principles.md) for canonical guidance.
+
 ## Superseding direction — 2026-11-02
 
 The first-pass composition documented below is a historical draft and remains a record of the earlier AQ-2 implementation. It is superseded as the product direction by the user's clarified priority: this homepage should be a highly creative, cool experience that feels like an actual fish tank. Realistic fish swimming should fill almost the entire main view.

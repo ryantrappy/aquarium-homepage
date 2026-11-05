@@ -1,5 +1,24 @@
 # Deployment on trappserv.er
 
+<!-- AGENT_DOC_METADATA
+Category: Operations / Runbook
+Status: Canonical / Active
+Authority: Operational Runbook
+Backlog: AQ-10, AQ-9
+Owner: @root
+Updated: 2026-11-05
+Upstream: AGENTS.md, AGENT_TASKS.md
+Downstream: Docker Compose configuration, Nitro build output (.output/)
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Operations & Deployment Runbook
+> - **Status**: Canonical / Active
+> - **Authority**: Operational Runbook
+> - **Backlog Reference**: `AQ-10`
+> - **Summary**: Production deployment specification for `trappserv.er`, Docker Node 24 runtime, LAN Caddy access controls, and atomic config persistence at `/api/config`. Note: User performs deployments after reviewed Git push.
+
 ## Live deployment
 
 The app is available at [https://aquarium.ryantr.app](https://aquarium.ryantr.app). It runs in the Node 24 Docker image built from reviewed commit `6e5c30a`; the host's Node 18 installation is unchanged.
@@ -103,3 +122,26 @@ Read-only inventory on 2026-11-03 found Ubuntu 24.04.5, Docker 27.3.1, Compose 2
 ## Prepared CPU temperature source (not deployed)
 
 The reviewed live deployment at commit `6e5c30a` does not include the CPU temperature API or host sensor mount. The current source Compose file prepares a narrow, read-only bind of `/sys/devices/platform/coretemp.0` to `/run/host-sensors/coretemp.0`, with `REEF_CPU_HWMON_ROOT=/run/host-sensors/coretemp.0`. The backend discovers `hwmon*` entries whose `name` is `coretemp`, then reads supported `temp*_label` / matching `temp*_input` pairs such as `Package id 0`; it exposes a stable `coretemp.0:package-id-0` default sensor ID. If the configured path, chip, label, or input is missing or unreadable, the reading is unavailable (or marked stale only when an earlier successful sample exists). It does not substitute a fabricated temperature. The aquarium scene heater indicator has not been implemented, and this source has not been mounted or deployed on `trappserv.er`.
+
+## Docker build and configuration reference
+
+The app is a TanStack Start/Nitro Node server. `npm run build` produces `.output/`, and `deploy/Dockerfile` builds it in a Node 24 Alpine stage and runs `node .output/server/index.mjs` as the unprivileged `node` user on port 3000. `deploy/compose.yaml` runs it read-only with all capabilities dropped, publishes `${REEF_BIND}:${REEF_HOST_PORT}` (default `127.0.0.1:3004`) for a reverse proxy, and bind-mounts the data directory and the CPU sensor directory.
+
+```sh
+cp .env.example .env        # edit values
+docker compose --env-file .env -f deploy/compose.yaml up -d --build
+curl -s http://127.0.0.1:3004/api/telemetry/cpu-temperature
+```
+
+See [.env.example](../.env.example) for every variable. Note that relative paths in `.env` (such as `REEF_DATA_DIR`) resolve from the directory of `deploy/compose.yaml`.
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `REEF_PUBLIC_ORIGIN` | Yes, for any non-default hostname | Exact origin browsers use. Config writes from other origins are rejected. |
+| `REEF_DATA_DIR` | Recommended | Host directory persisting `reef-config.json`; must be writable by uid 1000. Defaults to `../data`. |
+| `REEF_BIND`, `REEF_HOST_PORT` | No | Published address and port. Defaults `127.0.0.1` and `3004`. |
+| `REEF_CPU_SENSOR_HOST_PATH` | No | Host `coretemp` directory mounted read-only. The container will not start if it does not exist (for example on AMD CPUs or VMs); remove the mount and `REEF_CPU_HWMON_ROOT` there, and the API reports `unavailable`. |
+| `REEF_CONFIG_PATH`, `REEF_CPU_HWMON_ROOT` | No | Set by the image and Compose; override only outside Docker. |
+| `REEF_NETWORK_SOURCE_ID`, `_LABEL`, `REEF_NETWORK_STATS_ROOT` | No | All three enable the network traffic API; also add a read-only mount of the interface statistics directory. Not wired in Compose yet. |
+
+Tell Compose about `HOST`/`PORT` only if you change the container port; the image defaults are `0.0.0.0:3000`.

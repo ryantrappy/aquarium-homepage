@@ -17,14 +17,14 @@ services:
       HOST: 0.0.0.0
       PORT: 3000
       REEF_CONFIG_PATH: /var/lib/reef-control/reef-config.json
-      REEF_PUBLIC_ORIGIN: https://aquarium.ryantr.app
+      REEF_PUBLIC_ORIGIN: ${REEF_PUBLIC_ORIGIN:-https://aquarium.ryantr.app}
       REEF_CPU_HWMON_ROOT: /run/host-sensors/coretemp.0
     ports:
-      - "127.0.0.1:3004:3000"
+      - "${REEF_BIND:-127.0.0.1}:${REEF_HOST_PORT:-3004}:3000"
     volumes:
       - ${REEF_DATA_DIR:-../data}:/var/lib/reef-control
       - type: bind
-        source: /sys/devices/platform/coretemp.0
+        source: ${REEF_CPU_SENSOR_HOST_PATH:-/sys/devices/platform/coretemp.0}
         target: /run/host-sensors/coretemp.0
         read_only: true
         bind:

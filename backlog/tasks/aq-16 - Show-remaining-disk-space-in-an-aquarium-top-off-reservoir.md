@@ -1,11 +1,11 @@
 ---
 id: AQ-16
 title: Show remaining disk space in an aquarium top-off reservoir
-status: To Do
+status: In Progress
 assignee:
-  - '@Luna'
+  - '@root'
 created_date: '2026-11-03T04:25:00Z'
-updated_date: '2026-11-03T19:11:00Z'
+updated_date: '2026-11-05 03:34'
 labels: []
 dependencies: []
 references:
@@ -40,10 +40,18 @@ Add an aquarium top-off reservoir whose level represents actual remaining disk c
 - [ ] #2 Root agent reviews the completed result before the task is marked Done.
 <!-- DOD:END -->
 
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Reuse the reviewed host inventory and configure only explicit trusted read-only data-filesystem paths; never bind broad host roots or change mounts. 2. Consume completed AQ16.1 exact aggregation in a read-only stat/statfs adapter with stable configured selection IDs and per-sample filesystem identity deduplication; exclude unconfigured/system/pseudo scopes and report real stale/unavailable states. 3. Expose same-origin GET-only discovery/read API with exact byte strings, selected scope and weighted percentage, no client-controlled paths. 4. Integrate explicit disk/all-unique scope selection and a scene reservoir whose physical fill follows available capacity, preserving actual measurement timestamps and no fabricated data. 5. Root verifies source/data/visual/controls evidence before checking parent criteria or Done.
+<!-- SECTION:PLAN:END -->
+
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 Read-only source inventory on trappserv.er (2026-11-03): findmnt and df are available. Mounted local block filesystems include the root LVM ext4 volume (also shown as a duplicate /usr/share/hunspell submount), NVMe boot/EFI partitions, and mounted SATA ext3/ext4 data volumes under /media/internal; pseudo filesystems, snap loop images, Docker overlay mounts, and network namespace mounts are also visible and must be excluded. AQ16 adapter proposal: build candidates from the host mount table and block-device identity; count each eligible filesystem/device once (dedupe source/major:minor, normalize LVM subvolume suffixes), exclude pseudo/loop/overlay/snap/boot-only scopes as agreed, and obtain byte free/total via statfs/df on explicit read-only mount paths. Aggregate as sum(free)/sum(total), label the chosen scope, surface inaccessible/stale data. Avoid exposing a broad host-root mount just to inspect usage; make the required disk mount paths explicit and read-only. No mount or server config was changed.
+
+Bounded math packet AQ16.1 is Root-reviewed Done. Parent still needs actual read-only source adapter/API/settings/reservoir and live-source evidence. No mount/server/deployment changes have been made.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

@@ -242,7 +242,7 @@ def create_mesh_with_attributes(name, verts, faces, loop_uvs, loop_colors, mat):
     for li, uv in enumerate(loop_uvs):
         uv_layer.data[li].uv = uv
 
-    color_attr = mesh.color_attributes.new(name='COLOR_0', type='BYTE_COLOR', domain='CORNER')
+    color_attr = mesh.color_attributes.new(name='COLOR_0', type='FLOAT_COLOR', domain='CORNER')
     mesh.color_attributes.active_color = color_attr
     mesh.color_attributes.render_color_index = 0
     for li, rgba in enumerate(loop_colors):
@@ -480,8 +480,9 @@ def build_polyp_crown_mesh(heads, mat):
                         bulb_shape = math.sin(min(1.0, bulb_u) * math.pi * 0.82) * (1.0 - 0.35 * (bulb_u ** 3))
                         profile_r = stalk_r * max(0.38, 0.84 + 0.84 * bulb_shape)
 
-                    # Standardized COLOR_0 contract (Spec Section 4.1 & 4.4):
-                    flex_r = h ** 1.8
+                    # Standardized COLOR_0 contract (coral-raw-masks-v1, docs/asset-contract.md):
+                    # R stores raw normalized height h in [0, 1]; runtime applies pow(R, 1.8) once.
+                    flex_r = h
                     tip_g = smoothstep(0.76, 0.84, h)
                     ao_a = lerp(0.20 + 0.12 * radial_frac, 1.0, smoothstep(0.0, 0.65, h))
                     rgba = (flex_r, tip_g, phase_seed, ao_a)

@@ -1,5 +1,24 @@
 # Reef fish thumbnail assets
 
+<!-- AGENT_DOC_METADATA
+Category: Evidence / Asset Provenance
+Status: Active
+Authority: Evidentiary Record
+Backlog: AQ-40, AQ-33
+Owner: @root
+Updated: 2026-11-05
+Upstream: docs/reef-fish-roster.md
+Downstream: docs/fish-art-provenance.json, public/fish/*
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: 2D Asset Provenance & Thumbnail Catalog
+> - **Status**: Active / Evidentiary
+> - **Authority**: Evidentiary Record
+> - **Backlog Reference**: `AQ-40`, `AQ-33`
+> - **Summary**: Provenance documentation, generation logs, and visual trait checks for static 2D fish cutout assets powering service pickers and modal previews.
+
 Fish cutouts power the service fish picker, service list previews, and fallback in-scene fish art. They are static recognition art, not final production animation assets. The roster's anatomy and color notes guide each generated image; linked references are for species verification and were not copied as image sources.
 
 Per-file hashes and provenance status are recorded in [`fish-art-provenance.json`](fish-art-provenance.json). It distinguishes the 11 documented, frozen ImageGen WebPs, the four inherited WebPs removed after root approved their replacements, and the new unchanged transparent PNGs. The new PNGs are approved static preview art; they are not claims of final photorealistic or animated fish.

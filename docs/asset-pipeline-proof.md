@@ -1,5 +1,24 @@
 # Asset pipeline proofs
 
+<!-- AGENT_DOC_METADATA
+Category: Evidence / Verification
+Status: Active
+Authority: Evidentiary Record
+Backlog: AQ-40
+Owner: @root
+Updated: 2026-11-05
+Upstream: docs/asset-contract.md
+Downstream: src/rendering/proof/pipeline-assets/*
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Pipeline Verification & Export Proofs
+> - **Status**: Active / Evidentiary
+> - **Authority**: Evidentiary Record
+> - **Backlog Reference**: `AQ-40`
+> - **Summary**: Offline technical studies and proof exports for material baking, glTF inspection metadata, texture packing (ORM), and validator repro scripts.
+
 These are offline technical studies for AQ-40, not final production aquarium art. The three compact review GLBs and their notices, provenance, and validator reports are curated in [`src/rendering/proof/pipeline-assets/`](../src/rendering/proof/pipeline-assets/). Original source files and the saved procedural `.blend` remain external; the licensed Staghorn original is not bundled. The studies demonstrate bounded material baking and export, not completed reef art, modular-coral compliance, or final visual quality. The clownfish, yellow tang, and reef scan also serve as the current main-scene technical baseline; none is approved as final biological art.
 
 ## Original procedural rock: base color, roughness, and AO

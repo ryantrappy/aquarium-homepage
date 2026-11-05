@@ -1,0 +1,80 @@
+{
+  "extras": {
+    "reefAsset": {
+      "schema": "reef-asset-v1",
+      "id": "fish-yellow-tang",
+      "kind": "fish",
+      "units": "meter",
+      "upAxis": "+Y",
+      "origin": "local",
+      "dimensionsM": [
+        0.037058,
+        0.13075,
+        0.144611
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "6d52de0d90ab6e79a2a4c96f655857bc2a7c932b66f2cef78caa621aa184d640",
+        "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_yellow_tang.py -- /tmp/fish-models/fish-yellow-tang",
+        "attribution": "Original procedural Blender 5.0.1 rigged and animated fish asset (Zebrasoma flavescens (Yellow Tang)) with embedded 1024x1024 PBR textures."
+      }
+    }
+  },
+  "rootTransform": {
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "boundsM": {
+    "min": [
+      -0.018529,
+      -0.060871,
+      -0.066611
+    ],
+    "max": [
+      0.018529,
+      0.069879,
+      0.078
+    ]
+  },
+  "primitives": [
+    {
+      "id": "yellow_tang_body",
+      "role": "fish",
+      "vertexCount": 8804,
+      "boundsM": {
+        "min": [
+          -0.018529,
+          -0.060871,
+          -0.066611
+        ],
+        "max": [
+          0.018529,
+          0.069879,
+          0.078
+        ]
+      },
+      "material": {
+        "vertexColors": false,
+        "vertexAlpha": false,
+        "aoSource": "texture"
+      }
+    }
+  ],
+  "sockets": [],
+  "collisionParts": []
+}

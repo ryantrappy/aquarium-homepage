@@ -5,13 +5,14 @@ status: Done
 assignee:
   - '@Luna'
 created_date: '2026-11-03T12:38:00Z'
-updated_date: '2026-11-03T19:10:00Z'
-labels: []
+updated_date: '2026-11-05 13:09'
+labels:
+  - gemini-research
 dependencies: []
 references:
   - docs/fish-behavior-design.md
-  - https://www.sciencedirect.com/science/article/pii/S1055790315002729
-  - https://pmc.ncbi.nlm.nih.gov/articles/PMC5539144/
+  - 'https://www.sciencedirect.com/science/article/pii/S1055790315002729'
+  - 'https://pmc.ncbi.nlm.nih.gov/articles/PMC5539144/'
 documentation:
   - docs/fish-behavior-design.md
   - docs/reef-fish-roster.md

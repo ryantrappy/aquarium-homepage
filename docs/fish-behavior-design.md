@@ -1,5 +1,24 @@
 # Fish behavior design notes
 
+<!-- AGENT_DOC_METADATA
+Category: Specification / Behavioral Design
+Status: Canonical / Active
+Authority: Binding Behavioral Design Specification
+Backlog: AQ-35, AQ-44, AQ-45
+Owner: @behavior_profiles
+Updated: 2026-11-05
+Upstream: docs/reef-fish-roster.md, docs/requirements.md
+Downstream: docs/behavior-runtime-contract.md, src/lib/fish-behavior.ts
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Biological Behavioral Design Specification
+> - **Status**: Canonical / Active
+> - **Authority**: Binding Specification
+> - **Backlog Reference**: `AQ-35`
+> - **Summary**: Biological constraints, peer-reviewed corrections to generic state machines, refuge compatibility, and habitat anchors for all 15 target species.
+
 This note digests the proposed shared fish-behavior model and records biological constraints for future implementation. The sourced target remains the 15 species in the [reef fish roster](reef-fish-roster.md). Eels and cleaner wrasses discussed below are optional future roster candidates; they are not current supported species or implicit additions. This is a planning brief, not an implementation or a production-asset license.
 
 ## Corrections to the proposals

@@ -1,5 +1,24 @@
 # Network traffic sampler contract
 
+<!-- AGENT_DOC_METADATA
+Category: Specification / Telemetry Contract
+Status: Canonical / Active
+Authority: Binding Telemetry Contract
+Backlog: AQ-17, AQ-17.1
+Owner: @root
+Updated: 2026-11-05
+Upstream: docs/requirements.md
+Downstream: src/server/network-traffic.ts, src/routes/api/telemetry/network-traffic.ts
+-->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Hardware Telemetry Specification / Network Sampler
+> - **Status**: Canonical / Active
+> - **Authority**: Binding Contract
+> - **Backlog Reference**: `AQ-17`, `AQ-17.1`
+> - **Summary**: Server-side network telemetry sampler specification, rate calculations from `rx_bytes`/`tx_bytes`, strict path safety, monotonic time deltas, and honest `unavailable`/`stale` semantics without simulated values.
+
 `createNetworkTrafficStore` accepts a trusted server-side list of sources. Each entry has a stable `id`, display `label`, and absolute `statsRootPath`. The client may request a source by ID; it cannot supply a filesystem path. `getSources()` returns only IDs and labels.
 
 For a selected source, the sampler reads decimal `rx_bytes` and `tx_bytes` files beneath that configured root. It computes ingress and egress independently in bytes per second (`B/s`) using exact unsigned 64-bit counter deltas and monotonic elapsed time. Wall-clock time is used only for the `observedAt` timestamp. Concurrent requests for the same source share one in-flight sample. A short result cache limits reads to at most once per `minimumSampleIntervalMs` (default 250 ms), which must be no more than half the stale window; cached successful readings report their increasing monotonic age. Source descriptors and returned readings are copies, so caller mutation cannot change trusted configuration or internal samples.

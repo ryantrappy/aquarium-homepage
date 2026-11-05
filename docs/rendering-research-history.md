@@ -1,5 +1,21 @@
 # Historical rendering research and local experiments
 
+<!-- AGENT_DOC_METADATA
+Category: Archive / Research Spike
+Status: Archived
+Authority: Historical Reference (Superseded by docs/rendering.md)
+Backlog: AQ-5, AQ-38
+Owner: @root
+Updated: 2026-11-05
+Upstream: docs/rendering.md
+Downstream: None
+-->
+
+> [!WARNING]
+> **Archived Research Record**  
+> Historical record only. This document preserves early exploratory investigations and prototype comparisons.  
+> Refer to [`docs/rendering.md`](rendering.md) for the active technical baseline and architecture.
+
 > Historical record only. This document preserves earlier investigations and their status at the time. It is not the current proof entrypoint, a complete inventory of shipped assets, or a production recommendation. Older notes that call assets local-only or excluded predate the current three-asset checkpoint. The curated checked-in files are `candidate-real-clown.glb`, `candidate-real-tang.glb`, and `candidate-reef.glb`; current entrypoints, provenance, recipes, validation and limits are in [rendering.md](rendering.md), [ASSET_NOTICES.md](../src/rendering/proof/ASSET_NOTICES.md), and [asset-manifest.json](../src/rendering/proof/asset-manifest.json).
 
 The historical notes below include ignored or temporary prototypes. Their descriptions do not make those files part of the current proof bundle or authorize redistributing them.

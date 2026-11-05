@@ -1,5 +1,5 @@
 /**
- * Package finished modular coral colonies and bare live-rock island foundations into
+ * Package candidate modular coral colonies and bare live-rock island foundations into
  * `src/rendering/assets/corals/`, stamp in-band `reefAsset` / `reefPrimitive` / `reefSocket`
  * glTF extras per `docs/asset-contract.md`, emit `<id>-inspection.json` and `manifest.json`,
  * and verify every asset against `validateAssetContract` from `src/rendering/assets/contract.ts`.
@@ -11,6 +11,7 @@ import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import { validateAssetContract } from '../assets/contract.ts'
+import { inspectRockSockets } from '../assets/socket-inspector.ts'
 
 const REPO_ROOT = process.cwd()
 const SOURCE_DIR = '/tmp/coral-models'
@@ -188,7 +189,7 @@ function buildGlb(doc, binChunk) {
   return out
 }
 
-function decodeColor0Values(doc, binChunk, accessorIndex, forceRigidRZero) {
+function decodeColor0Values(doc, binChunk, accessorIndex, isRigid, assetId, primId) {
   const accessor = doc.accessors[accessorIndex]
   const bv = doc.bufferViews[accessor.bufferView]
   const byteOffset = (bv.byteOffset || 0) + (accessor.byteOffset || 0)
@@ -217,14 +218,21 @@ function decodeColor0Values(doc, binChunk, accessorIndex, forceRigidRZero) {
       g = binChunk.readFloatLE(base + 4)
       b = binChunk.readFloatLE(base + 8)
       a = isVec4 ? binChunk.readFloatLE(base + 12) : 1
+    } else {
+      throw new Error(`Unsupported COLOR_0 componentType ${componentType} on ${assetId}/${primId}`)
     }
-    if (forceRigidRZero) {
-      r = 0
+    for (const [chName, val] of [['R', r], ['G', g], ['B', b], ['A', a]]) {
+      if (!Number.isFinite(val) || val < 0 || val > 1) {
+        throw new Error(`Invalid COLOR_0.${chName}=${val} at vertex ${i} on ${assetId}/${primId}`)
+      }
     }
-    values[i * 4] = Number(Math.max(0, Math.min(1, r)).toFixed(4))
-    values[i * 4 + 1] = Number(Math.max(0, Math.min(1, g)).toFixed(4))
-    values[i * 4 + 2] = Number(Math.max(0, Math.min(1, b)).toFixed(4))
-    values[i * 4 + 3] = Number(Math.max(0, Math.min(1, a)).toFixed(4))
+    if (isRigid && r !== 0) {
+      throw new Error(`Rigid coral primitive ${assetId}/${primId} has non-zero flexibility COLOR_0.R=${r} at vertex ${i}`)
+    }
+    values[i * 4] = r
+    values[i * 4 + 1] = g
+    values[i * 4 + 2] = b
+    values[i * 4 + 3] = a
   }
   return values
 }
@@ -304,7 +312,7 @@ for (const spec of ASSETS) {
       if (colorAccessorIdx === undefined) {
         throw new Error(`Missing COLOR_0 attribute on coral primitive ${node.name} in ${spec.id}`)
       }
-      const colorValues = decodeColor0Values(doc, binChunk, colorAccessorIdx, primRole.role === 'coral-rigid')
+      const colorValues = decodeColor0Values(doc, binChunk, colorAccessorIdx, primRole.role === 'coral-rigid', spec.id, primRole.id)
       primRecord.color0 = {
         itemSize: 4,
         values: colorValues,
@@ -343,12 +351,7 @@ for (const spec of ASSETS) {
   const rootNode = doc.nodes[rootNodeIdx]
   rootNode.extras = { ...(rootNode.extras || {}), reefAsset }
 
-  // First build the stamped GLB so we can record its geometrySha256 for socket surface probes
-  let stampedGlb = buildGlb(doc, binChunk)
-  let glbSha256 = crypto.createHash('sha256').update(stampedGlb).digest('hex')
-
-  // Build sockets list for rock foundations
-  const sockets = []
+  // Stamp reefSocket intent onto rock socket nodes before building the final GLB
   if (spec.kind === 'rock') {
     const parentPrimId = primitives[0].id
     for (const node of doc.nodes) {
@@ -359,32 +362,6 @@ for (const spec of ASSETS) {
       const socketMeta = SOCKET_ARCHETYPES[prefix]
       if (!socketMeta) continue
 
-      const pos = (node.translation || [0, 0, 0]).map(v => Number(v.toFixed(6)))
-      const rot = normalizeQuat(node.rotation || [0, 0, 0, 1])
-      const normal = quatUpVector(rot)
-
-      const socketRecord = {
-        name: node.name,
-        role: 'coral-mount',
-        parentMesh: parentPrimId,
-        archetype: socketMeta.archetype,
-        positionM: pos,
-        normal,
-        rotation: rot,
-        footprintRadiusM: socketMeta.footprint,
-        clearanceRadiusM: socketMeta.clearance,
-        support: {
-          pointM: pos,
-          normal,
-          supportedRadiusM: Number((socketMeta.footprint + 0.012).toFixed(4)),
-          freeRadiusM: Number((socketMeta.clearance + 0.025).toFixed(4)),
-          evidence: {
-            method: 'surface-probes-v1',
-            geometrySha256: glbSha256,
-            report: `src/rendering/assets/corals/${spec.id}-inspection.json`,
-          },
-        },
-      }
       node.extras = {
         ...(node.extras || {}),
         reefSocket: {
@@ -395,14 +372,28 @@ for (const spec of ASSETS) {
           clearanceRadiusM: socketMeta.clearance,
         },
       }
-      sockets.push(socketRecord)
     }
-    // Re-serialize GLB with socket extras included and update geometrySha256
-    stampedGlb = buildGlb(doc, binChunk)
-    glbSha256 = crypto.createHash('sha256').update(stampedGlb).digest('hex')
-    for (const s of sockets) {
-      s.support.evidence.geometrySha256 = glbSha256
+  }
+
+  // Build final stamped GLB and compute its exact SHA-256
+  const stampedGlb = buildGlb(doc, binChunk)
+  const glbSha256 = crypto.createHash('sha256').update(stampedGlb).digest('hex')
+
+  // Measure actual exported rock sockets using the independent geometry inspector (AQ-52)
+  let sockets = []
+  // Collision proxies require independent solid-coverage and cave-clearance evidence (AQ-58).
+  const collisionParts = []
+  if (spec.kind === 'rock') {
+    const socketReportRelPath = `src/rendering/assets/corals/${spec.id}-socket-report.json`
+    const socketReportAbsPath = path.join(REPO_ROOT, socketReportRelPath)
+    const socketReport = inspectRockSockets(stampedGlb, socketReportRelPath)
+    fs.writeFileSync(socketReportAbsPath, JSON.stringify(socketReport, null, 2) + '\n')
+    if (socketReport.rejectedSockets.length > 0 || socketReport.supportedSockets.length === 0) {
+      console.error(`Socket geometry verification failed for ${spec.id}:`, JSON.stringify(socketReport.rejectedSockets, null, 2))
+      process.exit(1)
     }
+    sockets = socketReport.supportedSockets
+
   }
 
   const inspectionRecord = {
@@ -415,7 +406,7 @@ for (const spec of ASSETS) {
     boundsM: { min: overallMin, max: overallMax },
     primitives,
     sockets,
-    collisionParts: [],
+    collisionParts,
   }
 
   const validation = validateAssetContract(inspectionRecord)
@@ -453,7 +444,7 @@ for (const spec of ASSETS) {
     generatorSha256: sourceSha256,
     recipe: spec.recipe,
     contractValidated: true,
-    status: 'ready-for-project-integration',
+    status: 'candidate-awaiting-root-review',
   })
 
   console.log(`Packaged & contract-verified ${spec.id}: ${stampedGlb.length} bytes, ${totalTriangles} tris, sha256=${glbSha256.slice(0, 12)}...`)
@@ -466,7 +457,7 @@ fs.writeFileSync(
     {
       schema: 'modular-coral-and-rock-manifest-v1',
       contractSchema: 'reef-asset-v1',
-      note: 'All 8 modular coral colonies and 2 bare live-rock island foundations are contract-validated (validateAssetContract) and ready to be used in the project for AQ-42, AQ-14.3, and AQ-14.4.',
+      note: 'Ten supplied coral/rock candidates pass the offline contract; visual, collision and runtime integration require separate Root review.',
       assets: manifestEntries,
     },
     null,

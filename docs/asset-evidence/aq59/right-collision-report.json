@@ -1,0 +1,144 @@
+{
+  "schema": "rock-collision-review-v1",
+  "assetId": "live-rock-island-right",
+  "sourceSha256": "ab7b756344c6a0a879d254b6ca06a20c63c4246b0a19b76394cc532c61abfbee",
+  "boundsM": {
+    "min": [
+      -0.4678885042667389,
+      -0.012000000104308128,
+      -0.25136798620224
+    ],
+    "max": [
+      0.49856024980545044,
+      0.335999995470047,
+      0.26017624139785767
+    ]
+  },
+  "method": {
+    "name": "horizontal-band-exterior-prisms-v1",
+    "maxParts": 1,
+    "globalAssembledPartLimit": 32,
+    "minBandHeightM": 0.002,
+    "gapInsetM": 0.000001,
+    "axisX": 0,
+    "heightM": 0.08,
+    "probeAxisWithinSourceXY": true,
+    "probeRadiiM": [
+      0.02,
+      0.04,
+      0.06
+    ],
+    "probeInterpretation": "Fixed technical probes, not species or animated-fish envelopes",
+    "numericalAreaFloorM2": 1e-24,
+    "capsuleSafetyMarginM": 0.000001,
+    "sweptCubeContact": "closed-contact-is-unsafe; capsule-margin-also-required",
+    "maximumSourceTriangles": 100000,
+    "maximumCoordinateMagnitudeM": 1000,
+    "exhaustiveSelfIntersectionCheck": false
+  },
+  "topology": {
+    "exactPositionWeld": true,
+    "vertices": 12288,
+    "triangles": 24572,
+    "boundaryEdges": 0,
+    "nonManifoldEdges": 0,
+    "inconsistentEdges": 0,
+    "nonManifoldVertices": 0,
+    "degenerateTriangles": 0,
+    "duplicateFaces": 0,
+    "connectedComponents": 1,
+    "valid": true,
+    "exhaustiveSelfIntersectionCheck": false
+  },
+  "promotionStatus": "unavailable-pending-root-and-scene-review",
+  "status": "validated-offline",
+  "reason": "Independent surface/prism checks pass; Root and actual-scene review remain required",
+  "stoppedBy": "probe-targets-satisfied",
+  "bands": [
+    {
+      "low": -0.012000000104308128,
+      "high": 0.335999995470047
+    }
+  ],
+  "candidateParts": [
+    {
+      "id": "rock-part-01",
+      "boundsM": {
+        "min": [
+          -0.4678885042667389,
+          -0.012000000104308128,
+          -0.25136798620224
+        ],
+        "max": [
+          0.49856024980545044,
+          0.335999995470047,
+          0.26017624139785767
+        ]
+      }
+    }
+  ],
+  "coverage": {
+    "surfaceCovered": true,
+    "uncoveredTriangles": 0,
+    "uncoveredExamples": [],
+    "fullDepthPrismComplement": true,
+    "omittedPrisms": 0,
+    "boundaryCrossingPrisms": 0,
+    "exteriorPrismEndExtensionM": 0.000001,
+    "exteriorConnectedComplement": true,
+    "solidCoverageArgument": "Within the measured envelope, every omitted open prism continues along Z to known exterior beyond both source bounds. No boundary triangle enters its interior; a bounded closed-solid interpretation therefore cannot occupy it. This is conditional on the reported topology and does not certify absence of mesh self-intersections."
+  },
+  "probes": [
+    {
+      "radiusM": 0.02,
+      "startM": [
+        0,
+        0.08,
+        -0.35136798620223997
+      ],
+      "endM": [
+        0,
+        0.08,
+        0.36017624139785764
+      ],
+      "minimumMeshDistanceM": 0,
+      "exactMeshCapsuleSafe": false,
+      "exactMeshSweptCubeSafe": false,
+      "currentCubeInflatedAabbRouteSafe": false
+    },
+    {
+      "radiusM": 0.04,
+      "startM": [
+        0,
+        0.08,
+        -0.35136798620223997
+      ],
+      "endM": [
+        0,
+        0.08,
+        0.36017624139785764
+      ],
+      "minimumMeshDistanceM": 0,
+      "exactMeshCapsuleSafe": false,
+      "exactMeshSweptCubeSafe": false,
+      "currentCubeInflatedAabbRouteSafe": false
+    },
+    {
+      "radiusM": 0.06,
+      "startM": [
+        0,
+        0.08,
+        -0.35136798620223997
+      ],
+      "endM": [
+        0,
+        0.08,
+        0.36017624139785764
+      ],
+      "minimumMeshDistanceM": 0,
+      "exactMeshCapsuleSafe": false,
+      "exactMeshSweptCubeSafe": false,
+      "currentCubeInflatedAabbRouteSafe": false
+    }
+  ]
+}

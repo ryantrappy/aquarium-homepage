@@ -1,0 +1,69 @@
+{
+  "sourceSnapshotManifest": "snapshot.json",
+  "renderScriptSha256": "5ff381cce783763b27dd3241a77989561a6c855059110d8c7ec977a1cae5d52b",
+  "renderer": "Blender5.0.1 Cycles24samples 4threads 1000x750 orthographic AgX",
+  "textureReview": "Exact imported PBR textures, white area lights, neutral gray environment; no COLOR_0 present on imported rock. Temporary review floor at exported minimumY=-.012. Clay comparisons replace materials only in memory. No source save.",
+  "notes": "Imported topology has UV-seam duplication; welded geometric topology is reported independently. No exhaustive self-intersection certificate. No fish envelope or actual scene acceptance.",
+  "renders": [
+    {
+      "path": "renders/left-closeup.png",
+      "sha256": "db129a153e016c982110ea87a0feec40278c44713caf0e811d749bf89328c3a7",
+      "bytes": 985386
+    },
+    {
+      "path": "renders/left-front.png",
+      "sha256": "297f677e91ad7f6324c860327f5d24c280d0cfc74c195c36413bc7203d99faed",
+      "bytes": 778465
+    },
+    {
+      "path": "renders/left-neutral-front.png",
+      "sha256": "ca4230e2f138978baf5723a9fff11555edfe4dd55ba424c68ef960b7437e21c1",
+      "bytes": 625291
+    },
+    {
+      "path": "renders/left-neutral-oblique.png",
+      "sha256": "8891b2be89f4438766f067305bd2bd7e3f5846f8943015014567329de8507df2",
+      "bytes": 620957
+    },
+    {
+      "path": "renders/left-oblique.png",
+      "sha256": "cdea9587e2bdc30fbe55275d17a457cc119090815bcaf1ef0dd4964a9035d925",
+      "bytes": 829632
+    },
+    {
+      "path": "renders/left-top.png",
+      "sha256": "3d3deb1dea4ba911818448dd96010cbfca939dce98f6e57cb1ba150345710c99",
+      "bytes": 909417
+    },
+    {
+      "path": "renders/right-closeup.png",
+      "sha256": "2555bc222003dcc9b7d33662c192c8b7a15013c9a16b0a5976e285571bd667c6",
+      "bytes": 949463
+    },
+    {
+      "path": "renders/right-front.png",
+      "sha256": "f0e3197f29cfa6508d0eacc8c36e215d8386c9ed175b73eec6a43e35552c5e7e",
+      "bytes": 773056
+    },
+    {
+      "path": "renders/right-neutral-front.png",
+      "sha256": "8f138647e605eabd91e67ab7bc4eda4e3b9882865c6f6eeb89acff580fe124b8",
+      "bytes": 616781
+    },
+    {
+      "path": "renders/right-neutral-oblique.png",
+      "sha256": "f7e1f24fe5267a34a9a1d8ed18eb50955e1b308104664ab2ddc8d1a9309999ac",
+      "bytes": 608680
+    },
+    {
+      "path": "renders/right-oblique.png",
+      "sha256": "0cfe1761258a2bb58569d314a35fee6e41432c24137d0507bb2a2e08d7339bab",
+      "bytes": 809882
+    },
+    {
+      "path": "renders/right-top.png",
+      "sha256": "ce1ef98cc92e87fe526d101677540983b0ba503cb6ce9e6ff8092ccf8339d2fe",
+      "bytes": 913945
+    }
+  ]
+}
