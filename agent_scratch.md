@@ -89,3 +89,8 @@
 *Reviewed by Root — 2026-11-05: Current policy.*
 - User instruction: each task must be committed at the end of it so git history stays clean, granular, and traceable.
 - Agents must stage only files relevant to the completed task (never blanket stage or commit unrelated concurrent work) and use descriptive commit messages referencing the Backlog task ID (e.g. `feat(AQ-12): ...`, `fix(AQ-58): ...`, `docs(AQ-61): ...`).
+
+### 2026-11-05 — Backlog tasks created for review findings (AQ-63 through AQ-69)
+*Reviewed by Root — 2026-11-05: Actioned; 7 atomic tasks created in Backlog.*
+- Created AQ-63 (High - interaction picking desync), AQ-64 (Medium - inhabitant reconciliation), AQ-65 (Medium - shader double AO & turning rig cutoff), AQ-66 (High - thumbnail WebP & error handling), AQ-67 (High - mobile clearance search lock & obstacle caching), AQ-68 (Medium - telemetry hardening), AQ-69 (Low - dangling symlink & hygiene cleanup).
+- Documented in docs/code-review-findings.md; all 24 identified review items mapped to atomic tasks.
