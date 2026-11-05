@@ -1,0 +1,86 @@
+{
+  "source": "/tmp/aq-asset-review-20261104/src/rendering/assets/corals/live-rock-island-left.glb",
+  "sourceSha256": "2f90be064f3f5b15291dffd25a3ea00ec3ad3f212e8e232814daba8f456cfd6c",
+  "topologyAfterPositionWeldToleranceM": 1e-07,
+  "meshes": [
+    {
+      "name": "Live_Rock_Island_Left",
+      "verticesBeforeWeld": 13105,
+      "verticesAfterWeld": 12288,
+      "triangles": 24572,
+      "boundaryEdges": 0,
+      "nonmanifoldEdges": 0,
+      "eulerCharacteristic": 2
+    }
+  ],
+  "caveRows": [
+    {
+      "heightM": 0.002,
+      "clearWidthIntervalAt1mmResolutionM": [
+        -0.103,
+        0.103
+      ]
+    },
+    {
+      "heightM": 0.04,
+      "clearWidthIntervalAt1mmResolutionM": [
+        -0.087,
+        0.088
+      ]
+    },
+    {
+      "heightM": 0.08,
+      "clearWidthIntervalAt1mmResolutionM": [
+        -0.072,
+        0.072
+      ]
+    },
+    {
+      "heightM": 0.12,
+      "clearWidthIntervalAt1mmResolutionM": [
+        -0.054,
+        0.054
+      ]
+    },
+    {
+      "heightM": 0.16,
+      "clearWidthIntervalAt1mmResolutionM": [
+        -0.029,
+        0.031
+      ]
+    },
+    {
+      "heightM": 0.175,
+      "clearWidthIntervalAt1mmResolutionM": [
+        -0.014,
+        0.015
+      ]
+    }
+  ],
+  "axisPath": {
+    "xM": 0,
+    "heightM": 0.08,
+    "frontToBackM": [
+      -0.3,
+      0.3
+    ],
+    "stepM": 0.005,
+    "sampleCount": 121,
+    "rayBlocked": false,
+    "minimumSurfaceDistanceAtSamplesM": 0.06634345650672913,
+    "conservativeContinuousSurfaceClearanceM": 0.06384345650672912,
+    "note": "Distance-to-surface is 1-Lipschitz; subtract half the 5mm sampling step for this straight axis path. External sand is not included."
+  },
+  "boundsBlender": {
+    "min": [
+      -0.47622182965278625,
+      -0.25920674204826355,
+      -0.012000000104308128
+    ],
+    "max": [
+      0.4865860044956207,
+      0.2589026093482971,
+      0.375
+    ]
+  }
+}

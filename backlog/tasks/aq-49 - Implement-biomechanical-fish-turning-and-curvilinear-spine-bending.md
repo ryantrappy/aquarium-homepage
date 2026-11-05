@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@render-integration'
 created_date: '2026-11-04T19:20:00Z'
-updated_date: '2026-11-04T19:20:00Z'
+updated_date: '2026-11-05 03:12'
 labels: []
 dependencies:
   - AQ-35
@@ -55,3 +55,21 @@ Implement the biomechanical turning and curvilinear spine-bending plan documente
 3. In `src/rendering/scene/aquarium.ts`, cache rig bones on load and apply the post-mixer procedural spine bend (`turnCurvature` + `turnCurvatureDelayed`) and asymmetric left/right pectoral fin braking/rowing offsets per rig archetype (`subcarangiform_schooler` vs. `labriform_rigid_disc`), plus smooth cosine foreshortening for 2D fallback sprites.
 4. Add unit tests covering 180° reversal heading-velocity alignment, `turnCurvature` sign/decay, and collision safety.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Reverted experimental procedural bone turning overlays and motion modifications back to HEAD baseline per user direction due to broken pectoral fin rotations on the active fish rigs. Experimental turning logic and tests have been archived in docs/archive-modular-experiment/ for future investigation.
+
+Root audit AQ57, 2026-11-04: active motion.ts/aquarium.ts/motion.test.ts match 5031ca1. Rejected turning/fin overlays are not active. Worker made no source edits before interruption. AQ49.1 now inventories actual exported rigs before a new overlay design; Root must review bone axes, clip composition and visual motion before promotion. Existing waypoint-directed baseline still does not fulfill realistic-turning AC.
+<!-- SECTION:NOTES:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @root
+created: 2026-11-04 20:23
+---
+Root review 2026-11-04: prior checked criteria/DoD are not supported by current objective evidence. Translation still has a direct waypoint blend that allows lateral drift; route arrival is accepted within .025; sharp-turn pivot threshold is about 1.05 rad (~60°), below the required 65°; reversal tests allow forward alignment dot as low as .35 and include a tautological yaw assertion; there is no numeric integration against exact exported GLB bones and no new two-viewport evidence. Unchecking AC1-5 and DoD1-2 pending correction and review. I will reproduce meaningful failures before implementation and keep visual/browser responsiveness claims with Root.
+---
+<!-- COMMENTS:END -->

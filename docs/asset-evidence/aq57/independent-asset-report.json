@@ -1,0 +1,885 @@
+[
+  {
+    "assetId": "coral-acropora-staghorn",
+    "sha256": "629781835efee49bea46f109cfdeeef0ba434d94a8dc3bf33d769eb31f99c0ea",
+    "byteLength": 1582656,
+    "rootTransforms": [
+      {
+        "name": "Coral_Acropora_Staghorn"
+      }
+    ],
+    "sourceGeneratorHashMatches": true,
+    "sourceGeneratorSha256": "9b52281bf616a911a30b5c23515c0794a277c6383ef37db4dfd46505d4e07005",
+    "primitives": [
+      {
+        "id": "acropora_staghorn_colony",
+        "role": "coral-rigid",
+        "vertexCount": 18693,
+        "triangleCount": 23648,
+        "measuredBoundsM": {
+          "min": [
+            -0.09763641655445099,
+            -0.003000000026077032,
+            -0.09833954274654388
+          ],
+          "max": [
+            0.07693256437778473,
+            0.21805474162101746,
+            0.09583842754364014
+          ]
+        },
+        "mask": {
+          "accessorComponentType": 5123,
+          "normalized": true,
+          "positionCount": 18693,
+          "maskCount": 18693,
+          "allFiniteInRange": true,
+          "ranges": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.03799496452277409,
+              0.951995117112993
+            ],
+            [
+              0.14999618524452582,
+              1.0
+            ]
+          ],
+          "redDistinctValues": [
+            0.0
+          ],
+          "redZeroVertexCount": 18693,
+          "maxInspectionValueDifference": 0.0,
+          "inspectionCountMatches": true,
+          "minimumYVertices": {
+            "count": 65,
+            "nonzeroFlexCount": 0
+          }
+        }
+      }
+    ]
+  },
+  {
+    "assetId": "coral-acropora-table",
+    "sha256": "ad4c0f5d74fe4efe06f0faa7d57af4e61d8756952b63a54d6424675c9face10d",
+    "byteLength": 2236728,
+    "rootTransforms": [
+      {
+        "name": "Coral_Acropora_Table"
+      }
+    ],
+    "sourceGeneratorHashMatches": true,
+    "sourceGeneratorSha256": "327811b6c0af138bd0b979421ca8653262af9c2c975ea75747d67fa9724a7556",
+    "primitives": [
+      {
+        "id": "acropora_table_colony",
+        "role": "coral-rigid",
+        "vertexCount": 26665,
+        "triangleCount": 34176,
+        "measuredBoundsM": {
+          "min": [
+            -0.10860787332057953,
+            -0.0040000006556510925,
+            -0.07931537181138992
+          ],
+          "max": [
+            0.11434730142354965,
+            0.16889870166778564,
+            0.07645535469055176
+          ]
+        },
+        "mask": {
+          "accessorComponentType": 5123,
+          "normalized": true,
+          "positionCount": 26665,
+          "maskCount": 26665,
+          "allFiniteInRange": true,
+          "ranges": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.002105745021744106,
+              0.9982299534599832
+            ],
+            [
+              0.14999618524452582,
+              1.0
+            ]
+          ],
+          "redDistinctValues": [
+            0.0
+          ],
+          "redZeroVertexCount": 26665,
+          "maxInspectionValueDifference": 0.0,
+          "inspectionCountMatches": true,
+          "minimumYVertices": {
+            "count": 26,
+            "nonzeroFlexCount": 0
+          }
+        }
+      }
+    ]
+  },
+  {
+    "assetId": "coral-anemone-bta",
+    "sha256": "f587bdc3e94a75cefff1424abb250325d87f057cc9676daabfaef565bd6e81ef",
+    "byteLength": 1160328,
+    "rootTransforms": [
+      {
+        "name": "Anemone_Column_Disc"
+      },
+      {
+        "name": "Anemone_Tentacle_Crown"
+      }
+    ],
+    "sourceGeneratorHashMatches": true,
+    "sourceGeneratorSha256": "32e2fc2e3d54421b16ab0b2bafba7e34f35a871401689770d6c8d132c59bf740",
+    "primitives": [
+      {
+        "id": "anemone_column_disc",
+        "role": "coral-soft",
+        "vertexCount": 376,
+        "triangleCount": 640,
+        "measuredBoundsM": {
+          "min": [
+            -0.09057249873876572,
+            -0.017999999225139618,
+            -0.10558277368545532
+          ],
+          "max": [
+            0.10410843789577484,
+            0.049917783588171005,
+            0.08809544891119003
+          ]
+        },
+        "mask": {
+          "accessorComponentType": 5123,
+          "normalized": true,
+          "positionCount": 376,
+          "maskCount": 376,
+          "allFiniteInRange": true,
+          "ranges": [
+            [
+              0.0,
+              0.14000152590218967
+            ],
+            [
+              0.0,
+              0.6
+            ],
+            [
+              0.2500038147554742,
+              0.2500038147554742
+            ],
+            [
+              0.14999618524452582,
+              0.6800030518043794
+            ]
+          ],
+          "redDistinctValues": [
+            0.0,
+            0.009994659342336155,
+            0.020004577706569007,
+            0.03999389639124132,
+            0.05999847409781033,
+            0.08000305180437933,
+            0.14000152590218967
+          ],
+          "redZeroVertexCount": 126,
+          "maxInspectionValueDifference": 0.0,
+          "inspectionCountMatches": true,
+          "minimumYVertices": {
+            "count": 85,
+            "nonzeroFlexCount": 0
+          }
+        }
+      },
+      {
+        "id": "anemone_tentacle_crown",
+        "role": "coral-soft",
+        "vertexCount": 10452,
+        "triangleCount": 17160,
+        "measuredBoundsM": {
+          "min": [
+            -0.155954971909523,
+            0.02654198929667473,
+            -0.17363125085830688
+          ],
+          "max": [
+            0.15092109143733978,
+            0.12502548098564148,
+            0.15274715423583984
+          ]
+        },
+        "mask": {
+          "accessorComponentType": 5123,
+          "normalized": true,
+          "positionCount": 10452,
+          "maskCount": 10452,
+          "allFiniteInRange": true,
+          "ranges": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.005645838101777676,
+              0.9947203784237431
+            ],
+            [
+              0.220004577706569,
+              1.0
+            ]
+          ],
+          "redDistinctValues": [
+            0.0,
+            0.2,
+            0.420004577706569,
+            0.579995422293431,
+            0.6699931334401464,
+            0.7300068665598535,
+            0.779995422293431,
+            0.8299992370489052,
+            0.8800030518043793,
+            0.9400015259021897,
+            0.9850003814755475,
+            1.0
+          ],
+          "redZeroVertexCount": 1794,
+          "maxInspectionValueDifference": 0.0,
+          "inspectionCountMatches": true,
+          "minimumYVertices": {
+            "count": 4,
+            "nonzeroFlexCount": 0
+          }
+        }
+      }
+    ]
+  },
+  {
+    "assetId": "coral-brain-diploria",
+    "sha256": "904f471bb1a1094004b04294c4166ff309487f3333cea82e6105bf96ca1f100d",
+    "byteLength": 1408776,
+    "rootTransforms": [
+      {
+        "name": "Coral_Brain_Diploria"
+      }
+    ],
+    "sourceGeneratorHashMatches": true,
+    "sourceGeneratorSha256": "bb9ef5f2b4224de3f2758a2b5e41df6a9a8acae6b4b05b763a4c771b7840e166",
+    "primitives": [
+      {
+        "id": "diploria_brain_colony",
+        "role": "coral-soft",
+        "vertexCount": 6609,
+        "triangleCount": 12544,
+        "measuredBoundsM": {
+          "min": [
+            -0.12357743829488754,
+            -0.003000000026077032,
+            -0.11075800657272339
+          ],
+          "max": [
+            0.13213446736335754,
+            0.07915101200342178,
+            0.12357759475708008
+          ]
+        },
+        "mask": {
+          "accessorComponentType": 5123,
+          "normalized": true,
+          "positionCount": 6609,
+          "maskCount": 6609,
+          "allFiniteInRange": true,
+          "ranges": [
+            [
+              0.0,
+              0.04499885557335775
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.05000381475547418,
+              0.9499961852445258
+            ],
+            [
+              0.14999618524452582,
+              0.9923247119859617
+            ]
+          ],
+          "redDistinctValues": [
+            0.0,
+            1.5259021896696422e-05,
+            3.0518043793392844e-05,
+            4.5777065690089265e-05,
+            6.103608758678569e-05,
+            7.629510948348211e-05,
+            9.155413138017853e-05,
+            0.00010681315327687495,
+            0.00012207217517357137,
+            0.0001373311970702678,
+            0.00015259021896696422,
+            0.00016784924086366064,
+            0.00018310826276035706,
+            0.00019836728465705348,
+            0.0002136263065537499,
+            0.00022888532845044633,
+            0.00024414435034714275,
+            0.00025940337224383917,
+            0.0002746623941405356,
+            0.000289921416037232,
+            0.00030518043793392844,
+            0.00032043945983062486,
+            0.0003356984817273213,
+            0.0003509575036240177,
+            0.0003662165255207141,
+            0.00038147554741741054,
+            0.00039673456931410697,
+            0.0004119935912108034,
+            0.0004272526131074998,
+            0.00044251163500419623
+          ],
+          "redZeroVertexCount": 1771,
+          "maxInspectionValueDifference": 0.0,
+          "inspectionCountMatches": true,
+          "minimumYVertices": {
+            "count": 448,
+            "nonzeroFlexCount": 0
+          }
+        }
+      }
+    ]
+  },
+  {
+    "assetId": "coral-euphyllia-hammer",
+    "sha256": "6e1974d5f72ec3a898d84f559a5d4397a6002d8534387c47697452d6c2157fc8",
+    "byteLength": 1741436,
+    "rootTransforms": [
+      {
+        "name": "Euphyllia_Hammer_Polyp_Crown"
+      },
+      {
+        "name": "Euphyllia_Hammer_Skeleton"
+      }
+    ],
+    "sourceGeneratorHashMatches": true,
+    "sourceGeneratorSha256": "68d86057695f6799c1b0c8dc94331cf5aa2a52442717ee4a62a7c2165418a1da",
+    "primitives": [
+      {
+        "id": "euphyllia_hammer_polyp_crown",
+        "role": "coral-soft",
+        "vertexCount": 15232,
+        "triangleCount": 21760,
+        "measuredBoundsM": {
+          "min": [
+            -0.10085117071866989,
+            0.0794602632522583,
+            -0.08816701173782349
+          ],
+          "max": [
+            0.1018485352396965,
+            0.14707066118717194,
+            0.09000825136899948
+          ]
+        },
+        "mask": {
+          "accessorComponentType": 5123,
+          "normalized": true,
+          "positionCount": 15232,
+          "maskCount": 15232,
+          "allFiniteInRange": true,
+          "ranges": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.022171358815899902,
+              0.9976501106279088
+            ],
+            [
+              0.22400244144350348,
+              1.0
+            ]
+          ],
+          "redDistinctValues": [
+            0.0,
+            0.23999389639124133,
+            0.5000076295109483,
+            0.7199969481956207,
+            0.8,
+            0.8599984740978104,
+            0.9199969481956206,
+            0.9750057221332112,
+            1.0
+          ],
+          "redZeroVertexCount": 3128,
+          "maxInspectionValueDifference": 0.0,
+          "inspectionCountMatches": true,
+          "minimumYVertices": {
+            "count": 2,
+            "nonzeroFlexCount": 0
+          }
+        }
+      },
+      {
+        "id": "euphyllia_hammer_skeleton",
+        "role": "coral-rigid",
+        "vertexCount": 1538,
+        "triangleCount": 2352,
+        "measuredBoundsM": {
+          "min": [
+            -0.0848054364323616,
+            -0.0040000006556510925,
+            -0.08057881146669388
+          ],
+          "max": [
+            0.0866561233997345,
+            0.10641807317733765,
+            0.07047918438911438
+          ]
+        },
+        "mask": {
+          "accessorComponentType": 5123,
+          "normalized": true,
+          "positionCount": 1538,
+          "maskCount": 1538,
+          "allFiniteInRange": true,
+          "ranges": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05000381475547418,
+              0.35388723582818343
+            ],
+            [
+              0.14999618524452582,
+              0.820004577706569
+            ]
+          ],
+          "redDistinctValues": [
+            0.0
+          ],
+          "redZeroVertexCount": 1538,
+          "maxInspectionValueDifference": 0.0,
+          "inspectionCountMatches": true,
+          "minimumYVertices": {
+            "count": 61,
+            "nonzeroFlexCount": 0
+          }
+        }
+      }
+    ]
+  },
+  {
+    "assetId": "coral-euphyllia-torch",
+    "sha256": "e267292425df202d816b5f8a93336e2e5255962a87116f9cc8fd680ac260c022",
+    "byteLength": 2175012,
+    "rootTransforms": [
+      {
+        "name": "Euphyllia_Polyp_Crown"
+      },
+      {
+        "name": "Euphyllia_Skeleton"
+      }
+    ],
+    "sourceGeneratorHashMatches": true,
+    "sourceGeneratorSha256": "346e4d1eac641469b1abec8536b3da232722d4bdbc39ee89989d4816eabf6ab0",
+    "primitives": [
+      {
+        "id": "euphyllia_polyp_crown",
+        "role": "coral-soft",
+        "vertexCount": 16160,
+        "triangleCount": 23040,
+        "measuredBoundsM": {
+          "min": [
+            -0.13220535218715668,
+            0.08119919896125793,
+            -0.11648132652044296
+          ],
+          "max": [
+            0.13468076288700104,
+            0.1697666347026825,
+            0.12429870665073395
+          ]
+        },
+        "mask": {
+          "accessorComponentType": 5123,
+          "normalized": true,
+          "positionCount": 16160,
+          "maskCount": 16160,
+          "allFiniteInRange": true,
+          "ranges": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.003189135576409552,
+              0.9916227969787137
+            ],
+            [
+              0.2263981078812848,
+              1.0
+            ]
+          ],
+          "redDistinctValues": [
+            0.0,
+            0.2,
+            0.4399938963912413,
+            0.6599984740978103,
+            0.779995422293431,
+            0.8399938963912413,
+            0.9000076295109484,
+            0.9550011444266423,
+            0.9880064087891967,
+            1.0
+          ],
+          "redZeroVertexCount": 3040,
+          "maxInspectionValueDifference": 0.0,
+          "inspectionCountMatches": true,
+          "minimumYVertices": {
+            "count": 1,
+            "nonzeroFlexCount": 1
+          }
+        }
+      },
+      {
+        "id": "euphyllia_skeleton",
+        "role": "coral-rigid",
+        "vertexCount": 2037,
+        "triangleCount": 3192,
+        "measuredBoundsM": {
+          "min": [
+            -0.07845170050859451,
+            -0.006924783810973167,
+            -0.09183578938245773
+          ],
+          "max": [
+            0.09037768840789795,
+            0.11999999731779099,
+            0.07930568605661392
+          ]
+        },
+        "mask": {
+          "accessorComponentType": 5123,
+          "normalized": true,
+          "positionCount": 2037,
+          "maskCount": 2037,
+          "allFiniteInRange": true,
+          "ranges": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.002990768291752499,
+              0.46718547341115435
+            ],
+            [
+              0.14999618524452582,
+              0.820004577706569
+            ]
+          ],
+          "redDistinctValues": [
+            0.0
+          ],
+          "redZeroVertexCount": 2037,
+          "maxInspectionValueDifference": 0.0,
+          "inspectionCountMatches": true,
+          "minimumYVertices": {
+            "count": 9,
+            "nonzeroFlexCount": 0
+          }
+        }
+      }
+    ]
+  },
+  {
+    "assetId": "coral-montipora-plate",
+    "sha256": "87f4e1052e44f29b27b948f9c9f45cae42855c1948fdf8ee519ea7c70ae21252",
+    "byteLength": 666680,
+    "rootTransforms": [
+      {
+        "name": "Coral_Montipora_Plate"
+      }
+    ],
+    "sourceGeneratorHashMatches": true,
+    "sourceGeneratorSha256": "c624b9254d80bd02d78f85f894896e5f418f25c4a7c536974a6440e7dd7dbf67",
+    "primitives": [
+      {
+        "id": "montipora_plate_colony",
+        "role": "coral-rigid",
+        "vertexCount": 2830,
+        "triangleCount": 4560,
+        "measuredBoundsM": {
+          "min": [
+            -0.10531467199325562,
+            -0.0040000006556510925,
+            -0.11708783358335495
+          ],
+          "max": [
+            0.12505121529102325,
+            0.09305692464113235,
+            0.12361803650856018
+          ]
+        },
+        "mask": {
+          "accessorComponentType": 5123,
+          "normalized": true,
+          "positionCount": 2830,
+          "maskCount": 2830,
+          "allFiniteInRange": true,
+          "ranges": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.05000381475547418,
+              0.9643701838712139
+            ],
+            [
+              0.14999618524452582,
+              1.0
+            ]
+          ],
+          "redDistinctValues": [
+            0.0
+          ],
+          "redZeroVertexCount": 2830,
+          "maxInspectionValueDifference": 0.0,
+          "inspectionCountMatches": true,
+          "minimumYVertices": {
+            "count": 61,
+            "nonzeroFlexCount": 0
+          }
+        }
+      }
+    ]
+  },
+  {
+    "assetId": "coral-zoanthid-mat",
+    "sha256": "a60d91258fcf9a64d43a628dbe0f4027a91a1fce73104153d7f3ea424cc2463d",
+    "byteLength": 874704,
+    "rootTransforms": [
+      {
+        "name": "Coral_Zoanthid_Mat"
+      }
+    ],
+    "sourceGeneratorHashMatches": true,
+    "sourceGeneratorSha256": "431cb1d3856022952cdae9fbda0cc5338f63f10f945c83f44d9bb62341237d88",
+    "primitives": [
+      {
+        "id": "zoanthid_button_cluster",
+        "role": "coral-soft",
+        "vertexCount": 10543,
+        "triangleCount": 18600,
+        "measuredBoundsM": {
+          "min": [
+            -0.11717460304498672,
+            -0.003000000026077032,
+            -0.08050967752933502
+          ],
+          "max": [
+            0.12727896869182587,
+            0.03937522694468498,
+            0.0931495949625969
+          ]
+        },
+        "mask": {
+          "accessorComponentType": 5123,
+          "normalized": true,
+          "positionCount": 10543,
+          "maskCount": 10543,
+          "allFiniteInRange": true,
+          "ranges": [
+            [
+              0.0,
+              0.6500038147554742
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.00643930724040589,
+              0.9766536964980544
+            ],
+            [
+              0.14999618524452582,
+              1.0
+            ]
+          ],
+          "redDistinctValues": [
+            0.0,
+            0.013000686655985352,
+            0.019501029983978027,
+            0.020004577706569007,
+            0.029999237048905166,
+            0.03250171663996338,
+            0.039002059967956054,
+            0.05000381475547418,
+            0.05999847409781033,
+            0.10400549324788282,
+            0.16000610360875867,
+            0.2925001907377737,
+            0.4225070572976272,
+            0.4500038147554742,
+            0.6500038147554742
+          ],
+          "redZeroVertexCount": 2145,
+          "maxInspectionValueDifference": 0.0,
+          "inspectionCountMatches": true,
+          "minimumYVertices": {
+            "count": 77,
+            "nonzeroFlexCount": 0
+          }
+        }
+      }
+    ]
+  },
+  {
+    "assetId": "live-rock-island-left",
+    "sha256": "2f90be064f3f5b15291dffd25a3ea00ec3ad3f212e8e232814daba8f456cfd6c",
+    "byteLength": 3559632,
+    "rootTransforms": [
+      {
+        "name": "Live_Rock_Island_Left"
+      }
+    ],
+    "sourceGeneratorHashMatches": true,
+    "sourceGeneratorSha256": "e725024a01c07e09267258a1c9a3e2f28b6fbd07f03eef8cadb84a68c8437eed",
+    "primitives": [
+      {
+        "id": "live_rock_island_left",
+        "role": "rock",
+        "vertexCount": 13105,
+        "triangleCount": 24572,
+        "measuredBoundsM": {
+          "min": [
+            -0.47622182965278625,
+            -0.012000000104308128,
+            -0.2589026093482971
+          ],
+          "max": [
+            0.4865860044956207,
+            0.375,
+            0.25920674204826355
+          ]
+        },
+        "materialHasOcclusionTexture": true,
+        "collisionProxyVertexCoverage": {
+          "proxyCount": 3,
+          "uncoveredVertexCount": 1679,
+          "uncoveredExamples": [
+            [
+              -0.11637334525585175,
+              0.08302615582942963,
+              0.244855597615242
+            ],
+            [
+              -0.11637334525585175,
+              0.08302615582942963,
+              0.244855597615242
+            ],
+            [
+              -0.11645801365375519,
+              0.08734293282032013,
+              0.2371761053800583
+            ],
+            [
+              -0.11653923243284225,
+              0.09197759628295898,
+              0.22952044010162354
+            ],
+            [
+              -0.1166112869977951,
+              0.09690384566783905,
+              0.22187373042106628
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "assetId": "live-rock-island-right",
+    "sha256": "68337f7733b782f374efa0ea051138344a17fe6139be14ab4efa95f34eb2d4d6",
+    "byteLength": 3553424,
+    "rootTransforms": [
+      {
+        "name": "Live_Rock_Island_Right"
+      }
+    ],
+    "sourceGeneratorHashMatches": true,
+    "sourceGeneratorSha256": "e725024a01c07e09267258a1c9a3e2f28b6fbd07f03eef8cadb84a68c8437eed",
+    "primitives": [
+      {
+        "id": "live_rock_island_right",
+        "role": "rock",
+        "vertexCount": 12980,
+        "triangleCount": 24572,
+        "measuredBoundsM": {
+          "min": [
+            -0.45390427112579346,
+            -0.012000000104308128,
+            -0.24525396525859833
+          ],
+          "max": [
+            0.46703436970710754,
+            0.3149999976158142,
+            0.25130102038383484
+          ]
+        },
+        "materialHasOcclusionTexture": true,
+        "collisionProxyVertexCoverage": {
+          "proxyCount": 1,
+          "uncoveredVertexCount": 0,
+          "uncoveredExamples": []
+        }
+      }
+    ]
+  }
+]

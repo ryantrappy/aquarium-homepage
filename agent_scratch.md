@@ -1,65 +1,39 @@
 <!-- Keep this header. Append brief handoff notes below, newest at the bottom, and trim stale entries when resolved. -->
 <!-- Keep roughly the last 5 entries or ~100 lines max. Summarize what changed, verification run, and what remains. -->
 
-### 2026-11-04 — Handoff: real service-link shortcuts
+### 2026-11-04 — Local-first delivery policy
+*Reviewed by Root — 2026-11-04: Current policy.*
+- User: do not worry about deployment until the aquarium works well locally. Commit/push reviewed milestones; the user handles deployment. No incremental server deployments.
 
-*Reviewed by Root and Gemini — 2026-11-04: Actioned into AQ56 for bounded link testing, separate from final mappings in AQ8. Connected Mintlify source read recovered documented candidates; native aquarium navigation remains pending browser access. No configuration changed.*
-- Next agent: review https://docs.ryantr.app/overview#service-links and create a Backlog task to replace the current nonworking `trappserv.er:port` shortcut URLs with real documented service links. Choose only a few links for initial testing; leave other examples unchanged until individually verified. Test selected destinations from the aquarium and record observed results.
-- Related existing task: AQ-8 tracks review of the final service list and mappings with the user; coordinate scope and avoid presenting unconfirmed URLs as verified. The earlier attempted task creation failed; Root has now created AQ56 and recorded the source-access result there.
+### 2026-11-04 — Service shortcuts and livelier-background requests
+*Reviewed by Root — 2026-11-04: Actioned; AQ8 final user-approved roster is implemented.*
+- Service-link handoff: review https://docs.ryantr.app/overview#service-links; choose only a few documented links, test from aquarium and leave other examples unchanged until verified.
+- AQ56 and AQ8/AQ8.1 are Done. User approved Komodo, WatchMyBirds, Paperless, Home Assistant and Ombi; defaults and saved local configuration now match. Komodo/Ombi reached login, WatchMyBirds its titled page, HA a connection error, Paperless Authelia. No sign-ins or health claims.
+- Background handoff: use original design as reference; compare current scene before defining work, retaining sharp front-on tank perspective. AQ14.5 comparison is Done. Actual restoration AQ14.6 is To Do, dependent on accepted assembly AQ14.4; ambient motion remains AQ14.2.
 
-### 2026-11-04 — Handoff: restore a livelier aquarium background
-- Next agent: create a Backlog task to make the aquarium background more lively, using the original design as the visual reference. Review the original design and current scene before defining the change; retain the sharp, front-on reef tank and habitat perspective required by project guidance.
+### 2026-11-04 — Supplied assets and accepted framework
+*Reviewed by Root — 2026-11-04: Current candidate baseline; promotion pending. Earlier asset delivery and framework/socket entries inspected and consolidated here.*
+- Preserve eight corals/two rocks under src/rendering/assets/corals and six fish under src/rendering/assets/fish, with their modeling generators/manifests. These supplied assets are candidates, not Root-approved production art. Do not create competing visual models.
+- Useful retained changes: raw linear coral flexibility masks, FLOAT_COLOR authoring, rigid zero validation without clamping, real rock arch and measured mounts. Exact current sockets pass 12 left / 11 right; masks match actual exported arrays. Reports: docs/asset-evidence/aq57/.
+- Rock silhouette/materials fail Root visual review (AQ59). Hard-coded cave collision boxes missed 1679 vertices; Root withdrew those declarations (AQ58). Actual dimensions differ from supplied prose. AQ14.3/AQ42/AQ14.4 remain gated.
+- AQ55 extension framework remains Done and empty by default. It does not prove new behavior, fish articulation, turning or asset acceptance. AQ35 is Done after Root verified all15 frozen typed profiles and real adapter motion/depth/speed traces. This does not close lifelike animation, turning or final scene work. AQ51/AQ52 are Done for exact cave geometry and measured socket evidence; art and integration remain gated.
 
-### In the future do not worry about having it deployed until it is working well locally. I can handle the deployments once it is pushed. I want to ensure that everything is working before we worry about incremental deployments
+### 2026-11-04 — Rejected runtime experiments and audit
+*Reviewed by Root — 2026-11-04: Actioned into AQ57; earlier Gemini polish, sand/texture and runtime-reversion reports inspected. Experimental completion claims are superseded.*
+- Active scene, motion/tests, habitat data/derivation and build script match reviewed HEAD5031ca1. Broken fin overlays, modular promotion, rock wallpaper/glow and cadence experiments are absent. Baseline still needs realistic turns and final art; do not claim completion.
+- Prior AQ49/assembly/background checkmarks were withdrawn. AQ49 is To Do; inventory AQ49.1 is Done: eight exact rigs /174 channels, all numbered spine/pectoral joints rotation-animated, no axes/anatomy inferred.
+- Root quarantined untracked rejected source copies and two unused public rock textures outside the repo. Recovery archive: /tmp/aquarium-agent-audit-20261104/. Audit/dispositions: docs/agent-change-audit.md.
+- Verified: 142 tests, typecheck, isolated build; native baseline at1440x900/402x874 scale1, dialogs/pause/resume and native links. No captured console errors. No claim of realistic-turn completion or new full reduced-motion audit.
 
-*Reviewed by Root — 2026-11-04: Retained as policy: work locally; user handles deployment after reviewed pushes.*
+### 2026-11-04 — Continuous backlog work and bounded delegation
+*Reviewed by Root — 2026-11-04: Current user direction. All scratch entries were inspected; reviewed never means automatically completed.*
+- User: keep working with subagents until every task is complete; project is not complete while tasks remain. Audit/revert unhelpful changes and explicitly break out small tasks labeled easy.
+- Five easy packets exist: AQ49.1 rig inventory (Done), AQ52.1 socket freshness (Done), AQ42.1 manifest consistency (Done), AQ17.1 network API (Done), AQ8.1 service mapping sheet (Done). AQ15.1 method guard and AQ16.1 weighted disk math are also Done; AQ16.2 adapter is Done after Root review; medium-priority work is parked. Each has narrow file boundaries and objective evidence requirements.
+- Root owns shared handoff/scratch, main-scene review and Done. Workers record plans/evidence/review iterations in Backlog CLI; no broad model, renderer or configuration edits outside assigned scope. Root review is required before any task becomes Done.
 
-## Finished Modular Coral & Live-Rock Assets Ready for Project Integration (`AQ-42`, `AQ-14.3`, `AQ-14.4`)
-
-*Reviewed by Root — 2026-11-04: Actioned as supplied asset baseline; exact-export review findings are routed to Gemini in modeling-tagged AQ51, AQ52 and AQ53. No Codex model edits made; integration readiness remains under review.*
-
-All **8 modular coral colonies** and **2 bare live-rock island foundations** have been built in Blender 5.0.1 (`--threads 4 -b`), visually verified across 4 Cycles inspection views each (`/tmp/coral-models/renders/`), stamped with in-band `extras.reefAsset` / `extras.reefPrimitive` / `extras.reefSocket` metadata (`src/rendering/modeling/package_modular_corals.mjs`), validated with `validateAssetContract` from `src/rendering/assets/contract.ts`, and placed in `src/rendering/assets/corals/` (`src/rendering/assets/corals/manifest.json` and `src/rendering/assets/corals/README.md`). **Use these finished pieces directly in the project for `AQ-42`, `AQ-14.3`, and `AQ-14.4`:**
-
-- `src/rendering/assets/corals/coral-euphyllia-torch.glb` (`tentaculate-lps`, *Euphyllia glabrescens*, `26,232` tris, `euphyllia_skeleton` `coral-rigid` + `euphyllia_polyp_crown` `coral-soft`, generator: `src/rendering/modeling/build_euphyllia_torch.py`)
-- `src/rendering/assets/corals/coral-euphyllia-hammer.glb` (`tentaculate-lps`, *Euphyllia ancora / parancora*, `24,112` tris, `euphyllia_hammer_skeleton` `coral-rigid` + `euphyllia_hammer_polyp_crown` `coral-soft`, generator: `src/rendering/modeling/build_euphyllia_hammer.py`)
-- `src/rendering/assets/corals/coral-acropora-table.glb` (`branching-sps`, *Acropora hyacinthus / millepora*, `34,176` tris, `acropora_table_colony` `coral-rigid`, generator: `src/rendering/modeling/build_acropora_table.py`)
-- `src/rendering/assets/corals/coral-acropora-staghorn.glb` (`branching-sps`, *Acropora formosa / cervicornis*, `23,648` tris, `acropora_staghorn_colony` `coral-rigid`, generator: `src/rendering/modeling/build_acropora_staghorn.py`)
-- `src/rendering/assets/corals/coral-montipora-plate.glb` (`plating-sps`, *Montipora capricornis*, `4,560` tris, `montipora_plate_colony` `coral-rigid`, generator: `src/rendering/modeling/build_montipora_plate.py`)
-- `src/rendering/assets/corals/coral-brain-diploria.glb` (`mounded-lps`, *Diploria / Symphyllia*, `12,544` tris, `diploria_brain_colony` `coral-soft` with `R <= 0.045`, generator: `src/rendering/modeling/build_brain_coral.py`)
-- `src/rendering/assets/corals/coral-anemone-bta.glb` (`host-anemone`, *Entacmaea quadricolor*, `17,800` tris, `anemone_column_disc` + `anemone_tentacle_crown` `coral-soft`, generator: `src/rendering/modeling/build_bubble_tip_anemone.py`)
-- `src/rendering/assets/corals/coral-zoanthid-mat.glb` (`zoanthid-mat`, *Zoanthus sp.*, `18,600` tris, `zoanthid_button_cluster` `coral-soft`, generator: `src/rendering/modeling/build_zoanthid_mat.py`)
-- `src/rendering/assets/corals/live-rock-island-left.glb` (`rock`, left arched reef bommie foundation, `0.83 m × 0.51 m × 0.40 m`, `16,384` tris, 12 `socket_*` coral mount empties, `aoSource: "texture"`, generator: `src/rendering/modeling/build_live_rock_islands.py`)
-- `src/rendering/assets/corals/live-rock-island-right.glb` (`rock`, right terraced shelf reef foundation, `0.78 m × 0.39 m × 0.35 m`, `16,384` tris, 11 `socket_*` coral mount empties, `aoSource: "texture"`, generator: `src/rendering/modeling/build_live_rock_islands.py`)
-
-### 2026-11-04 — Biomechanical Fish Turning & Curvilinear Spine-Bending Plan (`AQ-49` / `AQ-12`)
-*Reviewed by Root and fish_framework — 2026-11-04: AQ49 turning changes are present locally and still need separate Root review; AQ55 framework acceptance does not approve this motion/visual work.*
-- **User Direction**: Fix the lack of realism when a fish turns around or changes direction.
-- **Root Causes Found in `src/rendering/scene/motion.ts` & `aquarium.ts`**:
-  1. `integrateSwimmingFish()` (`motion.ts` line 70) translates position along `(dx/remaining, dy/remaining, dz/remaining)` while `fish.yaw` rotates separately—causing fish to crab-slide sideways/backward when a new waypoint is behind them.
-  2. `aquarium.ts` (`line 118`) only rotates `item.root.rotation` as a rigid block over a straight-ahead swim clip—the spine never bends into the turn (`turnCurvature = 0`) and pectoral fins beat symmetrically during pivots.
-  3. Waypoints switch abruptly at `remaining < 0.025` with no corner lookahead filleting, and 2D fallback sprites flip `scale.x` in a single frame.
-- **Created Spec & High-Priority Task**:
-  - Wrote [`docs/fish-turning-and-maneuvering-plan.md`](docs/fish-turning-and-maneuvering-plan.md).
-  - Created [`backlog/tasks/aq-49 - Implement-biomechanical-fish-turning-and-curvilinear-spine-bending.md`](backlog/tasks/aq-49%20-%20Implement-biomechanical-fish-turning-and-curvilinear-spine-bending.md) (`priority: high`, `ordinal: 19500`, child of `AQ-12`) covering heading-locked translation, lookahead corner filleting, two-stage `brake-pivot` -> `exit-stroke` reversals, post-mixer procedural spine/pectoral turn overlays in `aquarium.ts`, and smoothed 2D fallback turn foreshortening.
-
-## 2026-11-04 — Finished Rigged & Animated 3D Reef Fish Models Ready for Project Integration (`AQ-18`, `AQ-19`, `AQ-20`, `AQ-21`, `AQ-22`, `AQ-26`)
-
-*Reviewed by Root — 2026-11-04: Supplied six-model fish library acknowledged for integration; preserve Gemini visual assets and verify current exports before use. Pending the current AQ55 framework review and existing priority gates; no model promotion or species-completion claim from this note alone.*
-
-All **6 rigged and animated 3D reef fish species models** have been built in Blender 5.0.1 (`--threads 4 -b`), visually verified across `side`, `oblique`, `front`, and `top` Cycles views (`/tmp/fish-models/renders/`), stamped with in-band `extras.reefAsset` (`kind: "fish"`) and `extras.reefPrimitive` (`role: "fish"`) metadata (`src/rendering/modeling/package_modular_fish.mjs`), validated with `validateAssetContract` from `src/rendering/assets/contract.ts`, and placed in `src/rendering/assets/fish/` (`src/rendering/assets/fish/manifest.json` and `src/rendering/assets/fish/README.md`). **Use these finished fish assets directly in the project (`src/rendering/scene/aquarium.ts`):**
-
-- `src/rendering/assets/fish/fish-ocellaris-clownfish.glb` (`ocellaris-clownfish`, *Amphiprion ocellaris*, `subcarangiform_schooler`, `16,534` tris, 7 joints, clip `clownfish_subcarangiform_swim`, generator: `src/rendering/modeling/build_clownfish.py`)
-- `src/rendering/assets/fish/fish-yellow-tang.glb` (`yellow-tang`, *Zebrasoma flavescens*, `labriform_rigid_disc`, `17,226` tris, 7 joints, clip `yellow_tang_labriform_swim`, generator: `src/rendering/modeling/build_yellow_tang.py`)
-- `src/rendering/assets/fish/fish-blue-tang.glb` (`blue-tang`, *Paracanthurus hepatus*, `labriform_cruiser`, `16,866` tris, 7 joints, clip `blue_tang_labriform_swim`, generator: `src/rendering/modeling/build_blue_tang.py` — provides the 3D rigged model for the default Jellyfin service in `EXAMPLE_SERVICES`)
-- `src/rendering/assets/fish/fish-royal-gramma.glb` (`royal-gramma`, *Gramma loreto*, `subcarangiform_schooler`, `15,118` tris, 7 joints, clip `royal_gramma_subcarangiform_swim`, generator: `src/rendering/modeling/build_royal_gramma.py`)
-- `src/rendering/assets/fish/fish-banggai-cardinalfish.glb` (`banggai-cardinalfish`, *Pterapogon kauderni*, `banner_hoverer`, `15,692` tris, 7 joints, clip `banggai_banner_hover_swim`, generator: `src/rendering/modeling/build_banggai_cardinalfish.py`)
-- `src/rendering/assets/fish/fish-mandarin-dragonet.glb` (`mandarin-dragonet`, *Synchiropus splendidus*, `benthic_percher_dragonet`, `15,460` tris, 7 joints, clip `mandarin_dragonet_hover_swim`, generator: `src/rendering/modeling/build_mandarin_dragonet.py`)
-
-### 2026-11-04 — Root reviewed framework and socket inspection checkpoint
-
-*Reviewed by Root — 2026-11-04: AQ55 actioned and Done; AQ52 remains In Progress with measured evidence; visual/model integration stays separately gated.*
-- AQ55 adds empty-by-default behavior/animation extension hooks with default → species → individual add/replace/disable resolution, isolated state, identity checks, frozen snapshots and robust cleanup. No new behavior or animation content is shipped. Details: docs/behavior-runtime-contract.md.
-- Root verified isolated scaffold 131 tests/typecheck/production build, combined working tree 133 tests/typecheck, and exact old/default movement traces for all15 species. Native CUA/browser access failed; HTTP smoke passed with native links/controls. No new viewport/WebGL review is claimed.
-- AQ52 independent exported-geometry checker and reports are in src/rendering/assets/socket-inspector.ts and docs/asset-evidence/. Current left12/right11 socket intents fail the documented conservative support settings; original source assets are unchanged. Packaging still needs measured-evidence adoption before AQ52 Done.
-- AQ49 now names biomechanical turning. Backlog doctor moved the old master-handoff task to AQ54 after a duplicate ID collision. Turning changes and the six-model fish delivery remain separate from Root framework acceptance.
-- Startup/resume rule: read every scratch entry before choosing work and add a dated disposition. Reviewed means inspected, not necessarily completed. Resolved historical checkpoints were trimmed here; their evidence remains in Backlog and AGENT_TASKS.md.
+### 2026-11-04 — Ownership, priority and 3D collision iteration
+*Reviewed by Root — 2026-11-04: Current policy; collision work pending and actively assigned.*
+- Another agent owns coral assets, generators, materials, packager, manifests, READMEs and renderer work. Preserve and exclude those paths from Root commits; no competing visual models.
+- Follow High Kanban priority/dependencies; finish the already-started AQ16.2 review, then keep the active lane on AQ58. AQ59 remains the user/Gemini modeling lane.
+- User: collision must handle a genuine3D environment. AQ34 already requires this; AQ58 contains the focused investigation and implementation iteration. Full-depth band boxes are comparison baseline only. Investigate exact arbitrary-direction swept-volume mesh checks and a bounded3D planner preserving caves, overhangs and depth gaps.
+- User: finish work and iterate toward consistent improvement; avoid proliferating open tasks. Keep this in AQ58/AQ34, close verified bounded slices, and keep unmet scene/fish-envelope criteria explicit.
