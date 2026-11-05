@@ -1,96 +1,40 @@
 <!-- Keep this header. Append brief handoff notes below, newest at the bottom, and trim stale entries when resolved. -->
 <!-- Keep roughly the last 5 entries or ~100 lines max. Summarize what changed, verification run, and what remains. -->
 
-### 2026-11-04 — Local-first delivery policy
-*2026-11-05 resume review — Root: Current policy; continue in Kanban order with bounded delegation, local-only delivery and Gemini research routing.*
-*Reviewed by Root — 2026-11-04: Current policy.*
-- User: do not worry about deployment until the aquarium works well locally. Commit/push reviewed milestones; the user handles deployment. No incremental server deployments.
+### 2026-11-05 — Standing user policy
+*Root goal restart review2026-11-05: Current policy.*
+- Local-first: per-task scoped commits, push reviewed milestones, user deploys on trappserv.er. Never deploy or blanket stage.
+- Continue all open Backlog tasks with bounded subagents and Root review. Project remains incomplete while any task is unmet. Keep user-choice/external-capability blockers explicit.
+- Use only1440x900 and402x874 CSS scale1 for responsive verification. Preserve Gemini visual work; no competing model generation. Long-form research goes to gemini-research.
+- Prior entries reviewed and consolidated: Local-first delivery policy; Continuous backlog work and bounded delegation; Planning-agent research routing; Per-task Git commit instruction — all current policy.
 
-### 2026-11-04 — Service shortcuts and livelier-background requests
-*2026-11-05 resume review — Root: Actioned service roster; background implementation remains pending its existing gates.*
-*Reviewed by Root — 2026-11-04: Actioned; AQ8 final user-approved roster is implemented.*
-- Service-link handoff: review https://docs.ryantr.app/overview#service-links; choose only a few documented links, test from aquarium and leave other examples unchanged until verified.
-- AQ56 and AQ8/AQ8.1 are Done. User approved Komodo, WatchMyBirds, Paperless, Home Assistant and Ombi; defaults and saved local configuration now match. Komodo/Ombi reached login, WatchMyBirds its titled page, HA a connection error, Paperless Authelia. No sign-ins or health claims.
-- Background handoff: use original design as reference; compare current scene before defining work, retaining sharp front-on tank perspective. AQ14.5 comparison is Done. Actual restoration AQ14.6 is To Do, dependent on accepted assembly AQ14.4; ambient motion remains AQ14.2.
+### 2026-11-05 — Supplied assets, modeling and collision gates
+*Root goal restart review2026-11-05: Pending art, animated envelope and assembled-scene acceptance.*
+- Preserve supplied corals/rocks/fish and uncommitted splat-fish script/assets plus13model URL/axis entries. Those current candidates are not Root-approved production art.
+- AQ-59 stays in Gemini modeling lane. Runtime material improvement does not fix or accept flat summit/mesa silhouettes. Existing arch and23mount measurements remain useful.
+- AQ-58 exact3D query/planner and metric adapter are reviewed technical slices; actual main uses legacy units and conservative band/canopy boxes. Fixed20/40/60mm cave probes are not animated fish envelopes.
+- Existing clean-pose player was present but not installed in main; new integration is under review. Six clip-only sphere studies do not certify procedural overlays or main-scene geometry.
+- Prior entries reviewed and consolidated: Supplied assets and accepted framework; Ownership, priority and3Dcollision iteration; Completed checkpoint and isolated collision integration; Resumed reviewed collision checkpoint; User confirms coral handoff finished — remaining gates pending, historical isolation/handoff actioned.
 
-### 2026-11-04 — Supplied assets and accepted framework
-*2026-11-05 resume review — Root: Pending remaining modeling, envelope and scene acceptance; isolated collision implementation continues without overwriting shared work.*
-*Reviewed by Root — 2026-11-04: Current candidate baseline; promotion pending. Earlier asset delivery and framework/socket entries inspected and consolidated here.*
-- Preserve eight corals/two rocks under src/rendering/assets/corals and six fish under src/rendering/assets/fish, with their modeling generators/manifests. These supplied assets are candidates, not Root-approved production art. Do not create competing visual models.
-- Useful retained changes: raw linear coral flexibility masks, FLOAT_COLOR authoring, rigid zero validation without clamping, real rock arch and measured mounts. Exact current sockets pass 12 left / 11 right; masks match actual exported arrays. Reports: docs/asset-evidence/aq57/.
-- Rock silhouette/materials fail Root visual review (AQ59). Hard-coded cave collision boxes missed 1679 vertices; Root withdrew those declarations (AQ58). Actual dimensions differ from supplied prose. AQ14.3/AQ42/AQ14.4 remain gated.
-- AQ55 extension framework remains Done and empty by default. It does not prove new behavior, fish articulation, turning or asset acceptance. AQ35 is Done after Root verified all15 frozen typed profiles and real adapter motion/depth/speed traces. This does not close lifelike animation, turning or final scene work. AQ51/AQ52 are Done for exact cave geometry and measured socket evidence; art and integration remain gated.
+### 2026-11-05 — Reviewed and pushed milestone
+*Root goal restart review2026-11-05: Actioned for the named task slices; remaining project work pending.*
+- Branch milestone/modular-reef-and-agent-framework pushed through b994682. Closed AQ-37,63,66,67,68 after objective evidence and Root review, with scoped task commits.
+- AQ-37 report corrected unsupported extent and hypothetical bind/shearing claims; selective-adaptation recommendation is bounded research, not model promotion.
+- AQ-63 native context/camera guard and AQ-67 immutable clearance cache pass independent tests; all5starter fish move safely through exact phone habitat. Original240ms position allegation was false.
+- AQ-66 all15WebPs max65764bytes; four original PNGs archived unchanged. Bounded512px masks; blocked image leaves usable native label. AQ-68 production HEAD/405/headerless-write403 proven without config writes.
+- Exact-size PNG evidence replaced clipped JPEG screenshot outputs (corrections9ca488d/5d6fc47). Reports under docs/asset-evidence/aq63/ and aq66/.
+- Prior Service shortcuts/livelier-background request reviewed: service roster actioned; background14.6/14.2 still pending accepted scene. Earlier Rejected runtime experiments/audit checkpoint remains historical, not a current source equality claim.
 
-### 2026-11-04 — Rejected runtime experiments and audit
-*2026-11-05 resume review — Root: Superseded as a current-source claim; retained historical audit evidence. Subsequent shared runtime edits remain pending review.*
-*Reviewed by Root — 2026-11-04: AQ57 audit actioned. Baseline equality below is historical; subsequent external runtime changes are pending review as recorded below.*
-- Active scene, motion/tests, habitat data/derivation and build script match reviewed HEAD5031ca1. Broken fin overlays, modular promotion, rock wallpaper/glow and cadence experiments are absent. Baseline still needs realistic turns and final art; do not claim completion.
-- Prior AQ49/assembly/background checkmarks were withdrawn. AQ49 is To Do; inventory AQ49.1 is Done: eight exact rigs /174 channels, all numbered spine/pectoral joints rotation-animated, no axes/anatomy inferred.
-- Root quarantined untracked rejected source copies and two unused public rock textures outside the repo. Recovery archive: /tmp/aquarium-agent-audit-20261104/. Audit/dispositions: docs/agent-change-audit.md.
-- Verified: 142 tests, typecheck, isolated build; native baseline at1440x900/402x874 scale1, dialogs/pause/resume and native links. No captured console errors. No claim of realistic-turn completion or new full reduced-motion audit.
+### 2026-11-05 — Active implementation and review
+*Root review2026-11-05: Pending; do not mark these tasks Done.*
+- @navigation_recovery owns AQ-65 coral material/turning/motion iteration. GPU alpha attenuation factors match CPU within2.70e-8; bounded pivot and vertical metric routing regressions still being resolved.
+- @link_interaction completed read-only envelope/player review and prepared AQ-58 reset integration; Root verifies/commits before AQ-64 shared aquarium reconciliation implementation. AQ-64 plan preserves unchanged instances and delta-only resource cleanup.
+- @thumbnail_loading owns AQ-69 hygiene/package/script checks. Preserve historical duplicate-doc content by archival relocation; remove only truly dangling proof links and truly unused functions.
+- Root owns handoff/scratch, native browser and Done. Latest stable isolated milestone372tests/typecheck/build passes; changing shared-tree full suite is not yet clean due current motion iteration.
+- Prior Full codebase review/defect audit and Backlog tasksAQ63–69 entries inspected: triage actioned for completed tasks; remaining findings pending actual proof. Prior Unified documentation framework/catalog entry inspected: framework/catalog active, technical assertions remain grounded in task evidence.
 
-### 2026-11-04 — Continuous backlog work and bounded delegation
-*2026-11-05 resume review — Root: Current policy; continue in Kanban order with bounded delegation, local-only delivery and Gemini research routing.*
-*Reviewed by Root — 2026-11-04: Current user direction. All scratch entries were inspected; reviewed never means automatically completed.*
-- User: keep working with subagents until every task is complete; project is not complete while tasks remain. Audit/revert unhelpful changes and explicitly break out small tasks labeled easy.
-- Five easy packets exist: AQ49.1 rig inventory (Done), AQ52.1 socket freshness (Done), AQ42.1 manifest consistency (Done), AQ17.1 network API (Done), AQ8.1 service mapping sheet (Done). AQ15.1 method guard and AQ16.1 weighted disk math are also Done; AQ16.2 adapter is Done after Root review; medium-priority work is parked. Each has narrow file boundaries and objective evidence requirements.
-- Root owns shared handoff/scratch, main-scene review and Done. Workers record plans/evidence/review iterations in Backlog CLI; no broad model, renderer or configuration edits outside assigned scope. Root review is required before any task becomes Done.
-
-### 2026-11-04 — Ownership, priority and 3D collision iteration
-*2026-11-05 resume review — Root: Current policy; continue in Kanban order with bounded delegation, local-only delivery and Gemini research routing.*
-*Reviewed by Root — 2026-11-04: Current policy; collision work pending and actively assigned.*
-- Superseded ownership notice (2026-11-05): user confirmed the other coral/scene agent finished. Root now owns review and integration of supplied work; preserve candidates and avoid competing visual model creation. Scoped workers coordinate file ownership with Root.
-- Follow High Kanban priority/dependencies; finish the already-started AQ16.2 review, then keep the active lane on AQ58. AQ59 remains the user/Gemini modeling lane.
-- User: collision must handle a genuine3D environment. AQ34 already requires this; AQ58 contains the focused investigation and implementation iteration. Full-depth band boxes are comparison baseline only. Investigate exact arbitrary-direction swept-volume mesh checks and a bounded3D planner preserving caves, overhangs and depth gaps.
-- User: finish work and iterate toward consistent improvement; avoid proliferating open tasks. Keep this in AQ58/AQ34, close verified bounded slices, and keep unmet scene/fish-envelope criteria explicit.
-
-### 2026-11-04 — Completed checkpoint and isolated collision integration
-*2026-11-05 resume review — Root: Pending remaining modeling, envelope and scene acceptance; isolated collision implementation continues without overwriting shared work.*
-*Reviewed by Root — 2026-11-04: Actioned isolation; final scene/envelope acceptance pending.*
-- Root committed/pushed895c87b (approved5services, profile evidence, read-only telemetry slices) and069c1dd (audit/evidence/handoff). AQ57 andAQ16.2 are Done. No deployment.
-- AQ58 true3D query, deterministic bounded planner and shared budget adapter are implemented/tested. Exact pinned cave passes20/40/60mm probes;70mm direct path blocks. Actual front-depth lane remains open where bands block it. Probes are not animated fish envelopes.
-- External workflow subsequently began changing aquarium.ts/motion.ts and adding fish-turning, coral-material and reef-assembly modules. Root subagents wrote none of these. Preserve these concurrent changes; they are unreviewed and excluded from Root commits. Earlier baseline equality is no longer a statement about current source.
-- To finish collision/swimming integration without conflicts, @behavior_profiles owns ONLY /tmp/aquarium-aq58-motion-20261104 (codex/aq58-motion-review at069c1dd) for metric mesh-mode motion/tests. Main Backlog remains authoritative. Separate explicit metric fish radius/world units required; no legacy-unit inference or box fallback.
-- Standalone collision-study proof bundles successfully in /tmp/aq58-collision-proof-build-20261104; new browser verification is unavailable because the Chrome connection times out. No viewport/occlusion acceptance claimed. Local proof Vite5189 is Root exec42641; main5173 listener unchanged by Root. Verify processes before use.
-
-### 2026-11-04 — Planning-agent research routing
-*2026-11-05 resume review — Root: Current policy; continue in Kanban order with bounded delegation, local-only delivery and Gemini research routing.*
-*Reviewed by Root — 2026-11-04: Actioned; added to AGENTS.md.*
-- Long-form research tasks should carry the `gemini-research` tag so the planning agent routes them to Gemini research.
-
-### 2026-11-05 — Unified agent documentation framework and catalog
-*2026-11-05 resume review — Root: Pending Root evidence review of the new framework/catalog; publication and metadata alone do not prove technical completion.*
-*Reviewed by Root — 2026-11-05: Actioned; AQ-61 implemented.*
-- Created single documentation entrypoint at `docs/README.md` and catalog index pointer `docs/INDEX.md`.
-- Defined formal multi-agent documentation framework in `docs/framework/DOCUMENTATION_FRAMEWORK.md` (7 authority tiers, standardized `AGENT_DOC_METADATA` schema, lifecycle states, contribution protocols) and `docs/framework/TEMPLATE.md`.
-- Categorized all 34 existing documents and evidence fixtures with zero file deletions. Standardized metadata headers across active specifications, runbooks, and audits; marked historical/superseded docs with warning alerts.
-- Verified test suite (35 files, 270 tests pass); referenced from `AGENTS.md` and `AGENT_TASKS.md`.
-
-### 2026-11-05 — Full codebase review and defect audit
-*2026-11-05 resume review — Root: Pending verification/triage of all listed findings against current code and Backlog; do not apply recommendations blindly.*
-*Reviewed by Root — 2026-11-05: Actioned; published to docs/code-review-findings.md.*
-- Full codebase audit across runtime, simulation, picking, telemetry, packaging, and deployment completed.
-- Identified 24 distinct bugs, performance issues, and architectural gaps not currently tracked in Backlog tasks AQ-1 through AQ-61. Detailed report output in docs/code-review-findings.md.
-
-### 2026-11-05 — Resumed reviewed collision checkpoint
-*Reviewed by Root — 2026-11-05: Actioned portable core/metric review and browser proof; main configuration and animated envelopes pending.*
-- All3subagents resumed after reset. Clean portable snapshot passes254tests/29files,typecheck/build; isolatedmetricmotion63tests independently reviewed. Root is merging with sharedturning changes surgically, preserving user-agent work.
-- Browser recovered; HTTPgzip proof-loading bug fixed with pinned encoded/decodedhashes. Native1440×900/402×874 scale1 verified60mm cave route and70mm over-rock detour, no phoneoverflow/capturedconsolewarnings/errors. Evidence and limits are in docs/asset-evidence/aq58/. No final fish/art/assembled-scene acceptance.
-- New audit four-claim triage:2.1false,2.2conditional,3.4unsafe blue-tang phone spawn confirmed with workingbackoff,4.8yellow-tang anchorclearance failure confirmed (legacyunits). ExistingAQ60/AQ45 updated; remainingclaims pending. Research37/46/47 tagged gemini-research.
-- AQ59nowcontains newly packagedrockhashesac2ed179…/ab7b7563…; @asset_validation independently pins/checks/renders them read-only forRootartreview. Never overwrite newart to match historicalAQ58fixture.
-
-### 2026-11-05 — User confirms coral handoff finished
-*Reviewed by Root — 2026-11-05: Actioned ownership handoff; remaining scene/art acceptance pending.*
-- Reviewed collision/optional metric navigation milestone9b12a5a is committed and pushed. Main motion surgically retains external turning; actual main aquarium still uses legacy habitat and two candidate rigs plus three artwork previews.
-- Current production snapshot passes298tests/typecheck/build before final spawn-state fix; final fix passes9focusedtests/typecheck/build. Native1440×900/402×874 review confirms blue-tang movement, pause/resume, fitted Settings, approved native links and no captured warning/errors. No final art or animated-envelope acceptance.
-- AQ58 analyzer clip-only proof ready for Root review; bounded procedural-overlay proof iteration assigned @asset_validation. AQ12/AQ60 exact supplied-fish renders assigned @behavior_profiles. AQ59 UV/surface bake functional fix assigned @background_review; outputs restricted to/tmp until Root visual review; preserve geometry, sockets and original material fields.
-
-### 2026-11-05 — Per-task Git commit instruction
-*Reviewed by Root — 2026-11-05: Current policy.*
-- User instruction: each task must be committed at the end of it so git history stays clean, granular, and traceable.
-- Agents must stage only files relevant to the completed task (never blanket stage or commit unrelated concurrent work) and use descriptive commit messages referencing the Backlog task ID (e.g. `feat(AQ-12): ...`, `fix(AQ-58): ...`, `docs(AQ-61): ...`).
-
-### 2026-11-05 — Backlog tasks created for review findings (AQ-63 through AQ-69)
-*Reviewed by Root — 2026-11-05: Actioned; 7 atomic tasks created in Backlog.*
-- Created AQ-63 (High - interaction picking desync), AQ-64 (Medium - inhabitant reconciliation), AQ-65 (Medium - shader double AO & turning rig cutoff), AQ-66 (High - thumbnail WebP & error handling), AQ-67 (High - mobile clearance search lock & obstacle caching), AQ-68 (Medium - telemetry hardening), AQ-69 (Low - dangling symlink & hygiene cleanup).
-- Documented in docs/code-review-findings.md; all 24 identified review items mapped to atomic tasks.
+### 2026-11-05 — Goal remains active
+*Root review2026-11-05: Pending all42open tasks at the recorded checkpoint.*
+- Continue from AGENT_TASKS.md and live Backlog; do not confuse reviewed entries with completed tasks.
+- No deployment, host mounts, remote configuration or sign-ins performed in this run.
+- Root verification servers5193dev and5194/5195isolatedproduction may remain; verify before reuse. Do not disturb user3000 or historical unrelated listeners.
