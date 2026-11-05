@@ -27,7 +27,7 @@ Find the authoritative documents for your task area:
 |---|---|---|---|
 | **Primary Requirements & Scope** | [`requirements.md`](requirements.md) | [`design-principles.md`](design-principles.md) | [`agent-change-audit.md`](agent-change-audit.md) |
 | **3D Rendering & Scene** | [`rendering.md`](rendering.md) | [`rendering-research-history.md`](rendering-research-history.md) | [`asset-pipeline-proof.md`](asset-pipeline-proof.md) |
-| **Fish Motion & Biomechanics** | [`fish-turning-and-maneuvering-plan.md`](fish-turning-and-maneuvering-plan.md) | [`sketchfab-motion-review.md`](sketchfab-motion-review.md), [`mesh2motion-review.md`](mesh2motion-review.md) | [`asset-evidence/fish-rig-inventory.md`](asset-evidence/fish-rig-inventory.md) |
+| **Fish Motion & Biomechanics** | [`fish-turning-and-maneuvering-plan.md`](fish-turning-and-maneuvering-plan.md) | [`sketchfab-motion-review.md`](sketchfab-motion-review.md), [`mesh2motion-review.md`](mesh2motion-review.md) | [`asset-evidence/fish-rig-inventory.md`](asset-evidence/fish-rig-inventory.md)  [AQ-58 reset proof](asset-evidence/aq58/fish-player-review.json) |
 | **Fish Behavior & AI Runtime** | [`behavior-runtime-contract.md`](behavior-runtime-contract.md) | [`fish-behavior-design.md`](fish-behavior-design.md), [`reef-fish-roster.md`](reef-fish-roster.md) | `src/simulation/behavior-runtime.test.ts` |
 | **Reef Navigation & Habitat** | [`habitat-navigation-core-contract.md`](habitat-navigation-core-contract.md) | [`modular-coral-and-live-rock-spec.md`](modular-coral-and-live-rock-spec.md) | `src/simulation/habitat-navigation.test.ts` |
 | **3D Collision & Geometry** | [`asset-evidence/aq58/3d-collision-review.md`](asset-evidence/aq58/3d-collision-review.md) | [`asset-evidence/aq58/README.md`](asset-evidence/aq58/README.md) | [`asset-evidence/aq58/`](asset-evidence/aq58/) |
@@ -83,6 +83,7 @@ Directory of project documentation and verification evidence:
 |---|---|---|---|---|
 | [`code-review-findings.md`](code-review-findings.md) | **Active** | Evidentiary | `AQ-61` | Comprehensive codebase audit: runtime picking desync, mobile memory allocations, narrow-viewport navigation locks. |
 | [`agent-change-audit.md`](agent-change-audit.md) | **Complete** | Evidentiary | `AQ-57` | Root audit of concurrent agent changes, rejected runtime experiments, and baseline restoration. |
+| [AQ-58 fish player and clip-only review](asset-evidence/aq58/fish-player-review.json) | **Active** | Evidentiary | AQ-58 | Source-pinned clean-pose reset compatibility and conditional supplied clip-only spheres; main-scene collision remains open. |
 | [AQ-65 GPU attenuation proof](asset-evidence/aq65/gpu-ao-review.json) | **Complete** | Evidentiary | AQ-65 | Actual shader float readpixels match the CPU curve; bounded turn/pitch recovery tests. |
 | [AQ-66 thumbnail evidence](asset-evidence/aq66/review.json) | **Complete** | Evidentiary | AQ-66 | Optimized image metrics, preserved PNG originals and native failed-artwork recovery proof. |
 | [`asset-evidence/aq63/review.json`](asset-evidence/aq63/review.json) | **Complete** | Evidentiary | `AQ-63` | Root interaction tests, native browser observations and two viewport screenshots; no scene/art acceptance. |

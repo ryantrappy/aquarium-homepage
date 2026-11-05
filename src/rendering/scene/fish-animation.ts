@@ -81,9 +81,13 @@ export function createFishClipPlayer(
     dispose(): void {
       if (disposed) return
       disposed = true
+      // Releasing mixer bindings restores their original bind values. Preserve
+      // the current pose when retiring an invalid clip in a still-visible fish.
+      const finalPose = bones.map(bone => bone.quaternion.clone())
       mixer.stopAllAction()
       mixer.uncacheClip(clip)
       mixer.uncacheRoot(root)
+      bones.forEach((bone, index) => bone.quaternion.copy(finalPose[index]))
       cleanPose.clear()
     },
   })
@@ -91,8 +95,10 @@ export function createFishClipPlayer(
 
 function collectSkinBones(root: THREE.Object3D): THREE.Bone[] {
   const bones = new Set<THREE.Bone>()
+  const palettes: (readonly THREE.Bone[])[] = []
   root.traverse(node => {
     if (!(node instanceof THREE.SkinnedMesh)) return
+    palettes.push(node.skeleton.bones)
     for (const bone of node.skeleton.bones) bones.add(bone)
   })
   if (bones.size === 0) {
@@ -101,6 +107,12 @@ function collectSkinBones(root: THREE.Object3D): THREE.Bone[] {
   if (bones.size > MAX_SKIN_BONES) {
     throw new RangeError(`Fish clip player supports at most ${MAX_SKIN_BONES} unique skin bones.`)
   }
+  // Several primitives may share the same skin palette. Separate skeleton
+  // objects created by SkeletonUtils.clone still refer to these same bones.
+  const first = palettes[0]
+  if (palettes.some(palette => palette.length !== first.length || palette.some((bone, i) => bone !== first[i]))) {
+    throw new RangeError('Fish clip player requires one shared skin-bone palette.')
+  }
   return [...bones]
 }
 
@@ -108,8 +120,11 @@ function captureCleanPose(
   bones: readonly THREE.Bone[],
   cleanPose: Map<THREE.Bone, THREE.Quaternion>,
 ): void {
+  // Validate the complete next pose before changing any saved bone. If a late
+  // track is malformed, advance() can then restore the complete prior pose.
+  for (const bone of bones) assertValidQuaternion(bone.quaternion, bone.name)
   for (const bone of bones) {
-    normalizeCheckedQuaternion(bone.quaternion, bone.name)
+    bone.quaternion.normalize()
     const saved = cleanPose.get(bone)
     if (saved) saved.copy(bone.quaternion)
     else cleanPose.set(bone, bone.quaternion.clone())
@@ -127,7 +142,7 @@ function restoreCleanPose(
   }
 }
 
-function normalizeCheckedQuaternion(quaternion: THREE.Quaternion, boneName: string): void {
+function assertValidQuaternion(quaternion: THREE.Quaternion, boneName: string): void {
   const length = quaternion.length()
   if (
     !Number.isFinite(quaternion.x)
@@ -140,5 +155,9 @@ function normalizeCheckedQuaternion(quaternion: THREE.Quaternion, boneName: stri
   ) {
     throw new RangeError(`Fish clip produced a malformed quaternion for bone ${boneName || '<unnamed>'}.`)
   }
+}
+
+function normalizeCheckedQuaternion(quaternion: THREE.Quaternion, boneName: string): void {
+  assertValidQuaternion(quaternion, boneName)
   quaternion.normalize()
 }

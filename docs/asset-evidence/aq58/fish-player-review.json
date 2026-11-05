@@ -1,0 +1,112 @@
+{
+  "scope": "real GLTFLoader skeletal/clip/reset compatibility only; material decoding bypassed, no visual/envelope/metric acceptance",
+  "resetAdapterSha256": "086b8d094bc803baee490f94781c20ab6a36256a419ef4aa152355df0468aa69",
+  "producerSha256": "1daf9aa482cdac0066fd1b2930dd5e3e901d7b5d92db5bb605f5ca429ba63aa6",
+  "assets": [
+    {
+      "id": "ocellaris-clownfish",
+      "path": "src/rendering/proof/candidate-real-clown.glb",
+      "group": "study",
+      "sourceSha256": "9beebbfe33e9e4459702e1aba6ad2df6f7309aca854f3bb5d1b88a36ca9444a6",
+      "skinBoneCount": 8,
+      "clip": "Experimental swim",
+      "frames": 120,
+      "maxCleanQuaternionError": 4.440892098500626e-16,
+      "pausePreservesOverlay": true,
+      "sourceTracksUnchanged": true
+    },
+    {
+      "id": "yellow-tang",
+      "path": "src/rendering/proof/candidate-real-tang.glb",
+      "group": "study",
+      "sourceSha256": "44d28509f62de1eec2a9644fea1a6ce5c79d642997b3487aa0e21d6069f76f5b",
+      "skinBoneCount": 8,
+      "clip": "Experimental swim",
+      "frames": 120,
+      "maxCleanQuaternionError": 3.3306690738754696e-16,
+      "pausePreservesOverlay": true,
+      "sourceTracksUnchanged": true
+    },
+    {
+      "id": "blue-tang",
+      "path": "src/rendering/assets/fish/fish-blue-tang.glb",
+      "group": "supplied",
+      "sourceSha256": "41eabfb7ec26b308ad0255566fb9962cc2930b1b295120fec2993bbe4fc60ba4",
+      "skinBoneCount": 7,
+      "clip": "blue_tang_labriform_swim",
+      "frames": 120,
+      "maxCleanQuaternionError": 3.3306690738754696e-16,
+      "pausePreservesOverlay": true,
+      "sourceTracksUnchanged": true
+    },
+    {
+      "id": "royal-gramma",
+      "path": "src/rendering/assets/fish/fish-royal-gramma.glb",
+      "group": "supplied",
+      "sourceSha256": "1d629137b3fde0e85519d8cdda51edd2e94ec7dcb98e5ec1c0558e4e57d2e87d",
+      "skinBoneCount": 7,
+      "clip": "royal_gramma_subcarangiform_swim",
+      "frames": 120,
+      "maxCleanQuaternionError": 3.3306690738754696e-16,
+      "pausePreservesOverlay": true,
+      "sourceTracksUnchanged": true
+    },
+    {
+      "id": "banggai-cardinalfish",
+      "path": "src/rendering/assets/fish/fish-banggai-cardinalfish.glb",
+      "group": "supplied",
+      "sourceSha256": "f927e8f163f95a11e924e304ba3280718c4ba43074da211afd761e618dcab1fe",
+      "skinBoneCount": 7,
+      "clip": "banggai_banner_hover_swim",
+      "frames": 120,
+      "maxCleanQuaternionError": 4.440892098500626e-16,
+      "pausePreservesOverlay": true,
+      "sourceTracksUnchanged": true
+    },
+    {
+      "id": "mandarin-dragonet",
+      "path": "src/rendering/assets/fish/fish-mandarin-dragonet.glb",
+      "group": "supplied",
+      "sourceSha256": "3adb30c2a5c88d1a8ac3a336446d1341641762c01c19dace6f5b95310cffc52e",
+      "skinBoneCount": 7,
+      "clip": "mandarin_dragonet_hover_swim",
+      "frames": 120,
+      "maxCleanQuaternionError": 4.440892098500626e-16,
+      "pausePreservesOverlay": true,
+      "sourceTracksUnchanged": true
+    },
+    {
+      "id": "ocellaris-clownfish",
+      "path": "src/rendering/assets/fish/fish-ocellaris-clownfish.glb",
+      "group": "inactive-supplied-alternative",
+      "sourceSha256": "af02b28c26be3ad268849fa089387055afcb62c034ac940a2501a4fa48fad29f",
+      "skinBoneCount": 7,
+      "clip": "clownfish_subcarangiform_swim",
+      "frames": 120,
+      "maxCleanQuaternionError": 4.440892098500626e-16,
+      "pausePreservesOverlay": true,
+      "sourceTracksUnchanged": true
+    },
+    {
+      "id": "yellow-tang",
+      "path": "src/rendering/assets/fish/fish-yellow-tang.glb",
+      "group": "inactive-supplied-alternative",
+      "sourceSha256": "a1a1ae0207ec0e2ee13da5de0443a8dc168b65866bf9d448e5ea870e26d815d2",
+      "skinBoneCount": 7,
+      "clip": "yellow_tang_labriform_swim",
+      "frames": 120,
+      "maxCleanQuaternionError": 3.3306690738754696e-16,
+      "pausePreservesOverlay": true,
+      "sourceTracksUnchanged": true
+    }
+  ],
+  "task": "AQ-58",
+  "reviewer": "Root",
+  "reproduction": "node scripts/verify-fish-clip-player.mjs",
+  "limits": [
+    "Eight tracked candidate source files exercised; no asset promoted.",
+    "New nine-model local splat work remains excluded; explicit CLI option studies it without bundling.",
+    "Finite pose/reset regressions are not continuous animation or mesh/coral collision certificates.",
+    "Actual main legacy scaling/band boxes and animated-envelope acceptance remain open."
+  ]
+}

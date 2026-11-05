@@ -1,0 +1,503 @@
+{
+  "scope": "independent read-only clip-only review; no overlay/main-scene certification",
+  "assets": [
+    {
+      "id": "fish-ocellaris-clownfish",
+      "speciesId": "ocellaris-clownfish",
+      "sourceSha256": "af02b28c26be3ad268849fa089387055afcb62c034ac940a2501a4fa48fad29f",
+      "generatorSha256": "0c5c1bbb1e5fe0d6f98fe6a2766a2a0d807986abe01a1065ba55577438fb34b3",
+      "sourceLengthM": 0.10709794610738754,
+      "adultLengthM": 0.07619999999999999,
+      "clipOnlyCertificate": {
+        "scope": "single-clip-only",
+        "sourceSha256": "af02b28c26be3ad268849fa089387055afcb62c034ac940a2501a4fa48fad29f",
+        "assetId": "fish-ocellaris-clownfish",
+        "clipName": "clownfish_subcarangiform_swim",
+        "centerM": [
+          0,
+          0,
+          0
+        ],
+        "radiusM": 0.04405316672382903,
+        "uniformScale": 0.7114982384778317,
+        "sourceReference": {
+          "lengthAxis": "+Z",
+          "lengthM": 0.10709794610738754,
+          "authority": "Exact generator src/rendering/modeling/build_clownfish.py SHA256 0c5c1bbb1e5fe0d6f98fe6a2766a2a0d807986abe01a1065ba55577438fb34b3: negative Blender-Y snout; export_yup=True; supplied meter/+Y metadata. No anatomy/art acceptance."
+        },
+        "adultLengthM": 0.07619999999999999,
+        "geometry": {
+          "vertices": 8444,
+          "triangles": 16534,
+          "joints": 7,
+          "maxJointDepth": 5
+        },
+        "proof": {
+          "method": "joint-product-telescope-and-whole-slerp-chord-bounds",
+          "sourceRadiusM": 0.06163471056065758,
+          "referenceDisplacementRadiusM": 0.06163471056065758,
+          "allRotationRadiusM": 0.16366452290377637,
+          "maxLocalRotationDifferenceNorm": 0.4183583012237854,
+          "coversTriangleInteriors": true,
+          "sampledPosesUsedAsProof": false,
+          "work": 547256
+        },
+        "numerics": {
+          "weightEvaluation": "nonnegative-l1-normalize-then-float32-store",
+          "sourceWeightSumRange": [
+            0.9999999701976776,
+            1.0000000298023224
+          ],
+          "normalizedWeightSumRange": [
+            0.9999999701976776,
+            1.0000000298023224
+          ],
+          "maxSourceQuaternionNormError": 5.730885055399426e-8,
+          "sourceQuaternionNormAllowanceM": 0.00003057238887102667,
+          "scalarOperationBudget": 2048,
+          "binary32UnitRoundoff": 5.960464477539063e-8,
+          "absoluteArithmeticBoundM": 1.389237355987236,
+          "paddingM": 0.0002001787308301569
+        },
+        "requires": [
+          "Exactly the selected normal clip at weight 1; arbitrary time/speed, clamped endpoints or looping within its key range.",
+          "Unit-normalized shortest-arc playback between authored rotation keys; deterministic evaluation from clip/reference pose, no accumulated rotations.",
+          "Declared constant translation/scales, exact inverse binds, nonnegative L1-normalized Float32 skin weights and standard linear blend skinning.",
+          "Standard round-to-nearest binary32 or more accurate arithmetic within the reported operation budget; unit-quaternion normalization is part of the contract.",
+          "Uniform adult scale about the declared root origin; source +Z length/anatomical authority and biological adult length are caller responsibilities."
+        ],
+        "excludes": [
+          "Procedural turning overlays",
+          "Clip blending/additive clips",
+          "Morph/shader displacement",
+          "Unvalidated renderer arithmetic/fast-math",
+          "Biological or art approval"
+        ]
+      },
+      "independentSampleCrosscheck": {
+        "sampledTimes": 65,
+        "allVertices": true,
+        "observedMaxM": 0.03842116939134727,
+        "observedTime": 0,
+        "notContinuousProof": true
+      },
+      "currentOverlayResult": "unavailable",
+      "currentOverlayReason": "Unvalidated procedural-overlay; clip-only sphere must not certify this playback"
+    },
+    {
+      "id": "fish-yellow-tang",
+      "speciesId": "yellow-tang",
+      "sourceSha256": "a1a1ae0207ec0e2ee13da5de0443a8dc168b65866bf9d448e5ea870e26d815d2",
+      "generatorSha256": "6d52de0d90ab6e79a2a4c96f655857bc2a7c932b66f2cef78caa621aa184d640",
+      "sourceLengthM": 0.1446107029914856,
+      "adultLengthM": 0.1651,
+      "clipOnlyCertificate": {
+        "scope": "single-clip-only",
+        "sourceSha256": "a1a1ae0207ec0e2ee13da5de0443a8dc168b65866bf9d448e5ea870e26d815d2",
+        "assetId": "fish-yellow-tang",
+        "clipName": "yellow_tang_labriform_swim",
+        "centerM": [
+          0,
+          0,
+          0
+        ],
+        "radiusM": 0.08995837038935846,
+        "uniformScale": 1.1416858958891913,
+        "sourceReference": {
+          "lengthAxis": "+Z",
+          "lengthM": 0.1446107029914856,
+          "authority": "Exact generator src/rendering/modeling/build_yellow_tang.py SHA256 6d52de0d90ab6e79a2a4c96f655857bc2a7c932b66f2cef78caa621aa184d640: negative Blender-Y snout; export_yup=True; supplied meter/+Y metadata. No anatomy/art acceptance."
+        },
+        "adultLengthM": 0.1651,
+        "geometry": {
+          "vertices": 8804,
+          "triangles": 17226,
+          "joints": 7,
+          "maxJointDepth": 5
+        },
+        "proof": {
+          "method": "joint-product-telescope-and-whole-slerp-chord-bounds",
+          "sourceRadiusM": 0.0784079389260688,
+          "referenceDisplacementRadiusM": 0.0784079389260688,
+          "allRotationRadiusM": 0.2364178393473735,
+          "maxLocalRotationDifferenceNorm": 0.5909652971969158,
+          "coversTriangleInteriors": true,
+          "sampledPosesUsedAsProof": false,
+          "work": 576675
+        },
+        "numerics": {
+          "weightEvaluation": "nonnegative-l1-normalize-then-float32-store",
+          "sourceWeightSumRange": [
+            0.9999999701976776,
+            1.0000000298023224
+          ],
+          "normalizedWeightSumRange": [
+            0.9999999701976776,
+            1.0000000298023224
+          ],
+          "maxSourceQuaternionNormError": 4.3832951490685446e-8,
+          "sourceQuaternionNormAllowanceM": 0.00005344957941307828,
+          "scalarOperationBudget": 2048,
+          "binary32UnitRoundoff": 5.960464477539063e-8,
+          "absoluteArithmeticBoundM": 3.175501724643611,
+          "paddingM": 0.0004411323917245923
+        },
+        "requires": [
+          "Exactly the selected normal clip at weight 1; arbitrary time/speed, clamped endpoints or looping within its key range.",
+          "Unit-normalized shortest-arc playback between authored rotation keys; deterministic evaluation from clip/reference pose, no accumulated rotations.",
+          "Declared constant translation/scales, exact inverse binds, nonnegative L1-normalized Float32 skin weights and standard linear blend skinning.",
+          "Standard round-to-nearest binary32 or more accurate arithmetic within the reported operation budget; unit-quaternion normalization is part of the contract.",
+          "Uniform adult scale about the declared root origin; source +Z length/anatomical authority and biological adult length are caller responsibilities."
+        ],
+        "excludes": [
+          "Procedural turning overlays",
+          "Clip blending/additive clips",
+          "Morph/shader displacement",
+          "Unvalidated renderer arithmetic/fast-math",
+          "Biological or art approval"
+        ]
+      },
+      "independentSampleCrosscheck": {
+        "sampledTimes": 65,
+        "allVertices": true,
+        "observedMaxM": 0.08915711821702126,
+        "observedTime": 0,
+        "notContinuousProof": true
+      },
+      "currentOverlayResult": "unavailable",
+      "currentOverlayReason": "Unvalidated procedural-overlay; clip-only sphere must not certify this playback"
+    },
+    {
+      "id": "fish-blue-tang",
+      "speciesId": "blue-tang",
+      "sourceSha256": "41eabfb7ec26b308ad0255566fb9962cc2930b1b295120fec2993bbe4fc60ba4",
+      "generatorSha256": "aaf49407602a72fc1909900e252ebbb9f60e4447ed0e75da0378727ac6652b67",
+      "sourceLengthM": 0.1526857241988182,
+      "adultLengthM": 0.2286,
+      "clipOnlyCertificate": {
+        "scope": "single-clip-only",
+        "sourceSha256": "41eabfb7ec26b308ad0255566fb9962cc2930b1b295120fec2993bbe4fc60ba4",
+        "assetId": "fish-blue-tang",
+        "clipName": "blue_tang_labriform_swim",
+        "centerM": [
+          0,
+          0,
+          0
+        ],
+        "radiusM": 0.1261813007466636,
+        "uniformScale": 1.4971930165673561,
+        "sourceReference": {
+          "lengthAxis": "+Z",
+          "lengthM": 0.1526857241988182,
+          "authority": "Exact generator src/rendering/modeling/build_blue_tang.py SHA256 aaf49407602a72fc1909900e252ebbb9f60e4447ed0e75da0378727ac6652b67: negative Blender-Y snout; export_yup=True; supplied meter/+Y metadata. No anatomy/art acceptance."
+        },
+        "adultLengthM": 0.2286,
+        "geometry": {
+          "vertices": 8620,
+          "triangles": 16866,
+          "joints": 7,
+          "maxJointDepth": 5
+        },
+        "proof": {
+          "method": "joint-product-telescope-and-whole-slerp-chord-bounds",
+          "sourceRadiusM": 0.083845795223439,
+          "referenceDisplacementRadiusM": 0.083845795223439,
+          "allRotationRadiusM": 0.24897963211303628,
+          "maxLocalRotationDifferenceNorm": 0.5646421746919889,
+          "coversTriangleInteriors": true,
+          "sampledPosesUsedAsProof": false,
+          "work": 568108
+        },
+        "numerics": {
+          "weightEvaluation": "nonnegative-l1-normalize-then-float32-store",
+          "sourceWeightSumRange": [
+            0.9999999701976776,
+            1.0000000298023224
+          ],
+          "normalizedWeightSumRange": [
+            0.9999999701976776,
+            1.0000000298023224
+          ],
+          "maxSourceQuaternionNormError": 6.426292542549561e-8,
+          "sourceQuaternionNormAllowanceM": 0.00010894974325442935,
+          "scalarOperationBudget": 2048,
+          "binary32UnitRoundoff": 5.960464477539063e-8,
+          "absoluteArithmeticBoundM": 4.415038497648481,
+          "paddingM": 0.000647961669594129
+        },
+        "requires": [
+          "Exactly the selected normal clip at weight 1; arbitrary time/speed, clamped endpoints or looping within its key range.",
+          "Unit-normalized shortest-arc playback between authored rotation keys; deterministic evaluation from clip/reference pose, no accumulated rotations.",
+          "Declared constant translation/scales, exact inverse binds, nonnegative L1-normalized Float32 skin weights and standard linear blend skinning.",
+          "Standard round-to-nearest binary32 or more accurate arithmetic within the reported operation budget; unit-quaternion normalization is part of the contract.",
+          "Uniform adult scale about the declared root origin; source +Z length/anatomical authority and biological adult length are caller responsibilities."
+        ],
+        "excludes": [
+          "Procedural turning overlays",
+          "Clip blending/additive clips",
+          "Morph/shader displacement",
+          "Unvalidated renderer arithmetic/fast-math",
+          "Biological or art approval"
+        ]
+      },
+      "independentSampleCrosscheck": {
+        "sampledTimes": 65,
+        "allVertices": true,
+        "observedMaxM": 0.12277211651528003,
+        "observedTime": 0,
+        "notContinuousProof": true
+      },
+      "currentOverlayResult": "unavailable",
+      "currentOverlayReason": "Unvalidated procedural-overlay; clip-only sphere must not certify this playback"
+    },
+    {
+      "id": "fish-royal-gramma",
+      "speciesId": "royal-gramma",
+      "sourceSha256": "1d629137b3fde0e85519d8cdda51edd2e94ec7dcb98e5ec1c0558e4e57d2e87d",
+      "generatorSha256": "766d78efd961ccfbff03cd9cd46139423f9dd3e12507d28503bcad7ae3eabb7f",
+      "sourceLengthM": 0.08218725770711899,
+      "adultLengthM": 0.06985,
+      "clipOnlyCertificate": {
+        "scope": "single-clip-only",
+        "sourceSha256": "1d629137b3fde0e85519d8cdda51edd2e94ec7dcb98e5ec1c0558e4e57d2e87d",
+        "assetId": "fish-royal-gramma",
+        "clipName": "royal_gramma_subcarangiform_swim",
+        "centerM": [
+          0,
+          0,
+          0
+        ],
+        "radiusM": 0.041301990406010916,
+        "uniformScale": 0.849888437072766,
+        "sourceReference": {
+          "lengthAxis": "+Z",
+          "lengthM": 0.08218725770711899,
+          "authority": "Exact generator src/rendering/modeling/build_royal_gramma.py SHA256 766d78efd961ccfbff03cd9cd46139423f9dd3e12507d28503bcad7ae3eabb7f: negative Blender-Y snout; export_yup=True; supplied meter/+Y metadata. No anatomy/art acceptance."
+        },
+        "adultLengthM": 0.06985,
+        "geometry": {
+          "vertices": 7732,
+          "triangles": 15118,
+          "joints": 7,
+          "maxJointDepth": 5
+        },
+        "proof": {
+          "method": "joint-product-telescope-and-whole-slerp-chord-bounds",
+          "sourceRadiusM": 0.048362488516813205,
+          "referenceDisplacementRadiusM": 0.048362488516813205,
+          "allRotationRadiusM": 0.13476148897705156,
+          "maxLocalRotationDifferenceNorm": 0.41835827399931375,
+          "coversTriangleInteriors": true,
+          "sampledPosesUsedAsProof": false,
+          "work": 502017
+        },
+        "numerics": {
+          "weightEvaluation": "nonnegative-l1-normalize-then-float32-store",
+          "sourceWeightSumRange": [
+            0.9999999701976776,
+            1.0000000298023224
+          ],
+          "normalizedWeightSumRange": [
+            0.9999999701976776,
+            1.0000000298023224
+          ],
+          "maxSourceQuaternionNormError": 6.341217084759876e-8,
+          "sourceQuaternionNormAllowanceM": 0.000033135887900850026,
+          "scalarOperationBudget": 2048,
+          "binary32UnitRoundoff": 5.960464477539063e-8,
+          "absoluteArithmeticBoundM": 1.3608014611135892,
+          "paddingM": 0.00019927062750695293
+        },
+        "requires": [
+          "Exactly the selected normal clip at weight 1; arbitrary time/speed, clamped endpoints or looping within its key range.",
+          "Unit-normalized shortest-arc playback between authored rotation keys; deterministic evaluation from clip/reference pose, no accumulated rotations.",
+          "Declared constant translation/scales, exact inverse binds, nonnegative L1-normalized Float32 skin weights and standard linear blend skinning.",
+          "Standard round-to-nearest binary32 or more accurate arithmetic within the reported operation budget; unit-quaternion normalization is part of the contract.",
+          "Uniform adult scale about the declared root origin; source +Z length/anatomical authority and biological adult length are caller responsibilities."
+        ],
+        "excludes": [
+          "Procedural turning overlays",
+          "Clip blending/additive clips",
+          "Morph/shader displacement",
+          "Unvalidated renderer arithmetic/fast-math",
+          "Biological or art approval"
+        ]
+      },
+      "independentSampleCrosscheck": {
+        "sampledTimes": 65,
+        "allVertices": true,
+        "observedMaxM": 0.03739547733948563,
+        "observedTime": 0,
+        "notContinuousProof": true
+      },
+      "currentOverlayResult": "unavailable",
+      "currentOverlayReason": "Unvalidated procedural-overlay; clip-only sphere must not certify this playback"
+    },
+    {
+      "id": "fish-banggai-cardinalfish",
+      "speciesId": "banggai-cardinalfish",
+      "sourceSha256": "f927e8f163f95a11e924e304ba3280718c4ba43074da211afd761e618dcab1fe",
+      "generatorSha256": "ea8cbb55574a1d015b79fa3ec560efba0bb4fff155de5e272696c79ec4ce3e2d",
+      "sourceLengthM": 0.08269856497645378,
+      "adultLengthM": 0.06985,
+      "clipOnlyCertificate": {
+        "scope": "single-clip-only",
+        "sourceSha256": "f927e8f163f95a11e924e304ba3280718c4ba43074da211afd761e618dcab1fe",
+        "assetId": "fish-banggai-cardinalfish",
+        "clipName": "banggai_banner_hover_swim",
+        "centerM": [
+          0,
+          0,
+          0
+        ],
+        "radiusM": 0.04231448408095983,
+        "uniformScale": 0.8446337614188097,
+        "sourceReference": {
+          "lengthAxis": "+Z",
+          "lengthM": 0.08269856497645378,
+          "authority": "Exact generator src/rendering/modeling/build_banggai_cardinalfish.py SHA256 ea8cbb55574a1d015b79fa3ec560efba0bb4fff155de5e272696c79ec4ce3e2d: negative Blender-Y snout; export_yup=True; supplied meter/+Y metadata. No anatomy/art acceptance."
+        },
+        "adultLengthM": 0.06985,
+        "geometry": {
+          "vertices": 8024,
+          "triangles": 15692,
+          "joints": 7,
+          "maxJointDepth": 5
+        },
+        "proof": {
+          "method": "joint-product-telescope-and-whole-slerp-chord-bounds",
+          "sourceRadiusM": 0.04985804886288453,
+          "referenceDisplacementRadiusM": 0.04985804886288453,
+          "allRotationRadiusM": 0.13354608491385575,
+          "maxLocalRotationDifferenceNorm": 0.5047087558435596,
+          "coversTriangleInteriors": true,
+          "sampledPosesUsedAsProof": false,
+          "work": 491196
+        },
+        "numerics": {
+          "weightEvaluation": "nonnegative-l1-normalize-then-float32-store",
+          "sourceWeightSumRange": [
+            0.9999999701976776,
+            1.0000000298023224
+          ],
+          "normalizedWeightSumRange": [
+            0.9999999701976776,
+            1.0000000298023224
+          ],
+          "maxSourceQuaternionNormError": 7.70065406996423e-8,
+          "sourceQuaternionNormAllowanceM": 0.000039521740187291454,
+          "scalarOperationBudget": 2048,
+          "binary32UnitRoundoff": 5.960464477539063e-8,
+          "absoluteArithmeticBoundM": 1.3365254103004123,
+          "paddingM": 0.0002026927328988544
+        },
+        "requires": [
+          "Exactly the selected normal clip at weight 1; arbitrary time/speed, clamped endpoints or looping within its key range.",
+          "Unit-normalized shortest-arc playback between authored rotation keys; deterministic evaluation from clip/reference pose, no accumulated rotations.",
+          "Declared constant translation/scales, exact inverse binds, nonnegative L1-normalized Float32 skin weights and standard linear blend skinning.",
+          "Standard round-to-nearest binary32 or more accurate arithmetic within the reported operation budget; unit-quaternion normalization is part of the contract.",
+          "Uniform adult scale about the declared root origin; source +Z length/anatomical authority and biological adult length are caller responsibilities."
+        ],
+        "excludes": [
+          "Procedural turning overlays",
+          "Clip blending/additive clips",
+          "Morph/shader displacement",
+          "Unvalidated renderer arithmetic/fast-math",
+          "Biological or art approval"
+        ]
+      },
+      "independentSampleCrosscheck": {
+        "sampledTimes": 65,
+        "allVertices": true,
+        "observedMaxM": 0.038394999518057575,
+        "observedTime": 0.638020858168602,
+        "notContinuousProof": true
+      },
+      "currentOverlayResult": "unavailable",
+      "currentOverlayReason": "Unvalidated procedural-overlay; clip-only sphere must not certify this playback"
+    },
+    {
+      "id": "fish-mandarin-dragonet",
+      "speciesId": "mandarin-dragonet",
+      "sourceSha256": "3adb30c2a5c88d1a8ac3a336446d1341641762c01c19dace6f5b95310cffc52e",
+      "generatorSha256": "7b446be469adf26399a45c6d034c49ffb1d3706024cc5c43505759f5f829604d",
+      "sourceLengthM": 0.07504413276910782,
+      "adultLengthM": 0.0635,
+      "clipOnlyCertificate": {
+        "scope": "single-clip-only",
+        "sourceSha256": "3adb30c2a5c88d1a8ac3a336446d1341641762c01c19dace6f5b95310cffc52e",
+        "assetId": "fish-mandarin-dragonet",
+        "clipName": "mandarin_dragonet_hover_swim",
+        "centerM": [
+          0,
+          0,
+          0
+        ],
+        "radiusM": 0.03523656603867058,
+        "uniformScale": 0.8461687497325574,
+        "sourceReference": {
+          "lengthAxis": "+Z",
+          "lengthM": 0.07504413276910782,
+          "authority": "Exact generator src/rendering/modeling/build_mandarin_dragonet.py SHA256 7b446be469adf26399a45c6d034c49ffb1d3706024cc5c43505759f5f829604d: negative Blender-Y snout; export_yup=True; supplied meter/+Y metadata. No anatomy/art acceptance."
+        },
+        "adultLengthM": 0.0635,
+        "geometry": {
+          "vertices": 7912,
+          "triangles": 15460,
+          "joints": 7,
+          "maxJointDepth": 5
+        },
+        "proof": {
+          "method": "joint-product-telescope-and-whole-slerp-chord-bounds",
+          "sourceRadiusM": 0.04144664637962913,
+          "referenceDisplacementRadiusM": 0.04144664637962913,
+          "allRotationRadiusM": 0.11310936263192789,
+          "maxLocalRotationDifferenceNorm": 0.6436097307818536,
+          "coversTriangleInteriors": true,
+          "sampledPosesUsedAsProof": false,
+          "work": 486209
+        },
+        "numerics": {
+          "weightEvaluation": "nonnegative-l1-normalize-then-float32-store",
+          "sourceWeightSumRange": [
+            0.9999999701976776,
+            1.0000000298023224
+          ],
+          "normalizedWeightSumRange": [
+            0.9999999701976776,
+            1.0000000298023224
+          ],
+          "maxSourceQuaternionNormError": 7.745472596631942e-8,
+          "sourceQuaternionNormAllowanceM": 0.00003246171605868649,
+          "scalarOperationBudget": 2048,
+          "binary32UnitRoundoff": 5.960464477539063e-8,
+          "absoluteArithmeticBoundM": 1.091421057245611,
+          "paddingM": 0.00016570909101236867
+        },
+        "requires": [
+          "Exactly the selected normal clip at weight 1; arbitrary time/speed, clamped endpoints or looping within its key range.",
+          "Unit-normalized shortest-arc playback between authored rotation keys; deterministic evaluation from clip/reference pose, no accumulated rotations.",
+          "Declared constant translation/scales, exact inverse binds, nonnegative L1-normalized Float32 skin weights and standard linear blend skinning.",
+          "Standard round-to-nearest binary32 or more accurate arithmetic within the reported operation budget; unit-quaternion normalization is part of the contract.",
+          "Uniform adult scale about the declared root origin; source +Z length/anatomical authority and biological adult length are caller responsibilities."
+        ],
+        "excludes": [
+          "Procedural turning overlays",
+          "Clip blending/additive clips",
+          "Morph/shader displacement",
+          "Unvalidated renderer arithmetic/fast-math",
+          "Biological or art approval"
+        ]
+      },
+      "independentSampleCrosscheck": {
+        "sampledTimes": 65,
+        "allVertices": true,
+        "observedMaxM": 0.03219891653994859,
+        "observedTime": 0,
+        "notContinuousProof": true
+      },
+      "currentOverlayResult": "unavailable",
+      "currentOverlayReason": "Unvalidated procedural-overlay; clip-only sphere must not certify this playback"
+    }
+  ]
+}

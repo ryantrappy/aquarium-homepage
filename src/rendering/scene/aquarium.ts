@@ -26,6 +26,7 @@ import { consumeFrameSteps, createFrameClock, SIMULATION_STEP_SECONDS, suspendFr
 import { handleArtworkTextureFailure, nearestVisibleIntersection, readArtworkAlpha, type SpriteMasks } from './alpha-picking'
 import { applyFishLinkVisibility } from './fish-link-focus'
 import { projectFishLinkBounds } from './fish-link-projection'
+import { createFishClipPlayer, type FishClipPlayer } from './fish-animation'
 
 const modelUrls: Record<string, string> = {
   'ocellaris-clownfish': new URL('../proof/candidate-real-clown.glb', import.meta.url).href,
@@ -33,7 +34,7 @@ const modelUrls: Record<string, string> = {
 }
 export type SceneStatus = 'loading' | 'ready' | 'failed'
 export type AquariumController = { update(services: ServiceConfig[], paused: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void }
-type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; mixer?: THREE.AnimationMixer; turningRig?: FishTurningRig; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean }
+type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean }
 
 function disposeTree(root: THREE.Object3D) {
   const geometries = new Set<THREE.BufferGeometry>(), materials = new Set<THREE.Material>(), textures = new Set<THREE.Texture>()
@@ -321,7 +322,7 @@ diffuseColor.rgb = waterCol;
     const extensionErrors: unknown[] = []
     fish.forEach(item => {
       try { item.motion.extensions.dispose() } catch (error) { extensionErrors.push(error) }
-      scene.remove(item.root); item.mixer?.stopAllAction(); item.mixer?.uncacheRoot(item.mixer.getRoot()); item.root.traverse(object => { if (object instanceof THREE.SkinnedMesh) object.skeleton.dispose() })
+      scene.remove(item.root); item.clipPlayer?.dispose(); item.root.traverse(object => { if (object instanceof THREE.SkinnedMesh) object.skeleton.dispose() })
     })
     fish.forEach(item => {
       const anchor = item.anchor
@@ -360,12 +361,22 @@ diffuseColor.rgb = waterCol;
       const spawn = spawnPlans[i]; if (!spawn) return
       const { species, clearance, position } = spawn
       const root = new THREE.Group(), base = modelBases.get(service.fishId), fallback = !base
-      let mixer: THREE.AnimationMixer | undefined
+      let clipPlayer: FishClipPlayer | undefined
       let turningRig: FishTurningRig | undefined
       if (base) {
         const model = clone(base.scene); root.add(model); model.scale.setScalar(fishModelScale(service.fishId))
-        turningRig = bindFishTurningRig(model, service.fishId)
-        mixer = new THREE.AnimationMixer(model); base.animations.forEach(clip => mixer!.clipAction(clip).play()); mixer.setTime((seedForId(service.id) % 1500) / 1000)
+        // This player owns one full-weight clip and restores its clean pose
+        // before each overlay, including when a mixer track value is unchanged.
+        if (base.animations.length === 1) {
+          try {
+            clipPlayer = createFishClipPlayer(model, base.animations[0], (seedForId(service.id) % 1500) / 1000)
+            turningRig = bindFishTurningRig(model, service.fishId)
+          } catch (error) {
+            clipPlayer?.dispose(); clipPlayer = undefined
+            console.warn('Fish animation unsupported; retaining static service fish', species.id, error)
+          }
+        } else console.warn('Fish animation requires one clip; retaining static service fish', species.id)
+
       } else {
         const spriteScale = fishSpriteScale(service.fishId)
         const texture = new THREE.TextureLoader().load(species.thumbnail, loadedTexture => {
@@ -399,7 +410,7 @@ diffuseColor.rgb = waterCol;
       root.position.set(motion.position.x, motion.position.y, motion.position.z); scene.add(root)
       root.traverse(object => { if (object instanceof THREE.Mesh) { object.userData.serviceId = service.id; hitMeshes.push(object) } })
       const anchor = anchors.get(service.id); if (anchor) anchor.title = `${service.name} · ${species.commonName}${fallback ? ' · artwork preview' : ''}`
-      fish.push({ service, root, motion, mixer, turningRig, anchor, visible: false, fallback, releasedFocus: false })
+      fish.push({ service, root, motion, clipPlayer, turningRig, anchor, visible: false, fallback, releasedFocus: false })
     })
     render(0, true)
     return true
@@ -464,7 +475,14 @@ diffuseColor.rgb = waterCol;
       const stopped = paused || document.hidden || (focused && !item.releasedFocus)
       stepSwimmingFish(item.motion, habitat, SIMULATION_STEP_SECONDS, stopped)
       if (!stopped) {
-        item.mixer?.update(SIMULATION_STEP_SECONDS * (.55 + Math.min(1.7, item.motion.speed * 2.2)) * item.motion.animationPlaybackRate)
+        try {
+          item.clipPlayer?.advance(SIMULATION_STEP_SECONDS * (.55 + Math.min(1.7, item.motion.speed * 2.2)) * item.motion.animationPlaybackRate)
+        } catch (error) {
+          // The player has restored its complete last clean pose. Retire this
+          // unsupported animation once; other fish and native links keep working.
+          item.clipPlayer?.dispose(); item.clipPlayer = undefined; item.turningRig = undefined
+          console.warn('Fish animation stopped after invalid clip output', item.service.id, error)
+        }
         if (item.turningRig) applyFishTurningRigOverlay(item.turningRig, item.motion.turnKinematics, stopped)
       }
     }

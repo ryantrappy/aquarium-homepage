@@ -161,6 +161,32 @@ describe('fish animation clean-pose mixer owner', () => {
     expect(() => createFishClipPlayer(nonUnitPose.root, clip)).toThrow(/malformed quaternion/i)
   })
 
+  it('restores the complete prior clean pose when a late skin-bone track becomes invalid', () => {
+    const { root, bones } = makeRig()
+    const clip = makeSwimClip()
+    clip.tracks[2] = new THREE.QuaternionKeyframeTrack('pectoral_L.quaternion', [0, .5, 1], [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
+    const player = createFishClipPlayer(root, clip)
+    const prior = [bones.body, bones.tail, bones.fin].map(bone => bone.quaternion.clone())
+    overlay(bones.body); overlay(bones.tail); overlay(bones.fin)
+    expect(() => player.advance(.5)).toThrow(/malformed quaternion/i)
+    // Tail is evaluated before the malformed fin and has a new valid clip
+    // rotation. It must roll back too, rather than becoming a partial new pose.
+    for (const [index, bone] of [bones.body, bones.tail, bones.fin].entries()) expectQuaternionNear(bone.quaternion, prior[index])
+    player.dispose()
+    for (const [index, bone] of [bones.body, bones.tail, bones.fin].entries()) expectQuaternionNear(bone.quaternion, prior[index])
+  })
+
+  it('accepts shared-skin primitives but rejects a second independent skin palette', () => {
+    const { root, bones } = makeRig()
+    const shared = new THREE.SkinnedMesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial())
+    root.add(shared); shared.bind(new THREE.Skeleton([bones.body, bones.tail, bones.fin]))
+    const player = createFishClipPlayer(root, makeSwimClip()); expect(player.skinBoneCount).toBe(3); player.dispose()
+    const other = new THREE.Bone(); other.name = 'another_skin'; root.add(other)
+    const independent = new THREE.SkinnedMesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial())
+    root.add(independent); independent.bind(new THREE.Skeleton([other]))
+    expect(() => createFishClipPlayer(root, makeSwimClip())).toThrow(/one shared skin-bone palette/i)
+  })
+
   it('rejects malformed clip output and invalid time inputs without emitting NaNs', () => {
     const { root, bones } = makeRig()
     const badTrack = new THREE.QuaternionKeyframeTrack('tail.quaternion', [0, 1], [0, 0, 0, 0, 0, 0, 0, 0])
