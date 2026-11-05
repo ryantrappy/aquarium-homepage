@@ -437,10 +437,11 @@ def build_live_rock_textures_from_surface(size, x_grid, y_grid, z_top_grid, norm
 
 
 def build_live_rock_surface_bake(size, verts, faces, loop_uvs, island_kind):
-    """Bake existing 3D fields from real triangle positions into the mesh's UV charts."""
+    """Bake 3D isotropic aragonite + upward-facing coralline fields from real triangle positions into the mesh's UV charts."""
     seed = 101 if island_kind == 'left' else 211
     base_pixels = [0.0] * (size * size * 4)
     orm_pixels = [0.0] * (size * size * 4)
+    height_buf = [[0.5] * size for _ in range(size)]
     coverage = bytearray(size * size)
     sampled_positions = {}
     overlap_conflicts = 0
@@ -459,38 +460,43 @@ def build_live_rock_surface_bake(size, verts, faces, loop_uvs, island_kind):
         normal[:] = [value / length for value in normal]
 
     def evaluate(px, py, pz, nx_v, ny_v, nz_v):
-        w1 = value_noise_3d(px * 6.5, py * 6.5, pz * 6.5, seed=seed) - 0.5
-        w2 = value_noise_3d(px * 6.5 + 3.1, py * 6.5 - 2.7, pz * 6.5 + 1.9, seed=seed + 7) - 0.5
+        w1 = value_noise_3d(px * 7.5, py * 7.5, pz * 7.5, seed=seed) - 0.5
+        w2 = value_noise_3d(px * 7.5 + 3.1, py * 7.5 - 2.7, pz * 7.5 + 1.9, seed=seed + 7) - 0.5
         wx, wy, wz = px + 0.022 * w1, py + 0.022 * w2, pz + 0.022 * (w1 - w2)
-        macro = ridged_3d(wx * 7.5, wy * 7.5, wz * 7.5, octaves=2, seed=seed + 13)
-        medium = fbm_3d(wx * 22.0, wy * 22.0, wz * 22.0, octaves=2, seed=seed + 29)
-        fine = value_noise_3d(px * 78.0, py * 78.0, pz * 78.0, seed=seed + 53)
-        vug1 = value_noise_3d(wx * 32.0, wy * 32.0, wz * 32.0, seed=seed + 71)
-        vug2 = value_noise_3d(wx * 64.0 + 1.7, wy * 64.0 - 2.3, wz * 64.0 + 0.9, seed=seed + 83)
-        pore = value_noise_3d(px * 115.0, py * 115.0, pz * 115.0, seed=seed + 97)
+        macro = ridged_3d(wx * 9.5, wy * 9.5, wz * 9.5, octaves=2, seed=seed + 13)
+        medium = fbm_3d(wx * 26.0, wy * 26.0, wz * 26.0, octaves=2, seed=seed + 29)
+        fine = value_noise_3d(px * 88.0, py * 88.0, pz * 88.0, seed=seed + 53)
+        vug1 = value_noise_3d(wx * 38.0, wy * 38.0, wz * 38.0, seed=seed + 71)
+        vug2 = value_noise_3d(wx * 72.0 + 1.7, wy * 72.0 - 2.3, wz * 72.0 + 0.9, seed=seed + 83)
+        pore = value_noise_3d(px * 125.0, py * 125.0, pz * 125.0, seed=seed + 97)
         cavity = (
-            smoothstep(0.22, 0.58, vug1 * 0.65 + vug2 * 0.35)
-            * (0.55 + 0.45 * smoothstep(0.20, 0.62, pore))
-            * (0.62 + 0.38 * smoothstep(0.03, 0.22, abs(vug1 - 0.5)))
+            smoothstep(0.24, 0.62, vug1 * 0.65 + vug2 * 0.35)
+            * (0.60 + 0.40 * smoothstep(0.20, 0.62, pore))
+            * (0.65 + 0.35 * smoothstep(0.03, 0.20, abs(vug1 - 0.5)))
         )
-        carb = lerp_color((0.145, 0.128, 0.105), (0.365, 0.335, 0.285), smoothstep(0.08, 0.52, cavity))
-        carb = lerp_color(carb, (0.615, 0.575, 0.495), smoothstep(0.42, 0.86, macro * 0.6 + medium * 0.4) * cavity)
-        olive = (1.0 - smoothstep(0.06, 0.24, pz)) * smoothstep(0.2, 0.8, medium) * 0.35
-        carb = lerp_color(carb, (0.310, 0.335, 0.215), olive)
-        cor_cell = value_noise_3d(wx * 14.0, wy * 14.0, wz * 14.0, seed=seed + 131)
-        exposure = smoothstep(-0.05, 0.62, nz_v) * smoothstep(0.02, 0.22, pz)
-        patch = 0.50 * medium + 0.50 * cor_cell + 0.28 * exposure
-        cor_mask = smoothstep(0.48, 0.66, patch) * smoothstep(0.22, 0.55, cavity)
-        cor = lerp_color((0.295, 0.095, 0.245), (0.515, 0.175, 0.405), smoothstep(0.30, 0.65, medium))
-        cor = lerp_color(cor, (0.685, 0.345, 0.565), smoothstep(0.58, 0.84, macro))
-        rim = math.exp(-((patch - 0.55) / 0.028) ** 2) * exposure
-        cor = lerp_color(cor, (0.865, 0.675, 0.795), rim * 0.65)
-        color = lerp_color(carb, cor, cor_mask * 0.86)
-        ao = max(0.18, min(1.0, cavity * (0.72 + 0.28 * smoothstep(-0.2, 0.6, nz_v))))
-        micro = 0.88 + 0.24 * fine
-        base = [max(0.0, min(1.0, channel * micro * (0.55 + 0.45 * ao))) for channel in color]
-        roughness = lerp(0.94, 0.64, cor_mask * 0.85)
-        return base, ao, roughness
+        # Warm porous cured Fiji/Marco aragonite carbonate palette (eliminating dark black/magenta blotches)
+        carb = lerp_color((0.270, 0.240, 0.190), (0.520, 0.470, 0.390), smoothstep(0.22, 0.62, cavity))
+        carb = lerp_color(carb, (0.740, 0.690, 0.590), smoothstep(0.42, 0.84, macro * 0.6 + medium * 0.4) * cavity)
+        olive = (1.0 - smoothstep(0.04, 0.22, pz)) * smoothstep(0.25, 0.78, medium) * 0.30
+        carb = lerp_color(carb, (0.390, 0.400, 0.280), olive)
+
+        # Crustose coralline algae plaques restricted to upward-facing sunlit surfaces (nz_v > 0.18)
+        cor_cell = value_noise_3d(wx * 15.5, wy * 15.5, wz * 15.5, seed=seed + 131)
+        exposure = smoothstep(0.18, 0.68, nz_v) * smoothstep(0.03, 0.22, pz)
+        patch = 0.50 * medium + 0.50 * cor_cell + 0.26 * exposure
+        cor_mask = smoothstep(0.50, 0.68, patch) * exposure * smoothstep(0.32, 0.62, cavity)
+        cor = lerp_color((0.350, 0.120, 0.280), (0.560, 0.210, 0.430), smoothstep(0.28, 0.66, medium))
+        cor = lerp_color(cor, (0.720, 0.390, 0.590), smoothstep(0.58, 0.85, macro))
+        rim = math.exp(-((patch - 0.56) / 0.028) ** 2) * exposure
+        cor = lerp_color(cor, (0.870, 0.710, 0.810), rim * 0.60)
+
+        color = lerp_color(carb, cor, cor_mask * 0.85)
+        ao = max(0.34, min(1.0, cavity * (0.76 + 0.24 * smoothstep(-0.3, 0.65, nz_v))))
+        micro = 0.90 + 0.20 * fine
+        base = [max(0.0, min(1.0, channel * micro * (0.65 + 0.35 * ao))) for channel in color]
+        roughness = lerp(0.90, 0.65, cor_mask * 0.85)
+        h_val = 0.42 * cavity + 0.32 * macro + 0.16 * medium + 0.10 * fine + 0.08 * cor_mask
+        return base, ao, roughness, h_val
 
     for triangle_index, face in enumerate(faces):
         tri_uv = loop_uvs[triangle_index * 3:triangle_index * 3 + 3]
@@ -529,10 +535,11 @@ def build_live_rock_surface_bake(size, verts, faces, loop_uvs, island_kind):
                 sampled_positions[pixel] = position
                 normal = [sum(weight * tri_norm[index][axis] for index, weight in enumerate((w0, w1, w2))) for axis in range(3)]
                 length = math.sqrt(sum(value * value for value in normal)) or 1.0
-                base, ao, roughness = evaluate(*position, *(value / length for value in normal))
+                base, ao, roughness, h_val = evaluate(*position, *(value / length for value in normal))
                 offset = pixel * 4
                 base_pixels[offset:offset + 4] = [*base, 1.0]
                 orm_pixels[offset:offset + 4] = [ao, roughness, 0.0, 1.0]
+                height_buf[y_i][x_i] = h_val
 
     # Extend chart colors several texels for filtered samples at island edges.
     filled = bytearray(coverage)
@@ -549,10 +556,26 @@ def build_live_rock_surface_bake(size, verts, faces, loop_uvs, island_kind):
         for pixel, source in additions:
             base_pixels[pixel * 4:pixel * 4 + 4] = base_pixels[source * 4:source * 4 + 4]
             orm_pixels[pixel * 4:pixel * 4 + 4] = orm_pixels[source * 4:source * 4 + 4]
+            sy_i, sx_i = divmod(source, size)
+            py_i, px_i = divmod(pixel, size)
+            height_buf[py_i][px_i] = height_buf[sy_i][sx_i]
             filled[pixel] = 1
 
-    # The old top-grid normal map has no valid basis on these charts. Use a neutral review normal.
-    norm_pixels = [0.5, 0.5, 1.0, 1.0] * (size * size)
+    norm_pixels = [0.0] * (size * size * 4)
+    for y_i in range(size):
+        y_prev = max(0, y_i - 1)
+        y_next = min(size - 1, y_i + 1)
+        row_off = y_i * size * 4
+        for x_i in range(size):
+            x_prev = max(0, x_i - 1)
+            x_next = min(size - 1, x_i + 1)
+            dh_dx = (height_buf[y_i][x_next] - height_buf[y_i][x_prev]) * 4.5
+            dh_dy = (height_buf[y_next][x_i] - height_buf[y_prev][x_i]) * 4.5
+            nx_t = max(-1.0, min(1.0, -dh_dx))
+            ny_t = max(-1.0, min(1.0, -dh_dy))
+            nz_t = math.sqrt(max(0.0, 1.0 - nx_t * nx_t - ny_t * ny_t))
+            norm_pixels[row_off:row_off + 4] = [0.5 + 0.5 * nx_t, 0.5 + 0.5 * ny_t, 0.5 + 0.5 * nz_t, 1.0]
+            row_off += 4
 
     def pack_buf(name, buf, non_color=False):
         image = bpy.data.images.new(name=name, width=size, height=size, alpha=True, float_buffer=False)
@@ -570,7 +593,7 @@ def build_live_rock_surface_bake(size, verts, faces, loop_uvs, island_kind):
         'overlapConflicts': overlap_conflicts,
         'overlapTypes': overlap_types,
         'coveredTexels': sum(coverage),
-        'normalMap': 'flat-neutral-review-variant',
+        'normalMap': '3d-surface-height-gradient-v1',
     }, sort_keys=True), flush=True)
     return (
         pack_buf(f'live_rock_{island_kind}_base', base_pixels),
@@ -739,11 +762,26 @@ def build_reef_foundation_mesh(name, island_kind='left'):
         for j in range(ny):
             verts.append((x_grid[i][j], y_grid[i][j], z_bot_grid[i][j]))
 
-    # Separate top, underside, and two skirt halves. Each chart uses the same 450px/m scale.
+    # Cumulative 3D surface arc-length parameterization across columns i and rows j
+    # expands steep interior boulder slopes in UV space while keeping a strictly monotonic non-overlapping grid.
     atlas_size = 1024
     density = 450.0
     margin = 8.0
     gutter = 12.0
+
+    def cumulative_3d_axes(idx_fn, target_w_px, target_h_px):
+        du = [0.0]
+        for i in range(nx - 1):
+            dists = sorted(math.dist(verts[idx_fn(i, j)], verts[idx_fn(i + 1, j)]) for j in range(ny))
+            du.append(du[-1] + dists[int(0.85 * (len(dists) - 1))])
+        dv = [0.0]
+        for j in range(ny - 1):
+            dists = sorted(math.dist(verts[idx_fn(i, j)], verts[idx_fn(i, j + 1)]) for i in range(nx))
+            dv.append(dv[-1] + dists[int(0.85 * (len(dists) - 1))])
+        scale_u = target_w_px / max(1e-6, du[-1])
+        scale_v = target_h_px / max(1e-6, dv[-1])
+        return [d * scale_u for d in du], [d * scale_v for d in dv]
+
     top_u_step = sum(math.dist(verts[top_v_idx(i, j)], verts[top_v_idx(i + 1, j)]) for i in range(nx - 1) for j in range(ny)) / ((nx - 1) * ny)
     top_v_step = sum(math.dist(verts[top_v_idx(i, j)], verts[top_v_idx(i, j + 1)]) for i in range(nx) for j in range(ny - 1)) / (nx * (ny - 1))
     bottom_u_step = sum(math.dist(verts[bot_v_idx(i, j)], verts[bot_v_idx(i + 1, j)]) for i in range(nx - 1) for j in range(ny)) / ((nx - 1) * ny)
@@ -755,13 +793,16 @@ def build_reef_foundation_mesh(name, island_kind='left'):
     top_origin = (margin, margin)
     bottom_origin = (margin, margin + top_chart_height + gutter)
 
+    top_u_px, top_v_px = cumulative_3d_axes(top_v_idx, top_chart_width, top_chart_height)
+    bot_u_px, bot_v_px = cumulative_3d_axes(bot_v_idx, bottom_chart_width, bottom_chart_height)
+
     def top_uv(i, j):
-        return ((top_origin[0] + i * top_u_step * density) / atlas_size,
-                (top_origin[1] + j * top_v_step * density) / atlas_size)
+        return ((top_origin[0] + top_u_px[i]) / atlas_size,
+                (top_origin[1] + top_v_px[j]) / atlas_size)
 
     def bottom_uv(i, j):
-        return ((bottom_origin[0] + i * bottom_u_step * density) / atlas_size,
-                (bottom_origin[1] + j * bottom_v_step * density) / atlas_size)
+        return ((bottom_origin[0] + bot_u_px[i]) / atlas_size,
+                (bottom_origin[1] + bot_v_px[j]) / atlas_size)
 
     for i in range(nx - 1):
         for j in range(ny - 1):

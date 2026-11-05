@@ -6,6 +6,7 @@ import {
   DEFAULT_RIGHT_ISLAND_MOUNTS,
   assembleCoralsOnRockSockets,
   inferSocketArchetype,
+  instantiateModularReefHabitat,
 } from './reef-assembly'
 
 function buildRockFixtureFromSocketReport(reportFile: string): THREE.Group {
@@ -13,6 +14,14 @@ function buildRockFixtureFromSocketReport(reportFile: string): THREE.Group {
     readFileSync(new URL(`../assets/corals/${reportFile}`, import.meta.url), 'utf8'),
   )
   const root = new THREE.Group()
+  const rockMesh = new THREE.Mesh(
+    new THREE.BufferGeometry(),
+    new THREE.MeshStandardMaterial({ map: new THREE.Texture() }),
+  )
+  rockMesh.name = 'Live_Rock_Island'
+  rockMesh.userData = { reefPrimitive: { id: 'live_rock', role: 'rock' } }
+  root.add(rockMesh)
+
   for (const socket of report.supportedSockets) {
     const node = new THREE.Object3D()
     node.name = socket.name
@@ -54,7 +63,7 @@ function buildMockCoralTemplates(): Map<string, THREE.Object3D> {
 }
 
 describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () => {
-  it('mounts all 12 left-island and 11 right-island sockets with verified archetypes and raw-mask material bindings', () => {
+  it('mounts all 12 left-island and 11 right-island sockets with verified archetypes, 3D live-rock shader, and raw-mask material bindings', () => {
     const templates = buildMockCoralTemplates()
     const leftRock = buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json')
     const rightRock = buildRockFixtureFromSocketReport('live-rock-island-right-socket-report.json')
@@ -64,6 +73,10 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
 
     expect(leftAssembly.mountedCorals).toHaveLength(12)
     expect(rightAssembly.mountedCorals).toHaveLength(11)
+
+    const leftRockMesh = leftRock.getObjectByName('Live_Rock_Island') as THREE.Mesh
+    expect((leftRockMesh.material as THREE.MeshStandardMaterial).userData.liveRockShader).toBe('live-rock-3d-aragonite-v1')
+    expect((leftRockMesh.material as THREE.MeshStandardMaterial).map).toBeNull()
 
     for (const mounted of [...leftAssembly.mountedCorals, ...rightAssembly.mountedCorals]) {
       expect(mounted.materialControllers.length).toBeGreaterThan(0)
@@ -89,6 +102,26 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     for (const ctrl of softControllers) {
       expect(ctrl.uniforms.uMotionScale.value).toBe(1)
     }
+  })
+
+  it('instantiates 3D modular reef obstacles preserving the left pass-through cave arch and grazing anchors', () => {
+    const leftHabitat = instantiateModularReefHabitat('left', 4.2, { x: -2.65, y: -2.72, z: -1.1 }, 'reef-0', 0)
+    expect(leftHabitat.obstacles.length).toBe(8)
+    expect(leftHabitat.anchors.length).toBe(3)
+
+    // The cave opening at the center of the left island (localX=0, localY=0.06 -> worldX=-2.65, worldY=-2.468)
+    // must NOT be inside any of the lower rock band obstacles (rock-part-01..06 flank left and right of the cave).
+    const cavePoint = { x: -2.65, y: -2.72 + 0.06 * 4.2, z: -1.1 }
+    const containingObstacles = leftHabitat.obstacles.filter(
+      obs =>
+        cavePoint.x >= obs.bounds.min.x &&
+        cavePoint.x <= obs.bounds.max.x &&
+        cavePoint.y >= obs.bounds.min.y &&
+        cavePoint.y <= obs.bounds.max.y &&
+        cavePoint.z >= obs.bounds.min.z &&
+        cavePoint.z <= obs.bounds.max.z,
+    )
+    expect(containingObstacles).toHaveLength(0)
   })
 
   it('rejects mismatched socket archetypes', () => {

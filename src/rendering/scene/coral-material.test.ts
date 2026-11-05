@@ -5,9 +5,11 @@ import {
   CORAL_FLEXIBILITY_EXPONENT,
   CORAL_RAW_MASK_SCHEMA,
   applyCoralRawMaskMaterial,
+  applyLiveRockMaterial,
   evaluateCoralContactAoFactor,
   evaluateCoralFlexibilityWeight,
   evaluateCoralVertexDisplacement,
+  evaluateLiveRockSurfaceSample,
   type CoralPrimitiveRole,
 } from './coral-material'
 
@@ -172,5 +174,32 @@ describe('coral-raw-masks-v1 material and shader adapter (AQ-53 / AQ-42)', () =>
         }
       }
     }
+  })
+
+  it('shades live-rock foundations in 3D isotropic meter space with upward-normal coralline plaques and zero UV stretching', () => {
+    const rockMat = new THREE.MeshStandardMaterial({
+      map: new THREE.Texture(),
+      normalMap: new THREE.Texture(),
+    })
+    applyLiveRockMaterial(rockMat)
+    expect(rockMat.map).toBeNull()
+    expect(rockMat.normalMap).toBeNull()
+    expect(rockMat.userData.liveRockShader).toBe('live-rock-3d-aragonite-v1')
+
+    const mockShader: THREE.WebGLProgramParametersWithUniforms = {
+      uniforms: {},
+      vertexShader: THREE.ShaderLib.standard.vertexShader,
+      fragmentShader: THREE.ShaderLib.standard.fragmentShader,
+    } as unknown as THREE.WebGLProgramParametersWithUniforms
+    rockMat.onBeforeCompile(mockShader, {} as THREE.WebGLRenderer)
+    expect(mockShader.vertexShader).toContain('vRockObjPos = position.xyz;')
+    expect(mockShader.fragmentShader).toContain('finalRockColor')
+    expect(mockShader.fragmentShader).toContain('roughnessFactor = mix(0.90, 0.65, corMask * 0.85);')
+
+    const upwardCrest = evaluateLiveRockSurfaceSample({ x: 0.12, y: 0.34, z: -0.08 }, { x: 0, y: 1, z: 0 })
+    const verticalWall = evaluateLiveRockSurfaceSample({ x: 0.12, y: 0.34, z: -0.08 }, { x: 1, y: 0, z: 0 })
+    expect(upwardCrest.corallineMask).toBeGreaterThan(verticalWall.corallineMask)
+    expect(verticalWall.corallineMask).toBe(0)
+    expect(upwardCrest.roughness).toBeLessThan(verticalWall.roughness)
   })
 })
