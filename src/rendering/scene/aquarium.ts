@@ -27,6 +27,7 @@ import { handleArtworkTextureFailure, nearestVisibleIntersection, readArtworkAlp
 import { applyFishLinkVisibility } from './fish-link-focus'
 import { projectFishLinkBounds } from './fish-link-projection'
 import { createFishClipPlayer, type FishClipPlayer } from './fish-animation'
+import { reconcileFishInhabitants, refreshFishLink } from './fish-inhabitants'
 
 const modelUrls: Record<string, string> = {
   'ocellaris-clownfish': new URL('../proof/candidate-real-clown.glb', import.meta.url).href,
@@ -34,7 +35,7 @@ const modelUrls: Record<string, string> = {
 }
 export type SceneStatus = 'loading' | 'ready' | 'failed'
 export type AquariumController = { update(services: ServiceConfig[], paused: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void }
-type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean }
+type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean }
 
 function disposeTree(root: THREE.Object3D) {
   const geometries = new Set<THREE.BufferGeometry>(), materials = new Set<THREE.Material>(), textures = new Set<THREE.Texture>()
@@ -238,9 +239,8 @@ diffuseColor.rgb = waterCol;
   let width = 1, height = 1, labelClock = 0, spawnUnavailable = false
   const clock = createFrameClock()
   const ray = new THREE.Raycaster(), projected = new THREE.Vector3(), sample = new THREE.Vector3(), hitMeshes: THREE.Object3D[] = []
-  const ownedSprites: THREE.Mesh[] = []
+  const ownedSprites = new Set<THREE.Mesh>()
   const spriteMasks: SpriteMasks = new WeakMap()
-  const unavailableArtwork = new Set<string>()
   function nearest(x: number, y: number) {
     const box = canvas.getBoundingClientRect()
     ray.setFromCamera(new THREE.Vector2((x - box.left) / box.width * 2 - 1, 1 - (y - box.top) / box.height * 2), camera)
@@ -248,7 +248,7 @@ diffuseColor.rgb = waterCol;
   }
   function updateVisibility(item: Inhabitant) {
     const rect = canvas.getBoundingClientRect()
-    const artworkUnavailable = unavailableArtwork.has(item.service.id)
+    const artworkUnavailable = Boolean(item.artworkUnavailable)
     let visible = artworkUnavailable && Boolean(projectFishLinkBounds(item.root.position, camera, width, height, fishRenderLength(item.service.fishId), projected))
     if (!visible && !artworkUnavailable) for (const [localY, localZ] of [[0, 0], [0, .31], [0, -.31], [.13, 0], [-.13, 0]]) {
       sample.set(item.fallback ? localZ : 0, localY, item.fallback ? 0 : localZ).applyMatrix4(item.root.matrixWorld).project(camera)
@@ -318,69 +318,51 @@ diffuseColor.rgb = waterCol;
     }
     hitMeshes.push(sand)
   }
-  function removeFish() {
-    const extensionErrors: unknown[] = []
-    fish.forEach(item => {
-      try { item.motion.extensions.dispose() } catch (error) { extensionErrors.push(error) }
-      scene.remove(item.root); item.clipPlayer?.dispose(); item.root.traverse(object => { if (object instanceof THREE.SkinnedMesh) object.skeleton.dispose() })
-    })
-    fish.forEach(item => {
-      const anchor = item.anchor
-      if (!anchor) return
-      anchor.removeAttribute('data-artwork-error')
-      const species = getFishById(item.service.fishId)
-      anchor.title = `${item.service.name} · ${species?.commonName ?? 'reef fish'}${item.fallback ? ' · artwork preview' : ''}`
-      anchor.setAttribute('aria-label', `Open ${item.service.name} in a new tab`)
-    })
-    unavailableArtwork.clear()
-    ownedSprites.forEach(sprite => { disposeTree(sprite) }); ownedSprites.length = 0; fish = []
-    if (extensionErrors.length) console.error('Fish extension cleanup failed', new AggregateError(extensionErrors, 'Fish extension cleanup failed'))
-  }
-  function rebuildFish(): boolean | undefined {
-    removeFish(); if (!loaded || disposed) return undefined
-    hitMeshes.splice(0); reefs.forEach(reef => reef.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) })); hitMeshes.push(sand)
-    const anchors = new Map(Array.from(overlay.querySelectorAll<HTMLAnchorElement>('a[data-service-id]')).map(anchor => [anchor.dataset.serviceId!, anchor]))
-    const spawnPlans = services.map((service, i) => {
-      const species = getFishById(service.fishId); if (!species) return undefined
-      const span = habitat.bounds.max.x - habitat.bounds.min.x
-      const x = width < 600 ? [-.3, .3, 0][i % 3] : ((i % 3) - 1) * Math.min(span * .26, 2.7)
-      const y = (width < 600 ? [1.25, .55, 1.95][i % 3] : 1.45) - Math.floor(i / 3) * .7
-      const clearance = fishClearanceRadius(service.fishId)
-      const preferred = { x, y: Math.max(.3, y), z: 1.8 + (i % 2) * .2 }
-      return { species, clearance, position: findSafeFishSpawn(preferred, habitat.bounds, habitat.obstacles, clearance) }
-    })
-    if (spawnPlans.some(plan => plan !== undefined && plan.position === undefined)) {
-      // The React-owned native service links remain in the visible fallback layout.
-      // Never create an unsafe fish or shrink its model/radius to make it fit.
-      spawnUnavailable = true
-      syncLoop()
-      return false
+  function disposeInhabitant(item: Inhabitant) {
+    try { item.motion.extensions.dispose() } catch (error) { console.error('Fish extension cleanup failed', error) }
+    scene.remove(item.root); item.clipPlayer?.dispose()
+    const skeletons = new Set<THREE.Skeleton>()
+    item.root.traverse(object => { if (object instanceof THREE.SkinnedMesh) skeletons.add(object.skeleton) })
+    skeletons.forEach(skeleton => skeleton.dispose())
+    if (item.artwork) {
+      ownedSprites.delete(item.artwork); spriteMasks.delete(item.artwork); disposeTree(item.artwork)
     }
-    spawnUnavailable = false
-    services.forEach((service, i) => {
-      const spawn = spawnPlans[i]; if (!spawn) return
-      const { species, clearance, position } = spawn
-      const root = new THREE.Group(), base = modelBases.get(service.fishId), fallback = !base
-      let clipPlayer: FishClipPlayer | undefined
-      let turningRig: FishTurningRig | undefined
+    item.anchor?.removeAttribute('data-artwork-error')
+  }
+  function removeFish() { fish.forEach(disposeInhabitant); fish = [] }
+  function rebuildHitMeshes() {
+    hitMeshes.length = 0
+    reefs.forEach(reef => reef.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) }))
+    hitMeshes.push(sand)
+    fish.forEach(item => item.root.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) }))
+  }
+  type FishSpawn = { species: NonNullable<ReturnType<typeof getFishById>>; clearance: number; position: SwimmingFish['position'] }
+  function createInhabitant(service: ServiceConfig, spawn: FishSpawn, anchor?: HTMLAnchorElement): Inhabitant {
+    const { species, clearance, position } = spawn
+    const root = new THREE.Group(), base = modelBases.get(service.fishId), fallback = !base
+    const motion = createSwimmingFish(service.id, service.fishId, position, clearance, fishExtensions)
+    const item: Inhabitant = { service, root, motion, anchor, visible: false, fallback, releasedFocus: false }
+    try {
       if (base) {
         const model = clone(base.scene); root.add(model); model.scale.setScalar(fishModelScale(service.fishId))
-        // This player owns one full-weight clip and restores its clean pose
-        // before each overlay, including when a mixer track value is unchanged.
+        // The player restores the clean clip pose before every turning overlay.
         if (base.animations.length === 1) {
           try {
-            clipPlayer = createFishClipPlayer(model, base.animations[0], (seedForId(service.id) % 1500) / 1000)
-            turningRig = bindFishTurningRig(model, service.fishId)
+            item.clipPlayer = createFishClipPlayer(model, base.animations[0], (seedForId(service.id) % 1500) / 1000)
+            item.turningRig = bindFishTurningRig(model, service.fishId)
           } catch (error) {
-            clipPlayer?.dispose(); clipPlayer = undefined
+            item.clipPlayer?.dispose(); item.clipPlayer = undefined
             console.warn('Fish animation unsupported; retaining static service fish', species.id, error)
           }
         } else console.warn('Fish animation requires one clip; retaining static service fish', species.id)
-
       } else {
         const spriteScale = fishSpriteScale(service.fishId)
+        // No-fit fallback retains old resources, but callbacks for a removed or
+        // replaced service must not rewrite its React-owned current native link.
+        const acceptsArtworkCallback = () => !disposed && !failed && ownedSprites.has(sprite)
+          && services.some(next => next.id === item.service.id && next.fishId === item.service.fishId)
         const texture = new THREE.TextureLoader().load(species.thumbnail, loadedTexture => {
-          if (disposed || failed || !ownedSprites.includes(sprite)) return
+          if (!acceptsArtworkCallback()) return
           const image = loadedTexture.image as HTMLImageElement
           const imageWidth = image.naturalWidth, imageHeight = image.naturalHeight
           if (Number.isFinite(imageWidth) && Number.isFinite(imageHeight) && imageWidth > 0 && imageHeight > 0) {
@@ -390,31 +372,67 @@ diffuseColor.rgb = waterCol;
           catch (error) { console.warn('Fish artwork alpha unavailable', error) }
           if (!document.hidden) render(0, true)
         }, undefined, error => {
-          if (disposed || !ownedSprites.includes(sprite)) return
-          unavailableArtwork.add(service.id)
-          const anchor = anchors.get(service.id)
-          handleArtworkTextureFailure(sprite, texture, hitMeshes, spriteMasks, anchor)
-          if (anchor) {
-            anchor.title = `${service.name} · ${species.commonName} · thumbnail unavailable`
-            anchor.setAttribute('aria-label', `Open ${service.name} in a new tab; fish thumbnail unavailable`)
-          }
+          if (!acceptsArtworkCallback()) return
+          item.artworkUnavailable = true
+          handleArtworkTextureFailure(sprite, texture, hitMeshes, spriteMasks, item.anchor)
+          sprite.material.map = null // the failure handler already disposed this owned texture
+          refreshFishLink(item, item.service, item.anchor)
           console.warn('Fish thumbnail failed to load; native service label remains available', species.thumbnail, error)
           if (!document.hidden) render(0, true)
         }); texture.colorSpace = THREE.SRGBColorSpace
         const sprite = new THREE.Mesh(new THREE.PlaneGeometry(SPRITE_PLANE_WIDTH, .62), new THREE.MeshBasicMaterial({ map: texture, transparent: true, alphaTest: .2, depthWrite: true, side: THREE.DoubleSide }))
         sprite.scale.set(spriteScale, spriteScale, 1)
-        root.add(sprite); ownedSprites.push(sprite)
+        root.add(sprite); ownedSprites.add(sprite); item.artwork = sprite
         spriteMasks.set(sprite, { texture }) // pending/failed masks never claim opaque pixels
       }
-      const motion = createSwimmingFish(service.id, service.fishId, position!, clearance, fishExtensions)
-      root.position.set(motion.position.x, motion.position.y, motion.position.z); scene.add(root)
-      root.traverse(object => { if (object instanceof THREE.Mesh) { object.userData.serviceId = service.id; hitMeshes.push(object) } })
-      const anchor = anchors.get(service.id); if (anchor) anchor.title = `${service.name} · ${species.commonName}${fallback ? ' · artwork preview' : ''}`
-      fish.push({ service, root, motion, clipPlayer, turningRig, anchor, visible: false, fallback, releasedFocus: false })
+      root.position.set(motion.position.x, motion.position.y, motion.position.z)
+      root.traverse(object => { if (object instanceof THREE.Mesh) object.userData.serviceId = service.id })
+      scene.add(root)
+      return item
+    } catch (error) { disposeInhabitant(item); throw error }
+  }
+  function reconcileFish(): boolean | undefined {
+    if (!loaded || disposed) return undefined
+    const anchors = new Map(Array.from(overlay.querySelectorAll<HTMLAnchorElement>('a[data-service-id]')).map(anchor => [anchor.dataset.serviceId!, anchor]))
+    const current = new Map(fish.map(item => [item.service.id, item]))
+    const nextServices = services.filter(service => getFishById(service.fishId))
+    const spawns = new Map<string, FishSpawn>()
+    const refreshRetainedLinks = () => nextServices.forEach(next => {
+      const retained = current.get(next.id)
+      if (retained?.service.fishId === next.fishId) refreshFishLink(retained, next, anchors.get(next.id))
     })
-    render(0, true)
+    for (const [i, service] of nextServices.entries()) {
+      const previous = current.get(service.id)
+      if (previous?.service.fishId === service.fishId) continue
+      const species = getFishById(service.fishId)!
+      const span = habitat.bounds.max.x - habitat.bounds.min.x
+      const x = width < 600 ? [-.3, .3, 0][i % 3] : ((i % 3) - 1) * Math.min(span * .26, 2.7)
+      const y = (width < 600 ? [1.25, .55, 1.95][i % 3] : 1.45) - Math.floor(i / 3) * .7
+      const clearance = fishClearanceRadius(service.fishId)
+      const position = findSafeFishSpawn({ x, y: Math.max(.3, y), z: 1.8 + (i % 2) * .2 }, habitat.bounds, habitat.obstacles, clearance)
+      if (!position) {
+        // Keep existing instances intact during the truthful full-native fallback.
+        // A later fitting configuration can reuse their exact poses and clocks.
+        refreshRetainedLinks()
+        spawnUnavailable = true; syncLoop(); return false
+      }
+      spawns.set(service.id, { species, clearance, position })
+    }
+    try {
+      fish = reconcileFishInhabitants(fish, nextServices, {
+        create: service => createInhabitant(service, spawns.get(service.id)!, anchors.get(service.id)),
+        refresh: (item, service) => refreshFishLink(item, service, anchors.get(service.id)),
+        dispose: disposeInhabitant,
+      })
+    } catch (error) {
+      console.error('Aquarium inhabitant update unavailable; native service links remain available', error)
+      refreshRetainedLinks()
+      spawnUnavailable = true; rebuildHitMeshes(); syncLoop(); return false
+    }
+    spawnUnavailable = false; rebuildHitMeshes(); render(0, true)
     return true
   }
+  function rebuildFish(): boolean | undefined { removeFish(); return reconcileFish() }
   function positionLabels(force = false) {
     for (const item of fish) {
       const anchor = item.anchor; if (!anchor) continue
@@ -560,7 +578,7 @@ diffuseColor.rgb = waterCol;
     update(next, stopped) {
       const changed = JSON.stringify(next) !== JSON.stringify(services); services = next; paused = stopped
       if (changed) {
-        const rebuilt = rebuildFish()
+        const rebuilt = reconcileFish()
         if (rebuilt !== undefined) status(fishSceneStatus(!rebuilt))
       }
       syncLoop()
