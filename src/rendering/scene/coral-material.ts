@@ -186,7 +186,7 @@ export function evaluateCoralVertexDisplacement(
 
   const swayX = Math.sin(primaryPhase) + 0.38 * Math.cos(secondaryPhase)
   const swayZ = 0.76 * Math.cos(primaryPhase * 0.92 + 0.65) + 0.34 * Math.sin(secondaryPhase)
-  const swayY = -0.18 * (Math.abs(swayX) + Math.abs(swayZ)) * flexibilityWeight
+  const swayY = -0.18 * (Math.abs(swayX) + Math.abs(swayZ)) * flexibilityWeight * flexibilityWeight
 
   return {
     dx: swayX * amplitude * flexibilityWeight,

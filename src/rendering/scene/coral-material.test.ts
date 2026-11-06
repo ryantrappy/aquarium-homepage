@@ -140,6 +140,27 @@ describe('coral-raw-masks-v1 material and shader adapter (AQ-53 / AQ-42)', () =>
     expect(evaluateCoralContactAoFactor(1)).toBeCloseTo(1.0, 6)
   })
 
+  it('matches the shader vertical flex-squared response at partial raw R', () => {
+    const position = { x: 0.03, y: 0.12, z: -0.02 }
+    const mask = { r: 0.44, g: 0.4, b: 0.67, a: 0.25 }
+    const time = 2.5
+    const amplitude = 0.014
+    const flexibility = Math.pow(mask.r, 1.8)
+    const phaseSeed = mask.b * Math.PI * 2
+    const spatialPhase = position.x * 11.5 + position.z * 9.2
+    const phase1 = time * Math.PI * 2 * 0.28 + phaseSeed + spatialPhase
+    const phase2 = time * Math.PI * 2 * 0.61 - phaseSeed * 1.37 + (position.z * 13 - position.x * 7.5)
+    const swayX = Math.sin(phase1) + 0.38 * Math.cos(phase2)
+    const swayZ = 0.76 * Math.cos(phase1 * 0.92 + 0.65) + 0.34 * Math.sin(phase2)
+    const expected = {
+      dx: swayX * amplitude * flexibility,
+      dy: -0.18 * (Math.abs(swayX) + Math.abs(swayZ)) * amplitude * flexibility * flexibility,
+      dz: swayZ * amplitude * flexibility,
+      flexibilityWeight: flexibility,
+    }
+    expect(evaluateCoralVertexDisplacement(position, mask, 'coral-soft', time)).toMatchObject(expected)
+  })
+
   it('consumes all 8 packaged coral inspection records with single-exponent soft crowns and zero-displacement rigid skeletons', () => {
     const coralIds = [
       'coral-euphyllia-torch',
