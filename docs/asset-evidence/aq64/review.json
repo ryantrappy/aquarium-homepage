@@ -1,0 +1,110 @@
+{
+  "laptop": {
+    "viewport": [
+      1440,
+      900
+    ],
+    "metadataPreserved": true,
+    "addCount": 6,
+    "additionPreserved": true,
+    "removeCount": 5,
+    "removalPreserved": true,
+    "reorderedIds": [
+      "ombi",
+      "home-assistant",
+      "paperless",
+      "watchmybirds",
+      "komodo"
+    ],
+    "reorderPreserved": true
+  },
+  "phone": {
+    "links": [
+      {
+        "height": "128.262px",
+        "href": "https://komodo.ryantr.app",
+        "id": "komodo",
+        "label": "Open Komodo in a new tab",
+        "transform": "translate3d(153.882px, 349.152px, 0px)",
+        "width": "189.105px"
+      },
+      {
+        "height": "68.3054px",
+        "href": "https://watchmybirds.ryantr.app",
+        "id": "watchmybirds",
+        "label": "Open WatchMyBirds in a new tab",
+        "transform": "translate3d(107.487px, 337.794px, 0px)",
+        "width": "89.4476px"
+      },
+      {
+        "height": "66.4081px",
+        "href": "https://paperless.ryantr.app",
+        "id": "paperless",
+        "label": "Open Paperless in a new tab",
+        "transform": "translate3d(157.519px, 119.19px, 0px)",
+        "width": "86.9629px"
+      },
+      {
+        "height": "68.3054px",
+        "href": "https://ha.ryantr.app",
+        "id": "home-assistant",
+        "label": "Open Home Assistant in a new tab",
+        "transform": "translate3d(204.903px, 337.794px, 0px)",
+        "width": "89.7729px"
+      },
+      {
+        "height": "177.594px",
+        "href": "https://ombi.ryantr.app",
+        "id": "ombi",
+        "label": "Open Ombi in a new tab",
+        "transform": "translate3d(25.6694px, 174.277px, 0px)",
+        "width": "261.838px"
+      }
+    ],
+    "overflow": false,
+    "viewport": [
+      402,
+      874,
+      1
+    ],
+    "metadataAndReorderPreserved": true
+  },
+  "motion": {
+    "allMove": true
+  },
+  "logs": [
+    {
+      "level": "warn",
+      "message": "THREE.WebGLShadowMap: PCFSoftShadowMap has been removed. Using PCFShadowMap instead.",
+      "timestamp": "2026-11-05T23:19:02.271Z",
+      "url": "chrome-extension://fmkadmapgofadopljbjfkapdkoienihi/build/installHook.js"
+    }
+  ],
+  "namespace": "/tmp/aq64-root-browser-20261105-v1/reef-config.json",
+  "limits": [
+    "UI writes only isolated temporary configuration; user configuration untouched.",
+    "Paused projected-pose comparisons combine with actual-controller motion/player lifecycle tests; no final visual or collision envelope acceptance."
+  ],
+  "task": "AQ-64",
+  "reviewer": "Root",
+  "date": "2026-11-05",
+  "authority": "Actual-controller lifecycle plus native UI functional evidence; no art/envelope acceptance",
+  "sourceSha256": {
+    "aquariumReviewed": "3b0944ab66b38751f9a76ef8cb065949f24b1d8b41a52f920582a2071f5611e4",
+    "fishInhabitants": "5576c54028ceb10b6269f4cd8bd5a0176e997a30fdcaa1471dd607895bae1630",
+    "lifecycleTest": "f8ca4b4d2f494ab1cc59dfff3ee34e975c04bcf8fba5dbc64449359c23f221a7"
+  },
+  "automated": {
+    "lifecycleTests": 7,
+    "focusedTests": 35,
+    "focusedFiles": 5,
+    "typecheck": "passed with tracked script syntax checks",
+    "build": "passed",
+    "fullSuite": {
+      "command": "npm test",
+      "files": 44,
+      "passed": 391
+    }
+  },
+  "namespaceSafety": "Only temporary isolated REEF_CONFIG_PATH was written through the actual Settings UI; user/main .data configuration untouched."
+}

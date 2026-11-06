@@ -55,6 +55,143 @@ const SOCKET_PREFIX_TO_ARCHETYPE: Record<string, CoralArchetype> = {
   soft_mat: 'zoanthid-mat',
 }
 
+type CoralGeometryBoundState = {
+  baseSphere: THREE.Sphere
+  maxMargin: number
+  maxSoftAmplitudeM: number
+  rigidMarginRecorded: boolean
+  invalid: boolean
+}
+
+type CoralMaterialBoundBinding = {
+  geometry: THREE.BufferGeometry
+  role: CoralPrimitiveRole
+  binding: ReturnType<typeof applyCoralRawMaskMaterial>
+}
+
+// Coral templates are cached and cloned with shared BufferGeometry. Keep the
+// original sphere once per geometry and grow it monotonically as more bindings
+// are attached; repeated socket rebuilds must not accumulate padding.
+const coralGeometryBoundStates = new WeakMap<THREE.BufferGeometry, CoralGeometryBoundState>()
+const CORAL_SKIRT_SMOOTHSTEP_MIN_M = -0.006
+const CORAL_SKIRT_SMOOTHSTEP_MAX_M = 0.018
+const CORAL_SKIRT_XZ_SCALE_MIN = 0.55
+const CORAL_SKIRT_Y_DROP_M = 0.008
+const CORAL_SWAY_X_GAIN = 1.38
+const CORAL_SWAY_Z_GAIN = 1.10
+const CORAL_SWAY_Y_GAIN = 0.18
+const CORAL_BOUNDS_NUMERIC_PAD_M = 1e-5
+
+function coralSmoothstep(edge0: number, edge1: number, value: number): number {
+  const t = THREE.MathUtils.clamp((value - edge0) / (edge1 - edge0), 0, 1)
+  return t * t * (3 - 2 * t)
+}
+
+function measureCoralShaderMargin(
+  geometry: THREE.BufferGeometry,
+  role: CoralPrimitiveRole,
+  amplitude: number,
+): number | null {
+  const position = geometry.getAttribute('position')
+  const color = geometry.getAttribute('color')
+  if (!position || position.count === 0 || !color || color.itemSize !== 4 || color.count !== position.count) return null
+
+  let margin = 0
+  let numericScale = 1
+  for (let i = 0; i < position.count; i++) {
+    const x = position.getX(i), y = position.getY(i), z = position.getZ(i)
+    const r = color.getX(i), g = color.getY(i), b = color.getZ(i), a = color.getW(i)
+    if (![x, y, z, r, g, b, a].every(Number.isFinite)) return null
+
+    const tuck = 1 - coralSmoothstep(CORAL_SKIRT_SMOOTHSTEP_MIN_M, CORAL_SKIRT_SMOOTHSTEP_MAX_M, y)
+    const flex = role === 'coral-soft' ? Math.pow(THREE.MathUtils.clamp(r, 0, 1), 1.8) : 0
+    const maxX = (1 - CORAL_SKIRT_XZ_SCALE_MIN) * tuck * Math.abs(x)
+      + CORAL_SWAY_X_GAIN * amplitude * flex
+    const maxZ = (1 - CORAL_SKIRT_XZ_SCALE_MIN) * tuck * Math.abs(z)
+      + CORAL_SWAY_Z_GAIN * amplitude * flex
+    const maxY = CORAL_SKIRT_Y_DROP_M * tuck
+      + CORAL_SWAY_Y_GAIN * (CORAL_SWAY_X_GAIN + CORAL_SWAY_Z_GAIN) * amplitude * flex * flex
+    const maxAbsX = Math.abs(x) + maxX
+    const maxAbsY = Math.abs(y) + maxY
+    const maxAbsZ = Math.abs(z) + maxZ
+    if (![maxX, maxY, maxZ, maxAbsX, maxAbsY, maxAbsZ].every(value => Number.isFinite(Math.fround(value)))) {
+      return null
+    }
+    margin = Math.max(margin, Math.hypot(maxX, maxY, maxZ))
+    numericScale = Math.max(numericScale, maxAbsX, maxAbsY, maxAbsZ)
+  }
+  return margin + CORAL_BOUNDS_NUMERIC_PAD_M * numericScale
+}
+
+/**
+ * Extends a shared coral geometry sphere for every vertex position the shader
+ * can reach within the assembly contract: immutable POSITION/COLOR_0 data, a
+ * fixed role uniform, and motion scale owned by assemble.update(). The envelope
+ * covers the basal skirt tuck for both roles and the absolute sine/cosine flow
+ * limits for soft tissue, using the binding's actual amplitude uniform. Three
+ * applies this local sphere through each mesh transform for camera and shadow
+ * culling. Arbitrary direct geometry or role/motion-uniform mutation is unsupported.
+ */
+function ensureCoralShaderBounds(
+  geometry: THREE.BufferGeometry,
+  role: CoralPrimitiveRole,
+  flowAmplitudeM: number,
+): void {
+  const position = geometry.getAttribute('position')
+  if (!position || position.count === 0) return
+
+  if (geometry.boundingSphere === null) geometry.computeBoundingSphere()
+  let state = coralGeometryBoundStates.get(geometry)
+  if (!state) {
+    const invalid = !Number.isFinite(geometry.boundingSphere!.radius)
+      || !Number.isFinite(geometry.boundingSphere!.center.x)
+      || !Number.isFinite(geometry.boundingSphere!.center.y)
+      || !Number.isFinite(geometry.boundingSphere!.center.z)
+    state = {
+      baseSphere: geometry.boundingSphere!.clone(),
+      maxMargin: 0,
+      maxSoftAmplitudeM: -1,
+      rigidMarginRecorded: false,
+      invalid,
+    }
+    coralGeometryBoundStates.set(geometry, state)
+  }
+
+  const flowMagnitude = Math.abs(flowAmplitudeM)
+  const flowOverflowsShaderFloat = !Number.isFinite(flowAmplitudeM)
+    || !Number.isFinite(Math.fround(flowMagnitude))
+    || !Number.isFinite(Math.fround(flowMagnitude * CORAL_SWAY_X_GAIN))
+    || !Number.isFinite(Math.fround(flowMagnitude * CORAL_SWAY_Z_GAIN))
+    || !Number.isFinite(Math.fround(flowMagnitude * (CORAL_SWAY_X_GAIN + CORAL_SWAY_Z_GAIN)))
+  if (state.invalid || flowOverflowsShaderFloat) {
+    state.invalid = true
+    geometry.boundingSphere!.copy(state.baseSphere)
+    geometry.boundingSphere!.radius = Infinity
+    return
+  }
+
+  const soft = role === 'coral-soft'
+  const amplitude = soft ? Math.abs(flowAmplitudeM) : 0
+  const alreadyCovered = soft
+    ? amplitude <= state.maxSoftAmplitudeM
+    : state.rigidMarginRecorded
+  if (!alreadyCovered) {
+    const margin = measureCoralShaderMargin(geometry, role, amplitude)
+    if (margin === null) {
+      state.invalid = true
+      geometry.boundingSphere!.copy(state.baseSphere)
+      geometry.boundingSphere!.radius = Infinity
+      return
+    }
+    state.maxMargin = Math.max(state.maxMargin, margin)
+    if (soft) state.maxSoftAmplitudeM = amplitude
+    else state.rigidMarginRecorded = true
+  }
+
+  geometry.boundingSphere!.copy(state.baseSphere)
+  geometry.boundingSphere!.radius += state.maxMargin
+}
+
 // Cohesive, velvety actinic-daylight reef palettes matching 12.23.52 PM & 12.23.09 PM:
 // High regradeStrength (0.90..0.95) and matte-velvety roughness (0.76..0.86) eliminate glossy plastic stripes.
 const PALETTE_MAUVE_GORGONIAN_PLUME: CoralPaletteOverride = {
@@ -604,6 +741,7 @@ function bindCoralInstanceMaterials(
   paletteOverride: CoralPaletteOverride | undefined,
   options: { paused?: boolean; reducedMotion?: boolean } | undefined,
   materialControllers: Array<ReturnType<typeof applyCoralRawMaskMaterial>>,
+  geometryBindings: CoralMaterialBoundBinding[],
 ) {
   instance.traverse(child => {
     if (!(child instanceof THREE.Mesh)) return
@@ -629,6 +767,8 @@ function bindCoralInstanceMaterials(
         paused: options?.paused,
         reducedMotion: options?.reducedMotion,
       })
+      ensureCoralShaderBounds(child.geometry, role, binding.uniforms.uFlowAmplitudeM.value)
+      geometryBindings.push({ geometry: child.geometry, role, binding })
       child.customDepthMaterial = binding.depthMaterial
       materialControllers.push(binding)
       return binding.material
@@ -679,6 +819,7 @@ export function assembleCoralsOnRockSockets(
   })
 
   const mountedCorals: AssembledCoralBinding[] = []
+  const geometryBindings: CoralMaterialBoundBinding[] = []
   const isLeftIsland = socketNodes.has('socket_sps_crest_01')
   const companionSpecs = hasRockGeometry
     ? isLeftIsland
@@ -719,7 +860,7 @@ export function assembleCoralsOnRockSockets(
     cloneRoot.scale.setScalar(mount.scale)
 
     const materialControllers: Array<ReturnType<typeof applyCoralRawMaskMaterial>> = []
-    bindCoralInstanceMaterials(instance, mount.paletteOverride, options, materialControllers)
+    bindCoralInstanceMaterials(instance, mount.paletteOverride, options, materialControllers, geometryBindings)
 
     // Attach lush companion reef-garden sub-colonies when mounting onto the live aquarium rock
     for (const comp of companionSpecs) {
@@ -734,7 +875,7 @@ export function assembleCoralsOnRockSockets(
       compGroup.rotateX(comp.tiltXRad)
       compGroup.rotateZ(comp.tiltZRad)
       compGroup.scale.setScalar(comp.scale)
-      bindCoralInstanceMaterials(compInstance, comp.paletteOverride, options, materialControllers)
+      bindCoralInstanceMaterials(compInstance, comp.paletteOverride, options, materialControllers, geometryBindings)
       cloneRoot.add(compGroup)
     }
 
@@ -754,6 +895,11 @@ export function assembleCoralsOnRockSockets(
         for (const controller of mounted.materialControllers) {
           controller.update(timeSeconds, paused, reducedMotion)
         }
+      }
+      // Controllers expose their uniforms. If a caller raises the amplitude,
+      // extend the shared local sphere before this frame's camera/shadow cull.
+      for (const item of geometryBindings) {
+        ensureCoralShaderBounds(item.geometry, item.role, item.binding.uniforms.uFlowAmplitudeM.value)
       }
     },
   }

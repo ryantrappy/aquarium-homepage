@@ -1,0 +1,98 @@
+{
+  "task": "AQ-42",
+  "reviewDateUtc": "2026-11-06",
+  "scope": "Root-reviewed shader-displacement camera/shadow culling bounds and CPU reference parity; parent task remains open",
+  "baseCommit": "d6767c2",
+  "sourceHashes": {
+    "src/rendering/scene/reef-assembly.ts": "0c2187458fb7ff22159f5d0ce221eb9983d7186288633999b12bcdebca36538a",
+    "src/rendering/scene/reef-assembly.test.ts": "84f71140c0c34e9745a696f0fdced959fdce85e838144fb781de933c40fb1ea7",
+    "src/rendering/scene/coral-material.ts": "93db5d62466824927872926ed53ea59a4ef5306bb8457ed8c04fbc80e2e21953",
+    "src/rendering/scene/coral-material.test.ts": "60371f9bcc81d665baf8b20aeffa716fd370617679418f10c3dc30af440da578"
+  },
+  "unchangedAssets": [
+    {
+      "id": "coral-acropora-staghorn",
+      "sha256": "629781835efee49bea46f109cfdeeef0ba434d94a8dc3bf33d769eb31f99c0ea"
+    },
+    {
+      "id": "coral-acropora-table",
+      "sha256": "ad4c0f5d74fe4efe06f0faa7d57af4e61d8756952b63a54d6424675c9face10d"
+    },
+    {
+      "id": "coral-anemone-bta",
+      "sha256": "f587bdc3e94a75cefff1424abb250325d87f057cc9676daabfaef565bd6e81ef"
+    },
+    {
+      "id": "coral-brain-diploria",
+      "sha256": "904f471bb1a1094004b04294c4166ff309487f3333cea82e6105bf96ca1f100d"
+    },
+    {
+      "id": "coral-euphyllia-hammer",
+      "sha256": "6e1974d5f72ec3a898d84f559a5d4397a6002d8534387c47697452d6c2157fc8"
+    },
+    {
+      "id": "coral-euphyllia-torch",
+      "sha256": "e267292425df202d816b5f8a93336e2e5255962a87116f9cc8fd680ac260c022"
+    },
+    {
+      "id": "coral-montipora-plate",
+      "sha256": "87f4e1052e44f29b27b948f9c9f45cae42855c1948fdf8ee519ea7c70ae21252"
+    },
+    {
+      "id": "coral-zoanthid-mat",
+      "sha256": "a60d91258fcf9a64d43a628dbe0f4027a91a1fce73104153d7f3ea424cc2463d"
+    }
+  ],
+  "shaderUnchanged": {
+    "comparison": "Byte-identical tail beginning function injectCoralRawMaskShader versus baseCommit. Only CPU reference dy changed in coral-material.ts.",
+    "sha256": "2ea816fa6b79af0c86c06161adacb21e514757b681040fdb5e100c4344a1a159"
+  },
+  "method": {
+    "localSpace": "Source geometry POSITION and normalized COLOR_0 getters; no source buffers or asset files modified.",
+    "skirt": "t=1-smoothstep(-.006,.018,y); delta x/z=-.45*t*(x/z), delta y=-.008*t for both roles.",
+    "soft": "f=clamp(R,0,1)^1.8; absolute sway limits |x|<=1.38*A*f, |z|<=1.10*A*f, downward y<=.18*2.48*A*f^2.",
+    "sphere": "For each source vertex, bound the norm of combined tuck/sway displacement. Add maximum displacement plus numeric pad to the original geometry sphere; triangle inequality and sphere convexity cover every vertex and triangle interior. This is a continuous algebraic bound, not a finite-time pose fit.",
+    "numeric": "10micrometers times max(1, per-axis source/displaced magnitude); Float32 uniform, individual sway, abs-sway sum and output overflow fail open to infinite sphere.",
+    "cache": "WeakMap per shared geometry stores original sphere and monotone maximum margin; repeated clones/rebuilds do not accumulate expansion. Assembly.update checks amplitude changes before culling.",
+    "scopeConditions": [
+      "Immutable POSITION/COLOR_0 and ordinary supplied mesh transforms.",
+      "Fixed role; controller update owns time/motion-scale. Only documented amplitude updates are incorporated; arbitrary other shader/geometry mutations are unsupported.",
+      "Actual installed Three camera and shadow paths call Mesh.intersectsFrustum, which forwards to Frustum.intersectsObject and the geometry sphere."
+    ]
+  },
+  "tests": {
+    "rootFocused": "2files/14tests pass; independent reviewer also passed14",
+    "regressions": [
+      "Nondegenerate rigid triangle: actual mount/world transform, all deformed world vertices in frustum, original sphere rejected and expanded sphere accepted through actual Mesh.intersectsFrustum.",
+      "Shared geometry identity and unchanged position arrays; no cumulative expansion on repeated assembly; amplitude .014->.05 increases sphere once.",
+      "Finite pose samples over0..8s corroborate continuous extrema; partial R=.44 CPU vertical reference now matches GLSL flex-squared response.",
+      "Nonfinite masks/uniforms and finite-JS-but-overflowing-Float32 amplitudes1e40/3e38/2e38 fail open, including zero-flex intermediate-overflow cases.",
+      "Large amplitude1000 receives scale-dependent numeric padding."
+    ],
+    "fullFrozen": "44files/408tests pass with default npm test; typecheck(10tracked scripts) and production build pass.",
+    "initialFullRun": "Two existing exact-rock fixture tests exceeded5s while other work/build ran; no assertion failure. The30fixture tests pass together in1.01s, then the same default408test suite passes with other jobs quiescent. No deadlines or fixture assertions changed."
+  },
+  "limitations": [
+    "No visual/model/generator changes and no final biological art acceptance.",
+    "This bounds rendering visibility, not actual animated collision volumes, fish navigation, deformed click occlusion or whole-scene geometry.",
+    "No measured GPU performance or final responsive art acceptance. Main source has concurrent external sand/model-map work excluded from this frozen review.",
+    "AQ-42 remains open for its actual art/flow/scene criteria; no acceptance checkbox is inferred solely from this technical slice.",
+    "No deployment."
+  ],
+  "actualAssetAudit": {
+    "command": "node docs/asset-evidence/aq42/audit-coral-bounds.mjs /tmp/aq42-coral-bounds-audit.json",
+    "scriptSha256": "840ef9217701112eea183d1e1f2564838d3caae37d8c97f34086068651391af5",
+    "report": "coral-bounds-audit.json",
+    "reportSha256": "81ab86048e3b94b0eb98f88a60c40e8935e44072cc415713fa91280e1d46bf6c",
+    "summary": {
+      "assetCount": 8,
+      "primitiveCount": 11,
+      "vertexCount": 111135,
+      "localSphereMarginRangeM": [
+        0.022896791487021433,
+        0.058166160040522864
+      ],
+      "method": "Analytic per-vertex displacement envelope, plus scale-aware finite-precision pad; no temporal sampling."
+    }
+  }
+}

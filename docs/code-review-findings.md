@@ -420,12 +420,12 @@ While unit tests (`34/34` test suites, `266` tests) and TypeScript typechecks cu
 
 ---
 
-### 5.2 Duplicate Filenames with Spaces in Repo Tree
+### 5.2 Historical Deployment Draft Had a Filename with Spaces
 - **Location:**
-  - `docs/deployment 2.md`
+  - Former path: `docs/deployment 2.md`
 - **Details:**
-  `docs/deployment 2.md` is an orphaned copy of `docs/deployment.md` created during an earlier editing conflict.
-- **Action:** Remove `docs/deployment 2.md`.
+  Review confirmed this 113-line draft contains preliminary deployment and read-only discovery history that differs from the canonical `docs/deployment.md`; it is not a duplicate of the active runbook. The historical content is retained at `docs/archive/deployment-2.md` with archive metadata and a working successor link. The documentation catalog points to the archive path.
+- **Action:** Keep the archived draft at the kebab-case path; do not delete its historical content.
 
 ---
 
@@ -471,6 +471,6 @@ While unit tests (`34/34` test suites, `266` tests) and TypeScript typechecks cu
 | 4.7 | Dead localStorage code & missing offline fallback | **Low** | Architecture | Clean up unused methods or use as offline cache |
 | 4.8 | Hardcoded `.53` clearance offset diverges from fish scale | **Medium** | Navigation / Simulation | Scale anchor offsets dynamically by species clearance |
 | 5.1 | Dangling symlinks pointing to `/tmp/` | **Low** | Hygiene | Delete dangling symlinks |
-| 5.2 | Duplicate file with spaces `docs/deployment 2.md` | **Low** | Hygiene | Remove duplicate file |
+| 5.2 | Historical deployment draft had spaces in its filename | **Low** | Hygiene | Retain at `docs/archive/deployment-2.md` with catalog metadata |
 | 5.3 | Scripts excluded from `tsconfig.json` | **Low** | Tooling | Include `scripts/` in typechecking |
 | 5.4 | Missing `onError` callback in `TextureLoader` | **Low** | Robustness | Handle texture load failures gracefully |

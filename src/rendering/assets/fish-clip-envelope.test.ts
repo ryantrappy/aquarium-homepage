@@ -297,5 +297,7 @@ describe('analytic clip-only fish sphere', () => {
       for (const extra of [['--unknown', 'x'], ['--adult-length-m', '.08']]) expect(spawnSync(process.execPath, [...args, ...extra]).status).toBe(1)
       expect(readFileSync(path).equals(input.bytes)).toBe(true)
     } finally { rmSync(directory, { recursive: true, force: true }) }
-  })
+  // This assertion-preserving CLI case spawns six Node processes; on the full
+  // suite under load it exceeded Vitest's default 5s deadline.
+  }, 30_000)
 })

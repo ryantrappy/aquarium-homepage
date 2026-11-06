@@ -2,19 +2,19 @@
 
 <!-- AGENT_DOC_METADATA
 Category: Archive / Historical Draft
-Status: Superseded
+Status: Archived
 Authority: Historical Reference (Superseded by docs/deployment.md)
-Backlog: AQ-10
+Backlog: AQ-10, AQ-69
 Owner: @root
 Updated: 2026-11-05
 Upstream: docs/deployment.md
-Downstream: None
+Downstream: docs/README.md
 -->
 
 > [!WARNING]
-> **Superseded Document**  
-> This document represents an earlier historical draft and preliminary discovery notes for Nitro container deployment.  
-> The canonical and active operational runbook is located at: [`docs/deployment.md`](deployment.md).
+> **Archived Historical Draft**
+> This document preserves earlier deployment planning and read-only discovery notes.
+> The canonical and active operational runbook is located at: [`docs/deployment.md`](../deployment.md).
 
 ## Current deployment shape
 

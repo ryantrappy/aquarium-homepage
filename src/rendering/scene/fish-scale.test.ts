@@ -32,19 +32,44 @@ function measureSwimAxis(path: string) {
   })
   return max - min
 }
-function parseReferenceTable() {
+function parseReferenceRows() {
   const doc = readFileSync(resolve(root, 'docs/fish-scale-reference.md'), 'utf8')
-  const rows = new Map<string, number>()
-  for (const match of doc.matchAll(/^\| `([a-z-]+)` \|[^|]+\|[^|]+\| ([\d.]+) \|/gm)) rows.set(match[1], Number(match[2]))
+  const rows = new Map<string, { typical: string; maximum: string; fishBaseUrl: string; renderLengthInches: number }>()
+  for (const line of doc.split('\n')) {
+    const cells = line.split('|').map(cell => cell.trim())
+    const id = cells[1]?.match(/^`([a-z-]+)`$/)?.[1]
+    if (!id || cells.length < 6) continue
+    const maxCell = cells[3]
+    const maximum = maxCell.match(/^\[([^\]]+)\]/)?.[1] ?? maxCell
+    const fishBaseUrl = maxCell.match(/\]\((https:\/\/www\.fishbase\.se\/summary\/[^)]+)\)/)?.[1] ?? ''
+    rows.set(id, { typical: cells[2], maximum, fishBaseUrl, renderLengthInches: Number(cells[4]) })
+  }
   return rows
 }
 
 describe('true relative fish sizing', () => {
   it('mirrors the render lengths in docs/fish-scale-reference.md for every roster species', () => {
-    const table = parseReferenceTable()
+    const table = parseReferenceRows()
     expect(table.size).toBe(fishData.length)
-    for (const fish of fishData) expect(FISH_RENDER_LENGTH_INCHES[fish.id], fish.id).toBe(table.get(fish.id))
+    for (const fish of fishData) expect(FISH_RENDER_LENGTH_INCHES[fish.id], fish.id).toBe(table.get(fish.id)?.renderLengthInches)
     expect(Object.keys(FISH_RENDER_LENGTH_INCHES).sort()).toEqual([...table.keys()].sort())
+  })
+
+  it('links each maximum by the roster scientific name and respects the female lyretail maximum', () => {
+    const rows = parseReferenceRows()
+    expect(rows.size).toBe(fishData.length)
+    for (const fish of fishData) {
+      const speciesSlug = fish.scientificName.trim().replace(/\s+/g, '-')
+      expect(rows.get(fish.id)?.fishBaseUrl, fish.id).toBe(`https://www.fishbase.se/summary/${speciesSlug}`)
+    }
+
+    const anthias = rows.get('lyretail-anthias')!
+    const femaleMax = anthias.maximum.match(/([\d.]+)\s*\/\s*([\d.]+)\s*TL\s*female/i)
+    expect(femaleMax).not.toBeNull()
+    const roster = readFileSync(resolve(root, 'docs/reef-fish-roster.md'), 'utf8')
+    const anthiasRosterRow = roster.split('\n').find(line => line.includes('`lyretail-anthias`'))
+    expect(anthiasRosterRow).toMatch(/adult female baseline/i)
+    expect(FISH_RENDER_LENGTH_INCHES['lyretail-anthias'] * 2.54).toBeLessThanOrEqual(Number(femaleMax![2]))
   })
 
   it('uses swim-axis extents re-measured from the runtime GLBs', () => {

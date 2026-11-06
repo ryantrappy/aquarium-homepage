@@ -1,35 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import {
-  EXAMPLE_SERVICES,
-  SERVICE_STORAGE_KEY,
-  exportServices,
-  importServices,
-  readServices,
-  saveServices,
-  loadSharedConfig,
-  resetSharedConfig,
-  addService,
-  deleteService,
-  updateService,
-  type StorageLike,
-} from './services'
-import { serviceConfigSchema, serviceUrlSchema } from './validation'
-
-class MemoryStorage implements StorageLike {
-  private values = new Map<string, string>()
-
-  getItem(key: string) {
-    return this.values.get(key) ?? null
-  }
-
-  setItem(key: string, value: string) {
-    this.values.set(key, value)
-  }
-}
+import { EXAMPLE_SERVICES, exportServices, loadSharedConfig, parseImportedServices, resetSharedConfig } from './services'
+import { serviceConfigSchema, serviceListSchema, serviceUrlSchema, sharedConfigSchema } from './validation'
 
 describe('service configuration', () => {
-  it('uses the confirmed starter roster when storage has no saved list', () => {
-    expect(readServices(new MemoryStorage())).toEqual(EXAMPLE_SERVICES)
+  it('uses the confirmed starter roster', () => {
     expect(EXAMPLE_SERVICES.every((service) => !service.isExample)).toBe(true)
     expect(EXAMPLE_SERVICES.map(({ name, url, fishId }) => ({ name, url, fishId }))).toEqual([
       { name: 'Komodo', url: 'https://komodo.ryantr.app', fishId: 'yellow-tang' },
@@ -54,56 +28,16 @@ describe('service configuration', () => {
     }).success).toBe(false)
 
     const duplicated = [{ ...EXAMPLE_SERVICES[0] }, { ...EXAMPLE_SERVICES[0] }]
-    expect(() => saveServices(duplicated, new MemoryStorage())).toThrow(/unique/)
+    expect(() => serviceListSchema.parse(duplicated)).toThrow(/unique/)
   })
 
-  it('round-trips valid settings and rejects malformed imports without changing saved settings', () => {
-    const storage = new MemoryStorage()
+  it('imports legacy arrays and shared envelopes and exports the current list', () => {
     const services = [...EXAMPLE_SERVICES]
-    saveServices(services, storage)
-    expect(JSON.parse(storage.getItem(SERVICE_STORAGE_KEY) ?? 'null')).toEqual(services)
-    expect(importServices(exportServices(services), storage)).toEqual(services)
-
-    expect(() => importServices('{"bad": true}', storage)).toThrow()
-    expect(readServices(storage)).toEqual(services)
-  })
-
-  it('supports a saved add, update, and delete sequence including an intentionally empty list', () => {
-    const storage = new MemoryStorage()
-    saveServices([], storage)
-    expect(readServices(storage)).toEqual([])
-
-    const afterAdd = addService({
-      name: 'Reef notes',
-      url: 'https://notes.example/reef',
-      fishId: 'royal-gramma',
-    }, readServices(storage), storage)
-    expect(afterAdd).toHaveLength(1)
-    expect(afterAdd[0]).toMatchObject({ name: 'Reef notes', isExample: false })
-
-    const afterUpdate = updateService(afterAdd[0].id, { name: 'Reef log' }, afterAdd, storage)
-    expect(afterUpdate[0].name).toBe('Reef log')
-
-    expect(deleteService(afterUpdate[0].id, afterUpdate, storage)).toEqual([])
-    expect(readServices(storage)).toEqual([])
-  })
-
-  it('preserves invalid saved data until the user explicitly imports or resets', () => {
-    const storage = new MemoryStorage()
-    storage.setItem(SERVICE_STORAGE_KEY, '{"unreadable": true}')
-
-    expect(() => readServices(storage)).toThrow(/invalid/)
-    expect(storage.getItem(SERVICE_STORAGE_KEY)).toBe('{"unreadable": true}')
-    expect(() => importServices('{"alsoBad": true}', storage)).toThrow()
-    expect(storage.getItem(SERVICE_STORAGE_KEY)).toBe('{"unreadable": true}')
-  })
-
-  it('reports when browser storage cannot save settings', () => {
-    const failingStorage: StorageLike = {
-      getItem: () => null,
-      setItem: () => { throw new Error('quota') },
-    }
-    expect(() => saveServices(EXAMPLE_SERVICES, failingStorage)).toThrow(/could not save/)
+    expect(parseImportedServices(JSON.stringify(services))).toEqual(services)
+    const config = sharedConfigSchema.parse({ version: 1, mode: 'reef', services })
+    expect(parseImportedServices(JSON.stringify(config))).toEqual(services)
+    expect(JSON.parse(exportServices(services))).toEqual(services)
+    expect(() => parseImportedServices('{"bad": true}')).toThrow()
   })
 
   it('reports a shared-server network failure without pretending a save succeeded', async () => {

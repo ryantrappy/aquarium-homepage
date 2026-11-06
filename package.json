@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && npm run scripts:check",
+    "scripts:check": "node scripts/validate-scripts.mjs",
     "test": "vitest run",
     "backlog": "backlog",
     "backlog:board": "backlog board",
@@ -14,18 +15,17 @@
     "start": "node .output/server/index.mjs"
   },
   "dependencies": {
-    "@babylonjs/core": "^9.33.2",
-    "@babylonjs/loaders": "^9.33.2",
     "@tanstack/react-router": "^1.170.46",
     "@tanstack/react-start": "^1.169.4",
     "nitro": "3.0.261102-rc",
-    "playcanvas": "^2.23.3",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "three": "^0.187.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@babylonjs/core": "^9.33.2",
+    "@babylonjs/loaders": "^9.33.2",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
@@ -33,6 +33,7 @@
     "@vitejs/plugin-react": "^6.2.1",
     "backlog.md": "1.55.3",
     "happy-dom": "^21.0.4",
+    "playcanvas": "^2.23.3",
     "typescript": "^7.0.2",
     "vite": "^8.3.5",
     "vitest": "^5.1.0"

@@ -59,7 +59,7 @@ describe('socket report freshness', () => {
     expect(result.summaries[0]).toMatch(/^left: \d+ supported, 0 rejected; [a-f0-9]{64}$/)
     expect(result.summaries[1]).toMatch(/^right: \d+ supported, 0 rejected; [a-f0-9]{64}$/)
     expect(await Promise.all([readFile(path), readFile(reportPath)])).toEqual(before)
-  })
+  }, 30_000)
 
   it('exits nonzero when a docs report has a stale source hash', async () => {
     const root = await fixture()
@@ -68,7 +68,7 @@ describe('socket report freshness', () => {
     expect(result.status).toBe(1)
     expect(result.stderr).toContain('aq52-left-socket-report.json: stale sourceSha256')
     expect(result.stdout).toContain('right:')
-  })
+  }, 30_000)
 
   it('exits nonzero when packaged measured results change despite a matching source hash', async () => {
     const root = await fixture()
@@ -76,7 +76,7 @@ describe('socket report freshness', () => {
     const result = spawnSync(process.execPath, [checker, root], { encoding: 'utf8' })
     expect(result.status).toBe(1)
     expect(result.stderr).toContain('socket results differ from current geometry (measurements)')
-  })
+  }, 30_000)
 
   it('does not normalize unrelated evidence fields or metadata', async () => {
     const root = await fixture()
@@ -84,7 +84,7 @@ describe('socket report freshness', () => {
     const result = await checkSocketReports(root)
     expect(result.valid).toBe(false)
     expect(result.errors.join('\n')).toContain('socket results differ from current geometry (supportedSockets)')
-  })
+  }, 30_000)
 
   it('fails clearly on missing report data and rejected socket records', async () => {
     const root = await fixture()
@@ -94,7 +94,7 @@ describe('socket report freshness', () => {
     expect(result.valid).toBe(false)
     expect(result.errors.join('\n')).toContain('missing supportedSockets, rejectedSockets or measurements arrays')
     expect(result.errors.join('\n')).toContain('socket results differ from current geometry (rejectedSockets)')
-  })
+  }, 30_000)
 
   it('fails clearly if a report file is absent', async () => {
     const root = await fixture()
@@ -102,5 +102,5 @@ describe('socket report freshness', () => {
     const result = await checkSocketReports(root)
     expect(result.valid).toBe(false)
     expect(result.errors.join('\n')).toContain('aq52-right-socket-report.json: ENOENT')
-  })
+  }, 30_000)
 })

@@ -393,7 +393,7 @@ export function evaluateSpineTurnAngles(
   const phase = Number.isFinite(state?.turnPhase) ? state!.turnPhase : 0
   const startle = Number.isFinite(state?.startleSeconds) && state!.startleSeconds > 0
 
-  if (count <= 1 || (Math.abs(curvature) <= 1e-4 && Math.abs(delayed) <= 1e-4)) {
+  if (count <= 1) {
     return {
       spineBendRad,
       pectoralLeftFlareRad: 0,
@@ -474,7 +474,12 @@ export function applyFishTurningRigOverlay(
   if (stopped || rig.spineJoints.length <= 1 || rig.spineJoints.length > MAX_TURNING_SPINE_JOINTS) return
 
   const angles = evaluateSpineTurnAngles(rig.spineJoints.length, kinematics, rig.archetype)
-  if (angles.spineBendRad.every(angle => Math.abs(angle) <= 1e-5)) return
+  const hasSpineBend = angles.spineBendRad.some(angle => Math.abs(angle) > 1e-5)
+  const hasPectoralRecovery = Math.abs(angles.pectoralLeftFlareRad) > 1e-5
+    || Math.abs(angles.pectoralRightFlareRad) > 1e-5
+    || Math.abs(angles.pectoralLeftPitchRad) > 1e-5
+    || Math.abs(angles.pectoralRightPitchRad) > 1e-5
+  if (!hasSpineBend && !hasPectoralRecovery) return
 
   for (let i = 1; i < rig.spineJoints.length; i++) {
     const angle = angles.spineBendRad[i]
@@ -483,13 +488,13 @@ export function applyFishTurningRigOverlay(
     normalizeFiniteQuaternion(rig.spineJoints[i].quaternion.multiply(tempDeltaQuat))
   }
 
-  if (rig.pectoralLeft && Math.abs(angles.pectoralLeftFlareRad) > 1e-5) {
+  if (rig.pectoralLeft && (Math.abs(angles.pectoralLeftFlareRad) > 1e-5 || Math.abs(angles.pectoralLeftPitchRad) > 1e-5)) {
     tempDeltaQuat.setFromAxisAngle(LOCAL_PECTORAL_FLARE_AXIS, -angles.pectoralLeftFlareRad)
     tempPectoralPitchQuat.setFromAxisAngle(LOCAL_PECTORAL_PITCH_AXIS, angles.pectoralLeftPitchRad)
     normalizeFiniteQuaternion(rig.pectoralLeft.quaternion.multiply(tempDeltaQuat).multiply(tempPectoralPitchQuat))
   }
 
-  if (rig.pectoralRight && Math.abs(angles.pectoralRightFlareRad) > 1e-5) {
+  if (rig.pectoralRight && (Math.abs(angles.pectoralRightFlareRad) > 1e-5 || Math.abs(angles.pectoralRightPitchRad) > 1e-5)) {
     tempDeltaQuat.setFromAxisAngle(LOCAL_PECTORAL_FLARE_AXIS, angles.pectoralRightFlareRad)
     tempPectoralPitchQuat.setFromAxisAngle(LOCAL_PECTORAL_PITCH_AXIS, angles.pectoralRightPitchRad)
     normalizeFiniteQuaternion(rig.pectoralRight.quaternion.multiply(tempDeltaQuat).multiply(tempPectoralPitchQuat))

@@ -1,0 +1,298 @@
+{
+  "task": "AQ-53",
+  "rootReviewDate": "2026-11-05",
+  "status": "Root-reviewed raw-mask encoding and runtime consumption; no art/assembled-scene approval",
+  "sourceHashes": {
+    "src/rendering/scene/coral-material.ts": "bf5f5162bc1426fe2822e9c3e199c968196210ea0e87271c94ae364b1df61100",
+    "src/rendering/scene/coral-material.test.ts": "9142ffc8446516ce827e83f84bc407069b01ddcdcce83387d5d5ecc4bc826646",
+    "src/rendering/proof/coral-mask-study.ts": "414168201571be217769856b83c1721e56b82ad758ddcbb5dc203f630dbcb355",
+    "src/rendering/proof/coral-mask-study.html": "648defec5dbe181d7a0f17f10f44e59acb09f871f297a90b48968343aa9cf830"
+  },
+  "rawBinaryVerification": [
+    {
+      "id": "coral-acropora-staghorn",
+      "sha256": "629781835efee49bea46f109cfdeeef0ba434d94a8dc3bf33d769eb31f99c0ea",
+      "generator": "src/rendering/modeling/build_acropora_staghorn.py",
+      "generatorSha256": "9b52281bf616a911a30b5c23515c0794a277c6383ef37db4dfd46505d4e07005",
+      "provenanceHashMatches": true,
+      "primitives": [
+        {
+          "id": "acropora_staghorn_colony",
+          "role": "coral-rigid",
+          "vertices": 18693,
+          "maskRows": 18693,
+          "finiteInRange": true,
+          "inspectionValuesExact": true,
+          "rigidRedZero": true
+        }
+      ]
+    },
+    {
+      "id": "coral-acropora-table",
+      "sha256": "ad4c0f5d74fe4efe06f0faa7d57af4e61d8756952b63a54d6424675c9face10d",
+      "generator": "src/rendering/modeling/build_acropora_table.py",
+      "generatorSha256": "327811b6c0af138bd0b979421ca8653262af9c2c975ea75747d67fa9724a7556",
+      "provenanceHashMatches": true,
+      "primitives": [
+        {
+          "id": "acropora_table_colony",
+          "role": "coral-rigid",
+          "vertices": 26665,
+          "maskRows": 26665,
+          "finiteInRange": true,
+          "inspectionValuesExact": true,
+          "rigidRedZero": true
+        }
+      ]
+    },
+    {
+      "id": "coral-anemone-bta",
+      "sha256": "f587bdc3e94a75cefff1424abb250325d87f057cc9676daabfaef565bd6e81ef",
+      "generator": "src/rendering/modeling/build_bubble_tip_anemone.py",
+      "generatorSha256": "32e2fc2e3d54421b16ab0b2bafba7e34f35a871401689770d6c8d132c59bf740",
+      "provenanceHashMatches": true,
+      "primitives": [
+        {
+          "id": "anemone_column_disc",
+          "role": "coral-soft",
+          "vertices": 376,
+          "maskRows": 376,
+          "finiteInRange": true,
+          "inspectionValuesExact": true,
+          "rigidRedZero": null
+        },
+        {
+          "id": "anemone_tentacle_crown",
+          "role": "coral-soft",
+          "vertices": 10452,
+          "maskRows": 10452,
+          "finiteInRange": true,
+          "inspectionValuesExact": true,
+          "rigidRedZero": null
+        }
+      ]
+    },
+    {
+      "id": "coral-brain-diploria",
+      "sha256": "904f471bb1a1094004b04294c4166ff309487f3333cea82e6105bf96ca1f100d",
+      "generator": "src/rendering/modeling/build_brain_coral.py",
+      "generatorSha256": "bb9ef5f2b4224de3f2758a2b5e41df6a9a8acae6b4b05b763a4c771b7840e166",
+      "provenanceHashMatches": true,
+      "primitives": [
+        {
+          "id": "diploria_brain_colony",
+          "role": "coral-soft",
+          "vertices": 6609,
+          "maskRows": 6609,
+          "finiteInRange": true,
+          "inspectionValuesExact": true,
+          "rigidRedZero": null
+        }
+      ]
+    },
+    {
+      "id": "coral-euphyllia-hammer",
+      "sha256": "6e1974d5f72ec3a898d84f559a5d4397a6002d8534387c47697452d6c2157fc8",
+      "generator": "src/rendering/modeling/build_euphyllia_hammer.py",
+      "generatorSha256": "68d86057695f6799c1b0c8dc94331cf5aa2a52442717ee4a62a7c2165418a1da",
+      "provenanceHashMatches": true,
+      "primitives": [
+        {
+          "id": "euphyllia_hammer_polyp_crown",
+          "role": "coral-soft",
+          "vertices": 15232,
+          "maskRows": 15232,
+          "finiteInRange": true,
+          "inspectionValuesExact": true,
+          "rigidRedZero": null
+        },
+        {
+          "id": "euphyllia_hammer_skeleton",
+          "role": "coral-rigid",
+          "vertices": 1538,
+          "maskRows": 1538,
+          "finiteInRange": true,
+          "inspectionValuesExact": true,
+          "rigidRedZero": true
+        }
+      ]
+    },
+    {
+      "id": "coral-euphyllia-torch",
+      "sha256": "e267292425df202d816b5f8a93336e2e5255962a87116f9cc8fd680ac260c022",
+      "generator": "src/rendering/modeling/build_euphyllia_torch.py",
+      "generatorSha256": "346e4d1eac641469b1abec8536b3da232722d4bdbc39ee89989d4816eabf6ab0",
+      "provenanceHashMatches": true,
+      "primitives": [
+        {
+          "id": "euphyllia_polyp_crown",
+          "role": "coral-soft",
+          "vertices": 16160,
+          "maskRows": 16160,
+          "finiteInRange": true,
+          "inspectionValuesExact": true,
+          "rigidRedZero": null
+        },
+        {
+          "id": "euphyllia_skeleton",
+          "role": "coral-rigid",
+          "vertices": 2037,
+          "maskRows": 2037,
+          "finiteInRange": true,
+          "inspectionValuesExact": true,
+          "rigidRedZero": true
+        }
+      ]
+    },
+    {
+      "id": "coral-montipora-plate",
+      "sha256": "87f4e1052e44f29b27b948f9c9f45cae42855c1948fdf8ee519ea7c70ae21252",
+      "generator": "src/rendering/modeling/build_montipora_plate.py",
+      "generatorSha256": "c624b9254d80bd02d78f85f894896e5f418f25c4a7c536974a6440e7dd7dbf67",
+      "provenanceHashMatches": true,
+      "primitives": [
+        {
+          "id": "montipora_plate_colony",
+          "role": "coral-rigid",
+          "vertices": 2830,
+          "maskRows": 2830,
+          "finiteInRange": true,
+          "inspectionValuesExact": true,
+          "rigidRedZero": true
+        }
+      ]
+    },
+    {
+      "id": "coral-zoanthid-mat",
+      "sha256": "a60d91258fcf9a64d43a628dbe0f4027a91a1fce73104153d7f3ea424cc2463d",
+      "generator": "src/rendering/modeling/build_zoanthid_mat.py",
+      "generatorSha256": "431cb1d3856022952cdae9fbda0cc5338f63f10f945c83f44d9bb62341237d88",
+      "provenanceHashMatches": true,
+      "primitives": [
+        {
+          "id": "zoanthid_button_cluster",
+          "role": "coral-soft",
+          "vertices": 10543,
+          "maskRows": 10543,
+          "finiteInRange": true,
+          "inspectionValuesExact": true,
+          "rigidRedZero": null
+        }
+      ]
+    }
+  ],
+  "pinnedBaseAndLinearHeightChecks": {
+    "reproduction": "Execute the second Python shell block in docs/asset-evidence/aq57/README.md",
+    "result": "All six indexed proximal-cap selections R=0; all torch/hammer/anemone crown vertices match source linear height within half U16 quantization + 1e-7."
+  },
+  "browser": {
+    "laptop": {
+      "report": {
+        "comparisons": {
+          "motionChangesPixels": true,
+          "pauseStable": true,
+          "reducedMotionStable": true,
+          "rigidStable": true
+        },
+        "hashes": {
+          "moving": [
+            "4da4b48a440d2d8b875eec2cb56f4da75e9e86fafc0284569b4db8b4624b86be",
+            "3c6bd94fbf49b632264de3a6bd28548fed188b208d58ff2ba08441d545a2722f"
+          ],
+          "paused": [
+            "16d2ab9a60121f3a1cf54269d6a3c906c507fc3eef69904599156903d0b9f33d",
+            "16d2ab9a60121f3a1cf54269d6a3c906c507fc3eef69904599156903d0b9f33d"
+          ],
+          "reduced": [
+            "16d2ab9a60121f3a1cf54269d6a3c906c507fc3eef69904599156903d0b9f33d",
+            "16d2ab9a60121f3a1cf54269d6a3c906c507fc3eef69904599156903d0b9f33d"
+          ],
+          "rigid": [
+            "3d62b6c2609f212aaed1c2f006a0e99bd4616e0634a581e45efea8b013ae25ad",
+            "3d62b6c2609f212aaed1c2f006a0e99bd4616e0634a581e45efea8b013ae25ad"
+          ]
+        },
+        "programs": 12,
+        "sources": [
+          {
+            "id": "coral-euphyllia-torch",
+            "sha256": "e267292425df202d816b5f8a93336e2e5255962a87116f9cc8fd680ac260c022"
+          },
+          {
+            "id": "coral-brain-diploria",
+            "sha256": "904f471bb1a1094004b04294c4166ff309487f3333cea82e6105bf96ca1f100d"
+          },
+          {
+            "id": "coral-acropora-staghorn",
+            "sha256": "629781835efee49bea46f109cfdeeef0ba434d94a8dc3bf33d769eb31f99c0ea"
+          }
+        ]
+      },
+      "viewport": {
+        "dpr": 1,
+        "height": 900,
+        "width": 1440
+      }
+    },
+    "phone": {
+      "report": {
+        "comparisons": {
+          "motionChangesPixels": true,
+          "pauseStable": true,
+          "reducedMotionStable": true,
+          "rigidStable": true
+        },
+        "hashes": {
+          "moving": [
+            "4da4b48a440d2d8b875eec2cb56f4da75e9e86fafc0284569b4db8b4624b86be",
+            "3c6bd94fbf49b632264de3a6bd28548fed188b208d58ff2ba08441d545a2722f"
+          ],
+          "paused": [
+            "16d2ab9a60121f3a1cf54269d6a3c906c507fc3eef69904599156903d0b9f33d",
+            "16d2ab9a60121f3a1cf54269d6a3c906c507fc3eef69904599156903d0b9f33d"
+          ],
+          "reduced": [
+            "16d2ab9a60121f3a1cf54269d6a3c906c507fc3eef69904599156903d0b9f33d",
+            "16d2ab9a60121f3a1cf54269d6a3c906c507fc3eef69904599156903d0b9f33d"
+          ],
+          "rigid": [
+            "3d62b6c2609f212aaed1c2f006a0e99bd4616e0634a581e45efea8b013ae25ad",
+            "3d62b6c2609f212aaed1c2f006a0e99bd4616e0634a581e45efea8b013ae25ad"
+          ]
+        },
+        "programs": 12,
+        "sources": [
+          {
+            "id": "coral-euphyllia-torch",
+            "sha256": "e267292425df202d816b5f8a93336e2e5255962a87116f9cc8fd680ac260c022"
+          },
+          {
+            "id": "coral-brain-diploria",
+            "sha256": "904f471bb1a1094004b04294c4166ff309487f3333cea82e6105bf96ca1f100d"
+          },
+          {
+            "id": "coral-acropora-staghorn",
+            "sha256": "629781835efee49bea46f109cfdeeef0ba434d94a8dc3bf33d769eb31f99c0ea"
+          }
+        ]
+      },
+      "viewport": {
+        "dpr": 1,
+        "height": 874,
+        "width": 402
+      }
+    }
+  },
+  "verification": {
+    "focused": "6/6 coral-material tests passed by Root and independent reviewer",
+    "frozenSuite": "44 files / 399 tests passed; typecheck and production build passed before later spawn iteration",
+    "shader": "Actual Three standard/depth templates share one raw-R pow(...,1.8) displacement path. Actual GPU compiles12programs and renders cast shadows. COLOR_0 RGB is not multiplied into display RGB and alpha does not become opacity.",
+    "reproduction": "Build src/rendering/proof/coral-mask-study.html as the single Vite entry with root src/rendering/proof, serve the isolated output on loopback, open /coral-mask-study.html and click Run GPU comparisons."
+  },
+  "limitations": [
+    "Image hashes establish temporal motion/stability, not numeric exponent accuracy or isolated shadow displacement. Exact-once conclusion combines unchanged raw binary/source-height checks, actual-template/CPU tests and GPU compilation.",
+    "Standalone proof disables frustum culling. Displacement-aware production culling, final biological art and full reef assembly remain AQ-42/AQ-14.4 scope.",
+    "Phone proof crops the outer colonies. It is a functional shader check, not responsive main-scene art acceptance.",
+    "No visual assets or generators modified; no deployment."
+  ]
+}

@@ -54,6 +54,45 @@ describe('rendered fish travel adapter', () => {
       expect(traveled).toBeGreaterThan(1.5); expect(distance(initial, fish.position)).toBeGreaterThan(.4); expect(turn).toBeGreaterThan(.5)
     }
   })
+  it('pivots at a boundary until the heading-locked step is safe, then progresses without a yaw snap', () => {
+    const bounded: WaterHabitat = {
+      bounds: { min: { x: -5, y: -2.4, z: -3 }, max: { x: 5, y: 2.8, z: 2.8 } },
+      obstacles: [],
+      anchors: [],
+    }
+    const fish = createSwimmingFish('boundary-chord', 'ocellaris-clownfish', { x: 4.695, y: .7, z: 1 }, .3)
+    fish.yaw = Math.PI / 2
+    fish.speed = .6
+    fish.routeGeneration = fish.behavior.navigationGeneration
+    fish.route = [fish.position, { x: 4.2, y: .7, z: 1 }]
+    fish.waypoint = 1
+    const start = { ...fish.position }
+    const yawBefore = fish.yaw
+    const dt = 1 / 60
+
+    stepSwimmingFish(fish, bounded, dt)
+
+    const yawDelta = Math.atan2(Math.sin(fish.yaw - yawBefore), Math.cos(fish.yaw - yawBefore))
+    const maxTurn = fish.behavior.variation.turnDegreesPerSecond * Math.PI / 180 * 1.65 * 2.2 * dt
+    expect(Math.abs(yawDelta)).toBeGreaterThan(0)
+    expect(Math.abs(yawDelta)).toBeLessThanOrEqual(maxTurn + 1e-9)
+    expect(fish.position).toEqual(start)
+    expect(fish.speed).toBe(0)
+    expect(fish.route).toHaveLength(2)
+    expect(isWaterSegmentSafe({ start, target: fish.position, waterBounds: bounded.bounds, obstacles: bounded.obstacles, fishClearanceRadius: fish.clearance })).toBe(true)
+
+    let traveled = 0
+    for (let frame = 0; frame < 600; frame++) {
+      const before = { ...fish.position }, yawBeforeFrame = fish.yaw
+      stepSwimmingFish(fish, bounded, dt)
+      const step = distance(before, fish.position)
+      traveled += step
+      expect(isWaterSegmentSafe({ start: before, target: fish.position, waterBounds: bounded.bounds, obstacles: bounded.obstacles, fishClearanceRadius: fish.clearance })).toBe(true)
+      const frameYawDelta = Math.atan2(Math.sin(fish.yaw - yawBeforeFrame), Math.cos(fish.yaw - yawBeforeFrame))
+      expect(Math.abs(frameYawDelta)).toBeLessThanOrEqual(maxTurn + 1e-9)
+    }
+    expect(traveled).toBeGreaterThan(0.1)
+  })
   it('freezes position and orientation while stopped, without a resume catch-up jump', () => {
     const fish = createSwimmingFish('paused', 'yellow-tang', { x: -2, y: 1, z: 2 })
     stepSwimmingFish(fish, habitat, .03)
@@ -195,10 +234,48 @@ describe('rendered fish travel adapter', () => {
     expect(route.path.some(point => point.y < -.05)).toBe(true)
     const fish = createSwimmingFish('mesh-overhang', 'yellow-tang', start, .5, undefined, { collisionRadiusM: .04 })
     fish.route = route.path; fish.waypoint = 1
-    for (let i = 0; i < 2400 && fish.position.x < .5; i++) stepSwimmingFish(fish, meshHabitat(checked), 1 / 30)
+    for (let i = 0; i < 2400 && fish.position.x < .5; i++) {
+      const previousPitch = fish.pitch
+      stepSwimmingFish(fish, meshHabitat(checked), 1 / 30)
+      expect(Math.abs(fish.pitch - previousPitch)).toBeLessThanOrEqual(1.2 / 30 + 1e-9)
+    }
     expect(fish.position.x).toBeGreaterThan(.4)
     expect(Math.min(...calls.map(call => Math.min(call.start.y, call.end.y)))).toBeLessThan(-.05)
     expect(calls.every(call => call.radius === .04)).toBe(true)
+  })
+  it('follows upward and downward vertical metric routes with rate-limited pitch and safe bounds', () => {
+    const verticalOnly: CapsuleClearanceQuery = (start, end) => ({
+      status: Math.hypot(end.x - start.x, end.z - start.z) <= 1e-5 ? 'clear' : 'blocked',
+      work: { nodeVisits: 0, triangleTests: 0 },
+    })
+    for (const targetY of [-.65, .65]) {
+      const fish = createSwimmingFish(`vertical-${targetY}`, 'ocellaris-clownfish', { x: 0, y: 0, z: 0 }, .5, undefined, { collisionRadiusM: .04 })
+      fish.yaw = 0
+      // Keep this route test inside a stable open-water state so an unrelated
+      // behavior transition cannot replace the hand-authored metric path.
+      fish.behavior = { ...fish.behavior, state: 'swim', stateElapsedSeconds: 0, stateDurationSeconds: 100, targetAnchor: undefined }
+      fish.routeGeneration = fish.behavior.navigationGeneration
+      fish.route = [fish.position, { x: 0, y: targetY, z: 0 }]
+      fish.waypoint = 1
+      const habitat = meshHabitat(verticalOnly)
+      let progress = 0
+      for (let frame = 0; frame < 3600 && fish.waypoint < fish.route.length; frame++) {
+        const before = { ...fish.position }, beforePitch = fish.pitch
+        fish.routeGeneration = fish.behavior.navigationGeneration
+        stepSwimmingFish(fish, habitat, 1 / 60)
+        expect(Math.abs(fish.pitch - beforePitch)).toBeLessThanOrEqual(1.2 / 60 + 1e-9)
+        expect(fish.position.x).toBeGreaterThanOrEqual(meshWater.min.x + .04)
+        expect(fish.position.x).toBeLessThanOrEqual(meshWater.max.x - .04)
+        expect(fish.position.y).toBeGreaterThanOrEqual(meshWater.min.y + .04)
+        expect(fish.position.y).toBeLessThanOrEqual(meshWater.max.y - .04)
+        expect(fish.position.z).toBeGreaterThanOrEqual(meshWater.min.z + .04)
+        expect(fish.position.z).toBeLessThanOrEqual(meshWater.max.z - .04)
+        progress += targetY > 0 ? fish.position.y - before.y : before.y - fish.position.y
+      }
+      expect(fish.waypoint).toBe(fish.route.length)
+      expect(progress).toBeGreaterThan(.4)
+      expect(targetY > 0 ? -fish.pitch : fish.pitch).toBeGreaterThan(.4)
+    }
   })
   it('holds at a rock face when a stale direct route is no longer capsule-clear', () => {
     const exact = collisionQuery(), blocked: number[] = []
@@ -316,6 +393,36 @@ describe('rendered fish travel adapter', () => {
     expect(finalTravel).toBeLessThan(.01)
     expect(final.navigationAnchor).toBe('grazingSurface')
     expect(final.behavior.navigationOutcome).toBeUndefined()
+  })
+  it('acknowledges close intermediate mesh points only after safe forward and point checks', () => {
+    const target = { x: .02, y: 0, z: 0 }
+    const clear: CapsuleClearanceQuery = () => ({ status: 'clear', work: { nodeVisits: 0, triangleTests: 0 } })
+    const fish = createSwimmingFish('mesh-close-intermediate', 'yellow-tang', { x: 0, y: 0, z: 0 }, .5, undefined, { collisionRadiusM: .04 })
+    fish.yaw = Math.PI / 2
+    fish.speed = .4
+    fish.routeGeneration = fish.behavior.navigationGeneration
+    fish.route = [fish.position, target, { x: .4, y: 0, z: 0 }]
+    fish.waypoint = 1
+    const before = { ...fish.position }
+    stepSwimmingFish(fish, meshHabitat(clear), 1 / 30)
+    expect(fish.waypoint).toBe(2)
+    expect(fish.position.x).toBeGreaterThan(before.x)
+    expect(fish.position.x).toBeLessThan(target.x)
+
+    const blockedAtPoint: CapsuleClearanceQuery = (_start, end) => ({
+      status: end.x === target.x && end.y === target.y && end.z === target.z ? 'blocked' : 'clear',
+      work: { nodeVisits: 0, triangleTests: 0 },
+    })
+    const blocked = createSwimmingFish('mesh-close-blocked-point', 'yellow-tang', { x: 0, y: 0, z: 0 }, .5, undefined, { collisionRadiusM: .04 })
+    blocked.yaw = Math.PI / 2
+    blocked.speed = .4
+    blocked.routeGeneration = blocked.behavior.navigationGeneration
+    blocked.route = [blocked.position, target, { x: .4, y: 0, z: 0 }]
+    blocked.waypoint = 1
+    stepSwimmingFish(blocked, meshHabitat(blockedAtPoint), 1 / 30)
+    expect(blocked.waypoint).toBe(1)
+    expect(blocked.position.x).toBeGreaterThan(0)
+    expect(blocked.position.x).toBeLessThan(target.x)
   })
   it('rejects stale out-of-water arrival and isolates query inputs from callback mutation', () => {
     const query = vi.fn((start, end, _radius, budget) => {

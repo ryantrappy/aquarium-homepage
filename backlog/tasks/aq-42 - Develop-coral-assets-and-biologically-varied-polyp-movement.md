@@ -5,8 +5,9 @@ status: In Progress
 assignee:
   - '@gemini'
   - '@root'
+  - '@Luna'
 created_date: '2026-11-03 12:34'
-updated_date: '2026-11-05 04:18'
+updated_date: '2026-11-06 04:54'
 labels: []
 dependencies:
   - AQ-14.3
@@ -47,12 +48,23 @@ The reference distinguishes hard branching SPS structure from soft LPS tissue an
 3. After the foundation readiness gate, implement the Three.js raw-mask adapter with COLOR_0 separate from display color/opacity and explicit contact AO.
 4. Integrate shared flow-driven tissue motion with stable rigid skeletons, bounded time, pause and reduced-motion behavior.
 5. Root verifies actual appearance, occlusion and responsive performance at 1440x900 and 402x874 before completion or scene promotion.
+
+### Specific Code Changes & Locations
+
+- **8 Modular Coral Generators & Packaged GLBs (`src/rendering/modeling/build_*.py` & `src/rendering/assets/corals/coral-*.glb`)**:
+  - Authors separate rigid skeleton (`R = 0.0`) and soft polyp/tentacle crown (`R = 0..1` raw linear height) primitives for *Euphyllia* Torch/Hammer, *Acropora* Staghorn/Table, *Montipora* Plate, *Diploria* Brain, Bubble-Tip Anemone, and *Zoanthid* mat colonies.
+- **Raw-mask Flow and Material Adapter (`src/rendering/scene/coral-material.ts`, `applyCoralRawMaskMaterial()`)**:
+  - Decodes `COLOR_0` without multiplying display albedo/alpha, applies `pow(coralRawR, 1.8)` in the vertex shader for dual-frequency surge + turbulence sway (`uTime`), adds procedural material detail and declared palette/roughness overrides, and freezes displacement when `paused || reducedMotion` is active.
+
+2026-11-05 Root-approved bounded renderer fix: verify Three Mesh.frustumCulled default path and WebGLShadowMap both call Mesh.intersectsFrustum -> Frustum.intersectsObject -> geometry.boundingSphere; compare those source-space bounds with exact coral shader deformation. Preserve source GLBs and shared cached BufferGeometry. Add an idempotent WeakMap-backed per-geometry boundingSphere expansion in renderer assembly for the shader's static basal skirt tuck plus exact worst-case soft-flow displacement from the current amplitude/coefficients and actual position/color attributes; account for rigid parts' static tuck, cloned mesh transforms and repeated assembly without cloning or rewriting vertex data. Add focused tests for conservative bound coverage, shared-template geometry identity, repeated/rebuild idempotency, rigid/soft profiles, and a Frustum case where an original bound misses a possible shader-displaced vertex. Leave aquarium.ts, generators/assets/packager untouched; report bounds/art/scene limits separately.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 Cross-reference the AQ-40 bounded 30k PixForge normal bake in comment #15. This does not close AQ-42; selected-Three proof, masks/contract and requested biological/visual criteria remain pending.
+
+Root reviewed bounded culling handoff2026-11-06 UTC: final4source pins0c218745/84f71140/93db5d62/60371f9b accepted with independent14tests and Root14tests. Frozen default44files/408tests, typecheck and production build pass. Initial full run hit2existing5s exact-rock fixture timeouts under contention;30fixture tests pass in1.01s and unchangeddefaultfull408suite passes at rest. No timeouts/assertions weakened. Portable audit: node docs/asset-evidence/aq42/audit-coral-bounds.mjs /tmp/aq42-coral-bounds-audit.json; pinsall8GLBs/11primitives/111135vertices and reproduces22.897–58.166mm local sphere additions atA=.014. Report: docs/asset-evidence/aq42/displacement-bounds-review.json and coral-bounds-audit.json. Actual GLSL tail is byte-identical to d6767c2; only CPU reference parity changed. Visual assets remain untouched. Broad task ownership includes Gemini for visual work; Luna handled only the reviewed renderer slice. All parent ACs remainopen for actual art/flow/scene acceptance.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
@@ -182,5 +194,95 @@ author: @root
 created: 2026-11-05 04:18
 ---
 User steering2026-11-04: another agent is actively working on the coral portion. Root reserves coral assets/generators/materials/packager/manifests/README/rendering for that agent, holds coral changes out of commits and makes no further edits there during ownership. Codex workers continue independent telemetry/profile verification and read-only pinned ROCK collision tooling. New export hashes invalidate prior validation; recheck before any future integration. Root retains final review/Done.
+---
+
+author: @root
+created: 2026-11-06 02:40
+---
+Photorealism audit 2026-11-05 (AQ-70): procedural colonies read as cartoon (uniform pastel saturation, repeated instances, cotton-swab Acropora tips, emissive neon brain coral). Detailed photoreal requirements per archetype are in AQ-70.11; fluorescence via masks in AQ-70.6.
+---
+
+created: 2026-11-06 04:23
+---
+Read-only implementation preflight (2026-11-05): Actual production path `aquarium.ts:rebuildHabitat()` clones cached coral templates, calls `assembleCoralsOnRockSockets`, then applies reef-scale 4.3–4.5; mount scales range about1.38–1.85. Cloned meshes share template BufferGeometry and retain default `frustumCulled=true`. Three 0.187 WebGLRenderer and WebGLShadowMap both filter meshes through `Mesh.intersectsFrustum()`, which tests the geometry's original POSITION-derived boundingSphere. Coral shaders deform vertex positions after that bound is computed: all roles have the basal skirt tuck; soft roles add flow displacement. The standalone AQ-53 proof disables frustum culling, so its pixel evidence cannot clear this issue. The defect is a possible false cull at camera or light-frustum boundaries, not a claim that every current view visibly clips. A local bound margin must cover static skirt tuck plus soft flow, be applied once to the shared geometry sphere, and be tested without editing cached position data or cloning geometry.
+---
+
+author: @Luna
+created: 2026-11-06 04:32
+---
+2026-11-05 AQ-42 bounded renderer bounds iteration (no asset/generator/packager/aquarium.ts edits):
+
+- Confirmed the real false-cull path: production clones shared coral template BufferGeometry, keeps Mesh.frustumCulled=true, and binds the raw-mask surface/custom-depth shader. In installed Three r187, WebGLRenderer and WebGLShadowMap both cull Mesh objects via Mesh.intersectsFrustum -> Frustum.intersectsObject -> geometry.boundingSphere, which is lazily computed from undeformed POSITION. The shader moves vertices after that bound. The standalone AQ-53 GPU proof explicitly sets frustumCulled=false, so it did not exercise this case. This establishes a real possible camera/light-frustum false negative, not a claim of visible clipping in every current camera view.
+- Recorded exact position envelope: for soft flex in [0,1], x displacement magnitude <=1.38*abs(A)*flex; z <=1.10*abs(A)*flex; shader y sway magnitude <=0.18*(1.38+1.10)*abs(A)*flex^2. Both roles also receive skirt tuck: smoothstep(-.006,.018,y), x/z scale from .55 to1 and y drop up to .008m. The renderer now calculates a per-vertex Euclidean displacement margin from actual POSITION and normalized COLOR_0 attributes, adds a 10µm numerical pad, and expands the original local bounding sphere by that margin. This does not assume that the tuck reduces distance from a non-origin sphere center. Three transforms the expanded sphere through each clone/mount/island scale for both camera and shadow culls.
+- Geometry remains shared and vertex buffers/assets remain unchanged. A WeakMap retains the original sphere and largest needed margin per geometry, so repeated cloned mounts/rebuilds do not accumulate expansion. Assembly checks the live amplitude uniform on binding and in assemble.update before the production render; increasing amplitude grows the sphere monotonically. Non-finite/malformed masks or a non-finite amplitude set the culling sphere radius to Infinity (fail-open for culling). Finite channel values use the same [0,1] clamps as the shader.
+- Independent binary read of all eight exact coral exports using their current default amplitude .014m gives local expansion margins about22.9–58.2mm including the pad; rigid primitives' margin is from skirt tuck alone. These are local geometry units (meter assets), then transformed by assembly scales.
+- Added regressions for a frustum miss before expansion and pass after expansion (rigid vertex x=1.01,y=0 tucks to x=.775), soft motion sampled across three vertices/times within the analytic sphere, actual shared geometry identity, repeated assembly idempotency, mutable amplitude growth, and non-finite mask/amplitude fail-open. Scoped command: `npm exec vitest -- run --maxWorkers=2 src/rendering/scene/reef-assembly.test.ts src/rendering/scene/coral-material.test.ts` — 2 files/12 tests pass. `git diff --check` passes. `npm run typecheck` is currently blocked only by unrelated concurrent fish-spawn.test.ts TS18048 errors at lines148-149 (`edge.expectedMinimum/Maximum` possibly undefined); the TypeScript pass reported no errors in these AQ-42 files.
+
+Only src/rendering/scene/reef-assembly.ts and reef-assembly.test.ts changed for this lane. Full art acceptance, exact current-scene visual clipping/performance, normal quality, and Root's viewport review remain separate AQ-42 gates. No acceptance criteria/status were changed.
+---
+
+author: root
+created: 2026-11-06 04:36
+---
+Root review of displacement-bound slice: static skirt plus per-vertex soft sway displacement and baseSphere+margin triangle inequality are conservative; shared geometry positions remain unchanged and monotone margin avoids rebuild accumulation. Actual installed Three camera and shadow renderers both call Mesh.intersectsFrustum -> Frustum.intersectsObject -> geometry.boundingSphere. One numeric follow-up before acceptance: finiteJS amplitude can overflow Float32 uniform input (e.g1e40), while currentCPU bound stays finite; fail-open on Float32 overflow and scale the numeric pad with position/displacement magnitude for large finite amplitudes. State immutablePOSITION/COLOR0, fixedroleuniform and assembly.update-owned motion-scale scope explicitly; this is not arbitraryshader-uniform support. Keep taskopen for art/scene criteria.
+---
+
+author: @link-interaction
+created: 2026-11-06 04:37
+---
+Independent review findings for the bounded culling fix (no reviewer edits): production displacement margin matches current GLSL static skirt tuck, X/Z flow coefficients and the shader vertical term with flex squared. The new sampled coverage test currently uses evaluateCoralVertexDisplacement.dy, whose CPU reference has only one flexibility factor; actual GLSL multiplies coralFlex twice. Please compute the test vertical displacement from the actual shader equation (or multiply returned CPU dy by its flexibilityWeight) and add a partial-flex-only fixture so the full-flex vertex does not dominate the shared maximum and hide that mismatch. Keep coral-material.ts outside this two-file patch.
+
+Please narrow the helper docstring from every shader-reachable vertex to the supported current contract: ordinary canonical coral Mesh geometry with unchanged position/color attributes, a conservative original sphere, fixed role uniform, finite supported shader inputs and controller-owned motion scale reset to 0/1 by assembly.update before rendering. Arbitrary external role/motion/geometry mutation is not covered. Root separately requested Float32 amplitude-overflow fail-open handling and magnitude-scaled numerical padding; those changes remain worker-owned. A useful final test improvement is comparing original versus expanded spheres under the same explicit updated parent transforms, and confirming an actual shader-deformed world point lies inside the test frustum; the current rigid example checks an unmounted baseline and does not exercise a refreshed mount transform chain. Camera and shadow source paths both use Mesh.intersectsFrustum -> Frustum.intersectsObject; ordinary supplied Mesh uses geometry.boundingSphere. External AQ70.12 sand edits in aquarium.ts are outside this review. AQ42 art/actual-scene acceptance remains open.
+---
+
+author: @Luna
+created: 2026-11-06 04:40
+---
+AQ-42 bounds follow-up iteration (2026-11-06), addressing independent review:
+
+- Corrected the CPU reference vertical displacement to use the same flexibility squared factor as GLSL and added an explicit partial-flex raw R=.44 equation regression. No shader or asset source changed.
+- The rigid-frustum regression now uses a nondegenerate three-vertex triangle. It computes each shader-tucked point through the assembled mesh's fully updated mount/world transform, constructs a frustum containing those points, then compares the same assembled mesh's Mesh.intersectsFrustum result with its original geometry sphere (culled) and expanded sphere (visible). This exercises the actual Three culling entry point and clone transform chain.
+- Bounds scope is now explicit: immutable POSITION/COLOR_0 data, fixed role uniform, assembly.update-owned motion scale (0/1), and finite amplitude. Arbitrary direct geometry/role/motion-uniform mutation is unsupported. The exposed amplitude is rechecked during assembly.update before the next production camera/shadow cull.
+- Float32 overflow is fail-open: reject a JS amplitude whose Math.fround is non-finite and reject per-vertex displacement/output extrema that overflow Float32, setting radius Infinity. Numeric pad now scales as 1e-5 * max(1, per-vertex local output magnitude), while ordinary default/.05 amplitude retains the 10µm pad. Added regressions for amplitude1000 scale-aware padding and JS-finite 1e40 Float32 overflow.
+- Current source hashes: reef-assembly.ts 00eea3069ff8014ace0aa424c6bd1dc0e71d704c4b3c9355f955733ebd5d34ca; reef-assembly.test.ts 2637ab1c1870fed15282d3e58453549690c4018eed9ccf2e260ccffa627255cb; coral-material.ts 93db5d62466824927872926ed53ea59a4ef5306bb8457ed8c04fbc80e2e21953; coral-material.test.ts 60371f9bcc81d665baf8b20aeffa716fd370617679418f10c3dc30af440da578.
+
+Verification: `npm exec vitest -- run --maxWorkers=2 src/rendering/scene/reef-assembly.test.ts src/rendering/scene/coral-material.test.ts` — 2 files/14 tests passed. `npm run typecheck` and its 11 script syntax checks pass; scoped diff-check passes. No acceptance criteria/status changed. AQ-42 visual/art and scene gates remain open.
+---
+
+author: @link-interaction
+created: 2026-11-06 04:41
+---
+Independent bounded culling review PASS after feedback, 2026-11-05. Reviewed pins: reef-assembly.ts 00eea3069ff8014ace0aa424c6bd1dc0e71d704c4b3c9355f955733ebd5d34ca; reef-assembly.test.ts 2637ab1c1870fed15282d3e58453549690c4018eed9ccf2e260ccffa627255cb; coral-material.ts 93db5d62466824927872926ed53ea59a4ef5306bb8457ed8c04fbc80e2e21953; coral-material.test.ts 60371f9bcc81d665baf8b20aeffa716fd370617679418f10c3dc30af440da578. Independently ran the two focused suites: 14 tests pass; scoped diff check passes. No blocking finding within the documented current assembly contract.
+
+Margin math conservatively adds each vertex static skirt displacement and absolute soft-flow limits: X gain 1.38, Z gain 1.10, Y gain 0.18*(1.38+1.10) times amplitude*flex squared. A sphere covering source vertices enlarged by the maximum displacement norm covers deformed vertices and triangle interiors. Shared geometry keeps one original sphere and monotone maximum margin, so repeated clones/rebuilds and lower-amplitude bindings do not compound or shrink padding. Normal updates perform constant metadata/sphere work per binding; an amplitude increase or first role binding triggers a vertex scan. This is not a claim of constant work while a caller increases amplitude every frame.
+
+Feedback resolved: CPU reference now matches shader dy*flex squared and has an explicit partial-mask equation regression; shader source itself is unchanged. The rigid frustum test compares the same fully updated assembled Mesh before/after restoring original versus expanded sphere, and verifies its shader-tucked world vertices are inside the frustum. Finite-JS/Float32-overflow amplitudes and overflowing local displacement fail open to an infinite culling sphere; padding scales with local magnitude. Supplied ordinary Mesh camera and WebGLShadowMap paths both call Mesh.intersectsFrustum -> Frustum.intersectsObject -> geometry.boundingSphere transformed by matrixWorld.
+
+Scope is immutable POSITION/COLOR_0, a conservative original bound, ordinary canonical coral meshes/current mount transforms, fixed role uniform and controller-owned motion scale reset before render. Arbitrary external geometry/role/motion mutation, invalid shader output repair, biological appearance, actual assembled-scene performance/occlusion and GPU/art acceptance are not established. External AQ70.12 sand edits in aquarium.ts were excluded from this review. No reviewer source/model edits, acceptance checks, Done, commit or promotion.
+---
+
+author: @link-interaction
+created: 2026-11-06 04:42
+---
+Correction to the preceding independent pass: Root identified a remaining Float32 intermediate overflow not covered by checking final algebraically simplified displacement components. At amplitude 2e38, individual X/Z sway envelopes can remain finite while abs(swayX)+abs(swayZ) overflows before multiplication by 0.18. The final pass is held pending the worker guard and explicit regression for that GLSL evaluation order. Earlier math, shared-geometry, transformed-frustum and CPU parity findings remain valid within supported finite intermediates; no full arbitrary-amplitude approval is implied.
+---
+
+author: @Luna
+created: 2026-11-06 04:43
+---
+Final Float32 guard update (2026-11-06): Added an explicit check for the shader's `abs(coralSwayX) + abs(coralSwayZ)` intermediate, not just each individual sway product. A=2e38 has finite Float32 A, 1.38A and 1.10A but the conservative 2.48A sum overflows; the R=0 regression confirms the assembly fails open with an infinite sphere for this case. Final hashes: reef-assembly.ts 0c2187458fb7ff22159f5d0ce221eb9983d7186288633999b12bcdebca36538a; reef-assembly.test.ts 84f71140c0c34e9745a696f0fdced959fdce85e838144fb781de933c40fb1ea7; coral-material.ts 93db5d62466824927872926ed53ea59a4ef5306bb8457ed8c04fbc80e2e21953; coral-material.test.ts 60371f9bcc81d665baf8b20aeffa716fd370617679418f10c3dc30af440da578. Final scoped run: 14 focused tests passed, typecheck + 11 script checks passed, diff-check passed. Acceptance criteria and status remain unchanged.
+---
+
+author: @link-interaction
+created: 2026-11-06 04:44
+---
+Final independent re-review PASS at the corrected pin: reef-assembly.ts 0c2187458fb7ff22159f5d0ce221eb9983d7186288633999b12bcdebca36538a; reef-assembly.test.ts 84f71140c0c34e9745a696f0fdced959fdce85e838144fb781de933c40fb1ea7. Coral-material source/test remain 93db5d62466824927872926ed53ea59a4ef5306bb8457ed8c04fbc80e2e21953 and 60371f9bcc81d665baf8b20aeffa716fd370617679418f10c3dc30af440da578. The missing Float32 intermediate guard is now present before role/flex attenuation: amplitude, each sway product and the absolute sway-sum envelope are checked, including the zero-flex A=2e38 regression. This supersedes the held pass in the preceding correction. Independently reran both focused suites: 14 tests pass.
+
+No blocking finding within the supported current assembly contract. Static tuck plus continuous flow bounds, shared-geometry monotonic/idempotent expansion, dynamic-amplitude remeasurement, magnitude-scaled padding, fail-open overflow handling, exact dy*flex-squared CPU flow parity and the same-updated-mesh frustum regression are coherent. Existing source roles, geometry attributes and controller-owned time/motion inputs are assumed valid as documented; arbitrary external uniform/geometry mutation and invalid shader output repair remain outside the claim. Stable frames do not rescan vertices; increasing amplitude can trigger a scan. Camera and directional-shadow culling both consume the transformed ordinary Mesh geometry sphere. Tests establish this functional slice, not biological art, GPU/platform conformance, actual assembled-scene occlusion or viewport performance acceptance. AQ42 stays open. No reviewer source/model edits or staging/commit.
+---
+
+created: 2026-11-06 04:49
+---
+Read-only per-current-asset bound audit reproduced at /tmp/aq42-root-reviewed-bounds/. Script: audit-coral-bounds.mjs (SHA-256 e26d05f6f4d6a5e9aeb9521bd116472440d4195efcaa980ae6c9a5c1c463933d); deterministic JSON report: coral-bounds-audit.json (SHA-256 3434b1e70286890d328faf7fa8932b203ce8ab9e782c233ddb04729625231675). Run: node /tmp/aq42-root-reviewed-bounds/audit-coral-bounds.mjs. It verifies pinned reef-assembly.ts 0c2187458fb7ff22159f5d0ce221eb9983d7186288633999b12bcdebca36538a, coral-material.ts 93db5d62466824927872926ed53ea59a4ef5306bb8457ed8c04fbc80e2e21953, manifest 6cab6a72c3dedaee2824155ae452793de90ed7fda4e596f7ccdc767ade983af4, and each of the eight current GLB SHA-256 values against the manifest. It decoded all 11 scene primitives / 111,135 POSITION and normalized COLOR_0 vertices. At default A=0.014m, per-primitive local sphere radius additions are 22.897–58.166mm (per-asset maxima: torch 40.271mm; table 37.638mm; staghorn 33.592mm; montipora 36.136mm; brain 58.166mm; anemone 25.495mm; hammer 36.933mm; zoanthid 52.423mm). Method is analytic per-vertex absolute component envelope for static skirt tuck plus maximum sine/cosine sway, then adds scale-aware 1e-5 numeric pad; no temporal sampling is used. The GLB sweep covers current local asset coordinates; expansion is added to the original bound and Three transforms it through the mesh mount. Scope remains fixed role, immutable POSITION/COLOR_0, assembly-managed motion scale, and reported default amplitude; this evidence does not establish visible clipping in a target camera, GPU conformance, arbitrary direct uniform mutation, art/scene acceptance, or viewport performance. No acceptance criteria/status changed.
 ---
 <!-- COMMENTS:END -->

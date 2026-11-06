@@ -1,0 +1,565 @@
+{
+  "schema": "aq42-coral-shader-bounds-source-audit-v1",
+  "status": "read-only-source-pinned-analytic-bounds-reproduction",
+  "sourcePins": {
+    "src/rendering/scene/reef-assembly.ts": "0c2187458fb7ff22159f5d0ce221eb9983d7186288633999b12bcdebca36538a",
+    "src/rendering/scene/coral-material.ts": "93db5d62466824927872926ed53ea59a4ef5306bb8457ed8c04fbc80e2e21953",
+    "src/rendering/assets/corals/manifest.json": "6cab6a72c3dedaee2824155ae452793de90ed7fda4e596f7ccdc767ade983af4"
+  },
+  "method": {
+    "amplitudeM": 0.014,
+    "formulas": {
+      "tuck": "1 - smoothstep(-0.006, 0.018, y)",
+      "softFlex": "pow(clamp(R, 0, 1), 1.8)",
+      "maxDx": "0.45 * tuck * abs(x) + 1.38 * A * flex",
+      "maxDy": "0.008 * tuck + 0.18 * (1.38 + 1.10) * A * flex^2",
+      "maxDz": "0.45 * tuck * abs(z) + 1.10 * A * flex",
+      "vertexMargin": "sqrt(maxDx^2 + maxDy^2 + maxDz^2)",
+      "numericPad": "1e-5 * max(1, abs(x)+maxDx, abs(y)+maxDy, abs(z)+maxDz)",
+      "geometryExpansion": "max(vertexMargin) + 1e-5 * max(numericScale), added to original geometry.boundingSphere.radius"
+    },
+    "rigidRole": "flex=0, so only skirt tuck contributes; raw R does not add flow displacement.",
+    "conservatism": "Each component uses independent absolute sine/cosine maxima; their Euclidean combination upper-bounds the per-vertex displacement even when extrema are not simultaneous. Adding that maximum displacement to the original sphere radius covers every displaced vertex; a sphere also covers triangle interiors by convexity.",
+    "notSamplingProof": "No time or pose samples are used to establish this analytic envelope. CPU/GPU finite-precision safety is the stated scaled numerical pad plus runtime Float32 overflow fail-open checks.",
+    "limits": [
+      "Exact current GLB POSITION and normalized COLOR_0 arrays only; source hash must match the pinned manifest.",
+      "Fixed primitive role and immutable POSITION/COLOR_0 attributes.",
+      "Assembly-managed motion scale 0/1; finite flow amplitude at the exact reported default 0.014m.",
+      "Arbitrary direct geometry/role/motion-uniform mutation is unsupported; assembly.update rechecks amplitude before production frame culling.",
+      "This is a local geometry-space sphere margin; mount/island Object3D transforms scale the sphere at runtime.",
+      "No claim of visible clipping in a particular camera view, photorealism, artifact-free normal deformation, or viewport performance."
+    ]
+  },
+  "assets": [
+    {
+      "id": "coral-euphyllia-torch",
+      "file": "coral-euphyllia-torch.glb",
+      "sourceSha256": "e267292425df202d816b5f8a93336e2e5255962a87116f9cc8fd680ac260c022",
+      "generator": "src/rendering/modeling/build_euphyllia_torch.py",
+      "generatorSha256": "346e4d1eac641469b1abec8536b3da232722d4bdbc39ee89989d4816eabf6ab0",
+      "manifestGeneratorSha256": "346e4d1eac641469b1abec8536b3da232722d4bdbc39ee89989d4816eabf6ab0",
+      "primitives": [
+        {
+          "nodeIndex": 0,
+          "nodeName": "Euphyllia_Polyp_Crown",
+          "meshIndex": 0,
+          "primitiveIndex": 0,
+          "role": "coral-soft",
+          "vertexCount": 16160,
+          "color0": {
+            "componentType": 5123,
+            "normalized": true,
+            "rawRedRange": [
+              0,
+              1
+            ]
+          },
+          "maxVertexIndex": 99,
+          "maxVertexDetails": {
+            "positionM": [
+              -0.01041753962635994,
+              0.16384686529636383,
+              -0.013332085683941841
+            ],
+            "rawMask": [
+              1,
+              1,
+              0.24678416113527124,
+              1
+            ],
+            "flexibility": 1,
+            "componentMaxM": {
+              "x": 0.01932,
+              "y": 0.006249599999999999,
+              "z": 0.015400000000000002
+            }
+          },
+          "shaderMarginM": 0.025484895529705433,
+          "numericScale": 1,
+          "numericPadM": 0.00001,
+          "expandedSphereRadiusAddM": 0.025494895529705432
+        },
+        {
+          "nodeIndex": 1,
+          "nodeName": "Euphyllia_Skeleton",
+          "meshIndex": 1,
+          "primitiveIndex": 0,
+          "role": "coral-rigid",
+          "vertexCount": 2037,
+          "color0": {
+            "componentType": 5123,
+            "normalized": true,
+            "rawRedRange": [
+              0,
+              0
+            ]
+          },
+          "maxVertexIndex": 38,
+          "maxVertexDetails": {
+            "positionM": [
+              -0.05467068403959274,
+              -0.0063454946503043175,
+              0.06855487078428268
+            ],
+            "rawMask": [
+              0,
+              0,
+              0.05000381475547418,
+              0.14999618524452582
+            ],
+            "flexibility": 0,
+            "componentMaxM": {
+              "x": 0.024601807817816734,
+              "y": 0.008,
+              "z": 0.03084969185292721
+            }
+          },
+          "shaderMarginM": 0.04026105357942526,
+          "numericScale": 1,
+          "numericPadM": 0.00001,
+          "expandedSphereRadiusAddM": 0.040271053579425266
+        }
+      ]
+    },
+    {
+      "id": "coral-acropora-table",
+      "file": "coral-acropora-table.glb",
+      "sourceSha256": "ad4c0f5d74fe4efe06f0faa7d57af4e61d8756952b63a54d6424675c9face10d",
+      "generator": "src/rendering/modeling/build_acropora_table.py",
+      "generatorSha256": "327811b6c0af138bd0b979421ca8653262af9c2c975ea75747d67fa9724a7556",
+      "manifestGeneratorSha256": "327811b6c0af138bd0b979421ca8653262af9c2c975ea75747d67fa9724a7556",
+      "primitives": [
+        {
+          "nodeIndex": 0,
+          "nodeName": "Coral_Acropora_Table",
+          "meshIndex": 0,
+          "primitiveIndex": 0,
+          "role": "coral-rigid",
+          "vertexCount": 26665,
+          "color0": {
+            "componentType": 5123,
+            "normalized": true,
+            "rawRedRange": [
+              0,
+              0
+            ]
+          },
+          "maxVertexIndex": 2,
+          "maxVertexDetails": {
+            "positionM": [
+              0.08057938516139984,
+              -0.004000000189989805,
+              -0.021591180935502052
+            ],
+            "rawMask": [
+              0,
+              0,
+              0.05000381475547418,
+              0.14999618524452582
+            ],
+            "flexibility": 0,
+            "componentMaxM": {
+              "x": 0.035547260148077325,
+              "y": 0.007842592621618811,
+              "z": 0.00952485954169529
+            }
+          },
+          "shaderMarginM": 0.037627608379390526,
+          "numericScale": 1,
+          "numericPadM": 0.00001,
+          "expandedSphereRadiusAddM": 0.03763760837939053
+        }
+      ]
+    },
+    {
+      "id": "coral-acropora-staghorn",
+      "file": "coral-acropora-staghorn.glb",
+      "sourceSha256": "629781835efee49bea46f109cfdeeef0ba434d94a8dc3bf33d769eb31f99c0ea",
+      "generator": "src/rendering/modeling/build_acropora_staghorn.py",
+      "generatorSha256": "9b52281bf616a911a30b5c23515c0794a277c6383ef37db4dfd46505d4e07005",
+      "manifestGeneratorSha256": "9b52281bf616a911a30b5c23515c0794a277c6383ef37db4dfd46505d4e07005",
+      "primitives": [
+        {
+          "nodeIndex": 0,
+          "nodeName": "Coral_Acropora_Staghorn",
+          "meshIndex": 0,
+          "primitiveIndex": 0,
+          "role": "coral-rigid",
+          "vertexCount": 18693,
+          "color0": {
+            "componentType": 5123,
+            "normalized": true,
+            "rawRedRange": [
+              0,
+              0
+            ]
+          },
+          "maxVertexIndex": 2,
+          "maxVertexDetails": {
+            "positionM": [
+              0.07446499913930893,
+              -0.003000000026077032,
+              -0.014812009409070015
+            ],
+            "rawMask": [
+              0,
+              0,
+              0.11999694819562066,
+              0.14999618524452582
+            ],
+            "flexibility": 0,
+            "componentMaxM": {
+              "x": 0.03206939906728735,
+              "y": 0.007656250005704351,
+              "z": 0.006379000150651042
+            }
+          },
+          "shaderMarginM": 0.033582080989849106,
+          "numericScale": 1,
+          "numericPadM": 0.00001,
+          "expandedSphereRadiusAddM": 0.03359208098984911
+        }
+      ]
+    },
+    {
+      "id": "coral-montipora-plate",
+      "file": "coral-montipora-plate.glb",
+      "sourceSha256": "87f4e1052e44f29b27b948f9c9f45cae42855c1948fdf8ee519ea7c70ae21252",
+      "generator": "src/rendering/modeling/build_montipora_plate.py",
+      "generatorSha256": "c624b9254d80bd02d78f85f894896e5f418f25c4a7c536974a6440e7dd7dbf67",
+      "manifestGeneratorSha256": "c624b9254d80bd02d78f85f894896e5f418f25c4a7c536974a6440e7dd7dbf67",
+      "primitives": [
+        {
+          "nodeIndex": 0,
+          "nodeName": "Coral_Montipora_Plate",
+          "meshIndex": 0,
+          "primitiveIndex": 0,
+          "role": "coral-rigid",
+          "vertexCount": 2830,
+          "color0": {
+            "componentType": 5123,
+            "normalized": true,
+            "rawRedRange": [
+              0,
+              0
+            ]
+          },
+          "maxVertexIndex": 4,
+          "maxVertexDetails": {
+            "positionM": [
+              0.07793449610471725,
+              -0.004000000189989805,
+              -0.01778803952038288
+            ],
+            "rawMask": [
+              0,
+              0,
+              0.05000381475547418,
+              0.14999618524452582
+            ],
+            "flexibility": 0,
+            "componentMaxM": {
+              "x": 0.0343804783567745,
+              "y": 0.007842592621618811,
+              "z": 0.007847119546628546
+            }
+          },
+          "shaderMarginM": 0.036126179375189804,
+          "numericScale": 1,
+          "numericPadM": 0.00001,
+          "expandedSphereRadiusAddM": 0.03613617937518981
+        }
+      ]
+    },
+    {
+      "id": "coral-brain-diploria",
+      "file": "coral-brain-diploria.glb",
+      "sourceSha256": "904f471bb1a1094004b04294c4166ff309487f3333cea82e6105bf96ca1f100d",
+      "generator": "src/rendering/modeling/build_brain_coral.py",
+      "generatorSha256": "bb9ef5f2b4224de3f2758a2b5e41df6a9a8acae6b4b05b763a4c771b7840e166",
+      "manifestGeneratorSha256": "bb9ef5f2b4224de3f2758a2b5e41df6a9a8acae6b4b05b763a4c771b7840e166",
+      "primitives": [
+        {
+          "nodeIndex": 0,
+          "nodeName": "Coral_Brain_Diploria",
+          "meshIndex": 0,
+          "primitiveIndex": 0,
+          "role": "coral-soft",
+          "vertexCount": 6609,
+          "color0": {
+            "componentType": 5123,
+            "normalized": true,
+            "rawRedRange": [
+              0,
+              0.04499885557335775
+            ]
+          },
+          "maxVertexIndex": 6305,
+          "maxVertexDetails": {
+            "positionM": [
+              -0.12060640007257462,
+              -0.003000000026077032,
+              -0.05808097869157791
+            ],
+            "rawMask": [
+              0,
+              0,
+              0.14999618524452582,
+              0.14999618524452582
+            ],
+            "flexibility": 0,
+            "componentMaxM": {
+              "x": 0.05194084225745422,
+              "y": 0.007656250005704351,
+              "z": 0.025013390255927304
+            }
+          },
+          "shaderMarginM": 0.05815616004052286,
+          "numericScale": 1,
+          "numericPadM": 0.00001,
+          "expandedSphereRadiusAddM": 0.058166160040522864
+        }
+      ]
+    },
+    {
+      "id": "coral-anemone-bta",
+      "file": "coral-anemone-bta.glb",
+      "sourceSha256": "f587bdc3e94a75cefff1424abb250325d87f057cc9676daabfaef565bd6e81ef",
+      "generator": "src/rendering/modeling/build_bubble_tip_anemone.py",
+      "generatorSha256": "32e2fc2e3d54421b16ab0b2bafba7e34f35a871401689770d6c8d132c59bf740",
+      "manifestGeneratorSha256": "32e2fc2e3d54421b16ab0b2bafba7e34f35a871401689770d6c8d132c59bf740",
+      "primitives": [
+        {
+          "nodeIndex": 0,
+          "nodeName": "Anemone_Column_Disc",
+          "meshIndex": 0,
+          "primitiveIndex": 0,
+          "role": "coral-soft",
+          "vertexCount": 376,
+          "color0": {
+            "componentType": 5123,
+            "normalized": true,
+            "rawRedRange": [
+              0,
+              0.14000152590218967
+            ]
+          },
+          "maxVertexIndex": 110,
+          "maxVertexDetails": {
+            "positionM": [
+              -0.028008712455630302,
+              -0.006255933549255133,
+              0.03855068236589432
+            ],
+            "rawMask": [
+              0,
+              0,
+              0.2500038147554742,
+              0.220004577706569
+            ],
+            "flexibility": 0,
+            "componentMaxM": {
+              "x": 0.012603920605033637,
+              "y": 0.008,
+              "z": 0.017347807064652443
+            }
+          },
+          "shaderMarginM": 0.022886791487021434,
+          "numericScale": 1,
+          "numericPadM": 0.00001,
+          "expandedSphereRadiusAddM": 0.022896791487021433
+        },
+        {
+          "nodeIndex": 1,
+          "nodeName": "Anemone_Tentacle_Crown",
+          "meshIndex": 1,
+          "primitiveIndex": 0,
+          "role": "coral-soft",
+          "vertexCount": 10452,
+          "color0": {
+            "componentType": 5123,
+            "normalized": true,
+            "rawRedRange": [
+              0,
+              1
+            ]
+          },
+          "maxVertexIndex": 132,
+          "maxVertexDetails": {
+            "positionM": [
+              0.03900296986103058,
+              0.10586192458868027,
+              0.006586774718016386
+            ],
+            "rawMask": [
+              1,
+              1,
+              0.8233310444800488,
+              1
+            ],
+            "flexibility": 1,
+            "componentMaxM": {
+              "x": 0.01932,
+              "y": 0.006249599999999999,
+              "z": 0.015400000000000002
+            }
+          },
+          "shaderMarginM": 0.025484895529705433,
+          "numericScale": 1,
+          "numericPadM": 0.00001,
+          "expandedSphereRadiusAddM": 0.025494895529705432
+        }
+      ]
+    },
+    {
+      "id": "coral-euphyllia-hammer",
+      "file": "coral-euphyllia-hammer.glb",
+      "sourceSha256": "6e1974d5f72ec3a898d84f559a5d4397a6002d8534387c47697452d6c2157fc8",
+      "generator": "src/rendering/modeling/build_euphyllia_hammer.py",
+      "generatorSha256": "68d86057695f6799c1b0c8dc94331cf5aa2a52442717ee4a62a7c2165418a1da",
+      "manifestGeneratorSha256": "68d86057695f6799c1b0c8dc94331cf5aa2a52442717ee4a62a7c2165418a1da",
+      "primitives": [
+        {
+          "nodeIndex": 0,
+          "nodeName": "Euphyllia_Hammer_Polyp_Crown",
+          "meshIndex": 0,
+          "primitiveIndex": 0,
+          "role": "coral-soft",
+          "vertexCount": 15232,
+          "color0": {
+            "componentType": 5123,
+            "normalized": true,
+            "rawRedRange": [
+              0,
+              1
+            ]
+          },
+          "maxVertexIndex": 110,
+          "maxVertexDetails": {
+            "positionM": [
+              0.03980628401041031,
+              0.1268739402294159,
+              -0.04169000685214996
+            ],
+            "rawMask": [
+              1,
+              1,
+              0.8580300602731364,
+              1
+            ],
+            "flexibility": 1,
+            "componentMaxM": {
+              "x": 0.01932,
+              "y": 0.006249599999999999,
+              "z": 0.015400000000000002
+            }
+          },
+          "shaderMarginM": 0.025484895529705433,
+          "numericScale": 1,
+          "numericPadM": 0.00001,
+          "expandedSphereRadiusAddM": 0.025494895529705432
+        },
+        {
+          "nodeIndex": 1,
+          "nodeName": "Euphyllia_Hammer_Skeleton",
+          "meshIndex": 1,
+          "primitiveIndex": 0,
+          "role": "coral-rigid",
+          "vertexCount": 1538,
+          "color0": {
+            "componentType": 5123,
+            "normalized": true,
+            "rawRedRange": [
+              0,
+              0
+            ]
+          },
+          "maxVertexIndex": 4,
+          "maxVertexDetails": {
+            "positionM": [
+              0.07973774522542953,
+              -0.004000000189989805,
+              -0.0181996189057827
+            ],
+            "rawMask": [
+              0,
+              0,
+              0.05000381475547418,
+              0.14999618524452582
+            ],
+            "flexibility": 0,
+            "componentMaxM": {
+              "x": 0.03517597419578293,
+              "y": 0.007842592621618811,
+              "z": 0.008028686078255567
+            }
+          },
+          "shaderMarginM": 0.0369230987295789,
+          "numericScale": 1,
+          "numericPadM": 0.00001,
+          "expandedSphereRadiusAddM": 0.0369330987295789
+        }
+      ]
+    },
+    {
+      "id": "coral-zoanthid-mat",
+      "file": "coral-zoanthid-mat.glb",
+      "sourceSha256": "a60d91258fcf9a64d43a628dbe0f4027a91a1fce73104153d7f3ea424cc2463d",
+      "generator": "src/rendering/modeling/build_zoanthid_mat.py",
+      "generatorSha256": "431cb1d3856022952cdae9fbda0cc5338f63f10f945c83f44d9bb62341237d88",
+      "manifestGeneratorSha256": "431cb1d3856022952cdae9fbda0cc5338f63f10f945c83f44d9bb62341237d88",
+      "primitives": [
+        {
+          "nodeIndex": 0,
+          "nodeName": "Coral_Zoanthid_Mat",
+          "meshIndex": 0,
+          "primitiveIndex": 0,
+          "role": "coral-soft",
+          "vertexCount": 10543,
+          "color0": {
+            "componentType": 5123,
+            "normalized": true,
+            "rawRedRange": [
+              0,
+              0.6500038147554742
+            ]
+          },
+          "maxVertexIndex": 4,
+          "maxVertexDetails": {
+            "positionM": [
+              0.11915478110313416,
+              -0.003000000026077032,
+              -0.017258381471037865
+            ],
+            "rawMask": [
+              0,
+              0,
+              0.05000381475547418,
+              0.14999618524452582
+            ],
+            "flexibility": 0,
+            "componentMaxM": {
+              "x": 0.051315682134407146,
+              "y": 0.007656250005704351,
+              "z": 0.007432564682029585
+            }
+          },
+          "shaderMarginM": 0.0524133610334418,
+          "numericScale": 1,
+          "numericPadM": 0.00001,
+          "expandedSphereRadiusAddM": 0.0524233610334418
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "assetCount": 8,
+    "primitiveCount": 11,
+    "vertexCount": 111135,
+    "localSphereMarginRangeM": [
+      0.022896791487021433,
+      0.058166160040522864
+    ],
+    "method": "Analytic per-vertex displacement envelope, plus scale-aware finite-precision pad; no temporal sampling."
+  }
+}

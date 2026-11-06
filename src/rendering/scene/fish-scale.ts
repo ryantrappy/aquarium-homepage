@@ -22,7 +22,7 @@ export const FISH_RENDER_LENGTH_INCHES: Readonly<Record<string, number>> = Objec
   'tailspot-blenny': 2.25,
   'six-line-wrasse': 3,
   'mccoskers-flasher-wrasse': 2.75,
-  'lyretail-anthias': 4.5,
+  'lyretail-anthias': 2.5,
   'flame-angelfish': 3.75,
   'copperband-butterflyfish': 6.5,
 })
