@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: aquarium-homepage:local
+    image: aquarium-homepage:latest
     container_name: aquarium-homepage
     restart: unless-stopped
     ports:
