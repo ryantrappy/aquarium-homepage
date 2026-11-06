@@ -26,7 +26,7 @@ Find the authoritative documents for your task area:
 | Subsystem / Topic | Primary Canonical Spec | Supporting Plans & Research | Validation & Evidence |
 |---|---|---|---|
 | **Primary Requirements & Scope** | [`requirements.md`](requirements.md) | [`design-principles.md`](design-principles.md) | [`agent-change-audit.md`](agent-change-audit.md) |
-| **3D Rendering & Scene** | [`rendering.md`](rendering.md) | [`rendering-research-history.md`](rendering-research-history.md) | [`asset-pipeline-proof.md`](asset-pipeline-proof.md), [AQ-70.12 sand functional proof](asset-evidence/aq70-12/functional-review.json) |
+| **3D Rendering & Scene** | [`rendering.md`](rendering.md) | [`rendering-research-history.md`](rendering-research-history.md) | [`asset-pipeline-proof.md`](asset-pipeline-proof.md), [candidate donor provenance](asset-evidence/aq12/splat-candidate-provenance.json), [AQ-70.12 sand functional proof](asset-evidence/aq70-12/functional-review.json) |
 | **Fish Motion & Biomechanics** | [`fish-turning-and-maneuvering-plan.md`](fish-turning-and-maneuvering-plan.md) | [`sketchfab-motion-review.md`](sketchfab-motion-review.md), [`mesh2motion-review.md`](mesh2motion-review.md) | [`asset-evidence/fish-rig-inventory.md`](asset-evidence/fish-rig-inventory.md)  [AQ-58 reset proof](asset-evidence/aq58/fish-player-review.json) |
 | **Fish Behavior & AI Runtime** | [`behavior-runtime-contract.md`](behavior-runtime-contract.md) | [`fish-behavior-design.md`](fish-behavior-design.md), [`reef-fish-roster.md`](reef-fish-roster.md) | `src/simulation/behavior-runtime.test.ts`  [AQ-64 state preservation](asset-evidence/aq64/review.json) |
 | **Reef Navigation & Habitat** | [`habitat-navigation-core-contract.md`](habitat-navigation-core-contract.md) | [`modular-coral-and-live-rock-spec.md`](modular-coral-and-live-rock-spec.md) | `src/simulation/habitat-navigation.test.ts` |
@@ -81,6 +81,7 @@ Directory of project documentation and verification evidence:
 ### Tier 4: Audits & Verification Evidence (Evidentiary)
 | Document | Status | Authority | Backlog | Scope / Purpose |
 |---|---|---|---|---|
+| [Nine fish candidate provenance](asset-evidence/aq12/splat-candidate-provenance.json) | **Active** | Evidentiary | `AQ-12`, `AQ-70.10` | Exact candidate/donor hashes, retained payload proof, owner confirmation and derivative credit; no asset promotion. |
 | [AQ-70.12 sand functional review](asset-evidence/aq70-12/functional-review.json) | **Active** | Evidentiary | `AQ-70.12` | Real WebGL shader/phase comparisons; final sand art, physical grain and budgets remain open. |
 | [AQ-70.14 caption/access review](asset-evidence/aq70-14/review.json) | **Complete** | Evidentiary | `AQ-70.14` | Both-viewport compact captions, native intercepted-label routing, keyboard/touch/modal access and exact PNGs. |
 | [`code-review-findings.md`](code-review-findings.md) | **Active** | Evidentiary | `AQ-61` | Comprehensive codebase audit: runtime picking desync, mobile memory allocations, narrow-viewport navigation locks. |
