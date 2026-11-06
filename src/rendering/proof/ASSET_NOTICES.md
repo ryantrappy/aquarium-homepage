@@ -1,5 +1,19 @@
 # Licensed rendering-study assets
 
+<!-- AGENT_DOC_METADATA
+Category: Evidence / Asset Attribution
+Status: Active
+Authority: Evidentiary
+Backlog: AQ-12, AQ-40, AQ-70.10, AQ-70.12
+Owner: @root
+Updated: 2026-11-06
+Upstream: docs/requirements.md, src/rendering/proof/asset-manifest.json
+Downstream: Rendering study assets and candidate attribution
+-->
+
+> [!NOTE]
+> Asset credit and provenance record. This does not approve final visual art or animation.
+
 These notices cover the original three separately verified source models used
 by the controlled engine study and current main technical baseline. Separate
 AQ40 material-proof specimens have their own [review notices](pipeline-assets/ASSET_NOTICES.md);
@@ -78,3 +92,37 @@ study derivatives are regular checked-in files so a clean checkout can load all
 three engine fixtures without `/tmp` symlinks. Keep creator credit, source and
 license links with redistributed derivatives. Revalidate and update the
 manifest/report when exporting a new revision.
+
+## Nine procedural fish candidates: retained Clownfish donor (AQ-12 / AQ-70.10)
+
+The nine files listed in [the exact provenance inventory](../../../docs/asset-evidence/aq12/splat-candidate-provenance.json)
+are preserved candidates under `src/rendering/assets/splat-fish/`, not approved production art.
+Each contains material retained from **Clownfish by zixisun02**,
+[source](https://sketchfab.com/3d-models/47ba2679d91a4f14b3fc0bf8e3805af5),
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+Keep this credit, source/license links and modification record with every redistributed derivative.
+No creator endorsement is implied.
+
+The generator replaces geometry, normals, UVs, skin weights, indices and the atlas/material
+with procedural species outputs. It retains the donor node hierarchy, skins, inverse-bind data,
+clips and buffer payloads (including unreferenced data). These include the project's earlier
+orientation/scale, approximate rig/clip and fin changes documented under Clownfish above.
+The inventory pins every output, the exact generator and donor, and independently verifies
+retained JSON and all 27 retained donor buffer views for each of the nine outputs.
+
+On 2026-11-06 the user explicitly confirmed all Gaussian-splat references mentioned for
+these nine species are theirs to share. The generator does not read a raw splat file;
+its species specifications and procedural atlas code supply the new geometry/colors.
+Individual external reference files/capture hashes were not supplied; no identity is invented.
+This records custom-owned reference permission and donor attribution, not species,
+material, rig, animation or final scene acceptance. This metadata handoff does not
+promote or copy the nine candidate binaries into the clean delivery branch.
+
+## Sand functional-study scope clarification (AQ-70.12)
+
+The experimental sand module generates seeded procedural PBR maps in code. The
+[functional GPU report](../../../docs/asset-evidence/aq70-12/functional-review.json)
+verifies source integration and temporal invariants only. No scanned/photo-derived
+map, 1–2mm physical calibration, tiling quality, final sand art or budget criterion
+has been accepted. Earlier reference/calibration descriptions are not evidence of
+those gates. The clean delivery keeps the module separate from the main aquarium.

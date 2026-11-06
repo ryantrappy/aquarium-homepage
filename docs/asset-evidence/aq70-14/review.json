@@ -1,0 +1,2834 @@
+{
+  "metadata": {
+    "category": "Evidence",
+    "authority": "Evidentiary",
+    "task": "AQ-70.14",
+    "owner": "Root",
+    "date": "2026-11-06",
+    "status": "Root verified"
+  },
+  "scope": "Caption presentation and native hit routing only. Initial-pose before/after captures use reduced-motion frozen canonical scene; moving overlap reproduction uses actual paused poses. AQ-70.2 tooling remains pending. Localhost fixture URLs only; no deployment or user config mutation.",
+  "source": {
+    "reviewBase": "b1bb742",
+    "files": {
+      "src/components/AquariumScene.tsx": "17c21875055b4a13d89399c10190e143757350eee1993fb463c6fe125378966b",
+      "src/components/AquariumScene.test.tsx": "93a90450a687a0db06addb96ae719214b2b816f2b5b71a99424da4b079073d04",
+      "src/styles/aquarium.css": "f6d024b3fb08d3ffe1599568d9ec4957965666c38d5f8d9476074a5e1cd6075d"
+    }
+  },
+  "checks": {
+    "focused": "37/37 component, focus and projection tests on clean delivery",
+    "typecheck": "passed, 10 tracked scripts on clean delivery; 11 on candidate branch",
+    "productionBuild": "passed frozen canonical scene plus CSS/component",
+    "counterfactual": "Seven new regressions fail with pre-fix component; 21 other component tests pass",
+    "native": "Report assertions pass: 5 visible named native links, >=44px target each at both sizes, 32px to24px captions, laptop11px to10px and phone10px maintained; focus/hover brighten, all5 modal links, touch and keyboard navigation; moving-phone Komodo caption intercepted by Ombi body opens Komodo and focuses Komodo; next Ombi keyboard action resets borrowed href and opens Ombi."
+  },
+  "captures": {
+    "phone.png": {
+      "sha256": "f1d515949cbb60e84eb520f583716a75686ae13af4e685a6e422a737473f8134",
+      "bytes": 330600,
+      "width": 402,
+      "height": 874
+    },
+    "laptop.png": {
+      "sha256": "29c886c54f059eb1ea27e7e6eceb645c5e793997e8ef72852967e80e4cf40f43",
+      "bytes": 1092241,
+      "width": 1440,
+      "height": 900
+    },
+    "focus-phone.png": {
+      "sha256": "f70e54b40d3fce7d52747232468790723ef9434fb767c5f28ab7f01501eb7f5a",
+      "bytes": 333267,
+      "width": 402,
+      "height": 874
+    },
+    "intercepted-caption-phone.png": {
+      "sha256": "ff294eb3414fcbe39943f65972268ea27a35a7fc1bd1d3678ad81ba163de2263",
+      "bytes": 328778,
+      "width": 402,
+      "height": 874
+    },
+    "fixed-intercepted-caption-phone.png": {
+      "sha256": "b0f9a0f9f9a70056a3dfef3ba2ad522f17af5978e70890747c95dcad452838d8",
+      "bytes": 329085,
+      "width": 402,
+      "height": 874
+    },
+    "fixed-laptop.png": {
+      "sha256": "7392898497cd17a3c03ddc905df6cc3b974510e4d567adc03e7424926f637301",
+      "bytes": 1092476,
+      "width": 1440,
+      "height": 900
+    }
+  },
+  "before": {
+    "phone": {
+      "fish": [
+        {
+          "ariaLabel": "Open Komodo in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 434.52093505859375,
+            "height": 91.1484375,
+            "left": 108.5738296508789,
+            "right": 242.9566421508789,
+            "top": 343.37249755859375,
+            "width": 134.3828125,
+            "x": 108.5738296508789,
+            "y": 343.37249755859375
+          },
+          "href": "http://127.0.0.1:5198/review-service/komodo",
+          "id": "komodo",
+          "name": "Komodo",
+          "rect": {
+            "bottom": 466.52093505859375,
+            "height": 32,
+            "left": 148.00350952148438,
+            "right": 203.5191345214844,
+            "top": 434.52093505859375,
+            "width": 55.515625,
+            "x": 148.00350952148438,
+            "y": 434.52093505859375
+          },
+          "style": {
+            "background": "rgba(5, 30, 35, 0.72)",
+            "color": "rgb(242, 251, 245)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "32px",
+            "opacity": "1",
+            "shadow": "rgba(0, 12, 16, 0.15) 0px 6px 16px 0px",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open WatchMyBirds in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 452.0470275878906,
+            "height": 66.5703125,
+            "left": 239.99647521972656,
+            "right": 327.1683349609375,
+            "top": 385.4767150878906,
+            "width": 87.17185974121094,
+            "x": 239.99647521972656,
+            "y": 385.4767150878906
+          },
+          "href": "http://127.0.0.1:5198/review-service/watchmybirds",
+          "id": "watchmybirds",
+          "name": "WatchMyBirds",
+          "rect": {
+            "bottom": 484.0470275878906,
+            "height": 32,
+            "left": 242.86366271972656,
+            "right": 324.3011474609375,
+            "top": 452.0470275878906,
+            "width": 81.43748474121094,
+            "x": 242.86366271972656,
+            "y": 452.0470275878906
+          },
+          "style": {
+            "background": "rgba(5, 30, 35, 0.72)",
+            "color": "rgb(242, 251, 245)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "32px",
+            "opacity": "1",
+            "shadow": "rgba(0, 12, 16, 0.15) 0px 6px 16px 0px",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Paperless in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 471.1403198242187,
+            "height": 58.34375,
+            "left": 199.8531188964844,
+            "right": 276.2593688964844,
+            "top": 412.7965698242187,
+            "width": 76.40625,
+            "x": 199.8531188964844,
+            "y": 412.7965698242187
+          },
+          "href": "http://127.0.0.1:5198/review-service/paperless",
+          "id": "paperless",
+          "name": "Paperless",
+          "rect": {
+            "bottom": 503.1403198242187,
+            "height": 32,
+            "left": 208.3882751464844,
+            "right": 267.7242126464844,
+            "top": 471.1403198242187,
+            "width": 59.3359375,
+            "x": 208.3882751464844,
+            "y": 471.1403198242187
+          },
+          "style": {
+            "background": "rgba(5, 30, 35, 0.72)",
+            "color": "rgb(242, 251, 245)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "32px",
+            "opacity": "1",
+            "shadow": "rgba(0, 12, 16, 0.15) 0px 6px 16px 0px",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Home Assistant in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 276.4544677734375,
+            "height": 61.07810974121094,
+            "left": 83.94451904296875,
+            "right": 164.22576904296875,
+            "top": 215.37635803222656,
+            "width": 80.28125,
+            "x": 83.94451904296875,
+            "y": 215.37635803222656
+          },
+          "href": "http://127.0.0.1:5198/review-service/home-assistant",
+          "id": "home-assistant",
+          "name": "Home Assistant",
+          "rect": {
+            "bottom": 308.4544677734375,
+            "height": 32,
+            "left": 80.84686279296875,
+            "right": 167.32342529296875,
+            "top": 276.4544677734375,
+            "width": 86.4765625,
+            "x": 80.84686279296875,
+            "y": 276.4544677734375
+          },
+          "style": {
+            "background": "rgba(5, 30, 35, 0.72)",
+            "color": "rgb(242, 251, 245)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "32px",
+            "opacity": "1",
+            "shadow": "rgba(0, 12, 16, 0.15) 0px 6px 16px 0px",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Ombi in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 380.73284912109375,
+            "height": 143.32810974121094,
+            "left": 113.26055145263672,
+            "right": 324.5808639526367,
+            "top": 237.4047393798828,
+            "width": 211.3203125,
+            "x": 113.26055145263672,
+            "y": 237.4047393798828
+          },
+          "href": "http://127.0.0.1:5198/review-service/ombi",
+          "id": "ombi",
+          "name": "Ombi",
+          "rect": {
+            "bottom": 412.73284912109375,
+            "height": 32,
+            "left": 196.91680908203125,
+            "right": 240.91680908203125,
+            "top": 380.73284912109375,
+            "width": 44,
+            "x": 196.91680908203125,
+            "y": 380.73284912109375
+          },
+          "style": {
+            "background": "rgba(5, 30, 35, 0.72)",
+            "color": "rgb(242, 251, 245)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "32px",
+            "opacity": "1",
+            "shadow": "rgba(0, 12, 16, 0.15) 0px 6px 16px 0px",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered is-paused",
+      "viewport": {
+        "dpr": 1,
+        "height": 874,
+        "width": 402
+      }
+    },
+    "laptop": {
+      "fish": [
+        {
+          "ariaLabel": "Open Komodo in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 369.3621520996094,
+            "height": 93.859375,
+            "left": 484.0857849121094,
+            "right": 622.4686279296875,
+            "top": 275.5027770996094,
+            "width": 138.38284301757812,
+            "x": 484.0857849121094,
+            "y": 275.5027770996094
+          },
+          "href": "http://127.0.0.1:5198/review-service/komodo",
+          "id": "komodo",
+          "name": "Komodo",
+          "rect": {
+            "bottom": 401.3621520996094,
+            "height": 32,
+            "left": 520.0389404296875,
+            "right": 586.5076904296875,
+            "top": 369.3621520996094,
+            "width": 66.46875,
+            "x": 520.0389404296875,
+            "y": 369.3621520996094
+          },
+          "style": {
+            "background": "rgba(5, 30, 35, 0.72)",
+            "color": "rgb(242, 251, 245)",
+            "display": "flex",
+            "fontSize": "11px",
+            "minHeight": "32px",
+            "opacity": "1",
+            "shadow": "rgba(0, 12, 16, 0.15) 0px 6px 16px 0px",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open WatchMyBirds in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 465.4908752441406,
+            "height": 68.546875,
+            "left": 1162.2552490234375,
+            "right": 1252.0208740234375,
+            "top": 396.9440002441406,
+            "width": 89.765625,
+            "x": 1162.2552490234375,
+            "y": 396.9440002441406
+          },
+          "href": "http://127.0.0.1:5198/review-service/watchmybirds",
+          "id": "watchmybirds",
+          "name": "WatchMyBirds",
+          "rect": {
+            "bottom": 497.4908752441406,
+            "height": 32,
+            "left": 1159.6497802734375,
+            "right": 1254.6263427734375,
+            "top": 465.4908752441406,
+            "width": 94.9765625,
+            "x": 1159.6497802734375,
+            "y": 465.4908752441406
+          },
+          "style": {
+            "background": "rgba(5, 30, 35, 0.72)",
+            "color": "rgb(242, 251, 245)",
+            "display": "flex",
+            "fontSize": "11px",
+            "minHeight": "32px",
+            "opacity": "1",
+            "shadow": "rgba(0, 12, 16, 0.15) 0px 6px 16px 0px",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Paperless in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 485.1546936035156,
+            "height": 60.078125,
+            "left": 899.2537231445312,
+            "right": 977.9334106445312,
+            "top": 425.0765686035156,
+            "width": 78.6796875,
+            "x": 899.2537231445312,
+            "y": 425.0765686035156
+          },
+          "href": "http://127.0.0.1:5198/review-service/paperless",
+          "id": "paperless",
+          "name": "Paperless",
+          "rect": {
+            "bottom": 517.1546630859375,
+            "height": 31.999969482421875,
+            "left": 903.2576293945312,
+            "right": 973.9216918945312,
+            "top": 485.1546936035156,
+            "width": 70.6640625,
+            "x": 903.2576293945312,
+            "y": 485.1546936035156
+          },
+          "style": {
+            "background": "rgba(5, 30, 35, 0.72)",
+            "color": "rgb(242, 251, 245)",
+            "display": "flex",
+            "fontSize": "11px",
+            "minHeight": "32px",
+            "opacity": "1",
+            "shadow": "rgba(0, 12, 16, 0.15) 0px 6px 16px 0px",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Home Assistant in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 284.681884765625,
+            "height": 62.89845275878906,
+            "left": 224.9705810546875,
+            "right": 307.6346435546875,
+            "top": 221.7834320068359,
+            "width": 82.6640625,
+            "x": 224.9705810546875,
+            "y": 221.7834320068359
+          },
+          "href": "http://127.0.0.1:5198/review-service/home-assistant",
+          "id": "home-assistant",
+          "name": "Home Assistant",
+          "rect": {
+            "bottom": 316.681884765625,
+            "height": 32,
+            "left": 216.0369873046875,
+            "right": 316.5604248046875,
+            "top": 284.681884765625,
+            "width": 100.5234375,
+            "x": 216.0369873046875,
+            "y": 284.681884765625
+          },
+          "style": {
+            "background": "rgba(5, 30, 35, 0.72)",
+            "color": "rgb(242, 251, 245)",
+            "display": "flex",
+            "fontSize": "11px",
+            "minHeight": "32px",
+            "opacity": "1",
+            "shadow": "rgba(0, 12, 16, 0.15) 0px 6px 16px 0px",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Ombi in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 396.01409912109375,
+            "height": 147.59375,
+            "left": 606.031494140625,
+            "right": 823.633056640625,
+            "top": 248.42034912109375,
+            "width": 217.6015625,
+            "x": 606.031494140625,
+            "y": 248.42034912109375
+          },
+          "href": "http://127.0.0.1:5198/review-service/ombi",
+          "id": "ombi",
+          "name": "Ombi",
+          "rect": {
+            "bottom": 428.01409912109375,
+            "height": 32,
+            "left": 688.918212890625,
+            "right": 740.738525390625,
+            "top": 396.01409912109375,
+            "width": 51.8203125,
+            "x": 688.918212890625,
+            "y": 396.01409912109375
+          },
+          "style": {
+            "background": "rgba(5, 30, 35, 0.72)",
+            "color": "rgb(242, 251, 245)",
+            "display": "flex",
+            "fontSize": "11px",
+            "minHeight": "32px",
+            "opacity": "1",
+            "shadow": "rgba(0, 12, 16, 0.15) 0px 6px 16px 0px",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered is-paused",
+      "viewport": {
+        "dpr": 1,
+        "height": 900,
+        "width": 1440
+      }
+    }
+  },
+  "presentationAndAccess": {
+    "phone": {
+      "fish": [
+        {
+          "ariaLabel": "Open Komodo in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 434.52093505859375,
+            "height": 91.1484375,
+            "left": 108.5738296508789,
+            "right": 242.9566421508789,
+            "top": 343.37249755859375,
+            "width": 134.3828125,
+            "x": 108.5738296508789,
+            "y": 343.37249755859375
+          },
+          "href": "http://127.0.0.1:5199/review-service/komodo",
+          "id": "komodo",
+          "name": "Komodo",
+          "rect": {
+            "bottom": 458.52093505859375,
+            "height": 24,
+            "left": 147.00350952148438,
+            "right": 204.5191345214844,
+            "top": 434.52093505859375,
+            "width": 57.515625,
+            "x": 147.00350952148438,
+            "y": 434.52093505859375
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open WatchMyBirds in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 452.0470275878906,
+            "height": 66.5703125,
+            "left": 239.99647521972656,
+            "right": 327.1683349609375,
+            "top": 385.4767150878906,
+            "width": 87.17185974121094,
+            "x": 239.99647521972656,
+            "y": 385.4767150878906
+          },
+          "href": "http://127.0.0.1:5199/review-service/watchmybirds",
+          "id": "watchmybirds",
+          "name": "WatchMyBirds",
+          "rect": {
+            "bottom": 476.0470275878906,
+            "height": 24,
+            "left": 241.86366271972656,
+            "right": 325.3011474609375,
+            "top": 452.0470275878906,
+            "width": 83.43748474121094,
+            "x": 241.86366271972656,
+            "y": 452.0470275878906
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Paperless in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 471.1403198242187,
+            "height": 58.34375,
+            "left": 199.8531188964844,
+            "right": 276.2593688964844,
+            "top": 412.7965698242187,
+            "width": 76.40625,
+            "x": 199.8531188964844,
+            "y": 412.7965698242187
+          },
+          "href": "http://127.0.0.1:5199/review-service/paperless",
+          "id": "paperless",
+          "name": "Paperless",
+          "rect": {
+            "bottom": 495.1403198242187,
+            "height": 24,
+            "left": 207.3882751464844,
+            "right": 268.7242126464844,
+            "top": 471.1403198242187,
+            "width": 61.3359375,
+            "x": 207.3882751464844,
+            "y": 471.1403198242187
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Home Assistant in a new tab",
+          "focused": true,
+          "hitRect": {
+            "bottom": 276.4544677734375,
+            "height": 61.07810974121094,
+            "left": 83.94451904296875,
+            "right": 164.22576904296875,
+            "top": 215.37635803222656,
+            "width": 80.28125,
+            "x": 83.94451904296875,
+            "y": 215.37635803222656
+          },
+          "href": "http://127.0.0.1:5199/review-service/home-assistant",
+          "id": "home-assistant",
+          "name": "Home Assistant",
+          "rect": {
+            "bottom": 300.4544677734375,
+            "height": 24,
+            "left": 79.84686279296875,
+            "right": 168.32342529296875,
+            "top": 276.4544677734375,
+            "width": 88.4765625,
+            "x": 79.84686279296875,
+            "y": 276.4544677734375
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Ombi in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 380.73284912109375,
+            "height": 143.32810974121094,
+            "left": 113.26055145263672,
+            "right": 324.5808639526367,
+            "top": 237.4047393798828,
+            "width": 211.3203125,
+            "x": 113.26055145263672,
+            "y": 237.4047393798828
+          },
+          "href": "http://127.0.0.1:5199/review-service/ombi",
+          "id": "ombi",
+          "name": "Ombi",
+          "rect": {
+            "bottom": 404.73284912109375,
+            "height": 24,
+            "left": 196.81524658203125,
+            "right": 241.01837158203125,
+            "top": 380.73284912109375,
+            "width": 44.203125,
+            "x": 196.81524658203125,
+            "y": 380.73284912109375
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered is-paused",
+      "viewport": {
+        "dpr": 1,
+        "height": 874,
+        "width": 402
+      }
+    },
+    "laptop": {
+      "fish": [
+        {
+          "ariaLabel": "Open Komodo in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 369.3621520996094,
+            "height": 93.859375,
+            "left": 484.0857849121094,
+            "right": 622.4686279296875,
+            "top": 275.5027770996094,
+            "width": 138.38284301757812,
+            "x": 484.0857849121094,
+            "y": 275.5027770996094
+          },
+          "href": "http://127.0.0.1:5199/review-service/komodo",
+          "id": "komodo",
+          "name": "Komodo",
+          "rect": {
+            "bottom": 393.3621520996094,
+            "height": 24,
+            "left": 524.5155029296875,
+            "right": 582.0311279296875,
+            "top": 369.3621520996094,
+            "width": 57.515625,
+            "x": 524.5155029296875,
+            "y": 369.3621520996094
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open WatchMyBirds in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 465.4908752441406,
+            "height": 68.546875,
+            "left": 1162.2552490234375,
+            "right": 1252.0208740234375,
+            "top": 396.9440002441406,
+            "width": 89.765625,
+            "x": 1162.2552490234375,
+            "y": 396.9440002441406
+          },
+          "href": "http://127.0.0.1:5199/review-service/watchmybirds",
+          "id": "watchmybirds",
+          "name": "WatchMyBirds",
+          "rect": {
+            "bottom": 489.4908752441406,
+            "height": 24,
+            "left": 1165.4193115234375,
+            "right": 1248.8568115234375,
+            "top": 465.4908752441406,
+            "width": 83.4375,
+            "x": 1165.4193115234375,
+            "y": 465.4908752441406
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Paperless in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 485.1546936035156,
+            "height": 60.078125,
+            "left": 899.2537231445312,
+            "right": 977.9334106445312,
+            "top": 425.0765686035156,
+            "width": 78.6796875,
+            "x": 899.2537231445312,
+            "y": 425.0765686035156
+          },
+          "href": "http://127.0.0.1:5199/review-service/paperless",
+          "id": "paperless",
+          "name": "Paperless",
+          "rect": {
+            "bottom": 509.1546936035156,
+            "height": 24,
+            "left": 907.9216918945312,
+            "right": 969.2576293945312,
+            "top": 485.1546936035156,
+            "width": 61.3359375,
+            "x": 907.9216918945312,
+            "y": 485.1546936035156
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Home Assistant in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 284.681884765625,
+            "height": 62.89845275878906,
+            "left": 224.9705810546875,
+            "right": 307.6346435546875,
+            "top": 221.7834320068359,
+            "width": 82.6640625,
+            "x": 224.9705810546875,
+            "y": 221.7834320068359
+          },
+          "href": "http://127.0.0.1:5199/review-service/home-assistant",
+          "id": "home-assistant",
+          "name": "Home Assistant",
+          "rect": {
+            "bottom": 308.681884765625,
+            "height": 24,
+            "left": 222.0604248046875,
+            "right": 310.5369873046875,
+            "top": 284.681884765625,
+            "width": 88.4765625,
+            "x": 222.0604248046875,
+            "y": 284.681884765625
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Ombi in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 396.01409912109375,
+            "height": 147.59375,
+            "left": 606.031494140625,
+            "right": 823.633056640625,
+            "top": 248.42034912109375,
+            "width": 217.6015625,
+            "x": 606.031494140625,
+            "y": 248.42034912109375
+          },
+          "href": "http://127.0.0.1:5199/review-service/ombi",
+          "id": "ombi",
+          "name": "Ombi",
+          "rect": {
+            "bottom": 420.01409912109375,
+            "height": 24,
+            "left": 692.726806640625,
+            "right": 736.929931640625,
+            "top": 396.01409912109375,
+            "width": 44.203125,
+            "x": 692.726806640625,
+            "y": 396.01409912109375
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered is-paused",
+      "viewport": {
+        "dpr": 1,
+        "height": 900,
+        "width": 1440
+      }
+    },
+    "phoneFocus": {
+      "fish": [
+        {
+          "ariaLabel": "Open Komodo in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 434.52093505859375,
+            "height": 91.1484375,
+            "left": 108.5738296508789,
+            "right": 242.9566421508789,
+            "top": 343.37249755859375,
+            "width": 134.3828125,
+            "x": 108.5738296508789,
+            "y": 343.37249755859375
+          },
+          "href": "http://127.0.0.1:5199/review-service/komodo",
+          "id": "komodo",
+          "name": "Komodo",
+          "rect": {
+            "bottom": 458.52093505859375,
+            "height": 24,
+            "left": 147.00350952148438,
+            "right": 204.5191345214844,
+            "top": 434.52093505859375,
+            "width": 57.515625,
+            "x": 147.00350952148438,
+            "y": 434.52093505859375
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open WatchMyBirds in a new tab",
+          "focused": true,
+          "hitRect": {
+            "bottom": 452.0470275878906,
+            "height": 66.5703125,
+            "left": 239.99647521972656,
+            "right": 327.1683349609375,
+            "top": 385.4767150878906,
+            "width": 87.17185974121094,
+            "x": 239.99647521972656,
+            "y": 385.4767150878906
+          },
+          "href": "http://127.0.0.1:5199/review-service/watchmybirds",
+          "id": "watchmybirds",
+          "name": "WatchMyBirds",
+          "rect": {
+            "bottom": 476.0470275878906,
+            "height": 24,
+            "left": 241.86366271972656,
+            "right": 325.3011474609375,
+            "top": 452.0470275878906,
+            "width": 83.43748474121094,
+            "x": 241.86366271972656,
+            "y": 452.0470275878906
+          },
+          "style": {
+            "background": "rgba(11, 45, 49, 0.84)",
+            "color": "rgb(244, 252, 247)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "rgba(180, 239, 220, 0.22) 0px 0px 12px 0px",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Paperless in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 471.1403198242187,
+            "height": 58.34375,
+            "left": 199.8531188964844,
+            "right": 276.2593688964844,
+            "top": 412.7965698242187,
+            "width": 76.40625,
+            "x": 199.8531188964844,
+            "y": 412.7965698242187
+          },
+          "href": "http://127.0.0.1:5199/review-service/paperless",
+          "id": "paperless",
+          "name": "Paperless",
+          "rect": {
+            "bottom": 495.1403198242187,
+            "height": 24,
+            "left": 207.3882751464844,
+            "right": 268.7242126464844,
+            "top": 471.1403198242187,
+            "width": 61.3359375,
+            "x": 207.3882751464844,
+            "y": 471.1403198242187
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Home Assistant in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 276.4544677734375,
+            "height": 61.07810974121094,
+            "left": 83.94451904296875,
+            "right": 164.22576904296875,
+            "top": 215.37635803222656,
+            "width": 80.28125,
+            "x": 83.94451904296875,
+            "y": 215.37635803222656
+          },
+          "href": "http://127.0.0.1:5199/review-service/home-assistant",
+          "id": "home-assistant",
+          "name": "Home Assistant",
+          "rect": {
+            "bottom": 300.4544677734375,
+            "height": 24,
+            "left": 79.84686279296875,
+            "right": 168.32342529296875,
+            "top": 276.4544677734375,
+            "width": 88.4765625,
+            "x": 79.84686279296875,
+            "y": 276.4544677734375
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Ombi in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 380.73284912109375,
+            "height": 143.32810974121094,
+            "left": 113.26055145263672,
+            "right": 324.5808639526367,
+            "top": 237.4047393798828,
+            "width": 211.3203125,
+            "x": 113.26055145263672,
+            "y": 237.4047393798828
+          },
+          "href": "http://127.0.0.1:5199/review-service/ombi",
+          "id": "ombi",
+          "name": "Ombi",
+          "rect": {
+            "bottom": 404.73284912109375,
+            "height": 24,
+            "left": 196.81524658203125,
+            "right": 241.01837158203125,
+            "top": 380.73284912109375,
+            "width": 44.203125,
+            "x": 196.81524658203125,
+            "y": 380.73284912109375
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered is-paused",
+      "viewport": {
+        "dpr": 1,
+        "height": 874,
+        "width": 402
+      }
+    },
+    "laptopFocus": {
+      "fish": [
+        {
+          "ariaLabel": "Open Komodo in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 369.3621520996094,
+            "height": 93.859375,
+            "left": 484.0857849121094,
+            "right": 622.4686279296875,
+            "top": 275.5027770996094,
+            "width": 138.38284301757812,
+            "x": 484.0857849121094,
+            "y": 275.5027770996094
+          },
+          "href": "http://127.0.0.1:5199/review-service/komodo",
+          "id": "komodo",
+          "name": "Komodo",
+          "rect": {
+            "bottom": 393.3621520996094,
+            "height": 24,
+            "left": 524.5155029296875,
+            "right": 582.0311279296875,
+            "top": 369.3621520996094,
+            "width": 57.515625,
+            "x": 524.5155029296875,
+            "y": 369.3621520996094
+          },
+          "style": {
+            "background": "rgba(11, 45, 49, 0.84)",
+            "color": "rgb(244, 252, 247)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "rgba(180, 239, 220, 0.22) 0px 0px 12px 0px",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open WatchMyBirds in a new tab",
+          "focused": true,
+          "hitRect": {
+            "bottom": 465.4908752441406,
+            "height": 68.546875,
+            "left": 1162.2552490234375,
+            "right": 1252.0208740234375,
+            "top": 396.9440002441406,
+            "width": 89.765625,
+            "x": 1162.2552490234375,
+            "y": 396.9440002441406
+          },
+          "href": "http://127.0.0.1:5199/review-service/watchmybirds",
+          "id": "watchmybirds",
+          "name": "WatchMyBirds",
+          "rect": {
+            "bottom": 489.4908752441406,
+            "height": 24,
+            "left": 1165.4193115234375,
+            "right": 1248.8568115234375,
+            "top": 465.4908752441406,
+            "width": 83.4375,
+            "x": 1165.4193115234375,
+            "y": 465.4908752441406
+          },
+          "style": {
+            "background": "rgba(11, 45, 49, 0.84)",
+            "color": "rgb(244, 252, 247)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "rgba(180, 239, 220, 0.22) 0px 0px 12px 0px",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Paperless in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 485.1546936035156,
+            "height": 60.078125,
+            "left": 899.2537231445312,
+            "right": 977.9334106445312,
+            "top": 425.0765686035156,
+            "width": 78.6796875,
+            "x": 899.2537231445312,
+            "y": 425.0765686035156
+          },
+          "href": "http://127.0.0.1:5199/review-service/paperless",
+          "id": "paperless",
+          "name": "Paperless",
+          "rect": {
+            "bottom": 509.1546936035156,
+            "height": 24,
+            "left": 907.9216918945312,
+            "right": 969.2576293945312,
+            "top": 485.1546936035156,
+            "width": 61.3359375,
+            "x": 907.9216918945312,
+            "y": 485.1546936035156
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Home Assistant in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 284.681884765625,
+            "height": 62.89845275878906,
+            "left": 224.9705810546875,
+            "right": 307.6346435546875,
+            "top": 221.7834320068359,
+            "width": 82.6640625,
+            "x": 224.9705810546875,
+            "y": 221.7834320068359
+          },
+          "href": "http://127.0.0.1:5199/review-service/home-assistant",
+          "id": "home-assistant",
+          "name": "Home Assistant",
+          "rect": {
+            "bottom": 308.681884765625,
+            "height": 24,
+            "left": 222.0604248046875,
+            "right": 310.5369873046875,
+            "top": 284.681884765625,
+            "width": 88.4765625,
+            "x": 222.0604248046875,
+            "y": 284.681884765625
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Ombi in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 396.01409912109375,
+            "height": 147.59375,
+            "left": 606.031494140625,
+            "right": 823.633056640625,
+            "top": 248.42034912109375,
+            "width": 217.6015625,
+            "x": 606.031494140625,
+            "y": 248.42034912109375
+          },
+          "href": "http://127.0.0.1:5199/review-service/ombi",
+          "id": "ombi",
+          "name": "Ombi",
+          "rect": {
+            "bottom": 420.01409912109375,
+            "height": 24,
+            "left": 692.726806640625,
+            "right": 736.929931640625,
+            "top": 396.01409912109375,
+            "width": 44.203125,
+            "x": 692.726806640625,
+            "y": 396.01409912109375
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered is-paused",
+      "viewport": {
+        "dpr": 1,
+        "height": 900,
+        "width": 1440
+      }
+    },
+    "laptopHover": {
+      "fish": [
+        {
+          "ariaLabel": "Open Komodo in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 369.3621520996094,
+            "height": 93.859375,
+            "left": 484.0857849121094,
+            "right": 622.4686279296875,
+            "top": 275.5027770996094,
+            "width": 138.38284301757812,
+            "x": 484.0857849121094,
+            "y": 275.5027770996094
+          },
+          "href": "http://127.0.0.1:5199/review-service/komodo",
+          "id": "komodo",
+          "name": "Komodo",
+          "rect": {
+            "bottom": 393.3621520996094,
+            "height": 24,
+            "left": 524.5155029296875,
+            "right": 582.0311279296875,
+            "top": 369.3621520996094,
+            "width": 57.515625,
+            "x": 524.5155029296875,
+            "y": 369.3621520996094
+          },
+          "style": {
+            "background": "rgba(11, 45, 49, 0.84)",
+            "color": "rgb(244, 252, 247)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "rgba(180, 239, 220, 0.22) 0px 0px 12px 0px",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open WatchMyBirds in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 465.4908752441406,
+            "height": 68.546875,
+            "left": 1162.2552490234375,
+            "right": 1252.0208740234375,
+            "top": 396.9440002441406,
+            "width": 89.765625,
+            "x": 1162.2552490234375,
+            "y": 396.9440002441406
+          },
+          "href": "http://127.0.0.1:5199/review-service/watchmybirds",
+          "id": "watchmybirds",
+          "name": "WatchMyBirds",
+          "rect": {
+            "bottom": 489.4908752441406,
+            "height": 24,
+            "left": 1165.4193115234375,
+            "right": 1248.8568115234375,
+            "top": 465.4908752441406,
+            "width": 83.4375,
+            "x": 1165.4193115234375,
+            "y": 465.4908752441406
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Paperless in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 485.1546936035156,
+            "height": 60.078125,
+            "left": 899.2537231445312,
+            "right": 977.9334106445312,
+            "top": 425.0765686035156,
+            "width": 78.6796875,
+            "x": 899.2537231445312,
+            "y": 425.0765686035156
+          },
+          "href": "http://127.0.0.1:5199/review-service/paperless",
+          "id": "paperless",
+          "name": "Paperless",
+          "rect": {
+            "bottom": 509.1546936035156,
+            "height": 24,
+            "left": 907.9216918945312,
+            "right": 969.2576293945312,
+            "top": 485.1546936035156,
+            "width": 61.3359375,
+            "x": 907.9216918945312,
+            "y": 485.1546936035156
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Home Assistant in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 284.681884765625,
+            "height": 62.89845275878906,
+            "left": 224.9705810546875,
+            "right": 307.6346435546875,
+            "top": 221.7834320068359,
+            "width": 82.6640625,
+            "x": 224.9705810546875,
+            "y": 221.7834320068359
+          },
+          "href": "http://127.0.0.1:5199/review-service/home-assistant",
+          "id": "home-assistant",
+          "name": "Home Assistant",
+          "rect": {
+            "bottom": 308.681884765625,
+            "height": 24,
+            "left": 222.0604248046875,
+            "right": 310.5369873046875,
+            "top": 284.681884765625,
+            "width": 88.4765625,
+            "x": 222.0604248046875,
+            "y": 284.681884765625
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Ombi in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 396.01409912109375,
+            "height": 147.59375,
+            "left": 606.031494140625,
+            "right": 823.633056640625,
+            "top": 248.42034912109375,
+            "width": 217.6015625,
+            "x": 606.031494140625,
+            "y": 248.42034912109375
+          },
+          "href": "http://127.0.0.1:5199/review-service/ombi",
+          "id": "ombi",
+          "name": "Ombi",
+          "rect": {
+            "bottom": 420.01409912109375,
+            "height": 24,
+            "left": 692.726806640625,
+            "right": 736.929931640625,
+            "top": 396.01409912109375,
+            "width": 44.203125,
+            "x": 692.726806640625,
+            "y": 396.01409912109375
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered is-paused",
+      "viewport": {
+        "dpr": 1,
+        "height": 900,
+        "width": 1440
+      }
+    },
+    "phoneModal": {
+      "links": [
+        {
+          "href": "http://127.0.0.1:5199/review-service/komodo",
+          "name": "KomodoYellow tang\u2197"
+        },
+        {
+          "href": "http://127.0.0.1:5199/review-service/watchmybirds",
+          "name": "WatchMyBirdsBanggai cardinalfish\u2197"
+        },
+        {
+          "href": "http://127.0.0.1:5199/review-service/paperless",
+          "name": "PaperlessRoyal gramma\u2197"
+        },
+        {
+          "href": "http://127.0.0.1:5199/review-service/home-assistant",
+          "name": "Home AssistantOcellaris clownfish\u2197"
+        },
+        {
+          "href": "http://127.0.0.1:5199/review-service/ombi",
+          "name": "OmbiBlue tang\u2197"
+        }
+      ],
+      "rect": {
+        "bottom": 698,
+        "height": 522,
+        "left": 11,
+        "right": 391,
+        "top": 176,
+        "width": 380,
+        "x": 11,
+        "y": 176
+      }
+    },
+    "laptopModal": {
+      "links": [
+        {
+          "href": "http://127.0.0.1:5199/review-service/komodo",
+          "name": "KomodoYellow tang\u2197"
+        },
+        {
+          "href": "http://127.0.0.1:5199/review-service/watchmybirds",
+          "name": "WatchMyBirdsBanggai cardinalfish\u2197"
+        },
+        {
+          "href": "http://127.0.0.1:5199/review-service/paperless",
+          "name": "PaperlessRoyal gramma\u2197"
+        },
+        {
+          "href": "http://127.0.0.1:5199/review-service/home-assistant",
+          "name": "Home AssistantOcellaris clownfish\u2197"
+        },
+        {
+          "href": "http://127.0.0.1:5199/review-service/ombi",
+          "name": "OmbiBlue tang\u2197"
+        }
+      ],
+      "rect": {
+        "bottom": 731.25,
+        "height": 562.5,
+        "left": 400,
+        "right": 1040,
+        "top": 168.75,
+        "width": 640,
+        "x": 400,
+        "y": 168.75
+      }
+    },
+    "touch": {
+      "expected": "watchmybirds",
+      "opened": [
+        {
+          "url": "http://127.0.0.1:5199/review-service/watchmybirds",
+          "id": "1298076677"
+        }
+      ],
+      "state": {
+        "fish": [
+          {
+            "ariaLabel": "Open Komodo in a new tab",
+            "focused": false,
+            "hitRect": {
+              "bottom": 434.52093505859375,
+              "height": 91.1484375,
+              "left": 108.5738296508789,
+              "right": 242.9566421508789,
+              "top": 343.37249755859375,
+              "width": 134.3828125,
+              "x": 108.5738296508789,
+              "y": 343.37249755859375
+            },
+            "href": "http://127.0.0.1:5199/review-service/komodo",
+            "id": "komodo",
+            "name": "Komodo",
+            "rect": {
+              "bottom": 458.52093505859375,
+              "height": 24,
+              "left": 147.00350952148438,
+              "right": 204.5191345214844,
+              "top": 434.52093505859375,
+              "width": 57.515625,
+              "x": 147.00350952148438,
+              "y": 434.52093505859375
+            },
+            "style": {
+              "background": "rgba(7, 29, 35, 0.46)",
+              "color": "rgb(220, 231, 225)",
+              "display": "flex",
+              "fontSize": "10px",
+              "minHeight": "24px",
+              "opacity": "1",
+              "shadow": "none",
+              "visibility": "visible"
+            },
+            "target": "_blank"
+          },
+          {
+            "ariaLabel": "Open WatchMyBirds in a new tab",
+            "focused": true,
+            "hitRect": {
+              "bottom": 452.0470275878906,
+              "height": 66.5703125,
+              "left": 239.99647521972656,
+              "right": 327.1683349609375,
+              "top": 385.4767150878906,
+              "width": 87.17185974121094,
+              "x": 239.99647521972656,
+              "y": 385.4767150878906
+            },
+            "href": "http://127.0.0.1:5199/review-service/watchmybirds",
+            "id": "watchmybirds",
+            "name": "WatchMyBirds",
+            "rect": {
+              "bottom": 476.0470275878906,
+              "height": 24,
+              "left": 241.86366271972656,
+              "right": 325.3011474609375,
+              "top": 452.0470275878906,
+              "width": 83.43748474121094,
+              "x": 241.86366271972656,
+              "y": 452.0470275878906
+            },
+            "style": {
+              "background": "rgba(11, 45, 49, 0.84)",
+              "color": "rgb(244, 252, 247)",
+              "display": "flex",
+              "fontSize": "10px",
+              "minHeight": "24px",
+              "opacity": "1",
+              "shadow": "rgba(180, 239, 220, 0.22) 0px 0px 12px 0px",
+              "visibility": "visible"
+            },
+            "target": "_blank"
+          },
+          {
+            "ariaLabel": "Open Paperless in a new tab",
+            "focused": false,
+            "hitRect": {
+              "bottom": 471.1403198242187,
+              "height": 58.34375,
+              "left": 199.8531188964844,
+              "right": 276.2593688964844,
+              "top": 412.7965698242187,
+              "width": 76.40625,
+              "x": 199.8531188964844,
+              "y": 412.7965698242187
+            },
+            "href": "http://127.0.0.1:5199/review-service/paperless",
+            "id": "paperless",
+            "name": "Paperless",
+            "rect": {
+              "bottom": 495.1403198242187,
+              "height": 24,
+              "left": 207.3882751464844,
+              "right": 268.7242126464844,
+              "top": 471.1403198242187,
+              "width": 61.3359375,
+              "x": 207.3882751464844,
+              "y": 471.1403198242187
+            },
+            "style": {
+              "background": "rgba(7, 29, 35, 0.46)",
+              "color": "rgb(220, 231, 225)",
+              "display": "flex",
+              "fontSize": "10px",
+              "minHeight": "24px",
+              "opacity": "1",
+              "shadow": "none",
+              "visibility": "visible"
+            },
+            "target": "_blank"
+          },
+          {
+            "ariaLabel": "Open Home Assistant in a new tab",
+            "focused": false,
+            "hitRect": {
+              "bottom": 276.4544677734375,
+              "height": 61.07810974121094,
+              "left": 83.94451904296875,
+              "right": 164.22576904296875,
+              "top": 215.37635803222656,
+              "width": 80.28125,
+              "x": 83.94451904296875,
+              "y": 215.37635803222656
+            },
+            "href": "http://127.0.0.1:5199/review-service/home-assistant",
+            "id": "home-assistant",
+            "name": "Home Assistant",
+            "rect": {
+              "bottom": 300.4544677734375,
+              "height": 24,
+              "left": 79.84686279296875,
+              "right": 168.32342529296875,
+              "top": 276.4544677734375,
+              "width": 88.4765625,
+              "x": 79.84686279296875,
+              "y": 276.4544677734375
+            },
+            "style": {
+              "background": "rgba(7, 29, 35, 0.46)",
+              "color": "rgb(220, 231, 225)",
+              "display": "flex",
+              "fontSize": "10px",
+              "minHeight": "24px",
+              "opacity": "1",
+              "shadow": "none",
+              "visibility": "visible"
+            },
+            "target": "_blank"
+          },
+          {
+            "ariaLabel": "Open Ombi in a new tab",
+            "focused": false,
+            "hitRect": {
+              "bottom": 380.73284912109375,
+              "height": 143.32810974121094,
+              "left": 113.26055145263672,
+              "right": 324.5808639526367,
+              "top": 237.4047393798828,
+              "width": 211.3203125,
+              "x": 113.26055145263672,
+              "y": 237.4047393798828
+            },
+            "href": "http://127.0.0.1:5199/review-service/ombi",
+            "id": "ombi",
+            "name": "Ombi",
+            "rect": {
+              "bottom": 404.73284912109375,
+              "height": 24,
+              "left": 196.81524658203125,
+              "right": 241.01837158203125,
+              "top": 380.73284912109375,
+              "width": 44.203125,
+              "x": 196.81524658203125,
+              "y": 380.73284912109375
+            },
+            "style": {
+              "background": "rgba(7, 29, 35, 0.46)",
+              "color": "rgb(220, 231, 225)",
+              "display": "flex",
+              "fontSize": "10px",
+              "minHeight": "24px",
+              "opacity": "1",
+              "shadow": "none",
+              "visibility": "visible"
+            },
+            "target": "_blank"
+          }
+        ],
+        "scene": "aquarium-scene aquarium-three is-rendered is-paused",
+        "viewport": {
+          "dpr": 1,
+          "height": 874,
+          "width": 402
+        }
+      }
+    },
+    "keyboard": {
+      "expected": "watchmybirds",
+      "opened": [
+        {
+          "id": "1298076681",
+          "url": "http://127.0.0.1:5199/review-service/watchmybirds"
+        }
+      ]
+    },
+    "phonePointerCaption": {
+      "caption": "Home Assistant",
+      "opened": "http://127.0.0.1:5199/review-service/home-assistant",
+      "correct": true
+    },
+    "source": "Frozen reviewed b1bb742 renderer + f6d024b3 captionCSS; no candidate-model/sand changes; local-only service fixture.",
+    "captures": "Production PNG no-clip; CSS baseline JPEGs from prior deterministic frozen initial frame."
+  },
+  "fixedNativeInteraction": {
+    "phoneInitial": {
+      "fish": [
+        {
+          "ariaLabel": "Open Komodo in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 434.52093505859375,
+            "height": 91.1484375,
+            "left": 108.5738296508789,
+            "right": 242.9566421508789,
+            "top": 343.37249755859375,
+            "width": 134.3828125,
+            "x": 108.5738296508789,
+            "y": 343.37249755859375
+          },
+          "href": "http://127.0.0.1:5199/review-service/komodo",
+          "id": "komodo",
+          "name": "Komodo",
+          "rect": {
+            "bottom": 458.52093505859375,
+            "height": 24,
+            "left": 147.00350952148438,
+            "right": 204.5191345214844,
+            "top": 434.52093505859375,
+            "width": 57.515625,
+            "x": 147.00350952148438,
+            "y": 434.52093505859375
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open WatchMyBirds in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 452.0470275878906,
+            "height": 66.5703125,
+            "left": 239.99647521972656,
+            "right": 327.1683349609375,
+            "top": 385.4767150878906,
+            "width": 87.17185974121094,
+            "x": 239.99647521972656,
+            "y": 385.4767150878906
+          },
+          "href": "http://127.0.0.1:5199/review-service/watchmybirds",
+          "id": "watchmybirds",
+          "name": "WatchMyBirds",
+          "rect": {
+            "bottom": 476.0470275878906,
+            "height": 24,
+            "left": 241.86366271972656,
+            "right": 325.3011474609375,
+            "top": 452.0470275878906,
+            "width": 83.43748474121094,
+            "x": 241.86366271972656,
+            "y": 452.0470275878906
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Paperless in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 471.1403198242187,
+            "height": 58.34375,
+            "left": 199.8531188964844,
+            "right": 276.2593688964844,
+            "top": 412.7965698242187,
+            "width": 76.40625,
+            "x": 199.8531188964844,
+            "y": 412.7965698242187
+          },
+          "href": "http://127.0.0.1:5199/review-service/paperless",
+          "id": "paperless",
+          "name": "Paperless",
+          "rect": {
+            "bottom": 495.1403198242187,
+            "height": 24,
+            "left": 207.3882751464844,
+            "right": 268.7242126464844,
+            "top": 471.1403198242187,
+            "width": 61.3359375,
+            "x": 207.3882751464844,
+            "y": 471.1403198242187
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Home Assistant in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 276.4544677734375,
+            "height": 61.07810974121094,
+            "left": 83.94451904296875,
+            "right": 164.22576904296875,
+            "top": 215.37635803222656,
+            "width": 80.28125,
+            "x": 83.94451904296875,
+            "y": 215.37635803222656
+          },
+          "href": "http://127.0.0.1:5199/review-service/home-assistant",
+          "id": "home-assistant",
+          "name": "Home Assistant",
+          "rect": {
+            "bottom": 300.4544677734375,
+            "height": 24,
+            "left": 79.84686279296875,
+            "right": 168.32342529296875,
+            "top": 276.4544677734375,
+            "width": 88.4765625,
+            "x": 79.84686279296875,
+            "y": 276.4544677734375
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Ombi in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 380.73284912109375,
+            "height": 143.32810974121094,
+            "left": 113.26055145263672,
+            "right": 324.5808639526367,
+            "top": 237.4047393798828,
+            "width": 211.3203125,
+            "x": 113.26055145263672,
+            "y": 237.4047393798828
+          },
+          "href": "http://127.0.0.1:5199/review-service/ombi",
+          "id": "ombi",
+          "name": "Ombi",
+          "rect": {
+            "bottom": 404.73284912109375,
+            "height": 24,
+            "left": 196.81524658203125,
+            "right": 241.01837158203125,
+            "top": 380.73284912109375,
+            "width": 44.203125,
+            "x": 196.81524658203125,
+            "y": 380.73284912109375
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered is-paused",
+      "viewport": {
+        "dpr": 1,
+        "height": 874,
+        "width": 402
+      }
+    },
+    "pausedOwnership": [
+      {
+        "id": "komodo",
+        "rect": {
+          "bottom": 434.8918151855469,
+          "height": 24,
+          "left": 137.40985107421875,
+          "right": 194.92547607421875,
+          "top": 410.8918151855469,
+          "width": 57.515625,
+          "x": 137.40985107421875,
+          "y": 410.8918151855469
+        },
+        "stack": [
+          {
+            "cls": "aquarium-fish-link",
+            "id": "ombi",
+            "tag": "A"
+          },
+          {
+            "cls": "",
+            "id": "komodo",
+            "tag": "SPAN"
+          },
+          {
+            "cls": "fish-name",
+            "id": "komodo",
+            "tag": "SPAN"
+          },
+          {
+            "cls": "aquarium-scene aquarium-three is-rendered is-paused",
+            "tag": "SECTION"
+          },
+          {
+            "cls": "page-shell",
+            "tag": "MAIN"
+          },
+          {
+            "cls": "",
+            "tag": "HTML"
+          }
+        ],
+        "top": "ombi",
+        "visible": "visible"
+      },
+      {
+        "id": "watchmybirds",
+        "rect": {
+          "bottom": 472.0275268554687,
+          "height": 24,
+          "left": 224.6410369873047,
+          "right": 308.07855224609375,
+          "top": 448.0275268554687,
+          "width": 83.43751525878906,
+          "x": 224.6410369873047,
+          "y": 448.0275268554687
+        },
+        "stack": [
+          {
+            "cls": "",
+            "id": "watchmybirds",
+            "tag": "SPAN"
+          },
+          {
+            "cls": "fish-name",
+            "id": "watchmybirds",
+            "tag": "SPAN"
+          },
+          {
+            "cls": "aquarium-scene aquarium-three is-rendered is-paused",
+            "tag": "SECTION"
+          },
+          {
+            "cls": "page-shell",
+            "tag": "MAIN"
+          },
+          {
+            "cls": "",
+            "tag": "HTML"
+          }
+        ],
+        "top": "watchmybirds",
+        "visible": "visible"
+      },
+      {
+        "id": "paperless",
+        "rect": {
+          "bottom": 502.8158874511719,
+          "height": 24,
+          "left": 183.6965179443359,
+          "right": 245.0324554443359,
+          "top": 478.8158874511719,
+          "width": 61.3359375,
+          "x": 183.6965179443359,
+          "y": 478.8158874511719
+        },
+        "stack": [
+          {
+            "cls": "",
+            "id": "paperless",
+            "tag": "SPAN"
+          },
+          {
+            "cls": "fish-name",
+            "id": "paperless",
+            "tag": "SPAN"
+          },
+          {
+            "cls": "aquarium-scene aquarium-three is-rendered is-paused",
+            "tag": "SECTION"
+          },
+          {
+            "cls": "page-shell",
+            "tag": "MAIN"
+          },
+          {
+            "cls": "",
+            "tag": "HTML"
+          }
+        ],
+        "top": "paperless",
+        "visible": "visible"
+      },
+      {
+        "id": "home-assistant",
+        "rect": {
+          "bottom": 311.849365234375,
+          "height": 24,
+          "left": 102.92159271240234,
+          "right": 191.39816284179688,
+          "top": 287.849365234375,
+          "width": 88.47657012939453,
+          "x": 102.92159271240234,
+          "y": 287.849365234375
+        },
+        "stack": [
+          {
+            "cls": "",
+            "id": "home-assistant",
+            "tag": "SPAN"
+          },
+          {
+            "cls": "fish-name",
+            "id": "home-assistant",
+            "tag": "SPAN"
+          },
+          {
+            "cls": "aquarium-fish-link",
+            "id": "ombi",
+            "tag": "A"
+          },
+          {
+            "cls": "aquarium-scene aquarium-three is-rendered is-paused",
+            "tag": "SECTION"
+          },
+          {
+            "cls": "page-shell",
+            "tag": "MAIN"
+          },
+          {
+            "cls": "",
+            "tag": "HTML"
+          }
+        ],
+        "top": "home-assistant",
+        "visible": "visible"
+      },
+      {
+        "id": "ombi",
+        "rect": {
+          "bottom": 453.9655456542969,
+          "height": 24,
+          "left": 187.02154541015625,
+          "right": 231.22467041015625,
+          "top": 429.9655456542969,
+          "width": 44.203125,
+          "x": 187.02154541015625,
+          "y": 429.9655456542969
+        },
+        "stack": [
+          {
+            "cls": "aquarium-fish-link",
+            "id": "paperless",
+            "tag": "A"
+          },
+          {
+            "cls": "",
+            "id": "ombi",
+            "tag": "SPAN"
+          },
+          {
+            "cls": "fish-name",
+            "id": "ombi",
+            "tag": "SPAN"
+          },
+          {
+            "cls": "aquarium-scene aquarium-three is-rendered is-paused",
+            "tag": "SECTION"
+          },
+          {
+            "cls": "page-shell",
+            "tag": "MAIN"
+          },
+          {
+            "cls": "",
+            "tag": "HTML"
+          }
+        ],
+        "top": "paperless",
+        "visible": "visible"
+      }
+    ],
+    "afterInterceptedClick": {
+      "fish": [
+        {
+          "ariaLabel": "Open Komodo in a new tab",
+          "focused": true,
+          "hitRect": {
+            "bottom": 410.8918151855469,
+            "height": 104.78125,
+            "left": 88.92548370361328,
+            "right": 243.41767120361328,
+            "top": 306.1105651855469,
+            "width": 154.4921875,
+            "x": 88.92548370361328,
+            "y": 306.1105651855469
+          },
+          "href": "http://127.0.0.1:5199/review-service/komodo",
+          "id": "komodo",
+          "name": "Komodo",
+          "rect": {
+            "bottom": 434.8918151855469,
+            "height": 24,
+            "left": 137.40985107421875,
+            "right": 194.92547607421875,
+            "top": 410.8918151855469,
+            "width": 57.515625,
+            "x": 137.40985107421875,
+            "y": 410.8918151855469
+          },
+          "style": {
+            "background": "rgba(11, 45, 49, 0.84)",
+            "color": "rgb(244, 252, 247)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "rgba(180, 239, 220, 0.22) 0px 0px 12px 0px",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open WatchMyBirds in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 448.0275268554687,
+            "height": 64.4921875,
+            "left": 224.1332244873047,
+            "right": 308.58636474609375,
+            "top": 383.5353393554687,
+            "width": 84.45314025878906,
+            "x": 224.1332244873047,
+            "y": 383.5353393554687
+          },
+          "href": "http://127.0.0.1:5199/review-service/watchmybirds",
+          "id": "watchmybirds",
+          "name": "WatchMyBirds",
+          "rect": {
+            "bottom": 472.0275268554687,
+            "height": 24,
+            "left": 224.6410369873047,
+            "right": 308.07855224609375,
+            "top": 448.0275268554687,
+            "width": 83.43751525878906,
+            "x": 224.6410369873047,
+            "y": 448.0275268554687
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Paperless in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 478.8158874511719,
+            "height": 55.640625,
+            "left": 177.93479919433594,
+            "right": 250.7941741943359,
+            "top": 423.1752624511719,
+            "width": 72.859375,
+            "x": 177.93479919433594,
+            "y": 423.1752624511719
+          },
+          "href": "http://127.0.0.1:5199/review-service/paperless",
+          "id": "paperless",
+          "name": "Paperless",
+          "rect": {
+            "bottom": 502.8158874511719,
+            "height": 24,
+            "left": 183.6965179443359,
+            "right": 245.0324554443359,
+            "top": 478.8158874511719,
+            "width": 61.3359375,
+            "x": 183.6965179443359,
+            "y": 478.8158874511719
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Home Assistant in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 287.849365234375,
+            "height": 56.921875,
+            "left": 109.75362396240234,
+            "right": 184.57394409179688,
+            "top": 230.927490234375,
+            "width": 74.82032012939453,
+            "x": 109.75362396240234,
+            "y": 230.927490234375
+          },
+          "href": "http://127.0.0.1:5199/review-service/home-assistant",
+          "id": "home-assistant",
+          "name": "Home Assistant",
+          "rect": {
+            "bottom": 311.849365234375,
+            "height": 24,
+            "left": 102.92159271240234,
+            "right": 191.39816284179688,
+            "top": 287.849365234375,
+            "width": 88.47657012939453,
+            "x": 102.92159271240234,
+            "y": 287.849365234375
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Ombi in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 429.9655456542969,
+            "height": 146.1875,
+            "left": 101.35747528076172,
+            "right": 316.8887252807617,
+            "top": 283.7780456542969,
+            "width": 215.53125,
+            "x": 101.35747528076172,
+            "y": 283.7780456542969
+          },
+          "href": "http://127.0.0.1:5199/review-service/komodo",
+          "id": "ombi",
+          "name": "Ombi",
+          "rect": {
+            "bottom": 453.9655456542969,
+            "height": 24,
+            "left": 187.02154541015625,
+            "right": 231.22467041015625,
+            "top": 429.9655456542969,
+            "width": 44.203125,
+            "x": 187.02154541015625,
+            "y": 429.9655456542969
+          },
+          "style": {
+            "background": "rgba(11, 45, 49, 0.84)",
+            "color": "rgb(244, 252, 247)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "rgba(180, 239, 220, 0.22) 0px 0px 12px 0px",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered is-paused",
+      "viewport": {
+        "dpr": 1,
+        "height": 874,
+        "width": 402
+      }
+    },
+    "openedAfterInterceptedClick": [
+      {
+        "id": "1298076689",
+        "providerTabId": "[\"d32b0b8f-c606-44fc-9f06-f1f2e7486f18\",\"1298076689\"]",
+        "title": "Reef Control",
+        "url": "http://127.0.0.1:5199/review-service/komodo"
+      }
+    ],
+    "afterBorrowedKeyboardReset": {
+      "fish": [
+        {
+          "ariaLabel": "Open Komodo in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 410.8918151855469,
+            "height": 104.78125,
+            "left": 88.92548370361328,
+            "right": 243.41767120361328,
+            "top": 306.1105651855469,
+            "width": 154.4921875,
+            "x": 88.92548370361328,
+            "y": 306.1105651855469
+          },
+          "href": "http://127.0.0.1:5199/review-service/komodo",
+          "id": "komodo",
+          "name": "Komodo",
+          "rect": {
+            "bottom": 434.8918151855469,
+            "height": 24,
+            "left": 137.40985107421875,
+            "right": 194.92547607421875,
+            "top": 410.8918151855469,
+            "width": 57.515625,
+            "x": 137.40985107421875,
+            "y": 410.8918151855469
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open WatchMyBirds in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 448.0275268554687,
+            "height": 64.4921875,
+            "left": 224.1332244873047,
+            "right": 308.58636474609375,
+            "top": 383.5353393554687,
+            "width": 84.45314025878906,
+            "x": 224.1332244873047,
+            "y": 383.5353393554687
+          },
+          "href": "http://127.0.0.1:5199/review-service/watchmybirds",
+          "id": "watchmybirds",
+          "name": "WatchMyBirds",
+          "rect": {
+            "bottom": 472.0275268554687,
+            "height": 24,
+            "left": 224.6410369873047,
+            "right": 308.07855224609375,
+            "top": 448.0275268554687,
+            "width": 83.43751525878906,
+            "x": 224.6410369873047,
+            "y": 448.0275268554687
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Paperless in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 478.8158874511719,
+            "height": 55.640625,
+            "left": 177.93479919433594,
+            "right": 250.7941741943359,
+            "top": 423.1752624511719,
+            "width": 72.859375,
+            "x": 177.93479919433594,
+            "y": 423.1752624511719
+          },
+          "href": "http://127.0.0.1:5199/review-service/paperless",
+          "id": "paperless",
+          "name": "Paperless",
+          "rect": {
+            "bottom": 502.8158874511719,
+            "height": 24,
+            "left": 183.6965179443359,
+            "right": 245.0324554443359,
+            "top": 478.8158874511719,
+            "width": 61.3359375,
+            "x": 183.6965179443359,
+            "y": 478.8158874511719
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Home Assistant in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 287.849365234375,
+            "height": 56.921875,
+            "left": 109.75362396240234,
+            "right": 184.57394409179688,
+            "top": 230.927490234375,
+            "width": 74.82032012939453,
+            "x": 109.75362396240234,
+            "y": 230.927490234375
+          },
+          "href": "http://127.0.0.1:5199/review-service/home-assistant",
+          "id": "home-assistant",
+          "name": "Home Assistant",
+          "rect": {
+            "bottom": 311.849365234375,
+            "height": 24,
+            "left": 102.92159271240234,
+            "right": 191.39816284179688,
+            "top": 287.849365234375,
+            "width": 88.47657012939453,
+            "x": 102.92159271240234,
+            "y": 287.849365234375
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Ombi in a new tab",
+          "focused": true,
+          "hitRect": {
+            "bottom": 429.9655456542969,
+            "height": 146.1875,
+            "left": 101.35747528076172,
+            "right": 316.8887252807617,
+            "top": 283.7780456542969,
+            "width": 215.53125,
+            "x": 101.35747528076172,
+            "y": 283.7780456542969
+          },
+          "href": "http://127.0.0.1:5199/review-service/ombi",
+          "id": "ombi",
+          "name": "Ombi",
+          "rect": {
+            "bottom": 453.9655456542969,
+            "height": 24,
+            "left": 187.02154541015625,
+            "right": 231.22467041015625,
+            "top": 429.9655456542969,
+            "width": 44.203125,
+            "x": 187.02154541015625,
+            "y": 429.9655456542969
+          },
+          "style": {
+            "background": "rgba(11, 45, 49, 0.84)",
+            "color": "rgb(244, 252, 247)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "rgba(180, 239, 220, 0.22) 0px 0px 12px 0px",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered is-paused",
+      "viewport": {
+        "dpr": 1,
+        "height": 874,
+        "width": 402
+      }
+    },
+    "openedAfterKeyboardReset": [
+      {
+        "id": "1298076693",
+        "providerTabId": "[\"d32b0b8f-c606-44fc-9f06-f1f2e7486f18\",\"1298076693\"]",
+        "title": "Reef Control",
+        "url": "http://127.0.0.1:5199/review-service/ombi"
+      }
+    ],
+    "phoneModal": {
+      "links": [
+        {
+          "name": "KomodoYellow tang\u2197",
+          "url": "http://127.0.0.1:5199/review-service/komodo"
+        },
+        {
+          "name": "WatchMyBirdsBanggai cardinalfish\u2197",
+          "url": "http://127.0.0.1:5199/review-service/watchmybirds"
+        },
+        {
+          "name": "PaperlessRoyal gramma\u2197",
+          "url": "http://127.0.0.1:5199/review-service/paperless"
+        },
+        {
+          "name": "Home AssistantOcellaris clownfish\u2197",
+          "url": "http://127.0.0.1:5199/review-service/home-assistant"
+        },
+        {
+          "name": "OmbiBlue tang\u2197",
+          "url": "http://127.0.0.1:5199/review-service/ombi"
+        }
+      ],
+      "rect": {
+        "bottom": 698,
+        "height": 522,
+        "left": 11,
+        "right": 391,
+        "top": 176,
+        "width": 380,
+        "x": 11,
+        "y": 176
+      }
+    },
+    "laptopFinal": {
+      "fish": [
+        {
+          "ariaLabel": "Open Komodo in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 369.3621520996094,
+            "height": 93.859375,
+            "left": 484.0857849121094,
+            "right": 622.4686279296875,
+            "top": 275.5027770996094,
+            "width": 138.38284301757812,
+            "x": 484.0857849121094,
+            "y": 275.5027770996094
+          },
+          "href": "http://127.0.0.1:5199/review-service/komodo",
+          "id": "komodo",
+          "name": "Komodo",
+          "rect": {
+            "bottom": 393.3621520996094,
+            "height": 24,
+            "left": 524.5155029296875,
+            "right": 582.0311279296875,
+            "top": 369.3621520996094,
+            "width": 57.515625,
+            "x": 524.5155029296875,
+            "y": 369.3621520996094
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open WatchMyBirds in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 465.4908752441406,
+            "height": 68.546875,
+            "left": 1162.2552490234375,
+            "right": 1252.0208740234375,
+            "top": 396.9440002441406,
+            "width": 89.765625,
+            "x": 1162.2552490234375,
+            "y": 396.9440002441406
+          },
+          "href": "http://127.0.0.1:5199/review-service/watchmybirds",
+          "id": "watchmybirds",
+          "name": "WatchMyBirds",
+          "rect": {
+            "bottom": 489.4908752441406,
+            "height": 24,
+            "left": 1165.4193115234375,
+            "right": 1248.8568115234375,
+            "top": 465.4908752441406,
+            "width": 83.4375,
+            "x": 1165.4193115234375,
+            "y": 465.4908752441406
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Paperless in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 485.1546936035156,
+            "height": 60.078125,
+            "left": 899.2537231445312,
+            "right": 977.9334106445312,
+            "top": 425.0765686035156,
+            "width": 78.6796875,
+            "x": 899.2537231445312,
+            "y": 425.0765686035156
+          },
+          "href": "http://127.0.0.1:5199/review-service/paperless",
+          "id": "paperless",
+          "name": "Paperless",
+          "rect": {
+            "bottom": 509.1546936035156,
+            "height": 24,
+            "left": 907.9216918945312,
+            "right": 969.2576293945312,
+            "top": 485.1546936035156,
+            "width": 61.3359375,
+            "x": 907.9216918945312,
+            "y": 485.1546936035156
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Home Assistant in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 284.681884765625,
+            "height": 62.89845275878906,
+            "left": 224.9705810546875,
+            "right": 307.6346435546875,
+            "top": 221.7834320068359,
+            "width": 82.6640625,
+            "x": 224.9705810546875,
+            "y": 221.7834320068359
+          },
+          "href": "http://127.0.0.1:5199/review-service/home-assistant",
+          "id": "home-assistant",
+          "name": "Home Assistant",
+          "rect": {
+            "bottom": 308.681884765625,
+            "height": 24,
+            "left": 222.0604248046875,
+            "right": 310.5369873046875,
+            "top": 284.681884765625,
+            "width": 88.4765625,
+            "x": 222.0604248046875,
+            "y": 284.681884765625
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        },
+        {
+          "ariaLabel": "Open Ombi in a new tab",
+          "focused": false,
+          "hitRect": {
+            "bottom": 396.01409912109375,
+            "height": 147.59375,
+            "left": 606.031494140625,
+            "right": 823.633056640625,
+            "top": 248.42034912109375,
+            "width": 217.6015625,
+            "x": 606.031494140625,
+            "y": 248.42034912109375
+          },
+          "href": "http://127.0.0.1:5199/review-service/ombi",
+          "id": "ombi",
+          "name": "Ombi",
+          "rect": {
+            "bottom": 420.01409912109375,
+            "height": 24,
+            "left": 692.726806640625,
+            "right": 736.929931640625,
+            "top": 396.01409912109375,
+            "width": 44.203125,
+            "x": 692.726806640625,
+            "y": 396.01409912109375
+          },
+          "style": {
+            "background": "rgba(7, 29, 35, 0.46)",
+            "color": "rgb(220, 231, 225)",
+            "display": "flex",
+            "fontSize": "10px",
+            "minHeight": "24px",
+            "opacity": "1",
+            "shadow": "none",
+            "visibility": "visible"
+          },
+          "target": "_blank"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered is-paused",
+      "viewport": {
+        "dpr": 1,
+        "height": 900,
+        "width": 1440
+      }
+    },
+    "logs": [
+      {
+        "level": "warn",
+        "message": "THREE.WebGLShadowMap: PCFSoftShadowMap has been removed. Using PCFShadowMap instead.",
+        "timestamp": "2026-11-06T14:17:09.634Z",
+        "url": "chrome-extension://fmkadmapgofadopljbjfkapdkoienihi/build/installHook.js"
+      }
+    ]
+  },
+  "limits": "Browser AX/name inspection, not a human screen-reader software session. No overall reef art, lighting, camera, fish-animation or performance acceptance is implied."
+}
