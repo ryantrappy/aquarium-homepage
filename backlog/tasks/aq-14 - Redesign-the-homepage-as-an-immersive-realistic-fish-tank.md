@@ -50,6 +50,14 @@ The user clarified that the aquarium itself is the product: a sharp, front-on re
 3. Keep fish links and baseline keyboard, pause, and reduced-motion behavior working. Treat current translating cutouts as scaffold only.
 4. Integrate the lifelike fish work from AQ-12 before considering the overall aquarium redesign complete.
 5. Verify layout only at 402x874 CSS pixels for the iPhone Pro proxy and 1440x900 for a normal laptop; use task comments and notes for root feedback and iterate until approved.
+
+### Specific Code Changes & Locations
+
+- **Full-Viewport Tank & Compact Controls (`src/App.tsx` & `src/styles/aquarium.css`)**:
+  - Render `<AquariumScene services={services} paused={paused} focusFallbackRef={servicesButtonRef} />` as the full-viewport primary view without any marketing header or persistent service dock.
+  - Keep only the compact top-right HUD buttons (`Pause`, `Services`, `Settings`) and open the searchable service list inside a native `<dialog>` modal that restores focus to `servicesButtonRef` on `Escape` or close.
+- **3D Reef & Lifelike Fish Renderer (`src/rendering/scene/aquarium.ts`, lines 49–360)**:
+  - Configure `ACESFilmicToneMapping`, `PCFSoftShadowMap`, 3-tier reef LED lighting (lines 65–95), layered reef-tank backdrop shader (lines 140–180), rippling top water meniscus at `y = 2.66` (lines 182–198), modular live-rock + 23 socketed coral colonies in `rebuildHabitat()` (lines 200–255), and 3D rigged fish in `rebuildFish()` (lines 260–315).
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes

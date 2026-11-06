@@ -47,6 +47,49 @@ Roster ID: `flame-angelfish`. Implement this fish as an independently reviewable
 - [ ] #2 Implementation follows project policy in AGENTS.md: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
 
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+### Specific Code Changes & Locations for `flame-angelfish`
+
+1. **3D Runtime Asset & Adult Scale Registration**:
+   - **Runtime GLB Binding (`src/rendering/scene/aquarium.ts`, `modelUrls` at lines 25–41)**:
+     ```ts
+     'flame-angelfish': new URL('../assets/splat-fish/flame-angelfish.glb', import.meta.url).href,
+     ```
+   - **Adult Size & Swim-Axis Calibration (`src/rendering/scene/fish-scale.ts`, lines 12–49)**:
+     - `FISH_RENDER_LENGTH_INCHES['flame-angelfish']` = `3.75 in (0.60 scene units)`
+     - `MODEL_SWIM_AXIS_LENGTH['flame-angelfish']` = `2` (so `fishModelScale('flame-angelfish')` scales the bind-space `+Z` snout-to-tail extent strictly to `fishRenderLength('flame-angelfish')`).
+   - **Code-Driven 3D Generator**: `scripts/build-splat-fish-glbs.mjs (SPECIES_SPECS[7])` (sculpted 3D ring-lofted body with `+Y` dorsal up and `+Z` snout forward, 3D convex cornea eyes, gill opercula, double-sided scalloped rayed fins, and 8-joint `spine_0..spine_5` + `pectoral_L/R` armature).
+2. **Typed Species Behavior Profile (`src/lib/fish-behavior.ts`, `SPECIES_BEHAVIOR_PROFILES['flame-angelfish']`)**:
+   - Verify compatible habitat anchors `anchors: ['rockCrevice', 'grazingSurface', 'coralOutcrop']`, depth range preference `depthRange`, cruise speed in tank-widths/sec, turn rate in deg/sec, and state transitions (`idle`, `swim`, `forage`, `display`, `burst`, `retreat`).
+3. **Species Locomotion Cadence & Opportunity Extension (`src/rendering/scene/species-locomotion-extensions.ts`, `SPECIES_LOCOMOTION_SIGNATURES['flame-angelfish']`)**:
+   - Modulate `AnimationMixer` playback rate per state via `SPECIES_LOCOMOTION_SIGNATURES['flame-angelfish']` and emit periodic `behavior-opportunity` intents into `stepSwimmingFish()` (`src/rendering/scene/motion.ts` lines 192–200).
+4. **Biomechanical Turning Rig & Habitat Anchor Interaction (`src/rendering/scene/fish-turning.ts` & `src/rendering/scene/habitat-anchor-interactions.ts`)**:
+   - Bind `getRigArchetypeForSpecies('flame-angelfish') -> 'subcarangiform_schooler'` in `bindFishTurningRig()` (`src/rendering/scene/fish-turning.ts` line 125) and apply additive post-mixer C/S-wave spine bending and pectoral braking via `applyFishTurningRigOverlay()` (`src/rendering/scene/aquarium.ts` line 330).
+   - **Species Behavioral Signature**: Agile contour-hugging patrols closely weaving in and out of live-rock arches and overhangs, pausing frequently with nose-down pitch (-0.22 rad) to nip microalgae and sponge film from grazingSurface anchors.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+### Current Codebase Context & Verification Parameters (`flame-angelfish`)
+
+- **Profile Parameters (`src/lib/fish-behavior.ts`, `SPECIES_BEHAVIOR_PROFILES['flame-angelfish']`)**:
+  - **Habitat Mode & Zone**: `sheltered-reef`, `reef-edge (depthRange: [0.40, 0.82])`
+  - **Locomotion Tuning**: `compact-reef-orbit (speed: [0.024, 0.075] tankWidths/s, turn: [42, 96] deg/s)`
+  - **State Machine**: `idle (1.2–3.6s, 0.18×, rockCrevice), swim (2.6–6.1s, 0.95×, rockCrevice), forage (1.4–4.1s, 0.42×, grazingSurface)`
+- **Animation Cadence & Triggers (`src/rendering/scene/species-locomotion-extensions.ts`)**:
+  - `basePlaybackByState: { idle: 0.84, swim: 1.14, forage: 1.22, display: 1.26, burst: 1.54, retreat: 1.70 }, pulse: 0.08 @ 1.20 Hz, trigger: foraging-opportunity every 6.4s`
+- **Physical Scale & Anchor Interaction (`src/rendering/scene/fish-scale.ts` & `src/rendering/scene/habitat-anchor-interactions.ts`)**:
+  - **Scale & Clearance**: `renderLength: 3.75 in (0.60 scene units), clearanceRadius: 0.50 scene units`
+  - **Anchor Interaction Category**: `substrate-grazing-forage (nose-down grazing pecks -0.22 rad) & crevice-refuge-hold`
+- **Verification Commands**:
+  - `npx vitest run src/lib/fish-behavior.test.ts src/rendering/scene/species-locomotion-extensions.test.ts src/rendering/scene/habitat-anchor-interactions.test.ts src/rendering/scene/fish-scale.test.ts`
+<!-- SECTION:NOTES:END -->
+
+
+
 ## Comments
 
 <!-- COMMENTS:BEGIN -->

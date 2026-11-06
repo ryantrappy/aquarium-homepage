@@ -28,10 +28,24 @@ import { applyFishLinkVisibility } from './fish-link-focus'
 import { projectFishLinkBounds } from './fish-link-projection'
 import { createFishClipPlayer, type FishClipPlayer } from './fish-animation'
 import { reconcileFishInhabitants, refreshFishLink } from './fish-inhabitants'
+import { createAragoniteSandBed } from './aragonite-sand'
 
 const modelUrls: Record<string, string> = {
   'ocellaris-clownfish': new URL('../proof/candidate-real-clown.glb', import.meta.url).href,
   'yellow-tang': new URL('../proof/candidate-real-tang.glb', import.meta.url).href,
+  'blue-tang': new URL('../assets/fish/fish-blue-tang.glb', import.meta.url).href,
+  'royal-gramma': new URL('../assets/fish/fish-royal-gramma.glb', import.meta.url).href,
+  'banggai-cardinalfish': new URL('../assets/fish/fish-banggai-cardinalfish.glb', import.meta.url).href,
+  'mandarin-dragonet': new URL('../assets/fish/fish-mandarin-dragonet.glb', import.meta.url).href,
+  'blue-green-chromis': new URL('../assets/splat-fish/blue-green-chromis.glb', import.meta.url).href,
+  firefish: new URL('../assets/splat-fish/firefish.glb', import.meta.url).href,
+  'yellow-watchman-goby': new URL('../assets/splat-fish/yellow-watchman-goby.glb', import.meta.url).href,
+  'tailspot-blenny': new URL('../assets/splat-fish/tailspot-blenny.glb', import.meta.url).href,
+  'six-line-wrasse': new URL('../assets/splat-fish/six-line-wrasse.glb', import.meta.url).href,
+  'mccoskers-flasher-wrasse': new URL('../assets/splat-fish/mccoskers-flasher-wrasse.glb', import.meta.url).href,
+  'lyretail-anthias': new URL('../assets/splat-fish/lyretail-anthias.glb', import.meta.url).href,
+  'flame-angelfish': new URL('../assets/splat-fish/flame-angelfish.glb', import.meta.url).href,
+  'copperband-butterflyfish': new URL('../assets/splat-fish/copperband-butterflyfish.glb', import.meta.url).href,
 }
 export type SceneStatus = 'loading' | 'ready' | 'failed'
 export type AquariumController = { update(services: ServiceConfig[], paused: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void }
@@ -97,59 +111,11 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
     fillLightIntensity: 1.12,
   })
 
-  // Granular aragonite & coralline-rubble sand bed with rock-base contact AO & caustic shimmer (AQ-14.6 & AQ-14.2)
-  const grain = new Uint8Array(256 * 256 * 4); let grainSeed = 1743
-  for (let i = 0; i < grain.length; i += 4) {
-    grainSeed = (Math.imul(grainSeed, 1664525) + 1013904223) >>> 0
-    const r0 = grainSeed / 4294967296
-    grainSeed = (Math.imul(grainSeed, 1664525) + 1013904223) >>> 0
-    const r1 = grainSeed / 4294967296
-    // Occasional tiny purple/pink coralline shell specks in warm ivory aragonite sand
-    const isCorallineSpeck = r1 < 0.065
-    const value = (r0 - .5) * 32
-    grain[i] = Math.min(255, Math.max(0, (isCorallineSpeck ? 185 : 226) + value))
-    grain[i + 1] = Math.min(255, Math.max(0, (isCorallineSpeck ? 152 : 228) + value))
-    grain[i + 2] = Math.min(255, Math.max(0, (isCorallineSpeck ? 192 : 236) + value))
-    grain[i + 3] = 255
-  }
-  const sandTexture = new THREE.DataTexture(grain, 256, 256); sandTexture.colorSpace = THREE.SRGBColorSpace; sandTexture.wrapS = sandTexture.wrapT = THREE.RepeatWrapping; sandTexture.repeat.set(38, 24); sandTexture.magFilter = THREE.LinearFilter; sandTexture.minFilter = THREE.LinearMipmapLinearFilter; sandTexture.generateMipmaps = true; sandTexture.needsUpdate = true
-  const sandGeometry = new THREE.PlaneGeometry(32, 20, 128, 80), sandPositions = sandGeometry.getAttribute('position')
-  for (let i = 0; i < sandPositions.count; i++) {
-    const sx = sandPositions.getX(i), sy = sandPositions.getY(i)
-    const ripple = .032 * Math.sin(sx * .9) + .020 * Math.cos(sy * 1.4 + sx * .4)
-    const leftMound = .12 * Math.exp(-Math.pow((sx + 2.35) / 2.5, 2) - Math.pow((sy - 1.35) / 1.7, 2))
-    const rightMound = .11 * Math.exp(-Math.pow((sx - 2.85) / 2.4, 2) - Math.pow((sy - 1.20) / 1.6, 2))
-    sandPositions.setZ(i, ripple + leftMound + rightMound)
-  }
-  sandGeometry.computeVertexNormals()
-  const sandUniforms = { uSandTime: { value: 0 } }
-  const sandMaterial = new THREE.MeshStandardMaterial({ map: sandTexture, roughness: 0.94, metalness: 0.0 })
-  sandMaterial.onBeforeCompile = shader => {
-    Object.assign(shader.uniforms, sandUniforms)
-    shader.vertexShader = `varying vec3 vSandWorldPos;\n` + shader.vertexShader
-    shader.vertexShader = shader.vertexShader.replace(
-      '#include <begin_vertex>',
-      `#include <begin_vertex>\nvec4 sandWp = modelMatrix * vec4(transformed, 1.0);\nvSandWorldPos = sandWp.xyz;`,
-    )
-    shader.fragmentShader = `uniform float uSandTime;\nvarying vec3 vSandWorldPos;\n` + shader.fragmentShader
-    shader.fragmentShader = shader.fragmentShader.replace(
-      '#include <color_fragment>',
-      `#include <color_fragment>
-// Deep indigo contact shadow beneath left and right live-rock islands + soft rear depth fade
-float leftRockAo = 1.0 - 0.58 * exp(-pow((vSandWorldPos.x + 2.35) / 2.35, 2.0) - pow((vSandWorldPos.z + 1.35) / 1.35, 2.0));
-float rightRockAo = 1.0 - 0.56 * exp(-pow((vSandWorldPos.x - 2.65) / 2.25, 2.0) - pow((vSandWorldPos.z + 1.20) / 1.30, 2.0));
-float sandContactAo = leftRockAo * rightRockAo;
-float rearDepthFade = smoothstep(-5.4, -0.4, vSandWorldPos.z);
-vec3 shadowTint = vec3(0.16, 0.17, 0.34);
-diffuseColor.rgb = mix(shadowTint, diffuseColor.rgb, sandContactAo * (0.42 + 0.58 * rearDepthFade));
-float sWave1 = sin(uSandTime * 1.38 + vSandWorldPos.x * 1.9 + vSandWorldPos.z * 1.6);
-float sWave2 = cos(uSandTime * 2.32 - vSandWorldPos.x * 1.4 + vSandWorldPos.z * 2.1);
-float sandCaustic = smoothstep(0.15, 0.88, 0.5 + 0.25 * (sWave1 + sWave2)) * sandContactAo * rearDepthFade;
-diffuseColor.rgb *= (0.86 + 0.22 * sandCaustic);
-`,
-    )
-  }
-  const sand = new THREE.Mesh(sandGeometry, sandMaterial); sand.rotation.x = -Math.PI / 2; sand.position.y = -2.8; sand.receiveShadow = true; scene.add(sand)
+  // Photoreal aragonite sand bed with 512x512 PBR maps, dual-scale aperiodic UVs, back-rising slope,
+  // scattered rubble/shell/coralline instances, and front-glass substrate edge (AQ-70.12)
+  const sandBed = createAragoniteSandBed({ narrow: false })
+  const sand = sandBed.sandMesh
+  scene.add(sandBed.group)
 
   // Layered Reef-Tank Backdrop (AQ-14.6 & AQ-39): eliminates the flat paint-bucket wall & sharp horizon line
   const rearUniforms = { uRearTime: { value: 0 } }
@@ -268,6 +234,7 @@ diffuseColor.rgb = waterCol;
     reefControllers = []; habitat.obstacles = []; habitat.anchors = []
     if (!rockIslandLeftBase || !rockIslandRightBase || coralTemplates.size === 0) return
     const reducedMotion = Boolean(reducedMotionQuery?.matches)
+    sandBed.setLayout(width < 600)
     const placements = width < 600
       ? [
           {
@@ -472,7 +439,7 @@ diffuseColor.rgb = waterCol;
       coralElapsedSec = (coralElapsedSec + steps * SIMULATION_STEP_SECONDS) % 3600
     }
     const effectiveEnvTime = habitatStopped || reducedMotion ? 0 : coralElapsedSec
-    sandUniforms.uSandTime.value = effectiveEnvTime
+    sandBed.update(coralElapsedSec, habitatStopped, reducedMotion)
     rearUniforms.uRearTime.value = effectiveEnvTime
     causticLightController.update(coralElapsedSec, habitatStopped, reducedMotion)
 
@@ -600,7 +567,7 @@ diffuseColor.rgb = waterCol;
     canActivate(id, x, y) { const item = fish.find(item => item.service.id === id); return Boolean(item && (x === undefined || y === undefined ? updateVisibility(item) : nearest(x, y) === id)) },
     dispose() {
       if (disposed) return; disposed = true; abort.abort(); observer.disconnect(); renderer.setAnimationLoop(null)
-      removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sand.geometry.dispose(); sand.material.dispose(); sandTexture.dispose(); rear.geometry.dispose(); rear.material.dispose(); waterSurfaceGeometry.dispose(); waterSurfaceMaterial.dispose(); particleGeometry.dispose(); particleMaterial.dispose(); renderer.dispose(); renderer.forceContextLoss()
+      removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sandBed.dispose(); rear.geometry.dispose(); rear.material.dispose(); waterSurfaceGeometry.dispose(); waterSurfaceMaterial.dispose(); particleGeometry.dispose(); particleMaterial.dispose(); renderer.dispose(); renderer.forceContextLoss()
     },
   }
 }

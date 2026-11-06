@@ -56,6 +56,49 @@ Roster ID: `ocellaris-clownfish`. Implement this fish as an independently review
 - [ ] #2 Implementation follows project policy in AGENTS.md: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
 
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+### Specific Code Changes & Locations for `ocellaris-clownfish`
+
+1. **3D Runtime Asset & Adult Scale Registration**:
+   - **Runtime GLB Binding (`src/rendering/scene/aquarium.ts`, `modelUrls` at lines 25–41)**:
+     ```ts
+     'ocellaris-clownfish': new URL('../proof/candidate-real-clown.glb', import.meta.url).href,
+     ```
+   - **Adult Size & Swim-Axis Calibration (`src/rendering/scene/fish-scale.ts`, lines 12–49)**:
+     - `FISH_RENDER_LENGTH_INCHES['ocellaris-clownfish']` = `3 in (0.48 scene units)`
+     - `MODEL_SWIM_AXIS_LENGTH['ocellaris-clownfish']` = `2 (or 0.107098 m on fish-ocellaris-clownfish.glb)` (so `fishModelScale('ocellaris-clownfish')` scales the bind-space `+Z` snout-to-tail extent strictly to `fishRenderLength('ocellaris-clownfish')`).
+   - **Code-Driven 3D Generator**: `src/rendering/modeling/build_clownfish.py` (sculpted 3D ring-lofted body with `+Y` dorsal up and `+Z` snout forward, 3D convex cornea eyes, gill opercula, double-sided scalloped rayed fins, and 8-joint `spine_0..spine_5` + `pectoral_L/R` armature).
+2. **Typed Species Behavior Profile (`src/lib/fish-behavior.ts`, `SPECIES_BEHAVIOR_PROFILES['ocellaris-clownfish']`)**:
+   - Verify compatible habitat anchors `anchors: ['hostAnemone']`, depth range preference `depthRange`, cruise speed in tank-widths/sec, turn rate in deg/sec, and state transitions (`idle`, `swim`, `forage`, `display`, `burst`, `retreat`).
+3. **Species Locomotion Cadence & Opportunity Extension (`src/rendering/scene/species-locomotion-extensions.ts`, `SPECIES_LOCOMOTION_SIGNATURES['ocellaris-clownfish']`)**:
+   - Modulate `AnimationMixer` playback rate per state via `SPECIES_LOCOMOTION_SIGNATURES['ocellaris-clownfish']` and emit periodic `behavior-opportunity` intents into `stepSwimmingFish()` (`src/rendering/scene/motion.ts` lines 192–200).
+4. **Biomechanical Turning Rig & Habitat Anchor Interaction (`src/rendering/scene/fish-turning.ts` & `src/rendering/scene/habitat-anchor-interactions.ts`)**:
+   - Bind `getRigArchetypeForSpecies('ocellaris-clownfish') -> 'subcarangiform_schooler'` in `bindFishTurningRig()` (`src/rendering/scene/fish-turning.ts` line 125) and apply additive post-mixer C/S-wave spine bending and pectoral braking via `applyFishTurningRigOverlay()` (`src/rendering/scene/aquarium.ts` line 330).
+   - **Species Behavioral Signature**: Bobbing station-keeping figure-eight loops within softHomeRadius (0.22 units) of hostAnemone (coral-anemone-bta on socket_anemone_crevice_01), brief display peeks outward, and immediate retreat back into the anemone tentacle crown.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+### Current Codebase Context & Verification Parameters (`ocellaris-clownfish`)
+
+- **Profile Parameters (`src/lib/fish-behavior.ts`, `SPECIES_BEHAVIOR_PROFILES['ocellaris-clownfish']`)**:
+  - **Habitat Mode & Zone**: `host-associated`, `upper-reef (depthRange: [0.18, 0.48])`
+  - **Locomotion Tuning**: `fin-hover (speed: [0.012, 0.045] tankWidths/s, turn: [28, 72] deg/s)`
+  - **State Machine**: `idle (2.2–6.5s, 0.25×, hostAnemone), swim (1.8–4.2s, 0.85×, hostAnemone), retreat (0.35–0.9s, 1.8×, destination: hostAnemone)`
+- **Animation Cadence & Triggers (`src/rendering/scene/species-locomotion-extensions.ts`)**:
+  - `basePlaybackByState: { idle: 0.92, swim: 1.18, forage: 1.12, display: 1.32, burst: 1.55, retreat: 1.65 }, pulse: 0.14 @ 1.6 Hz, trigger: display-opportunity every 7.5s`
+- **Physical Scale & Anchor Interaction (`src/rendering/scene/fish-scale.ts` & `src/rendering/scene/habitat-anchor-interactions.ts`)**:
+  - **Scale & Clearance**: `renderLength: 3.0 in (0.48 scene units), clearanceRadius: 0.50 scene units`
+  - **Anchor Interaction Category**: `host-anemone-symbiosis (softHomeRadius: 0.22, softTentacleOverlapAllowed: true)`
+- **Verification Commands**:
+  - `npx vitest run src/lib/fish-behavior.test.ts src/rendering/scene/species-locomotion-extensions.test.ts src/rendering/scene/habitat-anchor-interactions.test.ts src/rendering/scene/fish-scale.test.ts`
+<!-- SECTION:NOTES:END -->
+
+
+
 ## Comments
 
 <!-- COMMENTS:BEGIN -->

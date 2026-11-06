@@ -48,6 +48,15 @@ Add a pump gear or flow element that visualizes actual network traffic rates fro
 3. Preserve large integer counters exactly, compute nonnegative rates from counter deltas and elapsed time, and return honest unavailable/stale states for first samples, reset/invalid counters, unavailable reads, or invalid/stale elapsed time. Serialize/correlate concurrent samples so baselines cannot be corrupted.
 4. Add focused tests for rates, large counters, status transitions, source selection/path bounds, stale reads, and concurrent sampling; write a short source contract with units and limits.
 5. Leave API route, Compose/mount, remote deployment, UI/settings, and task Done criteria for root review/future work.
+
+### Specific Code Changes & Locations
+
+- **Coalesced `uint64` Byte-Counter Sampler (`src/server/network-traffic.ts` & `src/server/network-traffic.test.ts`)**:
+  - Reads `/sys/class/net/<iface>/statistics/{rx_bytes,tx_bytes}` for configured trusted interfaces (e.g. `enp4s0`), coalesces concurrent reads within `minimumSampleIntervalMs = 250`, and computes exact `rxBytesPerSecond` (ingress) and `txBytesPerSecond` (egress) deltas.
+- **GET API Route & Settings Interface Selector (`src/server/api.ts` & `src/components/SettingsModal.tsx`)**:
+  - Expose `GET /api/telemetry/network-traffic?sourceId=<id>` with `Cache-Control: no-store` and allow selecting the monitored interface in `SettingsModal.tsx`.
+- **In-Tank Return Pump / Wavemaker Impeller & Flow Plume (`src/rendering/scene/aquarium.ts`)**:
+  - Render a side-mounted reef wavemaker/pump housing at `x = 3.65, y = 1.15, z = -2.2` whose intake/impeller rotation rate scales with `rxBytesPerSecond` (ingress) and whose output nozzle micro-stream velocity scales with `txBytesPerSecond` (egress), freezing impeller rotation and stream particles when `paused || reducedMotion` is active.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes

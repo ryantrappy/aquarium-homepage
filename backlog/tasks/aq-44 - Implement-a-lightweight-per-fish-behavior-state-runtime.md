@@ -52,6 +52,13 @@ The 15 species profiles describe possible behaviors, but the app also needs a sm
 
 <!-- SECTION:PLAN:BEGIN -->
 1. Treat AQ-44 as a staged implementation because AQ-12, AQ-34, and AQ-35 are incomplete; coordinate with the storage owner and consume only the profile API they expose. 2. Implement an engine-independent per-instance elapsed-time FSM in src/simulation/behavior-runtime.ts, gated strictly by enabled profile states and transitions; keep state decisions separate from rendering/deformation. 3. Define typed individual activation and explicit group/environment event hooks plus a navigation adapter contract that emits compatible semantic anchor requests and accepts unavailable/obstructed responses without changing positions itself. 4. Add focused unit tests for independent deterministic instances, transition eligibility, fixed-step elapsed time, long-frame bounds, pause/hidden suspension, and typed event scoping. 5. Document the adapter contract and current dependency/integration limits; leave scene/renderer integration and dependent acceptance criteria pending root review and AQ-12/AQ-34 completion.
+
+### Specific Code Changes & Locations
+
+- **Per-Instance Deterministic FSM (`src/simulation/behavior-runtime.ts`)**:
+  - `createFishBehaviorInstance()`, `advanceFishBehavior()`, `dispatchBehaviorEvent()`, `getNavigationRequest()`, and `reportNavigationOutcome()` manage per-fish state (`idle`, `swim`, `forage`, `display`, `burst`, `retreat`), life-stage gating, and `navigationGeneration` tokens.
+- **Scene & Motion Loop Integration (`src/rendering/scene/motion.ts`, lines 72–245 & `src/rendering/scene/aquarium.ts`, lines 322–350)**:
+  - `stepSwimmingFish()` advances `advanceFishBehavior(fish.behavior, dt)` in fixed `1/60s` substeps (`SIMULATION_STEP_SECONDS`), consumes `SPECIES_LOCOMOTION_EXTENSIONS` opportunity intents, routes anchor requests via `resolveHabitatRoute()`, and scopes `startleFish()` strictly to the clicked service fish.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes

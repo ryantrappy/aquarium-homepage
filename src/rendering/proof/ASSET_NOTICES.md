@@ -78,3 +78,9 @@ study derivatives are regular checked-in files so a clean checkout can load all
 three engine fixtures without `/tmp` symlinks. Keep creator credit, source and
 license links with redistributed derivatives. Revalidate and update the
 manifest/report when exporting a new revision.
+
+## Aragonite Sand Bed (AQ-70.12)
+
+- Module: `src/rendering/scene/aragonite-sand.ts` (`createAragoniteSandBed`, `createAragoniteSandPbrTextures`).
+- License & Provenance: **Original custom-authored procedural PBR generator** (`0 KB` external download, $0 budget) calibrated against public-domain / [CC0 Poly Haven coastal & beach sand references](https://polyhaven.com/a/aerial_beach_01) ([Aerial Beach 02](https://polyhaven.com/a/aerial_beach_02), CC0 1.0 Universal).
+- Maps & Geometry: Generates `512x512` `albedo` (`SRGBColorSpace`), tangent-space `normal` (`LinearSRGBColorSpace`), and `roughness` (`LinearSRGBColorSpace`) textures with dual-scale rotated aperiodic UV blending, a back-rising aquascaping slope, a front-glass substrate cross-section strip (`AragoniteFrontGlassSandEdge`), and 112 instanced carbonate rubble, shell, and coralline fragments across 3 `THREE.InstancedMesh` batches.

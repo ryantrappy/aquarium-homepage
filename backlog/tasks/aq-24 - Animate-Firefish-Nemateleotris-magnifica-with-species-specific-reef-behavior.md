@@ -46,6 +46,49 @@ Roster ID: `firefish`. Implement this fish as an independently reviewable specie
 - [ ] #2 Implementation follows project policy in AGENTS.md: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
 
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+### Specific Code Changes & Locations for `firefish`
+
+1. **3D Runtime Asset & Adult Scale Registration**:
+   - **Runtime GLB Binding (`src/rendering/scene/aquarium.ts`, `modelUrls` at lines 25–41)**:
+     ```ts
+     'firefish': new URL('../assets/splat-fish/firefish.glb', import.meta.url).href,
+     ```
+   - **Adult Size & Swim-Axis Calibration (`src/rendering/scene/fish-scale.ts`, lines 12–49)**:
+     - `FISH_RENDER_LENGTH_INCHES['firefish']` = `2.75 in (0.44 scene units)`
+     - `MODEL_SWIM_AXIS_LENGTH['firefish']` = `2` (so `fishModelScale('firefish')` scales the bind-space `+Z` snout-to-tail extent strictly to `fishRenderLength('firefish')`).
+   - **Code-Driven 3D Generator**: `scripts/build-splat-fish-glbs.mjs (SPECIES_SPECS[1])` (sculpted 3D ring-lofted body with `+Y` dorsal up and `+Z` snout forward, 3D convex cornea eyes, gill opercula, double-sided scalloped rayed fins, and 8-joint `spine_0..spine_5` + `pectoral_L/R` armature).
+2. **Typed Species Behavior Profile (`src/lib/fish-behavior.ts`, `SPECIES_BEHAVIOR_PROFILES['firefish']`)**:
+   - Verify compatible habitat anchors `anchors: ['sandBurrowEntrance', 'rockCrevice']`, depth range preference `depthRange`, cruise speed in tank-widths/sec, turn rate in deg/sec, and state transitions (`idle`, `swim`, `forage`, `display`, `burst`, `retreat`).
+3. **Species Locomotion Cadence & Opportunity Extension (`src/rendering/scene/species-locomotion-extensions.ts`, `SPECIES_LOCOMOTION_SIGNATURES['firefish']`)**:
+   - Modulate `AnimationMixer` playback rate per state via `SPECIES_LOCOMOTION_SIGNATURES['firefish']` and emit periodic `behavior-opportunity` intents into `stepSwimmingFish()` (`src/rendering/scene/motion.ts` lines 192–200).
+4. **Biomechanical Turning Rig & Habitat Anchor Interaction (`src/rendering/scene/fish-turning.ts` & `src/rendering/scene/habitat-anchor-interactions.ts`)**:
+   - Bind `getRigArchetypeForSpecies('firefish') -> 'subcarangiform_schooler'` in `bindFishTurningRig()` (`src/rendering/scene/fish-turning.ts` line 125) and apply additive post-mixer C/S-wave spine bending and pectoral braking via `applyFishTurningRigOverlay()` (`src/rendering/scene/aquarium.ts` line 330).
+   - **Species Behavioral Signature**: Station-keeping hover +0.18 units above sandBurrowEntrance facing into the current with rhythmic first-dorsal pennant flicks (pulseAmplitude: 0.16, 1.45 Hz) and head-first bolt (reverseRetreat = false, pitchOffsetRad = -0.24) into the burrow entrance on startle/retreat.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+### Current Codebase Context & Verification Parameters (`firefish`)
+
+- **Profile Parameters (`src/lib/fish-behavior.ts`, `SPECIES_BEHAVIOR_PROFILES['firefish']`)**:
+  - **Habitat Mode & Zone**: `burrow-associated`, `lower-reef (depthRange: [0.48, 0.82])`
+  - **Locomotion Tuning**: `sand-burrow-hover (speed: [0.018, 0.065] tankWidths/s, turn: [52, 120] deg/s, higherEffortGaits: [short-refuge-dart])`
+  - **State Machine**: `idle (2.6–6.6s, 0.24×, sandBurrowEntrance), swim (1.8–4.8s, 0.72×, sandBurrowEntrance), retreat (0.25–0.72s, 2.5×, destination: sandBurrowEntrance)`
+- **Animation Cadence & Triggers (`src/rendering/scene/species-locomotion-extensions.ts`)**:
+  - `basePlaybackByState: { idle: 0.72, swim: 1.08, forage: 1.10, display: 1.28, burst: 1.68, retreat: 1.82 }, pulse: 0.16 @ 1.45 Hz, trigger: display-opportunity every 7.0s`
+- **Physical Scale & Anchor Interaction (`src/rendering/scene/fish-scale.ts` & `src/rendering/scene/habitat-anchor-interactions.ts`)**:
+  - **Scale & Clearance**: `renderLength: 2.75 in (0.44 scene units), clearanceRadius: 0.50 scene units`
+  - **Anchor Interaction Category**: `sand-burrow-hover-bolt (hoverHeight: +0.18, head-first bolt reverseRetreat: false)`
+- **Verification Commands**:
+  - `npx vitest run src/lib/fish-behavior.test.ts src/rendering/scene/species-locomotion-extensions.test.ts src/rendering/scene/habitat-anchor-interactions.test.ts src/rendering/scene/fish-scale.test.ts`
+<!-- SECTION:NOTES:END -->
+
+
+
 ## Comments
 
 <!-- COMMENTS:BEGIN -->

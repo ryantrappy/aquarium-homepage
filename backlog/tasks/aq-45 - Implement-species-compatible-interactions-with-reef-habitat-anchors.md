@@ -59,6 +59,27 @@ AQ-34 provides typed 3D habitat locations and AQ-35 describes which locations ea
 - [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
 
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+### Specific Code Changes & Locations
+
+1. **Profile-Strict Anchor Compatibility Filtering (`src/rendering/scene/habitat-anchor-interactions.ts`, `isSpeciesCompatibleWithAnchor()` at lines 45–68)**:
+   - Verify `profile.anchors.includes(location.anchor)` and `location.compatibleSpecies.includes(profile.speciesId)` before allowing any approach or station-keeping interaction.
+   - Never substitute `branchingCoralShelter` (*Acropora*) for `hostAnemone` (*Entacmaea quadricolor*) (AC #1, #2).
+2. **Species-Specific Anchor Kinematics (`src/rendering/scene/habitat-anchor-interactions.ts`, `evaluateAnchorInteractionOffset()` at lines 116–245)**:
+   - `'host-anemone-symbiosis'` (`ocellaris-clownfish` at `hostAnemone`): figure-eight bobbing loops within `softHomeRadius = 0.22` with `softTentacleOverlapAllowed = true` (AC #2).
+   - `'sand-burrow-hover-bolt'` (`firefish` at `sandBurrowEntrance`): elevated water-column hover (`y = +0.18 + 0.025 * sin(t)`) and head-first bolt (`reverseRetreat = false`, `pitchOffsetRad = -0.24`) on retreat (AC #3).
+   - `'sand-burrow-lookout-back-in'` (`yellow-watchman-goby` at `sandBurrowEntrance`): benthic lookout at `y = +0.03` with `yawLockToEntrance = true` and backward retreat (`reverseRetreat = true`, `z = -0.08`) without spinning 180° (AC #3).
+   - `'rock-perch-station'` (`tailspot-blenny` at `rockPerch`): perched head-up posture (`pitchOffsetRad = +0.12`) alternating with short algae-scrape lunges (`pitchOffsetRad = -0.14`) (AC #4).
+   - `'substrate-grazing-forage'` (`yellow-tang`, `flame-angelfish`, `mandarin-dragonet`, `copperband-butterflyfish`): nose-down grazing pitch (`pitchOffsetRad = -0.22`) with lateral inspection sweeps (AC #4).
+3. **Geometry-Derived Semantic Anchor Clearance (`src/rendering/scene/habitat.ts` lines 18–35 & `src/rendering/scene/reef-assembly.ts` `instantiateModularReefHabitat()` at lines 245–315)**:
+   - Compute `anchorClearanceOffset(anchor.compatibleSpecies) = Math.max(MIN_FISH_CLEARANCE, ...compatibleSpecies.map(fishClearanceRadius)) + 0.03` (`0.60` units for `yellow-tang` clearance `0.57`) so `resolveHabitatRoute()` in `src/simulation/habitat-navigation.ts` finds collision-free grazing and refuge paths at both `1440×900` and `402×874` (AC #5).
+4. **Integrate Offset Evaluation into Fish Motion Step (`src/rendering/scene/motion.ts`, `integrateSwimmingFish()` at lines 202–235)**:
+   - When a fish arrives at `fish.navigationAnchor`, modulate its hold/forage/perch pose using `resolveSafeAnchorInteractionTarget()` and `evaluateAnchorInteractionOffset()` while respecting `paused` and `reducedMotion` (AC #5, #7).
+<!-- SECTION:PLAN:END -->
+
+
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->

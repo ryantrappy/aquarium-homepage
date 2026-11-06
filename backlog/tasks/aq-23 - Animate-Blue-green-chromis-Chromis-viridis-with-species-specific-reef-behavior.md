@@ -49,6 +49,49 @@ Roster ID: `blue-green-chromis`. Implement this fish as an independently reviewa
 - [ ] #2 Implementation follows project policy in AGENTS.md: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
 
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+### Specific Code Changes & Locations for `blue-green-chromis`
+
+1. **3D Runtime Asset & Adult Scale Registration**:
+   - **Runtime GLB Binding (`src/rendering/scene/aquarium.ts`, `modelUrls` at lines 25–41)**:
+     ```ts
+     'blue-green-chromis': new URL('../assets/splat-fish/blue-green-chromis.glb', import.meta.url).href,
+     ```
+   - **Adult Size & Swim-Axis Calibration (`src/rendering/scene/fish-scale.ts`, lines 12–49)**:
+     - `FISH_RENDER_LENGTH_INCHES['blue-green-chromis']` = `3 in (0.48 scene units)`
+     - `MODEL_SWIM_AXIS_LENGTH['blue-green-chromis']` = `2` (so `fishModelScale('blue-green-chromis')` scales the bind-space `+Z` snout-to-tail extent strictly to `fishRenderLength('blue-green-chromis')`).
+   - **Code-Driven 3D Generator**: `scripts/build-splat-fish-glbs.mjs (SPECIES_SPECS[0])` (sculpted 3D ring-lofted body with `+Y` dorsal up and `+Z` snout forward, 3D convex cornea eyes, gill opercula, double-sided scalloped rayed fins, and 8-joint `spine_0..spine_5` + `pectoral_L/R` armature).
+2. **Typed Species Behavior Profile (`src/lib/fish-behavior.ts`, `SPECIES_BEHAVIOR_PROFILES['blue-green-chromis']`)**:
+   - Verify compatible habitat anchors `anchors: ['schoolCenter', 'branchingCoralRefuge']`, depth range preference `depthRange`, cruise speed in tank-widths/sec, turn rate in deg/sec, and state transitions (`idle`, `swim`, `forage`, `display`, `burst`, `retreat`).
+3. **Species Locomotion Cadence & Opportunity Extension (`src/rendering/scene/species-locomotion-extensions.ts`, `SPECIES_LOCOMOTION_SIGNATURES['blue-green-chromis']`)**:
+   - Modulate `AnimationMixer` playback rate per state via `SPECIES_LOCOMOTION_SIGNATURES['blue-green-chromis']` and emit periodic `behavior-opportunity` intents into `stepSwimmingFish()` (`src/rendering/scene/motion.ts` lines 192–200).
+4. **Biomechanical Turning Rig & Habitat Anchor Interaction (`src/rendering/scene/fish-turning.ts` & `src/rendering/scene/habitat-anchor-interactions.ts`)**:
+   - Bind `getRigArchetypeForSpecies('blue-green-chromis') -> 'subcarangiform_schooler'` in `bindFishTurningRig()` (`src/rendering/scene/fish-turning.ts` line 125) and apply additive post-mixer C/S-wave spine bending and pectoral braking via `applyFishTurningRigOverlay()` (`src/rendering/scene/aquarium.ts` line 330).
+   - **Species Behavioral Signature**: Active upper-water shoaling above branching Acropora heads (SPECIES_SOCIAL_GROUPING_MODE["blue-green-chromis"] = "shoal") with brisk subcarangiform tail cadence (1.85 Hz pulse) and synchronized retreat into branchingCoralRefuge on explicit group-disturbance events.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+### Current Codebase Context & Verification Parameters (`blue-green-chromis`)
+
+- **Profile Parameters (`src/lib/fish-behavior.ts`, `SPECIES_BEHAVIOR_PROFILES['blue-green-chromis']`)**:
+  - **Habitat Mode & Zone**: `schooling-over-reef`, `upper-reef (depthRange: [0.18, 0.55])`
+  - **Locomotion Tuning**: `school-hover (speed: [0.028, 0.09] tankWidths/s, turn: [45, 105] deg/s)`
+  - **State Machine**: `idle (2.4–6.4s, 0.28×, schoolCenter), swim (3.1–7.8s, 0.90×, schoolCenter), retreat (0.45–1.25s, 1.7×, destination: branchingCoralRefuge)`
+- **Animation Cadence & Triggers (`src/rendering/scene/species-locomotion-extensions.ts`)**:
+  - `basePlaybackByState: { idle: 0.95, swim: 1.26, forage: 1.28, display: 1.34, burst: 1.62, retreat: 1.75 }, pulse: 0.11 @ 1.85 Hz, trigger: foraging-opportunity every 6.5s`
+- **Physical Scale & Anchor Interaction (`src/rendering/scene/fish-scale.ts` & `src/rendering/scene/habitat-anchor-interactions.ts`)**:
+  - **Scale & Clearance**: `renderLength: 3.0 in (0.48 scene units), clearanceRadius: 0.50 scene units`
+  - **Anchor Interaction Category**: `crevice-refuge-hold & social grouping: shoal (neighborRadius: 2.2, cohesion: 0.24, alignment: 0.22)`
+- **Verification Commands**:
+  - `npx vitest run src/lib/fish-behavior.test.ts src/rendering/scene/species-locomotion-extensions.test.ts src/rendering/scene/habitat-anchor-interactions.test.ts src/rendering/scene/fish-scale.test.ts`
+<!-- SECTION:NOTES:END -->
+
+
+
 ## Comments
 
 <!-- COMMENTS:BEGIN -->

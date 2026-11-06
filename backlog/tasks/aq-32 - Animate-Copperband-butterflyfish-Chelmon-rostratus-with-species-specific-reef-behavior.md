@@ -48,6 +48,49 @@ Roster ID: `copperband-butterflyfish`. Implement this fish as an independently r
 - [ ] #2 Implementation follows project policy in AGENTS.md: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
 
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+### Specific Code Changes & Locations for `copperband-butterflyfish`
+
+1. **3D Runtime Asset & Adult Scale Registration**:
+   - **Runtime GLB Binding (`src/rendering/scene/aquarium.ts`, `modelUrls` at lines 25–41)**:
+     ```ts
+     'copperband-butterflyfish': new URL('../assets/splat-fish/copperband-butterflyfish.glb', import.meta.url).href,
+     ```
+   - **Adult Size & Swim-Axis Calibration (`src/rendering/scene/fish-scale.ts`, lines 12–49)**:
+     - `FISH_RENDER_LENGTH_INCHES['copperband-butterflyfish']` = `6.5 in (1.04 scene units)`
+     - `MODEL_SWIM_AXIS_LENGTH['copperband-butterflyfish']` = `2` (so `fishModelScale('copperband-butterflyfish')` scales the bind-space `+Z` snout-to-tail extent strictly to `fishRenderLength('copperband-butterflyfish')`).
+   - **Code-Driven 3D Generator**: `scripts/build-splat-fish-glbs.mjs (SPECIES_SPECS[8])` (sculpted 3D ring-lofted body with `+Y` dorsal up and `+Z` snout forward, 3D convex cornea eyes, gill opercula, double-sided scalloped rayed fins, and 8-joint `spine_0..spine_5` + `pectoral_L/R` armature).
+2. **Typed Species Behavior Profile (`src/lib/fish-behavior.ts`, `SPECIES_BEHAVIOR_PROFILES['copperband-butterflyfish']`)**:
+   - Verify compatible habitat anchors `anchors: ['rockCrevice', 'foragingPatch', 'coralOutcrop']`, depth range preference `depthRange`, cruise speed in tank-widths/sec, turn rate in deg/sec, and state transitions (`idle`, `swim`, `forage`, `display`, `burst`, `retreat`).
+3. **Species Locomotion Cadence & Opportunity Extension (`src/rendering/scene/species-locomotion-extensions.ts`, `SPECIES_LOCOMOTION_SIGNATURES['copperband-butterflyfish']`)**:
+   - Modulate `AnimationMixer` playback rate per state via `SPECIES_LOCOMOTION_SIGNATURES['copperband-butterflyfish']` and emit periodic `behavior-opportunity` intents into `stepSwimmingFish()` (`src/rendering/scene/motion.ts` lines 192–200).
+4. **Biomechanical Turning Rig & Habitat Anchor Interaction (`src/rendering/scene/fish-turning.ts` & `src/rendering/scene/habitat-anchor-interactions.ts`)**:
+   - Bind `getRigArchetypeForSpecies('copperband-butterflyfish') -> 'subcarangiform_schooler'` in `bindFishTurningRig()` (`src/rendering/scene/fish-turning.ts` line 125) and apply additive post-mixer C/S-wave spine bending and pectoral braking via `applyFishTurningRigOverlay()` (`src/rendering/scene/aquarium.ts` line 330).
+   - **Species Behavioral Signature**: Unhurried, poised laterally compressed disc gliding (idle: 0.66, swim: 0.94, 0.85 Hz pulse) with delicate maneuvering, frequent hover stops, and precise nose-down (-0.22 rad) forceps-snout probing into foragingPatch crevices.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+### Current Codebase Context & Verification Parameters (`copperband-butterflyfish`)
+
+- **Profile Parameters (`src/lib/fish-behavior.ts`, `SPECIES_BEHAVIOR_PROFILES['copperband-butterflyfish']`)**:
+  - **Habitat Mode & Zone**: `near-cover-search`, `reef-edge (depthRange: [0.40, 0.84])`
+  - **Locomotion Tuning**: `crevice-inspection (speed: [0.022, 0.068] tankWidths/s, turn: [30, 74] deg/s)`
+  - **State Machine**: `idle (1.3–4.2s, 0.16×, rockCrevice), swim (3.0–7.3s, 0.88×, rockCrevice), forage (1.5–4.2s, 0.32×, foragingPatch)`
+- **Animation Cadence & Triggers (`src/rendering/scene/species-locomotion-extensions.ts`)**:
+  - `basePlaybackByState: { idle: 0.66, swim: 0.94, forage: 1.06, display: 1.08, burst: 1.38, retreat: 1.52 }, pulse: 0.06 @ 0.85 Hz, trigger: foraging-opportunity every 7.2s`
+- **Physical Scale & Anchor Interaction (`src/rendering/scene/fish-scale.ts` & `src/rendering/scene/habitat-anchor-interactions.ts`)**:
+  - **Scale & Clearance**: `renderLength: 6.5 in (1.04 scene units), clearanceRadius: 0.57 scene units`
+  - **Anchor Interaction Category**: `substrate-grazing-forage (delicate forceps-snout crevice probing at -0.22 rad)`
+- **Verification Commands**:
+  - `npx vitest run src/lib/fish-behavior.test.ts src/rendering/scene/species-locomotion-extensions.test.ts src/rendering/scene/habitat-anchor-interactions.test.ts src/rendering/scene/fish-scale.test.ts`
+<!-- SECTION:NOTES:END -->
+
+
+
 ## Comments
 
 <!-- COMMENTS:BEGIN -->

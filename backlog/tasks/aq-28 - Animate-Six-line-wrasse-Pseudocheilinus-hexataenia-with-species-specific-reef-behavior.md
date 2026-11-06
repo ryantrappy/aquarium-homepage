@@ -47,6 +47,49 @@ Roster ID: `six-line-wrasse`. Implement this fish as an independently reviewable
 - [ ] #2 Implementation follows project policy in AGENTS.md: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
 
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+### Specific Code Changes & Locations for `six-line-wrasse`
+
+1. **3D Runtime Asset & Adult Scale Registration**:
+   - **Runtime GLB Binding (`src/rendering/scene/aquarium.ts`, `modelUrls` at lines 25–41)**:
+     ```ts
+     'six-line-wrasse': new URL('../assets/splat-fish/six-line-wrasse.glb', import.meta.url).href,
+     ```
+   - **Adult Size & Swim-Axis Calibration (`src/rendering/scene/fish-scale.ts`, lines 12–49)**:
+     - `FISH_RENDER_LENGTH_INCHES['six-line-wrasse']` = `3 in (0.48 scene units)`
+     - `MODEL_SWIM_AXIS_LENGTH['six-line-wrasse']` = `2` (so `fishModelScale('six-line-wrasse')` scales the bind-space `+Z` snout-to-tail extent strictly to `fishRenderLength('six-line-wrasse')`).
+   - **Code-Driven 3D Generator**: `scripts/build-splat-fish-glbs.mjs (SPECIES_SPECS[4])` (sculpted 3D ring-lofted body with `+Y` dorsal up and `+Z` snout forward, 3D convex cornea eyes, gill opercula, double-sided scalloped rayed fins, and 8-joint `spine_0..spine_5` + `pectoral_L/R` armature).
+2. **Typed Species Behavior Profile (`src/lib/fish-behavior.ts`, `SPECIES_BEHAVIOR_PROFILES['six-line-wrasse']`)**:
+   - Verify compatible habitat anchors `anchors: ['rockCrevice', 'branchingCoralShelter', 'foragingPatch']`, depth range preference `depthRange`, cruise speed in tank-widths/sec, turn rate in deg/sec, and state transitions (`idle`, `swim`, `forage`, `display`, `burst`, `retreat`).
+3. **Species Locomotion Cadence & Opportunity Extension (`src/rendering/scene/species-locomotion-extensions.ts`, `SPECIES_LOCOMOTION_SIGNATURES['six-line-wrasse']`)**:
+   - Modulate `AnimationMixer` playback rate per state via `SPECIES_LOCOMOTION_SIGNATURES['six-line-wrasse']` and emit periodic `behavior-opportunity` intents into `stepSwimmingFish()` (`src/rendering/scene/motion.ts` lines 192–200).
+4. **Biomechanical Turning Rig & Habitat Anchor Interaction (`src/rendering/scene/fish-turning.ts` & `src/rendering/scene/habitat-anchor-interactions.ts`)**:
+   - Bind `getRigArchetypeForSpecies('six-line-wrasse') -> 'subcarangiform_schooler'` in `bindFishTurningRig()` (`src/rendering/scene/fish-turning.ts` line 125) and apply additive post-mixer C/S-wave spine bending and pectoral braking via `applyFishTurningRigOverlay()` (`src/rendering/scene/aquarium.ts` line 330).
+   - **Species Behavioral Signature**: Continuous agile weaving through rock crevices, cave arches, and coral branches (swim playbackRate: 1.24, forage: 1.32, opportunityIntervalSeconds: 5.8) inspecting surfaces for micro-crustaceans.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+### Current Codebase Context & Verification Parameters (`six-line-wrasse`)
+
+- **Profile Parameters (`src/lib/fish-behavior.ts`, `SPECIES_BEHAVIOR_PROFILES['six-line-wrasse']`)**:
+  - **Habitat Mode & Zone**: `near-cover-search`, `reef-edge (depthRange: [0.35, 0.78])`
+  - **Locomotion Tuning**: `sinuous-cover-search (speed: [0.032, 0.105] tankWidths/s, turn: [70, 145] deg/s)`
+  - **State Machine**: `idle (0.8–2.8s, 0.18×, rockCrevice), swim (2.2–5.7s, 1.0×, branchingCoralShelter), forage (1.1–3.5s, 0.48×, foragingPatch)`
+- **Animation Cadence & Triggers (`src/rendering/scene/species-locomotion-extensions.ts`)**:
+  - `basePlaybackByState: { idle: 0.92, swim: 1.24, forage: 1.32, display: 1.35, burst: 1.60, retreat: 1.74 }, pulse: 0.10 @ 1.70 Hz, trigger: foraging-opportunity every 5.8s`
+- **Physical Scale & Anchor Interaction (`src/rendering/scene/fish-scale.ts` & `src/rendering/scene/habitat-anchor-interactions.ts`)**:
+  - **Scale & Clearance**: `renderLength: 3.0 in (0.48 scene units), clearanceRadius: 0.50 scene units`
+  - **Anchor Interaction Category**: `crevice-refuge-hold / substrate-grazing-forage`
+- **Verification Commands**:
+  - `npx vitest run src/lib/fish-behavior.test.ts src/rendering/scene/species-locomotion-extensions.test.ts src/rendering/scene/habitat-anchor-interactions.test.ts src/rendering/scene/fish-scale.test.ts`
+<!-- SECTION:NOTES:END -->
+
+
+
 ## Comments
 
 <!-- COMMENTS:BEGIN -->

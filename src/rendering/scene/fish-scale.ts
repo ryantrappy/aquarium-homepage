@@ -35,6 +35,19 @@ export const FISH_RENDER_LENGTH_INCHES: Readonly<Record<string, number>> = Objec
 export const MODEL_SWIM_AXIS_LENGTH: Readonly<Record<string, number>> = Object.freeze({
   'ocellaris-clownfish': 2, // src/rendering/proof/candidate-real-clown.glb, z -1 … 1
   'yellow-tang': 1.985423, // src/rendering/proof/candidate-real-tang.glb, z -0.999266 … 0.986158
+  'blue-tang': 0.152686, // src/rendering/assets/fish/fish-blue-tang.glb, z -0.070686 … 0.082
+  'royal-gramma': 0.082187, // src/rendering/assets/fish/fish-royal-gramma.glb, z -0.038187 … 0.044
+  'banggai-cardinalfish': 0.082699, // src/rendering/assets/fish/fish-banggai-cardinalfish.glb, z -0.040699 … 0.042
+  'mandarin-dragonet': 0.075044, // src/rendering/assets/fish/fish-mandarin-dragonet.glb, z -0.037044 … 0.038
+  'blue-green-chromis': 2, // src/rendering/assets/splat-fish/blue-green-chromis.glb, z -1 … 1
+  firefish: 2, // src/rendering/assets/splat-fish/firefish.glb, z -1 … 1
+  'yellow-watchman-goby': 2, // src/rendering/assets/splat-fish/yellow-watchman-goby.glb, z -1 … 1
+  'tailspot-blenny': 2, // src/rendering/assets/splat-fish/tailspot-blenny.glb, z -1 … 1
+  'six-line-wrasse': 2, // src/rendering/assets/splat-fish/six-line-wrasse.glb, z -1 … 1
+  'mccoskers-flasher-wrasse': 2, // src/rendering/assets/splat-fish/mccoskers-flasher-wrasse.glb, z -1 … 1
+  'lyretail-anthias': 2, // src/rendering/assets/splat-fish/lyretail-anthias.glb, z -1 … 1
+  'flame-angelfish': 2, // src/rendering/assets/splat-fish/flame-angelfish.glb, z -1 … 1
+  'copperband-butterflyfish': 2, // src/rendering/assets/splat-fish/copperband-butterflyfish.glb, z -1 … 1
 })
 
 /** Fallback artwork plane width in world units before species scaling. */

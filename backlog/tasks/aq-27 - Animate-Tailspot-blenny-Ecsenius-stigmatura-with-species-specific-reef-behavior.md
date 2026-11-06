@@ -50,6 +50,49 @@ Roster ID: `tailspot-blenny`. Implement this fish as an independently reviewable
 - [ ] #2 Implementation follows project policy in AGENTS.md: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
 
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+### Specific Code Changes & Locations for `tailspot-blenny`
+
+1. **3D Runtime Asset & Adult Scale Registration**:
+   - **Runtime GLB Binding (`src/rendering/scene/aquarium.ts`, `modelUrls` at lines 25–41)**:
+     ```ts
+     'tailspot-blenny': new URL('../assets/splat-fish/tailspot-blenny.glb', import.meta.url).href,
+     ```
+   - **Adult Size & Swim-Axis Calibration (`src/rendering/scene/fish-scale.ts`, lines 12–49)**:
+     - `FISH_RENDER_LENGTH_INCHES['tailspot-blenny']` = `2.25 in (0.36 scene units)`
+     - `MODEL_SWIM_AXIS_LENGTH['tailspot-blenny']` = `2` (so `fishModelScale('tailspot-blenny')` scales the bind-space `+Z` snout-to-tail extent strictly to `fishRenderLength('tailspot-blenny')`).
+   - **Code-Driven 3D Generator**: `scripts/build-splat-fish-glbs.mjs (SPECIES_SPECS[3])` (sculpted 3D ring-lofted body with `+Y` dorsal up and `+Z` snout forward, 3D convex cornea eyes, gill opercula, double-sided scalloped rayed fins, and 8-joint `spine_0..spine_5` + `pectoral_L/R` armature).
+2. **Typed Species Behavior Profile (`src/lib/fish-behavior.ts`, `SPECIES_BEHAVIOR_PROFILES['tailspot-blenny']`)**:
+   - Verify compatible habitat anchors `anchors: ['rockPerch', 'rockCrevice', 'grazingSurface']`, depth range preference `depthRange`, cruise speed in tank-widths/sec, turn rate in deg/sec, and state transitions (`idle`, `swim`, `forage`, `display`, `burst`, `retreat`).
+3. **Species Locomotion Cadence & Opportunity Extension (`src/rendering/scene/species-locomotion-extensions.ts`, `SPECIES_LOCOMOTION_SIGNATURES['tailspot-blenny']`)**:
+   - Modulate `AnimationMixer` playback rate per state via `SPECIES_LOCOMOTION_SIGNATURES['tailspot-blenny']` and emit periodic `behavior-opportunity` intents into `stepSwimmingFish()` (`src/rendering/scene/motion.ts` lines 192–200).
+4. **Biomechanical Turning Rig & Habitat Anchor Interaction (`src/rendering/scene/fish-turning.ts` & `src/rendering/scene/habitat-anchor-interactions.ts`)**:
+   - Bind `getRigArchetypeForSpecies('tailspot-blenny') -> 'subcarangiform_schooler'` in `bindFishTurningRig()` (`src/rendering/scene/fish-turning.ts` line 125) and apply additive post-mixer C/S-wave spine bending and pectoral braking via `applyFishTurningRigOverlay()` (`src/rendering/scene/aquarium.ts` line 330).
+   - **Species Behavioral Signature**: Perched head-up station-keeping on rockPerch ledges (idle playbackRate: 0.52, pitchOffsetRad: +0.12), short sinuate hops between rock perches, brief algae-scraping pecks at grazingSurface, and backing into rockCrevice holes.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+### Current Codebase Context & Verification Parameters (`tailspot-blenny`)
+
+- **Profile Parameters (`src/lib/fish-behavior.ts`, `SPECIES_BEHAVIOR_PROFILES['tailspot-blenny']`)**:
+  - **Habitat Mode & Zone**: `near-cover-search`, `lower-reef (depthRange: [0.48, 0.86])`
+  - **Locomotion Tuning**: `near-rock-darts (speed: [0.012, 0.055] tankWidths/s, turn: [48, 112] deg/s)`
+  - **State Machine**: `idle (2.4–7.0s, 0.10×, rockPerch), swim (0.9–2.8s, 0.82×, rockPerch)`
+- **Animation Cadence & Triggers (`src/rendering/scene/species-locomotion-extensions.ts`)**:
+  - `basePlaybackByState: { idle: 0.52, swim: 1.16, forage: 1.24, display: 1.18, burst: 1.52, retreat: 1.68 }, pulse: 0.08 @ 1.30 Hz, trigger: foraging-opportunity every 6.5s`
+- **Physical Scale & Anchor Interaction (`src/rendering/scene/fish-scale.ts` & `src/rendering/scene/habitat-anchor-interactions.ts`)**:
+  - **Scale & Clearance**: `renderLength: 2.25 in (0.36 scene units), clearanceRadius: 0.50 scene units`
+  - **Anchor Interaction Category**: `rock-perch-station (perched head-up pitchOffsetRad: +0.12 rad, forage nip: -0.14 rad)`
+- **Verification Commands**:
+  - `npx vitest run src/lib/fish-behavior.test.ts src/rendering/scene/species-locomotion-extensions.test.ts src/rendering/scene/habitat-anchor-interactions.test.ts src/rendering/scene/fish-scale.test.ts`
+<!-- SECTION:NOTES:END -->
+
+
+
 ## Comments
 
 <!-- COMMENTS:BEGIN -->

@@ -41,6 +41,28 @@ The reference proposes boids, spatial hashing and GPU computation for large fish
 - [ ] #4 School steering and refuge responses are limited to species whose profiles support group behavior and compatible shelter (such as blue-green chromis); an ordinary service click or nearby fish does not trigger a screen-wide panic. Any environmental disturbance is an explicit, scoped event.
 <!-- AC:END -->
 
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+### Specific Code Changes & Locations
+
+1. **Sourced Social Grouping Classification (`src/rendering/scene/schooling-navigation.ts`, lines 36–55)**:
+   - Use `SPECIES_SOCIAL_GROUPING_MODE` to restrict conspecific cohesion and alignment strictly to documented grouping species:
+     - `'blue-green-chromis': 'shoal'` (`neighborRadius = 2.2`, `cohesionGain = 0.24`, `alignmentGain = 0.22`)
+     - `'lyretail-anthias': 'harem-aggregation'` (`neighborRadius = 2.0`, `cohesionGain = 0.18`, `alignmentGain = 0.16`)
+     - `'banggai-cardinalfish': 'hover-group'` (`neighborRadius = 1.6`, `cohesionGain = 0.12`, `alignmentGain = 0.08`)
+   - Keep all 12 solitary/territorial/pair-bonded species on `'pair-or-solitary'` so they never school artificially (AC #1).
+2. **Collision-Safe Separation & Startle Isolation (`src/rendering/scene/schooling-navigation.ts`, `evaluateSchoolingSteering()` at lines 69–175)**:
+   - Apply personal-space repulsion across all nearby fish when `dist < self.clearanceRadius + peer.clearanceRadius + 0.12`.
+   - Ignore any startled peer (`peer.startleSeconds > 0`) when accumulating conspecific cohesion and heading alignment so a single-fish service click (AQ-13) never triggers a screen-wide panic (AC #4).
+   - Validate candidate steering offsets through `isWaterSegmentSafe({ start: self.position, target: candidate, waterBounds, obstacles, fishClearanceRadius: self.clearanceRadius })` before applying (AC #1, #3).
+3. **Wire Peer Schooling Step into Scene Loop (`src/rendering/scene/aquarium.ts`, `render()` at lines 322–334)**:
+   - In `render()`, build the snapshot array `peers: SchoolingPeer[]` from `fish.map(f => ({ id: f.service.id, speciesId: f.service.fishId as SpeciesBehaviorId, position: f.motion.position, yaw: f.motion.yaw, speed: f.motion.speed, clearanceRadius: f.motion.clearance, startleSeconds: f.motion.startleSeconds }))` and apply `evaluateSchoolingSteering()` during each simulation substep when `!stopped && !reducedMotion`.
+4. **CPU vs. Spatial-Grid Benchmark Verification (`src/rendering/scene/schooling-navigation.ts`, `benchmarkSchoolingStep()` at lines 183–234 & `src/rendering/scene/schooling-navigation.test.ts`)**:
+   - Run `benchmarkSchoolingStep(24, 50)` to verify direct CPU pairwise scanning completes in `< 500 µs/step` for realistic homepage populations (`N <= 24`), avoiding unnecessary GPU compute shader overhead (AC #2).
+<!-- SECTION:PLAN:END -->
+
+
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->

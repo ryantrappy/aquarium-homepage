@@ -46,6 +46,14 @@ Add a small heater thermometer as aquarium equipment that displays a real CPU te
 3. Add tests for source discovery, package/core selection, millidegree conversion, invalid values, unavailable sensors, stale last-known samples, and clock behavior.
 4. Keep UI/thermometer scene integration with AQ-34; no conventional dashboard UI or simulated temperature.
 5. Proposed production bind mount for root review only: host `/sys/devices/platform/coretemp.0` to container `/run/host-sensors/coretemp.0`, read-only. Verify the device path and label at deployment. Do not edit deploy/compose.yaml or mutate the server mount until root approves this exact mount proposal.
+
+### Specific Code Changes & Locations
+
+- **Backend Sensor Discovery & Read Endpoint (`src/server/cpu-temperature.ts` & `src/server/api.ts`)**:
+  - `readCpuTemperatureTelemetry()` scans `/run/host-sensors/coretemp.0` (or injected test root), keys sensors by sanitized `<chip>:<label>` IDs, converts `temp*_input` millidegrees to `°C`, and returns `status: 'fresh' | 'stale' | 'unavailable'` with `Cache-Control: no-store`.
+- **Settings Sensor Picker & In-Tank Heater Thermometer Equipment (`src/components/SettingsModal.tsx` & `src/rendering/scene/aquarium.ts`)**:
+  - Add a CPU sensor selector dropdown in `SettingsModal.tsx` bound to `GET /api/telemetry/cpu-temperature`.
+  - Render a vertical glass aquarium heater/thermometer tube mounted against the rear-left tank wall (`x = -3.75, y = 0.4, z = -4.8`) in `src/rendering/scene/aquarium.ts` whose mercury/LED column height and subtle warm indicator glow reflect the real `°C` reading, or dim to a clear `unavailable`/`stale` state without fabricating a temperature.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes

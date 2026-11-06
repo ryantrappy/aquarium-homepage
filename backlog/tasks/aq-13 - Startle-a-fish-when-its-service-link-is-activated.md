@@ -36,6 +36,41 @@ Extend the photorealistic fish animation system from AQ-12 with a realistic star
 - [ ] #5 With reduced motion enabled, the link still opens and the fish gives a clear non-spatial acknowledgment instead of darting; other fish keep their normal behavior.
 <!-- AC:END -->
 
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+### Specific Code Changes & Locations
+
+1. **Immediate Native Link Activation & Scoped Per-Fish Trigger (`src/components/AquariumScene.tsx`, `activate()` at lines 51–62)**:
+   - Keep `onClick` synchronous without calling `event.preventDefault()` on valid hits so the browser opens `target="_blank"` immediately on the user gesture (AC #1).
+   - Invoke `controller.current?.activate(selected.id)` and apply the `.is-acknowledged` CSS class for `1000ms` exclusively to the activated fish's `<a>` element (AC #2, #5):
+     ```ts
+     controller.current?.activate(selected.id)
+     anchor.classList.add('is-acknowledged')
+     ```
+2. **Per-Fish Startle State & Evasive Route Selection (`src/rendering/scene/motion.ts`, `startleFish()` at lines 93–98 & `plan()` at lines 155–173)**:
+   - In `startleFish(fish, habitat)`, dispatch `{ type: 'fish-activation', instanceId: fish.id, trigger: fish.speciesId === 'yellow-tang' ? 'high-effort-cue' : 'threat-cue' }`, set `fish.startleSeconds = 0.95`, clear `fish.route = []`, and reset `fish.targetWait = 0` so `plan()` immediately computes a collision-safe evasive vector (`evasiveYaw = fish.yaw ± (0.7 + random(fish) * 0.4)`, distance `1.4` units) without affecting any other fish in `fish[]` (AC #2).
+3. **Biomechanical C-Bend & Propulsive Burst Integration (`src/rendering/scene/motion.ts` lines 224–245 & `src/rendering/scene/fish-turning.ts` lines 302–370)**:
+   - While `fish.startleSeconds > 0`, boost angular turn rate by `3.0×` (`motion.ts` line 229), speed effort to `2.8×` with rapid acceleration smoothing `dt * 8` (`motion.ts` lines 238–241), and apply `STARTLE_SPINE_BEND_GAIN = 1.25` in `evaluateSpineTurnAngles()` (`fish-turning.ts` line 319) so the 3D `SkinnedMesh` executes a fast C-start flex and smooth recovery rather than a rigid slide (AC #3).
+4. **Label Tracking & Reduced-Motion Guard (`src/rendering/scene/aquarium.ts` lines 281–294, 349)**:
+   - In `aquarium.ts` `activate(id)` (line 349), guard on `if (!item || paused || document.hidden) return` so reduced-motion/paused states skip spatial darting while preserving the `.is-acknowledged` non-spatial highlight in `src/styles/aquarium.css` (AC #4, #5).
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+### Current Codebase Context & Verification Parameters
+
+- **Active Runtime Implementation**:
+  - **Immediate Link Opening**: `AquariumScene.tsx` `activate()` (lines 51–62) leaves the native `<a target="_blank" rel="noreferrer">` click unblocked on visible hits, adds `.is-acknowledged` for `1000ms`, and calls `controller.current?.activate(selected.id)` synchronously.
+  - **Isolated Per-Fish Startle**: `aquarium.ts` `activate(id)` (line 349) looks up only the matching `Inhabitant`, sets `item.releasedFocus = true` (so keyboard-focused fish are not held stationary during their startle dart), and calls `startleFish(item.motion, habitat)` (`src/rendering/scene/motion.ts` lines 93–98).
+  - **Kinematics & Spine Flex**: `startleFish()` sets `fish.startleSeconds = 0.95`, boosting turn rate `3.0×`, cruise effort `2.8×`, and spine bend gain `1.25×` (`STARTLE_SPINE_BEND_GAIN` in `src/rendering/scene/fish-turning.ts` line 31).
+- **Verification**:
+  - Covered by `npx vitest run src/components/AquariumScene.test.tsx src/rendering/scene/motion.test.ts src/rendering/scene/fish-turning.test.ts`.
+<!-- SECTION:NOTES:END -->
+
+
+
 ## Comments
 
 <!-- COMMENTS:BEGIN -->

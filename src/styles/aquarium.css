@@ -212,3 +212,25 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .manager-footer { flex-wrap: wrap; }
 .aquarium-fish-link[data-occluded="true"] { cursor: default; }
 .aquarium-three.is-fallback .fish-name { visibility: visible !important; }
+.aquarium-three.is-rendered .aquarium-fish-link .fish-name {
+  max-width: 150px;
+  min-width: 44px;
+  min-height: 24px;
+  padding: 4px 8px;
+  border-color: rgba(210, 232, 221, .2);
+  color: #dce7e1;
+  background: rgba(7, 29, 35, .46);
+  box-shadow: none;
+  backdrop-filter: blur(4px);
+  font-size: 10px;
+  line-height: 1.2;
+  transition: color .16s ease, border-color .16s ease, background-color .16s ease, box-shadow .16s ease;
+}
+.aquarium-three.is-rendered .aquarium-fish-link:hover .fish-name,
+.aquarium-three.is-rendered .aquarium-fish-link:focus-visible .fish-name,
+.aquarium-three.is-rendered .aquarium-fish-link.is-acknowledged .fish-name {
+  border-color: rgba(229, 247, 237, .76);
+  color: #f4fcf7;
+  background: rgba(11, 45, 49, .84);
+  box-shadow: 0 0 12px rgba(180, 239, 220, .22);
+}

@@ -6,7 +6,7 @@ assignee:
   - '@render-integration'
   - '@gemini'
 created_date: '2026-11-04T19:20:00Z'
-updated_date: '2026-11-05 14:17'
+updated_date: '2026-11-05 23:33'
 labels: []
 dependencies:
   - AQ-35
@@ -61,6 +61,17 @@ Implement the biomechanical turning and curvilinear spine-bending plan documente
 2026-11-05 bounded envelope contract: derive immutable per-joint spine caps from the existing normalized flex weights and the true worst-case sum 1.275 rad (including startle/wave/clamp); expose a typed procedural-overlay contract with pectoral flare/pitch bounds and mixer-reset prerequisite. Clamp only finite overlay outputs to those derived caps, normalize modified quaternions, and sanitize malformed kinematics. Add exact GLB skin/rest-axis/clip-reset checks for current clown/tang and canonical gramma, with hash-pinned compact snapshots as clean-checkout fallback; add output quaternion norm and angle-cap/NaN regressions. Touch only fish-turning.ts and fish-turning.test.ts; no aquarium, motion, asset, scene or acceptance-status changes.
 
 2026-11-05 mixer reset correction (Root-owned aquarium integration): add only `src/rendering/scene/fish-animation.ts` and `.test.ts`. `createFishClipPlayer(root, clip, initialTime)` will bind exactly one full-weight Three AnimationAction, discover/dedupe actual `SkinnedMesh.skeleton.bones` with a 32-bone bound, validate and normalize finite near-unit bone quaternions, set initial clip time, and capture a clean quaternion pose. For each finite positive `advance(dt)`, restore the last clean pose before mixer update, then normalize/capture the resulting clip pose; zero dt preserves the rendered overlay. Expose deterministic stop/uncache disposal. Use genuine Three AnimationMixer tracks (constant and changing) in regressions: repeated overlay over hundreds of frames must not accumulate; cover normalized results, pause/resume, independent roots, source clip immutability, and malformed bone pose rejection. Do not edit aquarium.ts, fish-turning.ts, supplied assets, analyzer, acceptance criteria or task status; Root owns runtime call-site integration.
+
+### Specific Code Changes & Locations
+
+1. **Heading-Locked Translation & Lookahead Filleting (`src/rendering/scene/fish-turning.ts` lines 183–245 & `src/rendering/scene/motion.ts` lines 215–265)**:
+   - `computeLookaheadTarget(fish.position, fish.route, fish.waypoint)` blends up to `48%` toward `route[waypoint + 1]` within `0.45` units of an intermediate waypoint (`fish-turning.ts` line 198).
+   - `computeHeadingLockedStepVector(fish.yaw, fish.pitch, travelDistance)` advances strictly along `(sin(yaw)*cos(pitch), -sin(pitch), cos(yaw)*cos(pitch))` (`fish-turning.ts` line 213) so `forwardDot === 1.0` during turns.
+2. **Two-Stage `65°` Brake-Pivot / Exit-Stroke State Machine (`src/rendering/scene/fish-turning.ts` lines 30, 143–181, 250–292)**:
+   - `SHARP_TURN_THRESHOLD_RAD = (65 * Math.PI) / 180` triggers `maneuverStage = 'brake-pivot'` (`0.38..0.62×` cruise speed in `evaluateTurnSpeedFactor()`, `1.65×` yaw rate boost in `motion.ts` line 227), transitioning to `'exit-stroke'` (`1.16×` burst + `0.18 * sin(phase)` caudal wave pulse) once `|delta| < 65°`.
+3. **Archetype-Specific Spine & Pectoral Overlay + Clean Mixer Reset (`src/rendering/scene/fish-turning.ts` lines 68–123, 297–419 & `src/rendering/scene/fish-animation.ts`)**:
+   - `normalizedSpineWeights(count, archetype)` locks `spine_0..spine_2` to `0 rad` when `archetype === 'labriform_rigid_disc'` (`yellow-tang`), flexing only `spine_3+`, while `subcarangiform_schooler` ramps across `spine_1..spine_N`.
+   - `createFishClipPlayer()` in `src/rendering/scene/fish-animation.ts` restores the captured clean clip quaternion pose before each `mixer.update(dt)` so constant quaternion tracks never accumulate additive `applyFishTurningRigOverlay()` rotations across frames.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -113,5 +124,25 @@ author: root
 created: 2026-11-05 14:12
 ---
 Root independent reset review found a concrete overlay accumulation defect: Three PropertyMixer.apply skips assigning unchanged cached track values, so mixer.update alone does not guarantee a fresh bone pose before multiplicative overlays. A constant quaternion-track repro accumulates0.1,0.2,0.3rad despite0.1rad per application. Root will add an explicit clean pose restore before mixer update, normalize/capture clean skin-joint quaternions before applying overlay, and regression-test real mixer constant/changing tracks and pause/resume. Existing track coverage/caps do not prove reset safety.
+---
+
+author: @Luna
+created: 2026-11-05 23:33
+---
+2026-11-05 independent read-only bind-axis audit (no source/model edits). Inputs are the exact AQ49.1 set: active study candidates `candidate-real-clown.glb` SHA-256 `9beebbfe33e9e4459702e1aba6ad2df6f7309aca854f3bb5d1b88a36ca9444a6` and `candidate-real-tang.glb` `44d28509f62de1eec2a9644fea1a6ce5c79d642997b3487aa0e21d6069f76f5b`, plus the six manifest-supplied fish GLBs (hashes match fish-rig-inventory/manifest). Temp evidence: `/tmp/aq49-local-axis-audit.json`.
+
+Method: parsed in-memory GLB copies through the exact Three `GLTFLoader`, removing only JSON primitive material refs and material/image/texture records so Node did not need image decoding; all scene nodes, skins, accessors, inverse bind matrices, animation data and original bytes/hashes were retained. Used actual `SkinnedMesh.skeleton.bones`, bind-pose world quaternions relative to the primary `SkinnedMesh`, and `SkeletonUtils.clone`. To verify resulting shape direction, rotated one actual joint by +0.1rad about local Z or X and compared every skinned vertex with `SkinnedMesh.getVertexPosition` before/after (which applies the loader's bind matrices and weights). No source GLB bytes changed.
+
+Body-axis authority: for the six supplied GLBs, all six manifest `generatorSha256` values match current Python generator sources; each exports `export_yup=True`. The generators place the snout at negative Blender Y and tail/peduncle at positive Blender Y (for example clown `build_clownfish.py:326,776,861`, yellow tang `build_yellow_tang.py:761,847`; same pattern in the other four). `docs/asset-contract.md` documents Blender `(x,y,z)` -> glTF `(x,z,-y)` and `docs/rendering/assets/fish/README.md` states exported +Y-up/+Z-snouth-forward. This is source-backed +Z-forward for the six. The two study files have Blender I/O `asset.generator` only, no `reefAsset` orientation/provenance extras or tracked generator source; their skinned bounds are Z-long and `fish-scale.ts` treats their +Z extents as nose-to-tail, but the sign is runtime-contract evidence rather than generator-authoritative provenance. Keep that limitation explicit.
+
+Axis result: for every one of the 8 files, every actual numbered spine bone (`spine_0..5` in candidates; `spine_0..4` in supplied) maps local +Z to body-local `[0,1,0]` at bind pose. The active `LOCAL_BEND_AXIS=(0,0,1)` therefore rotates around body-up +Y: it creates a horizontal lateral/yaw curve in X-Z, not a roll about body-forward +Z. The skinning test agrees: a +0.1rad local-Z rotation on `spine_2` yields zero Y displacement for all eight. For the six meter-authored supplied models, max lateral |X| displacement is 3.699–6.858mm and max fore/aft |Z| is 0.302–0.582mm. The two normalized study candidates produce ~0.112 model units lateral and ~0.013–0.019 model units fore/aft; their units are not declared, so do not relabel those as mm. This is a local-axis diagnostic sample, not a worst-case envelope or collision certificate.
+
+Pectoral bind axes are not identical enough to infer an anatomical `flare` from joint names. Model-body local +Z directions (left/right) are: study clown `[0,1,0]` / `[0,1,0]`; study tang `[-.0263,.7865,.6171]` / `[.0263,.7865,.6171]`; supplied clown `[-.0314,.9930,.1136]` / `[.0314,.9930,.1136]`; yellow tang `[-.0394,.9893,.1408]` / `[.0394,.9893,.1408]`; blue tang same as yellow; gramma `[-.0439,.9875,.1516]` / `[.0439,.9875,.1516]`; Banggai `[-.0414,.9897,.1374]` / `[.0414,.9897,.1374]`; mandarin `[-.0390,.9913,.1255]` / `[.0390,.9913,.1255]`. Thus current pectoral local-Z overlay is mostly body-up for the six supplied rigs, but the study tang has a substantial +Z component. Across the six supplied models, +0.1rad around pectoral local Z gives only ~0.019–0.030mm vertical displacement, versus 1.317–2.453mm vertical for local X; the former is primarily horizontal sweep, the latter primarily vertical movement. Candidate pectoral displacement magnitudes are in normalized model units and differ by asset. Proposal: local-Z spine bending is geometrically supported as a horizontal bend on all eight; keep pectoral axis semantics unclaimed until per-rig geometry/visual review, and do not reuse one pectoral overlay contract as an anatomical guarantee across both study rigs and supplied rigs. This audit makes no visual/art/collision acceptance claim.
+---
+
+author: @Luna
+created: 2026-11-05 23:33
+---
+Correction to comment #6 path typo: the README cited there is `src/rendering/assets/fish/README.md` (not `docs/rendering/assets/fish/README.md`). Its documented convention is +Y dorsal up and +Z snout forward.
 ---
 <!-- COMMENTS:END -->

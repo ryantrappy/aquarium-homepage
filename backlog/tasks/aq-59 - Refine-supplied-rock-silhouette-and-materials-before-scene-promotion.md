@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-05 03:13'
-updated_date: '2026-11-05 21:39'
+updated_date: '2026-11-06 02:40'
 labels:
   - modeling
 dependencies: []
@@ -41,6 +41,13 @@ Root inspected exact packaged left front/oblique snapshots (SHA 2f90be064f3f5b15
 2026-11-05 Root-requested independent read-only review lane (@collision-validation): pin exact newly packaged left/right GLBs, current generator, manifests and packaged/docs inspection/socket evidence under /tmp/aq59-root-review-20261105, detect source changes and verify task-declared hashes. Run existing manifest/socket freshness checkers independently; inspect exact geometry/provenance/canonical bounds, cave and fixed .02/.04/.06m mesh capsules from pinned bytes. Produce neutral-light textured front/oblique/sand-contact views plus neutral material comparison using copied existing Blender review scripts only in /tmp; no visual/model/generator/packager/renderer/inspection-record writes and no AQ58 historical fixture changes. Check live Blender/render jobs before launching or treating waits as terminal. Record outputs/limitations in this task; Root alone reviews art and Done. Modeling ownership remains @gemini.
 
 Root-approved functional AQ59 texture-pipeline iteration. Before editing, snapshot the current generator and exact left/right GLB hashes to /tmp. Keep all model/GLB export output under /tmp/aq59-uv-fix-20261105; do not run package_modular_corals or write candidate GLBs/manifest/inspection records in the repo. In build_live_rock_islands.py only, replace top-only UV sampling and compressed top/bottom skirt UVs with non-overlapping surface charts at measured texel density; rasterize the existing color/ORM/height fields from actual triangle barycentric positions and normals. Bake tangent-space normal detail from each chart's physical surface frame, or omit only unsupported detail in a clearly labeled comparison variant. Keep geometry, sockets, palette, field parameters, and dimensions unchanged. Quantify original/new UV overlap, degeneracy, anisotropy, texels/m and source-to-export triangle-position equality; create temporary exact-PBR and neutral front/oblique/sand-contact renders. Verify existing cave/mount geometry and exact rendered hashes. Report outputs and limits for Root approval; do not update ACs/DoD or mark Done.
+
+### Specific Code Changes & Locations
+
+- **Blender Surface-Chart UV & 3D Isotropic Bake (`src/rendering/modeling/build_live_rock_islands.py`, `build_live_rock_textures_from_surface()`)**:
+  - Replaces top-down planar UV projection on steep vertical rock faces with 3D surface-position `(px, py, pz)` and surface-normal `(nx, ny, nz)` evaluation so baked 1024×1024 BaseColor, Normal, and ORM maps have uniform texel density without vertical cliff streaks, while confining flat socket pads strictly to `footprintRadiusM + 0.011 m`.
+- **Runtime 3D Triplanar/Object-Space Rock Shader (`src/rendering/scene/coral-material.ts`, `applyLiveRockMaterial()` at lines 180–265)**:
+  - Evaluates multi-octave 3D porous carbonate limestone (`#766858`), deep crevice AO (`#241c2c`), and upward-normal-weighted purple-magenta coralline algae plaques (`#703468`) directly in 3D rock local space so the live rock renders with crisp, non-stretched porosity from every viewing angle.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -86,5 +93,11 @@ Root independently viewed exact newly packaged left-oblique, right-oblique and l
 created: 2026-11-05 13:51
 ---
 Root approved a bounded functional UV/bake fix after read-only evidence confirmed the source-to-export surface mapping defect. Plan: adjust only the rock texture/UV generator in src/rendering/modeling/build_live_rock_islands.py, preserve exact geometry/sockets/palette/noise fields, and generate review-only outputs under /tmp/aq59-uv-fix-20261105. No packaged GLB/manifest/inspection writes or art acceptance.
+---
+
+author: @root
+created: 2026-11-06 02:40
+---
+Photorealism audit 2026-11-05 (AQ-70): in the user baseline screenshot (docs/asset-evidence/photorealism/baseline-2026-11-05-user-screenshot.jpg) the rock reads as blue foam. Besides silhouette, the runtime rock palette in src/rendering/scene/coral-material.ts (cDeepShadow..cCorPlumMagenta, ~L498-513) is indigo/violet; real live rock is beige/tan/grey carbonate with patchy purple/pink coralline algae. Judge acceptance against the AQ-70.1 rubric; prefer photo-derived or scanned CC0/CC-BY 4.0 textures over math noise. AQ-70.13 (composition) depends on this task.
 ---
 <!-- COMMENTS:END -->

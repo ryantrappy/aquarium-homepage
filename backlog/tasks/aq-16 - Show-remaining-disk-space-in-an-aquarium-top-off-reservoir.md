@@ -44,6 +44,16 @@ Add an aquarium top-off reservoir whose level represents actual remaining disk c
 
 <!-- SECTION:PLAN:BEGIN -->
 1. Reuse the reviewed host inventory and configure only explicit trusted read-only data-filesystem paths; never bind broad host roots or change mounts. 2. Consume completed AQ16.1 exact aggregation in a read-only stat/statfs adapter with stable configured selection IDs and per-sample filesystem identity deduplication; exclude unconfigured/system/pseudo scopes and report real stale/unavailable states. 3. Expose same-origin GET-only discovery/read API with exact byte strings, selected scope and weighted percentage, no client-controlled paths. 4. Integrate explicit disk/all-unique scope selection and a scene reservoir whose physical fill follows available capacity, preserving actual measurement timestamps and no fabricated data. 5. Root verifies source/data/visual/controls evidence before checking parent criteria or Done.
+
+### Specific Code Changes & Locations
+
+- **Pure Capacity Aggregation & Deduplication (`src/server/disk-capacity.ts` & `src/server/disk-capacity.test.ts`)**:
+  - Deduplicates candidate mounts by device identity (`major:minor` and normalized source path) and computes `remainingRatio = sum(freeBytes) / sum(totalBytes)` using exact `BigInt` arithmetic.
+- **Read-Only `statfs` Adapter & GET Endpoint (`src/server/api.ts`)**:
+  - Expose `GET /api/telemetry/disk-capacity?scope=<diskId|all>` querying `fs.promises.statfs()` only on explicitly configured read-only mount paths, returning `freeBytes`, `totalBytes`, `remainingPercent`, `observedAt`, and `status: 'fresh' | 'stale' | 'unavailable'`.
+- **In-Tank Auto-Top-Off (ATO) Reservoir Visual (`src/rendering/scene/aquarium.ts` & `src/components/SettingsModal.tsx`)**:
+  - Add single-disk vs. `all-unique-disks` scope selector in `SettingsModal.tsx`.
+  - Render a translucent acrylic Auto-Top-Off reservoir column at the tank corner whose internal water-level mesh height scales directly with `remainingPercent / 100` (fuller when more free space remains) and displays a clear stale/unavailable marker when telemetry is offline.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes

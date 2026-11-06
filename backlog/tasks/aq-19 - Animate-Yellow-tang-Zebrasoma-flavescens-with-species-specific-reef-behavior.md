@@ -52,7 +52,45 @@ Roster ID: `yellow-tang`. Implement this fish as an independently reviewable spe
 
 <!-- SECTION:PLAN:BEGIN -->
 1. Verify real yellow tang identity and timestamped lateral/frontal footage before any anatomy or motion tuning; keep unverifiable guide candidates explicitly unreviewed. 2. Record observed fin root, membrane outline/rays, articulation and turns without inferring numeric gait parameters from unmeasured video. 3. After the shared rig script is released by root, author one bounded review-only pectoral prototype using the licensed yellow tang source, preserving rigid trunk/peduncle work. 4. Render matching lateral/frontal poses and a short articulated cycle outside git with provenance and numerical integrity checks, using four Blender threads; root compares against reference before promotion. No main GLB replacement or Done claim.
+
+### Specific Code Changes & Locations for `yellow-tang`
+
+1. **3D Runtime Asset & Adult Scale Registration**:
+   - **Runtime GLB Binding (`src/rendering/scene/aquarium.ts`, `modelUrls` at lines 25–41)**:
+     ```ts
+     'yellow-tang': new URL('../proof/candidate-real-tang.glb', import.meta.url).href,
+     ```
+   - **Adult Size & Swim-Axis Calibration (`src/rendering/scene/fish-scale.ts`, lines 12–49)**:
+     - `FISH_RENDER_LENGTH_INCHES['yellow-tang']` = `6.5 in (1.04 scene units)`
+     - `MODEL_SWIM_AXIS_LENGTH['yellow-tang']` = `1.985423 (or 0.144611 m on fish-yellow-tang.glb)` (so `fishModelScale('yellow-tang')` scales the bind-space `+Z` snout-to-tail extent strictly to `fishRenderLength('yellow-tang')`).
+   - **Code-Driven 3D Generator**: `src/rendering/modeling/build_yellow_tang.py` (sculpted 3D ring-lofted body with `+Y` dorsal up and `+Z` snout forward, 3D convex cornea eyes, gill opercula, double-sided scalloped rayed fins, and 8-joint `spine_0..spine_5` + `pectoral_L/R` armature).
+2. **Typed Species Behavior Profile (`src/lib/fish-behavior.ts`, `SPECIES_BEHAVIOR_PROFILES['yellow-tang']`)**:
+   - Verify compatible habitat anchors `anchors: ['grazingSurface', 'rockCrevice']`, depth range preference `depthRange`, cruise speed in tank-widths/sec, turn rate in deg/sec, and state transitions (`idle`, `swim`, `forage`, `display`, `burst`, `retreat`).
+3. **Species Locomotion Cadence & Opportunity Extension (`src/rendering/scene/species-locomotion-extensions.ts`, `SPECIES_LOCOMOTION_SIGNATURES['yellow-tang']`)**:
+   - Modulate `AnimationMixer` playback rate per state via `SPECIES_LOCOMOTION_SIGNATURES['yellow-tang']` and emit periodic `behavior-opportunity` intents into `stepSwimmingFish()` (`src/rendering/scene/motion.ts` lines 192–200).
+4. **Biomechanical Turning Rig & Habitat Anchor Interaction (`src/rendering/scene/fish-turning.ts` & `src/rendering/scene/habitat-anchor-interactions.ts`)**:
+   - Bind `getRigArchetypeForSpecies('yellow-tang') -> 'labriform_rigid_disc'` in `bindFishTurningRig()` (`src/rendering/scene/fish-turning.ts` line 125) and apply additive post-mixer C/S-wave spine bending and pectoral braking via `applyFishTurningRigOverlay()` (`src/rendering/scene/aquarium.ts` line 330).
+   - **Species Behavioral Signature**: Pectoral-driven labriform reef-front cruising with spine_0..spine_2 locked rigid (0 rad in evaluateSpineTurnAngles so tall dorsal/anal sails never shear), caudal flexion restricted to spine_3+, sweeping turns, and nose-down (-0.22 rad) benthic algae grazing pauses at grazingSurface anchors.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+### Current Codebase Context & Verification Parameters (`yellow-tang`)
+
+- **Profile Parameters (`src/lib/fish-behavior.ts`, `SPECIES_BEHAVIOR_PROFILES['yellow-tang']`)**:
+  - **Habitat Mode & Zone**: `open-reef-cruise`, `reef-edge (depthRange: [0.22, 0.70])`
+  - **Locomotion Tuning**: `pectoral-cruise (speed: [0.045, 0.12] tankWidths/s, turn: [34, 82] deg/s, higherEffortGaits: [body-caudal-undulation, burst-and-coast])`
+  - **State Machine**: `idle (1.2–3.8s, 0.15×), swim (3.5–8.5s, 1.0×), forage (1.4–4.5s, 0.35×, grazingSurface), burst (0.4–1.1s, 2.4×)`
+- **Animation Cadence & Triggers (`src/rendering/scene/species-locomotion-extensions.ts`)**:
+  - `basePlaybackByState: { idle: 0.78, swim: 1.12, forage: 1.24, display: 1.28, burst: 1.60, retreat: 1.72 }, pulse: 0.08 @ 1.1 Hz, trigger: foraging-opportunity every 6.0s`
+- **Physical Scale & Anchor Interaction (`src/rendering/scene/fish-scale.ts` & `src/rendering/scene/habitat-anchor-interactions.ts`)**:
+  - **Scale & Clearance**: `renderLength: 6.5 in (1.04 scene units), clearanceRadius: 0.57 scene units`
+  - **Anchor Interaction Category**: `substrate-grazing-forage (pitchOffsetRad: -0.22 rad nose-down grazing sweep)`
+- **Verification Commands**:
+  - `npx vitest run src/lib/fish-behavior.test.ts src/rendering/scene/species-locomotion-extensions.test.ts src/rendering/scene/habitat-anchor-interactions.test.ts src/rendering/scene/fish-scale.test.ts`
+<!-- SECTION:NOTES:END -->
+
 
 ## Comments
 
