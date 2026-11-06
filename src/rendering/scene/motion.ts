@@ -32,7 +32,7 @@ export type SwimmingFish = {
   /** Explicit world-meter query radius; legacy `clearance` is not metric. */
   collisionRadiusM?: number
 }
-export type SwimmingFishCollisionOptions = { collisionRadiusM?: number }
+export type SwimmingFishCollisionOptions = { collisionRadiusM?: number; initialYaw?: number }
 export const distance = (a: Vec3, b: Vec3) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z)
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
 export function seedForId(id: string) { let seed = 2166136261; for (const char of id) seed = Math.imul(seed ^ char.charCodeAt(0), 16777619); return seed >>> 0 }
@@ -80,16 +80,18 @@ function extensionSnapshot(fish: SwimmingFish): FishExtensionSnapshot {
   })
 }
 export function createSwimmingFish(id: string, speciesId: string, position: Vec3, clearance = .42, extensions: FishExtensionConfig = EMPTY_FISH_EXTENSIONS, collision: SwimmingFishCollisionOptions = {}): SwimmingFish {
+  const initialYaw = collision.initialYaw ?? Math.PI / 2
+  if (!Number.isFinite(initialYaw)) throw new RangeError('Fish initial yaw must be finite.')
   let behavior = createFishBehaviorInstance(id, speciesId, seedForId(id))
   // Begin at a cruising phase of the existing state machine, rather than making
   // every newly loaded service wait through the same idle window.
   for (let i = 0; behavior.state === 'idle' && i < 130; i++) behavior = advanceFishBehavior(behavior, .25)
   const initialSnapshot: FishExtensionSnapshot = Object.freeze({
     instanceId: id, speciesId, state: behavior.state, position: Object.freeze({ ...position }),
-    yaw: Math.PI / 2, pitch: 0, bank: 0, speed: 0,
+    yaw: initialYaw, pitch: 0, bank: 0, speed: 0,
   })
   return {
-    id, speciesId, behavior, position: { ...position }, yaw: Math.PI / 2, pitch: 0, bank: 0, speed: 0, clearance,
+    id, speciesId, behavior, position: { ...position }, yaw: initialYaw, pitch: 0, bank: 0, speed: 0, clearance,
     route: [], waypoint: 1, random: seedForId(id), startleSeconds: 0, routeGeneration: -1, targetWait: 0,
     extensions: createFishExtensionRuntime(extensions, initialSnapshot), animationPlaybackRate: 1,
     collisionRadiusM: collision.collisionRadiusM,

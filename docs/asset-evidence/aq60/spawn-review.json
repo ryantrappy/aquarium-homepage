@@ -1,0 +1,350 @@
+{
+  "task": "AQ-60",
+  "date": "2026-11-06",
+  "review": "Root accepted requested natural initial spread; parent task remains open for broader scale/source/envelope criteria",
+  "sourceHashes": {
+    "src/rendering/scene/aquarium.ts": "85c772f7a9f812cce45fcaf81bcb515b08fb38666ca2fef186b94b7faa448328",
+    "src/rendering/scene/motion.ts": "3e138d4e5bb88ae9e6c446d4e775d5b1ca730be44227d2dc17b02529cf755c43",
+    "src/rendering/scene/fish-spawn.ts": "cac77679a69ce9f726a58c8b7ebb4cde719a935944ab13bb618ed04e54c18035",
+    "src/rendering/scene/fish-spawn.test.ts": "e64912aaaf455fa218ae2d6c67a34c02da704b0723f1c5ac4209754069d00976",
+    "src/rendering/scene/aquarium-lifecycle.test.ts": "697bf95cc60388244de1ea46e55fc9c4975e8574c2757d9361d2726f45a74b69"
+  },
+  "policy": [
+    "Stable service-ID horizontal rank with bounded jitter spreads small rosters deliberately. Outer lanes start at different seeded forward depths; inner depths stay varied.",
+    "Y samples the species profile depth preference; preferred yaw is seeded and checked with up to8 safe forward segments. Geometry-safe bounded216candidate selection respects existing clearances.",
+    "New/replaced fish consider retained and planned positions; soft least-overlap fallback never shrinks model size or radii. Existing fish skip spawning and preserve state on metadata/reorder/add/remove."
+  ],
+  "nativeComposition": {
+    "phone": {
+      "centersPx": [
+        175.7652359008789,
+        283.58240509033203,
+        238.0562438964844,
+        124.08514404296875,
+        218.92070770263672
+      ],
+      "centerSpanPx": 159.49726104736328,
+      "fractionOfViewport": 0.3967593558392121,
+      "allFiveVisibleInitially": true,
+      "allFiveMovedAfterResume": true,
+      "screenshot": "spawn-phone.jpg"
+    },
+    "laptop": {
+      "centersPx": [
+        553.2772064208984,
+        1207.1380615234375,
+        938.5935668945312,
+        266.3026123046875,
+        714.832275390625
+      ],
+      "centerSpanPx": 940.83544921875,
+      "fractionOfViewport": 0.6533579508463542,
+      "allFiveVisibleInitially": true,
+      "allFiveMovedAfterResume": true,
+      "screenshot": "spawn-laptop.jpg"
+    }
+  },
+  "browser": {
+    "phone": {
+      "initial": {
+        "fish": [
+          {
+            "hidden": "false",
+            "id": "komodo",
+            "rect": {
+              "bottom": 434.52093505859375,
+              "height": 91.1484375,
+              "left": 108.5738296508789,
+              "right": 242.9566421508789,
+              "top": 343.37249755859375,
+              "width": 134.3828125,
+              "x": 108.5738296508789,
+              "y": 343.37249755859375
+            },
+            "style": "visibility: visible; transform: translate3d(108.574px, 343.372px, 0px); width: 134.387px; height: 91.1497px; z-index: 887;"
+          },
+          {
+            "hidden": "false",
+            "id": "watchmybirds",
+            "rect": {
+              "bottom": 452.0470275878906,
+              "height": 66.5703125,
+              "left": 239.99647521972656,
+              "right": 327.1683349609375,
+              "top": 385.4767150878906,
+              "width": 87.17185974121094,
+              "x": 239.99647521972656,
+              "y": 385.4767150878906
+            },
+            "style": "visibility: visible; transform: translate3d(239.996px, 385.477px, 0px); width: 87.1764px; height: 66.5711px; z-index: 1182;"
+          },
+          {
+            "hidden": "false",
+            "id": "paperless",
+            "rect": {
+              "bottom": 471.1403198242187,
+              "height": 58.34375,
+              "left": 199.8531188964844,
+              "right": 276.2593688964844,
+              "top": 412.7965698242187,
+              "width": 76.40625,
+              "x": 199.8531188964844,
+              "y": 412.7965698242187
+            },
+            "style": "visibility: visible; transform: translate3d(199.853px, 412.797px, 0px); width: 76.4106px; height: 58.3499px; z-index: 1081;"
+          },
+          {
+            "hidden": "false",
+            "id": "home-assistant",
+            "rect": {
+              "bottom": 276.4544677734375,
+              "height": 61.07810974121094,
+              "left": 83.94451904296875,
+              "right": 164.22576904296875,
+              "top": 215.37635803222656,
+              "width": 80.28125,
+              "x": 83.94451904296875,
+              "y": 215.37635803222656
+            },
+            "style": "visibility: visible; transform: translate3d(83.9445px, 215.376px, 0px); width: 80.2817px; height: 61.0839px; z-index: 1117;"
+          },
+          {
+            "hidden": "false",
+            "id": "ombi",
+            "rect": {
+              "bottom": 380.73284912109375,
+              "height": 143.32810974121094,
+              "left": 113.26055145263672,
+              "right": 324.5808639526367,
+              "top": 237.4047393798828,
+              "width": 211.3203125,
+              "x": 113.26055145263672,
+              "y": 237.4047393798828
+            },
+            "style": "visibility: visible; transform: translate3d(113.261px, 237.405px, 0px); width: 211.323px; height: 143.332px; z-index: 1008;"
+          }
+        ],
+        "scene": "aquarium-scene aquarium-three is-rendered is-paused",
+        "viewport": {
+          "dpr": 1,
+          "height": 874,
+          "width": 402
+        }
+      },
+      "afterMotion": {
+        "fish": [
+          {
+            "id": "komodo",
+            "style": "visibility: visible; transform: translate3d(79.0604px, 276.223px, 0px); width: 170.949px; height: 115.948px; z-index: 1104;"
+          },
+          {
+            "id": "watchmybirds",
+            "style": "visibility: visible; transform: translate3d(212.583px, 378.245px, 0px); width: 83.1087px; height: 63.4648px; z-index: 1147;"
+          },
+          {
+            "id": "paperless",
+            "style": "visibility: visible; transform: translate3d(187.57px, 427.056px, 0px); width: 70.4647px; height: 53.8094px; z-index: 1011;"
+          },
+          {
+            "id": "home-assistant",
+            "style": "visibility: visible; transform: translate3d(131.904px, 245.504px, 0px); width: 72.3618px; height: 55.0579px; z-index: 1032;"
+          },
+          {
+            "id": "ombi",
+            "style": "visibility: visible; transform: translate3d(66.3434px, 277.157px, 0px); width: 254.466px; height: 172.595px; z-index: 1159;"
+          }
+        ],
+        "scene": "aquarium-scene aquarium-three is-rendered"
+      }
+    },
+    "laptop": {
+      "initial": {
+        "fish": [
+          {
+            "hidden": "false",
+            "id": "komodo",
+            "rect": {
+              "bottom": 369.3621520996094,
+              "height": 93.859375,
+              "left": 484.0857849121094,
+              "right": 622.4686279296875,
+              "top": 275.5027770996094,
+              "width": 138.38284301757812,
+              "x": 484.0857849121094,
+              "y": 275.5027770996094
+            },
+            "style": "visibility: visible; transform: translate3d(484.086px, 275.503px, 0px); width: 138.385px; height: 93.8612px; z-index: 887;"
+          },
+          {
+            "hidden": "false",
+            "id": "watchmybirds",
+            "rect": {
+              "bottom": 465.4908752441406,
+              "height": 68.546875,
+              "left": 1162.2552490234375,
+              "right": 1252.0208740234375,
+              "top": 396.9440002441406,
+              "width": 89.765625,
+              "x": 1162.2552490234375,
+              "y": 396.9440002441406
+            },
+            "style": "visibility: visible; transform: translate3d(1162.26px, 396.944px, 0px); width: 89.7697px; height: 68.5514px; z-index: 1182;"
+          },
+          {
+            "hidden": "false",
+            "id": "paperless",
+            "rect": {
+              "bottom": 485.1546936035156,
+              "height": 60.078125,
+              "left": 899.2537231445312,
+              "right": 977.9334106445312,
+              "top": 425.0765686035156,
+              "width": 78.6796875,
+              "x": 899.2537231445312,
+              "y": 425.0765686035156
+            },
+            "style": "visibility: visible; transform: translate3d(899.254px, 425.077px, 0px); width: 78.6837px; height: 60.0857px; z-index: 1081;"
+          },
+          {
+            "hidden": "false",
+            "id": "home-assistant",
+            "rect": {
+              "bottom": 284.681884765625,
+              "height": 62.89845275878906,
+              "left": 224.9705810546875,
+              "right": 307.6346435546875,
+              "top": 221.7834320068359,
+              "width": 82.6640625,
+              "x": 224.9705810546875,
+              "y": 221.7834320068359
+            },
+            "style": "visibility: visible; transform: translate3d(224.971px, 221.783px, 0px); width: 82.6699px; height: 62.901px; z-index: 1117;"
+          },
+          {
+            "hidden": "false",
+            "id": "ombi",
+            "rect": {
+              "bottom": 396.01409912109375,
+              "height": 147.59375,
+              "left": 606.031494140625,
+              "right": 823.633056640625,
+              "top": 248.42034912109375,
+              "width": 217.6015625,
+              "x": 606.031494140625,
+              "y": 248.42034912109375
+            },
+            "style": "visibility: visible; transform: translate3d(606.032px, 248.42px, 0px); width: 217.609px; height: 147.596px; z-index: 1008;"
+          }
+        ],
+        "scene": "aquarium-scene aquarium-three is-rendered is-paused",
+        "viewport": {
+          "dpr": 1,
+          "height": 900,
+          "width": 1440
+        }
+      },
+      "afterMotion": {
+        "fish": [
+          {
+            "id": "komodo",
+            "style": "visibility: visible; transform: translate3d(419.388px, 272.575px, 0px); width: 153.601px; height: 104.182px; z-index: 987;"
+          },
+          {
+            "id": "watchmybirds",
+            "style": "visibility: visible; transform: translate3d(1127.97px, 389.243px, 0px); width: 87.4581px; height: 66.7862px; z-index: 1163;"
+          },
+          {
+            "id": "paperless",
+            "style": "visibility: visible; transform: translate3d(834.815px, 401.818px, 0px); width: 71.5006px; height: 54.6005px; z-index: 998;"
+          },
+          {
+            "id": "home-assistant",
+            "style": "visibility: visible; transform: translate3d(296.532px, 213.926px, 0px); width: 82.6379px; height: 62.8766px; z-index: 1117;"
+          },
+          {
+            "id": "ombi",
+            "style": "visibility: visible; transform: translate3d(821.23px, 262.212px, 0px); width: 216.432px; height: 146.797px; z-index: 1003;"
+          }
+        ],
+        "scene": "aquarium-scene aquarium-three is-rendered"
+      }
+    },
+    "pause": {
+      "before": [
+        {
+          "id": "komodo",
+          "style": "visibility: visible; transform: translate3d(340.036px, 250.798px, 0px); width: 170.745px; height: 115.81px; z-index: 1079;"
+        },
+        {
+          "id": "watchmybirds",
+          "style": "visibility: visible; transform: translate3d(1053.4px, 396.322px, 0px); width: 86.8313px; height: 66.3076px; z-index: 1157;"
+        },
+        {
+          "id": "paperless",
+          "style": "visibility: visible; transform: translate3d(709.124px, 427.108px, 0px); width: 70.2748px; height: 53.6644px; z-index: 983;"
+        },
+        {
+          "id": "home-assistant",
+          "style": "visibility: visible; transform: translate3d(444.935px, 233.551px, 0px); width: 76.3925px; height: 58.1248px; z-index: 1053;"
+        },
+        {
+          "id": "ombi",
+          "style": "visibility: visible; transform: translate3d(644.054px, 295.317px, 0px); width: 194.722px; height: 132.072px; z-index: 903;"
+        }
+      ],
+      "after": [
+        {
+          "id": "komodo",
+          "style": "visibility: visible; transform: translate3d(340.036px, 250.798px, 0px); width: 170.745px; height: 115.81px; z-index: 1079;"
+        },
+        {
+          "id": "watchmybirds",
+          "style": "visibility: visible; transform: translate3d(1053.4px, 396.322px, 0px); width: 86.8313px; height: 66.3076px; z-index: 1157;"
+        },
+        {
+          "id": "paperless",
+          "style": "visibility: visible; transform: translate3d(709.124px, 427.108px, 0px); width: 70.2748px; height: 53.6644px; z-index: 983;"
+        },
+        {
+          "id": "home-assistant",
+          "style": "visibility: visible; transform: translate3d(444.935px, 233.551px, 0px); width: 76.3925px; height: 58.1248px; z-index: 1053;"
+        },
+        {
+          "id": "ombi",
+          "style": "visibility: visible; transform: translate3d(644.054px, 295.317px, 0px); width: 194.722px; height: 132.072px; z-index: 903;"
+        }
+      ],
+      "stable": true
+    },
+    "logs": [
+      {
+        "level": "warn",
+        "message": "THREE.WebGLShadowMap: PCFSoftShadowMap has been removed. Using PCFShadowMap instead.",
+        "timestamp": "2026-11-06T04:28:47.744Z",
+        "url": "chrome-extension://fmkadmapgofadopljbjfkapdkoienihi/build/installHook.js"
+      },
+      {
+        "level": "warn",
+        "message": "THREE.WebGLShadowMap: PCFSoftShadowMap has been removed. Using PCFShadowMap instead.",
+        "timestamp": "2026-11-06T04:30:03.985Z",
+        "url": "chrome-extension://fmkadmapgofadopljbjfkapdkoienihi/build/installHook.js"
+      }
+    ],
+    "scope": "Fresh initial poses held by system-reduced-motion emulation, then resumed. Phone resumed before a failed read-only evaluate and timed-out120frame observation; final successful observation waits60rAF. Laptop successful60rAF observation; pause30rAF. No model or config edits."
+  },
+  "verification": {
+    "frozenDefaultSuite": "44files/403tests pass on final production source; later endpoint assertions/type narrowing pass15focusedtests and finaltypecheck",
+    "independentReview": "50tests across spawn,motion,lifecycle,scale pass; endpoint seeds fail deliberately unclamped temporary source",
+    "build": "Production build passes, isolated config namespace on loopback5196",
+    "lifecycle": "Existing AQ64 controller identity/resource/race tests pass; initial motion yaw equals first extension snapshot",
+    "initialMovement": "All5 starter fish have safe positions/headings, combined-clearance spacing and >.01 scene-unit movement over5s at both required sizes.",
+    "pause": "Actual pause control keeps all5 projected styles unchanged over30rAF."
+  },
+  "limits": [
+    "This changes initial staging, not final biological fish realism or scene art. Parent AQ60 remainsopen.",
+    "Current geometry queries use legacy scene units/obstacles, not approved metric animated envelopes.",
+    "Unreviewed13modelURL/axis additions,9splatassets and concurrent AQ70.12sand integration remain preserved and excluded from the frozen build/commit.",
+    "Native image API returned accurate full-viewport JPEGs this time; signatures/dimensions and visible content verified. CDP PNG attempts returned blank backgrounds and were discarded.",
+    "System reduced-motion emulation held exact initial poses for screenshots. Motion was then resumed and allfive changed. Media/viewport overrides restored; Root tabs closed."
+  ]
+}

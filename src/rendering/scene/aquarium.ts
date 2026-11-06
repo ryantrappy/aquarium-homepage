@@ -20,7 +20,7 @@ import {
 import { createSwimmingFish, seedForId, startleFish, stepSwimmingFish, type SwimmingFish, type WaterHabitat } from './motion'
 import { applyFishTurningRigOverlay, bindFishTurningRig, evaluateSpriteTurnScaleX, type FishTurningRig } from './fish-turning'
 import { SPRITE_PLANE_WIDTH, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale } from './fish-scale'
-import { canRunFishSceneLoop, findSafeFishSpawn, fishSceneStatus, isSafeFishPosition } from './fish-spawn'
+import { canRunFishSceneLoop, findSafeFishHeading, findSafeFishSpawn, fishSceneStatus, fishSpawnPreference, isSafeFishPosition } from './fish-spawn'
 import { EMPTY_FISH_EXTENSIONS, type FishExtensionConfig } from '../../simulation/fish-extensions'
 import { consumeFrameSteps, createFrameClock, SIMULATION_STEP_SECONDS, suspendFrameClock } from './clock'
 import { handleArtworkTextureFailure, nearestVisibleIntersection, readArtworkAlpha, type SpriteMasks } from './alpha-picking'
@@ -336,11 +336,11 @@ diffuseColor.rgb = waterCol;
     hitMeshes.push(sand)
     fish.forEach(item => item.root.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) }))
   }
-  type FishSpawn = { species: NonNullable<ReturnType<typeof getFishById>>; clearance: number; position: SwimmingFish['position'] }
+  type FishSpawn = { species: NonNullable<ReturnType<typeof getFishById>>; clearance: number; position: SwimmingFish['position']; yaw: number }
   function createInhabitant(service: ServiceConfig, spawn: FishSpawn, anchor?: HTMLAnchorElement): Inhabitant {
-    const { species, clearance, position } = spawn
+    const { species, clearance, position, yaw } = spawn
     const root = new THREE.Group(), base = modelBases.get(service.fishId), fallback = !base
-    const motion = createSwimmingFish(service.id, service.fishId, position, clearance, fishExtensions)
+    const motion = createSwimmingFish(service.id, service.fishId, position, clearance, fishExtensions, { initialYaw: yaw })
     const item: Inhabitant = { service, root, motion, anchor, visible: false, fallback, releasedFocus: false }
     try {
       if (base) {
@@ -396,27 +396,39 @@ diffuseColor.rgb = waterCol;
     const anchors = new Map(Array.from(overlay.querySelectorAll<HTMLAnchorElement>('a[data-service-id]')).map(anchor => [anchor.dataset.serviceId!, anchor]))
     const current = new Map(fish.map(item => [item.service.id, item]))
     const nextServices = services.filter(service => getFishById(service.fishId))
+    const horizontalOrder = [...nextServices].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : a.fishId < b.fishId ? -1 : a.fishId > b.fishId ? 1 : 0)
+    const horizontalSlots = new Map(horizontalOrder.map((service, index) => [service.id, { index, count: horizontalOrder.length }]))
     const spawns = new Map<string, FishSpawn>()
+    const occupied: Array<{ position: SwimmingFish['position']; clearance: number }> = nextServices.flatMap(next => {
+      const retained = current.get(next.id)
+      return retained?.service.fishId === next.fishId
+        ? [{ position: retained.motion.position, clearance: retained.motion.clearance }]
+        : []
+    })
     const refreshRetainedLinks = () => nextServices.forEach(next => {
       const retained = current.get(next.id)
       if (retained?.service.fishId === next.fishId) refreshFishLink(retained, next, anchors.get(next.id))
     })
-    for (const [i, service] of nextServices.entries()) {
+    for (const service of nextServices) {
       const previous = current.get(service.id)
       if (previous?.service.fishId === service.fishId) continue
       const species = getFishById(service.fishId)!
-      const span = habitat.bounds.max.x - habitat.bounds.min.x
-      const x = width < 600 ? [-.3, .3, 0][i % 3] : ((i % 3) - 1) * Math.min(span * .26, 2.7)
-      const y = (width < 600 ? [1.25, .55, 1.95][i % 3] : 1.45) - Math.floor(i / 3) * .7
       const clearance = fishClearanceRadius(service.fishId)
-      const position = findSafeFishSpawn({ x, y: Math.max(.3, y), z: 1.8 + (i % 2) * .2 }, habitat.bounds, habitat.obstacles, clearance)
-      if (!position) {
+      const preference = fishSpawnPreference(service.id, service.fishId, habitat.bounds, clearance, horizontalSlots.get(service.id))
+      const position = preference && findSafeFishSpawn(preference.position, habitat.bounds, habitat.obstacles, clearance, occupied)
+      if (!position || !preference) {
         // Keep existing instances intact during the truthful full-native fallback.
         // A later fitting configuration can reuse their exact poses and clocks.
         refreshRetainedLinks()
         spawnUnavailable = true; syncLoop(); return false
       }
-      spawns.set(service.id, { species, clearance, position })
+      const yaw = findSafeFishHeading(position, preference.yaw, habitat.bounds, habitat.obstacles, clearance)
+      if (yaw === undefined) {
+        refreshRetainedLinks()
+        spawnUnavailable = true; syncLoop(); return false
+      }
+      spawns.set(service.id, { species, clearance, position, yaw })
+      occupied.push({ position, clearance })
     }
     try {
       fish = reconcileFishInhabitants(fish, nextServices, {

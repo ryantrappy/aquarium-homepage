@@ -7,6 +7,7 @@ import type { SwimmingFish } from './motion'
 import type { FishClipPlayer } from './fish-animation'
 import { refreshFishLink } from './fish-inhabitants'
 import { createAquarium, type AquariumController, type SceneStatus } from './aquarium'
+import type { FishExtensionConfig, FishExtensionSnapshot } from '../../simulation/fish-extensions'
 
 const state = vi.hoisted(() => ({
   renderer: undefined as undefined | { scene?: import('three').Scene; loop: ((time: number) => void) | null },
@@ -67,7 +68,12 @@ vi.mock('./fish-animation', async importOriginal => {
 })
 vi.mock('./fish-spawn', async importOriginal => {
   const real = await importOriginal<typeof import('./fish-spawn')>()
-  return { ...real, findSafeFishSpawn: (...args: Parameters<typeof real.findSafeFishSpawn>) => state.blockedSpawn ? undefined : real.findSafeFishSpawn(...args) }
+  return {
+    ...real,
+    fishSpawnPreference: (id: string, speciesId: string, ...args: Parameters<typeof real.fishSpawnPreference> extends [string, string, ...infer Rest] ? Rest : never) =>
+      real.fishSpawnPreference(id, speciesId === 'artwork-fixture' ? 'ocellaris-clownfish' : speciesId, ...args),
+    findSafeFishSpawn: (...args: Parameters<typeof real.findSafeFishSpawn>) => state.blockedSpawn ? undefined : real.findSafeFishSpawn(...args),
+  }
 })
 vi.mock('../../lib/fish', async importOriginal => {
   const real = await importOriginal<typeof import('../../lib/fish')>()
@@ -92,8 +98,11 @@ function rootFor(id: string): THREE.Group {
 }
 function meshFor(id: string): THREE.SkinnedMesh { let mesh!: THREE.SkinnedMesh; rootFor(id).traverse(n => { if (n instanceof THREE.SkinnedMesh) mesh = n }); return mesh }
 function update(services: ServiceConfig[]) { anchors(services); controller.update(services, false) }
-async function start(services = [service('first'), service('second', 'yellow-tang')]) {
-  anchors(services); controller = createAquarium(host.querySelector('canvas')!, overlay, services, false, status)
+async function start(services = [service('first'), service('second', 'yellow-tang')], fishExtensions?: FishExtensionConfig) {
+  anchors(services)
+  controller = fishExtensions
+    ? createAquarium(host.querySelector('canvas')!, overlay, services, false, status, () => null, fishExtensions)
+    : createAquarium(host.querySelector('canvas')!, overlay, services, false, status)
   await vi.waitFor(() => expect(status).toHaveBeenLastCalledWith('ready'))
 }
 function advance() { state.renderer!.loop?.(0); state.renderer!.loop?.(50) }
@@ -129,6 +138,21 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     expect(first.extensions.dispose).not.toHaveBeenCalled(); expect(second.extensions.dispose).not.toHaveBeenCalled()
     const anchor = overlay.querySelector<HTMLAnchorElement>('[data-service-id="first"]')!
     expect(anchor.href).toBe(edited.url + '/'); expect(anchor.title).toContain('Latest name'); expect(anchor.getAttribute('aria-label')).toContain('Latest name')
+  })
+  it('initializes the fish heading and first extension snapshot with the same seeded yaw', async () => {
+    const snapshots: FishExtensionSnapshot[] = []
+    const capture = {
+      kind: 'behavior' as const,
+      id: 'capture-initial-yaw',
+      create(snapshot: FishExtensionSnapshot) { snapshots.push(snapshot); return { step: () => [] } },
+    }
+    const extensions: FishExtensionConfig = { defaults: { [capture.id]: { operation: 'add', extension: capture } } }
+    await start([service('heading', 'yellow-tang')], extensions)
+    expect(snapshots).toHaveLength(1)
+    expect(state.created[0].yaw).toBe(snapshots[0].yaw)
+    expect(state.created[0].yaw).toBeGreaterThanOrEqual(0)
+    expect(state.created[0].yaw).toBeLessThan(2 * Math.PI)
+    expect(snapshots[0].position).toEqual(state.created[0].position)
   })
   it('adds only the new fish and removes/replaces only the targeted private resources', async () => {
     await start(); advance()

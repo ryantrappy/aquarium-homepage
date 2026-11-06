@@ -4,9 +4,9 @@
 Category: Governance / Hub
 Status: Canonical / Active
 Authority: Binding Single Source of Documentation Truth
-Backlog: AQ-61, AQ-63, AQ-65, AQ-66, AQ-64, AQ-53
+Backlog: AQ-61, AQ-63, AQ-65, AQ-66, AQ-64, AQ-53, AQ-60
 Owner: @documentation
-Updated: 2026-11-05
+Updated: 2026-11-06
 Upstream: AGENTS.md, AGENT_TASKS.md, docs/requirements.md, docs/framework/DOCUMENTATION_FRAMEWORK.md
 Downstream: All repository documentation and active agent workflows
 -->
@@ -32,7 +32,7 @@ Find the authoritative documents for your task area:
 | **Reef Navigation & Habitat** | [`habitat-navigation-core-contract.md`](habitat-navigation-core-contract.md) | [`modular-coral-and-live-rock-spec.md`](modular-coral-and-live-rock-spec.md) | `src/simulation/habitat-navigation.test.ts` |
 | **3D Collision & Geometry** | [`asset-evidence/aq58/3d-collision-review.md`](asset-evidence/aq58/3d-collision-review.md) | [`asset-evidence/aq58/README.md`](asset-evidence/aq58/README.md) | [`asset-evidence/aq58/`](asset-evidence/aq58/) |
 | **Biological Asset Pipeline** | [`asset-contract.md`](asset-contract.md) | [`open-source-asset-and-motion-research.md`](open-source-asset-and-motion-research.md) | [`asset-pipeline-proof.md`](asset-pipeline-proof.md), [`asset-evidence/aq57/`](asset-evidence/aq57/) |
-| **Fish Roster & Adult Scaling** | [`fish-scale-reference.md`](fish-scale-reference.md) | [`reef-fish-roster.md`](reef-fish-roster.md) | `src/rendering/scene/fish-scale.test.ts` |
+| **Fish Roster & Adult Scaling** | [`fish-scale-reference.md`](fish-scale-reference.md) | [`reef-fish-roster.md`](reef-fish-roster.md) | `src/rendering/scene/fish-scale.test.ts`, [AQ-60 initial spread proof](asset-evidence/aq60/spawn-review.json) |
 | **Modular Corals & Rock Sockets**| [`modular-coral-and-live-rock-spec.md`](modular-coral-and-live-rock-spec.md)| [`socket-verification.md`](socket-verification.md) | [`asset-evidence/aq52-left-socket-report.json`](asset-evidence/aq52-left-socket-report.json), [AQ-53 mask runtime proof](asset-evidence/aq53/review.json) |
 | **2D Thumbnails & Cutouts** | [`fish-assets.md`](fish-assets.md) | [`fish-art-provenance.json`](fish-art-provenance.json) | `public/fish-art-provenance.json`  [AQ-66 thumbnail proof](asset-evidence/aq66/review.json) |
 | **Homelab Services & Links** | [`service-mapping-review.md`](service-mapping-review.md) | [`requirements.md`](requirements.md) | Backlog `AQ-8` / `AQ-56` |
@@ -85,6 +85,7 @@ Directory of project documentation and verification evidence:
 | [`agent-change-audit.md`](agent-change-audit.md) | **Complete** | Evidentiary | `AQ-57` | Root audit of concurrent agent changes, rejected runtime experiments, and baseline restoration. |
 | [AQ-58 fish player and clip-only review](asset-evidence/aq58/fish-player-review.json) | **Active** | Evidentiary | AQ-58 | Source-pinned clean-pose reset compatibility and conditional supplied clip-only spheres; main-scene collision remains open. |
 | [AQ-53 raw-mask runtime proof](asset-evidence/aq53/review.json) | **Complete** | Evidentiary | AQ-53 | Exact eight-coral raw masks, indexed pinned bases and shared surface/depth runtime curve; actual GPU motion and pause checks. |
+| [AQ-60 natural initial spread](asset-evidence/aq60/spawn-review.json) | **Active** | Evidentiary | AQ-60 | Root native starting composition, safe headings/movement and survivor-state checks; broader scale task remains open. |
 | [AQ-64 state preservation proof](asset-evidence/aq64/review.json) | **Complete** | Evidentiary | AQ-64 | Actual controller identity/resource tests and native edit/add/remove/reorder continuity at both target sizes. |
 | [AQ-65 GPU attenuation proof](asset-evidence/aq65/gpu-ao-review.json) | **Complete** | Evidentiary | AQ-65 | Actual shader float readpixels match the CPU curve; bounded turn/pitch recovery tests. |
 | [AQ-66 thumbnail evidence](asset-evidence/aq66/review.json) | **Complete** | Evidentiary | AQ-66 | Optimized image metrics, preserved PNG originals and native failed-artwork recovery proof. |
