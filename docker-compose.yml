@@ -1,0 +1,31 @@
+services:
+  aquarium:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: aquarium-homepage:latest
+    container_name: aquarium-homepage
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=3000
+      - REEF_CONFIG_PATH=/var/lib/reef-control/reef-config.json
+      # Optional: set to your external origin (e.g. https://aquarium.example.com) if behind a reverse proxy.
+      # When left empty, same-origin writes matching the incoming request URL are accepted.
+      - REEF_PUBLIC_ORIGIN=${REEF_PUBLIC_ORIGIN:-}
+      # Optional: set path to CPU temperature hwmon sensors if mounted from a Linux host
+      - REEF_CPU_HWMON_ROOT=${REEF_CPU_HWMON_ROOT:-}
+    volumes:
+      # Persistent storage for aquarium configuration (services, fish assignments)
+      - aquarium-data:/var/lib/reef-control
+      # To persist configuration to a local directory instead of a Docker volume, uncomment:
+      # - ./data:/var/lib/reef-control
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  aquarium-data:
+    name: aquarium-homepage-data
