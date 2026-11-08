@@ -14,9 +14,11 @@ import {
 import {
   DEFAULT_AQUARIUM_OPTICS_CONFIG,
   createRestrainedCausticLightController,
+  evaluateDepthTintedColor,
   evaluateSurfaceRippleOffset,
   evaluateSuspendedParticlePosition,
 } from './underwater-optics'
+import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
 import { createSwimmingFish, seedForId, startleFish, stepSwimmingFish, type SwimmingFish, type WaterHabitat } from './motion'
 import { applyFishTurningRigOverlay, bindFishTurningRig, evaluateSpriteTurnScaleX, type FishTurningRig } from './fish-turning'
 import { SPRITE_PLANE_WIDTH, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale } from './fish-scale'
@@ -27,6 +29,7 @@ import { handleArtworkTextureFailure, nearestVisibleIntersection, readArtworkAlp
 import { applyFishLinkVisibility } from './fish-link-focus'
 import { projectFishLinkBounds } from './fish-link-projection'
 import { createFishClipPlayer, type FishClipPlayer } from './fish-animation'
+import { bindFishFlexToModel, updateFishFlex, type FishFlexBinding } from './fish-flex-material'
 import { reconcileFishInhabitants, refreshFishLink } from './fish-inhabitants'
 
 const modelUrls: Record<string, string> = {
@@ -48,7 +51,7 @@ const modelUrls: Record<string, string> = {
 }
 export type SceneStatus = 'loading' | 'ready' | 'failed'
 export type AquariumController = { update(services: ServiceConfig[], paused: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void }
-type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean }
+type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; flex?: FishFlexBinding; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean }
 
 function disposeTree(root: THREE.Object3D) {
   const geometries = new Set<THREE.BufferGeometry>(), materials = new Set<THREE.Material>(), textures = new Set<THREE.Texture>()
@@ -74,17 +77,35 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   renderer.shadowMap.enabled = true
   renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
+  // Underwater optics are the single source of truth for the water column
+  // (AQ-39 AC #2): background, fog, light intensities, and ripple amplitude
+  // all come from DEFAULT_AQUARIUM_OPTICS_CONFIG instead of a second set of
+  // literals. The fog/background colour is the config background tinted by
+  // Beer-Lambert transmittance at the rear-wall path depth (3.5 m, the
+  // aquarium-scale bound in evaluateDepthTransmittance), so distant water
+  // loses red first while foreground fish at depth ~0 stay un-veiled.
+  // '#183654' tinted at 3.5 m is '#082d50'. This is a static setup-time
+  // colour, so pause / prefers-reduced-motion need no handling here; the
+  // animated optics (caustics, ripples, particles) already freeze below.
+  const optics = DEFAULT_AQUARIUM_OPTICS_CONFIG
+  const waterColumnColor = evaluateDepthTintedColor(optics.backgroundHex, 3.5)
   const scene = new THREE.Scene()
-  scene.background = new THREE.Color('#183654')
-  scene.fog = new THREE.Fog('#183654', 18, 36)
+  scene.background = new THREE.Color(waterColumnColor)
+  scene.fog = new THREE.Fog(waterColumnColor, optics.fogNear, optics.fogFar)
   const camera = new THREE.PerspectiveCamera(42, 1, .1, 60); camera.position.set(0, .15, 9); camera.lookAt(0, .15, 0)
+
+  // Runtime-generated PMREM environment map (AQ-71): procedural IBL from the
+  // tank's own palette, generated once here. scene.background stays the
+  // Beer-Lambert-tinted water colour from AQ-39.
+  const environmentMap = createAquariumEnvironmentMap(renderer)
+  if (environmentMap) scene.environment = environmentMap.texture
 
   // 3-tier reef LED lighting rig (AQ-14.2 & AQ-39):
   // 1) Balanced sky-to-indigo-crevice HemisphereLight so overhangs & caves retain deep actinic shadow contrast
-  const hemiLight = new THREE.HemisphereLight('#88ccff', '#1b1636', 0.62)
+  const hemiLight = new THREE.HemisphereLight('#88ccff', '#1b1636', 0.40)
   scene.add(hemiLight)
   // 2) Crisp 14,000K overhead reef daylight key light with soft shadow map
-  const keyLight = new THREE.DirectionalLight('#f6faff', 2.45)
+  const keyLight = new THREE.DirectionalLight('#f6faff', optics.keyLightIntensity)
   keyLight.position.set(1.2, 6.8, 4.6)
   keyLight.castShadow = true
   keyLight.shadow.mapSize.set(1024, 1024)
@@ -98,7 +119,7 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   keyLight.shadow.normalBias = 0.015
   scene.add(keyLight)
   // 3) Royal-blue actinic fill light + soft top-back rim light
-  const fillLight = new THREE.DirectionalLight('#5a98ff', 1.12)
+  const fillLight = new THREE.DirectionalLight('#5a98ff', optics.fillLightIntensity)
   fillLight.position.set(-4.2, 2.8, 3.2)
   scene.add(fillLight)
   const rimLight = new THREE.DirectionalLight('#b4dcff', 0.45)
@@ -106,8 +127,8 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   scene.add(rimLight)
 
   const causticLightController = createRestrainedCausticLightController(keyLight, fillLight, {
-    keyLightIntensity: 2.45,
-    fillLightIntensity: 1.12,
+    keyLightIntensity: optics.keyLightIntensity,
+    fillLightIntensity: optics.fillLightIntensity,
   })
 
   // Granular aragonite & coralline-rubble sand bed with rock-base contact AO & caustic shimmer (AQ-14.6 & AQ-14.2)
@@ -137,6 +158,7 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   sandGeometry.computeVertexNormals()
   const sandUniforms = { uSandTime: { value: 0 } }
   const sandMaterial = new THREE.MeshStandardMaterial({ map: sandTexture, roughness: 0.94, metalness: 0.0 })
+  sandMaterial.envMapIntensity = ENVIRONMENT_MAP_INTENSITY.sand
   sandMaterial.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, sandUniforms)
     shader.vertexShader = `varying vec3 vSandWorldPos;\n` + shader.vertexShader
@@ -167,6 +189,7 @@ diffuseColor.rgb *= (0.86 + 0.22 * sandCaustic);
   // Layered Reef-Tank Backdrop (AQ-14.6 & AQ-39): eliminates the flat paint-bucket wall & sharp horizon line
   const rearUniforms = { uRearTime: { value: 0 } }
   const rearMaterial = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.96, metalness: 0.0 })
+  rearMaterial.envMapIntensity = ENVIRONMENT_MAP_INTENSITY.backdrop
   rearMaterial.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, rearUniforms)
     shader.vertexShader = `varying vec3 vRearWorldPos;\n` + shader.vertexShader
@@ -218,6 +241,7 @@ diffuseColor.rgb = waterCol;
     side: THREE.DoubleSide,
     depthWrite: false,
   })
+  waterSurfaceMaterial.envMapIntensity = ENVIRONMENT_MAP_INTENSITY.waterSurface
   const waterSurface = new THREE.Mesh(waterSurfaceGeometry, waterSurfaceMaterial)
   waterSurface.rotation.x = Math.PI / 2
   waterSurface.position.set(0, 2.66, -1.2)
@@ -323,6 +347,7 @@ diffuseColor.rgb = waterCol;
       reef.rotation.y = yaw
       scene.add(reef)
       reefs.push(reef)
+      applyEnvironmentMapIntensity(reef, ENVIRONMENT_MAP_INTENSITY.reef)
 
       const result = instantiateModularReefHabitat(islandKind, uniformScale, position, `reef-${i}`, yaw)
       habitat.obstacles.push(...result.obstacles)
@@ -333,6 +358,7 @@ diffuseColor.rgb = waterCol;
   }
   function disposeInhabitant(item: Inhabitant) {
     try { item.motion.extensions.dispose() } catch (error) { console.error('Fish extension cleanup failed', error) }
+    item.flex?.dispose(); item.flex = undefined
     scene.remove(item.root); item.clipPlayer?.dispose()
     const skeletons = new Set<THREE.Skeleton>()
     item.root.traverse(object => { if (object instanceof THREE.SkinnedMesh) skeletons.add(object.skeleton) })
@@ -358,11 +384,17 @@ diffuseColor.rgb = waterCol;
     try {
       if (base) {
         const model = clone(base.scene); root.add(model); model.scale.setScalar(fishModelScale(service.fishId))
+        applyEnvironmentMapIntensity(model, ENVIRONMENT_MAP_INTENSITY.fish)
         // The player restores the clean clip pose before every turning overlay.
         if (base.animations.length === 1) {
           try {
             item.clipPlayer = createFishClipPlayer(model, base.animations[0], (seedForId(service.id) % 1500) / 1000)
             item.turningRig = bindFishTurningRig(model, service.fishId)
+            try {
+              item.flex = bindFishFlexToModel(model, service.fishId, seedForId(service.id))
+            } catch (error) {
+              console.warn('Fish body flex unavailable; retaining bone-only animation', species.id, error)
+            }
           } catch (error) {
             item.clipPlayer?.dispose(); item.clipPlayer = undefined
             console.warn('Fish animation unsupported; retaining static service fish', species.id, error)
@@ -493,7 +525,7 @@ diffuseColor.rgb = waterCol;
     const surfPos = waterSurfaceGeometry.getAttribute('position')
     for (let i = 0; i < surfPos.count; i++) {
       const wx = surfPos.getX(i), wz = surfPos.getY(i)
-      surfPos.setZ(i, evaluateSurfaceRippleOffset(wx, wz, coralElapsedSec, { paused: habitatStopped, reducedMotion, amplitudeM: 0.032 }))
+      surfPos.setZ(i, evaluateSurfaceRippleOffset(wx, wz, coralElapsedSec, { paused: habitatStopped, reducedMotion, amplitudeM: optics.surfaceRippleAmplitudeM }))
     }
     surfPos.needsUpdate = true
 
@@ -524,9 +556,25 @@ diffuseColor.rgb = waterCol;
           // The player has restored its complete last clean pose. Retire this
           // unsupported animation once; other fish and native links keep working.
           item.clipPlayer?.dispose(); item.clipPlayer = undefined; item.turningRig = undefined
+          item.flex?.dispose(); item.flex = undefined
           console.warn('Fish animation stopped after invalid clip output', item.service.id, error)
         }
         if (item.turningRig) applyFishTurningRigOverlay(item.turningRig, item.motion.turnKinematics, stopped)
+        // Lighthill body flex runs last in the frame: after the clip advance
+        // and the turning overlay, on the same simulation dt, so clip, bone
+        // bend, and vertex wave share one clock. Paused / hidden / focused
+        // frames never reach this block, so the wave freezes with the clip;
+        // prefers-reduced-motion neutralises the amplitude inside update.
+        if (item.flex) {
+          const cruiseSpeedWorld = item.motion.behavior.variation.cruiseSpeedTankWidthsPerSecond
+            * (habitat.bounds.max.x - habitat.bounds.min.x)
+          updateFishFlex(item.flex, item.service.fishId, {
+            speedNorm: cruiseSpeedWorld > 0 ? item.motion.speed / cruiseSpeedWorld : 0,
+            state: item.motion.behavior.state,
+            maneuverStage: item.motion.turnKinematics.maneuverStage,
+            startleSeconds: item.motion.startleSeconds,
+          }, SIMULATION_STEP_SECONDS, reducedMotion)
+        }
       }
     }
     for (const item of fish) {
@@ -613,7 +661,8 @@ diffuseColor.rgb = waterCol;
     canActivate(id, x, y) { const item = fish.find(item => item.service.id === id); return Boolean(item && (x === undefined || y === undefined ? updateVisibility(item) : nearest(x, y) === id)) },
     dispose() {
       if (disposed) return; disposed = true; abort.abort(); observer.disconnect(); renderer.setAnimationLoop(null)
-      removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sand.geometry.dispose(); sand.material.dispose(); sandTexture.dispose(); rear.geometry.dispose(); rear.material.dispose(); waterSurfaceGeometry.dispose(); waterSurfaceMaterial.dispose(); particleGeometry.dispose(); particleMaterial.dispose(); renderer.dispose(); renderer.forceContextLoss()
+      removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sand.geometry.dispose(); sand.material.dispose(); sandTexture.dispose(); rear.geometry.dispose(); rear.material.dispose(); waterSurfaceGeometry.dispose(); waterSurfaceMaterial.dispose(); particleGeometry.dispose(); particleMaterial.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
     },
   }
 }
+
