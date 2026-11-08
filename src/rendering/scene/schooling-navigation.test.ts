@@ -67,6 +67,69 @@ describe('species-aware schooling and scalable navigation (AQ-41)', () => {
     expect(grammaSteer.dz).toBe(0)
   })
 
+  it('splits steering into separation/cohesion/alignment components that sum to the combined offset (AQ-84)', () => {
+    const chromisA: SchoolingPeer = {
+      id: 'chromis-a',
+      speciesId: 'blue-green-chromis',
+      position: { x: -0.6, y: 0.8, z: 1.0 },
+      yaw: 0,
+      speed: 0.5,
+      clearanceRadius: 0.5,
+      startleSeconds: 0,
+    }
+    const chromisB: SchoolingPeer = {
+      id: 'chromis-b',
+      speciesId: 'blue-green-chromis',
+      position: { x: 0.9, y: 0.8, z: 1.0 },
+      yaw: 0,
+      speed: 0.5,
+      clearanceRadius: 0.5,
+      startleSeconds: 0,
+    }
+    const steer = evaluateSchoolingSteering({
+      self: chromisA,
+      peers: [chromisA, chromisB],
+      waterBounds,
+      obstacles: [],
+      dt: 1 / 30,
+    })
+    // 1.5 units apart is outside the separation range, so only
+    // cohesion/alignment act — and they point toward the peer (+x) and
+    // along the peer heading (+z).
+    expect(steer.separation).toEqual({ x: 0, y: 0, z: 0 })
+    expect(steer.cohesion.x).toBeGreaterThan(0)
+    expect(steer.alignment.z).toBeGreaterThan(0)
+    expect(steer.alignment.y).toBe(0)
+    expect(steer.dx).toBeCloseTo(steer.separation.x + steer.cohesion.x + steer.alignment.x, 12)
+    expect(steer.dy).toBeCloseTo(steer.separation.y + steer.cohesion.y + steer.alignment.y, 12)
+    expect(steer.dz).toBeCloseTo(steer.separation.z + steer.cohesion.z + steer.alignment.z, 12)
+
+    // Solitary species get no cohesion/alignment components at all.
+    const grammaA: SchoolingPeer = { ...chromisA, id: 'gramma-a', speciesId: 'royal-gramma' }
+    const grammaB: SchoolingPeer = { ...chromisB, id: 'gramma-b', speciesId: 'royal-gramma' }
+    const grammaSteer = evaluateSchoolingSteering({
+      self: grammaA,
+      peers: [grammaA, grammaB],
+      waterBounds,
+      obstacles: [],
+      dt: 1 / 30,
+    })
+    expect(grammaSteer.cohesion).toEqual({ x: 0, y: 0, z: 0 })
+    expect(grammaSteer.alignment).toEqual({ x: 0, y: 0, z: 0 })
+
+    // Overlapping fish get a separation component pushing them apart.
+    const closeA: SchoolingPeer = { ...chromisA, position: { x: 0, y: 0.8, z: 1.0 } }
+    const closeB: SchoolingPeer = { ...chromisB, position: { x: 0.3, y: 0.8, z: 1.0 } }
+    const separated = evaluateSchoolingSteering({
+      self: closeA,
+      peers: [closeA, closeB],
+      waterBounds,
+      obstacles: [],
+      dt: 1 / 30,
+    })
+    expect(separated.separation.x).toBeLessThan(0)
+  })
+
   it('isolates single-fish service-click startle so a startled peer never triggers a screen-wide panic (AC #4)', () => {
     const calmChromis: SchoolingPeer = {
       id: 'chromis-calm',

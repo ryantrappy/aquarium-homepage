@@ -24,6 +24,24 @@ export type SchoolingSteeringVector = Readonly<{
   dz: number
   mode: SocialGroupingMode
   neighborCount: number
+  /**
+   * Personal-space repulsion component (AQ-84). The only component still
+   * applied as a positional nudge, and only while fish overlap (within
+   * minSep); regular cohesion/alignment must never translate the body.
+   */
+  separation: Vec3
+  /**
+   * Cohesion component (AQ-84): displacement toward the conspecific group
+   * center, before the combined magnitude clamp. Drives heading, not
+   * position — callers blend its horizontal direction into the fish yaw.
+   */
+  cohesion: Vec3
+  /**
+   * Alignment component (AQ-84): mean conspecific heading (horizontal
+   * only, y is always 0), before the combined magnitude clamp. Drives
+   * heading alongside cohesion.
+   */
+  alignment: Vec3
 }>
 
 /**
@@ -71,6 +89,10 @@ export function isGroupSchoolingSpecies(speciesId: string): boolean {
 /**
  * Evaluates bounded, collision-safe social steering (`separation` for all fish to prevent body overlap,
  * plus conspecific `cohesion` and `alignment` only for profile-supported schooling/grouping species).
+ * The returned vector keeps the three components separate (AQ-84) so callers
+ * can steer heading with cohesion/alignment while only separation translates
+ * the body; `dx`/`dy`/`dz` remain the combined, magnitude-clamped offset and
+ * always equal the sum of the three components.
  *
  * Per `AQ-41` AC #4:
  * - Solitary species never receive school cohesion/alignment forces.
@@ -120,7 +142,8 @@ export function evaluateSchoolingSteering(input: {
     !Number.isFinite(dt) ||
     !getSpeciesBehaviorProfile(self.speciesId)
   ) {
-    return { dx: 0, dy: 0, dz: 0, mode, neighborCount: 0 }
+    const zero: Vec3 = { x: 0, y: 0, z: 0 }
+    return { dx: 0, dy: 0, dz: 0, mode, neighborCount: 0, separation: zero, cohesion: zero, alignment: zero }
   }
 
   const groupingAllowed = isGroupSchoolingSpecies(self.speciesId) && self.startleSeconds <= 0
@@ -174,10 +197,13 @@ export function evaluateSchoolingSteering(input: {
     }
   }
 
-  let steerX = sepX
-  let steerY = sepY
-  let steerZ = sepZ
-
+  // AQ-84: keep the three steering components separate so callers can route
+  // cohesion/alignment into heading (yaw) and keep only separation as a
+  // positional nudge. The combined vector below is unchanged: same gains,
+  // same magnitude clamp, same segment-safety gate.
+  const separation: Vec3 = { x: sepX, y: sepY, z: sepZ }
+  let cohesion: Vec3 = { x: 0, y: 0, z: 0 }
+  let alignment: Vec3 = { x: 0, y: 0, z: 0 }
   if (groupNeighbors > 0) {
     const inv = 1 / groupNeighbors
     const centerDx = cohX * inv - self.position.x
@@ -185,16 +211,19 @@ export function evaluateSchoolingSteering(input: {
     const centerDz = cohZ * inv - self.position.z
     const cohesionGain = mode === 'shoal' ? 0.24 : mode === 'harem-aggregation' ? 0.18 : 0.12
     const alignmentGain = mode === 'shoal' ? 0.22 : mode === 'harem-aggregation' ? 0.16 : 0.08
-
-    steerX += centerDx * cohesionGain + (alignSin * inv) * alignmentGain
-    steerY += centerDy * (cohesionGain * 0.5)
-    steerZ += centerDz * cohesionGain + (alignCos * inv) * alignmentGain
+    cohesion = { x: centerDx * cohesionGain, y: centerDy * (cohesionGain * 0.5), z: centerDz * cohesionGain }
+    alignment = { x: (alignSin * inv) * alignmentGain, y: 0, z: (alignCos * inv) * alignmentGain }
   }
+
+  const steerX = separation.x + cohesion.x + alignment.x
+  const steerY = separation.y + cohesion.y + alignment.y
+  const steerZ = separation.z + cohesion.z + alignment.z
 
   const maxStep = MAX_STEERING_OFFSET_PER_SEC * dt
   const mag = Math.hypot(steerX, steerY, steerZ)
   if (mag <= 1e-6) {
-    return { dx: 0, dy: 0, dz: 0, mode, neighborCount: totalNeighbors }
+    const zero: Vec3 = { x: 0, y: 0, z: 0 }
+    return { dx: 0, dy: 0, dz: 0, mode, neighborCount: totalNeighbors, separation: zero, cohesion: zero, alignment: zero }
   }
 
   const scale = mag > maxStep ? maxStep / mag : 1
@@ -219,10 +248,22 @@ export function evaluateSchoolingSteering(input: {
       })
 
   if (!segmentSafe) {
-    return { dx: 0, dy: 0, dz: 0, mode, neighborCount: totalNeighbors }
+    const zero: Vec3 = { x: 0, y: 0, z: 0 }
+    return { dx: 0, dy: 0, dz: 0, mode, neighborCount: totalNeighbors, separation: zero, cohesion: zero, alignment: zero }
   }
 
-  return { dx, dy, dz, mode, neighborCount: totalNeighbors }
+  // Scale every component by the same factor so they still sum exactly to
+  // the combined (dx, dy, dz) offset.
+  return {
+    dx,
+    dy,
+    dz,
+    mode,
+    neighborCount: totalNeighbors,
+    separation: { x: separation.x * scale, y: separation.y * scale, z: separation.z * scale },
+    cohesion: { x: cohesion.x * scale, y: cohesion.y * scale, z: cohesion.z * scale },
+    alignment: { x: alignment.x * scale, y: alignment.y * scale, z: alignment.z * scale },
+  }
 }
 
 /**

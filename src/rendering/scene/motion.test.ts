@@ -502,16 +502,18 @@ describe('school stepping and group disturbance (AQ-41/AQ-44)', () => {
   }
 
   it('applies cohesion to conspecific grouping species and none to solitary species (AC #1)', () => {
-    // One substep: route integration is identical with and without the
-    // school step, so any position difference is the steering nudge alone.
+    // AQ-84: cohesion now steers heading instead of translating the body,
+    // so the school pair's positions diverge from the identical-seed solo
+    // pair's over a second of swimming, rather than by a one-substep nudge.
     const soloA = createSwimmingFish('school-chromis-a', 'blue-green-chromis', { x: -0.6, y: 0.8, z: 1.0 }, .5)
     const soloB = createSwimmingFish('school-chromis-b', 'blue-green-chromis', { x: 0.9, y: 0.8, z: 1.0 }, .5)
-    stepSwimmingFish(soloA, habitat, 1 / 60)
-    stepSwimmingFish(soloB, habitat, 1 / 60)
+    for (let frame = 0; frame < 30; frame++) {
+      stepSwimmingFish(soloA, habitat, 1 / 30)
+      stepSwimmingFish(soloB, habitat, 1 / 30)
+    }
     const [schoolA, schoolB] = chromisPair()
-    stepSwimmingSchool([schoolA, schoolB], habitat, 1 / 60)
-    expect(Math.abs(schoolA.position.x - soloA.position.x)).toBeGreaterThan(0.001)
-    expect(Math.abs(schoolB.position.x - soloB.position.x)).toBeGreaterThan(0.001)
+    for (let frame = 0; frame < 30; frame++) stepSwimmingSchool([schoolA, schoolB], habitat, 1 / 30)
+    expect(distance(schoolA.position, soloA.position) + distance(schoolB.position, soloB.position)).toBeGreaterThan(0.01)
 
     // Solitary royal grammas at the same distance: steering is exactly zero,
     // so the school step matches the solo step bit for bit.
@@ -596,5 +598,93 @@ describe('school stepping and group disturbance (AQ-41/AQ-44)', () => {
     expect(chromisA.startleSeconds).toBeGreaterThan(0)
     expect(chromisB.behavior).toBe(beforeB)
     expect(chromisB.startleSeconds).toBe(0)
+  })
+})
+
+describe('schooling steering through heading kinematics (AQ-84)', () => {
+  const angleDiff = (a: number, b: number) => Math.atan2(Math.sin(a - b), Math.cos(a - b))
+
+  // An outer fish with no route to follow: the only turn it can make is the
+  // schooling turn, so yaw and turn kinematics isolate the AQ-84 path. The
+  // peer is stopped (still counts as a peer) so the school heading is fixed.
+  function outerFishNoRoute() {
+    // 1.5 units apart: inside the shoal neighbor radius (2.2) and outside
+    // the separation range (1.12), so only cohesion/alignment act.
+    const outer = createSwimmingFish('aq84-outer', 'blue-green-chromis', { x: -0.6, y: 0.8, z: 1.0 }, .5)
+    outer.yaw = 0
+    outer.route = []
+    outer.targetWait = 5
+    const peer = createSwimmingFish('aq84-peer', 'blue-green-chromis', { x: 0.9, y: 0.8, z: 1.0 }, .5)
+    peer.yaw = 0
+    return { outer, peer }
+  }
+
+  it('turns an outer fish yaw toward the school center without moving it sideways (AC #1/#4)', () => {
+    const { outer, peer } = outerFishNoRoute()
+    const start = { ...outer.position }
+    // School heading for the outer fish: cohesion toward the peer (+x) plus
+    // alignment with the peer's +z heading — about 1.02 rad from yaw 0.
+    const schoolHeading = Math.atan2(0.36, 0.22)
+    stepSwimmingSchool([outer, peer], habitat, 1 / 60, [false, true])
+    expect(outer.yaw).toBeGreaterThan(0)
+    expect(Math.abs(angleDiff(outer.yaw, schoolHeading))).toBeLessThan(Math.abs(angleDiff(0, schoolHeading)))
+    // No decoupled sideways drift: with no route and no speed the fish turns
+    // in place — its position is bit-identical.
+    expect(outer.position).toEqual(start)
+    // The turn kinematics record the school turn (AQ-84 AC #2).
+    expect(outer.turnKinematics.yawRateRadPerSec).toBeGreaterThan(0)
+    expect(outer.turnKinematics.smoothedYawRate).toBeGreaterThan(0)
+  })
+
+  it('respects the species turn limit on every substep and never overshoots the school heading (AC #2)', () => {
+    const { outer, peer } = outerFishNoRoute()
+    const turnRateRad = outer.behavior.variation.turnDegreesPerSecond * Math.PI / 180
+    const schoolHeading = Math.atan2(0.36, 0.22)
+    let previousYaw = outer.yaw
+    for (let frame = 0; frame < 60; frame++) {
+      stepSwimmingSchool([outer, peer], habitat, 1 / 30, [false, true])
+      const step = Math.abs(angleDiff(outer.yaw, previousYaw))
+      expect(step).toBeLessThanOrEqual(turnRateRad * (1 / 30) + 1e-9)
+      previousYaw = outer.yaw
+    }
+    expect(outer.yaw).toBeGreaterThan(0.5)
+    expect(Math.abs(angleDiff(outer.yaw, schoolHeading))).toBeLessThan(0.5)
+  })
+
+  it('advances curvilinearly with heading-locked displacement, not sideways drift (AC #4)', () => {
+    const outer = createSwimmingFish('aq84-advance-a', 'blue-green-chromis', { x: -0.6, y: 0.8, z: 1.0 }, .5)
+    const peer = createSwimmingFish('aq84-advance-b', 'blue-green-chromis', { x: 0.9, y: 0.8, z: 1.0 }, .5)
+    let lateral = 0
+    let forward = 0
+    for (let frame = 0; frame < 30; frame++) {
+      const before = { ...outer.position }
+      stepSwimmingSchool([outer, peer], habitat, 1 / 30)
+      const dx = outer.position.x - before.x
+      const dz = outer.position.z - before.z
+      // Displacement measured against the heading the fish swam along this
+      // substep: heading-locked travel has (near-)zero lateral component.
+      const forwardX = Math.sin(outer.yaw)
+      const forwardZ = Math.cos(outer.yaw)
+      lateral += Math.abs(dx * forwardZ - dz * forwardX)
+      forward += dx * forwardX + dz * forwardZ
+    }
+    expect(outer.yaw).not.toBe(Math.PI / 2)
+    expect(forward).toBeGreaterThan(0.05)
+    expect(lateral).toBeLessThan(0.05)
+    expect(lateral).toBeLessThan(forward * 0.5)
+  })
+
+  it('freezes schooling heading under reduced motion while route motion continues (AC #3)', () => {
+    const soloA = createSwimmingFish('aq84-frozen-a', 'blue-green-chromis', { x: -0.6, y: 0.8, z: 1.0 }, .5)
+    const soloB = createSwimmingFish('aq84-frozen-b', 'blue-green-chromis', { x: 0.9, y: 0.8, z: 1.0 }, .5)
+    stepSwimmingFish(soloA, habitat, 1 / 60)
+    stepSwimmingFish(soloB, habitat, 1 / 60)
+    const schoolA = createSwimmingFish('aq84-frozen-a', 'blue-green-chromis', { x: -0.6, y: 0.8, z: 1.0 }, .5)
+    const schoolB = createSwimmingFish('aq84-frozen-b', 'blue-green-chromis', { x: 0.9, y: 0.8, z: 1.0 }, .5)
+    stepSwimmingSchool([schoolA, schoolB], habitat, 1 / 60, false, { reducedMotion: true })
+    expect(schoolA.yaw).toBe(soloA.yaw)
+    expect(schoolB.yaw).toBe(soloB.yaw)
+    expect(schoolA.position).toEqual(soloA.position)
+    expect(schoolB.position).toEqual(soloB.position)
   })
 })
