@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@render-integration'
 created_date: '2026-11-03T04:15:00Z'
-updated_date: '2026-11-08T12:46:06Z'
+updated_date: '2026-11-06 19:53'
 labels: []
 dependencies:
   - AQ-5
@@ -16,6 +16,7 @@ references:
   - AQ-34
   - AQ-35
   - AQ-36
+  - docs/asset-evidence/aq12/splat-candidate-provenance.json
 documentation:
   - docs/fish-turning-and-maneuvering-plan.md
   - docs/requirements.md
@@ -55,6 +56,10 @@ The aquarium will succeed when fish look like living reef animals swimming throu
 2026-11-05 Root preservation audit: current uncommitted nine splat-fish GLBs/script and13modelURL/axis additions are preserved and excluded from reviewed commits. No per-asset manifest/notices accompany the nine-file folder at this checkpoint; generator references candidate-real-clown.glb as a donor. Before any production promotion, document exactly which donor data is reused and carry applicable derivative attribution/provenance plus objective source/art/rig validation. Finite player-load compatibility cannot establish license/art/realistic-animation acceptance. Do not replace or regenerate these supplied candidates from Codex.
 
 2026-11-08 (backlog mapping, PR 10): The promotion/swap of the 6 Blender-built fish to runtime — removing/replacing the corresponding extruded-silhouette GLBs — is NOT in AQ-12's scope. AQ-12 covers swimming animation, not asset promotion; its notes above require documented donor provenance and Root review before any production promotion, and fish source fidelity remains pending AQ-40. The swap is tracked by AQ-78 (Build scanned or sculpted fish for all 15 species with distinct rigs; task file added in PR #6, unmerged at the time of this note) and AQ-40. Do not treat any AQ-12 AC as covering the swap.
+
+2026-11-06 user ownership confirmation for the separate nine-fish reference family: asked explicitly whether the Gaussian-splat reference models mentioned by scripts/build-splat-fish-glbs.mjs for its nine species were also theirs; user answered "Yes, all those reference models are mine to share". This clears the missing ownership/redistribution permission question for those reference models. Preserve all supplied/generated assets. Still record precise source identities where available, output-specific CC-BY donor attribution/modifications, reproducibility and art/animation acceptance; permission alone does not verify geometry, material or motion quality. Earlier notes treating those references as an unresolved ownership blocker are superseded.
+
+2026-11-06 Root provenance handoff: user confirms all nine Gaussian-splat references are theirs to share. docs/asset-evidence/aq12/splat-candidate-provenance.json independently pins nine candidate hashes, exact generator and CC-BY4 Clownfish donor and verifies identical nodes/skins/animations/scenes plus27 retained donor buffer views for EACH output. Updated src/rendering/proof/ASSET_NOTICES.md supplies creator zixisun02, exact source/license links, modifications and output-specific inventory. No model, generator or runtime mapping was edited/run/promoted. Permission/credit questions are resolved as recorded; individual external reference files/capture metadata remain not supplied, and all art/geometry/clip/deformation/assembled-scene gates remain open.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

@@ -23,6 +23,29 @@ export function AquariumScene({ services, paused, focusFallbackRef }: AquariumSc
   useEffect(() => { controller.current?.update(services, paused) }, [services, paused])
   useEffect(() => { if (status !== 'ready') overlayRef.current?.querySelectorAll<HTMLAnchorElement>('a').forEach(anchor => { anchor.tabIndex = 0; anchor.removeAttribute('aria-hidden'); delete anchor.dataset.occluded }) }, [status])
 
+  function captionAtPoint(x: number, y: number) {
+    const overlay = overlayRef.current
+    if (!overlay || !Number.isFinite(x) || !Number.isFinite(y)) return undefined
+    // A transparent fish body can receive the event above another fish's
+    // caption. Native hit order also resolves two genuinely overlapping labels.
+    for (const element of overlay.ownerDocument.elementsFromPoint(x, y)) {
+      const caption = element.closest<HTMLElement>('.fish-name')
+      const owner = caption?.closest<HTMLAnchorElement>('a.aquarium-fish-link[data-service-id]')
+      if (!caption || !owner || !overlay.contains(owner)
+        || caption.closest('[hidden], [inert], [aria-hidden="true"], [data-occluded="true"]')) continue
+      const service = services.find(candidate => candidate.id === owner.dataset.serviceId)
+      if (!service) continue
+      const rect = caption.getBoundingClientRect()
+      if (![rect.left, rect.right, rect.top, rect.bottom, rect.width, rect.height].every(Number.isFinite)
+        || rect.width <= 0 || rect.height <= 0 || x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) continue
+      if ([caption, owner].some(node => {
+        const style = getComputedStyle(node)
+        return style.display === 'none' || style.visibility === 'hidden' || style.visibility === 'collapse' || style.opacity === '0'
+      })) continue
+      return service
+    }
+    return undefined
+  }
   function nativeTarget(event: MouseEvent<HTMLAnchorElement>, service: ServiceConfig) {
     // Every new action resolves its own target. A previous native context menu
     // may have borrowed this overlapping rectangle for a different fish.
@@ -31,8 +54,10 @@ export function AquariumScene({ services, paused, focusFallbackRef }: AquariumSc
     const keyboardOrLabel = keyboard || (event.target instanceof Element && Boolean(event.target.closest('.fish-name')))
     let selected = service
     if (status === 'ready') {
-      if (keyboardOrLabel) {
-        if (!controller.current?.canActivate(service.id)) { event.preventDefault(); return undefined }
+      const caption = keyboardOrLabel ? undefined : captionAtPoint(event.clientX, event.clientY)
+      if (keyboardOrLabel || caption) {
+        selected = caption ?? service
+        if (!controller.current?.canActivate(selected.id)) { event.preventDefault(); return undefined }
       } else {
         const picked = controller.current?.serviceAt(event.clientX, event.clientY)
         const visible = services.find(candidate => candidate.id === picked)

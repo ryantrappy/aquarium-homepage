@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sand material WebGL proof</title>
+    <style>
+      :root { color-scheme: dark; font: 14px/1.45 system-ui, sans-serif; background: #122029; color: #edf2f1; }
+      * { box-sizing: border-box; }
+      body { margin: 0; }
+      main { max-width: 1500px; margin: 0 auto; padding: 12px; }
+      h1 { margin: 0 0 6px; font-size: 18px; }
+      p { margin: 0 0 10px; }
+      canvas { display: block; width: 100%; height: min(68vh, 720px); min-height: 280px; background: #17262d; }
+      button { margin: 10px 0; padding: 9px 12px; font: inherit; }
+      output { display: block; min-height: 5lh; white-space: pre-wrap; overflow-wrap: anywhere; }
+      .scope { color: #c1d1d4; }
+      @media (max-width: 600px) { main { padding: 8px; } canvas { height: 58vh; min-height: 260px; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>AQ-70.12 sand material WebGL proof</h1>
+      <p class="scope">Actual sand factory and current surface shader. This checks compile and deterministic phase behavior; it does not accept photorealism, tiling, physical grain scale, or frame-time budget.</p>
+      <canvas id="sand-canvas" aria-label="Aragonite sand bed material and shadow proof"></canvas>
+      <button id="run-proof" type="button" disabled>Run WebGL compile and phase checks</button>
+      <output id="proof-report" role="status" aria-live="polite">Verifying the pinned sand factory and compiling the material…</output>
+    </main>
+    <script type="module" src="./sand-material-study.ts"></script>
+  </body>
+</html>

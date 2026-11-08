@@ -1,0 +1,165 @@
+{
+  "phone": {
+    "status": "PASS",
+    "factorySha256": "5b1439e98a09d3c0e5e9cf41d03f846e9b46fd30f946fe43873afd63ba649075",
+    "layout": {
+      "innerWidth": 402,
+      "innerHeight": 874,
+      "devicePixelRatio": 1,
+      "canvasCssWidth": 386,
+      "canvasCssHeight": 506.9140625,
+      "canvasBackingWidth": 386,
+      "canvasBackingHeight": 506,
+      "narrow": true,
+      "readbackWidth": 480,
+      "readbackHeight": 320
+    },
+    "comparisons": {
+      "activeTimeChangesPixels": true,
+      "pauseHoldsLastPhase": true,
+      "reducedMotionHoldsLastPhase": true,
+      "resumeAdvancesPhase": true,
+      "configuredTimeReproducible": true,
+      "sourcePinVerified": true,
+      "shaderCompileClean": true,
+      "webglErrorsClean": true
+    },
+    "pixelHashes": {
+      "activeQuarter": "ba00bafea215eca1740282fb256b2a05dc94f568cd81b64d6f712acb924f254c",
+      "activeOneQuarter": "60032c5e4b41215b603b97c4ed75beaa88d5f5b9afce0d8fca2474eb7c5b5b40",
+      "pausedHeld": "60032c5e4b41215b603b97c4ed75beaa88d5f5b9afce0d8fca2474eb7c5b5b40",
+      "reducedHeld": "60032c5e4b41215b603b97c4ed75beaa88d5f5b9afce0d8fca2474eb7c5b5b40",
+      "resumed": "410e5984a24829b66b0dc6770c227efa2de45ee4ea0fd555b53aa6dd1c374dc6",
+      "configuredTimeFirst": "eaebe5df7465dcf3accdbf57883d5e38c7a4025494370fb3a60bb089bea12cc9",
+      "configuredTimeSecond": "eaebe5df7465dcf3accdbf57883d5e38c7a4025494370fb3a60bb089bea12cc9"
+    },
+    "stats": {
+      "programCount": 13,
+      "drawCalls": 6,
+      "triangles": 24940,
+      "geometries": 5,
+      "textures": 7,
+      "webgl2": true,
+      "maxTextureSize": 16384,
+      "glVersion": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "shadingLanguageVersion": "WebGL GLSL ES 3.00 (OpenGL ES GLSL ES 3.0 Chromium)",
+      "surfaceGeometryHasTangent": false,
+      "mapColorSpaces": {
+        "albedo": "srgb",
+        "normal": "srgb-linear",
+        "roughness": "srgb-linear"
+      },
+      "shadowMapEnabled": true,
+      "shadowMapSize": [
+        1024,
+        1024
+      ],
+      "contextLost": false
+    },
+    "shaderErrors": [],
+    "webglErrors": [],
+    "scope": "Functional shader and phase proof only; not photorealism, tiling, physical grain scale, contact-art, or frame-time acceptance.",
+    "capture": {
+      "file": "functional-phone.png",
+      "sha256": "344c9528d7ee3db7512646dc97a33f2d95a69aca6a6cf20f9419a997cfd7cac5",
+      "width": 402,
+      "height": 874
+    }
+  },
+  "laptop": {
+    "status": "PASS",
+    "factorySha256": "5b1439e98a09d3c0e5e9cf41d03f846e9b46fd30f946fe43873afd63ba649075",
+    "layout": {
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "devicePixelRatio": 1,
+      "canvasCssWidth": 1416,
+      "canvasCssHeight": 612,
+      "canvasBackingWidth": 1416,
+      "canvasBackingHeight": 612,
+      "narrow": false,
+      "readbackWidth": 480,
+      "readbackHeight": 320
+    },
+    "comparisons": {
+      "activeTimeChangesPixels": true,
+      "pauseHoldsLastPhase": true,
+      "reducedMotionHoldsLastPhase": true,
+      "resumeAdvancesPhase": true,
+      "configuredTimeReproducible": true,
+      "sourcePinVerified": true,
+      "shaderCompileClean": true,
+      "webglErrorsClean": true
+    },
+    "pixelHashes": {
+      "activeQuarter": "47cf9dcf5941db294abcb60ea9007284abfb4e681a3590476095525302e34440",
+      "activeOneQuarter": "02fcd29d2a57974f7b51329cbaf6d6955e9584afa4aeab88b380a838c423e21d",
+      "pausedHeld": "02fcd29d2a57974f7b51329cbaf6d6955e9584afa4aeab88b380a838c423e21d",
+      "reducedHeld": "02fcd29d2a57974f7b51329cbaf6d6955e9584afa4aeab88b380a838c423e21d",
+      "resumed": "373e2b1a13939d8933224ca1198ad10062725b40a35da37c84a7315300e4b91b",
+      "configuredTimeFirst": "502d3d1a7e7e7255d5f23757362f1b9d31aca3b34c0b3d677eb7f616dfcff2ac",
+      "configuredTimeSecond": "502d3d1a7e7e7255d5f23757362f1b9d31aca3b34c0b3d677eb7f616dfcff2ac"
+    },
+    "stats": {
+      "programCount": 13,
+      "drawCalls": 6,
+      "triangles": 24940,
+      "geometries": 5,
+      "textures": 7,
+      "webgl2": true,
+      "maxTextureSize": 16384,
+      "glVersion": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "shadingLanguageVersion": "WebGL GLSL ES 3.00 (OpenGL ES GLSL ES 3.0 Chromium)",
+      "surfaceGeometryHasTangent": false,
+      "mapColorSpaces": {
+        "albedo": "srgb",
+        "normal": "srgb-linear",
+        "roughness": "srgb-linear"
+      },
+      "shadowMapEnabled": true,
+      "shadowMapSize": [
+        1024,
+        1024
+      ],
+      "contextLost": false
+    },
+    "shaderErrors": [],
+    "webglErrors": [],
+    "scope": "Functional shader and phase proof only; not photorealism, tiling, physical grain scale, contact-art, or frame-time acceptance.",
+    "capture": {
+      "file": "functional-laptop.png",
+      "sha256": "85cb1aa78b9617e0793c3756bbc8d39cdc946a2a0ad68580092074270c62cc78",
+      "width": 1440,
+      "height": 900
+    }
+  },
+  "logs": [
+    {
+      "level": "warn",
+      "message": "THREE.WebGLShadowMap: PCFSoftShadowMap has been removed. Using PCFShadowMap instead.",
+      "timestamp": "2026-11-06T14:22:29.533Z",
+      "url": "chrome-extension://fmkadmapgofadopljbjfkapdkoienihi/build/installHook.js"
+    }
+  ],
+  "metadata": {
+    "category": "Evidence",
+    "authority": "Evidentiary",
+    "task": "AQ-70.12",
+    "owner": "Root",
+    "date": "2026-11-06",
+    "status": "Functional handoff only; task open"
+  },
+  "source": {
+    "src/rendering/scene/aragonite-sand.ts": "5b1439e98a09d3c0e5e9cf41d03f846e9b46fd30f946fe43873afd63ba649075",
+    "src/rendering/scene/aragonite-sand.test.ts": "93c888c17bf943cb1798e3543cea83f77c32c7263f5d5844be26f9d195edeca3",
+    "src/rendering/proof/sand-material-study.ts": "9d94dafee0014985fe8c662e2fa44fd975f67e068deecd0cd534b1b1fcb2c4b4",
+    "src/rendering/proof/sand-material-study.html": "4d8af0e8730584ef32387afc0f93ead1ae4e3e361012d4c6f9adfae6e2a32f3a"
+  },
+  "verification": {
+    "tests": "6 focused tests pass",
+    "build": "single-entry Vite production build using the actual source, Three and shader factory; no mocks",
+    "runtime": "Chrome actual WebGL2 at two required viewport sizes. No tangent attribute; shared world UVs drive all maps, each normal sample uses its own derivative tangent frame. Pixel hashes change on active/resume and match on pause/reduced/frozen time.",
+    "statsScope": "renderer.info values are rendered draw/triangle totals for the last render including shadow draws, not unique mesh payload counts; 24940 rendered triangles, 6 calls. Three generated512RGBA maps total3MiB base, about4MiB with full mips, excluding other targets/maps/CPU overhead."
+  },
+  "limits": "Procedural seeded maps are custom generated, not scanned/photo-derived assets. Current grain scale, tiling, assembled contact/silhouette, photorealism and frame-time/asset budget criteria remain unverified. No main aquarium integration is included in this functional handoff. Main renderer remains on its existing sand until separately reviewed. Pre-existing PCFSoftShadowMap warning remains. This proof does not visually validate tangent direction or material accuracy; it verifies source integration, successful shader execution and temporal invariants."
+}
