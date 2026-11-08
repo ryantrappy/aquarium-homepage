@@ -1,0 +1,80 @@
+{
+  "extras": {
+    "reefAsset": {
+      "schema": "reef-asset-v1",
+      "id": "fish-firefish",
+      "kind": "fish",
+      "units": "meter",
+      "upAxis": "+Y",
+      "origin": "local",
+      "dimensionsM": [
+        0.508044,
+        0.758724,
+        2
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+        "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+        "attribution": "Original photorealistic 3D rigged and animated fish asset (Nemateleotris magnifica (Firefish / Magnificent Dartfish)) reconstructed from project-original public/fish/firefish.webp with embedded 512x512 BaseColor, Normal, and ORM PBR textures."
+      }
+    }
+  },
+  "rootTransform": {
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "boundsM": {
+    "min": [
+      -0.254022,
+      -0.368581,
+      -1
+    ],
+    "max": [
+      0.254022,
+      0.390143,
+      1
+    ]
+  },
+  "primitives": [
+    {
+      "id": "firefish_body",
+      "role": "fish",
+      "vertexCount": 3685,
+      "boundsM": {
+        "min": [
+          -0.254022,
+          -0.368581,
+          -1
+        ],
+        "max": [
+          0.254022,
+          0.390143,
+          1
+        ]
+      },
+      "material": {
+        "vertexColors": false,
+        "vertexAlpha": false,
+        "aoSource": "texture"
+      }
+    }
+  ],
+  "sockets": [],
+  "collisionParts": []
+}

@@ -1,0 +1,80 @@
+{
+  "extras": {
+    "reefAsset": {
+      "schema": "reef-asset-v1",
+      "id": "fish-copperband-butterflyfish",
+      "kind": "fish",
+      "units": "meter",
+      "upAxis": "+Y",
+      "origin": "local",
+      "dimensionsM": [
+        0.541594,
+        1.31382,
+        2
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+        "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+        "attribution": "Original photorealistic 3D rigged and animated fish asset (Chelmon rostratus (Copperband Butterflyfish)) reconstructed from project-original public/fish/copperband-butterflyfish.webp with embedded 512x512 BaseColor, Normal, and ORM PBR textures."
+      }
+    }
+  },
+  "rootTransform": {
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "boundsM": {
+    "min": [
+      -0.270797,
+      -0.655694,
+      -1
+    ],
+    "max": [
+      0.270797,
+      0.658126,
+      1
+    ]
+  },
+  "primitives": [
+    {
+      "id": "copperband_butterflyfish_body",
+      "role": "fish",
+      "vertexCount": 4480,
+      "boundsM": {
+        "min": [
+          -0.270797,
+          -0.655694,
+          -1
+        ],
+        "max": [
+          0.270797,
+          0.658126,
+          1
+        ]
+      },
+      "material": {
+        "vertexColors": false,
+        "vertexAlpha": false,
+        "aoSource": "texture"
+      }
+    }
+  ],
+  "sockets": [],
+  "collisionParts": []
+}

@@ -1,0 +1,722 @@
+{
+  "schema": "modular-fish-manifest-v1",
+  "contractSchema": "reef-asset-v1",
+  "note": "Thirteen self-contained photorealistic 3D rigged fish assets reconstructed from project-original public/fish/*.webp cutouts pass the offline reef-asset-v1 contract.",
+  "assets": [
+    {
+      "id": "fish-blue-tang",
+      "fishSpeciesId": "blue-tang",
+      "file": "blue-tang.glb",
+      "path": "src/rendering/assets/splat-fish/blue-tang.glb",
+      "inspectionReport": "src/rendering/assets/splat-fish/fish-blue-tang-inspection.json",
+      "kind": "fish",
+      "rigArchetype": "labriform_cruiser",
+      "species": "Paracanthurus hepatus (Regal Blue Tang / Palette Surgeonfish)",
+      "sha256": "2ced93ac4fbaa1c5633e6d1dd86f8cc77085e3bbf6e3936767f5cadf22a13d94",
+      "bytes": 1188676,
+      "triangles": 10596,
+      "dimensionsM": [
+        0.608694,
+        0.920125,
+        2
+      ],
+      "boundsM": {
+        "min": [
+          -0.304347,
+          -0.459964,
+          -1
+        ],
+        "max": [
+          0.304347,
+          0.460161,
+          1
+        ]
+      },
+      "joints": [
+        "spine_0",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "spine_4",
+        "spine_5",
+        "pectoral_L",
+        "pectoral_R"
+      ],
+      "animations": [
+        "blue_tang_labriform_swim"
+      ],
+      "primitives": [
+        {
+          "id": "blue_tang_body",
+          "role": "fish",
+          "vertexCount": 5350
+        }
+      ],
+      "generator": "scripts/build-splat-fish-glbs.mjs",
+      "generatorSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+      "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+      "contractValidated": true,
+      "status": "candidate-awaiting-root-review"
+    },
+    {
+      "id": "fish-royal-gramma",
+      "fishSpeciesId": "royal-gramma",
+      "file": "royal-gramma.glb",
+      "path": "src/rendering/assets/splat-fish/royal-gramma.glb",
+      "inspectionReport": "src/rendering/assets/splat-fish/fish-royal-gramma-inspection.json",
+      "kind": "fish",
+      "rigArchetype": "subcarangiform_schooler",
+      "species": "Gramma loreto (Royal Gramma / Fairy Basslet)",
+      "sha256": "44b6f75203f4779685df53aee7d7542bf6f500f435b80e310d22b479c2cb4a0c",
+      "bytes": 1170164,
+      "triangles": 9064,
+      "dimensionsM": [
+        0.602344,
+        0.934322,
+        2
+      ],
+      "boundsM": {
+        "min": [
+          -0.301172,
+          -0.465694,
+          -1
+        ],
+        "max": [
+          0.301172,
+          0.468628,
+          1
+        ]
+      },
+      "joints": [
+        "spine_0",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "spine_4",
+        "spine_5",
+        "pectoral_L",
+        "pectoral_R"
+      ],
+      "animations": [
+        "royal_gramma_subcarangiform_swim"
+      ],
+      "primitives": [
+        {
+          "id": "royal_gramma_body",
+          "role": "fish",
+          "vertexCount": 4582
+        }
+      ],
+      "generator": "scripts/build-splat-fish-glbs.mjs",
+      "generatorSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+      "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+      "contractValidated": true,
+      "status": "candidate-awaiting-root-review"
+    },
+    {
+      "id": "fish-banggai-cardinalfish",
+      "fishSpeciesId": "banggai-cardinalfish",
+      "file": "banggai-cardinalfish.glb",
+      "path": "src/rendering/assets/splat-fish/banggai-cardinalfish.glb",
+      "inspectionReport": "src/rendering/assets/splat-fish/fish-banggai-cardinalfish-inspection.json",
+      "kind": "fish",
+      "rigArchetype": "banner_hoverer",
+      "species": "Pterapogon kauderni (Banggai Cardinalfish)",
+      "sha256": "4b025d846f0146eda14771df6e7f01ce1e43135a4ae5bdae2837e8fd3c83d8c2",
+      "bytes": 1099508,
+      "triangles": 6140,
+      "dimensionsM": [
+        0.588744,
+        1.399841,
+        2
+      ],
+      "boundsM": {
+        "min": [
+          -0.294372,
+          -0.701815,
+          -1
+        ],
+        "max": [
+          0.294372,
+          0.698026,
+          1
+        ]
+      },
+      "joints": [
+        "spine_0",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "spine_4",
+        "spine_5",
+        "pectoral_L",
+        "pectoral_R"
+      ],
+      "animations": [
+        "banggai_banner_hover_swim"
+      ],
+      "primitives": [
+        {
+          "id": "banggai_cardinalfish_body",
+          "role": "fish",
+          "vertexCount": 3126
+        }
+      ],
+      "generator": "scripts/build-splat-fish-glbs.mjs",
+      "generatorSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+      "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+      "contractValidated": true,
+      "status": "candidate-awaiting-root-review"
+    },
+    {
+      "id": "fish-mandarin-dragonet",
+      "fishSpeciesId": "mandarin-dragonet",
+      "file": "mandarin-dragonet.glb",
+      "path": "src/rendering/assets/splat-fish/mandarin-dragonet.glb",
+      "inspectionReport": "src/rendering/assets/splat-fish/fish-mandarin-dragonet-inspection.json",
+      "kind": "fish",
+      "rigArchetype": "benthic_percher_dragonet",
+      "species": "Synchiropus splendidus (Mandarin Dragonet)",
+      "sha256": "87d4745222426b932effb953be81503952c34012f603608d9055e8a39cdaa40b",
+      "bytes": 1475020,
+      "triangles": 8008,
+      "dimensionsM": [
+        0.689392,
+        0.893234,
+        2
+      ],
+      "boundsM": {
+        "min": [
+          -0.344696,
+          -0.450781,
+          -1
+        ],
+        "max": [
+          0.344696,
+          0.442453,
+          1
+        ]
+      },
+      "joints": [
+        "spine_0",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "spine_4",
+        "spine_5",
+        "pectoral_L",
+        "pectoral_R"
+      ],
+      "animations": [
+        "mandarin_dragonet_hover_swim"
+      ],
+      "primitives": [
+        {
+          "id": "mandarin_dragonet_body",
+          "role": "fish",
+          "vertexCount": 4050
+        }
+      ],
+      "generator": "scripts/build-splat-fish-glbs.mjs",
+      "generatorSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+      "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+      "contractValidated": true,
+      "status": "candidate-awaiting-root-review"
+    },
+    {
+      "id": "fish-blue-green-chromis",
+      "fishSpeciesId": "blue-green-chromis",
+      "file": "blue-green-chromis.glb",
+      "path": "src/rendering/assets/splat-fish/blue-green-chromis.glb",
+      "inspectionReport": "src/rendering/assets/splat-fish/fish-blue-green-chromis-inspection.json",
+      "kind": "fish",
+      "rigArchetype": "subcarangiform_schooler",
+      "species": "Chromis viridis (Blue-Green Chromis)",
+      "sha256": "1b35ba4dd23c29a5fe3b989df8a1a72ebb073c0f69062efc04896f829f44abef",
+      "bytes": 1108844,
+      "triangles": 8140,
+      "dimensionsM": [
+        0.588744,
+        0.918953,
+        2
+      ],
+      "boundsM": {
+        "min": [
+          -0.294372,
+          -0.45512,
+          -1
+        ],
+        "max": [
+          0.294372,
+          0.463833,
+          1
+        ]
+      },
+      "joints": [
+        "spine_0",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "spine_4",
+        "spine_5",
+        "pectoral_L",
+        "pectoral_R"
+      ],
+      "animations": [
+        "chromis_subcarangiform_swim"
+      ],
+      "primitives": [
+        {
+          "id": "blue_green_chromis_body",
+          "role": "fish",
+          "vertexCount": 4121
+        }
+      ],
+      "generator": "scripts/build-splat-fish-glbs.mjs",
+      "generatorSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+      "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+      "contractValidated": true,
+      "status": "candidate-awaiting-root-review"
+    },
+    {
+      "id": "fish-firefish",
+      "fishSpeciesId": "firefish",
+      "file": "firefish.glb",
+      "path": "src/rendering/assets/splat-fish/firefish.glb",
+      "inspectionReport": "src/rendering/assets/splat-fish/fish-firefish-inspection.json",
+      "kind": "fish",
+      "rigArchetype": "subcarangiform_schooler",
+      "species": "Nemateleotris magnifica (Firefish / Magnificent Dartfish)",
+      "sha256": "3aceb378816c6d585b06b3fb9fd79cd39986ff36b5f577e0e056bc18e731d7d6",
+      "bytes": 1010560,
+      "triangles": 7264,
+      "dimensionsM": [
+        0.508044,
+        0.758724,
+        2
+      ],
+      "boundsM": {
+        "min": [
+          -0.254022,
+          -0.368581,
+          -1
+        ],
+        "max": [
+          0.254022,
+          0.390143,
+          1
+        ]
+      },
+      "joints": [
+        "spine_0",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "spine_4",
+        "spine_5",
+        "pectoral_L",
+        "pectoral_R"
+      ],
+      "animations": [
+        "firefish_hover_dart_swim"
+      ],
+      "primitives": [
+        {
+          "id": "firefish_body",
+          "role": "fish",
+          "vertexCount": 3685
+        }
+      ],
+      "generator": "scripts/build-splat-fish-glbs.mjs",
+      "generatorSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+      "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+      "contractValidated": true,
+      "status": "candidate-awaiting-root-review"
+    },
+    {
+      "id": "fish-yellow-watchman-goby",
+      "fishSpeciesId": "yellow-watchman-goby",
+      "file": "yellow-watchman-goby.glb",
+      "path": "src/rendering/assets/splat-fish/yellow-watchman-goby.glb",
+      "inspectionReport": "src/rendering/assets/splat-fish/fish-yellow-watchman-goby-inspection.json",
+      "kind": "fish",
+      "rigArchetype": "subcarangiform_schooler",
+      "species": "Cryptocentrus cinctus (Yellow Watchman Goby)",
+      "sha256": "efd4b6b28a1fb130dbc4948802b8e5bfba13594524e2ce9444854b3a6b3fce6b",
+      "bytes": 1104408,
+      "triangles": 9012,
+      "dimensionsM": [
+        0.588744,
+        0.707371,
+        2
+      ],
+      "boundsM": {
+        "min": [
+          -0.294372,
+          -0.353172,
+          -1
+        ],
+        "max": [
+          0.294372,
+          0.354199,
+          1
+        ]
+      },
+      "joints": [
+        "spine_0",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "spine_4",
+        "spine_5",
+        "pectoral_L",
+        "pectoral_R"
+      ],
+      "animations": [
+        "watchman_goby_benthic_swim"
+      ],
+      "primitives": [
+        {
+          "id": "yellow_watchman_goby_body",
+          "role": "fish",
+          "vertexCount": 4550
+        }
+      ],
+      "generator": "scripts/build-splat-fish-glbs.mjs",
+      "generatorSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+      "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+      "contractValidated": true,
+      "status": "candidate-awaiting-root-review"
+    },
+    {
+      "id": "fish-tailspot-blenny",
+      "fishSpeciesId": "tailspot-blenny",
+      "file": "tailspot-blenny.glb",
+      "path": "src/rendering/assets/splat-fish/tailspot-blenny.glb",
+      "inspectionReport": "src/rendering/assets/splat-fish/fish-tailspot-blenny-inspection.json",
+      "kind": "fish",
+      "rigArchetype": "subcarangiform_schooler",
+      "species": "Ecsenius stigmatura (Tailspot Blenny)",
+      "sha256": "3647c73925516a33dc9aaecb9dd9b6b89245b58ece1e84f3cabdece6ef0f5f64",
+      "bytes": 1260304,
+      "triangles": 9568,
+      "dimensionsM": [
+        0.555194,
+        0.520964,
+        2
+      ],
+      "boundsM": {
+        "min": [
+          -0.277597,
+          -0.291936,
+          -1
+        ],
+        "max": [
+          0.277597,
+          0.229028,
+          1
+        ]
+      },
+      "joints": [
+        "spine_0",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "spine_4",
+        "spine_5",
+        "pectoral_L",
+        "pectoral_R"
+      ],
+      "animations": [
+        "tailspot_blenny_sinuate_swim"
+      ],
+      "primitives": [
+        {
+          "id": "tailspot_blenny_body",
+          "role": "fish",
+          "vertexCount": 4834
+        }
+      ],
+      "generator": "scripts/build-splat-fish-glbs.mjs",
+      "generatorSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+      "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+      "contractValidated": true,
+      "status": "candidate-awaiting-root-review"
+    },
+    {
+      "id": "fish-six-line-wrasse",
+      "fishSpeciesId": "six-line-wrasse",
+      "file": "six-line-wrasse.glb",
+      "path": "src/rendering/assets/splat-fish/six-line-wrasse.glb",
+      "inspectionReport": "src/rendering/assets/splat-fish/fish-six-line-wrasse-inspection.json",
+      "kind": "fish",
+      "rigArchetype": "subcarangiform_schooler",
+      "species": "Pseudocheilinus hexataenia (Six-Line Wrasse)",
+      "sha256": "778db99293b744c11a60cb3f15170159bcb50f1e24d4ae5cba879b08be9393b9",
+      "bytes": 1188360,
+      "triangles": 10348,
+      "dimensionsM": [
+        0.588744,
+        0.737195,
+        2
+      ],
+      "boundsM": {
+        "min": [
+          -0.294372,
+          -0.37008,
+          -1
+        ],
+        "max": [
+          0.294372,
+          0.367115,
+          1
+        ]
+      },
+      "joints": [
+        "spine_0",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "spine_4",
+        "spine_5",
+        "pectoral_L",
+        "pectoral_R"
+      ],
+      "animations": [
+        "six_line_wrasse_labriform_swim"
+      ],
+      "primitives": [
+        {
+          "id": "six_line_wrasse_body",
+          "role": "fish",
+          "vertexCount": 5231
+        }
+      ],
+      "generator": "scripts/build-splat-fish-glbs.mjs",
+      "generatorSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+      "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+      "contractValidated": true,
+      "status": "candidate-awaiting-root-review"
+    },
+    {
+      "id": "fish-mccoskers-flasher-wrasse",
+      "fishSpeciesId": "mccoskers-flasher-wrasse",
+      "file": "mccoskers-flasher-wrasse.glb",
+      "path": "src/rendering/assets/splat-fish/mccoskers-flasher-wrasse.glb",
+      "inspectionReport": "src/rendering/assets/splat-fish/fish-mccoskers-flasher-wrasse-inspection.json",
+      "kind": "fish",
+      "rigArchetype": "subcarangiform_schooler",
+      "species": "Paracheilinus mccoskeri (McCosker's Flasher Wrasse)",
+      "sha256": "a840609dc76ca68bfd1323de6b7380105a98b61a75f85bc049ea874ba44a617c",
+      "bytes": 1151208,
+      "triangles": 8452,
+      "dimensionsM": [
+        0.555194,
+        0.926831,
+        2
+      ],
+      "boundsM": {
+        "min": [
+          -0.277597,
+          -0.460731,
+          -1
+        ],
+        "max": [
+          0.277597,
+          0.4661,
+          1
+        ]
+      },
+      "joints": [
+        "spine_0",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "spine_4",
+        "spine_5",
+        "pectoral_L",
+        "pectoral_R"
+      ],
+      "animations": [
+        "mccoskers_flasher_wrasse_swim"
+      ],
+      "primitives": [
+        {
+          "id": "mccoskers_flasher_wrasse_body",
+          "role": "fish",
+          "vertexCount": 4265
+        }
+      ],
+      "generator": "scripts/build-splat-fish-glbs.mjs",
+      "generatorSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+      "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+      "contractValidated": true,
+      "status": "candidate-awaiting-root-review"
+    },
+    {
+      "id": "fish-lyretail-anthias",
+      "fishSpeciesId": "lyretail-anthias",
+      "file": "lyretail-anthias.glb",
+      "path": "src/rendering/assets/splat-fish/lyretail-anthias.glb",
+      "inspectionReport": "src/rendering/assets/splat-fish/fish-lyretail-anthias-inspection.json",
+      "kind": "fish",
+      "rigArchetype": "subcarangiform_schooler",
+      "species": "Pseudanthias squamipinnis (Lyretail Anthias)",
+      "sha256": "08d859c6847acfcdb0b6efa141d80b51ba6f7e522348091e975c85c4ca4f3af9",
+      "bytes": 917928,
+      "triangles": 8364,
+      "dimensionsM": [
+        0.588744,
+        0.803034,
+        2
+      ],
+      "boundsM": {
+        "min": [
+          -0.294372,
+          -0.399212,
+          -1
+        ],
+        "max": [
+          0.294372,
+          0.403822,
+          1
+        ]
+      },
+      "joints": [
+        "spine_0",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "spine_4",
+        "spine_5",
+        "pectoral_L",
+        "pectoral_R"
+      ],
+      "animations": [
+        "lyretail_anthias_school_swim"
+      ],
+      "primitives": [
+        {
+          "id": "lyretail_anthias_body",
+          "role": "fish",
+          "vertexCount": 4236
+        }
+      ],
+      "generator": "scripts/build-splat-fish-glbs.mjs",
+      "generatorSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+      "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+      "contractValidated": true,
+      "status": "candidate-awaiting-root-review"
+    },
+    {
+      "id": "fish-flame-angelfish",
+      "fishSpeciesId": "flame-angelfish",
+      "file": "flame-angelfish.glb",
+      "path": "src/rendering/assets/splat-fish/flame-angelfish.glb",
+      "inspectionReport": "src/rendering/assets/splat-fish/fish-flame-angelfish-inspection.json",
+      "kind": "fish",
+      "rigArchetype": "subcarangiform_schooler",
+      "species": "Centropyge loricula (Flame Angelfish)",
+      "sha256": "5ffcf526c1174ed3924d590a2b79cb0fbee492349af96f3ab3edaad21759707e",
+      "bytes": 1282892,
+      "triangles": 10036,
+      "dimensionsM": [
+        0.588744,
+        1.25812,
+        2
+      ],
+      "boundsM": {
+        "min": [
+          -0.294372,
+          -0.621258,
+          -1
+        ],
+        "max": [
+          0.294372,
+          0.636862,
+          1
+        ]
+      },
+      "joints": [
+        "spine_0",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "spine_4",
+        "spine_5",
+        "pectoral_L",
+        "pectoral_R"
+      ],
+      "animations": [
+        "flame_angelfish_reef_swim"
+      ],
+      "primitives": [
+        {
+          "id": "flame_angelfish_body",
+          "role": "fish",
+          "vertexCount": 5064
+        }
+      ],
+      "generator": "scripts/build-splat-fish-glbs.mjs",
+      "generatorSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+      "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+      "contractValidated": true,
+      "status": "candidate-awaiting-root-review"
+    },
+    {
+      "id": "fish-copperband-butterflyfish",
+      "fishSpeciesId": "copperband-butterflyfish",
+      "file": "copperband-butterflyfish.glb",
+      "path": "src/rendering/assets/splat-fish/copperband-butterflyfish.glb",
+      "inspectionReport": "src/rendering/assets/splat-fish/fish-copperband-butterflyfish-inspection.json",
+      "kind": "fish",
+      "rigArchetype": "subcarangiform_schooler",
+      "species": "Chelmon rostratus (Copperband Butterflyfish)",
+      "sha256": "faac8099861a931b4b5094f379f042ed8ba5cb5bf00a6275d78fcdeab2f598d6",
+      "bytes": 1297060,
+      "triangles": 8876,
+      "dimensionsM": [
+        0.541594,
+        1.31382,
+        2
+      ],
+      "boundsM": {
+        "min": [
+          -0.270797,
+          -0.655694,
+          -1
+        ],
+        "max": [
+          0.270797,
+          0.658126,
+          1
+        ]
+      },
+      "joints": [
+        "spine_0",
+        "spine_1",
+        "spine_2",
+        "spine_3",
+        "spine_4",
+        "spine_5",
+        "pectoral_L",
+        "pectoral_R"
+      ],
+      "animations": [
+        "copperband_butterflyfish_glide_swim"
+      ],
+      "primitives": [
+        {
+          "id": "copperband_butterflyfish_body",
+          "role": "fish",
+          "vertexCount": 4480
+        }
+      ],
+      "generator": "scripts/build-splat-fish-glbs.mjs",
+      "generatorSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+      "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+      "contractValidated": true,
+      "status": "candidate-awaiting-root-review"
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "extras": {
+    "reefAsset": {
+      "schema": "reef-asset-v1",
+      "id": "fish-blue-tang",
+      "kind": "fish",
+      "units": "meter",
+      "upAxis": "+Y",
+      "origin": "local",
+      "dimensionsM": [
+        0.608694,
+        0.920125,
+        2
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+        "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+        "attribution": "Original photorealistic 3D rigged and animated fish asset (Paracanthurus hepatus (Regal Blue Tang / Palette Surgeonfish)) reconstructed from project-original public/fish/blue-tang.webp with embedded 512x512 BaseColor, Normal, and ORM PBR textures."
+      }
+    }
+  },
+  "rootTransform": {
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "boundsM": {
+    "min": [
+      -0.304347,
+      -0.459964,
+      -1
+    ],
+    "max": [
+      0.304347,
+      0.460161,
+      1
+    ]
+  },
+  "primitives": [
+    {
+      "id": "blue_tang_body",
+      "role": "fish",
+      "vertexCount": 5350,
+      "boundsM": {
+        "min": [
+          -0.304347,
+          -0.459964,
+          -1
+        ],
+        "max": [
+          0.304347,
+          0.460161,
+          1
+        ]
+      },
+      "material": {
+        "vertexColors": false,
+        "vertexAlpha": false,
+        "aoSource": "texture"
+      }
+    }
+  ],
+  "sockets": [],
+  "collisionParts": []
+}

@@ -1,0 +1,80 @@
+{
+  "extras": {
+    "reefAsset": {
+      "schema": "reef-asset-v1",
+      "id": "fish-mccoskers-flasher-wrasse",
+      "kind": "fish",
+      "units": "meter",
+      "upAxis": "+Y",
+      "origin": "local",
+      "dimensionsM": [
+        0.555194,
+        0.926831,
+        2
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+        "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+        "attribution": "Original photorealistic 3D rigged and animated fish asset (Paracheilinus mccoskeri (McCosker's Flasher Wrasse)) reconstructed from project-original public/fish/mccoskers-flasher-wrasse.webp with embedded 512x512 BaseColor, Normal, and ORM PBR textures."
+      }
+    }
+  },
+  "rootTransform": {
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "boundsM": {
+    "min": [
+      -0.277597,
+      -0.460731,
+      -1
+    ],
+    "max": [
+      0.277597,
+      0.4661,
+      1
+    ]
+  },
+  "primitives": [
+    {
+      "id": "mccoskers_flasher_wrasse_body",
+      "role": "fish",
+      "vertexCount": 4265,
+      "boundsM": {
+        "min": [
+          -0.277597,
+          -0.460731,
+          -1
+        ],
+        "max": [
+          0.277597,
+          0.4661,
+          1
+        ]
+      },
+      "material": {
+        "vertexColors": false,
+        "vertexAlpha": false,
+        "aoSource": "texture"
+      }
+    }
+  ],
+  "sockets": [],
+  "collisionParts": []
+}

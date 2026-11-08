@@ -1,0 +1,80 @@
+{
+  "extras": {
+    "reefAsset": {
+      "schema": "reef-asset-v1",
+      "id": "fish-lyretail-anthias",
+      "kind": "fish",
+      "units": "meter",
+      "upAxis": "+Y",
+      "origin": "local",
+      "dimensionsM": [
+        0.588744,
+        0.803034,
+        2
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+        "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+        "attribution": "Original photorealistic 3D rigged and animated fish asset (Pseudanthias squamipinnis (Lyretail Anthias)) reconstructed from project-original public/fish/lyretail-anthias.webp with embedded 512x512 BaseColor, Normal, and ORM PBR textures."
+      }
+    }
+  },
+  "rootTransform": {
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "boundsM": {
+    "min": [
+      -0.294372,
+      -0.399212,
+      -1
+    ],
+    "max": [
+      0.294372,
+      0.403822,
+      1
+    ]
+  },
+  "primitives": [
+    {
+      "id": "lyretail_anthias_body",
+      "role": "fish",
+      "vertexCount": 4236,
+      "boundsM": {
+        "min": [
+          -0.294372,
+          -0.399212,
+          -1
+        ],
+        "max": [
+          0.294372,
+          0.403822,
+          1
+        ]
+      },
+      "material": {
+        "vertexColors": false,
+        "vertexAlpha": false,
+        "aoSource": "texture"
+      }
+    }
+  ],
+  "sockets": [],
+  "collisionParts": []
+}
