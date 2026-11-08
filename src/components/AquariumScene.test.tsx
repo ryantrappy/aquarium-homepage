@@ -241,3 +241,36 @@ describe('native fish links with geometry picking', () => {
     expect(event.defaultPrevented).toBe(true); expect(mock.activate).not.toHaveBeenCalled()
   })
 })
+
+describe('AQ-13 hover/focus affordances', () => {
+  it('renders one aria-hidden tooltip per fish link with the same service name as its caption', () => {
+    for (const service of services) {
+      const link = anchor(service.id)
+      const tooltip = link.querySelector<HTMLElement>('.fish-link-tooltip')
+      expect(tooltip).not.toBeNull()
+      expect(tooltip!.textContent).toBe(service.name)
+      expect(tooltip!.getAttribute('aria-hidden')).toBe('true')
+      expect(link.querySelector('.fish-name')!.textContent).toContain(service.name)
+      // The tooltip is a visual duplicate, not a second accessible name.
+      expect(link.getAttribute('aria-label')).toBe(`Open ${service.name} in a new tab`)
+    }
+  })
+  it('leaves the tooltip untouched when a fish is occluded — suppression is CSS-only', () => {
+    const link = anchor('clown')
+    const tooltip = link.querySelector<HTMLElement>('.fish-link-tooltip')!
+    applyFishLinkVisibility(link, false, null)
+    expect(link.dataset.occluded).toBe('true')
+    expect(link.getAttribute('aria-hidden')).toBe('true')
+    expect(link.tabIndex).toBe(-1)
+    expect(tooltip.textContent).toBe('Home')
+    expect(tooltip.style.visibility).toBe('')
+    expect(tooltip.style.display).toBe('')
+  })
+  it('keeps the native anchor contract with the tooltip present', () => {
+    const link = anchor('tang')
+    expect(link.target).toBe('_blank')
+    expect(link.rel).toBe('noreferrer')
+    expect(link.href).toBe(services[1].url + '/')
+    expect(link.querySelectorAll('.fish-link-tooltip')).toHaveLength(1)
+  })
+})

@@ -566,6 +566,12 @@ diffuseColor.rgb = waterCol;
       anchor.style.visibility = 'visible'
       anchor.style.transform = `translate3d(${bounds.x}px,${bounds.y}px,0)`; anchor.style.width = `${bounds.width}px`; anchor.style.height = `${bounds.height}px`
       anchor.style.zIndex = String(Math.round((item.root.position.z + 10) * 100))
+      // AQ-13: keep the hover tooltip on-screen — flip it below the caption
+      // near the top edge and align it inward near the left/right edges.
+      const tooltipCenterX = bounds.x + bounds.width / 2
+      anchor.classList.toggle('fish-link-tooltip-below', bounds.y < 40)
+      anchor.classList.toggle('fish-link-tooltip-left', tooltipCenterX < 110)
+      anchor.classList.toggle('fish-link-tooltip-right', tooltipCenterX > width - 110)
     }
   }
   function render(steps: number, forceLabels = false) {

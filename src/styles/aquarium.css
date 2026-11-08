@@ -234,3 +234,83 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   background: rgba(11, 45, 49, .84);
   box-shadow: 0 0 12px rgba(180, 239, 220, .22);
 }
+
+/* AQ-13 hover/focus affordances (tracker #16). Anchor-only: no canvas click
+ * handling, no layout shift, no transform on the anchor itself, and never a
+ * visibility/display override — the label's inline visibility: hidden for
+ * occluded fish (fish-link-focus.ts) always wins. */
+.aquarium-three.is-rendered .aquarium-fish-link .fish-name { opacity: .65; }
+.aquarium-three.is-rendered .aquarium-fish-link:hover .fish-name,
+.aquarium-three.is-rendered .aquarium-fish-link:focus-visible .fish-name,
+.aquarium-three.is-rendered .aquarium-fish-link:focus-within .fish-name,
+.aquarium-three.is-rendered .aquarium-fish-link.is-acknowledged .fish-name { opacity: 1; }
+
+/* Hover glow (pointer devices only) and an equal-or-stronger keyboard glow.
+ * The more specific selectors below override the global a:focus-visible
+ * outline for fish links. */
+.aquarium-three.is-rendered .aquarium-fish-link:not([data-occluded="true"]):not([aria-hidden="true"]):focus-visible {
+  outline: 2px solid rgba(255, 255, 255, .9);
+  outline-offset: 2px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .25), 0 0 18px 4px rgba(120, 200, 255, .45);
+  transition: box-shadow 120ms ease, outline-color 120ms ease;
+}
+@media (hover: hover) {
+  .aquarium-three.is-rendered .aquarium-fish-link:not([data-occluded="true"]):not([aria-hidden="true"]):hover {
+    outline: 2px solid rgba(255, 255, 255, .9);
+    outline-offset: 2px;
+    border-radius: 999px;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, .25), 0 0 18px 4px rgba(120, 200, 255, .45);
+    transition: box-shadow 120ms ease, outline-color 120ms ease;
+  }
+}
+
+/* Service-name tooltip (visual duplicate of the always-visible caption, so
+ * aria-hidden: the anchor already carries the accessible name). Shown only
+ * for exposed fish; pointer-events: none keeps it out of hit testing. The
+ * scene toggles the -below/-left/-right classes while repositioning anchors
+ * (positionLabels in aquarium.ts) so the tooltip never clips at an edge. */
+.aquarium-fish-link .fish-link-tooltip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 200px;
+  padding: 4px 9px;
+  border: 1px solid rgba(220, 247, 231, .35);
+  border-radius: 99px;
+  color: #f4fcf7;
+  background: rgba(7, 29, 35, .88);
+  box-shadow: 0 4px 12px rgba(0, 12, 16, .3);
+  font-size: 10px;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.aquarium-fish-link:not([data-occluded="true"]):not([aria-hidden="true"]):hover .fish-link-tooltip,
+.aquarium-fish-link:not([data-occluded="true"]):not([aria-hidden="true"]):focus-visible .fish-link-tooltip { opacity: 1; }
+.aquarium-fish-link.fish-link-tooltip-below .fish-link-tooltip { top: calc(100% + 38px); bottom: auto; }
+.aquarium-fish-link.fish-link-tooltip-left .fish-link-tooltip { left: 0; transform: none; }
+.aquarium-fish-link.fish-link-tooltip-right .fish-link-tooltip { left: auto; right: 0; transform: none; }
+
+/* Pure-CSS click ripple on the anchor only; navigation is never delayed. */
+.aquarium-fish-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+}
+.aquarium-fish-link:not([data-occluded="true"]):not([aria-hidden="true"]):active::after { animation: fish-link-ripple 450ms ease-out; }
+@keyframes fish-link-ripple {
+  from { box-shadow: 0 0 0 0 rgba(160, 220, 255, .55); opacity: 1; }
+  to { box-shadow: 0 0 0 18px rgba(160, 220, 255, 0); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aquarium-fish-link:active::after { animation: none; }
+}

@@ -99,6 +99,7 @@ export function AquariumScene({ services, paused, focusFallbackRef }: AquariumSc
           return <a key={service.id} data-service-id={service.id} className="aquarium-fish-link" href={service.url} target="_blank" rel="noreferrer" aria-label={`Open ${service.name} in a new tab`} title={`${service.name} · ${species.commonName}`} onClick={event => activate(event, service)} onAuxClick={event => { if (event.button === 1) activate(event, service) }} onContextMenu={event => { nativeTarget(event, service) }}>
             <FishFigure fish={species} />
             <span className="fish-name"><span>{service.name}</span>{service.isExample && <small>example</small>}</span>
+            <span className="fish-link-tooltip" aria-hidden="true">{service.name}</span>
           </a>
         })}
       </div>
