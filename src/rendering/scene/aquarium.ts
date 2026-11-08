@@ -20,6 +20,7 @@ import {
 } from './underwater-optics'
 import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
 import { createSwimmingFish, seedForId, startleFish, stepSwimmingFish, type SwimmingFish, type WaterHabitat } from './motion'
+import { createReefMeshNavigation, MESH_NAVIGATION_COLLISION_RADIUS_M, type ReefMeshIslandInput } from './reef-mesh-navigation'
 import { applyFishTurningRigOverlay, bindFishTurningRig, evaluateSpriteTurnScaleX, type FishTurningRig } from './fish-turning'
 import { SPRITE_PLANE_WIDTH, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale } from './fish-scale'
 import { canRunFishSceneLoop, findSafeFishHeading, findSafeFishSpawn, fishSceneStatus, fishSpawnPreference, isSafeFishPosition } from './fish-spawn'
@@ -273,6 +274,7 @@ diffuseColor.rgb = waterCol;
   const loadedAssets = new Set<GLTF>()
   let habitat: WaterHabitat = { bounds: { min: { x: -4, y: -2.25, z: -4.6 }, max: { x: 4, y: 2.8, z: 2.8 } }, obstacles: [], anchors: [] }
   let width = 1, height = 1, labelClock = 0, spawnUnavailable = false
+  let meshNavigationGeneration = 0
   const clock = createFrameClock()
   const ray = new THREE.Raycaster(), projected = new THREE.Vector3(), sample = new THREE.Vector3(), hitMeshes: THREE.Object3D[] = []
   const ownedSprites = new Set<THREE.Mesh>()
@@ -300,6 +302,12 @@ diffuseColor.rgb = waterCol;
     return visible
   }
   function rebuildHabitat() {
+    // Invalidate any previous mesh routing before the reefs are replaced; a
+    // fresh collider build is kicked off below and applied only if this
+    // generation is still current. Until it lands, fish keep AABB routing.
+    meshNavigationGeneration++
+    const generation = meshNavigationGeneration
+    habitat.meshNavigation = undefined
     reefs.forEach(reef => { scene.remove(reef) }); reefs.length = 0; hitMeshes.length = 0
     reefControllers = []; habitat.obstacles = []; habitat.anchors = []
     if (!rockIslandLeftBase || !rockIslandRightBase || coralTemplates.size === 0) return
@@ -333,6 +341,7 @@ diffuseColor.rgb = waterCol;
             yaw: -0.10,
           },
         ]
+    const meshIslands: ReefMeshIslandInput[] = []
     for (const [i, placement] of placements.entries()) {
       const { islandKind, rockScene, mounts, position, uniformScale, yaw } = placement
       const reef = rockScene.clone(true)
@@ -352,8 +361,23 @@ diffuseColor.rgb = waterCol;
       habitat.obstacles.push(...result.obstacles)
       habitat.anchors.push(...result.anchors)
       reef.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) })
+      meshIslands.push({ reef, islandId: `reef-${i}`, mountedCorals: assembled.mountedCorals })
     }
     hitMeshes.push(sand)
+    // Mesh routing builds after first paint (~1 s per island on the main
+    // thread) and activates only for this generation. Any failure keeps the
+    // existing AABB routing; nothing below depends on the mesh being ready.
+    createReefMeshNavigation(meshIslands).then(result => {
+      if (disposed || generation !== meshNavigationGeneration) return
+      if (result.status === 'ready') {
+        habitat.meshNavigation = result.meshNavigation
+        console.info('Mesh navigation ready', result.diagnostics)
+      } else {
+        console.warn('Mesh navigation unavailable; staying on AABB routing', result.reason, result.diagnostics)
+      }
+    }).catch(error => {
+      if (!disposed && generation === meshNavigationGeneration) console.warn('Mesh navigation build failed; staying on AABB routing', error)
+    })
   }
   function disposeInhabitant(item: Inhabitant) {
     try { item.motion.extensions.dispose() } catch (error) { console.error('Fish extension cleanup failed', error) }
@@ -377,7 +401,7 @@ diffuseColor.rgb = waterCol;
   function createInhabitant(service: ServiceConfig, spawn: FishSpawn, anchor?: HTMLAnchorElement): Inhabitant {
     const { species, clearance, position, yaw } = spawn
     const root = new THREE.Group(), base = modelBases.get(service.fishId), fallback = !base
-    const motion = createSwimmingFish(service.id, service.fishId, position, clearance, fishExtensions, { initialYaw: yaw })
+    const motion = createSwimmingFish(service.id, service.fishId, position, clearance, fishExtensions, { initialYaw: yaw, collisionRadiusM: MESH_NAVIGATION_COLLISION_RADIUS_M })
     const item: Inhabitant = { service, root, motion, anchor, visible: false, fallback, releasedFocus: false }
     try {
       if (base) {
@@ -447,13 +471,22 @@ diffuseColor.rgb = waterCol;
       const retained = current.get(next.id)
       if (retained?.service.fishId === next.fishId) refreshFishLink(retained, next, anchors.get(next.id))
     })
+    // Once mesh routing is active, a spawn must also be clear of the rock
+    // mesh and the coral envelopes. Before the async build lands there is no
+    // mesh to consult, so the existing AABB check is the whole check.
+    const meshSpawnCheck = habitat.meshNavigation?.queryCapsule
+      ? (candidate: SwimmingFish['position']) => {
+          const mesh = habitat.meshNavigation!
+          return mesh.queryCapsule!(candidate, candidate, MESH_NAVIGATION_COLLISION_RADIUS_M, { ...mesh.movementBudget }).status === 'clear'
+        }
+      : undefined
     for (const service of nextServices) {
       const previous = current.get(service.id)
       if (previous?.service.fishId === service.fishId) continue
       const species = getFishById(service.fishId)!
       const clearance = fishClearanceRadius(service.fishId)
       const preference = fishSpawnPreference(service.id, service.fishId, habitat.bounds, clearance, horizontalSlots.get(service.id))
-      const position = preference && findSafeFishSpawn(preference.position, habitat.bounds, habitat.obstacles, clearance, occupied)
+      const position = preference && findSafeFishSpawn(preference.position, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck)
       if (!position || !preference) {
         // Keep existing instances intact during the truthful full-native fallback.
         // A later fitting configuration can reuse their exact poses and clocks.
