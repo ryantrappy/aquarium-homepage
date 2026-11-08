@@ -12,13 +12,13 @@
       "kind": "fish",
       "rigArchetype": "labriform_cruiser",
       "species": "Paracanthurus hepatus (Regal Blue Tang / Palette Surgeonfish)",
-      "sha256": "fa9013baf908a489cfcd80e636fa121f753d697d27cbb3f9d35199c1cc411355",
-      "bytes": 1686884,
+      "sha256": "d660d63a4c9c8efd87ac48e1209f523493dd3aa9953c3d2aefc0af60f671583e",
+      "bytes": 1686860,
       "triangles": 19406,
       "dimensionsM": [
         0.348248,
         0.897737,
-        1.999727
+        2
       ],
       "boundsM": {
         "min": [
@@ -29,7 +29,7 @@
         "max": [
           0.174124,
           0.455306,
-          0.999727
+          1
         ]
       },
       "joints": [
