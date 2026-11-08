@@ -32,6 +32,19 @@ import { reconcileFishInhabitants, refreshFishLink } from './fish-inhabitants'
 const modelUrls: Record<string, string> = {
   'ocellaris-clownfish': new URL('../proof/candidate-real-clown.glb', import.meta.url).href,
   'yellow-tang': new URL('../proof/candidate-real-tang.glb', import.meta.url).href,
+  'blue-tang': new URL('../assets/splat-fish/blue-tang.glb', import.meta.url).href,
+  'royal-gramma': new URL('../assets/splat-fish/royal-gramma.glb', import.meta.url).href,
+  'banggai-cardinalfish': new URL('../assets/splat-fish/banggai-cardinalfish.glb', import.meta.url).href,
+  'mandarin-dragonet': new URL('../assets/splat-fish/mandarin-dragonet.glb', import.meta.url).href,
+  'blue-green-chromis': new URL('../assets/splat-fish/blue-green-chromis.glb', import.meta.url).href,
+  firefish: new URL('../assets/splat-fish/firefish.glb', import.meta.url).href,
+  'yellow-watchman-goby': new URL('../assets/splat-fish/yellow-watchman-goby.glb', import.meta.url).href,
+  'tailspot-blenny': new URL('../assets/splat-fish/tailspot-blenny.glb', import.meta.url).href,
+  'six-line-wrasse': new URL('../assets/splat-fish/six-line-wrasse.glb', import.meta.url).href,
+  'mccoskers-flasher-wrasse': new URL('../assets/splat-fish/mccoskers-flasher-wrasse.glb', import.meta.url).href,
+  'lyretail-anthias': new URL('../assets/splat-fish/lyretail-anthias.glb', import.meta.url).href,
+  'flame-angelfish': new URL('../assets/splat-fish/flame-angelfish.glb', import.meta.url).href,
+  'copperband-butterflyfish': new URL('../assets/splat-fish/copperband-butterflyfish.glb', import.meta.url).href,
 }
 export type SceneStatus = 'loading' | 'ready' | 'failed'
 export type AquariumController = { update(services: ServiceConfig[], paused: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void }

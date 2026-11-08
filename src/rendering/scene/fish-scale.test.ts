@@ -11,6 +11,19 @@ const root = resolve(__dirname, '../../..')
 const runtimeModels: Record<string, string> = {
   'ocellaris-clownfish': 'src/rendering/proof/candidate-real-clown.glb',
   'yellow-tang': 'src/rendering/proof/candidate-real-tang.glb',
+  'blue-tang': 'src/rendering/assets/splat-fish/blue-tang.glb',
+  'royal-gramma': 'src/rendering/assets/splat-fish/royal-gramma.glb',
+  'banggai-cardinalfish': 'src/rendering/assets/splat-fish/banggai-cardinalfish.glb',
+  'mandarin-dragonet': 'src/rendering/assets/splat-fish/mandarin-dragonet.glb',
+  'blue-green-chromis': 'src/rendering/assets/splat-fish/blue-green-chromis.glb',
+  firefish: 'src/rendering/assets/splat-fish/firefish.glb',
+  'yellow-watchman-goby': 'src/rendering/assets/splat-fish/yellow-watchman-goby.glb',
+  'tailspot-blenny': 'src/rendering/assets/splat-fish/tailspot-blenny.glb',
+  'six-line-wrasse': 'src/rendering/assets/splat-fish/six-line-wrasse.glb',
+  'mccoskers-flasher-wrasse': 'src/rendering/assets/splat-fish/mccoskers-flasher-wrasse.glb',
+  'lyretail-anthias': 'src/rendering/assets/splat-fish/lyretail-anthias.glb',
+  'flame-angelfish': 'src/rendering/assets/splat-fish/flame-angelfish.glb',
+  'copperband-butterflyfish': 'src/rendering/assets/splat-fish/copperband-butterflyfish.glb',
 }
 
 type GltfJson = { meshes: { primitives: { attributes: { POSITION: number } }[] }[]; accessors: { min?: number[]; max?: number[] }[]; nodes: { mesh?: number; skin?: number }[] }
