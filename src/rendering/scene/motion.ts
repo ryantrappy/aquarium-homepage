@@ -268,6 +268,20 @@ export type SchoolStepOptions = {
   reducedMotion?: boolean
 }
 
+/**
+ * Schooling heading influence (AQ-84): the horizontal cohesion + alignment
+ * steering direction for one fish, fed into `integrateSwimmingFish` so the
+ * fish turns toward the school under its own yaw/turn kinematics instead of
+ * being translated sideways. `cruiseSpeed` is the mean speed of conspecific
+ * peers (m/s); the integrator blends the fish's cruise toward it so a
+ * lagging outer fish accelerates forward along its heading to catch up.
+ */
+export type SchoolingHeadingInfluence = {
+  dx: number
+  dz: number
+  cruiseSpeed?: number
+}
+
 function schoolingPeer(fish: SwimmingFish): SchoolingPeer {
   return {
     id: fish.id,
@@ -282,17 +296,23 @@ function schoolingPeer(fish: SwimmingFish): SchoolingPeer {
 
 /**
  * Steps a whole school together (AQ-41 AC #1/#3/#4, AQ-44 AC #4/#5): the same
- * per-fish FSM + route integration as `stepSwimmingFish`, plus the existing
- * species-aware Boids steering (`evaluateSchoolingSteering`) as a bounded
- * 0.45/s nudge on top of route following. Steering is computed from a
- * pre-move peer snapshot taken once per substep, so results are
- * order-independent and deterministic for a given seed/frame; the nudge is
- * applied only when `movementSafety()` reports `clear` for the resulting
- * segment and is dropped — never forced — otherwise. Cohesion/alignment
- * apply only while the fish's motion intent is `hold` or `travel`
- * (idle/swim); separation applies in every state to every species. A stopped
- * fish (e.g. keyboard-focused) does not move but still counts as a peer.
- * `stopped` is either one flag for the whole school or one flag per fish.
+ * per-fish FSM + route integration as `stepSwimmingFish`, plus species-aware
+ * Boids steering (`evaluateSchoolingSteering`) folded into the fish's own
+ * locomotion (AQ-84). Steering is computed from a pre-move peer snapshot
+ * taken once per substep, so results are order-independent and deterministic
+ * for a given seed/frame. Cohesion/alignment steer the fish's heading: the
+ * horizontal cohesion + alignment direction is passed into
+ * `integrateSwimmingFish`, which rotates yaw toward it within the species
+ * turn limit and drives the turn kinematics (bank, spine bend, body flex),
+ * so outer fish turn and swim into the school instead of sliding sideways.
+ * Only personal-space separation still translates the body, as a small
+ * bounded nudge applied only when `movementSafety()` reports `clear` for
+ * the resulting segment, and dropped — never forced — otherwise.
+ * Cohesion/alignment apply only while the fish's motion intent is `hold` or
+ * `travel` (idle/swim); separation applies in every state to every species.
+ * A stopped fish (e.g. keyboard-focused) does not move but still counts as
+ * a peer. `stopped` is either one flag for the whole school or one flag per
+ * fish.
  */
 export function stepSwimmingSchool(
   fishes: readonly SwimmingFish[],
@@ -306,7 +326,6 @@ export function stepSwimmingSchool(
     const peers = fishes.map(schoolingPeer)
     fishes.forEach((fish, index) => {
       if (isStopped(index)) return
-      integrateSwimmingFish(fish, habitat, dt)
       const intent = getMotionIntent(fish.behavior.state)
       const steering = evaluateSchoolingSteering({
         self: peers[index],
@@ -319,17 +338,41 @@ export function stepSwimmingSchool(
         cohesionAllowed: intent === 'hold' || intent === 'travel',
         isSegmentSafe: (_start, target) => movementSafety(fish, habitat, target) === 'clear',
       })
-      if (steering.dx || steering.dy || steering.dz) {
+      // AQ-84: cohesion/alignment become a heading influence for the
+      // integrator; the fish turns toward the school and closes the
+      // distance by swimming forward along its new heading.
+      const schoolDx = steering.cohesion.x + steering.alignment.x
+      const schoolDz = steering.cohesion.z + steering.alignment.z
+      const schooling: SchoolingHeadingInfluence | undefined =
+        Math.hypot(schoolDx, schoolDz) > 1e-9
+          ? { dx: schoolDx, dz: schoolDz, cruiseSpeed: meanConspecificPeerSpeed(peers, fish) }
+          : undefined
+      integrateSwimmingFish(fish, habitat, dt, schooling)
+      // AQ-84: only separation still moves the body directly, as a small
+      // bounded nudge while fish overlap; regular cohesion/alignment never
+      // translate the fish.
+      if (steering.separation.x || steering.separation.y || steering.separation.z) {
         const candidate = {
-          x: fish.position.x + steering.dx,
-          y: fish.position.y + steering.dy,
-          z: fish.position.z + steering.dz,
+          x: fish.position.x + steering.separation.x,
+          y: fish.position.y + steering.separation.y,
+          z: fish.position.z + steering.separation.z,
         }
         if (movementSafety(fish, habitat, candidate) === 'clear') fish.position = candidate
       }
       stepFishExtensions(fish, dt)
     })
   }
+}
+
+function meanConspecificPeerSpeed(peers: readonly SchoolingPeer[], fish: SwimmingFish): number | undefined {
+  let total = 0
+  let count = 0
+  for (const peer of peers) {
+    if (peer.id === fish.id || peer.speciesId !== fish.speciesId || peer.startleSeconds > 0) continue
+    total += peer.speed
+    count++
+  }
+  return count > 0 ? total / count : undefined
 }
 
 /**
@@ -353,7 +396,7 @@ export function disturbSchool(fishes: readonly SwimmingFish[], speciesId: string
     fish.behavior = dispatchBehaviorEvent(fish.behavior, { type: 'group-disturbance', instanceIds, trigger })
   }
 }
-function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: number) {
+function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: number, schooling?: SchoolingHeadingInfluence) {
   // Configured mesh mode is fail-closed. Invalidate stale routes before they
   // can trigger arrival or movement through a legacy AABB fallback.
   if (habitat.meshNavigation !== undefined && !validMeshNavigation(fish, habitat)) {
@@ -366,6 +409,17 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   }
   fish.behavior = advanceFishBehavior(fish.behavior, dt)
   const profile = getSpeciesBehaviorProfile(fish.speciesId)!
+  // AQ-84: rotate the heading toward the schooling direction first, within
+  // the species turn limit for this substep. The route turn below is then
+  // capped by the remaining budget, so the total turn in one substep never
+  // exceeds the species limit. Forward motion along the updated yaw (in the
+  // main path) closes the distance to the school — no sideways translation.
+  const schoolHeadingMag = schooling ? Math.hypot(schooling.dx, schooling.dz) : 0
+  const schoolHeading = schoolHeadingMag > 1e-9 ? Math.atan2(schooling!.dx, schooling!.dz) : fish.yaw
+  const schoolDelta = Math.atan2(Math.sin(schoolHeading - fish.yaw), Math.cos(schoolHeading - fish.yaw))
+  const schoolMaxTurn = fish.behavior.variation.turnDegreesPerSecond * Math.PI / 180 * dt
+  const schoolTurn = clamp(schoolDelta, -schoolMaxTurn, schoolMaxTurn)
+  fish.yaw += schoolTurn
   fish.startleSeconds = Math.max(0, fish.startleSeconds - dt); fish.targetWait -= dt
   if (fish.behavior.state === 'swim' && fish.speciesId === 'yellow-tang' && fish.behavior.stateElapsedSeconds > 2 && habitat.anchors.some(anchor => distance(anchor.position, fish.position) < .9) && fish.routeGeneration !== fish.behavior.navigationGeneration) {
     fish.behavior = dispatchBehaviorEvent(fish.behavior, { type: 'behavior-opportunity', instanceId: fish.id, trigger: 'foraging-opportunity' })
@@ -376,7 +430,9 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   const rawTarget = fish.route[fish.waypoint]
   if (!rawTarget) {
     fish.speed *= Math.exp(-dt * 4)
-    fish.turnKinematics = stepFishTurnKinematics(fish.turnKinematics, 0, dt, fish.speed, fish.startleSeconds, 0)
+    // AQ-84: with no route to follow the fish still turns in place toward
+    // the school, and the turn kinematics record that turn.
+    fish.turnKinematics = stepFishTurnKinematics(fish.turnKinematics, schoolTurn, dt, fish.speed, fish.startleSeconds, schoolDelta)
     return
   }
   const rawDx = rawTarget.x - fish.position.x, rawDy = rawTarget.y - fish.position.y, rawDz = rawTarget.z - fish.position.z, rawRemaining = Math.hypot(rawDx, rawDy, rawDz)
@@ -391,7 +447,7 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
           fish.behavior = reportNavigationOutcome(fish.behavior, fish.routeGeneration, fish.navigationAnchor, clearance)
           fish.navigationAnchor = undefined
         }
-        fish.turnKinematics = stepFishTurnKinematics(fish.turnKinematics, 0, dt, fish.speed, fish.startleSeconds, 0)
+        fish.turnKinematics = stepFishTurnKinematics(fish.turnKinematics, schoolTurn, dt, fish.speed, fish.startleSeconds, schoolDelta)
         return
       }
       // Close route points may be acknowledged within a small tolerance when
@@ -399,7 +455,7 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
       if (rawRemaining <= .015 * dt + 1e-12) fish.position = { ...rawTarget }
     }
     completeRouteWaypoint(fish)
-    fish.turnKinematics = stepFishTurnKinematics(fish.turnKinematics, 0, dt, fish.speed, fish.startleSeconds, 0)
+    fish.turnKinematics = stepFishTurnKinematics(fish.turnKinematics, schoolTurn, dt, fish.speed, fish.startleSeconds, schoolDelta)
     return
   }
   const steerTarget = habitat.meshNavigation !== undefined
@@ -410,7 +466,11 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   const sharpTurnBoost = Math.abs(delta) >= SHARP_TURN_THRESHOLD_RAD ? 1.65 : 1.0
   const proximityTurnBoost = rawRemaining < 0.35 ? 2.2 : 1.0
   const maxTurn = fish.behavior.variation.turnDegreesPerSecond * Math.PI / 180 * (fish.startleSeconds > 0 ? 3 : sharpTurnBoost * proximityTurnBoost) * dt
-  const turn = clamp(delta, -maxTurn, maxTurn); fish.yaw += turn
+  // AQ-84: the route turn shares the species turn budget with the schooling
+  // turn already applied above, so the total turn in one substep never
+  // exceeds the species limit.
+  const routeMaxTurn = Math.max(0, maxTurn - Math.abs(schoolTurn))
+  const turn = clamp(delta, -routeMaxTurn, routeMaxTurn); fish.yaw += turn
   const desiredPitch = habitat.meshNavigation !== undefined
     ? clamp(-Math.atan2(dy, Math.hypot(dx, dz)), -MAX_PITCH_RAD_METRIC, MAX_PITCH_RAD_METRIC)
     : clamp(-Math.atan2(dy, Math.hypot(dx, dz)), -MAX_PITCH_RAD_LEGACY, MAX_PITCH_RAD_LEGACY)
@@ -420,14 +480,23 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   } else {
     fish.pitch += (desiredPitch - fish.pitch) * Math.min(1, dt * (rawRemaining < 0.45 ? 10 : 4))
   }
-  fish.bank += (clamp(-turn / dt * .12, -.18, .18) - fish.bank) * Math.min(1, dt * 4)
+  // AQ-84: banking and the turning rig reflect the total turn (schooling +
+  // route) in this substep, so the spine bends and banks into school turns.
+  fish.bank += (clamp(-(turn + schoolTurn) / dt * .12, -.18, .18) - fish.bank) * Math.min(1, dt * 4)
 
-  fish.turnKinematics = stepFishTurnKinematics(fish.turnKinematics, turn, dt, fish.speed, fish.startleSeconds, delta)
+  fish.turnKinematics = stepFishTurnKinematics(fish.turnKinematics, turn + schoolTurn, dt, fish.speed, fish.startleSeconds, delta)
   const multiplier = profile.states[fish.behavior.state]?.speedMultiplier ?? 1
   const cruise = fish.behavior.variation.cruiseSpeedTankWidthsPerSecond * (habitat.bounds.max.x - habitat.bounds.min.x)
+  // AQ-84: a lagging outer fish accelerates forward along its heading toward
+  // the schoolmates' cruise speed (blended 25%, capped at +20% of its own
+  // cruise) instead of being dragged sideways to catch up.
+  const schoolCruise = schooling?.cruiseSpeed
+  const effectiveCruise = schoolCruise !== undefined && Number.isFinite(schoolCruise)
+    ? cruise * 0.75 + Math.min(Math.max(0, schoolCruise), cruise * 1.2) * 0.25
+    : cruise
   const effort = fish.startleSeconds > 0 ? 2.8 : multiplier
   const turnSpeedFactor = evaluateTurnSpeedFactor(delta, fish.startleSeconds, fish.turnKinematics.maneuverStage)
-  const wanted = cruise * effort * turnSpeedFactor * Math.min(1, rawRemaining / .22)
+  const wanted = effectiveCruise * effort * turnSpeedFactor * Math.min(1, rawRemaining / .22)
   fish.speed += (wanted - fish.speed) * Math.min(1, dt * (fish.startleSeconds > 0 ? 8 : 3.2))
 
   const travel = Math.min(rawRemaining, Math.max(.015, fish.speed) * dt)
