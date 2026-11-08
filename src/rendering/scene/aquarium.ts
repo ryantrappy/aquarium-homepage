@@ -19,7 +19,7 @@ import {
   evaluateSuspendedParticlePosition,
 } from './underwater-optics'
 import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
-import { createSwimmingFish, seedForId, startleFish, stepSwimmingFish, type SwimmingFish, type WaterHabitat } from './motion'
+import { createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
 import { createReefMeshNavigation, MESH_NAVIGATION_COLLISION_RADIUS_M, type ReefMeshIslandInput } from './reef-mesh-navigation'
 import { applyFishTurningRigOverlay, bindFishTurningRig, evaluateSpriteTurnScaleX, type FishTurningRig } from './fish-turning'
 import { SPRITE_PLANE_WIDTH, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale } from './fish-scale'
@@ -32,6 +32,7 @@ import { projectFishLinkBounds } from './fish-link-projection'
 import { createFishClipPlayer, type FishClipPlayer } from './fish-animation'
 import { bindFishFlexToModel, updateFishFlex, type FishFlexBinding } from './fish-flex-material'
 import { reconcileFishInhabitants, refreshFishLink } from './fish-inhabitants'
+import { SCHOOL_TOTAL_COUNT, resolveSchoolPopulation, schoolmateSpawnOffset } from './school-population'
 import { applyCaustics, createCaustics } from './caustics'
 
 const modelUrls: Record<string, string> = {
@@ -53,7 +54,7 @@ const modelUrls: Record<string, string> = {
 }
 export type SceneStatus = 'loading' | 'ready' | 'failed'
 export type AquariumController = { update(services: ServiceConfig[], paused: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void }
-type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; flex?: FishFlexBinding; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean }
+type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; flex?: FishFlexBinding; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean; schoolmate: boolean }
 
 function disposeTree(root: THREE.Object3D) {
   const geometries = new Set<THREE.BufferGeometry>(), materials = new Set<THREE.Material>(), textures = new Set<THREE.Texture>()
@@ -282,6 +283,11 @@ diffuseColor.rgb = waterCol;
   let coralElapsedSec = 0
   const reducedMotionQuery = typeof window !== 'undefined' && typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-reduced-motion: reduce)') : null
   let disposed = false, failed = false, loaded = false, paused = initialPaused, services = initialServices, fish: Inhabitant[] = []
+  // Visual-only schoolmates (AQ-41): no service, no anchor, no link. Kept in
+  // a separate list from the service fish so the AQ-64 service reconcile
+  // never disposes or refreshes them; they are reconciled with the service
+  // list by reconcileSchoolmates() below.
+  let schoolmates: Inhabitant[] = []
   const loadedAssets = new Set<GLTF>()
   let habitat: WaterHabitat = { bounds: { min: { x: -4, y: -2.25, z: -4.6 }, max: { x: 4, y: 2.8, z: 2.8 } }, obstacles: [], anchors: [] }
   let width = 1, height = 1, labelClock = 0, spawnUnavailable = false
@@ -417,19 +423,20 @@ diffuseColor.rgb = waterCol;
     }
     item.anchor?.removeAttribute('data-artwork-error')
   }
-  function removeFish() { fish.forEach(disposeInhabitant); fish = [] }
+  function removeFish() { fish.forEach(disposeInhabitant); fish = []; schoolmates.forEach(disposeInhabitant); schoolmates = [] }
   function rebuildHitMeshes() {
     hitMeshes.length = 0
     reefs.forEach(reef => reef.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) }))
     hitMeshes.push(sand)
     fish.forEach(item => item.root.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) }))
+    schoolmates.forEach(item => item.root.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) }))
   }
   type FishSpawn = { species: NonNullable<ReturnType<typeof getFishById>>; clearance: number; position: SwimmingFish['position']; yaw: number }
-  function createInhabitant(service: ServiceConfig, spawn: FishSpawn, anchor?: HTMLAnchorElement): Inhabitant {
+  function createInhabitant(service: ServiceConfig, spawn: FishSpawn, anchor?: HTMLAnchorElement, schoolmate = false): Inhabitant {
     const { species, clearance, position, yaw } = spawn
     const root = new THREE.Group(), base = modelBases.get(service.fishId), fallback = !base
     const motion = createSwimmingFish(service.id, service.fishId, position, clearance, fishExtensions, { initialYaw: yaw, collisionRadiusM: MESH_NAVIGATION_COLLISION_RADIUS_M })
-    const item: Inhabitant = { service, root, motion, anchor, visible: false, fallback, releasedFocus: false }
+    const item: Inhabitant = { service, root, motion, anchor, visible: false, fallback, releasedFocus: false, schoolmate }
     try {
       if (base) {
         const model = clone(base.scene); root.add(model); model.scale.setScalar(fishModelScale(service.fishId))
@@ -454,7 +461,7 @@ diffuseColor.rgb = waterCol;
         // No-fit fallback retains old resources, but callbacks for a removed or
         // replaced service must not rewrite its React-owned current native link.
         const acceptsArtworkCallback = () => !disposed && !failed && ownedSprites.has(sprite)
-          && services.some(next => next.id === item.service.id && next.fishId === item.service.fishId)
+          && (schoolmate || services.some(next => next.id === item.service.id && next.fishId === item.service.fishId))
         const texture = new THREE.TextureLoader().load(species.thumbnail, loadedTexture => {
           if (!acceptsArtworkCallback()) return
           const image = loadedTexture.image as HTMLImageElement
@@ -480,10 +487,72 @@ diffuseColor.rgb = waterCol;
         spriteMasks.set(sprite, { texture }) // pending/failed masks never claim opaque pixels
       }
       root.position.set(motion.position.x, motion.position.y, motion.position.z)
-      root.traverse(object => { if (object instanceof THREE.Mesh) object.userData.serviceId = service.id })
+      // Schoolmates are never pickable (AQ-41 AC #4 / AQ-13): only service
+      // fish get a serviceId on their meshes, so picking can never resolve a
+      // click or a focus target to a schoolmate. Their meshes still join
+      // hitMeshes for honest occlusion of the fish behind them.
+      if (!schoolmate) root.traverse(object => { if (object instanceof THREE.Mesh) object.userData.serviceId = service.id })
       scene.add(root)
       return item
     } catch (error) { disposeInhabitant(item); throw error }
+  }
+  /**
+   * Reconciles the visual-only schoolmates with the current service list
+   * (AQ-41, AQ-64): a chromis service keeps 5 schoolmates (6 total), an
+   * anthias service 3 (4 total). Mates are retained across service updates
+   * when their lead fish and species are unchanged, so other fishes' swimming
+   * state is never reset; a mate is re-spawned only when its lead is new,
+   * its species changed, or its current position is no longer safe in the
+   * (possibly resized) habitat. A mate that cannot find a safe spawn is
+   * skipped fail-soft — it never fails the whole scene the way a service
+   * fish's missing spawn does. Mates cluster around their lead fish's current
+   * position with deterministic per-instance offsets (school-population.ts);
+   * no schoolCenter anchor is invented — the runtime habitat emits only
+   * grazingSurface anchors.
+   */
+  function reconcileSchoolmates(
+    nextServices: readonly ServiceConfig[],
+    occupied: Array<{ position: SwimmingFish['position']; clearance: number }>,
+    meshSpawnCheck: ((candidate: SwimmingFish['position']) => boolean) | undefined,
+    spawns: Map<string, FishSpawn>,
+  ) {
+    const leadPosition = new Map<string, SwimmingFish['position']>()
+    for (const service of nextServices) {
+      const retained = fish.find(item => item.service.id === service.id)
+      if (retained?.service.fishId === service.fishId) leadPosition.set(service.id, { ...retained.motion.position })
+      else if (spawns.get(service.id)) leadPosition.set(service.id, { ...spawns.get(service.id)!.position })
+    }
+    const currentMates = new Map(schoolmates.map(item => [item.service.id, item]))
+    const tankWidth = habitat.bounds.max.x - habitat.bounds.min.x
+    const nextMates: Inhabitant[] = []
+    for (const mate of resolveSchoolPopulation(nextServices)) {
+      const lead = leadPosition.get(mate.serviceId)
+      if (!lead) continue
+      const existing = currentMates.get(mate.id)
+      if (existing && existing.service.fishId === mate.speciesId
+        && isSafeFishPosition(existing.motion.position, existing.motion.clearance, habitat.bounds, habitat.obstacles)) {
+        nextMates.push(existing)
+        occupied.push({ position: existing.motion.position, clearance: existing.motion.clearance })
+        continue
+      }
+      const species = getFishById(mate.speciesId)!
+      const clearance = fishClearanceRadius(mate.speciesId)
+      const offset = schoolmateSpawnOffset(mate.id, mate.speciesId, tankWidth, mate.index, SCHOOL_TOTAL_COUNT[mate.speciesId] - 1)
+      const preferred = { x: lead.x + offset.x, y: lead.y + offset.y, z: lead.z + offset.z }
+      const position = findSafeFishSpawn(preferred, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck)
+      if (!position) continue
+      const yaw = findSafeFishHeading(position, Math.atan2(offset.x, offset.z), habitat.bounds, habitat.obstacles, clearance)
+      if (yaw === undefined) continue
+      nextMates.push(createInhabitant(
+        { id: mate.id, name: '', url: '', fishId: mate.speciesId, isExample: false },
+        { species, clearance, position, yaw },
+        undefined,
+        true,
+      ))
+      occupied.push({ position, clearance })
+    }
+    for (const old of schoolmates) if (!nextMates.includes(old)) disposeInhabitant(old)
+    schoolmates = nextMates
   }
   function reconcileFish(): boolean | undefined {
     if (!loaded || disposed) return undefined
@@ -544,6 +613,7 @@ diffuseColor.rgb = waterCol;
       refreshRetainedLinks()
       spawnUnavailable = true; rebuildHitMeshes(); syncLoop(); return false
     }
+    reconcileSchoolmates(nextServices, occupied, meshSpawnCheck, spawns)
     spawnUnavailable = false; rebuildHitMeshes(); render(0, true)
     return true
   }
@@ -611,40 +681,49 @@ diffuseColor.rgb = waterCol;
     for (const controller of reefControllers) {
       controller.update(coralElapsedSec, habitatStopped, reducedMotion)
     }
-    for (let step = 0; step < steps; step++) for (const item of fish) {
-      const focused = document.activeElement === item.anchor
-      if (!focused) item.releasedFocus = false
-      const stopped = paused || document.hidden || (focused && !item.releasedFocus)
-      stepSwimmingFish(item.motion, habitat, SIMULATION_STEP_SECONDS, stopped)
-      if (!stopped) {
-        try {
-          item.clipPlayer?.advance(SIMULATION_STEP_SECONDS * (.55 + Math.min(1.7, item.motion.speed * 2.2)) * item.motion.animationPlaybackRate)
-        } catch (error) {
-          // The player has restored its complete last clean pose. Retire this
-          // unsupported animation once; other fish and native links keep working.
-          item.clipPlayer?.dispose(); item.clipPlayer = undefined; item.turningRig = undefined
-          item.flex?.dispose(); item.flex = undefined
-          console.warn('Fish animation stopped after invalid clip output', item.service.id, error)
+    for (let step = 0; step < steps; step++) {
+      // School steering needs one pre-move peer snapshot per frame (AQ-41),
+      // so the whole school — service fish and visual-only schoolmates — is
+      // stepped together instead of one fish at a time.
+      const swimmers = [...fish, ...schoolmates]
+      const stoppedFlags = swimmers.map(item => {
+        const focused = document.activeElement === item.anchor
+        if (!focused) item.releasedFocus = false
+        return paused || document.hidden || (focused && !item.releasedFocus)
+      })
+      stepSwimmingSchool(swimmers.map(item => item.motion), habitat, SIMULATION_STEP_SECONDS, stoppedFlags, { reducedMotion })
+      swimmers.forEach((item, index) => {
+        const stopped = stoppedFlags[index]
+        if (!stopped) {
+          try {
+            item.clipPlayer?.advance(SIMULATION_STEP_SECONDS * (.55 + Math.min(1.7, item.motion.speed * 2.2)) * item.motion.animationPlaybackRate)
+          } catch (error) {
+            // The player has restored its complete last clean pose. Retire this
+            // unsupported animation once; other fish and native links keep working.
+            item.clipPlayer?.dispose(); item.clipPlayer = undefined; item.turningRig = undefined
+            item.flex?.dispose(); item.flex = undefined
+            console.warn('Fish animation stopped after invalid clip output', item.service.id, error)
+          }
+          if (item.turningRig) applyFishTurningRigOverlay(item.turningRig, item.motion.turnKinematics, stopped)
+          // Lighthill body flex runs last in the frame: after the clip advance
+          // and the turning overlay, on the same simulation dt, so clip, bone
+          // bend, and vertex wave share one clock. Paused / hidden / focused
+          // frames never reach this block, so the wave freezes with the clip;
+          // prefers-reduced-motion neutralises the amplitude inside update.
+          if (item.flex) {
+            const cruiseSpeedWorld = item.motion.behavior.variation.cruiseSpeedTankWidthsPerSecond
+              * (habitat.bounds.max.x - habitat.bounds.min.x)
+            updateFishFlex(item.flex, item.service.fishId, {
+              speedNorm: cruiseSpeedWorld > 0 ? item.motion.speed / cruiseSpeedWorld : 0,
+              state: item.motion.behavior.state,
+              maneuverStage: item.motion.turnKinematics.maneuverStage,
+              startleSeconds: item.motion.startleSeconds,
+            }, SIMULATION_STEP_SECONDS, reducedMotion)
+          }
         }
-        if (item.turningRig) applyFishTurningRigOverlay(item.turningRig, item.motion.turnKinematics, stopped)
-        // Lighthill body flex runs last in the frame: after the clip advance
-        // and the turning overlay, on the same simulation dt, so clip, bone
-        // bend, and vertex wave share one clock. Paused / hidden / focused
-        // frames never reach this block, so the wave freezes with the clip;
-        // prefers-reduced-motion neutralises the amplitude inside update.
-        if (item.flex) {
-          const cruiseSpeedWorld = item.motion.behavior.variation.cruiseSpeedTankWidthsPerSecond
-            * (habitat.bounds.max.x - habitat.bounds.min.x)
-          updateFishFlex(item.flex, item.service.fishId, {
-            speedNorm: cruiseSpeedWorld > 0 ? item.motion.speed / cruiseSpeedWorld : 0,
-            state: item.motion.behavior.state,
-            maneuverStage: item.motion.turnKinematics.maneuverStage,
-            startleSeconds: item.motion.startleSeconds,
-          }, SIMULATION_STEP_SECONDS, reducedMotion)
-        }
-      }
+      })
     }
-    for (const item of fish) {
+    for (const item of [...fish, ...schoolmates]) {
       const pose = item.motion; item.root.position.set(pose.position.x, pose.position.y, pose.position.z)
       if (item.fallback) { item.root.rotation.set(0, 0, 0); item.root.scale.x = evaluateSpriteTurnScaleX(pose.yaw) }
       else { item.root.rotation.set(pose.pitch, pose.yaw, pose.bank, 'YXZ') }
@@ -677,7 +756,7 @@ diffuseColor.rgb = waterCol;
     const newNarrow = width < 600
     const recoveringFromUnavailableSpawn = spawnUnavailable
     let rebuildSucceeded: boolean | undefined
-    if (loaded && (narrow !== newNarrow || (spawnUnavailable && sizeChanged) || fish.some(item => !isSafeFishPosition(item.motion.position, item.motion.clearance, habitat.bounds, habitat.obstacles)))) {
+    if (loaded && (narrow !== newNarrow || (spawnUnavailable && sizeChanged) || [...fish, ...schoolmates].some(item => !isSafeFishPosition(item.motion.position, item.motion.clearance, habitat.bounds, habitat.obstacles)))) {
       narrow = newNarrow; rebuildHabitat(); rebuildSucceeded = rebuildFish()
       if (rebuildSucceeded !== undefined) status(fishSceneStatus(!rebuildSucceeded))
     }

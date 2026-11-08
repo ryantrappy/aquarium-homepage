@@ -1,5 +1,6 @@
 import { getSpeciesBehaviorProfile, type HabitatAnchor } from '../../lib/fish-behavior'
-import { advanceFishBehavior, createFishBehaviorInstance, dispatchBehaviorEvent, getNavigationRequest, reportNavigationOutcome, type FishBehaviorInstance } from '../../simulation/behavior-runtime'
+import { advanceFishBehavior, createFishBehaviorInstance, dispatchBehaviorEvent, getMotionIntent, getNavigationRequest, reportNavigationOutcome, type FishBehaviorInstance } from '../../simulation/behavior-runtime'
+import { evaluateSchoolingSteering, isGroupSchoolingSpecies, type SchoolingPeer } from './schooling-navigation'
 import { createFishExtensionRuntime, EMPTY_FISH_EXTENSIONS, type FishExtensionConfig, type FishExtensionSnapshot } from '../../simulation/fish-extensions'
 import { findWaterRoute, isWaterSegmentSafe, resolveHabitatRoute, type AxisAlignedBox, type HabitatAnchorLocation, type SolidObstacleVolume, type Vec3 } from '../../simulation/habitat-navigation'
 import { findMeshRoute, type CapsuleClearanceQuery, type MeshNavigationBudget, type MeshNavigationWorkBudget, type MeshNavigationWorkReport } from '../../simulation/mesh-navigation'
@@ -247,13 +248,108 @@ function movementSafety(fish: SwimmingFish, habitat: WaterHabitat, target: Vec3)
     return 'unavailable'
   }
 }
+function stepFishExtensions(fish: SwimmingFish, dt: number) {
+  const result = fish.extensions.step(extensionSnapshot(fish), dt, true)
+  fish.animationPlaybackRate = result.playbackRate
+  for (const intent of result.behaviorIntents) fish.behavior = dispatchBehaviorEvent(fish.behavior, { ...intent, instanceId: fish.id })
+}
+
 export function stepSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, elapsed: number, stopped = false) {
   if (stopped) return
   for (const dt of simulationSubsteps(elapsed)) {
     integrateSwimmingFish(fish, habitat, dt)
-    const result = fish.extensions.step(extensionSnapshot(fish), dt, true)
-    fish.animationPlaybackRate = result.playbackRate
-    for (const intent of result.behaviorIntents) fish.behavior = dispatchBehaviorEvent(fish.behavior, { ...intent, instanceId: fish.id })
+    stepFishExtensions(fish, dt)
+  }
+}
+
+export type SchoolStepOptions = {
+  /** Pause/reduced-motion freeze the steering nudge (the FSM route still advances, as in stepSwimmingFish). */
+  paused?: boolean
+  reducedMotion?: boolean
+}
+
+function schoolingPeer(fish: SwimmingFish): SchoolingPeer {
+  return {
+    id: fish.id,
+    speciesId: fish.speciesId as SchoolingPeer['speciesId'],
+    position: { ...fish.position },
+    yaw: fish.yaw,
+    speed: fish.speed,
+    clearanceRadius: fish.clearance,
+    startleSeconds: fish.startleSeconds,
+  }
+}
+
+/**
+ * Steps a whole school together (AQ-41 AC #1/#3/#4, AQ-44 AC #4/#5): the same
+ * per-fish FSM + route integration as `stepSwimmingFish`, plus the existing
+ * species-aware Boids steering (`evaluateSchoolingSteering`) as a bounded
+ * 0.45/s nudge on top of route following. Steering is computed from a
+ * pre-move peer snapshot taken once per substep, so results are
+ * order-independent and deterministic for a given seed/frame; the nudge is
+ * applied only when `movementSafety()` reports `clear` for the resulting
+ * segment and is dropped — never forced — otherwise. Cohesion/alignment
+ * apply only while the fish's motion intent is `hold` or `travel`
+ * (idle/swim); separation applies in every state to every species. A stopped
+ * fish (e.g. keyboard-focused) does not move but still counts as a peer.
+ * `stopped` is either one flag for the whole school or one flag per fish.
+ */
+export function stepSwimmingSchool(
+  fishes: readonly SwimmingFish[],
+  habitat: WaterHabitat,
+  elapsed: number,
+  stopped: readonly boolean[] | boolean = false,
+  options: SchoolStepOptions = {},
+) {
+  const isStopped = (index: number) => Array.isArray(stopped) ? Boolean(stopped[index]) : stopped
+  for (const dt of simulationSubsteps(elapsed)) {
+    const peers = fishes.map(schoolingPeer)
+    fishes.forEach((fish, index) => {
+      if (isStopped(index)) return
+      integrateSwimmingFish(fish, habitat, dt)
+      const intent = getMotionIntent(fish.behavior.state)
+      const steering = evaluateSchoolingSteering({
+        self: peers[index],
+        peers,
+        waterBounds: habitat.bounds,
+        obstacles: habitat.obstacles,
+        dt,
+        paused: options.paused,
+        reducedMotion: options.reducedMotion,
+        cohesionAllowed: intent === 'hold' || intent === 'travel',
+      })
+      if (steering.dx || steering.dy || steering.dz) {
+        const candidate = {
+          x: fish.position.x + steering.dx,
+          y: fish.position.y + steering.dy,
+          z: fish.position.z + steering.dz,
+        }
+        if (movementSafety(fish, habitat, candidate) === 'clear') fish.position = candidate
+      }
+      stepFishExtensions(fish, dt)
+    })
+  }
+}
+
+/**
+ * Explicit, scoped group disturbance (AQ-41 AC #4 / AQ-44 AC #4): dispatches
+ * a `group-disturbance` event with `instanceIds` set to exactly the
+ * conspecific grouping-species members of this school — never the omitted
+ * (all-fish) form, and never to solitary species. A chromis in `swim` retreats
+ * to `branchingCoralRefuge` at ×1.7 per its profile; anthias has no retreat
+ * state, so a disturbance leaves it on its existing idle/swim/forage cycle
+ * (no retreat is invented). There is currently no live UI trigger for this —
+ * a single service click must stay a single-fish `fish-activation` — so the
+ * helper is the scoped event path for a future disturbance source, proven in
+ * tests. It does not set `startleSeconds`: fleeing fish are already excluded
+ * from cohesion/alignment by their `flee` motion intent.
+ */
+export function disturbSchool(fishes: readonly SwimmingFish[], speciesId: string, trigger: 'threat-cue' | 'high-effort-cue' = 'threat-cue'): void {
+  const members = fishes.filter(fish => fish.speciesId === speciesId && isGroupSchoolingSpecies(fish.speciesId))
+  if (!members.length) return
+  const instanceIds = members.map(fish => fish.id)
+  for (const fish of members) {
+    fish.behavior = dispatchBehaviorEvent(fish.behavior, { type: 'group-disturbance', instanceIds, trigger })
   }
 }
 function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: number) {
