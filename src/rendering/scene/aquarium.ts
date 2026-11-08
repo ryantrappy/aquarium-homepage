@@ -320,6 +320,7 @@ diffuseColor.rgb = waterCol;
   bubbleGeometry.setDrawRange(0, 0)
   scene.add(bubbles)
   let bubbleEmitters: Readonly<{ x: number; y: number; z: number }>[] = []
+  let particleBuffersDirty = true
 
   const abort = new AbortController(), loader = new GLTFLoader(), modelBases = new Map<string, GLTF>(), coralTemplates = new Map<string, THREE.Object3D>(), reefs: THREE.Object3D[] = []
   let rockIslandLeftBase: GLTF | undefined, rockIslandRightBase: GLTF | undefined
@@ -362,6 +363,31 @@ diffuseColor.rgb = waterCol;
     }
     return visible
   }
+  function isSafeCurrentInhabitantPosition(item: Inhabitant): boolean {
+    if (habitat.meshNavigation?.queryCapsule) {
+      const r = MESH_NAVIGATION_COLLISION_RADIUS_M
+      const { min, max } = habitat.bounds
+      const p = item.motion.position
+      if (
+        p.x < min.x + r || p.x > max.x - r ||
+        p.y < min.y + r || p.y > max.y - r ||
+        p.z < min.z + r || p.z > max.z - r
+      ) {
+        return false
+      }
+      return (
+        habitat.meshNavigation.queryCapsule(p, p, r, {
+          ...habitat.meshNavigation.movementBudget,
+        }).status === 'clear'
+      )
+    }
+    return isSafeFishPosition(
+      item.motion.position,
+      item.motion.clearance,
+      habitat.bounds,
+      habitat.obstacles,
+    )
+  }
   function rebuildHabitat() {
     // Invalidate any previous mesh routing before the reefs are replaced; a
     // fresh collider build is kicked off below and applied only if this
@@ -369,6 +395,7 @@ diffuseColor.rgb = waterCol;
     meshNavigationGeneration++
     const generation = meshNavigationGeneration
     habitat.meshNavigation = undefined
+    particleBuffersDirty = true
     reefs.forEach(reef => { scene.remove(reef) }); reefs.length = 0; hitMeshes.length = 0
     reefControllers = []; habitat.obstacles = []; habitat.anchors = []
     if (!rockIslandLeftBase || !rockIslandRightBase || coralTemplates.size === 0) return
@@ -461,6 +488,40 @@ diffuseColor.rgb = waterCol;
       if (disposed || generation !== meshNavigationGeneration) return
       if (result.status === 'ready') {
         habitat.meshNavigation = result.meshNavigation
+        // Relocate any fish or schoolmate that drifted into a coral envelope
+        // during the brief AABB window before the async mesh collider resolved.
+        const meshCheck = (candidate: SwimmingFish['position']) =>
+          result.meshNavigation.queryCapsule!(
+            candidate,
+            candidate,
+            MESH_NAVIGATION_COLLISION_RADIUS_M,
+            { ...result.meshNavigation.movementBudget },
+          ).status === 'clear'
+        const allInhabitants = [...fish, ...schoolmates]
+        const occupiedForRelocation: Array<{ position: SwimmingFish['position']; clearance: number }> = []
+        for (const item of allInhabitants) {
+          if (isSafeCurrentInhabitantPosition(item)) {
+            occupiedForRelocation.push({ position: item.motion.position, clearance: item.motion.clearance })
+          }
+        }
+        for (const item of allInhabitants) {
+          if (isSafeCurrentInhabitantPosition(item)) continue
+          const relocated = findSafeFishSpawn(
+            item.motion.position,
+            habitat.bounds,
+            habitat.obstacles,
+            item.motion.clearance,
+            occupiedForRelocation,
+            meshCheck,
+          )
+          if (relocated) {
+            item.motion.position = relocated
+            item.motion.route = []
+            item.motion.speed = 0
+            item.root.position.set(relocated.x, relocated.y, relocated.z)
+            occupiedForRelocation.push({ position: relocated, clearance: item.motion.clearance })
+          }
+        }
         console.info('Mesh navigation ready', result.diagnostics)
       } else {
         console.warn('Mesh navigation unavailable; staying on AABB routing', result.reason, result.diagnostics)
@@ -588,7 +649,7 @@ diffuseColor.rgb = waterCol;
       if (!lead) continue
       const existing = currentMates.get(mate.id)
       if (existing && existing.service.fishId === mate.speciesId
-        && isSafeFishPosition(existing.motion.position, existing.motion.clearance, habitat.bounds, habitat.obstacles)) {
+        && isSafeCurrentInhabitantPosition(existing)) {
         nextMates.push(existing)
         occupied.push({ position: existing.motion.position, clearance: existing.motion.clearance })
         continue
@@ -730,6 +791,7 @@ diffuseColor.rgb = waterCol;
     // moving — when paused or reduced-motion the helpers return the frozen
     // base positions, so there is nothing new to upload.
     const motesMoving = !habitatStopped && !reducedMotion
+    const uploadParticles = motesMoving || particleBuffersDirty
     for (let i = 0; i < foregroundParticleCount; i++) {
       const pt = evaluateSuspendedParticlePosition(i, habitat.bounds, coralElapsedSec, {
         paused: habitatStopped,
@@ -740,9 +802,9 @@ diffuseColor.rgb = waterCol;
       foregroundParticlePositions[i * 3 + 1] = pt.y
       foregroundParticlePositions[i * 3 + 2] = pt.z
     }
-    if (motesMoving) foregroundParticlePositionAttr.needsUpdate = true
+    if (uploadParticles) foregroundParticlePositionAttr.needsUpdate = true
     for (let i = 0; i < backgroundParticleCount; i++) {
-      const pt = evaluateSuspendedParticlePosition(i, habitat.bounds, coralElapsedSec, {
+      const pt = evaluateSuspendedParticlePosition(foregroundParticleCount + i, habitat.bounds, coralElapsedSec, {
         paused: habitatStopped,
         reducedMotion,
         zBand: { min: -4.6, max: -1.5 },
@@ -751,7 +813,7 @@ diffuseColor.rgb = waterCol;
       backgroundParticlePositions[i * 3 + 1] = pt.y
       backgroundParticlePositions[i * 3 + 2] = pt.z
     }
-    if (motesMoving) backgroundParticlePositionAttr.needsUpdate = true
+    if (uploadParticles) backgroundParticlePositionAttr.needsUpdate = true
 
     // Update sparse bubble streams (AQ-43 AC #2 as amended): slots 0..15
     // belong to the first emitter, the rest to the second; the draw range
@@ -759,7 +821,7 @@ diffuseColor.rgb = waterCol;
     for (let i = 0; i < DEFAULT_AQUARIUM_OPTICS_CONFIG.maxBubbles; i++) {
       const streamIndex = i < bubblesPerStream ? 0 : 1
       const emitter = bubbleEmitters[streamIndex] ?? bubbleEmitters[0] ?? { x: 0, y: DEFAULT_AQUARIUM_OPTICS_CONFIG.bubbleEmitterBaseY, z: 0 }
-      const bubble = evaluateBubblePosition(i - streamIndex * bubblesPerStream, emitter, habitat.bounds, coralElapsedSec, {
+      const bubble = evaluateBubblePosition(i, emitter, habitat.bounds, coralElapsedSec, {
         paused: habitatStopped,
         reducedMotion,
       })
@@ -767,7 +829,8 @@ diffuseColor.rgb = waterCol;
       bubblePositions[i * 3 + 1] = bubble.y
       bubblePositions[i * 3 + 2] = bubble.z
     }
-    if (motesMoving) bubblePositionAttr.needsUpdate = true
+    if (uploadParticles) bubblePositionAttr.needsUpdate = true
+    particleBuffersDirty = false
 
     for (const controller of reefControllers) {
       controller.update(coralElapsedSec, habitatStopped, reducedMotion)
@@ -838,6 +901,7 @@ diffuseColor.rgb = waterCol;
     if (disposed || failed) return
     const nextWidth = Math.max(1, canvas.parentElement!.clientWidth), nextHeight = Math.max(1, canvas.parentElement!.clientHeight)
     const sizeChanged = width !== nextWidth || height !== nextHeight
+    if (sizeChanged) particleBuffersDirty = true
     width = nextWidth; height = nextHeight
     camera.aspect = width / height; camera.updateProjectionMatrix(); renderer.setSize(width, height, false)
     // The nearest fish depth controls the safe horizontal envelope, so depth
@@ -847,7 +911,7 @@ diffuseColor.rgb = waterCol;
     const newNarrow = width < 600
     const recoveringFromUnavailableSpawn = spawnUnavailable
     let rebuildSucceeded: boolean | undefined
-    if (loaded && (narrow !== newNarrow || (spawnUnavailable && sizeChanged) || [...fish, ...schoolmates].some(item => !isSafeFishPosition(item.motion.position, item.motion.clearance, habitat.bounds, habitat.obstacles)))) {
+    if (loaded && (narrow !== newNarrow || (spawnUnavailable && sizeChanged) || [...fish, ...schoolmates].some(item => !isSafeCurrentInhabitantPosition(item)))) {
       narrow = newNarrow; rebuildHabitat(); rebuildSucceeded = rebuildFish()
       if (rebuildSucceeded !== undefined) status(fishSceneStatus(!rebuildSucceeded))
     }

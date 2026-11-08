@@ -47,23 +47,37 @@ describe('self-contained procedural 3D reef fish assets (src/rendering/assets/sp
 
       // Parse GLB JSON and verify in-band extras + zero unreferenced accessors or bufferViews
       const doc = parseGlbJson(glbBytes)
-      expect(doc.nodes[0].extras?.reefAsset).toEqual(report.extras.reefAsset)
-      expect(doc.nodes[1].extras?.reefPrimitive).toEqual({
+      const rootNodeIndex = doc.scenes?.[0]?.nodes?.[0] ?? 0
+      const rootNode = doc.nodes[rootNodeIndex]
+      const meshNode = doc.nodes.find((n: { mesh?: number }) => typeof n.mesh === 'number')
+      expect(rootNode?.extras?.reefAsset).toEqual(report.extras.reefAsset)
+      expect(meshNode?.extras?.reefPrimitive).toEqual({
         id: entry.primitives[0].id,
         role: 'fish',
       })
 
       // Check 3 PBR textures (BaseColor, Normal, ORM wired to metallicRoughnessTexture & occlusionTexture)
       expect(doc.images).toHaveLength(3)
-      expect(doc.materials[0].pbrMetallicRoughness.baseColorTexture.index).toBe(0)
-      expect(doc.materials[0].normalTexture.index).toBe(1)
-      expect(doc.materials[0].pbrMetallicRoughness.metallicRoughnessTexture.index).toBe(2)
-      expect(doc.materials[0].occlusionTexture.index).toBe(2)
+      const baseColorIdx = doc.materials[0].pbrMetallicRoughness.baseColorTexture.index
+      const normalIdx = doc.materials[0].normalTexture.index
+      const mrIdx = doc.materials[0].pbrMetallicRoughness.metallicRoughnessTexture.index
+      const occIdx = doc.materials[0].occlusionTexture.index
+      expect(occIdx).toBe(mrIdx)
+      expect(new Set([baseColorIdx, normalIdx, mrIdx])).toEqual(new Set([0, 1, 2]))
 
-      // Check 8 joints and 8 animation rotation channels (1 per joint)
+      // Check 8 joints and 8 animation rotation channels (1 per joint; Blender overrides may also export translation/scale)
       expect(doc.skins[0].joints).toHaveLength(8)
       expect(doc.animations).toHaveLength(1)
-      expect(doc.animations[0].channels).toHaveLength(8)
+      const jointSet = new Set<number>(doc.skins[0].joints)
+      const rotationChannels = doc.animations[0].channels.filter(
+        (c: { target?: { path?: string; node?: number } }) => c.target?.path === 'rotation',
+      )
+      expect(rotationChannels).toHaveLength(8)
+      expect(new Set(rotationChannels.map((c: { target: { node: number } }) => c.target.node))).toEqual(jointSet)
+      for (const ch of doc.animations[0].channels) {
+        expect(jointSet.has(ch.target.node)).toBe(true)
+        expect(['rotation', 'translation', 'scale']).toContain(ch.target.path)
+      }
 
       // Verify every accessor and bufferView is referenced
       const usedAccessors = new Set<number>()

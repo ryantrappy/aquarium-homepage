@@ -317,6 +317,7 @@ export function stepSwimmingSchool(
         paused: options.paused,
         reducedMotion: options.reducedMotion,
         cohesionAllowed: intent === 'hold' || intent === 'travel',
+        isSegmentSafe: (_start, target) => movementSafety(fish, habitat, target) === 'clear',
       })
       if (steering.dx || steering.dy || steering.dz) {
         const candidate = {

@@ -120,8 +120,29 @@ describe('fish flex material (AQ-12 / AQ-49)', () => {
       uniforms: {} as Record<string, { value: number }>,
     }
     material.onBeforeCompile(scratch as never, undefined as never)
+    expect(scratch.uniforms.uFlexTime.value).toBeCloseTo(1 / 60, 10)
     expect(scratch.uniforms.uFlexEnabled.value).toBe(0)
     expect(scratch.uniforms.uFlexTailAmplitude.value).toBe(0)
+
+    // Verify uFlexTime advances on the uniform and frequency changes remain phase-continuous.
+    for (let i = 0; i < 60; i++) {
+      updateFishFlex(binding, 'ocellaris-clownfish', swimInput, 1 / 60, false)
+    }
+    expect(scratch.uniforms.uFlexTime.value).toBeCloseTo(61 / 60, 6)
+    const evalWavePhase = () =>
+      -Math.PI * 2 * scratch.uniforms.uFlexFrequencyHz.value * scratch.uniforms.uFlexTime.value +
+      scratch.uniforms.uFlexPhase.value
+    const phaseBeforeSpeedChange = evalWavePhase()
+    const slowInput = { ...swimInput, speedNorm: 0.2 }
+    // Updating at dt = 0 with a new speed/frequency must not jump the shader wave phase.
+    updateFishFlex(binding, 'ocellaris-clownfish', slowInput, 0, false)
+    const phaseAfterSpeedChange = evalWavePhase()
+    const phaseDelta = Math.atan2(
+      Math.sin(phaseAfterSpeedChange - phaseBeforeSpeedChange),
+      Math.cos(phaseAfterSpeedChange - phaseBeforeSpeedChange),
+    )
+    expect(Math.abs(phaseDelta)).toBeLessThan(1e-6)
+
     binding.dispose()
     expect(values.frequencyHz).toBeGreaterThan(0)
   })

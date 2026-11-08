@@ -231,7 +231,9 @@ export function bindFishFlexToModel(
   }
   if (records.length === 0) return undefined
 
+  const TWO_PI = Math.PI * 2
   let flexTimeSeconds = 0
+  let accumulatedWavePhaseRad = 0
   let disposed = false
   return Object.freeze({
     bodyLength,
@@ -241,9 +243,21 @@ export function bindFishFlexToModel(
     },
     update(values: FishFlexValues, dtSeconds: number, reducedMotion: boolean): void {
       if (disposed) return
+      const prevTimeSeconds = flexTimeSeconds
       flexTimeSeconds = advanceFishFlexTime(flexTimeSeconds, reducedMotion ? 0 : dtSeconds)
+      const stepDt = flexTimeSeconds - prevTimeSeconds
+      accumulatedWavePhaseRad =
+        (accumulatedWavePhaseRad + TWO_PI * values.frequencyHz * stepDt) % TWO_PI
+      uniforms.uFlexTime.value = flexTimeSeconds
       uniforms.uFlexFrequencyHz.value = values.frequencyHz
       uniforms.uFlexWaveNumber.value = values.waveNumber
+      // Compensate uFlexPhase so that `2π * uFlexFrequencyHz * uFlexTime - uFlexPhase`
+      // equals `accumulatedWavePhaseRad - phaseRad`, preserving C0 phase continuity
+      // whenever `values.frequencyHz` changes with speed or swim state.
+      const targetPhase =
+        phaseRad +
+        ((TWO_PI * values.frequencyHz * flexTimeSeconds - accumulatedWavePhaseRad) % TWO_PI)
+      uniforms.uFlexPhase.value = ((targetPhase % TWO_PI) + TWO_PI) % TWO_PI
       const amplitudeScale = reducedMotion ? 0 : values.amplitudeScale
       uniforms.uFlexTailAmplitude.value =
         values.tailAmplitudeBL * amplitudeScale * bodyLength

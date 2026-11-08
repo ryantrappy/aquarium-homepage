@@ -92,8 +92,24 @@ export function evaluateSchoolingSteering(input: {
    * steering never fights a forage pass or a refuge run. Defaults to true.
    */
   cohesionAllowed?: boolean
+  /**
+   * Optional segment-safety predicate used when mesh navigation is active so
+   * steering nudges are validated against the active BVH/coral collider rather
+   * than legacy AABB obstacles. Defaults to `isWaterSegmentSafe`.
+   */
+  isSegmentSafe?: (start: Vec3, target: Vec3) => boolean
 }): SchoolingSteeringVector {
-  const { self, peers, waterBounds, obstacles, dt, paused, reducedMotion, cohesionAllowed = true } = input
+  const {
+    self,
+    peers,
+    waterBounds,
+    obstacles,
+    dt,
+    paused,
+    reducedMotion,
+    cohesionAllowed = true,
+    isSegmentSafe,
+  } = input
   const mode =
     SPECIES_SOCIAL_GROUPING_MODE[self.speciesId] ?? 'pair-or-solitary'
 
@@ -192,15 +208,17 @@ export function evaluateSchoolingSteering(input: {
     z: self.position.z + dz,
   }
 
-  if (
-    !isWaterSegmentSafe({
-      start: self.position,
-      target: candidate,
-      waterBounds,
-      obstacles,
-      fishClearanceRadius: self.clearanceRadius,
-    })
-  ) {
+  const segmentSafe = isSegmentSafe
+    ? isSegmentSafe(self.position, candidate)
+    : isWaterSegmentSafe({
+        start: self.position,
+        target: candidate,
+        waterBounds,
+        obstacles,
+        fishClearanceRadius: self.clearanceRadius,
+      })
+
+  if (!segmentSafe) {
     return { dx: 0, dy: 0, dz: 0, mode, neighborCount: totalNeighbors }
   }
 
