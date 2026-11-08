@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: 2026-11-08 00:30
-updated_date: '2026-11-08T20:08:00Z'
+updated_date: '2026-11-08T20:35:00Z'
 labels:
   - performance
   - rendering
@@ -43,3 +43,13 @@ Coordinate with AQ-70.3 (photoreal asset-delivery and frame-time budgets) to imp
 - [ ] #1 Root agent reviews the completed work before the task is marked Done.
 - [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-11-08 PR #18 review findings to address before merging origin/perf/lod-adaptive-aq76:
+1. Rebase onto current branch to resolve conflicts in src/rendering/scene/aquarium.ts and docs/rendering.md, and include schoolmates (AQ-41) in evaluateFishLod(), pumpLazyLoads(), and the animation loop.
+2. In pumpLazyLoads(), replace fish.find(...) with a loop over all inhabitants ([...fish, ...schoolmates].filter(...)) so every instance sharing a speciesId (including schoolmates) upgrades from fallback sprite to GLB, and continue past off-screen species in lazyQueue instead of breaking out of the while loop.
+3. Lower LOD_SPRITE_PROJECTED_PX from 70px (which forces tailspot-blenny to a 2D sprite at all depths and drops 10 other species to 2D sprites in mid-tank) and add hysteresis to the projected-pixel threshold.
+4. Pass 2 * SIMULATION_STEP_SECONDS when advancing clipPlayer and updateFishFlex on even steps at LOD1 (so LOD1 does not halve animation speed to 0.5x) and retain applyFishTurningRigOverlay.
+<!-- SECTION:NOTES:END -->
