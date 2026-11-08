@@ -14,6 +14,7 @@ import {
 import {
   DEFAULT_AQUARIUM_OPTICS_CONFIG,
   createRestrainedCausticLightController,
+  evaluateBubblePosition,
   evaluateDepthTintedColor,
   evaluateSurfaceRippleOffset,
   evaluateSuspendedParticlePosition,
@@ -259,22 +260,65 @@ diffuseColor.rgb = waterCol;
   waterSurface.raycast = () => {}
   scene.add(waterSurface)
 
-  // Restrained 24-Mote Suspended Water-Column Particles (AQ-43)
-  const particleCount = DEFAULT_AQUARIUM_OPTICS_CONFIG.maxSuspendedParticles
-  const particlePositions = new Float32Array(particleCount * 3)
-  const particleGeometry = new THREE.BufferGeometry()
-  const particlePositionAttr = new THREE.BufferAttribute(particlePositions, 3)
-  particleGeometry.setAttribute('position', particlePositionAttr)
-  const particleMaterial = new THREE.PointsMaterial({
+  // Depth-graded suspended particulate (AQ-43 as amended 2026-11-08):
+  // 48 motes total — 16 faint foreground motes in the fish volume
+  // (z -1.5..+2.8) and 32 background motes behind it (z -4.6..-1.5),
+  // so the density reads as a depth cue without clouding the fish.
+  const foregroundParticleCount = DEFAULT_AQUARIUM_OPTICS_CONFIG.foregroundSuspendedParticles
+  const backgroundParticleCount = DEFAULT_AQUARIUM_OPTICS_CONFIG.backgroundSuspendedParticles
+  const foregroundParticlePositions = new Float32Array(foregroundParticleCount * 3)
+  const foregroundParticleGeometry = new THREE.BufferGeometry()
+  const foregroundParticlePositionAttr = new THREE.BufferAttribute(foregroundParticlePositions, 3)
+  foregroundParticleGeometry.setAttribute('position', foregroundParticlePositionAttr)
+  const foregroundParticleMaterial = new THREE.PointsMaterial({
     color: '#d8f0ff',
-    size: 0.024,
+    size: 0.02,
     transparent: true,
-    opacity: 0.28,
+    opacity: 0.2,
     depthWrite: false,
   })
-  const particles = new THREE.Points(particleGeometry, particleMaterial)
-  particles.raycast = () => {}
-  scene.add(particles)
+  const foregroundParticles = new THREE.Points(foregroundParticleGeometry, foregroundParticleMaterial)
+  foregroundParticles.raycast = () => {}
+  scene.add(foregroundParticles)
+  const backgroundParticlePositions = new Float32Array(backgroundParticleCount * 3)
+  const backgroundParticleGeometry = new THREE.BufferGeometry()
+  const backgroundParticlePositionAttr = new THREE.BufferAttribute(backgroundParticlePositions, 3)
+  backgroundParticleGeometry.setAttribute('position', backgroundParticlePositionAttr)
+  const backgroundParticleMaterial = new THREE.PointsMaterial({
+    color: '#d8f0ff',
+    size: 0.03,
+    transparent: true,
+    opacity: 0.34,
+    depthWrite: false,
+  })
+  const backgroundParticles = new THREE.Points(backgroundParticleGeometry, backgroundParticleMaterial)
+  backgroundParticles.raycast = () => {}
+  scene.add(backgroundParticles)
+
+  // Sparse bubble streams (AQ-43 as amended 2026-11-08): one pre-allocated
+  // Points system, 16 slots per stream, 32 total. Emitters are derived
+  // from the live-rock island placements in rebuildHabitat() (one per
+  // island; narrow viewports have only the left island, so only one
+  // stream — the draw range below hides the unused slots). Normal
+  // blending, not additive, so bubbles never become the bright specular
+  // dots AQ-43 originally warned about.
+  const bubblesPerStream = DEFAULT_AQUARIUM_OPTICS_CONFIG.maxBubbles / 2
+  const bubblePositions = new Float32Array(DEFAULT_AQUARIUM_OPTICS_CONFIG.maxBubbles * 3)
+  const bubbleGeometry = new THREE.BufferGeometry()
+  const bubblePositionAttr = new THREE.BufferAttribute(bubblePositions, 3)
+  bubbleGeometry.setAttribute('position', bubblePositionAttr)
+  const bubbleMaterial = new THREE.PointsMaterial({
+    color: '#eaf7ff',
+    size: 0.035,
+    transparent: true,
+    opacity: 0.4,
+    depthWrite: false,
+  })
+  const bubbles = new THREE.Points(bubbleGeometry, bubbleMaterial)
+  bubbles.raycast = () => {}
+  bubbleGeometry.setDrawRange(0, 0)
+  scene.add(bubbles)
+  let bubbleEmitters: Readonly<{ x: number; y: number; z: number }>[] = []
 
   const abort = new AbortController(), loader = new GLTFLoader(), modelBases = new Map<string, GLTF>(), coralTemplates = new Map<string, THREE.Object3D>(), reefs: THREE.Object3D[] = []
   let rockIslandLeftBase: GLTF | undefined, rockIslandRightBase: GLTF | undefined
@@ -352,6 +396,20 @@ diffuseColor.rgb = waterCol;
             yaw: -0.10,
           },
         ]
+    // Bubble emitters (AQ-43 as amended): one at the base of each live-rock
+    // island, derived from the placements above — never hardcoded. The left
+    // stream is the anemone stream: the host-anemone mount lives on the
+    // left island (DEFAULT_LEFT_ISLAND_MOUNTS, socket_anemone_crevice_01),
+    // but habitat.anchors only ever carries grazingSurface locations, so
+    // no runtime world position for the anemone exists to resolve — the
+    // left-island base is the fallback the spec allows, and it is where
+    // the anemone sits.
+    bubbleEmitters = placements.map(placement => ({
+      x: placement.position.x,
+      y: DEFAULT_AQUARIUM_OPTICS_CONFIG.bubbleEmitterBaseY,
+      z: placement.position.z,
+    }))
+    bubbleGeometry.setDrawRange(0, bubbleEmitters.length * bubblesPerStream)
     const meshIslands: ReefMeshIslandInput[] = []
     for (const [i, placement] of placements.entries()) {
       const { islandKind, rockScene, mounts, position, uniformScale, yaw } = placement
@@ -596,17 +654,50 @@ diffuseColor.rgb = waterCol;
     }
     surfPos.needsUpdate = true
 
-    // Update 24 restrained water-column motes (AQ-43 AC #2)
-    for (let i = 0; i < particleCount; i++) {
+    // Update depth-graded water-column motes (AQ-43 AC #2 as amended):
+    // foreground motes stay in the fish volume, background motes behind it.
+    // Position attributes are only flagged when the tank is actually
+    // moving — when paused or reduced-motion the helpers return the frozen
+    // base positions, so there is nothing new to upload.
+    const motesMoving = !habitatStopped && !reducedMotion
+    for (let i = 0; i < foregroundParticleCount; i++) {
       const pt = evaluateSuspendedParticlePosition(i, habitat.bounds, coralElapsedSec, {
         paused: habitatStopped,
         reducedMotion,
+        zBand: { min: -1.5, max: 2.8 },
       })
-      particlePositions[i * 3] = pt.x
-      particlePositions[i * 3 + 1] = pt.y
-      particlePositions[i * 3 + 2] = pt.z
+      foregroundParticlePositions[i * 3] = pt.x
+      foregroundParticlePositions[i * 3 + 1] = pt.y
+      foregroundParticlePositions[i * 3 + 2] = pt.z
     }
-    particlePositionAttr.needsUpdate = true
+    if (motesMoving) foregroundParticlePositionAttr.needsUpdate = true
+    for (let i = 0; i < backgroundParticleCount; i++) {
+      const pt = evaluateSuspendedParticlePosition(i, habitat.bounds, coralElapsedSec, {
+        paused: habitatStopped,
+        reducedMotion,
+        zBand: { min: -4.6, max: -1.5 },
+      })
+      backgroundParticlePositions[i * 3] = pt.x
+      backgroundParticlePositions[i * 3 + 1] = pt.y
+      backgroundParticlePositions[i * 3 + 2] = pt.z
+    }
+    if (motesMoving) backgroundParticlePositionAttr.needsUpdate = true
+
+    // Update sparse bubble streams (AQ-43 AC #2 as amended): slots 0..15
+    // belong to the first emitter, the rest to the second; the draw range
+    // set in rebuildHabitat() hides slots with no emitter (narrow view).
+    for (let i = 0; i < DEFAULT_AQUARIUM_OPTICS_CONFIG.maxBubbles; i++) {
+      const streamIndex = i < bubblesPerStream ? 0 : 1
+      const emitter = bubbleEmitters[streamIndex] ?? bubbleEmitters[0] ?? { x: 0, y: DEFAULT_AQUARIUM_OPTICS_CONFIG.bubbleEmitterBaseY, z: 0 }
+      const bubble = evaluateBubblePosition(i - streamIndex * bubblesPerStream, emitter, habitat.bounds, coralElapsedSec, {
+        paused: habitatStopped,
+        reducedMotion,
+      })
+      bubblePositions[i * 3] = bubble.x
+      bubblePositions[i * 3 + 1] = bubble.y
+      bubblePositions[i * 3 + 2] = bubble.z
+    }
+    if (motesMoving) bubblePositionAttr.needsUpdate = true
 
     for (const controller of reefControllers) {
       controller.update(coralElapsedSec, habitatStopped, reducedMotion)
@@ -728,7 +819,7 @@ diffuseColor.rgb = waterCol;
     canActivate(id, x, y) { const item = fish.find(item => item.service.id === id); return Boolean(item && (x === undefined || y === undefined ? updateVisibility(item) : nearest(x, y) === id)) },
     dispose() {
       if (disposed) return; disposed = true; abort.abort(); observer.disconnect(); renderer.setAnimationLoop(null)
-      removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sand.geometry.dispose(); sand.material.dispose(); sandTexture.dispose(); rear.geometry.dispose(); rear.material.dispose(); waterSurfaceGeometry.dispose(); waterSurfaceMaterial.dispose(); particleGeometry.dispose(); particleMaterial.dispose(); caustics.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
+      removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sand.geometry.dispose(); sand.material.dispose(); sandTexture.dispose(); rear.geometry.dispose(); rear.material.dispose(); waterSurfaceGeometry.dispose(); waterSurfaceMaterial.dispose(); foregroundParticleGeometry.dispose(); foregroundParticleMaterial.dispose(); backgroundParticleGeometry.dispose(); backgroundParticleMaterial.dispose(); bubbleGeometry.dispose(); bubbleMaterial.dispose(); caustics.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
     },
   }
 }

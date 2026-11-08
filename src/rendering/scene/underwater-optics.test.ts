@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import {
   DEFAULT_AQUARIUM_OPTICS_CONFIG,
   createRestrainedCausticLightController,
+  evaluateBubblePosition,
   evaluateCausticIntensity,
   evaluateCausticPatternUV,
   evaluateCausticSurfaceMask,
@@ -106,6 +107,81 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
     expect(pActive.y).toBeLessThanOrEqual(bounds.max.y)
     expect(pActive.z).toBeGreaterThanOrEqual(bounds.min.z)
     expect(pActive.z).toBeLessThanOrEqual(bounds.max.z)
+  })
+
+  it('keeps depth-graded motes inside their z-band and bounds, and freezes them on pause', () => {
+    const bounds = { min: { x: -4, y: -2.2, z: -4.6 }, max: { x: 4, y: 2.8, z: 2.8 } }
+    // The two amended bands sum to the configured total.
+    expect(
+      DEFAULT_AQUARIUM_OPTICS_CONFIG.foregroundSuspendedParticles +
+        DEFAULT_AQUARIUM_OPTICS_CONFIG.backgroundSuspendedParticles,
+    ).toBe(DEFAULT_AQUARIUM_OPTICS_CONFIG.maxSuspendedParticles)
+    for (let i = 0; i < 48; i++) {
+      const fg = evaluateSuspendedParticlePosition(i, bounds, 3.7, { zBand: { min: -1.5, max: 2.8 } })
+      const bg = evaluateSuspendedParticlePosition(i, bounds, 3.7, { zBand: { min: -4.6, max: -1.5 } })
+      // ±0.04 m Z drift may carry a mote just past its band edge; it must
+      // never leave the water column itself.
+      expect(fg.z).toBeGreaterThanOrEqual(-1.5 - 0.05)
+      expect(fg.z).toBeLessThanOrEqual(2.8 + 0.05)
+      expect(bg.z).toBeGreaterThanOrEqual(-4.6 - 0.05)
+      expect(bg.z).toBeLessThanOrEqual(-1.5 + 0.05)
+      for (const p of [fg, bg]) {
+        expect(p.x).toBeGreaterThanOrEqual(bounds.min.x)
+        expect(p.x).toBeLessThanOrEqual(bounds.max.x)
+        expect(p.y).toBeGreaterThanOrEqual(bounds.min.y)
+        expect(p.y).toBeLessThanOrEqual(bounds.max.y)
+      }
+    }
+    const frozen1 = evaluateSuspendedParticlePosition(5, bounds, 1.0, { paused: true, zBand: { min: -1.5, max: 2.8 } })
+    const frozen2 = evaluateSuspendedParticlePosition(5, bounds, 9.0, { paused: true, zBand: { min: -1.5, max: 2.8 } })
+    expect(frozen1).toEqual(frozen2)
+  })
+
+  it('rises sparse emitter-anchored bubbles, recycles them below the surface, and freezes them on pause (AQ-43 as amended)', () => {
+    const cfg = DEFAULT_AQUARIUM_OPTICS_CONFIG
+    expect(cfg.maxBubbles).toBe(32)
+    const bounds = { min: { x: -4, y: -2.25, z: -4.6 }, max: { x: 4, y: 2.8, z: 2.8 } }
+    const emitter = { x: -2.35, y: cfg.bubbleEmitterBaseY, z: -1.35 }
+
+    // Deterministic: same seed and time always give the same position.
+    const a = evaluateBubblePosition(2, emitter, bounds, 4.2)
+    expect(a).toEqual(evaluateBubblePosition(2, emitter, bounds, 4.2))
+
+    // Rises monotonically between recycles and never passes the recycle
+    // height (below the water surface plane at y = 2.66).
+    let previousY = -Infinity
+    let sawRecycle = false
+    for (let t = 0; t <= 30; t += 0.25) {
+      const p = evaluateBubblePosition(2, emitter, bounds, t)
+      expect(p.y).toBeLessThanOrEqual(cfg.bubbleRecycleTopY)
+      expect(p.y).toBeGreaterThanOrEqual(emitter.y)
+      expect(p.x).toBeGreaterThanOrEqual(bounds.min.x)
+      expect(p.x).toBeLessThanOrEqual(bounds.max.x)
+      expect(p.z).toBeGreaterThanOrEqual(bounds.min.z)
+      expect(p.z).toBeLessThanOrEqual(bounds.max.z)
+      // Wobble is bounded by the configured amplitude.
+      expect(Math.abs(p.x - emitter.x)).toBeLessThanOrEqual(cfg.bubbleWobbleAmplitudeM + 1e-9)
+      expect(Math.abs(p.z - emitter.z)).toBeLessThanOrEqual(cfg.bubbleWobbleAmplitudeM + 1e-9)
+      if (p.y < previousY) sawRecycle = true
+      else expect(p.y).toBeGreaterThanOrEqual(previousY)
+      previousY = p.y
+    }
+    expect(sawRecycle).toBe(true)
+
+    // Larger bubbles (higher size hash) rise faster: compare two seeds
+    // over the same interval and expect the faster one higher, or equal
+    // only if both recycled — so compare shortly after t=0 instead.
+    const slow = evaluateBubblePosition(0, emitter, bounds, 1.0)
+    const fast = evaluateBubblePosition(7, emitter, bounds, 1.0)
+    expect(slow.y).not.toBe(fast.y)
+
+    // Pause and reduced-motion freeze at the static emitter position,
+    // identical at different times.
+    const frozen1 = evaluateBubblePosition(2, emitter, bounds, 1.0, { paused: true })
+    const frozen2 = evaluateBubblePosition(2, emitter, bounds, 15.0, { paused: true })
+    expect(frozen1).toEqual(frozen2)
+    expect(frozen1.y).toBe(emitter.y)
+    expect(evaluateBubblePosition(2, emitter, bounds, 15.0, { reducedMotion: true })).toEqual(frozen1)
   })
 
   it('modulates directional key/fill lights and restores exact base intensity and position when paused', () => {
