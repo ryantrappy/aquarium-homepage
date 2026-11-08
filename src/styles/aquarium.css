@@ -199,7 +199,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .aquarium-three.is-rendered { background: #155c73; }
 .aquarium-link-layer { position: absolute; inset: 0; pointer-events: none; }
 .aquarium-fish-link { position: absolute; display: block; min-width: 44px; min-height: 44px; pointer-events: auto; text-decoration: none; transform-origin: 0 0; border-radius: 45%; }
-.aquarium-fish-link .fish-name { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); max-width: 170px; min-width: 44px; min-height: 32px; justify-content: center; margin: 0; font-size: 11px; }
+.aquarium-fish-link .fish-name { position: absolute; top: calc(100% - var(--fish-label-lift, 10px) + var(--fish-label-dy, 0px)); left: 50%; transform: translateX(-50%); max-width: 170px; min-width: 44px; min-height: 32px; justify-content: center; margin: 0; font-size: 11px; }
+/* AQ-89: a caption that would clip past a frame edge aligns inward instead
+ * of centring, and a caption that cannot clear another fish fades out —
+ * the native link and its 44px target stay usable either way. */
+.aquarium-fish-link.fish-label-align-left .fish-name { left: 0; transform: none; }
+.aquarium-fish-link.fish-label-align-right .fish-name { left: auto; right: 0; transform: none; }
+.aquarium-three.is-rendered .aquarium-fish-link.fish-label-deconflicted .fish-name,
+.aquarium-three.is-rendered .aquarium-fish-link.fish-label-deconflicted:hover .fish-name,
+.aquarium-three.is-rendered .aquarium-fish-link.fish-label-deconflicted:focus-visible .fish-name,
+.aquarium-three.is-rendered .aquarium-fish-link.fish-label-deconflicted:focus-within .fish-name,
+.aquarium-three.is-rendered .aquarium-fish-link.fish-label-deconflicted.is-acknowledged .fish-name { opacity: 0; }
 .aquarium-three.is-rendered .aquarium-fish-link { margin-left: calc(-.5 * var(--fish-width, 0px)); }
 .aquarium-three.is-rendered .aquarium-fish-link > .fish-figure { display: none; }
 .aquarium-fish-link:hover .fish-name, .aquarium-fish-link:focus-visible .fish-name, .aquarium-fish-link.is-acknowledged .fish-name { border-color: #d4f2e8; background: #16434dec; box-shadow: 0 0 16px #b8efe84d; }
@@ -293,7 +303,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 .aquarium-fish-link:not([data-occluded="true"]):not([aria-hidden="true"]):hover .fish-link-tooltip,
 .aquarium-fish-link:not([data-occluded="true"]):not([aria-hidden="true"]):focus-visible .fish-link-tooltip { opacity: 1; }
-.aquarium-fish-link.fish-link-tooltip-below .fish-link-tooltip { top: calc(100% + 38px); bottom: auto; }
+.aquarium-fish-link.fish-link-tooltip-below .fish-link-tooltip { top: calc(100% - var(--fish-label-lift, 10px) + var(--fish-label-dy, 0px) + 38px); bottom: auto; }
 .aquarium-fish-link.fish-link-tooltip-left .fish-link-tooltip { left: 0; transform: none; }
 .aquarium-fish-link.fish-link-tooltip-right .fish-link-tooltip { left: auto; right: 0; transform: none; }
 

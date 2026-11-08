@@ -13,12 +13,21 @@ import {
 } from './reef-assembly'
 import {
   DEFAULT_AQUARIUM_OPTICS_CONFIG,
+  DEPTH_HAZE_END_Z,
+  DEPTH_HAZE_START_Z,
+  LIGHT_SHAFT_BAND_CENTERS,
+  LIGHT_SHAFT_BAND_WIDTH_M,
+  LIGHT_SHAFT_SLANT_PER_M,
+  LIGHT_SHAFT_SWAY_AMPLITUDE_M,
+  LIGHT_SHAFT_SWAY_HZ,
   createRestrainedCausticLightController,
   evaluateBubblePosition,
   evaluateDepthTintedColor,
   evaluateSurfaceRippleOffset,
   evaluateSuspendedParticlePosition,
 } from './underwater-optics'
+import { createAragoniteSandBed } from './aragonite-sand'
+import { estimateCaptionRect, labelLiftPx, resolveLabelDeconflicts } from './fish-label-layout'
 import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
 import { createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
 import { createReefMeshNavigation, MESH_NAVIGATION_COLLISION_RADIUS_M, type ReefMeshIslandInput } from './reef-mesh-navigation'
@@ -141,64 +150,16 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   // Fish, backdrop, and water surface are deliberately not patched.
   const caustics = createCaustics()
 
-  // Granular aragonite & coralline-rubble sand bed with rock-base contact AO & caustic shimmer (AQ-14.6 & AQ-14.2)
-  const grain = new Uint8Array(256 * 256 * 4); let grainSeed = 1743
-  for (let i = 0; i < grain.length; i += 4) {
-    grainSeed = (Math.imul(grainSeed, 1664525) + 1013904223) >>> 0
-    const r0 = grainSeed / 4294967296
-    grainSeed = (Math.imul(grainSeed, 1664525) + 1013904223) >>> 0
-    const r1 = grainSeed / 4294967296
-    // Occasional tiny purple/pink coralline shell specks in warm ivory aragonite sand
-    const isCorallineSpeck = r1 < 0.065
-    const value = (r0 - .5) * 32
-    grain[i] = Math.min(255, Math.max(0, (isCorallineSpeck ? 185 : 226) + value))
-    grain[i + 1] = Math.min(255, Math.max(0, (isCorallineSpeck ? 152 : 228) + value))
-    grain[i + 2] = Math.min(255, Math.max(0, (isCorallineSpeck ? 192 : 236) + value))
-    grain[i + 3] = 255
-  }
-  const sandTexture = new THREE.DataTexture(grain, 256, 256); sandTexture.colorSpace = THREE.SRGBColorSpace; sandTexture.wrapS = sandTexture.wrapT = THREE.RepeatWrapping; sandTexture.repeat.set(38, 24); sandTexture.magFilter = THREE.LinearFilter; sandTexture.minFilter = THREE.LinearMipmapLinearFilter; sandTexture.generateMipmaps = true; sandTexture.needsUpdate = true
-  const sandGeometry = new THREE.PlaneGeometry(32, 20, 128, 80), sandPositions = sandGeometry.getAttribute('position')
-  for (let i = 0; i < sandPositions.count; i++) {
-    const sx = sandPositions.getX(i), sy = sandPositions.getY(i)
-    const ripple = .032 * Math.sin(sx * .9) + .020 * Math.cos(sy * 1.4 + sx * .4)
-    const leftMound = .12 * Math.exp(-Math.pow((sx + 2.35) / 2.5, 2) - Math.pow((sy - 1.35) / 1.7, 2))
-    const rightMound = .11 * Math.exp(-Math.pow((sx - 2.85) / 2.4, 2) - Math.pow((sy - 1.20) / 1.6, 2))
-    sandPositions.setZ(i, ripple + leftMound + rightMound)
-  }
-  sandGeometry.computeVertexNormals()
-  const sandUniforms = { uSandTime: { value: 0 } }
-  const sandMaterial = new THREE.MeshStandardMaterial({ map: sandTexture, roughness: 0.94, metalness: 0.0 })
-  sandMaterial.envMapIntensity = ENVIRONMENT_MAP_INTENSITY.sand
-  sandMaterial.onBeforeCompile = shader => {
-    Object.assign(shader.uniforms, sandUniforms)
-    shader.vertexShader = `varying vec3 vSandWorldPos;\n` + shader.vertexShader
-    shader.vertexShader = shader.vertexShader.replace(
-      '#include <begin_vertex>',
-      `#include <begin_vertex>\nvec4 sandWp = modelMatrix * vec4(transformed, 1.0);\nvSandWorldPos = sandWp.xyz;`,
-    )
-    shader.fragmentShader = `uniform float uSandTime;\nvarying vec3 vSandWorldPos;\n` + shader.fragmentShader
-    shader.fragmentShader = shader.fragmentShader.replace(
-      '#include <color_fragment>',
-      `#include <color_fragment>
-// Deep indigo contact shadow beneath left and right live-rock islands + soft rear depth fade
-float leftRockAo = 1.0 - 0.58 * exp(-pow((vSandWorldPos.x + 2.35) / 2.35, 2.0) - pow((vSandWorldPos.z + 1.35) / 1.35, 2.0));
-float rightRockAo = 1.0 - 0.56 * exp(-pow((vSandWorldPos.x - 2.65) / 2.25, 2.0) - pow((vSandWorldPos.z + 1.20) / 1.30, 2.0));
-float sandContactAo = leftRockAo * rightRockAo;
-float rearDepthFade = smoothstep(-5.4, -0.4, vSandWorldPos.z);
-vec3 shadowTint = vec3(0.16, 0.17, 0.34);
-diffuseColor.rgb = mix(shadowTint, diffuseColor.rgb, sandContactAo * (0.42 + 0.58 * rearDepthFade));
-float sWave1 = sin(uSandTime * 1.38 + vSandWorldPos.x * 1.9 + vSandWorldPos.z * 1.6);
-float sWave2 = cos(uSandTime * 2.32 - vSandWorldPos.x * 1.4 + vSandWorldPos.z * 2.1);
-float sandCaustic = smoothstep(0.15, 0.88, 0.5 + 0.25 * (sWave1 + sWave2)) * sandContactAo * rearDepthFade;
-diffuseColor.rgb *= (0.86 + 0.22 * sandCaustic);
-`,
-    )
-  }
-  // The sand's scalar caustic shimmer above stays; the texture term below
-  // adds the spatial web on top of it. applyCaustics chains the existing
-  // onBeforeCompile instead of replacing it.
-  applyCaustics(sandMaterial, caustics)
-  const sand = new THREE.Mesh(sandGeometry, sandMaterial); sand.rotation.x = -Math.PI / 2; sand.position.y = -2.8; sand.receiveShadow = true; scene.add(sand)
+  // Photoreal aragonite sand bed (AQ-73 / AQ-70.12): the generated PBR
+  // trio (grain-scale normal/roughness, non-repeating macro variation),
+  // rock-base contact AO, talus mounding, and rear-rising aquascaping slope
+  // live in aragonite-sand.ts. This replaces the old inline 256x256 LCG-noise
+  // texture with its hard-coded indigo AO blobs, which made the islands read
+  // as floating. The bed's own shader already carries its caustic network,
+  // so the shared caustic texture is not chained on top of it.
+  const sandBed = createAragoniteSandBed({ narrow: false })
+  const sand = sandBed.sandMesh
+  scene.add(sandBed.group)
 
   // Layered Reef-Tank Backdrop (AQ-14.6 & AQ-39): eliminates the flat paint-bucket wall & sharp horizon line
   const rearUniforms = { uRearTime: { value: 0 } }
@@ -217,8 +178,9 @@ diffuseColor.rgb *= (0.86 + 0.22 * sandCaustic);
       `#include <color_fragment>
 float hNorm = clamp((vRearWorldPos.y + 2.8) / 5.6, 0.0, 1.0);
 // Deep actinic navy-indigo at base -> rich reef cobalt mid-water -> luminous aquamarine-violet under top LEDs
-vec3 cBottom = vec3(0.06, 0.11, 0.24);
-vec3 cMid = vec3(0.12, 0.26, 0.44);
+// AQ-86: deepened base/mid so the graded background reads darker deep-blue with depth.
+vec3 cBottom = vec3(0.04, 0.08, 0.19);
+vec3 cMid = vec3(0.10, 0.23, 0.40);
 vec3 cTop = vec3(0.26, 0.48, 0.66);
 vec3 waterCol = mix(cBottom, cMid, smoothstep(0.0, 0.58, hNorm));
 waterCol = mix(waterCol, cTop, smoothstep(0.52, 1.0, hNorm));
@@ -236,11 +198,82 @@ float beam2 = 0.5 + 0.5 * cos(beamCoord * 3.9 - uRearTime * 0.32 + 1.4);
 float sunbeams = pow(beam1 * 0.6 + beam2 * 0.4, 2.2) * smoothstep(0.18, 0.98, hNorm);
 waterCol += vec3(0.10, 0.16, 0.24) * sunbeams * 0.55;
 
+// AQ-86: soften the hard horizontal background/sand seam — the lowest band
+// of the backdrop eases toward the warm aragonite sand tone instead of
+// ending on a hard navy line. No blur, veil, or vignette is involved.
+waterCol = mix(vec3(0.30, 0.27, 0.22), waterCol, smoothstep(0.0, 0.14, hNorm));
+
 diffuseColor.rgb = waterCol;
 `,
     )
   }
   const rear = new THREE.Mesh(new THREE.PlaneGeometry(32, 14), rearMaterial); rear.position.set(0, 0, -5.5); scene.add(rear)
+
+  // Restrained aquarium-scale depth haze (AQ-86 AC #1): one translucent
+  // plane midway between the fish volume and the rear wall, deepening the
+  // rear water column without fogging the foreground. No open-ocean fog
+  // (AQ-39 §1.1), blue veil, blur, or dark vignette (AQ-14.6 AC #3,
+  // AQ-14.2 AC #4) — the plane is static, its alpha peaks at 0.22 at the
+  // sand, and it sits behind the fish volume (z < -1.5) by construction.
+  const hazeMaterial = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    uniforms: { uHazeAlpha: { value: optics.depthHazeMaxAlpha } },
+    vertexShader: 'varying vec2 vHazeUv; void main() { vHazeUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: `
+      uniform float uHazeAlpha;
+      varying vec2 vHazeUv;
+      void main() {
+        float vertical = 1.0 - vHazeUv.y;
+        float edgeFade = smoothstep(0.0, 0.10, vHazeUv.x) * smoothstep(1.0, 0.90, vHazeUv.x);
+        vec3 hazeColor = mix(vec3(0.05, 0.16, 0.30), vec3(0.02, 0.07, 0.16), vertical);
+        float alpha = uHazeAlpha * (0.45 + 0.55 * vertical) * edgeFade;
+        gl_FragColor = vec4(hazeColor, alpha);
+      }`,
+  })
+  const hazePlane = new THREE.Mesh(new THREE.PlaneGeometry(16, 5.4), hazeMaterial)
+  hazePlane.position.set(0, -0.08, (DEPTH_HAZE_START_Z + DEPTH_HAZE_END_Z) / 2)
+  hazePlane.renderOrder = 1
+  hazePlane.raycast = () => {}
+  scene.add(hazePlane)
+
+  // Soft volumetric light shafts (AQ-86 AC #2): one additive plane just
+  // behind the fish volume carrying the three slanted bands from
+  // underwater-optics.ts (mirrored by evaluateLightShaftIntensity, so the
+  // CPU reference and the shader can never disagree). Bands weaken with
+  // depth and freeze at the t=0 phase on pause / reduced-motion / hidden,
+  // exactly like the caustic and ripple channels.
+  const shaftUniforms = {
+    uShaftTime: { value: 0 },
+    uShaftAlpha: { value: optics.lightShaftMaxAlpha },
+  }
+  const shaftMaterial = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    uniforms: shaftUniforms,
+    vertexShader: 'varying vec3 vShaftWorldPos; varying vec2 vShaftUv; void main() { vShaftUv = uv; vec4 shaftWp = modelMatrix * vec4(position, 1.0); vShaftWorldPos = shaftWp.xyz; gl_Position = projectionMatrix * viewMatrix * shaftWp; }',
+    fragmentShader: `
+      uniform float uShaftTime;
+      uniform float uShaftAlpha;
+      varying vec3 vShaftWorldPos;
+      varying vec2 vShaftUv;
+      void main() {
+        float depthFromTop = clamp((2.8 - vShaftWorldPos.y) / 5.6, 0.0, 1.0);
+        float depthEnvelope = 1.0 - 0.85 * depthFromTop;
+        float edgeFade = smoothstep(0.0, 0.06, vShaftUv.x) * smoothstep(1.0, 0.94, vShaftUv.x);
+        float shaft = 0.0;
+${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = ${LIGHT_SHAFT_SWAY_AMPLITUDE_M.toFixed(2)} * sin(uShaftTime * ${(2 * Math.PI * LIGHT_SHAFT_SWAY_HZ).toFixed(4)} + ${center.toFixed(2)});
+        shaft += exp(-pow((vShaftWorldPos.x - (${center.toFixed(2)} + (2.8 - vShaftWorldPos.y) * ${LIGHT_SHAFT_SLANT_PER_M.toFixed(2)} + sway${index})) / ${LIGHT_SHAFT_BAND_WIDTH_M.toFixed(2)}, 2.0));`).join('\n')}
+        float alpha = min(shaft, 1.0) * depthEnvelope * edgeFade * uShaftAlpha;
+        gl_FragColor = vec4(vec3(0.55, 0.80, 0.95) * alpha, alpha);
+      }`,
+  })
+  const shaftPlane = new THREE.Mesh(new THREE.PlaneGeometry(16, 5.4), shaftMaterial)
+  shaftPlane.position.set(0, -0.08, DEPTH_HAZE_START_Z - 0.3)
+  shaftPlane.renderOrder = 2
+  shaftPlane.raycast = () => {}
+  scene.add(shaftPlane)
 
   // Visible Rippling Top Water Surface / Meniscus (AQ-14.2 AC #1 & AQ-14.6 AC #2)
   const waterSurfaceGeometry = new THREE.PlaneGeometry(32, 12, 48, 20)
@@ -818,6 +851,9 @@ diffuseColor.rgb = waterCol;
   }
   function rebuildFish(): boolean | undefined { removeFish(); return reconcileFish() }
   function positionLabels(force = false) {
+    // AQ-89: two passes — place every visible label tight under its fish,
+    // then de-conflict the captions so none covers another fish or caption.
+    const placedLabels: Array<{ anchor: HTMLAnchorElement; id: string; bounds: { x: number; y: number; width: number; height: number }; lift: number; depth: number }> = []
     for (const item of fish) {
       const anchor = item.anchor; if (!anchor) continue
       const bounds = projectFishLinkBounds(item.root.position, camera, width, height, fishRenderLength(item.service.fishId), projected)
@@ -835,12 +871,45 @@ diffuseColor.rgb = waterCol;
       anchor.style.visibility = 'visible'
       anchor.style.transform = `translate3d(${bounds.x}px,${bounds.y}px,0)`; anchor.style.width = `${bounds.width}px`; anchor.style.height = `${bounds.height}px`
       anchor.style.zIndex = String(Math.round((item.root.position.z + 10) * 100))
+      // AQ-89 AC #1: tuck the caption tight under the fish's belly — the
+      // link box is centred on the fish and taller than the body, so a
+      // caption at top: 100% would float with a visible gap.
+      const lift = labelLiftPx(bounds.height)
+      anchor.style.setProperty('--fish-label-lift', `${lift}px`)
+      placedLabels.push({ anchor, id: item.service.id, bounds, lift, depth: item.root.position.z })
       // AQ-13: keep the hover tooltip on-screen — flip it below the caption
       // near the top edge and align it inward near the left/right edges.
       const tooltipCenterX = bounds.x + bounds.width / 2
       anchor.classList.toggle('fish-link-tooltip-below', bounds.y < 40)
       anchor.classList.toggle('fish-link-tooltip-left', tooltipCenterX < 110)
       anchor.classList.toggle('fish-link-tooltip-right', tooltipCenterX > width - 110)
+    }
+    if (placedLabels.length > 1) {
+      const resolved = resolveLabelDeconflicts(
+        placedLabels.map(entry => ({
+          id: entry.id,
+          caption: estimateCaptionRect(entry.bounds, entry.lift),
+          body: entry.bounds,
+          depth: entry.depth,
+        })),
+        { width, height },
+      )
+      for (const result of resolved) {
+        const entry = placedLabels.find(candidate => candidate.id === result.id)
+        if (!entry) continue
+        entry.anchor.style.setProperty('--fish-label-dy', `${result.dy}px`)
+        entry.anchor.classList.toggle('fish-label-deconflicted', result.faded)
+        entry.anchor.classList.toggle('fish-label-align-left', result.align === 'left')
+        entry.anchor.classList.toggle('fish-label-align-right', result.align === 'right')
+      }
+    } else if (placedLabels.length === 1) {
+      // A lone label never needs a shift, but a stale de-conflict from a
+      // busier frame must not linger on it.
+      const entry = placedLabels[0]!
+      entry.anchor.style.setProperty('--fish-label-dy', '0px')
+      entry.anchor.classList.remove('fish-label-deconflicted')
+      entry.anchor.classList.remove('fish-label-align-left')
+      entry.anchor.classList.remove('fish-label-align-right')
     }
   }
   function render(steps: number, forceLabels = false) {
@@ -850,8 +919,12 @@ diffuseColor.rgb = waterCol;
       coralElapsedSec = (coralElapsedSec + steps * SIMULATION_STEP_SECONDS) % 3600
     }
     const effectiveEnvTime = habitatStopped || reducedMotion ? 0 : coralElapsedSec
-    sandUniforms.uSandTime.value = effectiveEnvTime
+    // AQ-73: the aragonite bed owns its sand time; its caustic network
+    // freezes at its last phase on pause / reduced-motion / hidden.
+    sandBed.update(coralElapsedSec, habitatStopped, reducedMotion)
     rearUniforms.uRearTime.value = effectiveEnvTime
+    // AQ-86: the shaft sway freezes at its t=0 phase with everything else.
+    shaftUniforms.uShaftTime.value = effectiveEnvTime
     causticLightController.update(coralElapsedSec, habitatStopped, reducedMotion)
     // The caustic texture time freezes at 0 on pause / reduced-motion,
     // exactly like the scalar shimmer above.
@@ -1042,6 +1115,9 @@ diffuseColor.rgb = waterCol;
     const newNarrow = width < 600
     const recoveringFromUnavailableSpawn = spawnUnavailable
     let rebuildSucceeded: boolean | undefined
+    // AQ-73: the sand bed follows the single-/dual-island layout with the
+    // habitat; setLayout is a no-op when the layout already matches.
+    if (newNarrow !== narrow) sandBed.setLayout(newNarrow)
     if (loaded && (narrow !== newNarrow || (spawnUnavailable && sizeChanged) || [...fish, ...schoolmates].some(item => !isSafeCurrentInhabitantPosition(item)))) {
       narrow = newNarrow; rebuildHabitat(); rebuildSucceeded = rebuildFish()
       if (rebuildSucceeded !== undefined) status(fishSceneStatus(!rebuildSucceeded))
@@ -1157,7 +1233,7 @@ diffuseColor.rgb = waterCol;
     canActivate(id, x, y) { const item = fish.find(item => item.service.id === id); return Boolean(item && (x === undefined || y === undefined ? updateVisibility(item) : nearest(x, y) === id)) },
     dispose() {
       if (disposed) return; disposed = true; abort.abort(); observer.disconnect(); renderer.setAnimationLoop(null); lazyQueue = []
-      removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sand.geometry.dispose(); sand.material.dispose(); sandTexture.dispose(); rear.geometry.dispose(); rear.material.dispose(); waterSurfaceGeometry.dispose(); waterSurfaceMaterial.dispose(); foregroundParticleGeometry.dispose(); foregroundParticleMaterial.dispose(); backgroundParticleGeometry.dispose(); backgroundParticleMaterial.dispose(); bubbleGeometry.dispose(); bubbleMaterial.dispose(); caustics.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
+      removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sandBed.dispose(); rear.geometry.dispose(); rear.material.dispose(); hazePlane.geometry.dispose(); hazeMaterial.dispose(); shaftPlane.geometry.dispose(); shaftMaterial.dispose(); waterSurfaceGeometry.dispose(); waterSurfaceMaterial.dispose(); foregroundParticleGeometry.dispose(); foregroundParticleMaterial.dispose(); backgroundParticleGeometry.dispose(); backgroundParticleMaterial.dispose(); bubbleGeometry.dispose(); bubbleMaterial.dispose(); caustics.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
     },
   }
 }

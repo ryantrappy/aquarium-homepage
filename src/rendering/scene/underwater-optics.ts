@@ -46,6 +46,13 @@ export type AquariumOpticsConfig = Readonly<{
   /** Bubbles recycle to their emitter above this height, below the water
    * surface plane (y = 2.66). */
   bubbleRecycleTopY: number
+  /** Maximum alpha of the restrained rear depth-haze plane (AQ-86): haze
+   * starts behind the fish volume (z < -1.5) and never veils foreground
+   * fish. This is not open-ocean fog (forbidden by AQ-39 §1.1). */
+  depthHazeMaxAlpha: number
+  /** Maximum alpha of the volumetric light-shaft plane (AQ-86): soft
+   * additive shafts from the surface, weakening with depth. */
+  lightShaftMaxAlpha: number
 }>
 
 /**
@@ -85,9 +92,29 @@ export const DEFAULT_AQUARIUM_OPTICS_CONFIG: AquariumOpticsConfig = Object.freez
   bubbleWobbleAmplitudeM: 0.05,
   bubbleEmitterBaseY: -2.5,
   bubbleRecycleTopY: 2.5,
+  // AQ-86: restrained rear depth haze + volumetric shafts. Both stay well
+  // below full opacity so the tank keeps crisp deep focus (AQ-14.2 AC #4).
+  depthHazeMaxAlpha: 0.22,
+  lightShaftMaxAlpha: 0.16,
 })
 
 const TWO_PI = Math.PI * 2
+
+/** Rear boundary of the primary fish swimming volume (AQ-43 zBand, AQ-86):
+ * depth haze starts behind this plane and never veils foreground fish. */
+export const DEPTH_HAZE_START_Z = -1.5
+/** Rear wall of the water column; haze reaches full strength here. */
+export const DEPTH_HAZE_END_Z = -4.6
+/** World-space x centres of the three volumetric light-shaft bands at the surface (AQ-86). */
+export const LIGHT_SHAFT_BAND_CENTERS: readonly number[] = Object.freeze([-2.2, 0.2, 2.4])
+/** Gaussian half-width of one shaft band, in metres. */
+export const LIGHT_SHAFT_BAND_WIDTH_M = 0.55
+/** How far a shaft band slants sideways per metre of depth (slanting away from the surface). */
+export const LIGHT_SHAFT_SLANT_PER_M = 0.35
+/** Slow lateral sway amplitude of a shaft band, in metres. */
+export const LIGHT_SHAFT_SWAY_AMPLITUDE_M = 0.15
+/** Slow lateral sway frequency of a shaft band, in Hz. */
+export const LIGHT_SHAFT_SWAY_HZ = 0.05
 
 function clamp(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) return min
@@ -128,6 +155,55 @@ export function evaluateDepthTintedColor(backgroundHex: string, depthMeters: num
   const g = Math.round(((n >> 8) & 0xff) * t.g)
   const b = Math.round((n & 0xff) * t.b)
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
+}
+
+/**
+ * Evaluates the restrained rear depth-haze factor at a water-column point
+ * (`AQ-86` AC #1): 0 everywhere inside the primary fish volume
+ * (z >= -1.5), ramping to 1 at the rear wall (z = -4.6), and stronger with
+ * depth (0.55 at the surface, 1.0 at the sand). The haze is a rear-water
+ * depth cue only — it never veils foreground or mid-tank fish, and it is
+ * not open-ocean fog (forbidden by AQ-39 §1.1) or a blue veil.
+ */
+export function evaluateDepthHazeFactor(z: number, y: number): number {
+  if (!Number.isFinite(z) || !Number.isFinite(y)) return 0
+  const zFactor = clamp((DEPTH_HAZE_START_Z - z) / (DEPTH_HAZE_START_Z - DEPTH_HAZE_END_Z), 0, 1)
+  const depthFactor = 0.55 + 0.45 * clamp((2.8 - y) / 5.6, 0, 1)
+  return zFactor * depthFactor
+}
+
+/**
+ * Evaluates soft volumetric light-shaft intensity at a water-column point
+ * (`AQ-86` AC #2): three slanted Gaussian bands descending from the
+ * surface, weakening with depth (15% of surface strength at the sand),
+ * swaying slowly sideways. Freezes at the static t=0 phase when `paused`
+ * or `reducedMotion` is active, and never flickers. The GLSL in
+ * `aquarium.ts` mirrors these constants; keep the two in sync.
+ */
+export function evaluateLightShaftIntensity(
+  x: number,
+  y: number,
+  timeSeconds: number,
+  options?: {
+    paused?: boolean
+    reducedMotion?: boolean
+  },
+): number {
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return 0
+  const effectiveTime =
+    options?.paused || options?.reducedMotion || !Number.isFinite(timeSeconds)
+      ? 0
+      : timeSeconds % 3600
+  const depthFromTop = clamp((2.8 - y) / 5.6, 0, 1)
+  const depthEnvelope = 1 - 0.85 * depthFromTop
+  let total = 0
+  for (const center of LIGHT_SHAFT_BAND_CENTERS) {
+    const sway = LIGHT_SHAFT_SWAY_AMPLITUDE_M * Math.sin(effectiveTime * TWO_PI * LIGHT_SHAFT_SWAY_HZ + center)
+    const bandCenter = center + (2.8 - y) * LIGHT_SHAFT_SLANT_PER_M + sway
+    const d = (x - bandCenter) / LIGHT_SHAFT_BAND_WIDTH_M
+    total += Math.exp(-(d * d))
+  }
+  return Math.min(1, total) * depthEnvelope
 }
 
 /**
