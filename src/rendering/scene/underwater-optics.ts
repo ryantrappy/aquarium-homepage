@@ -38,8 +38,11 @@ export const DEFAULT_AQUARIUM_OPTICS_CONFIG: AquariumOpticsConfig = Object.freez
   backgroundHex: '#183654',
   fogNear: 18,
   fogFar: 36,
-  keyLightIntensity: 2.45,
-  fillLightIntensity: 1.12,
+  // AQ-71: re-tuned down to compensate for the added PMREM/IBL ambient
+  // light. aquarium.ts reads these via the optics config, so the key/fill
+  // constructors and the caustic-controller bases all follow.
+  keyLightIntensity: 2.1,
+  fillLightIntensity: 0.95,
   causticBaseIntensity: 2.45,
   causticModulationAmplitude: 0.18,
   causticPrimaryHz: 0.22,
