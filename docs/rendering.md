@@ -125,3 +125,18 @@ For AQ-38 AC #3, the combined research evaluates Babylon's actual two-species sk
 The fish meshes and motion remain technical baselines with baked shading, approximate fins and no independently articulated eyes, gills or mouth. The study does not establish production-quality anatomy, equivalent reef lighting, underwater optics, full-school performance, habitat-aware navigation, service-link accessibility, or renderer lifecycle integration with the application. Translating a still image alone remains insufficient for the product's realistic-fish goal.
 
 Detailed earlier asset comparisons, local rig and Mesh2Motion experiments, calibration notes, and historical limitations are preserved in [rendering-research-history.md](rendering-research-history.md); they are not current entrypoints or claims that those historical prototypes ship.
+
+## WebGPU evaluation (AQ-77, 2026-11-08)
+
+**Decision: DEFER — stay on `WebGLRenderer`.** The full evaluation is in
+[research/webgpu-evaluation-aq77.md](research/webgpu-evaluation-aq77.md).
+Three.js r187 (the pinned version) already ships `WebGPURenderer` + TSL with an
+automatic WebGL 2 fallback, and browser support is ~84% full, but the renderer
+is still experimental per the three.js manual, the scene's 30 `onBeforeCompile`
+GLSL patches would all need TSL ports, and the volumetric-water / refraction /
+SSS gains are gated on rigged/sculpted fish assets (AQ-78) and fin work (AQ-72)
+that do not exist yet. No measured GPU bottleneck exists — the 33.3 ms median
+frame interval is a host frame interval, not a GPU timing. Re-evaluate once the
+in-flight realism work (AQ-39 optics, AQ-76 LOD, AQ-78 assets) has landed and
+either `WebGPURenderer` leaves experimental status or a measured GPU bottleneck
+appears. No production renderer code was changed by this evaluation (AQ-38 AC7).

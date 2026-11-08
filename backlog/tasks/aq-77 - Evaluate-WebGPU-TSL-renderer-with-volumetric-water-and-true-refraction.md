@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: 2026-11-08 00:30
-updated_date: '2026-11-08T06:30:00Z'
+updated_date: '2026-11-08T18:45:00Z'
 labels: []
 dependencies:
   - AQ-38
@@ -31,3 +31,9 @@ ordinal: 77
 - [ ] #3 A go / no-go decision for a renderer migration is recorded, with Root review
 - [ ] #4 No production renderer code is changed as part of this evaluation task
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Evaluation completed 2026-11-08 (docs/research/webgpu-evaluation-aq77.md, PR queued as docs/webgpu-evaluation-aq77). Recommendation: DEFER — stay on WebGLRenderer. Three.js r187 (pinned) already ships WebGPURenderer + TSL with automatic WebGL 2 fallback, but it is still experimental per the three.js manual, the scene's 30 onBeforeCompile GLSL patches would all need TSL ports, and volumetric-water/refraction/SSS gains are gated on AQ-78 rigged fish and AQ-72 fin work that do not exist yet. No measured GPU bottleneck exists (33.3 ms median is a host frame interval, not a GPU timing). Re-evaluate once AQ-39 optics, AQ-76 LOD, and AQ-78 assets have landed and either WebGPURenderer leaves experimental status or a measured GPU bottleneck appears. No production renderer code changed (AC #4, AQ-38 AC7). ACs remain unchecked pending Root review; status/Done left to Root.
+<!-- SECTION:NOTES:END -->
