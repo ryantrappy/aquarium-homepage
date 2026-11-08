@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@render-integration'
 created_date: '2026-11-03T04:15:00Z'
-updated_date: '2026-11-08T04:47:00Z'
+updated_date: '2026-11-08T12:46:06Z'
 labels: []
 dependencies:
   - AQ-5
@@ -53,6 +53,8 @@ The aquarium will succeed when fish look like living reef animals swimming throu
 
 <!-- SECTION:NOTES:BEGIN -->
 2026-11-05 Root preservation audit: current uncommitted nine splat-fish GLBs/script and13modelURL/axis additions are preserved and excluded from reviewed commits. No per-asset manifest/notices accompany the nine-file folder at this checkpoint; generator references candidate-real-clown.glb as a donor. Before any production promotion, document exactly which donor data is reused and carry applicable derivative attribution/provenance plus objective source/art/rig validation. Finite player-load compatibility cannot establish license/art/realistic-animation acceptance. Do not replace or regenerate these supplied candidates from Codex.
+
+2026-11-08 (backlog mapping, PR 10): The promotion/swap of the 6 Blender-built fish to runtime — removing/replacing the corresponding extruded-silhouette GLBs — is NOT in AQ-12's scope. AQ-12 covers swimming animation, not asset promotion; its notes above require documented donor provenance and Root review before any production promotion, and fish source fidelity remains pending AQ-40. The swap is tracked by AQ-78 (Build scanned or sculpted fish for all 15 species with distinct rigs; task file added in PR #6, unmerged at the time of this note) and AQ-40. Do not treat any AQ-12 AC as covering the swap.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

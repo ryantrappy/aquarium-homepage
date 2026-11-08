@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: 2026-11-03 12:33
-updated_date: '2026-11-08T04:47:00Z'
+updated_date: '2026-11-08T12:46:06Z'
 labels: []
 dependencies:
   - AQ-5
@@ -82,6 +82,8 @@ Per `docs/open-source-asset-and-motion-research.md` §6.2:
   * evaluateDepthTransmittance(depthMeters) applies Pope & Fry (1997) pure-water absorption coefficients (alpha_R=0.43, alpha_G=0.055, alpha_B=0.015 m^-1) bounded to home aquarium path lengths (0..3.5 m) with visibility floors (R>=0.35, G>=0.78, B>=0.90) so foreground fish are never obscured by an open-ocean blue veil.
   * Added full source-bounded Implementation Plan detailing the optical justification (Pope & Fry 1997, Alieva et al. 2008, Eyal et al. 2015, OSU refractive index) and exact lines to update in src/rendering/scene/aquarium.ts (lines 37-47).
   * Verified with vitest and tsc --noEmit.
+
+2026-11-08 (backlog mapping, PR 10) — glass-pane conflict note: AQ-39 §1.3 omits heavy front-pane reflections (they degrade fish readability and violate AQ-14.6 AC #3). Tracker item #13 proposes a glass pane, which would introduce front-pane reflections and therefore conflicts with this omission. Before implementing heavy front-pane reflections or a glass pane, resolve the conflict explicitly: either keep the AQ-39 omission and defer/reject the glass pane, or update AQ-39 to specify the intended reflection behaviour. Do not implement both the omission and the glass pane silently. This note changes no implementation scope.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
