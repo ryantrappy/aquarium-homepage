@@ -21,6 +21,36 @@ const REPO_ROOT = path.resolve(__dirname, '..')
 const OUT_DIR = path.join(REPO_ROOT, 'src/rendering/assets/splat-fish')
 const PUBLIC_FISH_DIR = path.join(REPO_ROOT, 'public/fish')
 
+const LEARNED_GUIDE_PATH = path.join(OUT_DIR, 'overrides', 'learned-shape-guide.json')
+const LEARNED_GUIDES = fs.existsSync(LEARNED_GUIDE_PATH)
+  ? JSON.parse(fs.readFileSync(LEARNED_GUIDE_PATH, 'utf8'))
+  : null
+
+function sampleLearnedGuideMultiplier(specId, s, v) {
+  if (!LEARNED_GUIDES) return 1.0
+  const guide =
+    LEARNED_GUIDES.guidesBySpecies?.[specId] ??
+    Object.values(LEARNED_GUIDES.guidesByArchetype ?? {})[0] ??
+    null
+  if (!guide) return 1.0
+  const longArr = guide.longitudinalMultipliers
+  const dvArr = guide.dorsoventralMultipliers
+  if (!Array.isArray(longArr) || !Array.isArray(dvArr) || !longArr.length || !dvArr.length) return 1.0
+
+  const fsIdx = clamp(s, 0, 1) * (longArr.length - 1)
+  const i0 = Math.floor(fsIdx), i1 = Math.min(longArr.length - 1, i0 + 1)
+  const longMult = lerp(longArr[i0], longArr[i1], fsIdx - i0)
+
+  const fvIdx = clamp(v, 0, 1) * (dvArr.length - 1)
+  const j0 = Math.floor(fvIdx), j1 = Math.min(dvArr.length - 1, j0 + 1)
+  const dvMult = lerp(dvArr[j0], dvArr[j1], fvIdx - j0)
+
+  const weight = LEARNED_GUIDES.guidesBySpecies?.[specId] ? 0.65 : 0.35
+  const combined = clamp(longMult * 0.7 + dvMult * 0.3, 0.72, 1.32)
+  return lerp(1.0, combined, weight)
+}
+
+
 const clamp = (v, lo = 0.0, hi = 1.0) => Math.max(lo, Math.min(hi, v))
 const lerp = (a, b, t) => a + (b - a) * t
 function smoothstep(edge0, edge1, x) {
@@ -636,7 +666,8 @@ function buildPhotoreal3DMesh(spec) {
           longHw = spec.maxHalfW * Math.pow(Math.sin(clamp(tHead, 0, 1) * Math.PI * 0.5), 0.68)
         }
       }
-      gThick[i] = Math.max(0.0015 * Math.pow(dNorm, 0.6), longHw * lenticularArch)
+      const guideMult = sampleLearnedGuideMultiplier(spec.id, s, v)
+      gThick[i] = Math.max(0.0015 * Math.pow(dNorm, 0.6), longHw * lenticularArch * guideMult)
     }
   }
 
@@ -1162,7 +1193,7 @@ function buildSelfContainedContractGlb(spec, meshData, sourceSha256) {
   }
 }
 
-function loadManualOverrideGlb(spec, overrideGlbPath, proceduralFallback, sourceSha256) {
+function loadManualOverrideGlb(spec, overrideGlbPath, proceduralMeshData, sourceSha256) {
   const rawBuf = fs.readFileSync(overrideGlbPath)
   if (rawBuf.byteLength < 20 || rawBuf.readUInt32LE(0) !== 0x46546c67 || rawBuf.readUInt32LE(4) !== 2) {
     throw new Error(`Invalid GLB header in manual override: ${overrideGlbPath}`)
@@ -1177,130 +1208,89 @@ function loadManualOverrideGlb(spec, overrideGlbPath, proceduralFallback, source
   const binChunkLen = rawBuf.readUInt32LE(binHeaderOffset)
   const binBuf = rawBuf.subarray(binHeaderOffset + 8, binHeaderOffset + 8 + binChunkLen)
 
-  let vertCount = 0
-  let triCount = 0
-  const posMin = [Infinity, Infinity, Infinity]
-  const posMax = [-Infinity, -Infinity, -Infinity]
+  const prim = doc.meshes?.[0]?.primitives?.[0]
+  if (!prim) {
+    throw new Error(`Manual override GLB contains no mesh primitive: ${overrideGlbPath}`)
+  }
 
-  for (const mesh of doc.meshes ?? []) {
-    for (const prim of mesh.primitives ?? []) {
-      const posIdx = prim.attributes?.POSITION
-      if (typeof posIdx === 'number' && doc.accessors?.[posIdx]) {
-        const acc = doc.accessors[posIdx]
-        vertCount += acc.count ?? 0
-        if (Array.isArray(acc.min) && Array.isArray(acc.max)) {
-          for (let c = 0; c < 3; c++) {
-            posMin[c] = Math.min(posMin[c], acc.min[c])
-            posMax[c] = Math.max(posMax[c], acc.max[c])
-          }
-        }
-      }
-      if (typeof prim.indices === 'number' && doc.accessors?.[prim.indices]) {
-        triCount += Math.floor((doc.accessors[prim.indices].count ?? 0) / 3)
+  function readFloatAccessor(accIdx, compCount) {
+    if (typeof accIdx !== 'number' || !doc.accessors?.[accIdx]) return null
+    const acc = doc.accessors[accIdx]
+    const bv = doc.bufferViews[acc.bufferView]
+    const baseOff = (bv.byteOffset ?? 0) + (acc.byteOffset ?? 0)
+    const stride = bv.byteStride || compCount * 4
+    const out = new Float32Array(acc.count * compCount)
+    for (let i = 0; i < acc.count; i++) {
+      const vOff = baseOff + i * stride
+      for (let c = 0; c < compCount; c++) {
+        out[i * compCount + c] = binBuf.readFloatLE(vOff + c * 4)
       }
     }
+    return out
   }
 
-  const pMin = Number.isFinite(posMin[0])
-    ? posMin.map(v => Number(v.toFixed(6)))
-    : proceduralFallback.inspectionRecord.boundsM.min
-  const pMax = Number.isFinite(posMax[0])
-    ? posMax.map(v => Number(v.toFixed(6)))
-    : proceduralFallback.inspectionRecord.boundsM.max
-  const dimensionsM = [
-    Number((pMax[0] - pMin[0]).toFixed(6)),
-    Number((pMax[1] - pMin[1]).toFixed(6)),
-    Number((pMax[2] - pMin[2]).toFixed(6)),
-  ]
-
-  const assetId = `fish-${spec.id}`
-  const primitiveId = `${spec.id.replace(/-/g, '_')}_body`
-  const recipe = `node --experimental-strip-types scripts/build-splat-fish-glbs.mjs`
-
-  const reefAsset = {
-    schema: 'reef-asset-v1',
-    id: assetId,
-    kind: 'fish',
-    units: 'meter',
-    upAxis: '+Y',
-    origin: 'local',
-    dimensionsM,
-    provenance: {
-      license: 'original',
-      creator: 'Aquarium project (Blender manual override)',
-      sourceSha256,
-      recipe,
-      attribution: `Hand-edited 3D rigged and animated fish asset (${spec.scientificName}) exported from Blender override src/rendering/assets/splat-fish/overrides/${spec.id}.glb.`,
-    },
-  }
-  const reefPrimitive = { id: primitiveId, role: 'fish' }
-
-  if (Array.isArray(doc.nodes) && doc.nodes.length > 0) {
-    const rootNode = doc.nodes.find(n => n.name === `${spec.id}_Root` || n.name === `${spec.id.replace(/-/g, '_')}_Root`) ?? doc.nodes[0]
-    rootNode.extras = { ...(rootNode.extras ?? {}), reefAsset }
-    const meshNode = doc.nodes.find(n => typeof n.mesh === 'number')
-    if (meshNode) {
-      meshNode.extras = { ...(meshNode.extras ?? {}), reefPrimitive }
+  function readJointsAccessor(accIdx) {
+    if (typeof accIdx !== 'number' || !doc.accessors?.[accIdx]) return null
+    const acc = doc.accessors[accIdx]
+    const bv = doc.bufferViews[acc.bufferView]
+    const baseOff = (bv.byteOffset ?? 0) + (acc.byteOffset ?? 0)
+    const isU16 = acc.componentType === 5123
+    const elemSize = isU16 ? 2 : 1
+    const stride = bv.byteStride || 4 * elemSize
+    // Map Blender's exported joint ordering back to canonical [spine_0..spine_5, pectoral_L, pectoral_R] (0..7)
+    const canonicalNames = ['spine_0', 'spine_1', 'spine_2', 'spine_3', 'spine_4', 'spine_5', 'pectoral_L', 'pectoral_R']
+    const exportedJointNodes = doc.skins?.[0]?.joints?.map(nIdx => doc.nodes?.[nIdx]?.name) ?? canonicalNames
+    const remap = exportedJointNodes.map((name, idx) => {
+      const found = canonicalNames.indexOf(name)
+      return found !== -1 ? found : Math.min(7, idx)
+    })
+    const out = new Uint8Array(acc.count * 4)
+    for (let i = 0; i < acc.count; i++) {
+      const vOff = baseOff + i * stride
+      for (let c = 0; c < 4; c++) {
+        const rawJ = isU16 ? binBuf.readUInt16LE(vOff + c * 2) : binBuf.readUInt8(vOff + c)
+        out[i * 4 + c] = remap[rawJ] ?? rawJ
+      }
     }
+    return out
   }
 
-  const jsonStr = JSON.stringify(doc)
-  const jsonPad = (4 - (Buffer.byteLength(jsonStr, 'utf8') % 4)) % 4
-  const jsonBuf = Buffer.from(jsonStr + ' '.repeat(jsonPad), 'utf8')
-  const totalLength = 12 + 8 + jsonBuf.length + 8 + binBuf.length
-  const header = Buffer.alloc(12)
-  header.writeUInt32LE(0x46546c67, 0)
-  header.writeUInt32LE(2, 4)
-  header.writeUInt32LE(totalLength, 8)
-  const jsonHeader = Buffer.alloc(8)
-  jsonHeader.writeUInt32LE(jsonBuf.length, 0)
-  jsonHeader.writeUInt32LE(0x4e4f534a, 4)
-  const binHeader = Buffer.alloc(8)
-  binHeader.writeUInt32LE(binBuf.length, 0)
-  binHeader.writeUInt32LE(0x004e4942, 4)
-
-  const inspectionRecord = {
-    extras: { reefAsset },
-    rootTransform: {
-      translation: [0, 0, 0],
-      rotation: [0, 0, 0, 1],
-      scale: [1, 1, 1],
-    },
-    boundsM: { min: pMin, max: pMax },
-    primitives: [
-      {
-        id: primitiveId,
-        role: 'fish',
-        vertexCount: vertCount || proceduralFallback.vertCount,
-        boundsM: { min: pMin, max: pMax },
-        material: {
-          vertexColors: false,
-          vertexAlpha: false,
-          aoSource: 'texture',
-        },
-      },
-    ],
-    sockets: [],
-    collisionParts: [],
+  function readIndicesAccessor(accIdx) {
+    if (typeof accIdx !== 'number' || !doc.accessors?.[accIdx]) return null
+    const acc = doc.accessors[accIdx]
+    const bv = doc.bufferViews[acc.bufferView]
+    const baseOff = (bv.byteOffset ?? 0) + (acc.byteOffset ?? 0)
+    const out = new Uint16Array(acc.count)
+    for (let i = 0; i < acc.count; i++) {
+      out[i] = acc.componentType === 5125
+        ? binBuf.readUInt32LE(baseOff + i * 4)
+        : acc.componentType === 5123
+          ? binBuf.readUInt16LE(baseOff + i * 2)
+          : binBuf.readUInt8(baseOff + i)
+    }
+    return out
   }
 
-  const validation = validateAssetContract(inspectionRecord)
-  if (!validation.valid) {
-    throw new Error(`Contract validation failed for override ${assetId}: ${JSON.stringify(validation.issues)}`)
+  const positions = readFloatAccessor(prim.attributes.POSITION, 3) ?? proceduralMeshData.positions
+  const normals = readFloatAccessor(prim.attributes.NORMAL, 3) ?? proceduralMeshData.normals
+  const uvs = readFloatAccessor(prim.attributes.TEXCOORD_0, 2) ?? proceduralMeshData.uvs
+  const joints = readJointsAccessor(prim.attributes.JOINTS_0) ?? proceduralMeshData.joints
+  const weights = readFloatAccessor(prim.attributes.WEIGHTS_0, 4) ?? proceduralMeshData.weights
+  const indices = readIndicesAccessor(prim.indices) ?? proceduralMeshData.indices
+
+  const overrideMeshData = {
+    ...proceduralMeshData,
+    positions,
+    normals,
+    uvs,
+    joints,
+    weights,
+    indices,
   }
 
-  const skinJoints = doc.skins?.[0]?.joints?.map(idx => doc.nodes?.[idx]?.name).filter(Boolean)
-  const animNames = (doc.animations ?? []).map(a => a.name).filter(Boolean)
-
+  const built = buildSelfContainedContractGlb(spec, overrideMeshData, sourceSha256)
   return {
-    glbBuf: Buffer.concat([header, jsonHeader, jsonBuf, binHeader, binBuf]),
-    inspectionRecord,
-    dimensionsM,
-    vertCount: vertCount || proceduralFallback.vertCount,
-    triCount: triCount || proceduralFallback.triCount,
-    joints: skinJoints?.length ? skinJoints : proceduralFallback.joints,
-    animations: animNames.length ? animNames : proceduralFallback.animations,
-    primitiveId,
+    ...built,
     isOverride: true,
   }
 }
@@ -1321,7 +1311,7 @@ for (const spec of SPECIES_SPECS) {
   const fileName = `${spec.id}.glb`
   const overrideGlbPath = path.join(OVERRIDES_DIR, fileName)
   const built = !forceProcedural && fs.existsSync(overrideGlbPath)
-    ? loadManualOverrideGlb(spec, overrideGlbPath, proceduralBuilt, generatorSha256)
+    ? loadManualOverrideGlb(spec, overrideGlbPath, meshData, generatorSha256)
     : proceduralBuilt
   const assetId = `fish-${spec.id}`
   const outGlbPath = path.join(OUT_DIR, fileName)

@@ -15,7 +15,7 @@
       "provenance": {
         "license": "original",
         "creator": "Aquarium project",
-        "sourceSha256": "54d14a95a547a3c9c30dd5cd484df865761f26b67a05d9914f7d67e5a803420c",
+        "sourceSha256": "e45a59ca0bfdc686aca6cd022918a02cfcc43e192dea373922c3be77e33965e4",
         "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
         "attribution": "Original photorealistic 3D rigged and animated fish asset (Chelmon rostratus (Copperband Butterflyfish)) reconstructed from project-original public/fish/copperband-butterflyfish.webp with embedded PBR textures."
       }

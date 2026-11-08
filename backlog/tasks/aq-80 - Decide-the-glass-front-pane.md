@@ -4,12 +4,20 @@ title: Decide the glass front pane (go / no-go)
 status: To Do
 assignee:
   - '@Luna'
-created_date: 2026-11-08
-updated_date: '2026-11-08T19:35:00Z'
-labels: []
+created_date: '2026-11-08'
+updated_date: '2026-11-08T20:08:00Z'
+labels:
+  - optics
+  - rendering
 dependencies:
   - AQ-39
   - AQ-14.6
+references:
+  - src/rendering/scene/underwater-optics.ts
+  - src/rendering/scene/aquarium.ts
+  - AQ-39
+  - AQ-43
+  - AQ-70.1
 documentation:
   - docs/rendering.md
 priority: '2'
@@ -30,3 +38,9 @@ Decision-only task resolving the AQ-39 conflict: AQ-39 §1.3 explicitly omits he
 - [ ] #3 If go, the intended reflection behaviour is specified and AQ-39 is updated
 - [ ] #4 No implementation in this task
 <!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 Root agent reviews the completed work before the task is marked Done.
+- [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
+<!-- DOD:END -->

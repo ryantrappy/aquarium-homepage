@@ -1,7 +1,11 @@
 # Editable Blender Source Files (`splat-fish`)
 
-Store `.blend` workfiles here (for example `blue-tang.blend`).
+Store `.blend` workfiles here (for example `blue-tang.blend`) with all textures packed (`File -> External Data -> Pack Resources`).
 
-When you finish editing or sculpting a fish in Blender:
-1. Export to `../overrides/<species-id>.glb` (`File -> Export -> glTF 2.0 (.glb)`).
-2. Run `node scripts/sync-blender-override.mjs` to copy the override into `src/rendering/assets/splat-fish/<species-id>.glb`, inject/validate the `reef-asset-v1` contract metadata and updated bounding box, and refresh `fish-<species-id>-inspection.json` and `manifest.json`.
+## Mandatory Rule: Always Export & Commit Blender Edits
+
+Changes in an open Blender session are **not** tracked until saved, exported, synced, and committed:
+1. Save `src/rendering/assets/splat-fish/blend/<species-id>.blend`.
+2. Export `src/rendering/assets/splat-fish/overrides/<species-id>.glb`.
+3. Run `node scripts/sync-blender-override.mjs --learn-guide`.
+4. Commit the updated `.blend`, `overrides/`, `.glb`, inspection JSON, and `manifest.json` files to Git.

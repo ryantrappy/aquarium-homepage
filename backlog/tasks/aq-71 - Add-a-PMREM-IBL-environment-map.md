@@ -5,11 +5,19 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: 2026-11-08 00:30
-updated_date: '2026-11-08T06:30:00Z'
-labels: []
+updated_date: '2026-11-08T20:08:00Z'
+labels:
+  - photorealism
+  - rendering
+  - optics
 dependencies:
   - AQ-39
   - AQ-14.2
+  - AQ-70.4
+references:
+  - src/rendering/scene/aquarium.ts
+  - src/rendering/scene/underwater-optics.ts
+  - AQ-70.4
 documentation:
   - docs/rendering.md
 priority: '2'
@@ -20,7 +28,7 @@ ordinal: 71
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-The main scene has no environment map / PMREM / IBL, so fish PBR materials read flat and plasticky. Add a PMREM-generated environment map and a proper specular environment to the Three.js scene so wet, iridescent fish surfaces read as wet. Keep ACESFilmicToneMapping exposure 1.02 as the baseline and re-tune lighting after the env map lands.
+The main scene currently lacks a scene.environment PMREM texture, causing MeshStandardMaterial fish and coral surfaces to lack view-dependent specular reflections and read flat or plasticky. Coordinate with AQ-70.4 to generate and apply a custom or CC0/CC-BY-4.0 verified reef-tank PMREM environment map in src/rendering/scene/aquarium.ts, evaluate tone mapping (ACESFilmicToneMapping exposure 1.02 baseline vs AgX/Neutral per AQ-70.4), and re-tune key/fill/rim light intensities so wet, iridescent fish surfaces read naturally without over-exposing highlights.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -30,3 +38,9 @@ The main scene has no environment map / PMREM / IBL, so fish PBR materials read 
 - [ ] #3 Exposure and light intensities are re-tuned so the scene is not over- or under-exposed at 1440x900 and 402x874
 - [ ] #4 Performance is verified at both viewports with no regression in frame rate
 <!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 Root agent reviews the completed work before the task is marked Done.
+- [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
+<!-- DOD:END -->

@@ -8,16 +8,16 @@
       "upAxis": "+Y",
       "origin": "local",
       "dimensionsM": [
-        0.342624,
-        0.898795,
+        0.315434,
+        0.909703,
         2
       ],
       "provenance": {
         "license": "original",
-        "creator": "Aquarium project (Blender manual override)",
-        "sourceSha256": "54d14a95a547a3c9c30dd5cd484df865761f26b67a05d9914f7d67e5a803420c",
+        "creator": "Aquarium project",
+        "sourceSha256": "e45a59ca0bfdc686aca6cd022918a02cfcc43e192dea373922c3be77e33965e4",
         "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
-        "attribution": "Hand-edited 3D rigged and animated fish asset (Paracanthurus hepatus (Regal Blue Tang / Palette Surgeonfish)) exported from Blender override src/rendering/assets/splat-fish/overrides/blue-tang.glb."
+        "attribution": "Original photorealistic 3D rigged and animated fish asset (Paracanthurus hepatus (Regal Blue Tang / Palette Surgeonfish)) reconstructed from project-original public/fish/blue-tang.webp with embedded PBR textures."
       }
     }
   },
@@ -41,13 +41,13 @@
   },
   "boundsM": {
     "min": [
-      -0.171312,
-      -0.407224,
+      -0.157717,
+      -0.417059,
       -1
     ],
     "max": [
-      0.171312,
-      0.491571,
+      0.157717,
+      0.492644,
       1
     ]
   },
@@ -58,13 +58,13 @@
       "vertexCount": 9828,
       "boundsM": {
         "min": [
-          -0.171312,
-          -0.407224,
+          -0.157717,
+          -0.417059,
           -1
         ],
         "max": [
-          0.171312,
-          0.491571,
+          0.157717,
+          0.492644,
           1
         ]
       },

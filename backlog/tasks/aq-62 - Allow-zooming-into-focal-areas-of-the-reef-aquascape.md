@@ -5,9 +5,18 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: 2026-11-05 18:00
-updated_date: '2026-11-08T04:47:00Z'
-labels: []
+updated_date: '2026-11-08T20:08:00Z'
+labels:
+  - ui
+  - rendering
+  - accessibility
 dependencies: []
+references:
+  - src/rendering/scene/aquarium.ts
+  - src/rendering/scene/alpha-picking.ts
+  - src/components/AquariumScene.tsx
+  - AQ-50
+  - AQ-58
 documentation:
   - docs/design-principles.md
   - docs/rendering.md
@@ -31,3 +40,9 @@ The current aquarium scene uses a fixed front-on perspective of the full tank vo
 - [ ] #5 Reduced-motion preference (prefers-reduced-motion) disables animated camera smoothing in favor of instant framing
 - [ ] #6 Responsive behavior is verified on 1440x900 and 402x874 viewports without UI clipping
 <!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 Root agent reviews the completed work before the task is marked Done.
+- [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
+<!-- DOD:END -->

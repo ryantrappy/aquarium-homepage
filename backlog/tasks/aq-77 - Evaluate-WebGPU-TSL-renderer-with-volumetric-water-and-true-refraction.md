@@ -5,11 +5,22 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: 2026-11-08 00:30
-updated_date: '2026-11-08T18:45:00Z'
-labels: []
+updated_date: '2026-11-08T20:08:00Z'
+labels:
+  - rendering
+  - research
+  - gemini-research
 dependencies:
   - AQ-38
   - AQ-39
+  - AQ-70.4
+references:
+  - src/rendering/scene/aquarium.ts
+  - src/rendering/scene/coral-material.ts
+  - src/rendering/scene/underwater-optics.ts
+  - AQ-70.4
+  - AQ-72
+  - AQ-78
 documentation:
   - docs/rendering.md
   - docs/gemini_planning.md
@@ -31,6 +42,12 @@ ordinal: 77
 - [ ] #3 A go / no-go decision for a renderer migration is recorded, with Root review
 - [ ] #4 No production renderer code is changed as part of this evaluation task
 <!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 Root agent reviews the completed work before the task is marked Done.
+- [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
+<!-- DOD:END -->
 
 ## Implementation Notes
 

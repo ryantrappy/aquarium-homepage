@@ -4,13 +4,26 @@ title: Promote the 6 existing Blender-built fish into the runtime
 status: To Do
 assignee:
   - '@Luna'
-created_date: 2026-11-08
-updated_date: '2026-11-08T19:35:00Z'
-labels: []
+created_date: '2026-11-08'
+updated_date: '2026-11-08T20:08:00Z'
+labels:
+  - modeling
+  - photorealism
+  - rendering
 dependencies:
   - AQ-70
   - AQ-12
   - AQ-40
+  - AQ-58
+  - AQ-60
+references:
+  - src/rendering/assets/fish/manifest.json
+  - src/rendering/assets/splat-fish/manifest.json
+  - src/rendering/assets/splat-fish/overrides/
+  - src/rendering/scene/aquarium.ts
+  - scripts/verify-fish-clip-player.mjs
+  - AQ-58
+  - AQ-60
 documentation:
   - docs/rendering.md
 priority: '2'
@@ -21,7 +34,7 @@ ordinal: 79
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Per-species, Root-reviewed promotion of the 6 Blender-built fish in src/rendering/assets/fish/ into the live roster, wiring them in aquarium.ts / the fish roster and replacing the corresponding splat-fish GLBs (procedurally extruded from 2D silhouettes). This closes the remaining gap in tracker item 1: AQ-78 covers building NEW scanned/sculpted fish only (its AC #4 covers promotion of those new models, "no automatic swap"), and AQ-70.9/70.10 are rebuild work — neither covers promoting the existing Blender fish. This is a prerequisite for AQ-72 (translucent fins/iridescence AC #1) and AQ-74 (eyes/gills/mouth AC #1), both of which assume "the promoted fish models". No automatic swap — Root review is required per the Blender README (do not replace active models automatically).
+Perform per-species visual and contract comparison between the 6 candidate models in src/rendering/assets/fish/ and the photoreal texture-projected / Blender-override models in src/rendering/assets/splat-fish/ (including overrides/blue-tang.glb), promoting only the higher-realism, Root-approved asset for each species into the active runtime roster in src/rendering/scene/aquarium.ts without breaking service-link picking, adult scale (AQ-60), or clip-player pose safety (AQ-58).
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -32,3 +45,9 @@ Per-species, Root-reviewed promotion of the 6 Blender-built fish in src/renderin
 - [ ] #4 Visual acceptance passes at 1440x900 and 402x874
 - [ ] #5 No automatic swap — promotion only on Root approval per species
 <!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 Root agent reviews the completed work before the task is marked Done.
+- [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
+<!-- DOD:END -->

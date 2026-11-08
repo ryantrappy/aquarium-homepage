@@ -30,3 +30,14 @@ Each asset is stamped in-band with `reefAsset` and `reefPrimitive` glTF extras, 
    node --experimental-strip-types scripts/build-splat-fish-glbs.mjs
    npx vitest run src/rendering/assets/splat-fish-contract.test.ts
    ```
+
+## Mandatory Blender Edit, Export & Git Commit Workflow
+
+Whenever any fish is created or edited in Blender (including via Blender MCP):
+1. **Save the `.blend` file** with packed textures to `src/rendering/assets/splat-fish/blend/<species-id>.blend`.
+2. **Export the `.glb` override** to `src/rendering/assets/splat-fish/overrides/<species-id>.glb`.
+3. **Run `node scripts/sync-blender-override.mjs --learn-guide`** so:
+   - `overrides/<species-id>.glb` is contract-validated and copied to `src/rendering/assets/splat-fish/<species-id>.glb`,
+   - `overrides/learned-shape-guide.json` is extracted from your manual sculpt to guide the procedural fish generator across the roster, and
+   - `fish-<species-id>-inspection.json` and `manifest.json` are updated with the new SHA-256 hashes and bounds.
+4. **Commit all updated files to Git** (`blend/`, `overrides/`, `*.glb`, `*-inspection.json`, and `manifest.json`). Never leave Blender changes uncommitted or only in viewport memory.
