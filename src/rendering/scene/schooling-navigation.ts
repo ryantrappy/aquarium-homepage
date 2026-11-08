@@ -85,8 +85,15 @@ export function evaluateSchoolingSteering(input: {
   dt: number
   paused?: boolean
   reducedMotion?: boolean
+  /**
+   * When false, cohesion/alignment are suppressed and only personal-space
+   * separation applies (AQ-41 AC #1 / AQ-44 AC #4). The live scene passes
+   * false while a fish is foraging, retreating, displaying, or bursting, so
+   * steering never fights a forage pass or a refuge run. Defaults to true.
+   */
+  cohesionAllowed?: boolean
 }): SchoolingSteeringVector {
-  const { self, peers, waterBounds, obstacles, dt, paused, reducedMotion } = input
+  const { self, peers, waterBounds, obstacles, dt, paused, reducedMotion, cohesionAllowed = true } = input
   const mode =
     SPECIES_SOCIAL_GROUPING_MODE[self.speciesId] ?? 'pair-or-solitary'
 
@@ -131,9 +138,12 @@ export function evaluateSchoolingSteering(input: {
       totalNeighbors++
     }
 
-    // Conspecific schooling only applies to grouping species and ignores startled peers (AQ-41 AC #4)
+    // Conspecific schooling only applies to grouping species and ignores startled peers (AQ-41 AC #4).
+    // Cohesion/alignment are also suppressed while the fish is foraging, retreating,
+    // displaying, or bursting (cohesionAllowed false) — separation still applies.
     if (
       groupingAllowed &&
+      cohesionAllowed &&
       peer.speciesId === self.speciesId &&
       peer.startleSeconds <= 0 &&
       dist < neighborRadius

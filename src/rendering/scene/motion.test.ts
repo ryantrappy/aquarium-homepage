@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { BoxGeometry } from 'three'
-import { MAX_PITCH_RAD_LEGACY, MAX_PITCH_RAD_METRIC, MAX_PITCH_RATE_RAD_PER_SEC_METRIC, createSwimmingFish, distance, startleFish, stepSwimmingFish, type WaterHabitat } from './motion'
+import { MAX_PITCH_RAD_LEGACY, MAX_PITCH_RAD_METRIC, MAX_PITCH_RATE_RAD_PER_SEC_METRIC, createSwimmingFish, distance, disturbSchool, startleFish, stepSwimmingFish, stepSwimmingSchool, type WaterHabitat } from './motion'
 import { instantiateModularReefHabitat } from './reef-assembly'
 import { fishClearanceRadius } from './fish-scale'
 import { findSafeFishSpawn } from './fish-spawn'
@@ -9,7 +9,7 @@ import { findWaterRoute, isWaterSegmentSafe } from '../../simulation/habitat-nav
 import { buildMeshCollider } from '../../simulation/mesh-collision'
 import { createMeshClearanceQuery } from '../../simulation/mesh-habitat'
 import { findMeshRoute, type CapsuleClearanceQuery, type MeshNavigationBudget } from '../../simulation/mesh-navigation'
-import { dispatchBehaviorEvent } from '../../simulation/behavior-runtime'
+import { advanceFishBehavior, dispatchBehaviorEvent } from '../../simulation/behavior-runtime'
 import type { FishExtensionConfig } from '../../simulation/fish-extensions'
 
 const habitat: WaterHabitat = { bounds: { min: { x: -5, y: -2.4, z: -3 }, max: { x: 5, y: 2.8, z: 2.8 } }, obstacles: [{ id: 'real-reef-envelope', bounds: { min: { x: -1.2, y: -2.8, z: -.8 }, max: { x: 1.2, y: .1, z: .8 } } }], anchors: [] }
@@ -484,5 +484,117 @@ describe('rendered fish travel adapter', () => {
     expect(query).toHaveBeenCalled()
     expect(fish.position).toEqual({ x: -.7, y: .6, z: 0 })
     expect(fish.route).toEqual([])
+  })
+})
+
+describe('school stepping and group disturbance (AQ-41/AQ-44)', () => {
+  function chromisPair() {
+    return [
+      createSwimmingFish('school-chromis-a', 'blue-green-chromis', { x: -0.6, y: 0.8, z: 1.0 }, .5),
+      createSwimmingFish('school-chromis-b', 'blue-green-chromis', { x: 0.9, y: 0.8, z: 1.0 }, .5),
+    ]
+  }
+  function toSwim(fish: ReturnType<typeof createSwimmingFish>) {
+    for (let i = 0; i < 400 && fish.behavior.state !== 'swim'; i++) {
+      fish.behavior = advanceFishBehavior(fish.behavior, .25)
+    }
+    if (fish.behavior.state !== 'swim') throw new Error(`fish ${fish.id} never reached swim (state ${fish.behavior.state})`)
+  }
+
+  it('applies cohesion to conspecific grouping species and none to solitary species (AC #1)', () => {
+    // One substep: route integration is identical with and without the
+    // school step, so any position difference is the steering nudge alone.
+    const soloA = createSwimmingFish('school-chromis-a', 'blue-green-chromis', { x: -0.6, y: 0.8, z: 1.0 }, .5)
+    const soloB = createSwimmingFish('school-chromis-b', 'blue-green-chromis', { x: 0.9, y: 0.8, z: 1.0 }, .5)
+    stepSwimmingFish(soloA, habitat, 1 / 60)
+    stepSwimmingFish(soloB, habitat, 1 / 60)
+    const [schoolA, schoolB] = chromisPair()
+    stepSwimmingSchool([schoolA, schoolB], habitat, 1 / 60)
+    expect(Math.abs(schoolA.position.x - soloA.position.x)).toBeGreaterThan(0.001)
+    expect(Math.abs(schoolB.position.x - soloB.position.x)).toBeGreaterThan(0.001)
+
+    // Solitary royal grammas at the same distance: steering is exactly zero,
+    // so the school step matches the solo step bit for bit.
+    const soloGrammaA = createSwimmingFish('school-gramma-a', 'royal-gramma', { x: -0.6, y: 0.8, z: 1.0 }, .5)
+    const soloGrammaB = createSwimmingFish('school-gramma-b', 'royal-gramma', { x: 0.9, y: 0.8, z: 1.0 }, .5)
+    stepSwimmingFish(soloGrammaA, habitat, 1 / 60)
+    stepSwimmingFish(soloGrammaB, habitat, 1 / 60)
+    const schoolGrammaA = createSwimmingFish('school-gramma-a', 'royal-gramma', { x: -0.6, y: 0.8, z: 1.0 }, .5)
+    const schoolGrammaB = createSwimmingFish('school-gramma-b', 'royal-gramma', { x: 0.9, y: 0.8, z: 1.0 }, .5)
+    stepSwimmingSchool([schoolGrammaA, schoolGrammaB], habitat, 1 / 60)
+    expect(schoolGrammaA.position).toEqual(soloGrammaA.position)
+    expect(schoolGrammaB.position).toEqual(soloGrammaB.position)
+  })
+
+  it('freezes steering under reduced motion while route motion continues (AC #3)', () => {
+    const soloA = createSwimmingFish('school-chromis-a', 'blue-green-chromis', { x: -0.6, y: 0.8, z: 1.0 }, .5)
+    const soloB = createSwimmingFish('school-chromis-b', 'blue-green-chromis', { x: 0.9, y: 0.8, z: 1.0 }, .5)
+    stepSwimmingFish(soloA, habitat, 1 / 60)
+    stepSwimmingFish(soloB, habitat, 1 / 60)
+    const [reducedA, reducedB] = chromisPair()
+    stepSwimmingSchool([reducedA, reducedB], habitat, 1 / 60, false, { reducedMotion: true })
+    expect(reducedA.position).toEqual(soloA.position)
+    expect(reducedB.position).toEqual(soloB.position)
+  })
+
+  it('separates overlapping schoolmates without ever moving through the reef (AC #3)', () => {
+    const closeA = createSwimmingFish('school-close-a', 'blue-green-chromis', { x: 0, y: 0.8, z: 1.0 }, .5)
+    const closeB = createSwimmingFish('school-close-b', 'blue-green-chromis', { x: 0.3, y: 0.8, z: 1.0 }, .5)
+    const initial = distance(closeA.position, closeB.position)
+    for (let frame = 0; frame < 60; frame++) {
+      const previousA = { ...closeA.position }, previousB = { ...closeB.position }
+      stepSwimmingSchool([closeA, closeB], habitat, 1 / 30)
+      expect(isWaterSegmentSafe({ start: previousA, target: closeA.position, waterBounds: habitat.bounds, obstacles: habitat.obstacles, fishClearanceRadius: .5 })).toBe(true)
+      expect(isWaterSegmentSafe({ start: previousB, target: closeB.position, waterBounds: habitat.bounds, obstacles: habitat.obstacles, fishClearanceRadius: .5 })).toBe(true)
+    }
+    expect(distance(closeA.position, closeB.position)).toBeGreaterThan(initial)
+  })
+
+  it('keeps a chromis pair within schooling range over time (AC #1)', () => {
+    const [a, b] = chromisPair()
+    for (let frame = 0; frame < 300; frame++) stepSwimmingSchool([a, b], habitat, 1 / 30)
+    expect(distance(a.position, b.position)).toBeLessThan(2.2)
+    expect(distance(a.position, b.position)).toBeGreaterThan(0.2)
+  })
+
+  it('holds a stopped fish still while it still counts as a peer (AQ-44 AC #4)', () => {
+    const [a, b] = chromisPair()
+    const held = { ...a.position }
+    stepSwimmingSchool([a, b], habitat, 1 / 60, [true, false])
+    expect(a.position).toEqual(held)
+    expect(b.position).not.toEqual({ x: 0.9, y: 0.8, z: 1.0 })
+  })
+
+  it('retreats only the chromis school on an explicit group disturbance, never the whole tank (AC #4)', () => {
+    const chromisA = createSwimmingFish('disturb-chromis-a', 'blue-green-chromis', { x: -0.6, y: 0.8, z: 1.0 }, .5)
+    const chromisB = createSwimmingFish('disturb-chromis-b', 'blue-green-chromis', { x: 0.9, y: 0.8, z: 1.0 }, .5)
+    const anthias = createSwimmingFish('disturb-anthias', 'lyretail-anthias', { x: 2, y: 0.5, z: 1.0 }, .5)
+    const tang = createSwimmingFish('disturb-tang', 'yellow-tang', { x: -2, y: 0.5, z: 1.0 }, .5)
+    for (const fish of [chromisA, chromisB, anthias, tang]) toSwim(fish)
+    const anthiasBefore = anthias.behavior
+    const tangBefore = tang.behavior
+
+    disturbSchool([chromisA, chromisB, anthias, tang], 'blue-green-chromis')
+
+    for (const fish of [chromisA, chromisB]) {
+      expect(fish.behavior.state).toBe('retreat')
+      expect(fish.behavior.targetAnchor).toBe('branchingCoralRefuge')
+    }
+    expect(anthias.behavior).toBe(anthiasBefore)
+    expect(tang.behavior).toBe(tangBefore)
+
+    // Anthias has no retreat state: a disturbance aimed at anthias changes nothing.
+    disturbSchool([chromisA, chromisB, anthias, tang], 'lyretail-anthias')
+    expect(anthias.behavior.state).toBe('swim')
+  })
+
+  it('never panics the school from a single-fish service click (AC #4)', () => {
+    const chromisA = createSwimmingFish('click-chromis-a', 'blue-green-chromis', { x: -0.6, y: 0.8, z: 1.0 }, .5)
+    const chromisB = createSwimmingFish('click-chromis-b', 'blue-green-chromis', { x: 0.9, y: 0.8, z: 1.0 }, .5)
+    const beforeB = chromisB.behavior
+    startleFish(chromisA, habitat)
+    expect(chromisA.startleSeconds).toBeGreaterThan(0)
+    expect(chromisB.behavior).toBe(beforeB)
+    expect(chromisB.startleSeconds).toBe(0)
   })
 })
