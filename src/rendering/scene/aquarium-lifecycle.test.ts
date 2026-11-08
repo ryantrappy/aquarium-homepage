@@ -210,6 +210,26 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     state.blockedSpawn = false; update([{ ...next, name: 'Fitting replacement' }])
     expect(status).toHaveBeenLastCalledWith('ready'); expect(pending.texture.dispose).toHaveBeenCalledTimes(1)
   })
+  it('lazy-loads species beyond the first three and swaps sprites to GLBs in place (AQ-76 AC #2)', async () => {
+    const services = [service('one', 'ocellaris-clownfish'), service('two', 'yellow-tang'), service('three', 'royal-gramma'), service('four', 'blue-tang'), service('five', 'firefish')]
+    await start(services)
+    // Drive the animation loop so the ~0.24 s label cadence re-pumps the
+    // lazy queue (the idle-callback pump alone is timing-dependent).
+    for (let i = 0; i < 6; i++) advance()
+    // Phase 0 blocks first paint on the first 3 configured species only:
+    // the 4th and 5th start as thumbnail sprites, links already clickable.
+    const rootFour = rootFor('four'), rootFive = rootFor('five')
+    expect(rootFour).toBeDefined(); expect(rootFive).toBeDefined()
+    expect(meshFor('four')).toBeUndefined(); expect(meshFor('five')).toBeUndefined()
+    expect(overlay.querySelector<HTMLAnchorElement>('[data-service-id="four"]')!.title).toContain('artwork preview')
+    // The background queue swaps each sprite to its GLB in place: same root
+    // and motion, no new inhabitant, and the preview suffix drops.
+    await vi.waitFor(() => expect(meshFor('four')).toBeDefined())
+    await vi.waitFor(() => expect(meshFor('five')).toBeDefined())
+    expect(rootFor('four')).toBe(rootFour); expect(rootFor('five')).toBe(rootFive)
+    expect(state.created).toHaveLength(5)
+    expect(overlay.querySelector<HTMLAnchorElement>('[data-service-id="four"]')!.title).not.toContain('artwork preview')
+  }, 15000)
   it('uses current metadata for delayed artwork failure and ignores callbacks from a removed generation', async () => {
     await start([service('art', 'artwork-fixture')]); const old = state.textures[0]
     update([{ ...service('art', 'artwork-fixture'), name: 'Renamed artwork', url: 'https://renamed.example.test' }])

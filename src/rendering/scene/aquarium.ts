@@ -33,6 +33,7 @@ import { createFishClipPlayer, type FishClipPlayer } from './fish-animation'
 import { bindFishFlexToModel, updateFishFlex, type FishFlexBinding } from './fish-flex-material'
 import { reconcileFishInhabitants, refreshFishLink } from './fish-inhabitants'
 import { applyCaustics, createCaustics } from './caustics'
+import { AdaptiveQualityController, LAZY_MAX_CONCURRENT_LOADS, QUALITY_TIERS, lodAnimationFrameSkip, orderLazyLoadQueue, phase0SpeciesIds, projectedFishLengthPx, selectFishLod, type FishLod, type QualityTier } from './runtime-quality'
 
 const modelUrls: Record<string, string> = {
   'ocellaris-clownfish': new URL('../proof/candidate-real-clown.glb', import.meta.url).href,
@@ -53,7 +54,7 @@ const modelUrls: Record<string, string> = {
 }
 export type SceneStatus = 'loading' | 'ready' | 'failed'
 export type AquariumController = { update(services: ServiceConfig[], paused: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void }
-type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; flex?: FishFlexBinding; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean }
+type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; flex?: FishFlexBinding; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean; lod: FishLod; lodModel?: THREE.Object3D; lodSprite?: THREE.Mesh }
 
 function disposeTree(root: THREE.Object3D) {
   const geometries = new Set<THREE.BufferGeometry>(), materials = new Set<THREE.Material>(), textures = new Set<THREE.Texture>()
@@ -287,6 +288,16 @@ diffuseColor.rgb = waterCol;
   let width = 1, height = 1, labelClock = 0, spawnUnavailable = false
   let meshNavigationGeneration = 0
   const clock = createFrameClock()
+  // AQ-76 runtime quality: global simulation-step counter for the LOD1
+  // half-rate clip cadence, and the adaptive tier controller + active tier.
+  let animationStepIndex = 0
+  let qualityTier: QualityTier = 'high'
+  const qualityController = new AdaptiveQualityController()
+  // AQ-76 lazy-load queue state lives with the other scene state (not beside
+  // initialize): resize() -> render() can pump the queue during setup, before
+  // the initialize() block below has run, so these must be initialized here.
+  let lazyQueue: string[] = []
+  let lazyActiveLoads = 0
   const ray = new THREE.Raycaster(), projected = new THREE.Vector3(), sample = new THREE.Vector3(), hitMeshes: THREE.Object3D[] = []
   const ownedSprites = new Set<THREE.Mesh>()
   const spriteMasks: SpriteMasks = new WeakMap()
@@ -415,7 +426,120 @@ diffuseColor.rgb = waterCol;
     if (item.artwork) {
       ownedSprites.delete(item.artwork); spriteMasks.delete(item.artwork); disposeTree(item.artwork)
     }
+    if (item.lodSprite) {
+      ownedSprites.delete(item.lodSprite); spriteMasks.delete(item.lodSprite); disposeTree(item.lodSprite); item.lodSprite = undefined
+    }
     item.anchor?.removeAttribute('data-artwork-error')
+  }
+  // Bind a loaded GLB to an inhabitant: clone, scale, env intensity, and the
+  // clip player + turning rig + body flex. Shared with the lazy-load
+  // sprite-to-GLB swap below, so the two paths can never drift apart.
+  function bindGlbToInhabitant(item: Inhabitant, base: GLTF) {
+    const model = clone(base.scene); model.scale.setScalar(fishModelScale(item.service.fishId))
+    applyEnvironmentMapIntensity(model, ENVIRONMENT_MAP_INTENSITY.fish)
+    model.traverse(object => { if (object instanceof THREE.Mesh) object.userData.serviceId = item.service.id })
+    item.root.add(model); item.lodModel = model; item.lod = 0
+    // The player restores the clean clip pose before every turning overlay.
+    if (base.animations.length === 1) {
+      try {
+        item.clipPlayer = createFishClipPlayer(model, base.animations[0], (seedForId(item.service.id) % 1500) / 1000)
+        item.turningRig = bindFishTurningRig(model, item.service.fishId)
+        try {
+          item.flex = bindFishFlexToModel(model, item.service.fishId, seedForId(item.service.id))
+        } catch (error) {
+          console.warn('Fish body flex unavailable; retaining bone-only animation', item.service.fishId, error)
+        }
+      } catch (error) {
+        item.clipPlayer?.dispose(); item.clipPlayer = undefined
+        console.warn('Fish animation unsupported; retaining static service fish', item.service.fishId, error)
+      }
+    } else console.warn('Fish animation requires one clip; retaining static service fish', item.service.fishId)
+  }
+  // Build the thumbnail sprite for an inhabitant. Used for the no-GLB
+  // fallback (`lodOnly: false`, stored as `item.artwork`) and for the far
+  // LOD2 sprite (`lodOnly: true`, stored as `item.lodSprite`). A failed LOD
+  // sprite only drops that fish back to its full GLB; a failed fallback
+  // sprite keeps the existing thumbnail-unavailable handling.
+  function buildSprite(item: Inhabitant, lodOnly: boolean) {
+    const species = getFishById(item.service.fishId)!
+    const spriteScale = fishSpriteScale(item.service.fishId)
+    // No-fit fallback retains old resources, but callbacks for a removed or
+    // replaced service must not rewrite its React-owned current native link.
+    const acceptsArtworkCallback = () => !disposed && !failed && ownedSprites.has(sprite)
+      && services.some(next => next.id === item.service.id && next.fishId === item.service.fishId)
+    const texture = new THREE.TextureLoader().load(species.thumbnail, loadedTexture => {
+      if (!acceptsArtworkCallback()) return
+      const image = loadedTexture.image as HTMLImageElement
+      const imageWidth = image.naturalWidth, imageHeight = image.naturalHeight
+      if (Number.isFinite(imageWidth) && Number.isFinite(imageHeight) && imageWidth > 0 && imageHeight > 0) {
+        sprite.scale.set(spriteScale, spriteScale * (SPRITE_PLANE_WIDTH / .62) * (imageHeight / imageWidth), 1)
+      }
+      try { spriteMasks.set(sprite, { texture: loadedTexture, pixels: readArtworkAlpha(image) }) }
+      catch (error) { console.warn('Fish artwork alpha unavailable', error) }
+      if (!document.hidden) render(0, true)
+    }, undefined, error => {
+      if (!acceptsArtworkCallback()) return
+      if (lodOnly) {
+        console.warn('Far-fish LOD sprite failed to load; keeping full GLB', species.thumbnail, error)
+        item.root.remove(sprite)
+        ownedSprites.delete(sprite); spriteMasks.delete(sprite); disposeTree(sprite)
+        if (item.lodSprite === sprite) { item.lodSprite = undefined; item.lod = 1 }
+        return
+      }
+      item.artworkUnavailable = true
+      handleArtworkTextureFailure(sprite, texture, hitMeshes, spriteMasks, item.anchor)
+      sprite.material.map = null // the failure handler already disposed this owned texture
+      refreshFishLink(item, item.service, item.anchor)
+      console.warn('Fish thumbnail failed to load; native service label remains available', species.thumbnail, error)
+      if (!document.hidden) render(0, true)
+    }); texture.colorSpace = THREE.SRGBColorSpace
+    const sprite = new THREE.Mesh(new THREE.PlaneGeometry(SPRITE_PLANE_WIDTH, .62), new THREE.MeshBasicMaterial({ map: texture, transparent: true, alphaTest: .2, depthWrite: true, side: THREE.DoubleSide }))
+    sprite.scale.set(spriteScale, spriteScale, 1)
+    sprite.userData.serviceId = item.service.id
+    item.root.add(sprite); ownedSprites.add(sprite)
+    spriteMasks.set(sprite, { texture }) // pending/failed masks never claim opaque pixels
+    return sprite
+  }
+  // Upgrade a thumbnail-fallback inhabitant to its GLB in place when the
+  // background lazy load lands: same position, yaw, motion, anchor, and
+  // service link — only the artwork changes. A failed swap keeps the sprite.
+  function swapFallbackToGlb(item: Inhabitant) {
+    const base = modelBases.get(item.service.fishId)
+    if (!base || !item.fallback || disposed || failed) return
+    const sprite = item.artwork
+    try {
+      if (sprite) {
+        item.root.remove(sprite)
+        ownedSprites.delete(sprite); spriteMasks.delete(sprite); disposeTree(sprite)
+        item.artwork = undefined
+      }
+      bindGlbToInhabitant(item, base)
+      item.fallback = false
+      refreshFishLink(item, item.service, item.anchor)
+      rebuildHitMeshes()
+      if (!document.hidden) render(0, true)
+    } catch (error) {
+      console.warn('Fish GLB swap failed; keeping thumbnail fallback', item.service.fishId, error)
+    }
+  }
+  // Apply a distance-LOD tier to a GLB inhabitant. LOD2 hides the skinned
+  // model and shows the cached thumbnail sprite (created on first entry);
+  // LOD0/LOD1 show the model and hide the sprite. Fallback (sprite-only)
+  // fish have no model to swap, so their tier is recorded but not applied.
+  function applyFishLod(item: Inhabitant, lod: FishLod) {
+    if (item.fallback || !item.lodModel) { item.lod = lod; return }
+    if (lod === 2) {
+      if (!item.lodSprite) {
+        item.lodSprite = buildSprite(item, true)
+        rebuildHitMeshes()
+      }
+      item.lodModel.visible = false
+      if (item.lodSprite) item.lodSprite.visible = true
+    } else {
+      item.lodModel.visible = true
+      if (item.lodSprite) item.lodSprite.visible = false
+    }
+    item.lod = lod
   }
   function removeFish() { fish.forEach(disposeInhabitant); fish = [] }
   function rebuildHitMeshes() {
@@ -426,59 +550,13 @@ diffuseColor.rgb = waterCol;
   }
   type FishSpawn = { species: NonNullable<ReturnType<typeof getFishById>>; clearance: number; position: SwimmingFish['position']; yaw: number }
   function createInhabitant(service: ServiceConfig, spawn: FishSpawn, anchor?: HTMLAnchorElement): Inhabitant {
-    const { species, clearance, position, yaw } = spawn
+    const { clearance, position, yaw } = spawn
     const root = new THREE.Group(), base = modelBases.get(service.fishId), fallback = !base
     const motion = createSwimmingFish(service.id, service.fishId, position, clearance, fishExtensions, { initialYaw: yaw, collisionRadiusM: MESH_NAVIGATION_COLLISION_RADIUS_M })
-    const item: Inhabitant = { service, root, motion, anchor, visible: false, fallback, releasedFocus: false }
+    const item: Inhabitant = { service, root, motion, anchor, visible: false, fallback, releasedFocus: false, lod: 0 }
     try {
-      if (base) {
-        const model = clone(base.scene); root.add(model); model.scale.setScalar(fishModelScale(service.fishId))
-        applyEnvironmentMapIntensity(model, ENVIRONMENT_MAP_INTENSITY.fish)
-        // The player restores the clean clip pose before every turning overlay.
-        if (base.animations.length === 1) {
-          try {
-            item.clipPlayer = createFishClipPlayer(model, base.animations[0], (seedForId(service.id) % 1500) / 1000)
-            item.turningRig = bindFishTurningRig(model, service.fishId)
-            try {
-              item.flex = bindFishFlexToModel(model, service.fishId, seedForId(service.id))
-            } catch (error) {
-              console.warn('Fish body flex unavailable; retaining bone-only animation', species.id, error)
-            }
-          } catch (error) {
-            item.clipPlayer?.dispose(); item.clipPlayer = undefined
-            console.warn('Fish animation unsupported; retaining static service fish', species.id, error)
-          }
-        } else console.warn('Fish animation requires one clip; retaining static service fish', species.id)
-      } else {
-        const spriteScale = fishSpriteScale(service.fishId)
-        // No-fit fallback retains old resources, but callbacks for a removed or
-        // replaced service must not rewrite its React-owned current native link.
-        const acceptsArtworkCallback = () => !disposed && !failed && ownedSprites.has(sprite)
-          && services.some(next => next.id === item.service.id && next.fishId === item.service.fishId)
-        const texture = new THREE.TextureLoader().load(species.thumbnail, loadedTexture => {
-          if (!acceptsArtworkCallback()) return
-          const image = loadedTexture.image as HTMLImageElement
-          const imageWidth = image.naturalWidth, imageHeight = image.naturalHeight
-          if (Number.isFinite(imageWidth) && Number.isFinite(imageHeight) && imageWidth > 0 && imageHeight > 0) {
-            sprite.scale.set(spriteScale, spriteScale * (SPRITE_PLANE_WIDTH / .62) * (imageHeight / imageWidth), 1)
-          }
-          try { spriteMasks.set(sprite, { texture: loadedTexture, pixels: readArtworkAlpha(image) }) }
-          catch (error) { console.warn('Fish artwork alpha unavailable', error) }
-          if (!document.hidden) render(0, true)
-        }, undefined, error => {
-          if (!acceptsArtworkCallback()) return
-          item.artworkUnavailable = true
-          handleArtworkTextureFailure(sprite, texture, hitMeshes, spriteMasks, item.anchor)
-          sprite.material.map = null // the failure handler already disposed this owned texture
-          refreshFishLink(item, item.service, item.anchor)
-          console.warn('Fish thumbnail failed to load; native service label remains available', species.thumbnail, error)
-          if (!document.hidden) render(0, true)
-        }); texture.colorSpace = THREE.SRGBColorSpace
-        const sprite = new THREE.Mesh(new THREE.PlaneGeometry(SPRITE_PLANE_WIDTH, .62), new THREE.MeshBasicMaterial({ map: texture, transparent: true, alphaTest: .2, depthWrite: true, side: THREE.DoubleSide }))
-        sprite.scale.set(spriteScale, spriteScale, 1)
-        root.add(sprite); ownedSprites.add(sprite); item.artwork = sprite
-        spriteMasks.set(sprite, { texture }) // pending/failed masks never claim opaque pixels
-      }
+      if (base) bindGlbToInhabitant(item, base)
+      else item.artwork = buildSprite(item, false)
       root.position.set(motion.position.x, motion.position.y, motion.position.z)
       root.traverse(object => { if (object instanceof THREE.Mesh) object.userData.serviceId = service.id })
       scene.add(root)
@@ -611,49 +689,100 @@ diffuseColor.rgb = waterCol;
     for (const controller of reefControllers) {
       controller.update(coralElapsedSec, habitatStopped, reducedMotion)
     }
-    for (let step = 0; step < steps; step++) for (const item of fish) {
-      const focused = document.activeElement === item.anchor
-      if (!focused) item.releasedFocus = false
-      const stopped = paused || document.hidden || (focused && !item.releasedFocus)
-      stepSwimmingFish(item.motion, habitat, SIMULATION_STEP_SECONDS, stopped)
-      if (!stopped) {
-        try {
-          item.clipPlayer?.advance(SIMULATION_STEP_SECONDS * (.55 + Math.min(1.7, item.motion.speed * 2.2)) * item.motion.animationPlaybackRate)
-        } catch (error) {
-          // The player has restored its complete last clean pose. Retire this
-          // unsupported animation once; other fish and native links keep working.
-          item.clipPlayer?.dispose(); item.clipPlayer = undefined; item.turningRig = undefined
-          item.flex?.dispose(); item.flex = undefined
-          console.warn('Fish animation stopped after invalid clip output', item.service.id, error)
+    for (let step = 0; step < steps; step++) {
+      for (const item of fish) {
+        const focused = document.activeElement === item.anchor
+        if (!focused) item.releasedFocus = false
+        const stopped = paused || document.hidden || (focused && !item.releasedFocus)
+        stepSwimmingFish(item.motion, habitat, SIMULATION_STEP_SECONDS, stopped)
+        // Animation LOD (AQ-76 AC #1): fish keep swimming at every tier, but
+        // far fish advance their swim clip at half rate (LOD1) or not at all
+        // (LOD2 sprite), and the turning-rig overlay runs only at LOD0.
+        // `animationStepIndex` is the global step counter, so the half rate
+        // is a real every-other-step cadence rather than a per-frame coin flip.
+        const animateThisStep = !stopped && item.lod !== 2 && animationStepIndex % lodAnimationFrameSkip(item.lod) === 0
+        if (animateThisStep) {
+          try {
+            item.clipPlayer?.advance(SIMULATION_STEP_SECONDS * (.55 + Math.min(1.7, item.motion.speed * 2.2)) * item.motion.animationPlaybackRate)
+          } catch (error) {
+            // The player has restored its complete last clean pose. Retire this
+            // unsupported animation once; other fish and native links keep working.
+            item.clipPlayer?.dispose(); item.clipPlayer = undefined; item.turningRig = undefined
+            item.flex?.dispose(); item.flex = undefined
+            console.warn('Fish animation stopped after invalid clip output', item.service.id, error)
+          }
+          // Lighthill body flex runs last in the frame: after the clip advance
+          // and the turning overlay, on the same simulation dt, so clip, bone
+          // bend, and vertex wave share one clock. Paused / hidden / focused
+          // frames never reach this block, so the wave freezes with the clip;
+          // prefers-reduced-motion neutralises the amplitude inside update.
+          if (item.flex) {
+            const cruiseSpeedWorld = item.motion.behavior.variation.cruiseSpeedTankWidthsPerSecond
+              * (habitat.bounds.max.x - habitat.bounds.min.x)
+            updateFishFlex(item.flex, item.service.fishId, {
+              speedNorm: cruiseSpeedWorld > 0 ? item.motion.speed / cruiseSpeedWorld : 0,
+              state: item.motion.behavior.state,
+              maneuverStage: item.motion.turnKinematics.maneuverStage,
+              startleSeconds: item.motion.startleSeconds,
+            }, SIMULATION_STEP_SECONDS, reducedMotion)
+          }
         }
-        if (item.turningRig) applyFishTurningRigOverlay(item.turningRig, item.motion.turnKinematics, stopped)
-        // Lighthill body flex runs last in the frame: after the clip advance
-        // and the turning overlay, on the same simulation dt, so clip, bone
-        // bend, and vertex wave share one clock. Paused / hidden / focused
-        // frames never reach this block, so the wave freezes with the clip;
-        // prefers-reduced-motion neutralises the amplitude inside update.
-        if (item.flex) {
-          const cruiseSpeedWorld = item.motion.behavior.variation.cruiseSpeedTankWidthsPerSecond
-            * (habitat.bounds.max.x - habitat.bounds.min.x)
-          updateFishFlex(item.flex, item.service.fishId, {
-            speedNorm: cruiseSpeedWorld > 0 ? item.motion.speed / cruiseSpeedWorld : 0,
-            state: item.motion.behavior.state,
-            maneuverStage: item.motion.turnKinematics.maneuverStage,
-            startleSeconds: item.motion.startleSeconds,
-          }, SIMULATION_STEP_SECONDS, reducedMotion)
-        }
-      }
+      if (!stopped && item.lod === 0 && item.turningRig) applyFishTurningRigOverlay(item.turningRig, item.motion.turnKinematics, stopped)
+    }
+    animationStepIndex++
     }
     for (const item of fish) {
       const pose = item.motion; item.root.position.set(pose.position.x, pose.position.y, pose.position.z)
-      if (item.fallback) { item.root.rotation.set(0, 0, 0); item.root.scale.x = evaluateSpriteTurnScaleX(pose.yaw) }
+      if (item.fallback || item.lod === 2) { item.root.rotation.set(0, 0, 0); item.root.scale.x = evaluateSpriteTurnScaleX(pose.yaw) }
       else { item.root.rotation.set(pose.pitch, pose.yaw, pose.bank, 'YXZ') }
     }
     scene.updateMatrixWorld(true)
-    labelClock += steps * SIMULATION_STEP_SECONDS; positionLabels(forceLabels || labelClock > .24); if (labelClock > .24) labelClock = 0
+    labelClock += steps * SIMULATION_STEP_SECONDS
+    const refreshLabels = forceLabels || labelClock > .24
+    if (refreshLabels) {
+      evaluateFishLod()
+      pumpLazyLoads()
+    }
+    positionLabels(refreshLabels)
+    if (labelClock > .24) labelClock = 0
     renderer.render(scene, camera)
   }
-  function tick(now: number) { const steps = consumeFrameSteps(clock, now); if (steps) render(steps) }
+  // Distance LOD (AQ-76 AC #1), evaluated at the ~0.24 s label cadence
+  // using the already-computed projection depth — no extra raycast. Depth
+  // is camera z (9) minus fish z, so it spans the real 6.2-13.6 range.
+  function evaluateFishLod() {
+    const lodBias = QUALITY_TIERS[qualityTier].lodBias
+    for (const item of fish) {
+      if (item.fallback || !item.lodModel) continue
+      const depth = camera.position.z - item.root.position.z
+      const projected = projectedFishLengthPx(fishRenderLength(item.service.fishId), height, camera.fov, depth)
+      const next = selectFishLod(depth, projected, item.lod, lodBias)
+      if (next !== item.lod) applyFishLod(item, next)
+    }
+  }
+  // Adaptive quality (AQ-76 AC #3): sample every rAF interval, but never
+  // let hidden/paused/reduced-motion frames count as load — the controller
+  // drops those and clears its window. Tier changes apply the pixel-ratio
+  // cap and shadow toggle, then re-apply the stored size via resize().
+  let lastTickTimestamp: number | undefined
+  function applyQualityTier(tier: QualityTier) {
+    qualityTier = tier
+    const spec = QUALITY_TIERS[tier]
+    renderer.setPixelRatio(Math.min(devicePixelRatio, spec.pixelRatioCap))
+    keyLight.castShadow = spec.shadows
+    resize()
+  }
+  function tick(now: number) {
+    const steps = consumeFrameSteps(clock, now)
+    if (lastTickTimestamp !== undefined && now > lastTickTimestamp) {
+      const excluded = document.hidden || paused || Boolean(reducedMotionQuery?.matches)
+      qualityController.recordFrameInterval(now - lastTickTimestamp, now, excluded)
+      const nextTier = qualityController.evaluate(now)
+      if (nextTier !== qualityTier) applyQualityTier(nextTier)
+    }
+    lastTickTimestamp = now
+    if (steps) render(steps)
+  }
   function syncLoop() {
     if (disposed || failed) return
     suspendFrameClock(clock)
@@ -687,6 +816,60 @@ diffuseColor.rgb = waterCol;
   const observer = new ResizeObserver(resize); observer.observe(canvas.parentElement!); resize()
   document.addEventListener('visibilitychange', syncLoop, { signal: abort.signal })
   canvas.addEventListener('webglcontextlost', event => { event.preventDefault(); failed = true; renderer.setAnimationLoop(null); status('failed') }, { signal: abort.signal })
+  // Per-asset fish load with failure isolation (AQ-76 AC #2): a single GLB
+  // failure logs a warning and leaves that species on its thumbnail sprite
+  // instead of failing the whole scene, as the old single Promise.all did.
+  // A load that finishes after disposal disposes its GLB instead of adding it.
+  async function loadFishModel(id: string) {
+    try {
+      const model = await loader.loadAsync(modelUrls[id])
+      if (disposed || failed) { disposeTree(model.scene); return undefined }
+      loadedAssets.add(model)
+      return model
+    } catch (error) {
+      console.warn('Fish model failed to load; keeping thumbnail fallback', id, error)
+      return undefined
+    }
+  }
+  // Background lazy-load queue (AQ-76 AC #2): at most 2 GLBs in flight,
+  // driven by requestIdleCallback with a setTimeout fallback. Species with
+  // no configured service are never queued. A species whose inhabitant is
+  // currently off-screen (no valid link projection) stays queued until it
+  // re-enters; the queue is re-pumped on the ~0.24 s label cadence.
+  function enqueueLazyFishLoads(fishIds: readonly string[]) {
+    const pending = orderLazyLoadQueue(
+      fishIds.filter(id => !modelBases.has(id) && !lazyQueue.includes(id)),
+      services.map(service => service.fishId),
+    )
+    lazyQueue.push(...pending)
+    scheduleLazyPump()
+  }
+  function scheduleLazyPump() {
+    if (typeof requestIdleCallback === 'function') requestIdleCallback(() => pumpLazyLoads(), { timeout: 1000 })
+    else setTimeout(() => pumpLazyLoads(), 50)
+  }
+  function pumpLazyLoads() {
+    if (disposed || failed || lazyQueue.length === 0) return
+    while (lazyActiveLoads < LAZY_MAX_CONCURRENT_LOADS && lazyQueue.length > 0) {
+      const id = lazyQueue[0]
+      const item = fish.find(next => next.service.fishId === id)
+      if (item && !item.fallback) { lazyQueue.shift(); continue }
+      if (item && !projectFishLinkBounds(item.root.position, camera, width, height, fishRenderLength(id), projected)) break
+      lazyQueue.shift()
+      lazyActiveLoads++
+      void loadFishModel(id).then(model => {
+        lazyActiveLoads--
+        if (disposed || failed) { if (model) disposeTree(model.scene); return }
+        if (model) {
+          modelBases.set(id, model)
+          const target = fish.find(next => next.service.fishId === id && next.fallback)
+          if (target) swapFallbackToGlb(target)
+          if (!document.hidden) render(0, true)
+        }
+        scheduleLazyPump()
+      })
+    }
+  }
   async function initialize() {
     const load = async (url: string) => {
       const model = await loader.loadAsync(url)
@@ -695,22 +878,28 @@ diffuseColor.rgb = waterCol;
       return model
     }
     const coralIds = Object.keys(MODULAR_CORAL_ASSET_URLS)
-    const fishIds = Object.keys(modelUrls)
+    // Lazy loading (AQ-76 AC #2): Phase 0 blocks first paint on the rocks,
+    // corals, and the first 3 configured species only. The remaining
+    // configured species load in the background after `ready`; species with
+    // no configured service never load at all.
+    const configuredFishIds = [...new Set(services.map(service => service.fishId))]
+    const phase0Ids = phase0SpeciesIds(configuredFishIds)
     const [rockLeft, rockRight, ...restModels] = await Promise.all([
       load(LIVE_ROCK_ISLAND_URLS.left),
       load(LIVE_ROCK_ISLAND_URLS.right),
       ...coralIds.map(id => load(MODULAR_CORAL_ASSET_URLS[id])),
-      ...fishIds.map(id => load(modelUrls[id])),
+      ...phase0Ids.map(id => loadFishModel(id)),
     ])
     if (disposed || failed) return
     rockIslandLeftBase = rockLeft
     rockIslandRightBase = rockRight
-    coralIds.forEach((id, i) => coralTemplates.set(id, restModels[i].scene))
-    fishIds.forEach((id, i) => modelBases.set(id, restModels[coralIds.length + i]))
+    coralIds.forEach((id, i) => coralTemplates.set(id, restModels[i]!.scene))
+    phase0Ids.forEach((id, i) => { const model = restModels[coralIds.length + i]; if (model) modelBases.set(id, model) })
     loaded = true; narrow = width < 600; rebuildHabitat()
     const initialSpawnSucceeded = rebuildFish() === true
     status(fishSceneStatus(!initialSpawnSucceeded))
     syncLoop()
+    enqueueLazyFishLoads(configuredFishIds)
   }
   void initialize().catch(error => { console.error('Aquarium assets could not load', error); failed = true; loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); if (!disposed) { renderer.setAnimationLoop(null); status('failed') } })
   syncLoop()
@@ -720,6 +909,10 @@ diffuseColor.rgb = waterCol;
       if (changed) {
         const rebuilt = reconcileFish()
         if (rebuilt !== undefined) status(fishSceneStatus(!rebuilt))
+        // A newly configured species starts on its thumbnail sprite and its
+        // GLB joins the background queue; removing a service never evicts a
+        // loaded GLB in v1 (15 species max, ~18 MB total).
+        enqueueLazyFishLoads(next.map(service => service.fishId))
       }
       syncLoop()
     },
@@ -727,7 +920,7 @@ diffuseColor.rgb = waterCol;
     serviceAt: nearest,
     canActivate(id, x, y) { const item = fish.find(item => item.service.id === id); return Boolean(item && (x === undefined || y === undefined ? updateVisibility(item) : nearest(x, y) === id)) },
     dispose() {
-      if (disposed) return; disposed = true; abort.abort(); observer.disconnect(); renderer.setAnimationLoop(null)
+      if (disposed) return; disposed = true; abort.abort(); observer.disconnect(); renderer.setAnimationLoop(null); lazyQueue = []
       removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sand.geometry.dispose(); sand.material.dispose(); sandTexture.dispose(); rear.geometry.dispose(); rear.material.dispose(); waterSurfaceGeometry.dispose(); waterSurfaceMaterial.dispose(); particleGeometry.dispose(); particleMaterial.dispose(); caustics.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
     },
   }
