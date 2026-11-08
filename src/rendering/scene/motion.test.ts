@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { BoxGeometry } from 'three'
-import { createSwimmingFish, distance, startleFish, stepSwimmingFish, type WaterHabitat } from './motion'
+import { MAX_PITCH_RAD_LEGACY, MAX_PITCH_RAD_METRIC, MAX_PITCH_RATE_RAD_PER_SEC_METRIC, createSwimmingFish, distance, startleFish, stepSwimmingFish, type WaterHabitat } from './motion'
 import { instantiateModularReefHabitat } from './reef-assembly'
 import { fishClearanceRadius } from './fish-scale'
 import { findSafeFishSpawn } from './fish-spawn'
@@ -276,6 +276,47 @@ describe('rendered fish travel adapter', () => {
       expect(progress).toBeGreaterThan(.4)
       expect(targetY > 0 ? -fish.pitch : fish.pitch).toBeGreaterThan(.4)
     }
+  })
+  it('clamps pitch to ±0.28 rad in AABB/legacy mode on a steep route (AQ-49 AC #6)', () => {
+    const openWater: WaterHabitat = { bounds: habitat.bounds, obstacles: [], anchors: [] }
+    const fish = createSwimmingFish('aabb-steep-pitch', 'ocellaris-clownfish', { x: 0, y: 0, z: 0 }, .5)
+    fish.behavior = { ...fish.behavior, state: 'swim', stateElapsedSeconds: 0, stateDurationSeconds: 100, targetAnchor: undefined }
+    fish.routeGeneration = fish.behavior.navigationGeneration
+    // Vertical target demands far more than 0.28 rad of pitch.
+    fish.route = [fish.position, { x: 0, y: .65, z: 0 }]
+    fish.waypoint = 1
+    let maxAbsPitch = 0
+    for (let frame = 0; frame < 600; frame++) {
+      stepSwimmingFish(fish, openWater, 1 / 60)
+      expect(Math.abs(fish.pitch)).toBeLessThanOrEqual(MAX_PITCH_RAD_LEGACY + 1e-9)
+      maxAbsPitch = Math.max(maxAbsPitch, Math.abs(fish.pitch))
+    }
+    // Pitch must have actually approached the legacy cap, not stayed level.
+    expect(maxAbsPitch).toBeGreaterThan(.2)
+  })
+  it('bounds metric pitch to ±π/2, rate-limits it, and follows a ~0.53 rad route (AQ-49 AC #6)', () => {
+    const alwaysClear: CapsuleClearanceQuery = () => ({ status: 'clear', work: { nodeVisits: 0, triangleTests: 0 } })
+    const fish = createSwimmingFish('metric-diagonal-pitch', 'ocellaris-clownfish', { x: 0, y: 0, z: 0 }, .5, undefined, { collisionRadiusM: .04 })
+    fish.yaw = 0
+    fish.behavior = { ...fish.behavior, state: 'swim', stateElapsedSeconds: 0, stateDurationSeconds: 100, targetAnchor: undefined }
+    fish.routeGeneration = fish.behavior.navigationGeneration
+    // Required pitch atan2(0.48, 0.8) ≈ 0.54 rad — beyond the legacy ±0.28 rad clamp.
+    // Target stays inside the clearance-shrunk water bounds (x, y ≤ 0.96).
+    fish.route = [fish.position, { x: .8, y: .48, z: 0 }]
+    fish.waypoint = 1
+    const metricHabitat = meshHabitat(alwaysClear)
+    let progress = 0
+    for (let frame = 0; frame < 3600 && fish.waypoint < fish.route.length; frame++) {
+      const before = { ...fish.position }, beforePitch = fish.pitch
+      fish.routeGeneration = fish.behavior.navigationGeneration
+      stepSwimmingFish(fish, metricHabitat, 1 / 60)
+      expect(Math.abs(fish.pitch)).toBeLessThanOrEqual(MAX_PITCH_RAD_METRIC + 1e-9)
+      expect(Math.abs(fish.pitch - beforePitch)).toBeLessThanOrEqual(MAX_PITCH_RATE_RAD_PER_SEC_METRIC / 60 + 1e-9)
+      progress += Math.hypot(fish.position.x - before.x, fish.position.y - before.y, fish.position.z - before.z)
+    }
+    expect(fish.waypoint).toBe(fish.route.length)
+    expect(progress).toBeGreaterThan(.4)
+    expect(-fish.pitch).toBeGreaterThan(.4)
   })
   it('holds at a rock face when a stale direct route is no longer capsule-clear', () => {
     const exact = collisionQuery(), blocked: number[] = []
