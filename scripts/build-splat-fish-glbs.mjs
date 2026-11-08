@@ -1162,14 +1162,167 @@ function buildSelfContainedContractGlb(spec, meshData, sourceSha256) {
   }
 }
 
+function loadManualOverrideGlb(spec, overrideGlbPath, proceduralFallback, sourceSha256) {
+  const rawBuf = fs.readFileSync(overrideGlbPath)
+  if (rawBuf.byteLength < 20 || rawBuf.readUInt32LE(0) !== 0x46546c67 || rawBuf.readUInt32LE(4) !== 2) {
+    throw new Error(`Invalid GLB header in manual override: ${overrideGlbPath}`)
+  }
+  const jsonChunkLen = rawBuf.readUInt32LE(12)
+  const jsonChunkType = rawBuf.readUInt32LE(16)
+  if (jsonChunkType !== 0x4e4f534a) {
+    throw new Error(`First chunk in manual override is not JSON: ${overrideGlbPath}`)
+  }
+  const doc = JSON.parse(rawBuf.subarray(20, 20 + jsonChunkLen).toString('utf8'))
+  const binHeaderOffset = 20 + jsonChunkLen
+  const binChunkLen = rawBuf.readUInt32LE(binHeaderOffset)
+  const binBuf = rawBuf.subarray(binHeaderOffset + 8, binHeaderOffset + 8 + binChunkLen)
+
+  let vertCount = 0
+  let triCount = 0
+  const posMin = [Infinity, Infinity, Infinity]
+  const posMax = [-Infinity, -Infinity, -Infinity]
+
+  for (const mesh of doc.meshes ?? []) {
+    for (const prim of mesh.primitives ?? []) {
+      const posIdx = prim.attributes?.POSITION
+      if (typeof posIdx === 'number' && doc.accessors?.[posIdx]) {
+        const acc = doc.accessors[posIdx]
+        vertCount += acc.count ?? 0
+        if (Array.isArray(acc.min) && Array.isArray(acc.max)) {
+          for (let c = 0; c < 3; c++) {
+            posMin[c] = Math.min(posMin[c], acc.min[c])
+            posMax[c] = Math.max(posMax[c], acc.max[c])
+          }
+        }
+      }
+      if (typeof prim.indices === 'number' && doc.accessors?.[prim.indices]) {
+        triCount += Math.floor((doc.accessors[prim.indices].count ?? 0) / 3)
+      }
+    }
+  }
+
+  const pMin = Number.isFinite(posMin[0])
+    ? posMin.map(v => Number(v.toFixed(6)))
+    : proceduralFallback.inspectionRecord.boundsM.min
+  const pMax = Number.isFinite(posMax[0])
+    ? posMax.map(v => Number(v.toFixed(6)))
+    : proceduralFallback.inspectionRecord.boundsM.max
+  const dimensionsM = [
+    Number((pMax[0] - pMin[0]).toFixed(6)),
+    Number((pMax[1] - pMin[1]).toFixed(6)),
+    Number((pMax[2] - pMin[2]).toFixed(6)),
+  ]
+
+  const assetId = `fish-${spec.id}`
+  const primitiveId = `${spec.id.replace(/-/g, '_')}_body`
+  const recipe = `node --experimental-strip-types scripts/build-splat-fish-glbs.mjs`
+
+  const reefAsset = {
+    schema: 'reef-asset-v1',
+    id: assetId,
+    kind: 'fish',
+    units: 'meter',
+    upAxis: '+Y',
+    origin: 'local',
+    dimensionsM,
+    provenance: {
+      license: 'original',
+      creator: 'Aquarium project (Blender manual override)',
+      sourceSha256,
+      recipe,
+      attribution: `Hand-edited 3D rigged and animated fish asset (${spec.scientificName}) exported from Blender override src/rendering/assets/splat-fish/overrides/${spec.id}.glb.`,
+    },
+  }
+  const reefPrimitive = { id: primitiveId, role: 'fish' }
+
+  if (Array.isArray(doc.nodes) && doc.nodes.length > 0) {
+    const rootNode = doc.nodes.find(n => n.name === `${spec.id}_Root` || n.name === `${spec.id.replace(/-/g, '_')}_Root`) ?? doc.nodes[0]
+    rootNode.extras = { ...(rootNode.extras ?? {}), reefAsset }
+    const meshNode = doc.nodes.find(n => typeof n.mesh === 'number')
+    if (meshNode) {
+      meshNode.extras = { ...(meshNode.extras ?? {}), reefPrimitive }
+    }
+  }
+
+  const jsonStr = JSON.stringify(doc)
+  const jsonPad = (4 - (Buffer.byteLength(jsonStr, 'utf8') % 4)) % 4
+  const jsonBuf = Buffer.from(jsonStr + ' '.repeat(jsonPad), 'utf8')
+  const totalLength = 12 + 8 + jsonBuf.length + 8 + binBuf.length
+  const header = Buffer.alloc(12)
+  header.writeUInt32LE(0x46546c67, 0)
+  header.writeUInt32LE(2, 4)
+  header.writeUInt32LE(totalLength, 8)
+  const jsonHeader = Buffer.alloc(8)
+  jsonHeader.writeUInt32LE(jsonBuf.length, 0)
+  jsonHeader.writeUInt32LE(0x4e4f534a, 4)
+  const binHeader = Buffer.alloc(8)
+  binHeader.writeUInt32LE(binBuf.length, 0)
+  binHeader.writeUInt32LE(0x004e4942, 4)
+
+  const inspectionRecord = {
+    extras: { reefAsset },
+    rootTransform: {
+      translation: [0, 0, 0],
+      rotation: [0, 0, 0, 1],
+      scale: [1, 1, 1],
+    },
+    boundsM: { min: pMin, max: pMax },
+    primitives: [
+      {
+        id: primitiveId,
+        role: 'fish',
+        vertexCount: vertCount || proceduralFallback.vertCount,
+        boundsM: { min: pMin, max: pMax },
+        material: {
+          vertexColors: false,
+          vertexAlpha: false,
+          aoSource: 'texture',
+        },
+      },
+    ],
+    sockets: [],
+    collisionParts: [],
+  }
+
+  const validation = validateAssetContract(inspectionRecord)
+  if (!validation.valid) {
+    throw new Error(`Contract validation failed for override ${assetId}: ${JSON.stringify(validation.issues)}`)
+  }
+
+  const skinJoints = doc.skins?.[0]?.joints?.map(idx => doc.nodes?.[idx]?.name).filter(Boolean)
+  const animNames = (doc.animations ?? []).map(a => a.name).filter(Boolean)
+
+  return {
+    glbBuf: Buffer.concat([header, jsonHeader, jsonBuf, binHeader, binBuf]),
+    inspectionRecord,
+    dimensionsM,
+    vertCount: vertCount || proceduralFallback.vertCount,
+    triCount: triCount || proceduralFallback.triCount,
+    joints: skinJoints?.length ? skinJoints : proceduralFallback.joints,
+    animations: animNames.length ? animNames : proceduralFallback.animations,
+    primitiveId,
+    isOverride: true,
+  }
+}
+
+const OVERRIDES_DIR = path.join(OUT_DIR, 'overrides')
+const BLEND_DIR = path.join(OUT_DIR, 'blend')
 fs.mkdirSync(OUT_DIR, { recursive: true })
+fs.mkdirSync(OVERRIDES_DIR, { recursive: true })
+fs.mkdirSync(BLEND_DIR, { recursive: true })
+
+const forceProcedural = process.argv.includes('--force-procedural')
 const generatorSha256 = crypto.createHash('sha256').update(fs.readFileSync(__filename)).digest('hex')
 const manifestEntries = []
 
 for (const spec of SPECIES_SPECS) {
   const meshData = buildPhotoreal3DMesh(spec)
-  const built = buildSelfContainedContractGlb(spec, meshData, generatorSha256)
+  const proceduralBuilt = buildSelfContainedContractGlb(spec, meshData, generatorSha256)
   const fileName = `${spec.id}.glb`
+  const overrideGlbPath = path.join(OVERRIDES_DIR, fileName)
+  const built = !forceProcedural && fs.existsSync(overrideGlbPath)
+    ? loadManualOverrideGlb(spec, overrideGlbPath, proceduralBuilt, generatorSha256)
+    : proceduralBuilt
   const assetId = `fish-${spec.id}`
   const outGlbPath = path.join(OUT_DIR, fileName)
   const outInspectionPath = path.join(OUT_DIR, `${assetId}-inspection.json`)
@@ -1208,8 +1361,9 @@ for (const spec of SPECIES_SPECS) {
     status: 'candidate-awaiting-root-review',
   })
 
+  const modeLabel = built.isOverride ? '[override]' : 'Built     '
   console.log(
-    `Built & contract-verified ${assetId.padEnd(30)} -> ${(built.glbBuf.length / 1024).toFixed(1)} KB | tris: ${built.triCount} | anim: ${spec.clipName} | sha256: ${glbSha256.slice(0, 12)}...`,
+    `${modeLabel} & contract-verified ${assetId.padEnd(30)} -> ${(built.glbBuf.length / 1024).toFixed(1)} KB | tris: ${built.triCount} | anim: ${spec.clipName} | sha256: ${glbSha256.slice(0, 12)}...`,
   )
 }
 

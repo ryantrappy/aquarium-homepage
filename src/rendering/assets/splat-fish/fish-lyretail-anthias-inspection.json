@@ -15,7 +15,7 @@
       "provenance": {
         "license": "original",
         "creator": "Aquarium project",
-        "sourceSha256": "45b734ca98e4a9013e2282eeae0cf87f91326cc7c85b68c07d41cd4e861287fa",
+        "sourceSha256": "54d14a95a547a3c9c30dd5cd484df865761f26b67a05d9914f7d67e5a803420c",
         "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
         "attribution": "Original photorealistic 3D rigged and animated fish asset (Pseudanthias squamipinnis (Lyretail Anthias)) reconstructed from project-original public/fish/lyretail-anthias.webp with embedded PBR textures."
       }
