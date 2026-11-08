@@ -197,6 +197,24 @@ describe('safe aquarium fish spawning', () => {
     expect(clearance).toBe(.77)
   })
 
+  it('applies an extra mesh check to spawns and fails closed when it rejects everything', () => {
+    const bounds: AxisAlignedBox = { min: { x: -2, y: -2, z: -2 }, max: { x: 2, y: 2, z: 2 } }
+    const preferred = { x: 0, y: 0, z: 0 }
+    // Reject the preferred point only: the spawn moves to the next candidate.
+    const moved = findSafeFishSpawn(preferred, bounds, [], 0.5, [], (candidate) => !(candidate.x === 0 && candidate.y === 0 && candidate.z === 0))
+    expect(moved).toBeDefined()
+    expect(moved).not.toEqual(preferred)
+    // Reject everything: no spawn, rather than an unchecked one.
+    expect(findSafeFishSpawn(preferred, bounds, [], 0.5, [], () => false)).toBeUndefined()
+    // A throwing check fails closed for that candidate only.
+    const throwing = findSafeFishSpawn(preferred, bounds, [], 0.5, [], (candidate) => {
+      if (candidate.x === 0 && candidate.y === 0 && candidate.z === 0) throw new Error('mesh query failed')
+      return true
+    })
+    expect(throwing).toBeDefined()
+    expect(throwing).not.toEqual(preferred)
+  })
+
   it('uses a best safe fallback rather than declaring no fit when only the fish-to-fish spacing is infeasible', () => {
     const bounds: AxisAlignedBox = { min: { x: -1, y: -1, z: -1 }, max: { x: 1, y: 1, z: 1 } }
     const occupied = [{ position: { x: 0, y: 0, z: 0 }, clearance: .77 }]

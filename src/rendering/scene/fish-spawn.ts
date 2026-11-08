@@ -127,6 +127,12 @@ export function findSafeFishSpawn(
   obstacles: readonly SolidObstacleVolume[],
   clearance: number,
   occupied: readonly OccupiedFishSpawn[] = [],
+  /**
+   * Optional extra clearance check (e.g. the mesh-navigation capsule query).
+   * Applied lazily to ranked candidates; a candidate passes only when it
+   * returns true. A throwing check fails closed for that candidate.
+   */
+  isSafe?: (position: Vec3) => boolean,
 ): Vec3 | undefined {
   const coordinates = [preferred.x, preferred.y, preferred.z,
     waterBounds.min.x, waterBounds.min.y, waterBounds.min.z,
@@ -183,5 +189,12 @@ export function findSafeFishSpawn(
     }
     return targetDistance(a) - targetDistance(b) || a.x - b.x || a.y - b.y || a.z - b.z
   })
-  return ranked[0]
+  return ranked.find(candidate => {
+    if (!isSafe) return true
+    try {
+      return isSafe(candidate)
+    } catch {
+      return false
+    }
+  })
 }
