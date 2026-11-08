@@ -30,6 +30,7 @@ import { applyFishLinkVisibility } from './fish-link-focus'
 import { projectFishLinkBounds } from './fish-link-projection'
 import { createFishClipPlayer, type FishClipPlayer } from './fish-animation'
 import { reconcileFishInhabitants, refreshFishLink } from './fish-inhabitants'
+import { applyCaustics, createCaustics } from './caustics'
 
 const modelUrls: Record<string, string> = {
   'ocellaris-clownfish': new URL('../proof/candidate-real-clown.glb', import.meta.url).href,
@@ -130,6 +131,11 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
     fillLightIntensity: optics.fillLightIntensity,
   })
 
+  // Real caustic texture (AQ-14.2 AC #2): one shared procedural texture and
+  // time uniform for the sand, live-rock, and coral shaders (see caustics.ts).
+  // Fish, backdrop, and water surface are deliberately not patched.
+  const caustics = createCaustics()
+
   // Granular aragonite & coralline-rubble sand bed with rock-base contact AO & caustic shimmer (AQ-14.6 & AQ-14.2)
   const grain = new Uint8Array(256 * 256 * 4); let grainSeed = 1743
   for (let i = 0; i < grain.length; i += 4) {
@@ -183,6 +189,10 @@ diffuseColor.rgb *= (0.86 + 0.22 * sandCaustic);
 `,
     )
   }
+  // The sand's scalar caustic shimmer above stays; the texture term below
+  // adds the spatial web on top of it. applyCaustics chains the existing
+  // onBeforeCompile instead of replacing it.
+  applyCaustics(sandMaterial, caustics)
   const sand = new THREE.Mesh(sandGeometry, sandMaterial); sand.rotation.x = -Math.PI / 2; sand.position.y = -2.8; sand.receiveShadow = true; scene.add(sand)
 
   // Layered Reef-Tank Backdrop (AQ-14.6 & AQ-39): eliminates the flat paint-bucket wall & sharp horizon line
@@ -341,6 +351,21 @@ diffuseColor.rgb = waterCol;
         reducedMotion,
       })
       reefControllers.push(assembled)
+      // Real caustics on live rock and coral (AQ-14.2 AC #2). Assembly clones
+      // the rock/coral materials per island, so each rebuild patches fresh
+      // material instances; applyCaustics also guards against double-patching.
+      // Rock gets a broader pattern (fewer, wider webs) than sand/coral.
+      // Fish materials are never touched here.
+      reef.traverse(object => {
+        if (!(object instanceof THREE.Mesh)) return
+        for (const mat of Array.isArray(object.material) ? object.material : [object.material]) {
+          if (!(mat instanceof THREE.MeshStandardMaterial)) continue
+          const isRock = Boolean(mat.userData.liveRockShader)
+          const isCoral = Boolean(mat.userData.coralRawMasks)
+          if (!isRock && !isCoral) continue
+          applyCaustics(mat, caustics, isRock ? { scaleA: 0.25, scaleB: 0.4 } : undefined)
+        }
+      })
       reef.scale.setScalar(uniformScale)
       reef.position.set(position.x, position.y, position.z)
       reef.rotation.y = yaw
@@ -513,6 +538,9 @@ diffuseColor.rgb = waterCol;
     sandUniforms.uSandTime.value = effectiveEnvTime
     rearUniforms.uRearTime.value = effectiveEnvTime
     causticLightController.update(coralElapsedSec, habitatStopped, reducedMotion)
+    // The caustic texture time freezes at 0 on pause / reduced-motion,
+    // exactly like the scalar shimmer above.
+    caustics.update(coralElapsedSec, habitatStopped, reducedMotion)
 
     // Update top water-surface ripple displacement (AQ-14.2 AC #1 & #5)
     const surfPos = waterSurfaceGeometry.getAttribute('position')
@@ -638,7 +666,7 @@ diffuseColor.rgb = waterCol;
     canActivate(id, x, y) { const item = fish.find(item => item.service.id === id); return Boolean(item && (x === undefined || y === undefined ? updateVisibility(item) : nearest(x, y) === id)) },
     dispose() {
       if (disposed) return; disposed = true; abort.abort(); observer.disconnect(); renderer.setAnimationLoop(null)
-      removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sand.geometry.dispose(); sand.material.dispose(); sandTexture.dispose(); rear.geometry.dispose(); rear.material.dispose(); waterSurfaceGeometry.dispose(); waterSurfaceMaterial.dispose(); particleGeometry.dispose(); particleMaterial.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
+      removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sand.geometry.dispose(); sand.material.dispose(); sandTexture.dispose(); rear.geometry.dispose(); rear.material.dispose(); waterSurfaceGeometry.dispose(); waterSurfaceMaterial.dispose(); particleGeometry.dispose(); particleMaterial.dispose(); caustics.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
     },
   }
 }
