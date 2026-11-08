@@ -30,6 +30,7 @@ import { handleArtworkTextureFailure, nearestVisibleIntersection, readArtworkAlp
 import { applyFishLinkVisibility } from './fish-link-focus'
 import { projectFishLinkBounds } from './fish-link-projection'
 import { createFishClipPlayer, type FishClipPlayer } from './fish-animation'
+import { bindFishFlexToModel, updateFishFlex, type FishFlexBinding } from './fish-flex-material'
 import { reconcileFishInhabitants, refreshFishLink } from './fish-inhabitants'
 
 const modelUrls: Record<string, string> = {
@@ -51,7 +52,7 @@ const modelUrls: Record<string, string> = {
 }
 export type SceneStatus = 'loading' | 'ready' | 'failed'
 export type AquariumController = { update(services: ServiceConfig[], paused: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void }
-type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean }
+type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; flex?: FishFlexBinding; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean }
 
 function disposeTree(root: THREE.Object3D) {
   const geometries = new Set<THREE.BufferGeometry>(), materials = new Set<THREE.Material>(), textures = new Set<THREE.Texture>()
@@ -381,6 +382,7 @@ diffuseColor.rgb = waterCol;
   }
   function disposeInhabitant(item: Inhabitant) {
     try { item.motion.extensions.dispose() } catch (error) { console.error('Fish extension cleanup failed', error) }
+    item.flex?.dispose(); item.flex = undefined
     scene.remove(item.root); item.clipPlayer?.dispose()
     const skeletons = new Set<THREE.Skeleton>()
     item.root.traverse(object => { if (object instanceof THREE.SkinnedMesh) skeletons.add(object.skeleton) })
@@ -412,6 +414,11 @@ diffuseColor.rgb = waterCol;
           try {
             item.clipPlayer = createFishClipPlayer(model, base.animations[0], (seedForId(service.id) % 1500) / 1000)
             item.turningRig = bindFishTurningRig(model, service.fishId)
+            try {
+              item.flex = bindFishFlexToModel(model, service.fishId, seedForId(service.id))
+            } catch (error) {
+              console.warn('Fish body flex unavailable; retaining bone-only animation', species.id, error)
+            }
           } catch (error) {
             item.clipPlayer?.dispose(); item.clipPlayer = undefined
             console.warn('Fish animation unsupported; retaining static service fish', species.id, error)
@@ -582,9 +589,25 @@ diffuseColor.rgb = waterCol;
           // The player has restored its complete last clean pose. Retire this
           // unsupported animation once; other fish and native links keep working.
           item.clipPlayer?.dispose(); item.clipPlayer = undefined; item.turningRig = undefined
+          item.flex?.dispose(); item.flex = undefined
           console.warn('Fish animation stopped after invalid clip output', item.service.id, error)
         }
         if (item.turningRig) applyFishTurningRigOverlay(item.turningRig, item.motion.turnKinematics, stopped)
+        // Lighthill body flex runs last in the frame: after the clip advance
+        // and the turning overlay, on the same simulation dt, so clip, bone
+        // bend, and vertex wave share one clock. Paused / hidden / focused
+        // frames never reach this block, so the wave freezes with the clip;
+        // prefers-reduced-motion neutralises the amplitude inside update.
+        if (item.flex) {
+          const cruiseSpeedWorld = item.motion.behavior.variation.cruiseSpeedTankWidthsPerSecond
+            * (habitat.bounds.max.x - habitat.bounds.min.x)
+          updateFishFlex(item.flex, item.service.fishId, {
+            speedNorm: cruiseSpeedWorld > 0 ? item.motion.speed / cruiseSpeedWorld : 0,
+            state: item.motion.behavior.state,
+            maneuverStage: item.motion.turnKinematics.maneuverStage,
+            startleSeconds: item.motion.startleSeconds,
+          }, SIMULATION_STEP_SECONDS, reducedMotion)
+        }
       }
     }
     for (const item of fish) {
