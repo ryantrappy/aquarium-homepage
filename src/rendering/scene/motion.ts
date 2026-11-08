@@ -35,6 +35,12 @@ export type SwimmingFish = {
 export type SwimmingFishCollisionOptions = { collisionRadiusM?: number; initialYaw?: number }
 export const distance = (a: Vec3, b: Vec3) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z)
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
+/** AQ-49 AC #6: pitch bounds per mode. Legacy/AABB keeps the ±0.28 rad clamp;
+ * metric (mesh) mode follows the true rawTarget pitch, bounded to ±π/2 and
+ * rate-limited to 1.2 rad/s per substep (AQ-65 Root-approved iteration). */
+export const MAX_PITCH_RAD_LEGACY = 0.28
+export const MAX_PITCH_RAD_METRIC = Math.PI / 2
+export const MAX_PITCH_RATE_RAD_PER_SEC_METRIC = 1.2
 export function seedForId(id: string) { let seed = 2166136261; for (const char of id) seed = Math.imul(seed ^ char.charCodeAt(0), 16777619); return seed >>> 0 }
 function random(fish: SwimmingFish) { fish.random = (Math.imul(fish.random, 1664525) + 1013904223) >>> 0; return fish.random / 4294967296 }
 function routeInput(fish: SwimmingFish, habitat: WaterHabitat, target: Vec3) { return { start: fish.position, target, waterBounds: habitat.bounds, obstacles: habitat.obstacles, fishClearanceRadius: fish.clearance } }
@@ -309,10 +315,10 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   const maxTurn = fish.behavior.variation.turnDegreesPerSecond * Math.PI / 180 * (fish.startleSeconds > 0 ? 3 : sharpTurnBoost * proximityTurnBoost) * dt
   const turn = clamp(delta, -maxTurn, maxTurn); fish.yaw += turn
   const desiredPitch = habitat.meshNavigation !== undefined
-    ? clamp(-Math.atan2(dy, Math.hypot(dx, dz)), -Math.PI / 2, Math.PI / 2)
-    : clamp(-Math.atan2(dy, Math.hypot(dx, dz)), -.28, .28)
+    ? clamp(-Math.atan2(dy, Math.hypot(dx, dz)), -MAX_PITCH_RAD_METRIC, MAX_PITCH_RAD_METRIC)
+    : clamp(-Math.atan2(dy, Math.hypot(dx, dz)), -MAX_PITCH_RAD_LEGACY, MAX_PITCH_RAD_LEGACY)
   if (habitat.meshNavigation !== undefined) {
-    const maxPitchStep = 1.2 * dt
+    const maxPitchStep = MAX_PITCH_RATE_RAD_PER_SEC_METRIC * dt
     fish.pitch += clamp(desiredPitch - fish.pitch, -maxPitchStep, maxPitchStep)
   } else {
     fish.pitch += (desiredPitch - fish.pitch) * Math.min(1, dt * (rawRemaining < 0.45 ? 10 : 4))
