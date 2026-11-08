@@ -4,6 +4,8 @@ import {
   DEFAULT_AQUARIUM_OPTICS_CONFIG,
   createRestrainedCausticLightController,
   evaluateCausticIntensity,
+  evaluateCausticPatternUV,
+  evaluateCausticSurfaceMask,
   evaluateDepthTintedColor,
   evaluateDepthTransmittance,
   evaluateSurfaceRippleOffset,
@@ -54,6 +56,36 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
 
     const reducedA = evaluateCausticIntensity({ x: 0.5, y: 1.0, z: 0.2 }, 1.0, 1.2, { reducedMotion: true })
     expect(reducedA).toEqual(pausedA)
+  })
+
+  it('masks caustics to upward-facing surfaces and fades them with depth, shared by the scalar and texture channels', () => {
+    expect(evaluateCausticSurfaceMask({ x: 0, y: 0, z: 0 }, -0.6)).toBe(0)
+    expect(evaluateCausticSurfaceMask({ x: 0, y: 0, z: 0 }, 0)).toBe(0)
+    // Top of tank, fully upward: full mask
+    expect(evaluateCausticSurfaceMask({ x: 0, y: 2.8, z: 0 }, 1)).toBeCloseTo(1)
+    // Sand bed: faded to 0.65, never zero
+    expect(evaluateCausticSurfaceMask({ x: 0, y: -2.8, z: 0 }, 1)).toBeCloseTo(0.65)
+    // Half-upward normal halves the mask
+    expect(evaluateCausticSurfaceMask({ x: 0, y: 2.8, z: 0 }, 0.5)).toBeCloseTo(0.5)
+  })
+
+  it('returns two scrolled caustic-texture UV pairs that freeze at t=0 on pause or reduced-motion', () => {
+    const atZero = evaluateCausticPatternUV(1.2, -0.8, 0)
+    expect(atZero.a.u).toBeCloseTo(1.2 * DEFAULT_AQUARIUM_OPTICS_CONFIG.causticTextureScaleA)
+    expect(atZero.a.v).toBeCloseTo(-0.8 * DEFAULT_AQUARIUM_OPTICS_CONFIG.causticTextureScaleA)
+    expect(atZero.b.u).toBeCloseTo(1.2 * DEFAULT_AQUARIUM_OPTICS_CONFIG.causticTextureScaleB)
+    expect(atZero.b.v).toBeCloseTo(-0.8 * DEFAULT_AQUARIUM_OPTICS_CONFIG.causticTextureScaleB)
+
+    const active = evaluateCausticPatternUV(1.2, -0.8, 5)
+    // Layers scroll in opposite directions and at different rates
+    expect(active.a.u).toBeGreaterThan(atZero.a.u)
+    expect(active.b.u).toBeLessThan(atZero.b.u)
+    expect(active.a).not.toEqual(active.b)
+
+    const paused = evaluateCausticPatternUV(1.2, -0.8, 5, { paused: true })
+    expect(paused).toEqual(atZero)
+    const reduced = evaluateCausticPatternUV(1.2, -0.8, 5, { reducedMotion: true })
+    expect(reduced).toEqual(atZero)
   })
 
   it('evaluates subtle water-surface ripples and suspended particle drift that freeze cleanly under pause and reduced-motion', () => {
