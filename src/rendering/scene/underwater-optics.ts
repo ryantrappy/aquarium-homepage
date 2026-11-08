@@ -26,17 +26,25 @@ export type AquariumOpticsConfig = Readonly<{
   maxSuspendedParticles: number
 }>
 
+/**
+ * Canonical scene values (AQ-39): these were aligned with the values
+ * `createAquarium` in aquarium.ts actually uses, so the optics config is the
+ * single source of truth for background, fog, light intensities, and ripple
+ * amplitude instead of a second, divergent set of literals. The previous
+ * defaults ('#155c73', fog 15-32, key 3.0, fill 1.0, ripple 0.008 m) matched
+ * the stale AQ-39 plan's line references, not the scene.
+ */
 export const DEFAULT_AQUARIUM_OPTICS_CONFIG: AquariumOpticsConfig = Object.freeze({
-  backgroundHex: '#155c73',
-  fogNear: 15,
-  fogFar: 32,
-  keyLightIntensity: 3.0,
-  fillLightIntensity: 1.0,
-  causticBaseIntensity: 3.0,
+  backgroundHex: '#183654',
+  fogNear: 18,
+  fogFar: 36,
+  keyLightIntensity: 2.45,
+  fillLightIntensity: 1.12,
+  causticBaseIntensity: 2.45,
   causticModulationAmplitude: 0.18,
   causticPrimaryHz: 0.22,
   causticSecondaryHz: 0.37,
-  surfaceRippleAmplitudeM: 0.008,
+  surfaceRippleAmplitudeM: 0.032,
   maxSuspendedParticles: 24,
 })
 
@@ -62,6 +70,25 @@ export function evaluateDepthTransmittance(depthMeters: number): {
   const g = Math.max(0.78, Math.exp(-POPE_FRY_ABSORPTION_PER_METER.g * d))
   const b = Math.max(0.90, Math.exp(-POPE_FRY_ABSORPTION_PER_METER.b * d))
   return { r, g, b }
+}
+
+/**
+ * Applies Beer-Lambert depth transmittance to a background colour (`AQ-39`
+ * AC #2): returns the colour of `backgroundHex` after travelling
+ * `depthMeters` through the water column. At depth 0 the colour is unchanged,
+ * so foreground fish are never veiled; at the rear-wall path depth red is
+ * attenuated most, giving the fog/background a restrained depth tint.
+ * A malformed hex is returned unchanged.
+ */
+export function evaluateDepthTintedColor(backgroundHex: string, depthMeters: number): string {
+  const match = /^#([0-9a-fA-F]{6})$/.exec(backgroundHex.trim())
+  if (!match) return backgroundHex
+  const t = evaluateDepthTransmittance(depthMeters)
+  const n = parseInt(match[1], 16)
+  const r = Math.round(((n >> 16) & 0xff) * t.r)
+  const g = Math.round(((n >> 8) & 0xff) * t.g)
+  const b = Math.round((n & 0xff) * t.b)
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
 }
 
 /**

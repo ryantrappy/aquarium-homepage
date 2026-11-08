@@ -4,6 +4,7 @@ import {
   DEFAULT_AQUARIUM_OPTICS_CONFIG,
   createRestrainedCausticLightController,
   evaluateCausticIntensity,
+  evaluateDepthTintedColor,
   evaluateDepthTransmittance,
   evaluateSurfaceRippleOffset,
   evaluateSuspendedParticlePosition,
@@ -23,6 +24,19 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
     expect(rearWall.r).toBeGreaterThanOrEqual(0.35)
     expect(rearWall.g).toBeGreaterThanOrEqual(0.78)
     expect(rearWall.b).toBeGreaterThanOrEqual(0.90)
+  })
+
+  it('tints a background colour by Beer-Lambert transmittance without veiling the foreground (AQ-39)', () => {
+    expect(evaluateDepthTintedColor('#183654', 0)).toBe('#183654')
+    // At the rear-wall path depth the scene background '#183654' becomes '#082d50'
+    expect(evaluateDepthTintedColor(DEFAULT_AQUARIUM_OPTICS_CONFIG.backgroundHex, 3.5)).toBe('#082d50')
+    const tinted = evaluateDepthTintedColor('#ffffff', 3.5)
+    const channels = [1, 3, 5].map(i => parseInt(tinted.slice(i, i + 2), 16))
+    // Red attenuates most, blue least — the depth tint is a blue shift, not a grey veil
+    expect(channels[0]).toBeLessThan(channels[1])
+    expect(channels[1]).toBeLessThan(channels[2])
+    expect(tinted).toMatch(/^#[0-9a-f]{6}$/)
+    expect(evaluateDepthTintedColor('not-a-colour', 3.5)).toBe('not-a-colour')
   })
 
   it('projects coherent dual-wave caustics onto upward-facing surfaces and freezes when paused or reduced-motion is active', () => {

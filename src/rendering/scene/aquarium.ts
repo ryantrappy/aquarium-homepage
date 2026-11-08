@@ -14,6 +14,7 @@ import {
 import {
   DEFAULT_AQUARIUM_OPTICS_CONFIG,
   createRestrainedCausticLightController,
+  evaluateDepthTintedColor,
   evaluateSurfaceRippleOffset,
   evaluateSuspendedParticlePosition,
 } from './underwater-optics'
@@ -74,9 +75,21 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   renderer.shadowMap.enabled = true
   renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
+  // Underwater optics are the single source of truth for the water column
+  // (AQ-39 AC #2): background, fog, light intensities, and ripple amplitude
+  // all come from DEFAULT_AQUARIUM_OPTICS_CONFIG instead of a second set of
+  // literals. The fog/background colour is the config background tinted by
+  // Beer-Lambert transmittance at the rear-wall path depth (3.5 m, the
+  // aquarium-scale bound in evaluateDepthTransmittance), so distant water
+  // loses red first while foreground fish at depth ~0 stay un-veiled.
+  // '#183654' tinted at 3.5 m is '#082d50'. This is a static setup-time
+  // colour, so pause / prefers-reduced-motion need no handling here; the
+  // animated optics (caustics, ripples, particles) already freeze below.
+  const optics = DEFAULT_AQUARIUM_OPTICS_CONFIG
+  const waterColumnColor = evaluateDepthTintedColor(optics.backgroundHex, 3.5)
   const scene = new THREE.Scene()
-  scene.background = new THREE.Color('#183654')
-  scene.fog = new THREE.Fog('#183654', 18, 36)
+  scene.background = new THREE.Color(waterColumnColor)
+  scene.fog = new THREE.Fog(waterColumnColor, optics.fogNear, optics.fogFar)
   const camera = new THREE.PerspectiveCamera(42, 1, .1, 60); camera.position.set(0, .15, 9); camera.lookAt(0, .15, 0)
 
   // 3-tier reef LED lighting rig (AQ-14.2 & AQ-39):
@@ -84,7 +97,7 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   const hemiLight = new THREE.HemisphereLight('#88ccff', '#1b1636', 0.62)
   scene.add(hemiLight)
   // 2) Crisp 14,000K overhead reef daylight key light with soft shadow map
-  const keyLight = new THREE.DirectionalLight('#f6faff', 2.45)
+  const keyLight = new THREE.DirectionalLight('#f6faff', optics.keyLightIntensity)
   keyLight.position.set(1.2, 6.8, 4.6)
   keyLight.castShadow = true
   keyLight.shadow.mapSize.set(1024, 1024)
@@ -98,7 +111,7 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   keyLight.shadow.normalBias = 0.015
   scene.add(keyLight)
   // 3) Royal-blue actinic fill light + soft top-back rim light
-  const fillLight = new THREE.DirectionalLight('#5a98ff', 1.12)
+  const fillLight = new THREE.DirectionalLight('#5a98ff', optics.fillLightIntensity)
   fillLight.position.set(-4.2, 2.8, 3.2)
   scene.add(fillLight)
   const rimLight = new THREE.DirectionalLight('#b4dcff', 0.45)
@@ -106,8 +119,8 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   scene.add(rimLight)
 
   const causticLightController = createRestrainedCausticLightController(keyLight, fillLight, {
-    keyLightIntensity: 2.45,
-    fillLightIntensity: 1.12,
+    keyLightIntensity: optics.keyLightIntensity,
+    fillLightIntensity: optics.fillLightIntensity,
   })
 
   // Granular aragonite & coralline-rubble sand bed with rock-base contact AO & caustic shimmer (AQ-14.6 & AQ-14.2)
@@ -493,7 +506,7 @@ diffuseColor.rgb = waterCol;
     const surfPos = waterSurfaceGeometry.getAttribute('position')
     for (let i = 0; i < surfPos.count; i++) {
       const wx = surfPos.getX(i), wz = surfPos.getY(i)
-      surfPos.setZ(i, evaluateSurfaceRippleOffset(wx, wz, coralElapsedSec, { paused: habitatStopped, reducedMotion, amplitudeM: 0.032 }))
+      surfPos.setZ(i, evaluateSurfaceRippleOffset(wx, wz, coralElapsedSec, { paused: habitatStopped, reducedMotion, amplitudeM: optics.surfaceRippleAmplitudeM }))
     }
     surfPos.needsUpdate = true
 
@@ -617,3 +630,4 @@ diffuseColor.rgb = waterCol;
     },
   }
 }
+
