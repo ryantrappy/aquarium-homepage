@@ -22,6 +22,11 @@ export type AquariumOpticsConfig = Readonly<{
   causticModulationAmplitude: number
   causticPrimaryHz: number
   causticSecondaryHz: number
+  /** World-space UV scale (UV per metre) of the two scrolling caustic texture layers. */
+  causticTextureScaleA: number
+  causticTextureScaleB: number
+  /** Maximum additive caustic brightness added to direct diffuse light (0..1). */
+  causticMaxAdd: number
   surfaceRippleAmplitudeM: number
   maxSuspendedParticles: number
 }>
@@ -44,6 +49,9 @@ export const DEFAULT_AQUARIUM_OPTICS_CONFIG: AquariumOpticsConfig = Object.freez
   causticModulationAmplitude: 0.18,
   causticPrimaryHz: 0.22,
   causticSecondaryHz: 0.37,
+  causticTextureScaleA: 0.35,
+  causticTextureScaleB: 0.55,
+  causticMaxAdd: 0.35,
   surfaceRippleAmplitudeM: 0.032,
   maxSuspendedParticles: 24,
 })
@@ -92,6 +100,25 @@ export function evaluateDepthTintedColor(backgroundHex: string, depthMeters: num
 }
 
 /**
+ * Shared caustic surface mask: caustics only fall on upward-facing surfaces
+ * and fade with depth, from the top of the tank (+2.8) down to the sand
+ * (-2.8). Used by both the scalar light modulation below and the spatial
+ * caustic texture pattern (`evaluateCausticPatternUV` / `caustics.ts`), so
+ * the two channels can never disagree about where caustics may appear.
+ */
+export function evaluateCausticSurfaceMask(
+  position: Readonly<{ x: number; y: number; z: number }>,
+  normalY: number,
+): number {
+  const upwardFactor = clamp(normalY, 0, 1)
+  if (upwardFactor <= 0) return 0
+  // Depth attenuation of surface caustics from top of tank (+2.8) down to sand (-2.8)
+  const depthFromTop = clamp((2.8 - position.y) / 5.6, 0, 1)
+  const depthEnvelope = 1 - 0.35 * depthFromTop
+  return upwardFactor * depthEnvelope
+}
+
+/**
  * Evaluates coherent dual-wave caustic light intensity on upward-facing reef/sand
  * surfaces (`AQ-14.2` AC #2 & #5). Freezes at the static t=0 phase when `paused`
  * or `reducedMotion` is active, and never flickers.
@@ -107,8 +134,8 @@ export function evaluateCausticIntensity(
   },
 ): number {
   const cfg = { ...DEFAULT_AQUARIUM_OPTICS_CONFIG, ...options?.config }
-  const upwardFactor = clamp(normalY, 0, 1)
-  if (upwardFactor <= 0) return 0
+  const surfaceMask = evaluateCausticSurfaceMask(position, normalY)
+  if (surfaceMask <= 0) return 0
 
   const effectiveTime =
     options?.paused || options?.reducedMotion || !Number.isFinite(timeSeconds)
@@ -125,15 +152,45 @@ export function evaluateCausticIntensity(
     position.z * 2.05
 
   const waveInterference = 0.5 * (Math.sin(phase1) + Math.cos(phase2))
-  // Depth attenuation of surface caustics from top of tank (+2.8) down to sand (-2.8)
-  const depthFromTop = clamp((2.8 - position.y) / 5.6, 0, 1)
-  const depthEnvelope = 1 - 0.35 * depthFromTop
 
-  return (
-    upwardFactor *
-    depthEnvelope *
-    (1 + cfg.causticModulationAmplitude * waveInterference)
-  )
+  return surfaceMask * (1 + cfg.causticModulationAmplitude * waveInterference)
+}
+
+/**
+ * Evaluates the two scrolled world-space UV pairs that sample the caustic
+ * texture in `caustics.ts` (`AQ-14.2` AC #2). The layers scroll in opposite
+ * directions at the existing optics frequencies (0.22 Hz and 0.37 Hz); the
+ * 0.10 / 0.06 and 0.08 / 0.05 factors are the UV drift per cycle, so the
+ * pattern moves slowly rather than panning across the tank. Freezes at the
+ * static t=0 UVs when `paused` or `reducedMotion` is active, exactly like
+ * `evaluateCausticIntensity`. The GLSL in `caustics.ts` mirrors these
+ * constants; keep the two in sync.
+ */
+export function evaluateCausticPatternUV(
+  worldX: number,
+  worldZ: number,
+  timeSeconds: number,
+  options?: {
+    paused?: boolean
+    reducedMotion?: boolean
+    config?: Partial<AquariumOpticsConfig>
+  },
+): { a: { u: number; v: number }; b: { u: number; v: number } } {
+  const cfg = { ...DEFAULT_AQUARIUM_OPTICS_CONFIG, ...options?.config }
+  const effectiveTime =
+    options?.paused || options?.reducedMotion || !Number.isFinite(timeSeconds)
+      ? 0
+      : timeSeconds % 3600
+  return {
+    a: {
+      u: worldX * cfg.causticTextureScaleA + effectiveTime * cfg.causticPrimaryHz * 0.1,
+      v: worldZ * cfg.causticTextureScaleA - effectiveTime * cfg.causticPrimaryHz * 0.06,
+    },
+    b: {
+      u: worldX * cfg.causticTextureScaleB - effectiveTime * cfg.causticSecondaryHz * 0.08,
+      v: worldZ * cfg.causticTextureScaleB + effectiveTime * cfg.causticSecondaryHz * 0.05,
+    },
+  }
 }
 
 /**
