@@ -29,6 +29,23 @@ export type AquariumOpticsConfig = Readonly<{
   causticMaxAdd: number
   surfaceRippleAmplitudeM: number
   maxSuspendedParticles: number
+  /** Depth-graded mote split (AQ-43 as amended 2026-11-08): foreground band
+   * (z -1.5..+2.8, the fish volume) is faintest; background band
+   * (z -4.6..-1.5, behind the fish volume) carries the density. The two
+   * bands sum to maxSuspendedParticles. */
+  foregroundSuspendedParticles: number
+  backgroundSuspendedParticles: number
+  /** Bubble budget (AQ-43 as amended 2026-11-08): two sparse streams of at
+   * most 16 bubbles each, 32 total. */
+  maxBubbles: number
+  bubbleRiseSpeedMinMPerSec: number
+  bubbleRiseSpeedMaxMPerSec: number
+  bubbleWobbleAmplitudeM: number
+  /** Bubble spawn height, just above the sand bed (y = -2.8). */
+  bubbleEmitterBaseY: number
+  /** Bubbles recycle to their emitter above this height, below the water
+   * surface plane (y = 2.66). */
+  bubbleRecycleTopY: number
 }>
 
 /**
@@ -56,7 +73,18 @@ export const DEFAULT_AQUARIUM_OPTICS_CONFIG: AquariumOpticsConfig = Object.freez
   causticTextureScaleB: 0.55,
   causticMaxAdd: 0.35,
   surfaceRippleAmplitudeM: 0.032,
-  maxSuspendedParticles: 24,
+  // AQ-43 as amended 2026-11-08 (Ryan-approved): 48 depth-graded motes
+  // (16 faint foreground + 32 background) and two sparse bubble streams
+  // of at most 16 bubbles each (32 total).
+  maxSuspendedParticles: 48,
+  foregroundSuspendedParticles: 16,
+  backgroundSuspendedParticles: 32,
+  maxBubbles: 32,
+  bubbleRiseSpeedMinMPerSec: 0.25,
+  bubbleRiseSpeedMaxMPerSec: 0.45,
+  bubbleWobbleAmplitudeM: 0.05,
+  bubbleEmitterBaseY: -2.5,
+  bubbleRecycleTopY: 2.5,
 })
 
 const TWO_PI = Math.PI * 2
@@ -234,6 +262,10 @@ export function evaluateSuspendedParticlePosition(
   options?: {
     paused?: boolean
     reducedMotion?: boolean
+    /** Depth band the mote's base depth is drawn from (AQ-43 as amended:
+     * foreground z -1.5..+2.8, background z -4.6..-1.5). Without it the
+     * mote is drawn from the full bounds, as before. */
+    zBand?: Readonly<{ min: number; max: number }>
   },
 ): { x: number; y: number; z: number } {
   const hash = (n: number) => {
@@ -250,7 +282,9 @@ export function evaluateSuspendedParticlePosition(
 
   const baseX = bounds.min.x + 0.08 * spanX + uX * 0.84 * spanX
   const baseY = bounds.min.y + 0.08 * spanY + uY * 0.84 * spanY
-  const baseZ = bounds.min.z + 0.08 * spanZ + uZ * 0.84 * spanZ
+  const baseZ = options?.zBand
+    ? options.zBand.min + uZ * (options.zBand.max - options.zBand.min)
+    : bounds.min.z + 0.08 * spanZ + uZ * 0.84 * spanZ
 
   if (options?.paused || options?.reducedMotion || !Number.isFinite(timeSeconds)) {
     return { x: baseX, y: baseY, z: baseZ }
@@ -266,6 +300,69 @@ export function evaluateSuspendedParticlePosition(
     x: clamp(baseX + driftX, bounds.min.x, bounds.max.x),
     y: clamp(baseY + driftY, bounds.min.y, bounds.max.y),
     z: clamp(baseZ + driftZ, bounds.min.z, bounds.max.z),
+  }
+}
+
+/**
+ * Evaluates one bubble in a sparse, emitter-anchored stream (`AQ-43` as
+ * amended 2026-11-08): rises from its emitter at a deterministic,
+ * size-hashed speed (larger bubbles rise faster), wobbles sinusoidally in
+ * X/Z, and recycles to the emitter once it passes `bubbleRecycleTopY`
+ * (below the water surface plane at y = 2.66). Freezes at the static
+ * emitter position when `paused` or `reducedMotion` is active; X/Z never
+ * leave the water column bounds and Y never leaves [emitter.y,
+ * recycleTopY]. Per-bubble size growth with height is
+ * not modelled: `THREE.PointsMaterial` has a single size, and a custom
+ * shader for per-point size was out of scope for this restrained design;
+ * the size/speed hash correlation (faster bubbles are the larger ones)
+ * carries the size cue instead.
+ */
+export function evaluateBubblePosition(
+  seedIndex: number,
+  emitter: Readonly<{ x: number; y: number; z: number }>,
+  bounds: Readonly<{ min: { x: number; y: number; z: number }; max: { x: number; y: number; z: number } }>,
+  timeSeconds: number,
+  options?: {
+    paused?: boolean
+    reducedMotion?: boolean
+    config?: Partial<AquariumOpticsConfig>
+  },
+): { x: number; y: number; z: number } {
+  const cfg = { ...DEFAULT_AQUARIUM_OPTICS_CONFIG, ...options?.config }
+  const hash = (n: number) => {
+    const x = Math.sin(n * 127.1 + 311.7) * 43758.5453123
+    return x - Math.floor(x)
+  }
+  const sizeHash = hash(seedIndex * 3 + 1)
+  const phase = hash(seedIndex * 3 + 2) * TWO_PI
+  const cycleOffset = hash(seedIndex * 3 + 3)
+  const wobble = cfg.bubbleWobbleAmplitudeM
+
+  // Frozen bubbles rest at the emitter with their t=0 wobble offset, so
+  // each bubble keeps a distinct static position instead of stacking.
+  // Note y is clamped to [emitter.y, recycleTopY], not to bounds: the
+  // emitter sits at y = -2.5, just above the sand bed (-2.8) but below
+  // the fish-navigation bounds' min y (-2.25); clamping to bounds would
+  // lift every bubble off its emitter.
+  if (options?.paused || options?.reducedMotion || !Number.isFinite(timeSeconds)) {
+    return {
+      x: clamp(emitter.x + wobble * Math.sin(phase), bounds.min.x, bounds.max.x),
+      y: emitter.y,
+      z: clamp(emitter.z + wobble * Math.cos(phase), bounds.min.z, bounds.max.z),
+    }
+  }
+
+  const riseSpeed =
+    cfg.bubbleRiseSpeedMinMPerSec +
+    sizeHash * (cfg.bubbleRiseSpeedMaxMPerSec - cfg.bubbleRiseSpeedMinMPerSec)
+  const span = cfg.bubbleRecycleTopY - emitter.y
+  const t = timeSeconds % 3600
+  const progress = (cycleOffset + (t * riseSpeed) / span) % 1
+  const wobblePhase = t * TWO_PI * 0.6 + phase
+  return {
+    x: clamp(emitter.x + wobble * Math.sin(wobblePhase), bounds.min.x, bounds.max.x),
+    y: clamp(emitter.y + progress * span, emitter.y, cfg.bubbleRecycleTopY),
+    z: clamp(emitter.z + wobble * Math.cos(wobblePhase), bounds.min.z, bounds.max.z),
   }
 }
 
