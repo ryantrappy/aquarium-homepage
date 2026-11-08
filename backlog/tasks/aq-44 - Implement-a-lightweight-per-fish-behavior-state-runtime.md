@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-03T12:38:00Z'
-updated_date: '2026-11-03T18:51:00Z'
+updated_date: '2026-11-08T04:47:00Z'
 labels: []
 dependencies:
   - AQ-12
@@ -21,9 +21,9 @@ documentation:
   - docs/fish-behavior-design.md
   - docs/reef-fish-roster.md
   - docs/behavior-runtime-contract.md
-priority: high
+priority: '9'
 type: enhancement
-ordinal: 18000
+ordinal: 9
 ---
 
 ## Description

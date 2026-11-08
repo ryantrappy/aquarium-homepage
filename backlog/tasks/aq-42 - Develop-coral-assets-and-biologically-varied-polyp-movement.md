@@ -6,8 +6,8 @@ assignee:
   - '@gemini'
   - '@root'
   - '@Luna'
-created_date: '2026-11-03 12:34'
-updated_date: '2026-11-06 04:54'
+created_date: 2026-11-03 12:34
+updated_date: '2026-11-08T04:47:00Z'
 labels: []
 dependencies:
   - AQ-14.3
@@ -18,13 +18,13 @@ references:
   - docs/reef_aquarium_all_code.md
   - docs/open-source-asset-and-motion-research.md
   - docs/modular-coral-and-live-rock-spec.md
-  - 'https://pmc.ncbi.nlm.nih.gov/articles/PMC7329047/'
+  - https://pmc.ncbi.nlm.nih.gov/articles/PMC7329047/
 documentation:
   - docs/open-source-asset-and-motion-research.md
   - docs/modular-coral-and-live-rock-spec.md
-priority: high
+priority: '5'
 type: enhancement
-ordinal: 13000
+ordinal: 5
 ---
 
 ## Description

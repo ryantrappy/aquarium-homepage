@@ -35,3 +35,10 @@
 - Backlog count:44Done,38To Do,16In Progress. Read AGENT_TASKS.md and live Backlog; reviewed notes do not imply completion.
 - Root5193dev may remain. Root verified command/cwd and stopped5194/5195/5196/5197verification servers. Do not disturb user3000 or historical5191/5189; restart an isolated intended build before browser evidence.
 - No deployment, host mounts, remote configuration or sign-ins performed this run. Local5196uses disposable config under /tmp/aq64-root-browser-20261105-v1/.
+
+### 2026-11-07 — `gemini_control` short-term lead handoff (Gemini Argon)
+*Gemini Argon review 2026-11-07: Current policy on `gemini_control` branch while Codex designated lead is out of tokens.*
+- On the `gemini_control` branch, Gemini Argon is the short-term "lead" dev who manages work while the Codex designated lead is out of tokens for a few days.
+- Do not mark tasks as fully complete (`Done`); instead, mark them as `gemini approved` and leave their status as `In Progress`.
+- Only the Codex designated lead can move tasks to completed (`Done`). When the Codex lead returns and takes control back after Gemini Argon has worked for a while, it should check the `gemini approved` items first.
+

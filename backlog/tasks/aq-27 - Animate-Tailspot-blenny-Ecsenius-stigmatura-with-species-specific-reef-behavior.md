@@ -7,7 +7,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: 2026-11-03 04:37
-updated_date: '2026-11-04T02:31:00Z'
+updated_date: '2026-11-08T04:47:00Z'
 labels:
   - reef-fish
   - animation
@@ -24,9 +24,9 @@ documentation:
   - docs/requirements.md
   - docs/fish-behavior-design.md
   - docs/open-source-asset-and-motion-research.md
-priority: medium
+priority: '30'
 type: enhancement
-ordinal: 39000
+ordinal: 30
 ---
 
 ## Description

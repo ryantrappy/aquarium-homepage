@@ -8,16 +8,16 @@
       "upAxis": "+Y",
       "origin": "local",
       "dimensionsM": [
-        0.588744,
-        1.25812,
+        0.279412,
+        1.263197,
         2
       ],
       "provenance": {
         "license": "original",
         "creator": "Aquarium project",
-        "sourceSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+        "sourceSha256": "45b734ca98e4a9013e2282eeae0cf87f91326cc7c85b68c07d41cd4e861287fa",
         "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
-        "attribution": "Original photorealistic 3D rigged and animated fish asset (Centropyge loricula (Flame Angelfish)) reconstructed from project-original public/fish/flame-angelfish.webp with embedded 512x512 BaseColor, Normal, and ORM PBR textures."
+        "attribution": "Original photorealistic 3D rigged and animated fish asset (Centropyge loricula (Flame Angelfish)) reconstructed from project-original public/fish/flame-angelfish.webp with embedded PBR textures."
       }
     }
   },
@@ -41,13 +41,13 @@
   },
   "boundsM": {
     "min": [
-      -0.294372,
-      -0.621258,
+      -0.139706,
+      -0.625324,
       -1
     ],
     "max": [
-      0.294372,
-      0.636862,
+      0.139706,
+      0.637873,
       1
     ]
   },
@@ -55,16 +55,16 @@
     {
       "id": "flame_angelfish_body",
       "role": "fish",
-      "vertexCount": 5064,
+      "vertexCount": 5933,
       "boundsM": {
         "min": [
-          -0.294372,
-          -0.621258,
+          -0.139706,
+          -0.625324,
           -1
         ],
         "max": [
-          0.294372,
-          0.636862,
+          0.139706,
+          0.637873,
           1
         ]
       },

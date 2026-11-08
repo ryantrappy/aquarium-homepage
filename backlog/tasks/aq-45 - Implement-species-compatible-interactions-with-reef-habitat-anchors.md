@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-03T12:38:00Z'
-updated_date: '2026-11-05 13:09'
+updated_date: '2026-11-08T04:47:00Z'
 labels: []
 dependencies:
   - AQ-34
@@ -14,13 +14,13 @@ dependencies:
 references:
   - docs/fish-behavior-design.md
   - docs/reef-fish-roster.md
-  - 'https://pmc.ncbi.nlm.nih.gov/articles/PMC6850181/'
+  - https://pmc.ncbi.nlm.nih.gov/articles/PMC6850181/
   - >-
     https://www.aquariumofpacific.org/onlinelearningcenter/species/clown_anemonefish
-  - 'https://www.fao.org/fishery/docs/CDrom/bobp/cd1/Bobp/Publns/MAG/021.pdf'
+  - https://www.fao.org/fishery/docs/CDrom/bobp/cd1/Bobp/Publns/MAG/021.pdf
   - >-
     https://australian.museum/learn/animals/fishes/yellow-shrimpgoby-cryptocentrus-cinctus/
-  - 'https://nrm-fishbaselinux01.nrm.se/Ecology/Ecsenius_stigmatura'
+  - https://nrm-fishbaselinux01.nrm.se/Ecology/Ecsenius_stigmatura
   - AQ-18
   - AQ-19
   - AQ-24
@@ -31,9 +31,9 @@ references:
 documentation:
   - docs/fish-behavior-design.md
   - docs/reef-fish-roster.md
-priority: high
+priority: '11'
 type: enhancement
-ordinal: 19000
+ordinal: 11
 ---
 
 ## Description

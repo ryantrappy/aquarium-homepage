@@ -4,8 +4,8 @@ title: Refine supplied rock silhouette and materials before scene promotion
 status: In Progress
 assignee:
   - '@gemini'
-created_date: '2026-11-05 03:13'
-updated_date: '2026-11-05 21:39'
+created_date: 2026-11-05 03:13
+updated_date: '2026-11-08T04:47:00Z'
 labels:
   - modeling
 dependencies: []
@@ -17,9 +17,9 @@ references:
   - /tmp/aq-asset-review-20261104/left-exact-oblique.png
   - docs/asset-evidence/aq57/left-exact-front.png
   - docs/asset-evidence/aq57/left-exact-oblique.png
-priority: high
+priority: '2'
 type: bug
-ordinal: 11950
+ordinal: 2
 ---
 
 ## Description

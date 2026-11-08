@@ -4,8 +4,8 @@ title: Evaluate restrained suspended particles and microbubbles
 status: To Do
 assignee:
   - '@Luna'
-created_date: '2026-11-03 12:34'
-updated_date: '2026-11-05 07:32'
+created_date: 2026-11-03 12:34
+updated_date: '2026-11-08T04:47:00Z'
 labels:
   - good-for-parallel-work
 dependencies:
@@ -19,9 +19,9 @@ references:
   - src/rendering/scene/underwater-optics.ts
 documentation:
   - docs/open-source-asset-and-motion-research.md
-priority: low
+priority: '34'
 type: enhancement
-ordinal: 44000
+ordinal: 34
 ---
 
 ## Description

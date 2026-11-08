@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: 2026-11-03 12:33
-updated_date: '2026-11-04T02:32:00Z'
+updated_date: '2026-11-08T04:47:00Z'
 labels: []
 dependencies:
   - AQ-12
@@ -22,9 +22,9 @@ references:
 documentation:
   - docs/fish-behavior-design.md
   - docs/open-source-asset-and-motion-research.md
-priority: medium
+priority: '18'
 type: enhancement
-ordinal: 27000
+ordinal: 18
 ---
 
 ## Description

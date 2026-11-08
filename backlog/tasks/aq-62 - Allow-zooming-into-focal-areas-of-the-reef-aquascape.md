@@ -4,15 +4,16 @@ title: Allow zooming into focal areas of the reef aquascape
 status: To Do
 assignee:
   - '@Luna'
-created_date: '2026-11-05 18:00'
+created_date: 2026-11-05 18:00
+updated_date: '2026-11-08T04:47:00Z'
 labels: []
 dependencies: []
 documentation:
   - docs/design-principles.md
   - docs/rendering.md
-priority: medium
+priority: '33'
 type: feature
-ordinal: 65000
+ordinal: 33
 ---
 
 ## Description

@@ -4,14 +4,14 @@ title: Scale fish models to true relative adult sizes
 status: In Progress
 assignee:
   - '@Antigravity'
-created_date: '2026-11-05 05:14'
-updated_date: '2026-11-05 23:35'
+created_date: 2026-11-05 05:14
+updated_date: '2026-11-08T04:47:00Z'
 labels:
   - easy
   - rendering
 dependencies: []
-priority: high
-ordinal: 63000
+priority: '3'
+ordinal: 3
 ---
 
 ## Description

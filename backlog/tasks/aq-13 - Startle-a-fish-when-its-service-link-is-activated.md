@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-03T04:15:00Z'
-updated_date: '2026-11-04T02:25:00Z'
+updated_date: '2026-11-08T04:47:00Z'
 labels: []
 dependencies:
   - AQ-12
@@ -16,9 +16,9 @@ documentation:
   - docs/requirements.md
   - docs/design-principles.md
   - docs/fish-behavior-design.md
-priority: medium
+priority: '32'
 type: enhancement
-ordinal: 26000
+ordinal: 32
 ---
 
 ## Description

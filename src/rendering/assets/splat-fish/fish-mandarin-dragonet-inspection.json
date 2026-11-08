@@ -8,16 +8,16 @@
       "upAxis": "+Y",
       "origin": "local",
       "dimensionsM": [
-        0.689392,
-        0.893234,
+        0.33427,
+        0.894236,
         2
       ],
       "provenance": {
         "license": "original",
         "creator": "Aquarium project",
-        "sourceSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+        "sourceSha256": "45b734ca98e4a9013e2282eeae0cf87f91326cc7c85b68c07d41cd4e861287fa",
         "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
-        "attribution": "Original photorealistic 3D rigged and animated fish asset (Synchiropus splendidus (Mandarin Dragonet)) reconstructed from project-original public/fish/mandarin-dragonet.webp with embedded 512x512 BaseColor, Normal, and ORM PBR textures."
+        "attribution": "Original photorealistic 3D rigged and animated fish asset (Synchiropus splendidus (Mandarin Dragonet)) reconstructed from project-original public/fish/mandarin-dragonet.webp with embedded PBR textures."
       }
     }
   },
@@ -41,13 +41,13 @@
   },
   "boundsM": {
     "min": [
-      -0.344696,
-      -0.450781,
+      -0.167135,
+      -0.450777,
       -1
     ],
     "max": [
-      0.344696,
-      0.442453,
+      0.167135,
+      0.443459,
       1
     ]
   },
@@ -55,16 +55,16 @@
     {
       "id": "mandarin_dragonet_body",
       "role": "fish",
-      "vertexCount": 4050,
+      "vertexCount": 4750,
       "boundsM": {
         "min": [
-          -0.344696,
-          -0.450781,
+          -0.167135,
+          -0.450777,
           -1
         ],
         "max": [
-          0.344696,
-          0.442453,
+          0.167135,
+          0.443459,
           1
         ]
       },

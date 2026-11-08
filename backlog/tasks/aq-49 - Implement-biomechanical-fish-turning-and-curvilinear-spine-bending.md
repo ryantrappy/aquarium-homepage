@@ -6,7 +6,7 @@ assignee:
   - '@render-integration'
   - '@gemini'
 created_date: '2026-11-04T19:20:00Z'
-updated_date: '2026-11-05 14:17'
+updated_date: '2026-11-08T04:47:00Z'
 labels: []
 dependencies:
   - AQ-35
@@ -22,9 +22,9 @@ documentation:
   - docs/fish-turning-and-maneuvering-plan.md
   - docs/fish-behavior-design.md
 parent_task_id: AQ-12
-priority: high
+priority: '10'
 type: enhancement
-ordinal: 19500
+ordinal: 10
 ---
 
 ## Description

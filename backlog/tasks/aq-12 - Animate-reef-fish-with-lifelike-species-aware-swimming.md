@@ -1,16 +1,16 @@
 ---
 id: AQ-12
-title: 'Animate reef fish with photorealistic, species-aware swimming'
+title: Animate reef fish with photorealistic, species-aware swimming
 status: In Progress
 assignee:
   - '@render-integration'
 created_date: '2026-11-03T04:15:00Z'
-updated_date: '2026-11-05 21:39'
+updated_date: '2026-11-08T04:47:00Z'
 labels: []
 dependencies:
   - AQ-5
 references:
-  - 'https://www.fisheries.noaa.gov/species/banggai-cardinalfish/resources'
+  - https://www.fisheries.noaa.gov/species/banggai-cardinalfish/resources
   - >-
     https://www.montereybayaquarium.org/animals-the-ocean/animals-a-to-z/clownfish
   - AQ-34
@@ -21,9 +21,9 @@ documentation:
   - docs/requirements.md
   - docs/design-principles.md
   - docs/fish-behavior-design.md
-priority: high
+priority: '8'
 type: enhancement
-ordinal: 20000
+ordinal: 8
 ---
 
 ## Description

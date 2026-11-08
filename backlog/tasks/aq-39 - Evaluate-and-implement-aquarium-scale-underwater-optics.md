@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: 2026-11-03 12:33
-updated_date: '2026-11-05T07:31:00Z'
+updated_date: '2026-11-08T04:47:00Z'
 labels: []
 dependencies:
   - AQ-5
@@ -25,9 +25,9 @@ references:
 documentation:
   - docs/modular-coral-and-live-rock-spec.md
   - docs/open-source-asset-and-motion-research.md
-priority: high
+priority: '15'
 type: enhancement
-ordinal: 24000
+ordinal: 15
 ---
 
 ## Description
