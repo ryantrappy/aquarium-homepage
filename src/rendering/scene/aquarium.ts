@@ -18,6 +18,7 @@ import {
   evaluateSurfaceRippleOffset,
   evaluateSuspendedParticlePosition,
 } from './underwater-optics'
+import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
 import { createSwimmingFish, seedForId, startleFish, stepSwimmingFish, type SwimmingFish, type WaterHabitat } from './motion'
 import { applyFishTurningRigOverlay, bindFishTurningRig, evaluateSpriteTurnScaleX, type FishTurningRig } from './fish-turning'
 import { SPRITE_PLANE_WIDTH, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale } from './fish-scale'
@@ -92,9 +93,15 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   scene.fog = new THREE.Fog(waterColumnColor, optics.fogNear, optics.fogFar)
   const camera = new THREE.PerspectiveCamera(42, 1, .1, 60); camera.position.set(0, .15, 9); camera.lookAt(0, .15, 0)
 
+  // Runtime-generated PMREM environment map (AQ-71): procedural IBL from the
+  // tank's own palette, generated once here. scene.background stays the
+  // Beer-Lambert-tinted water colour from AQ-39.
+  const environmentMap = createAquariumEnvironmentMap(renderer)
+  if (environmentMap) scene.environment = environmentMap.texture
+
   // 3-tier reef LED lighting rig (AQ-14.2 & AQ-39):
   // 1) Balanced sky-to-indigo-crevice HemisphereLight so overhangs & caves retain deep actinic shadow contrast
-  const hemiLight = new THREE.HemisphereLight('#88ccff', '#1b1636', 0.62)
+  const hemiLight = new THREE.HemisphereLight('#88ccff', '#1b1636', 0.40)
   scene.add(hemiLight)
   // 2) Crisp 14,000K overhead reef daylight key light with soft shadow map
   const keyLight = new THREE.DirectionalLight('#f6faff', optics.keyLightIntensity)
@@ -150,6 +157,7 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   sandGeometry.computeVertexNormals()
   const sandUniforms = { uSandTime: { value: 0 } }
   const sandMaterial = new THREE.MeshStandardMaterial({ map: sandTexture, roughness: 0.94, metalness: 0.0 })
+  sandMaterial.envMapIntensity = ENVIRONMENT_MAP_INTENSITY.sand
   sandMaterial.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, sandUniforms)
     shader.vertexShader = `varying vec3 vSandWorldPos;\n` + shader.vertexShader
@@ -180,6 +188,7 @@ diffuseColor.rgb *= (0.86 + 0.22 * sandCaustic);
   // Layered Reef-Tank Backdrop (AQ-14.6 & AQ-39): eliminates the flat paint-bucket wall & sharp horizon line
   const rearUniforms = { uRearTime: { value: 0 } }
   const rearMaterial = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.96, metalness: 0.0 })
+  rearMaterial.envMapIntensity = ENVIRONMENT_MAP_INTENSITY.backdrop
   rearMaterial.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, rearUniforms)
     shader.vertexShader = `varying vec3 vRearWorldPos;\n` + shader.vertexShader
@@ -231,6 +240,7 @@ diffuseColor.rgb = waterCol;
     side: THREE.DoubleSide,
     depthWrite: false,
   })
+  waterSurfaceMaterial.envMapIntensity = ENVIRONMENT_MAP_INTENSITY.waterSurface
   const waterSurface = new THREE.Mesh(waterSurfaceGeometry, waterSurfaceMaterial)
   waterSurface.rotation.x = Math.PI / 2
   waterSurface.position.set(0, 2.66, -1.2)
@@ -336,6 +346,7 @@ diffuseColor.rgb = waterCol;
       reef.rotation.y = yaw
       scene.add(reef)
       reefs.push(reef)
+      applyEnvironmentMapIntensity(reef, ENVIRONMENT_MAP_INTENSITY.reef)
 
       const result = instantiateModularReefHabitat(islandKind, uniformScale, position, `reef-${i}`, yaw)
       habitat.obstacles.push(...result.obstacles)
@@ -371,6 +382,7 @@ diffuseColor.rgb = waterCol;
     try {
       if (base) {
         const model = clone(base.scene); root.add(model); model.scale.setScalar(fishModelScale(service.fishId))
+        applyEnvironmentMapIntensity(model, ENVIRONMENT_MAP_INTENSITY.fish)
         // The player restores the clean clip pose before every turning overlay.
         if (base.animations.length === 1) {
           try {
@@ -626,7 +638,7 @@ diffuseColor.rgb = waterCol;
     canActivate(id, x, y) { const item = fish.find(item => item.service.id === id); return Boolean(item && (x === undefined || y === undefined ? updateVisibility(item) : nearest(x, y) === id)) },
     dispose() {
       if (disposed) return; disposed = true; abort.abort(); observer.disconnect(); renderer.setAnimationLoop(null)
-      removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sand.geometry.dispose(); sand.material.dispose(); sandTexture.dispose(); rear.geometry.dispose(); rear.material.dispose(); waterSurfaceGeometry.dispose(); waterSurfaceMaterial.dispose(); particleGeometry.dispose(); particleMaterial.dispose(); renderer.dispose(); renderer.forceContextLoss()
+      removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sand.geometry.dispose(); sand.material.dispose(); sandTexture.dispose(); rear.geometry.dispose(); rear.material.dispose(); waterSurfaceGeometry.dispose(); waterSurfaceMaterial.dispose(); particleGeometry.dispose(); particleMaterial.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
     },
   }
 }
