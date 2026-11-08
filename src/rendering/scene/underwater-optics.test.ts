@@ -2,13 +2,18 @@ import { describe, expect, it } from 'vitest'
 import * as THREE from 'three'
 import {
   DEFAULT_AQUARIUM_OPTICS_CONFIG,
+  LIGHT_SHAFT_BAND_CENTERS,
+  LIGHT_SHAFT_SLANT_PER_M,
+  LIGHT_SHAFT_SWAY_AMPLITUDE_M,
   createRestrainedCausticLightController,
   evaluateBubblePosition,
   evaluateCausticIntensity,
   evaluateCausticPatternUV,
   evaluateCausticSurfaceMask,
+  evaluateDepthHazeFactor,
   evaluateDepthTintedColor,
   evaluateDepthTransmittance,
+  evaluateLightShaftIntensity,
   evaluateSurfaceRippleOffset,
   evaluateSuspendedParticlePosition,
 } from './underwater-optics'
@@ -197,5 +202,53 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
     expect(key.intensity).toBe(DEFAULT_AQUARIUM_OPTICS_CONFIG.keyLightIntensity)
     expect(key.position.toArray()).toEqual([1, 6, 5])
     expect(fill.intensity).toBe(DEFAULT_AQUARIUM_OPTICS_CONFIG.fillLightIntensity)
+  })
+
+  it('keeps restrained depth haze behind the fish volume and out of the foreground (AQ-86 AC #1)', () => {
+    // Inside the primary fish volume (z >= -1.5): no haze at any height.
+    expect(evaluateDepthHazeFactor(2.0, 0)).toBe(0)
+    expect(evaluateDepthHazeFactor(-1.5, 0)).toBe(0)
+    expect(evaluateDepthHazeFactor(-1.4, -2.8)).toBe(0)
+    // Behind the volume the haze ramps in, reaching full strength at the rear wall.
+    expect(evaluateDepthHazeFactor(-3.0, 0)).toBeGreaterThan(0)
+    expect(evaluateDepthHazeFactor(-3.0, 0)).toBeLessThan(1)
+    expect(evaluateDepthHazeFactor(-4.6, -2.8)).toBeCloseTo(1)
+    // Stronger with depth at the same z: 0.55 at the surface, 1.0 at the sand.
+    expect(evaluateDepthHazeFactor(-4.6, 2.8)).toBeCloseTo(0.55)
+    expect(evaluateDepthHazeFactor(-3.0, -2.8)).toBeGreaterThan(evaluateDepthHazeFactor(-3.0, 2.8))
+    // The rendered haze stays well below full opacity: crisp deep focus, no veil.
+    expect(DEFAULT_AQUARIUM_OPTICS_CONFIG.depthHazeMaxAlpha).toBeLessThanOrEqual(0.25)
+    expect(DEFAULT_AQUARIUM_OPTICS_CONFIG.lightShaftMaxAlpha).toBeLessThanOrEqual(0.2)
+    expect(evaluateDepthHazeFactor(NaN, 0)).toBe(0)
+  })
+
+  it('projects soft volumetric shafts that weaken with depth and freeze on pause (AQ-86 AC #2)', () => {
+    const firstBand = LIGHT_SHAFT_BAND_CENTERS[0]!
+    // On a band centre at the surface: strong.
+    const surfaceCenter = firstBand + LIGHT_SHAFT_SWAY_AMPLITUDE_M * Math.sin(firstBand)
+    const onBand = evaluateLightShaftIntensity(surfaceCenter, 2.8, 0)
+    expect(onBand).toBeGreaterThan(0.5)
+    // Far from every band: ~0.
+    expect(evaluateLightShaftIntensity(5.5, 2.8, 0)).toBeLessThan(0.05)
+    // The same band at the sand is 15% of its surface strength (slant included).
+    const sandCenter = firstBand + 5.6 * LIGHT_SHAFT_SLANT_PER_M + LIGHT_SHAFT_SWAY_AMPLITUDE_M * Math.sin(firstBand)
+    const atSand = evaluateLightShaftIntensity(sandCenter, -2.8, 0)
+    expect(atSand).toBeGreaterThan(0)
+    expect(atSand).toBeLessThanOrEqual(onBand * 0.2)
+    // Slow sway, never flicker-fast.
+    const t1 = evaluateLightShaftIntensity(0.2, 1.0, 1.2)
+    const t2 = evaluateLightShaftIntensity(0.2, 1.0, 2.7)
+    expect(t1).not.toBeCloseTo(t2, 4)
+    // Pause and reduced-motion freeze at the static t=0 phase.
+    const pausedA = evaluateLightShaftIntensity(0.2, 1.0, 1.2, { paused: true })
+    const pausedB = evaluateLightShaftIntensity(0.2, 1.0, 9.8, { paused: true })
+    expect(pausedA).toEqual(pausedB)
+    expect(evaluateLightShaftIntensity(0.2, 1.0, 5, { reducedMotion: true })).toEqual(pausedA)
+    // Bounded 0..1 everywhere in the tank.
+    for (const [x, y] of [[-4, -2.8], [0, 0], [4, 2.8], [-2.2, 2.8]] as const) {
+      const value = evaluateLightShaftIntensity(x, y, 3.3)
+      expect(value).toBeGreaterThanOrEqual(0)
+      expect(value).toBeLessThanOrEqual(1)
+    }
   })
 })

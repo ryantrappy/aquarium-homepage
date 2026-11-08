@@ -5,6 +5,17 @@ const SPAWN_SEARCH_DIVISIONS = 4
 const INITIAL_HEADING_ALTERNATIVES = 8
 const TWO_PI = Math.PI * 2
 
+/**
+ * Distinct spawn depth planes as fractions of the clearance-safe z range
+ * (AQ-87): far / mid / near. Spawn depth is quantized onto these planes
+ * instead of drawn continuously, so the school reads on multiple visibly
+ * distinct depth planes instead of one front plane. The outer horizontal
+ * lanes stay on the near plane so projected X spread survives perspective.
+ */
+export const FISH_SPAWN_DEPTH_PLANES: readonly number[] = Object.freeze([0.28, 0.55, 0.85])
+/** Small deterministic jitter around a depth plane, as a z-range fraction. */
+export const FISH_SPAWN_DEPTH_PLANE_JITTER = 0.03
+
 export type OccupiedFishSpawn = { position: Vec3; clearance: number }
 export type FishSpawnPreference = { position: Vec3; yaw: number }
 
@@ -79,7 +90,17 @@ export function fishSpawnPreference(instanceId: string, speciesId: string, water
   if (safeMin.x > safeMax.x || safeMin.y > safeMax.y || safeMin.z > safeMax.z) return undefined
 
   const seed = spawnSeed(instanceId, speciesId)
-  const depth = profile.depthRange[0] + seededUnit(seed, 0x9e3779b9) * (profile.depthRange[1] - profile.depthRange[0])
+  // AQ-87: a plain seeded draw inside each species' depthRange clusters the
+  // whole school in the middle of the column (the five starters' draws
+  // spanned only ~0.27 of the depth). Stratify the draw by horizontal slot
+  // — the same cohort index already stratifies X — so each fish takes a
+  // different fifth of its own declared band and the ensemble spans the
+  // full column. The draw never leaves the species' depthRange.
+  const depthUnit = seededUnit(seed, 0x9e3779b9)
+  const depthFraction = horizontalSlot
+    ? (horizontalSlot.index + depthUnit) / horizontalSlot.count
+    : depthUnit
+  const depth = profile.depthRange[0] + depthFraction * (profile.depthRange[1] - profile.depthRange[0])
   const height = waterBounds.max.y - waterBounds.min.y
   const preferredY = waterBounds.max.y - depth * height
   const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
@@ -94,13 +115,16 @@ export function fishSpawnPreference(instanceId: string, speciesId: string, water
   const xFraction = horizontalSlot ? .02 + .96 * clamp(horizontalFraction, 0, 1) : .04 + .92 * horizontalFraction
   const preferredX = safeMin.x + (safeMax.x - safeMin.x) * xFraction
   const zNoise = seededUnit(seed, 0x85ebca6b)
-  // Put only the outer fish lanes nearer the camera so projected X
-  // spread survives perspective. Interior lanes retain varied depth.
-  const zFraction = horizontalSlot && horizontalSlot.count > 1 && horizontalSlot.index === 0
-    ? .8 + .05 * zNoise
-    : horizontalSlot && horizontalSlot.count > 1 && horizontalSlot.index === horizontalSlot.count - 1
-      ? .91 + .04 * zNoise
-      : .4 + .6 * zNoise
+  // AQ-87: quantize spawn depth onto the three distinct depth planes
+  // (far / mid / near) instead of a continuous z draw. The outer
+  // horizontal lanes stay on the near plane so projected X spread survives
+  // perspective; interior lanes take a seeded plane with small jitter.
+  const isOuterLane = horizontalSlot && horizontalSlot.count > 1
+    && (horizontalSlot.index === 0 || horizontalSlot.index === horizontalSlot.count - 1)
+  const planeIndex = isOuterLane
+    ? FISH_SPAWN_DEPTH_PLANES.length - 1
+    : Math.min(FISH_SPAWN_DEPTH_PLANES.length - 1, Math.floor(zNoise * FISH_SPAWN_DEPTH_PLANES.length))
+  const zFraction = FISH_SPAWN_DEPTH_PLANES[planeIndex]! + (zNoise * 2 - 1) * FISH_SPAWN_DEPTH_PLANE_JITTER
   const preferredZ = safeMin.z + (safeMax.z - safeMin.z) * zFraction
   const safeYForProfile = clamp(preferredY, safeMin.y, safeMax.y)
   const profileLowY = clamp(waterBounds.max.y - profile.depthRange[1] * height, safeMin.y, safeMax.y)

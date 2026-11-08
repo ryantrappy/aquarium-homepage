@@ -196,4 +196,21 @@ describe('photoreal aragonite sand bed (AQ-70.12)', () => {
     bed.update(12.5, true, false)
     bed.dispose()
   })
+
+  it('shares the deterministic pixel bytes across calls so scene rebuilds stay cheap (AQ-73)', () => {
+    const first = createAragoniteSandPbrTextures(128)
+    const second = createAragoniteSandPbrTextures(128)
+    // Fresh wrappers per call, identical pixels: the ~180 ms 512²
+    // generation runs once per size, not once per createAquarium call.
+    expect(second.albedoTexture).not.toBe(first.albedoTexture)
+    expect(second.normalTexture).not.toBe(first.normalTexture)
+    expect(second.roughnessTexture).not.toBe(first.roughnessTexture)
+    expect(second.albedoTexture.image.data).toBe(first.albedoTexture.image.data)
+    expect(second.normalTexture.image.data).toBe(first.normalTexture.image.data)
+    expect(second.roughnessTexture.image.data).toBe(first.roughnessTexture.image.data)
+    // A different size still generates its own pixels.
+    const other = createAragoniteSandPbrTextures(64)
+    expect(other.albedoTexture.image.width).toBe(64)
+    expect(other.albedoTexture.image.data).not.toBe(first.albedoTexture.image.data)
+  })
 })

@@ -80,17 +80,27 @@ function tileableNoise(u: number, v: number, freq: number): number {
   return a + (b - a) * uy
 }
 
+type AragoniteSandPixels = Readonly<{
+  dim: number
+  albedo: Uint8Array
+  normal: Uint8Array
+  roughness: Uint8Array
+}>
+
+// The pixel data is deterministic (fixed seed + tileable noise), so it is
+// generated once per size and shared: a scene rebuild must not pay the
+// ~180 ms 512² generation again on every createAquarium call (AQ-73).
+// Each caller still gets fresh DataTexture wrappers, and dispose() only
+// releases GPU resources — the cached bytes stay valid.
+const aragoniteSandPixelCache = new Map<number, AragoniteSandPixels>()
+
 /**
- * Generates a tileable PBR map trio (albedo in sRGB, tangent-space normal in Linear,
- * roughness in Linear) calibrated to warm cream/ivory oolitic & special-grade aragonite reef sand
- * (1-2 mm calcium carbonate grains, shell flecks, and pink/lilac coralline specks).
+ * Generates the deterministic PBR pixel trio (albedo in sRGB, tangent-space
+ * normal in Linear, roughness in Linear) calibrated to warm cream/ivory
+ * oolitic & special-grade aragonite reef sand (1-2 mm calcium carbonate
+ * grains, shell flecks, and pink/lilac coralline specks).
  */
-export function createAragoniteSandPbrTextures(size = 512): {
-  albedoTexture: THREE.DataTexture
-  normalTexture: THREE.DataTexture
-  roughnessTexture: THREE.DataTexture
-} {
-  const dim = clamp(Math.trunc(size), 64, 1024)
+function generateAragoniteSandPixels(dim: number): AragoniteSandPixels {
   const pixelCount = dim * dim
   const albedoData = new Uint8Array(pixelCount * 4)
   const normalData = new Uint8Array(pixelCount * 4)
@@ -177,6 +187,26 @@ export function createAragoniteSandPbrTextures(size = 512): {
       normalData[p4 + 3] = 255
     }
   }
+
+  return { dim, albedo: albedoData, normal: normalData, roughness: roughnessData }
+}
+
+/**
+ * Returns a tileable PBR map trio wrapping the cached deterministic pixels
+ * for `size` (fresh DataTexture objects per call, shared pixel bytes).
+ */
+export function createAragoniteSandPbrTextures(size = 512): {
+  albedoTexture: THREE.DataTexture
+  normalTexture: THREE.DataTexture
+  roughnessTexture: THREE.DataTexture
+} {
+  const dim = clamp(Math.trunc(size), 64, 1024)
+  let pixels = aragoniteSandPixelCache.get(dim)
+  if (!pixels) {
+    pixels = generateAragoniteSandPixels(dim)
+    aragoniteSandPixelCache.set(dim, pixels)
+  }
+  const { albedo: albedoData, normal: normalData, roughness: roughnessData } = pixels
 
   const configureTexture = (tex: THREE.DataTexture, srgb: boolean) => {
     tex.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.LinearSRGBColorSpace

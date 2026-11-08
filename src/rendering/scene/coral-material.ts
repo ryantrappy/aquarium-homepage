@@ -3,6 +3,34 @@ import * as THREE from 'three'
 export const CORAL_RAW_MASK_SCHEMA = 'coral-raw-masks-v1' as const
 export const CORAL_FLEXIBILITY_EXPONENT = 1.8 as const
 
+/**
+ * Interim healthy-tissue grade (AQ-88): the shared saturation boost applied
+ * to the regraded coral tissue colour, pulling bleached lavender/white
+ * toward saturated tissue without touching any asset. The GLSL in
+ * `injectCoralRawMaskShader` interpolates this constant; the CPU reference
+ * `evaluateCoralTissueColor` mirrors it exactly.
+ */
+export const CORAL_TISSUE_SATURATION_BOOST = 1.18 as const
+/** How far a pale tip colour is pulled toward its base colour (AQ-88), so
+ * near-white tips stop washing the colony out. */
+export const CORAL_TIP_BASE_PULL = 0.25 as const
+/** Per-channel ceiling on graded tissue colour (AQ-88): no channel may blow
+ * out to near-white, however bright the raw texture underneath is. */
+export const CORAL_TISSUE_HIGHLIGHT_CEILING = 0.92 as const
+/** Default regrade strength (AQ-88): corals without an explicit palette
+ * override are graded toward the healthy default palette instead of
+ * showing the raw bleached texture (the old default was 0.0). */
+export const CORAL_DEFAULT_REGRADE = 0.92 as const
+/** Saturated healthy-tissue default palette (AQ-88): deep rose base and tip
+ * over a dark crevice, replacing the old pale lavender defaults
+ * (#c490ab / #f2dce8 / #4a3048). Per-mount overrides in reef-assembly.ts
+ * still win wherever they are supplied. */
+export const CORAL_DEFAULT_PALETTE = Object.freeze({
+  baseColor: '#a84a72',
+  tipColor: '#cf6f9e',
+  creviceColor: '#3d2233',
+})
+
 export type CoralPrimitiveRole = 'coral-rigid' | 'coral-soft'
 
 export type CoralPaletteOverride = {
@@ -86,6 +114,51 @@ export function evaluateCoralFlexibilityWeight(rawR: number, role: CoralPrimitiv
 export function evaluateCoralContactAoFactor(rawA: number): number {
   const ao = clamp01(rawA)
   return 0.28 + 0.72 * ao
+}
+
+export type CoralTissueGradeInput = Readonly<{
+  baseColor: Readonly<{ r: number; g: number; b: number }>
+  tipColor: Readonly<{ r: number; g: number; b: number }>
+  creviceColor: Readonly<{ r: number; g: number; b: number }>
+  /** `coralHeightMask * 0.55 + coralMaskAlpha * 0.45` in the shader. */
+  heightTerm: number
+  /** `coralTipMask * 0.65 + polypHighlight * 0.35` in the shader. */
+  tipTerm: number
+  /** Luminance of the raw texture texel. */
+  texLuma: number
+  /** Micro-polyp stipple highlight (0..1) from the shader noise field. */
+  polypHighlight: number
+}>
+
+/**
+ * Deterministic CPU reference for the coral tissue grade in
+ * `injectCoralRawMaskShader` (AQ-88). Mirrors the GLSL exactly: crevice →
+ * base → (tip pulled toward base) gradient, brightness factor, saturation
+ * boost, and highlight ceiling. Used for unit verification that pale
+ * lavender/white inputs grade toward saturated healthy tissue; the shader
+ * remains the runtime path. Fluorescence and subsurface terms are
+ * deliberately not part of this grade — they stay mask-driven, and no
+ * blanket emissive is added anywhere.
+ */
+export function evaluateCoralTissueColor(input: CoralTissueGradeInput): { r: number; g: number; b: number } {
+  const mix = (a: number, b: number, t: number) => a + (b - a) * clamp01(t)
+  const mix3 = (a: Readonly<{ r: number; g: number; b: number }>, b: Readonly<{ r: number; g: number; b: number }>, t: number) => ({
+    r: mix(a.r, b.r, t),
+    g: mix(a.g, b.g, t),
+    b: mix(a.b, b.b, t),
+  })
+  let grad = mix3(input.creviceColor, input.baseColor, smoothstep(0.02, 0.34, input.heightTerm))
+  const pulledTip = mix3(input.tipColor, input.baseColor, CORAL_TIP_BASE_PULL)
+  grad = mix3(grad, pulledTip, smoothstep(0.22, 0.92, input.tipTerm))
+  const brightness = 0.86 + 0.22 * input.texLuma + 0.16 * (input.polypHighlight - 0.4)
+  grad = { r: grad.r * brightness, g: grad.g * brightness, b: grad.b * brightness }
+  const luma = 0.299 * grad.r + 0.587 * grad.g + 0.114 * grad.b
+  grad = mix3({ r: luma, g: luma, b: luma }, grad, CORAL_TISSUE_SATURATION_BOOST)
+  return {
+    r: Math.min(grad.r, CORAL_TISSUE_HIGHLIGHT_CEILING),
+    g: Math.min(grad.g, CORAL_TISSUE_HIGHLIGHT_CEILING),
+    b: Math.min(grad.b, CORAL_TISSUE_HIGHLIGHT_CEILING),
+  }
 }
 
 /**
@@ -325,10 +398,17 @@ float polypDots = coralNoise3D(vCoralLocalPos * 195.0) * 0.6 + coralNoise3D(vCor
 float polypHighlight = smoothstep(0.46, 0.78, polypDots);
 
 // Soft, cohesive tissue gradient (avoids harsh dark-bottom/white-tip crayon contrast)
+// AQ-88: pull pale tips toward the base, boost tissue saturation, and cap
+// highlights so bleached lavender/white grades toward healthy saturated
+// tissue instead of washing out. Fluorescence stays mask-driven below.
 float texLuma = dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114));
 vec3 naturalGrad = mix(uPaletteCrevice, uPaletteBase, smoothstep(0.02, 0.34, coralHeightMask * 0.55 + coralMaskAlpha * 0.45));
-naturalGrad = mix(naturalGrad, uPaletteTip, smoothstep(0.22, 0.92, coralTipMask * 0.65 + polypHighlight * 0.35));
+vec3 coralTip = mix(uPaletteTip, uPaletteBase, ${CORAL_TIP_BASE_PULL.toFixed(2)});
+naturalGrad = mix(naturalGrad, coralTip, smoothstep(0.22, 0.92, coralTipMask * 0.65 + polypHighlight * 0.35));
 naturalGrad *= (0.86 + 0.22 * texLuma + 0.16 * (polypHighlight - 0.4));
+float coralLuma = dot(naturalGrad, vec3(0.299, 0.587, 0.114));
+naturalGrad = mix(vec3(coralLuma), naturalGrad, ${CORAL_TISSUE_SATURATION_BOOST.toFixed(2)});
+naturalGrad = min(naturalGrad, vec3(${CORAL_TISSUE_HIGHLIGHT_CEILING.toFixed(2)}));
 diffuseColor.rgb = mix(diffuseColor.rgb, naturalGrad, clamp(uPaletteRegrade, 0.0, 1.0));
 
 // Blend basal attachment seamlessly into deep actinic indigo rock shadow so no dark saucer rim is visible
@@ -580,16 +660,19 @@ export function applyCoralRawMaskMaterial(
     uPrimaryFrequencyHz: { value: options.primaryFrequencyHz ?? DEFAULT_PRIMARY_FREQ_HZ },
     uSecondaryFrequencyHz: { value: options.secondaryFrequencyHz ?? DEFAULT_SECONDARY_FREQ_HZ },
     uRoleIsSoft: { value: roleIsSoft },
-    uSubsurfaceStrength: { value: pal?.subsurfaceStrength ?? options.subsurfaceStrength ?? (options.role === 'coral-soft' ? 0.36 : 0.26) },
+    uSubsurfaceStrength: { value: pal?.subsurfaceStrength ?? options.subsurfaceStrength ?? (options.role === 'coral-soft' ? 0.38 : 0.28) },
     uFluorescenceStrength: { value: pal?.fluorescenceStrength ?? options.fluorescenceStrength ?? (options.role === 'coral-soft' ? 0.16 : 0.10) },
     uFluorescenceTint: {
       value: new THREE.Color(options.fluorescenceTint ?? (pal?.tipColor ?? (options.role === 'coral-soft' ? '#f0d5e4' : '#e2d4f0'))),
     },
-    uPaletteBase: { value: new THREE.Color(pal?.baseColor ?? '#c490ab') },
-    uPaletteTip: { value: new THREE.Color(pal?.tipColor ?? '#f2dce8') },
-    uPaletteCrevice: { value: new THREE.Color(pal?.creviceColor ?? '#4a3048') },
-    uPaletteRegrade: { value: pal?.regradeStrength ?? 0.0 },
-    uRoughnessOverride: { value: pal?.roughness ?? (options.role === 'coral-soft' ? 0.78 : 0.82) },
+    // AQ-88: saturated healthy-tissue defaults with the regrade on, so a
+    // coral without an explicit palette override no longer shows the raw
+    // bleached texture. Fluorescence strengths are unchanged (mask-driven).
+    uPaletteBase: { value: new THREE.Color(pal?.baseColor ?? CORAL_DEFAULT_PALETTE.baseColor) },
+    uPaletteTip: { value: new THREE.Color(pal?.tipColor ?? CORAL_DEFAULT_PALETTE.tipColor) },
+    uPaletteCrevice: { value: new THREE.Color(pal?.creviceColor ?? CORAL_DEFAULT_PALETTE.creviceColor) },
+    uPaletteRegrade: { value: pal?.regradeStrength ?? CORAL_DEFAULT_REGRADE },
+    uRoughnessOverride: { value: pal?.roughness ?? (options.role === 'coral-soft' ? 0.74 : 0.78) },
   }
 
   const cacheKey = `coral-raw-masks-v1:${options.role}`
