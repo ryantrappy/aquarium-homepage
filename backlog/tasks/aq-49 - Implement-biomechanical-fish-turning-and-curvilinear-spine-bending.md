@@ -6,7 +6,7 @@ assignee:
   - '@render-integration'
   - '@gemini'
 created_date: '2026-11-04T19:20:00Z'
-updated_date: '2026-11-08T04:47:00Z'
+updated_date: '2026-11-08T12:46:06Z'
 labels: []
 dependencies:
   - AQ-35
@@ -42,6 +42,7 @@ Implement the biomechanical turning and curvilinear spine-bending plan documente
 - [x] #3 `src/rendering/scene/aquarium.ts` applies a post-mixer procedural turn overlay on rigged 3D fish bones: archetype-appropriate curvilinear spine bending (`spine_mid`/`tail_base`/`tail_tip` ramp for `subcarangiform_schooler`; peduncle/tail-only bend for `labriform_rigid_disc` so tang sails never shear) with a delayed traveling tail wave, plus asymmetric inside-pectoral braking flare and outside-pectoral rowing boost.
 - [x] #4 Fallback 2D sprite planes replace the single-frame `scale.x` binary flip with a smoothed foreshortening turn transition, and all turn states freeze deterministically when `paused`, hidden, or under `prefers-reduced-motion`.
 - [ ] #5 Unit tests verify zero backward/sideways crab-sliding on 180° reversals, two-stage turn curvature progression, obstacle clearance, and 1440x900 / 402x874 browser responsiveness.
+- [ ] #6 Fish pitch is clamped to ±0.28 rad (±16.0°) in AABB/legacy mode at all times, including during turns, vertical movement, and idle sway; in metric (mesh) mode pitch is instead bounded to ±π/2 and rate-limited to 1.2 rad/s. No fish exceeds the bound for its mode in a recorded run.
 <!-- AC:END -->
 
 ## Definition of Done

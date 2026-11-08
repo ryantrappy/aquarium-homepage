@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-03T04:15:00Z'
-updated_date: '2026-11-08T04:47:00Z'
+updated_date: '2026-11-08T12:46:06Z'
 labels: []
 dependencies:
   - AQ-12
@@ -34,6 +34,7 @@ Extend the photorealistic fish animation system from AQ-12 with a realistic star
 - [ ] #3 The response retains photorealistic body, fin, and tail motion; it does not substitute a separate rigid sprite translation or generic bounce.
 - [ ] #4 The fish label follows the fish and remains readable without flipping or becoming detached.
 - [ ] #5 With reduced motion enabled, the link still opens and the fish gives a clear non-spatial acknowledgment instead of darting; other fish keep their normal behavior.
+- [ ] #6 Fish/service captions are always visible, rendered smaller/subtle by default, and brighter on hover/focus, verified in the running aquarium for mouse hover and keyboard focus; the 44px minimum link target is preserved. Caption choice is the recorded user choice implemented as AQ-70.14 helpers (see AGENT_TASKS.md), pending Root native review; no AQ-70.14 task file exists on gemini_control, and this AC is not final until Root review is recorded.
 <!-- AC:END -->
 
 ## Comments
