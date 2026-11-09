@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-03T12:38:00Z'
-updated_date: '2026-11-09T11:35:00Z'
+updated_date: '2026-11-09T17:55:00Z'
 labels: []
 dependencies:
   - AQ-34
@@ -14,6 +14,7 @@ dependencies:
 references:
   - docs/fish-behavior-design.md
   - docs/reef-fish-roster.md
+  - docs/aq45-interaction-architecture.md
   - https://pmc.ncbi.nlm.nih.gov/articles/PMC6850181/
   - >-
     https://www.aquariumofpacific.org/onlinelearningcenter/species/clown_anemonefish
@@ -31,6 +32,7 @@ references:
 documentation:
   - docs/fish-behavior-design.md
   - docs/reef-fish-roster.md
+  - docs/aq45-interaction-architecture.md
 priority: '11'
 type: enhancement
 ordinal: 11
@@ -75,6 +77,10 @@ Mechanisms (no new systems; build on what exists): AQ-35 profiles (per-species d
 - **Phase 4 — display / territory.** Royal gramma belly-to-rock orientation under its ledge (pose offset on the hold state, not a new rig); flasher-wrasse display runs in open water above the right island (AQ-44 display state + fin-flare overlay when the asset supports it); clownfish anemone defence (chase-off dart at an approaching fish, then return) — needs AQ-44 AC #4 group/single-activation distinction.
 
 **Out of scope / explicitly not modeled:** the pistol shrimp itself (the goby's lookout reads alone; a shrimp asset + burrow-digging animation is a separate modeling task if ever wanted); spawning, mating and anthias sex change; cleaner-client interactions (the gramma's facultative cleaning is noted for a future task, not this one); inter-species aggression beyond the AQ-13 startle; anemone stinging of non-host fish (no predation model). **Needs art first:** dense branching Acropora thickets the chromis/anthias can visibly dive into (AQ-70.11/AQ-59 modeling lane); burrow-mouth visuals at the sand/rock base.
+
+### Implementation plan — interaction architecture (2026-11-09)
+
+The implementation plan for this task is `docs/aq45-interaction-architecture.md`: a single typed event bus, one FSM, one fixed tick order, and everything else as data. It names the code hierarchy (profiles → FSM → bus → navigation → steering → pose → presentation), the full trigger catalog, the animation pathway (decision → state → steering → gait/flex → pose), the Opportunity Scheduler that replaces the inline yellow-tang check in `motion.ts`, and the pose stage that finally wires `evaluateAnchorInteractionOffset()` into the live scene (AQ-82 AC #4). Phasing: Phase 0 foundations (bus, scheduler, pose stage) → Phase 1 hosting/perching/burrows → Phase 2 schooling positions → Phase 3 grazing/probing patrols → Phase 4 display/territory. No code is changed by the design doc; Root review of the doc is required before Phase 0 implementation.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
