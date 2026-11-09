@@ -232,43 +232,43 @@
       "kind": "coral",
       "archetype": "host-anemone",
       "species": "Entacmaea quadricolor (Rose / Sunburst Bubble-Tip Host Anemone)",
-      "sha256": "f587bdc3e94a75cefff1424abb250325d87f057cc9676daabfaef565bd6e81ef",
-      "bytes": 1160328,
-      "triangles": 17800,
+      "sha256": "b95f24977cce9c2e2acf723b4720c7c0913dee04e04a8a2cfa6761f5ebc39917",
+      "bytes": 2535424,
+      "triangles": 38976,
       "dimensionsM": [
-        0.306876,
-        0.143025,
-        0.326378
+        0.286919,
+        0.166179,
+        0.274334
       ],
       "boundsM": {
         "min": [
-          -0.155955,
-          -0.018,
-          -0.173631
+          -0.123741,
+          -0.024954,
+          -0.134026
         ],
         "max": [
-          0.150921,
-          0.125025,
-          0.152747
+          0.163178,
+          0.141225,
+          0.140308
         ]
       },
       "primitives": [
         {
           "id": "anemone_column_disc",
           "role": "coral-soft",
-          "vertexCount": 376,
+          "vertexCount": 852,
           "maskSchema": "coral-raw-masks-v1"
         },
         {
           "id": "anemone_tentacle_crown",
           "role": "coral-soft",
-          "vertexCount": 10452,
+          "vertexCount": 23040,
           "maskSchema": "coral-raw-masks-v1"
         }
       ],
       "socketCount": 0,
       "generator": "src/rendering/modeling/build_bubble_tip_anemone.py",
-      "generatorSha256": "32e2fc2e3d54421b16ab0b2bafba7e34f35a871401689770d6c8d132c59bf740",
+      "generatorSha256": "f5cfcfe69646749b0aeb15692aca464caae236d18f345e161fc318da48b94222",
       "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_bubble_tip_anemone.py -- /tmp/coral-models/coral-anemone-bta",
       "contractValidated": true,
       "status": "candidate-awaiting-root-review"

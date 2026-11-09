@@ -12,23 +12,23 @@
       "kind": "fish",
       "rigArchetype": "labriform_cruiser",
       "species": "Paracanthurus hepatus (Regal Blue Tang / Palette Surgeonfish)",
-      "sha256": "15fa72af7e711e40f16127311f8d0d32a04d95d07f6af3511b1e5584d92f353b",
-      "bytes": 2530376,
-      "triangles": 24299,
+      "sha256": "de1aaf4fcbc72b82749190e4047d26a226cd2d987bee8ef06f50849aac36fc9e",
+      "bytes": 1594900,
+      "triangles": 12880,
       "dimensionsM": [
-        0.296712,
-        0.920124,
+        0.348844,
+        1.18265,
         2
       ],
       "boundsM": {
         "min": [
-          -0.148356,
-          -0.459963,
+          -0.174422,
+          -0.591325,
           -1
         ],
         "max": [
-          0.148356,
-          0.460161,
+          0.174422,
+          0.591325,
           1
         ]
       },
@@ -49,11 +49,11 @@
         {
           "id": "blue_tang_body",
           "role": "fish",
-          "vertexCount": 12450
+          "vertexCount": 6868
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",
-      "generatorSha256": "6e8f2e4dfe512a408565878dc70788a99d3d50c7457e916a87cc781f1fc0cf27",
+      "generatorSha256": "7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd",
       "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
       "contractValidated": true,
       "status": "candidate-awaiting-root-review"
@@ -67,8 +67,8 @@
       "kind": "fish",
       "rigArchetype": "subcarangiform_schooler",
       "species": "Gramma loreto (Royal Gramma / Fairy Basslet)",
-      "sha256": "c9a8492fc8ee06c7877d96e21ec11d7301b4de15e5f5bb9f514b7c946fb1300c",
-      "bytes": 823952,
+      "sha256": "ffb095bfc7f3e836971b0ef70c203e7c2e1301af2133efbbd4609db7f2af4d06",
+      "bytes": 850968,
       "triangles": 10544,
       "dimensionsM": [
         0.293486,
@@ -108,7 +108,7 @@
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",
-      "generatorSha256": "6e8f2e4dfe512a408565878dc70788a99d3d50c7457e916a87cc781f1fc0cf27",
+      "generatorSha256": "7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd",
       "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
       "contractValidated": true,
       "status": "candidate-awaiting-root-review"
@@ -122,8 +122,8 @@
       "kind": "fish",
       "rigArchetype": "banner_hoverer",
       "species": "Pterapogon kauderni (Banggai Cardinalfish)",
-      "sha256": "3036ecd9ea7f61a3346bb0f1ea11d35ff4a03d84abdb2b0aab90f0f73f54c140",
-      "bytes": 649700,
+      "sha256": "2227babc3370b84e18b66f2c81ec15c4ec2f09b68156471c13a90805620807d7",
+      "bytes": 676712,
       "triangles": 7164,
       "dimensionsM": [
         0.275092,
@@ -163,7 +163,7 @@
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",
-      "generatorSha256": "6e8f2e4dfe512a408565878dc70788a99d3d50c7457e916a87cc781f1fc0cf27",
+      "generatorSha256": "7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd",
       "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
       "contractValidated": true,
       "status": "candidate-awaiting-root-review"
@@ -177,8 +177,8 @@
       "kind": "fish",
       "rigArchetype": "benthic_percher_dragonet",
       "species": "Synchiropus splendidus (Mandarin Dragonet)",
-      "sha256": "4ea759335805ba78795ff1812dcc938d92a0220b1c1d5b69b02114bb90a47735",
-      "bytes": 937300,
+      "sha256": "bd19565d563ca10131b65c4ed9bd684dda658d4cb123a7d965383328d9f1e9cb",
+      "bytes": 964312,
       "triangles": 9360,
       "dimensionsM": [
         0.33427,
@@ -218,7 +218,7 @@
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",
-      "generatorSha256": "6e8f2e4dfe512a408565878dc70788a99d3d50c7457e916a87cc781f1fc0cf27",
+      "generatorSha256": "7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd",
       "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
       "contractValidated": true,
       "status": "candidate-awaiting-root-review"
@@ -232,8 +232,8 @@
       "kind": "fish",
       "rigArchetype": "subcarangiform_schooler",
       "species": "Chromis viridis (Blue-Green Chromis)",
-      "sha256": "2e883ffb014a4165f63a80b2ab02f8b5b029ed7c0ea38ec959b7dea94dd6f84f",
-      "bytes": 742728,
+      "sha256": "c53ea07f3e6f96d254546cbb54f418106b268dcc00ea96c2aed14796e1b855de",
+      "bytes": 769740,
       "triangles": 9436,
       "dimensionsM": [
         0.282292,
@@ -273,7 +273,7 @@
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",
-      "generatorSha256": "6e8f2e4dfe512a408565878dc70788a99d3d50c7457e916a87cc781f1fc0cf27",
+      "generatorSha256": "7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd",
       "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
       "contractValidated": true,
       "status": "candidate-awaiting-root-review"
@@ -287,8 +287,8 @@
       "kind": "fish",
       "rigArchetype": "subcarangiform_schooler",
       "species": "Nemateleotris magnifica (Firefish / Magnificent Dartfish)",
-      "sha256": "939b4a6f40e9d797d98e3fce7c183ee229b69a2bbac9dbd6567cac142382a9dc",
-      "bytes": 691264,
+      "sha256": "3ffd93d5db1b308987c371636ff2f43d39a5359be16a998ba6aa9a7ad153732a",
+      "bytes": 718276,
       "triangles": 8480,
       "dimensionsM": [
         0.252702,
@@ -328,7 +328,7 @@
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",
-      "generatorSha256": "6e8f2e4dfe512a408565878dc70788a99d3d50c7457e916a87cc781f1fc0cf27",
+      "generatorSha256": "7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd",
       "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
       "contractValidated": true,
       "status": "candidate-awaiting-root-review"
@@ -342,8 +342,8 @@
       "kind": "fish",
       "rigArchetype": "subcarangiform_schooler",
       "species": "Cryptocentrus cinctus (Yellow Watchman Goby)",
-      "sha256": "f3794e38d3bea8621f6e36207be61712646675bceae39ad9de71b8593cefd5b6",
-      "bytes": 811752,
+      "sha256": "edba60aef7ffc577f6e3196ff7553af510ce422098166b05c2f19cba466b7533",
+      "bytes": 838764,
       "triangles": 10472,
       "dimensionsM": [
         0.293486,
@@ -383,7 +383,7 @@
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",
-      "generatorSha256": "6e8f2e4dfe512a408565878dc70788a99d3d50c7457e916a87cc781f1fc0cf27",
+      "generatorSha256": "7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd",
       "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
       "contractValidated": true,
       "status": "candidate-awaiting-root-review"
@@ -397,8 +397,8 @@
       "kind": "fish",
       "rigArchetype": "subcarangiform_schooler",
       "species": "Ecsenius stigmatura (Tailspot Blenny)",
-      "sha256": "0719363574436b2f4a5ff34c0a667bd675905bf683da70b072cbc25df5754a82",
-      "bytes": 864572,
+      "sha256": "c26259de8d03ac186d3a2c00723a5d7b449b9df8f5cf16971a9882e80280151a",
+      "bytes": 891584,
       "triangles": 11200,
       "dimensionsM": [
         0.271096,
@@ -438,7 +438,7 @@
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",
-      "generatorSha256": "6e8f2e4dfe512a408565878dc70788a99d3d50c7457e916a87cc781f1fc0cf27",
+      "generatorSha256": "7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd",
       "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
       "contractValidated": true,
       "status": "candidate-awaiting-root-review"
@@ -452,8 +452,8 @@
       "kind": "fish",
       "rigArchetype": "subcarangiform_schooler",
       "species": "Pseudocheilinus hexataenia (Six-Line Wrasse)",
-      "sha256": "5fe8e424da28f2382b48fa591d3f69e62586855e5e5d14b2e4fd7d8dc093fb36",
-      "bytes": 845884,
+      "sha256": "a23addc928cf6c2a8828108a885f04c4d4ba5aaf97e322669225c0f04dff49f9",
+      "bytes": 872900,
       "triangles": 12184,
       "dimensionsM": [
         0.278296,
@@ -493,7 +493,7 @@
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",
-      "generatorSha256": "6e8f2e4dfe512a408565878dc70788a99d3d50c7457e916a87cc781f1fc0cf27",
+      "generatorSha256": "7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd",
       "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
       "contractValidated": true,
       "status": "candidate-awaiting-root-review"
@@ -507,8 +507,8 @@
       "kind": "fish",
       "rigArchetype": "subcarangiform_schooler",
       "species": "Paracheilinus mccoskeri (McCosker's Flasher Wrasse)",
-      "sha256": "ce88ca1948a3772b6e604e744c4d64f9a01cc20f91c768a7093966cbca860726",
-      "bytes": 795084,
+      "sha256": "f0d5afcdf0d007a2978b7a964e457f7b4b1b464e6440801181732cee26ab803b",
+      "bytes": 822096,
       "triangles": 9772,
       "dimensionsM": [
         0.275416,
@@ -548,7 +548,7 @@
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",
-      "generatorSha256": "6e8f2e4dfe512a408565878dc70788a99d3d50c7457e916a87cc781f1fc0cf27",
+      "generatorSha256": "7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd",
       "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
       "contractValidated": true,
       "status": "candidate-awaiting-root-review"
@@ -562,8 +562,8 @@
       "kind": "fish",
       "rigArchetype": "subcarangiform_schooler",
       "species": "Pseudanthias squamipinnis (Lyretail Anthias)",
-      "sha256": "c3675e55bfd682e6fa458c41827cbce660198425c0e82b7540f3807f0f007f16",
-      "bytes": 681696,
+      "sha256": "04b7b8cc411c9a29dd7b94c44358a39374032d2896c1e66c7819df65ba0b5007",
+      "bytes": 708712,
       "triangles": 9800,
       "dimensionsM": [
         0.282292,
@@ -603,7 +603,7 @@
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",
-      "generatorSha256": "6e8f2e4dfe512a408565878dc70788a99d3d50c7457e916a87cc781f1fc0cf27",
+      "generatorSha256": "7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd",
       "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
       "contractValidated": true,
       "status": "candidate-awaiting-root-review"
@@ -617,8 +617,8 @@
       "kind": "fish",
       "rigArchetype": "subcarangiform_schooler",
       "species": "Centropyge loricula (Flame Angelfish)",
-      "sha256": "43d609cbbbfe2aa3e9fb809532de1a176e121cd11a7b7f662259b1ff3cb5007c",
-      "bytes": 888332,
+      "sha256": "6739db04161fb7fed09e2337a80f23d4c26af352fc9a5180ca94a749e2cd6da9",
+      "bytes": 915348,
       "triangles": 11740,
       "dimensionsM": [
         0.279412,
@@ -658,7 +658,7 @@
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",
-      "generatorSha256": "6e8f2e4dfe512a408565878dc70788a99d3d50c7457e916a87cc781f1fc0cf27",
+      "generatorSha256": "7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd",
       "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
       "contractValidated": true,
       "status": "candidate-awaiting-root-review"
@@ -672,8 +672,8 @@
       "kind": "fish",
       "rigArchetype": "subcarangiform_schooler",
       "species": "Chelmon rostratus (Copperband Butterflyfish)",
-      "sha256": "e3b3bf99fb6f6b1ccee2d533f17574d1bb7a1f6d9736d931c5cf524b4df59983",
-      "bytes": 855116,
+      "sha256": "66c341c2663574522f523f3a11284a760c06fdee47a183d2af808ae489d50aa0",
+      "bytes": 882128,
       "triangles": 10384,
       "dimensionsM": [
         0.252702,
@@ -713,7 +713,7 @@
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",
-      "generatorSha256": "6e8f2e4dfe512a408565878dc70788a99d3d50c7457e916a87cc781f1fc0cf27",
+      "generatorSha256": "7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd",
       "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
       "contractValidated": true,
       "status": "candidate-awaiting-root-review"

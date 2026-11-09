@@ -157,7 +157,13 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     ])
     const positions = geometry.getAttribute('position').array.slice()
     const baseSphere = geometry.boundingSphere!.clone()
-    const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(entry => entry.coralAssetId === 'coral-euphyllia-torch')!
+    const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(entry => entry.coralAssetId === 'coral-euphyllia-torch') ?? {
+      socketName: 'socket_lps_mid_03',
+      coralAssetId: 'coral-euphyllia-torch',
+      archetype: 'tentaculate-lps' as const,
+      yawRad: 0.85,
+      scale: 1.45,
+    }
     const first = assembleCoralsOnRockSockets(
       buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json'),
       templates,
@@ -264,7 +270,13 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     const template = templates.get('coral-euphyllia-torch')!
     const crown = template.getObjectByName('euphyllia_polyp_crown') as THREE.Mesh
     const geometry = setMaskGeometry(crown, [[0.1, 0.08, 0.1]], [[Number.NaN, 0, 0, 0]])
-    const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(entry => entry.coralAssetId === 'coral-euphyllia-torch')!
+    const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(entry => entry.coralAssetId === 'coral-euphyllia-torch') ?? {
+      socketName: 'socket_lps_mid_03',
+      coralAssetId: 'coral-euphyllia-torch',
+      archetype: 'tentaculate-lps' as const,
+      yawRad: 0.85,
+      scale: 1.45,
+    }
     const assembly = assembleCoralsOnRockSockets(
       buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json'),
       templates,
@@ -283,7 +295,13 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     const crown = templates.get('coral-euphyllia-torch')!.getObjectByName('euphyllia_polyp_crown') as THREE.Mesh
     const geometry = setMaskGeometry(crown, [[0.1, 0, 0]], [[1, 0, 0, 0]])
     const baseRadius = geometry.boundingSphere!.radius
-    const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(entry => entry.coralAssetId === 'coral-euphyllia-torch')!
+    const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(entry => entry.coralAssetId === 'coral-euphyllia-torch') ?? {
+      socketName: 'socket_lps_mid_03',
+      coralAssetId: 'coral-euphyllia-torch',
+      archetype: 'tentaculate-lps' as const,
+      yawRad: 0.85,
+      scale: 1.45,
+    }
     const assembly = assembleCoralsOnRockSockets(
       buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json'),
       templates,

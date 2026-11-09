@@ -21,6 +21,7 @@ export type ModularCoralMountEntry = {
   tiltZRad?: number
   offsetM?: readonly [number, number, number]
   paletteOverride?: CoralPaletteOverride
+  columnPaletteOverride?: CoralPaletteOverride
 }
 
 export type AssembledCoralBinding = {
@@ -192,8 +193,7 @@ function ensureCoralShaderBounds(
   geometry.boundingSphere!.radius += state.maxMargin
 }
 
-// Cohesive, velvety actinic-daylight reef palettes matching 12.23.52 PM & 12.23.09 PM:
-// High regradeStrength (0.90..0.95) and matte-velvety roughness (0.76..0.86) eliminate glossy plastic stripes.
+// Cohesive, velvety actinic-daylight reef palettes for branching SPS, plating Montipora, and GSP carpets:
 const PALETTE_MAUVE_GORGONIAN_PLUME: CoralPaletteOverride = {
   baseColor: '#c48ca8',
   tipColor: '#f2d8e6',
@@ -237,33 +237,6 @@ const PALETTE_ROYAL_PLUM_MONTIPORA: CoralPaletteOverride = {
   regradeStrength: 0.92,
   roughness: 0.82,
 }
-const PALETTE_SEAFOAM_CYAN_CORAL: CoralPaletteOverride = {
-  baseColor: '#3d98a8',
-  tipColor: '#a2eef5',
-  creviceColor: '#1b4552',
-  regradeStrength: 0.92,
-  roughness: 0.78,
-  subsurfaceStrength: 0.38,
-  fluorescenceStrength: 0.18,
-}
-const PALETTE_ROSE_MAUVE_ANEMONE: CoralPaletteOverride = {
-  baseColor: '#b86888',
-  tipColor: '#f0bcd2',
-  creviceColor: '#4f2438',
-  regradeStrength: 0.92,
-  roughness: 0.74,
-  subsurfaceStrength: 0.44,
-  fluorescenceStrength: 0.18,
-}
-const PALETTE_TERRACOTTA_SUNBURST_BTA: CoralPaletteOverride = {
-  baseColor: '#d46858',
-  tipColor: '#f7b8a2',
-  creviceColor: '#592620',
-  regradeStrength: 0.90,
-  roughness: 0.72,
-  subsurfaceStrength: 0.44,
-  fluorescenceStrength: 0.20,
-}
 const PALETTE_GSP_GREEN_CARPET: CoralPaletteOverride = {
   baseColor: '#48b838',
   tipColor: '#92f56c',
@@ -281,10 +254,102 @@ const PALETTE_DEEP_VIOLET_POLYP_MAT: CoralPaletteOverride = {
   roughness: 0.84,
 }
 
+// Realistic, lifelike Sea Anemone color morphs (creamy-ivory fluted tentacle roots,
+// translucent hydrostat shafts, glowing rounded acrosphere tips, and terracotta/crimson verrucose pedal columns):
+const PALETTE_ANEMONE_COLUMN_TERRACOTTA: CoralPaletteOverride = {
+  baseColor: '#d8481c',
+  tipColor: '#f7ead8',
+  creviceColor: '#5c1210',
+  regradeStrength: 0.22,
+  roughness: 0.52,
+  subsurfaceStrength: 0.44,
+  fluorescenceStrength: 0.14,
+}
+const PALETTE_ANEMONE_COLUMN_CRIMSON: CoralPaletteOverride = {
+  baseColor: '#a81c2e',
+  tipColor: '#f2e0c8',
+  creviceColor: '#480a14',
+  regradeStrength: 0.28,
+  roughness: 0.52,
+  subsurfaceStrength: 0.44,
+  fluorescenceStrength: 0.14,
+}
+const PALETTE_ANEMONE_COLUMN_SIENNA: CoralPaletteOverride = {
+  baseColor: '#cc461e',
+  tipColor: '#f5e8d2',
+  creviceColor: '#52160c',
+  regradeStrength: 0.25,
+  roughness: 0.52,
+  subsurfaceStrength: 0.44,
+  fluorescenceStrength: 0.14,
+}
+
+// 1. Rose-Magenta / Lavender Magnificent Anemone (matches user reference photos 1 & 2)
+const PALETTE_ROSE_MAUVE_ANEMONE: CoralPaletteOverride = {
+  baseColor: '#e85298',
+  tipColor: '#ff3888',
+  creviceColor: '#f5e8d0',
+  regradeStrength: 0.22,
+  roughness: 0.30,
+  subsurfaceStrength: 0.56,
+  fluorescenceStrength: 0.24,
+}
+// 2. Sunburst / Rainbow Host Anemone (emerald-jade base -> fiery tangerine shaft -> neon rose-coral tip)
+const PALETTE_TERRACOTTA_SUNBURST_BTA: CoralPaletteOverride = {
+  baseColor: '#f25c28',
+  tipColor: '#ff2e58',
+  creviceColor: '#a8e898',
+  regradeStrength: 0.78,
+  roughness: 0.30,
+  subsurfaceStrength: 0.56,
+  fluorescenceStrength: 0.26,
+}
+// 3. Electric Mint-Green / Chartreuse-Tip Ritteri Anemone (creamy-jade base -> seafoam-emerald shaft -> chartreuse tip)
+const PALETTE_MINT_GREEN_ANEMONE: CoralPaletteOverride = {
+  baseColor: '#38c86e',
+  tipColor: '#c8ff4d',
+  creviceColor: '#e6f2d4',
+  regradeStrength: 0.78,
+  roughness: 0.30,
+  subsurfaceStrength: 0.56,
+  fluorescenceStrength: 0.24,
+}
+// 4. Royal Purple / Lavender-Tip Sebae Anemone (champagne-ivory base -> amethyst-lavender shaft -> glowing violet tip)
+const PALETTE_PURPLE_LAVENDER_ANEMONE: CoralPaletteOverride = {
+  baseColor: '#9462dc',
+  tipColor: '#df52ff',
+  creviceColor: '#f4e8d6',
+  regradeStrength: 0.76,
+  roughness: 0.30,
+  subsurfaceStrength: 0.56,
+  fluorescenceStrength: 0.24,
+}
+// 5. Golden-Peach / Rose-Gold Long-Tentacle Anemone (vanilla-ivory base -> warm apricot-peach shaft -> rose-gold tip)
+const PALETTE_GOLDEN_PEACH_ANEMONE: CoralPaletteOverride = {
+  baseColor: '#f07c4e',
+  tipColor: '#ff98c4',
+  creviceColor: '#f8eed8',
+  regradeStrength: 0.74,
+  roughness: 0.30,
+  subsurfaceStrength: 0.56,
+  fluorescenceStrength: 0.22,
+}
+// 6. Aquamarine / Violet-Tip Reef Anemone (creamy-aqua base -> translucent turquoise shaft -> glowing violet-pink tip)
+const PALETTE_SEAFOAM_CYAN_CORAL: CoralPaletteOverride = {
+  baseColor: '#32b8c4',
+  tipColor: '#f068d8',
+  creviceColor: '#e4f5ee',
+  regradeStrength: 0.76,
+  roughness: 0.30,
+  subsurfaceStrength: 0.56,
+  fluorescenceStrength: 0.24,
+}
+
 /**
- * Large, lush, mature reef coral mounts (`scale: 1.35..1.85`) with cohesive velvety
- * mauve-pink, cream-blush, dusty-lavender, powder-blue, and lower green star-polyp (GSP)
- * coloration matching the user's reference reef tanks (12.23.52 PM & 12.23.09 PM).
+ * Large, lush, mature reef coral mounts (`scale: 1.35..1.85`) featuring the new Blender
+ * Host Sea Anemone (`coral-anemone-bta`) across the tentaculate & anemone sockets in realistic,
+ * lifelike biological color morphs (Rose-Magenta, Mint-Chartreuse, Golden-Peach, Sunburst-Rainbow,
+ * Royal-Lavender, and Aquamarine-Violet).
  */
 export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
   // Giant sweeping upper-crest branching & gorgonian plumes (Mauve-Pink, Dusty Lavender, Cream-Blush)
@@ -344,52 +409,56 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
     offsetM: [0.03, 0.01, 0.02],
     paletteOverride: PALETTE_CREAM_BLUSH_LEATHER,
   },
-  // Large billowing mid-slope Cream-Blush Leather, Mauve-Rose, and Seafoam colonies
+  // Mid-slope Sea Anemones in realistic Mint-Chartreuse, Golden-Peach, and Rose-Magenta morphs
   {
     socketName: 'socket_lps_mid_01',
-    coralAssetId: 'coral-euphyllia-hammer',
+    coralAssetId: 'coral-anemone-bta',
     archetype: 'tentaculate-lps',
     yawRad: 0.15,
-    scale: 1.55,
+    scale: 1.42,
     tiltXRad: 0.24,
     tiltZRad: 0.18,
     offsetM: [-0.03, 0.01, 0.03],
-    paletteOverride: PALETTE_CREAM_BLUSH_LEATHER,
+    paletteOverride: PALETTE_MINT_GREEN_ANEMONE,
+    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_SIENNA,
   },
   {
     socketName: 'socket_lps_mid_02',
-    coralAssetId: 'coral-euphyllia-hammer',
+    coralAssetId: 'coral-anemone-bta',
     archetype: 'tentaculate-lps',
     yawRad: -0.4,
-    scale: 1.52,
+    scale: 1.40,
     tiltXRad: 0.22,
     tiltZRad: -0.16,
     offsetM: [0.03, 0.01, 0.03],
-    paletteOverride: PALETTE_POWDER_BLUE_TOADSTOOL,
+    paletteOverride: PALETTE_GOLDEN_PEACH_ANEMONE,
+    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_CRIMSON,
   },
   {
     socketName: 'socket_lps_mid_03',
-    coralAssetId: 'coral-euphyllia-torch',
+    coralAssetId: 'coral-anemone-bta',
     archetype: 'tentaculate-lps',
     yawRad: 0.85,
     scale: 1.45,
-    tiltXRad: 0.20,
+    tiltXRad: 0.22,
     tiltZRad: 0.08,
     offsetM: [0.0, 0.02, 0.03],
-    paletteOverride: PALETTE_CREAM_BLUSH_LEATHER,
+    paletteOverride: PALETTE_PURPLE_LAVENDER_ANEMONE,
+    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_TERRACOTTA,
   },
   {
     socketName: 'socket_anemone_crevice_01',
     coralAssetId: 'coral-anemone-bta',
     archetype: 'host-anemone',
     yawRad: 0.1,
-    scale: 1.38,
+    scale: 1.45,
     tiltXRad: 0.24,
     tiltZRad: -0.10,
     offsetM: [-0.06, -0.02, 0.04],
     paletteOverride: PALETTE_ROSE_MAUVE_ANEMONE,
+    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_TERRACOTTA,
   },
-  // Lush fuzzy Green Star-Polyp (GSP) carpets along the lower rock apron (matching bottom of 12.23.52 PM!)
+  // Lush fuzzy Green Star-Polyp (GSP) carpets along the lower rock apron
   {
     socketName: 'socket_brain_apron_01',
     coralAssetId: 'coral-brain-diploria',
@@ -483,41 +552,44 @@ export const DEFAULT_RIGHT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
     offsetM: [0.04, 0.01, 0.02],
     paletteOverride: PALETTE_ROYAL_PLUM_MONTIPORA,
   },
-  // Large billowing Powder-Blue Toadstool, Cream-Blush Leather, and Terracotta-Rose BTA on mid-right
+  // Mid-right Sea Anemones in Aquamarine-Violet, Sunburst-Rainbow, and Royal-Lavender morphs
   {
     socketName: 'socket_lps_mid_04',
-    coralAssetId: 'coral-euphyllia-hammer',
+    coralAssetId: 'coral-anemone-bta',
     archetype: 'tentaculate-lps',
     yawRad: 0.22,
-    scale: 1.58,
+    scale: 1.44,
     tiltXRad: 0.24,
     tiltZRad: 0.20,
     offsetM: [-0.04, 0.01, 0.04],
     paletteOverride: PALETTE_SEAFOAM_CYAN_CORAL,
+    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_CRIMSON,
   },
   {
     socketName: 'socket_lps_mid_05',
-    coralAssetId: 'coral-euphyllia-torch',
+    coralAssetId: 'coral-anemone-bta',
     archetype: 'tentaculate-lps',
     yawRad: -0.5,
-    scale: 1.48,
+    scale: 1.46,
     tiltXRad: 0.24,
     tiltZRad: -0.18,
     offsetM: [0.04, 0.01, 0.03],
     paletteOverride: PALETTE_TERRACOTTA_SUNBURST_BTA,
+    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_TERRACOTTA,
   },
   {
     socketName: 'socket_lps_mid_06',
-    coralAssetId: 'coral-euphyllia-hammer',
+    coralAssetId: 'coral-anemone-bta',
     archetype: 'tentaculate-lps',
     yawRad: 0.75,
-    scale: 1.56,
+    scale: 1.42,
     tiltXRad: 0.22,
     tiltZRad: 0.10,
     offsetM: [0.0, 0.02, 0.04],
-    paletteOverride: PALETTE_POWDER_BLUE_TOADSTOOL,
+    paletteOverride: PALETTE_PURPLE_LAVENDER_ANEMONE,
+    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_SIENNA,
   },
-  // Lower right apron: lush Green Star-Polyp (GSP) carpet & deep violet-blue polyp mounds (matching 12.23.52 PM)
+  // Lower right apron: lush Green Star-Polyp (GSP) carpet & deep violet-blue polyp mounds
   {
     socketName: 'socket_brain_apron_03',
     coralAssetId: 'coral-brain-diploria',
@@ -562,6 +634,7 @@ const EXTRA_COMPANION_CLUSTERS_LEFT: ReadonlyArray<{
   tiltZRad: number
   scale: number
   paletteOverride: CoralPaletteOverride
+  columnPaletteOverride?: CoralPaletteOverride
 }> = [
   {
     parentSocket: 'socket_sps_crest_01',
@@ -575,23 +648,25 @@ const EXTRA_COMPANION_CLUSTERS_LEFT: ReadonlyArray<{
   },
   {
     parentSocket: 'socket_plate_ledge_01',
-    coralAssetId: 'coral-euphyllia-hammer',
+    coralAssetId: 'coral-anemone-bta',
     localOffsetM: [-0.04, -0.02, 0.06],
     yawRad: 0.5,
     tiltXRad: 0.26,
     tiltZRad: 0.22,
     scale: 0.94,
-    paletteOverride: PALETTE_MAUVE_GORGONIAN_PLUME,
+    paletteOverride: PALETTE_PURPLE_LAVENDER_ANEMONE,
+    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_TERRACOTTA,
   },
   {
     parentSocket: 'socket_soft_mat_01',
-    coralAssetId: 'coral-euphyllia-torch',
+    coralAssetId: 'coral-anemone-bta',
     localOffsetM: [0.04, 0.01, 0.03],
     yawRad: 0.4,
     tiltXRad: 0.22,
     tiltZRad: 0.14,
     scale: 0.95,
-    paletteOverride: PALETTE_ROSE_MAUVE_ANEMONE,
+    paletteOverride: PALETTE_TERRACOTTA_SUNBURST_BTA,
+    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_CRIMSON,
   },
   {
     parentSocket: 'socket_plate_ledge_02',
@@ -614,6 +689,7 @@ const EXTRA_COMPANION_CLUSTERS_RIGHT: ReadonlyArray<{
   tiltZRad: number
   scale: number
   paletteOverride: CoralPaletteOverride
+  columnPaletteOverride?: CoralPaletteOverride
 }> = [
   {
     parentSocket: 'socket_sps_crest_04',
@@ -647,13 +723,14 @@ const EXTRA_COMPANION_CLUSTERS_RIGHT: ReadonlyArray<{
   },
   {
     parentSocket: 'socket_brain_apron_03',
-    coralAssetId: 'coral-euphyllia-hammer',
+    coralAssetId: 'coral-anemone-bta',
     localOffsetM: [-0.05, 0.02, 0.04],
     yawRad: 0.2,
     tiltXRad: 0.22,
     tiltZRad: 0.16,
     scale: 0.94,
-    paletteOverride: PALETTE_SEAFOAM_CYAN_CORAL,
+    paletteOverride: PALETTE_ROSE_MAUVE_ANEMONE,
+    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_TERRACOTTA,
   },
 ]
 
@@ -739,6 +816,7 @@ function sculptOrganicRockContour(rockRoot: THREE.Object3D) {
 function bindCoralInstanceMaterials(
   instance: THREE.Object3D,
   paletteOverride: CoralPaletteOverride | undefined,
+  columnPaletteOverride: CoralPaletteOverride | undefined,
   options: { paused?: boolean; reducedMotion?: boolean; actinicLevel?: number } | undefined,
   materialControllers: Array<ReturnType<typeof applyCoralRawMaskMaterial>>,
   geometryBindings: CoralMaterialBoundBinding[],
@@ -759,11 +837,23 @@ function bindCoralInstanceMaterials(
         ? 'coral-soft'
         : 'coral-rigid'
 
+    // Keep the fleshy verrucose terracotta/crimson pedal column & creamy radially-striated oral disc
+    // distinct from the translucent tentacle crown on every coral-anemone-bta instance.
+    const childNameLower = child.name.toLowerCase()
+    const primIdLower = (reefPrimitive?.id ?? '').toLowerCase()
+    const isAnemoneColumn = childNameLower.includes('anemone_column_disc') || primIdLower === 'anemone_column_disc'
+    const isAnemoneTentacles = childNameLower.includes('anemone_tentacle_crown') || primIdLower === 'anemone_tentacle_crown'
+    const effectivePalette = isAnemoneColumn
+      ? (columnPaletteOverride ?? PALETTE_ANEMONE_COLUMN_TERRACOTTA)
+      : paletteOverride
+    const anemoneMode = isAnemoneColumn ? 'column' : isAnemoneTentacles ? 'tentacles' : undefined
+
     const clonedMaterials = (Array.isArray(child.material) ? child.material : [child.material]).map(mat => {
       const stdMat = mat instanceof THREE.MeshStandardMaterial ? mat.clone() : new THREE.MeshStandardMaterial()
       const binding = applyCoralRawMaskMaterial(stdMat, {
         role,
-        paletteOverride,
+        paletteOverride: effectivePalette,
+        anemoneMode,
         paused: options?.paused,
         reducedMotion: options?.reducedMotion,
         actinicLevel: options?.actinicLevel,
@@ -861,7 +951,14 @@ export function assembleCoralsOnRockSockets(
     cloneRoot.scale.setScalar(mount.scale)
 
     const materialControllers: Array<ReturnType<typeof applyCoralRawMaskMaterial>> = []
-    bindCoralInstanceMaterials(instance, mount.paletteOverride, options, materialControllers, geometryBindings)
+    bindCoralInstanceMaterials(
+      instance,
+      mount.paletteOverride,
+      mount.columnPaletteOverride,
+      options,
+      materialControllers,
+      geometryBindings,
+    )
 
     // Attach lush companion reef-garden sub-colonies when mounting onto the live aquarium rock
     for (const comp of companionSpecs) {
@@ -876,7 +973,14 @@ export function assembleCoralsOnRockSockets(
       compGroup.rotateX(comp.tiltXRad)
       compGroup.rotateZ(comp.tiltZRad)
       compGroup.scale.setScalar(comp.scale)
-      bindCoralInstanceMaterials(compInstance, comp.paletteOverride, options, materialControllers, geometryBindings)
+      bindCoralInstanceMaterials(
+        compInstance,
+        comp.paletteOverride,
+        comp.columnPaletteOverride,
+        options,
+        materialControllers,
+        geometryBindings,
+      )
       cloneRoot.add(compGroup)
     }
 

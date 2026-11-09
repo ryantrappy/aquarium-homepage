@@ -64,8 +64,8 @@ import {
 } from './camera-zoom'
 
 const modelUrls: Record<string, string> = {
-  'ocellaris-clownfish': new URL('../proof/candidate-real-clown.glb', import.meta.url).href,
-  'yellow-tang': new URL('../proof/candidate-real-tang.glb', import.meta.url).href,
+  'ocellaris-clownfish': new URL('../assets/fish/download_testing_copies/clownfish-copy.glb', import.meta.url).href,
+  'yellow-tang': new URL('../assets/fish/download_testing_copies/zebrasoma_desjardinii-copy.glb', import.meta.url).href,
   'blue-tang': new URL('../assets/splat-fish/blue-tang.glb', import.meta.url).href,
   'royal-gramma': new URL('../assets/splat-fish/royal-gramma.glb', import.meta.url).href,
   'banggai-cardinalfish': new URL('../assets/splat-fish/banggai-cardinalfish.glb', import.meta.url).href,

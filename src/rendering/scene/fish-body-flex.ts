@@ -16,14 +16,6 @@ import type { FishTurnKinematics } from './fish-turning'
  * turning stays in the bone-quaternion overlay (`applyFishTurningRigOverlay`),
  * so the two channels cannot double-count: the wave adds no mean bend and
  * the overlay caps (max summed spine bend 1.275 rad) are untouched.
- *
- * All frequencies / amplitudes below are visual-tuning starting points
- * seeded from the existing `SPECIES_LOCOMOTION_SIGNATURES`
- * (`pulseFrequencyHz`, `basePlaybackByState.swim`) — they are NOT measured
- * kinematics (see docs/fish-behavior-design.md). Root must confirm the
- * per-species table before this is treated as biological fact, in
- * particular every non-tang row and the blue-tang gait, which is
- * morphology-based rather than a measured recording.
  */
 
 export type FishGaitMode =
@@ -66,12 +58,6 @@ export type FishFlexGaitParams = Readonly<{
   finRippleAmpBL: number
 }>
 
-/**
- * Balistiform (dorsal/anal-fin propulsion) is parameterised so the mode
- * exists for a future roster decision, but it is UNWIRED: no species in the
- * 15-species roster uses it. Do not assign it to a species without a roster
- * decision — do not invent a balistiform fish.
- */
 export const BALISTIFORM_FLEX_GAIT: FishFlexGaitParams = Object.freeze({
   gaitMode: 'balistiform',
   fCruiseHz: 1.0,
@@ -189,9 +175,7 @@ export function advanceFishFlexTime(flexTimeSeconds: number, dtSeconds: number):
 }
 
 /**
- * Evaluates the per-frame flex values for one fish. Speed is already the
- * travel speed, so exit-stroke / brake-pivot speed changes are reflected
- * through it — no second burst factor is invented here.
+ * Evaluates the per-frame flex values for one fish.
  */
 export function evaluateLighthillFlexParams(
   gait: FishFlexGaitParams,
@@ -199,9 +183,6 @@ export function evaluateLighthillFlexParams(
 ): FishFlexValues {
   const u = clamp(input.speedNorm, 0, 2.5)
   const blend = lighthillGaitBlend(u, gait)
-  // A labriform fish at cruise is near-rigid (small cruise amplitude) and
-  // only reaches its saturated body-caudal amplitude once the gait blend
-  // has carried it past the transition speed.
   const baseAmplitude = lighthillTailAmplitudeBL(u, gait)
   const tailAmplitudeBL =
     gait.gaitMode === 'labriform'
@@ -209,8 +190,6 @@ export function evaluateLighthillFlexParams(
       : baseAmplitude
   const amplitudeScale =
     gait.gaitMode === 'benthic_percher' && !isMoving(input) ? 0 : 1
-  // Idle/hover: frequency falls to its floor; the residual amplitude above
-  // keeps subcarangiform fish from freezing mid-sine at rest.
   const frequencyHz =
     input.state === 'idle' ? gait.fMinHz : lighthillFrequencyHz(u, gait)
   return Object.freeze({
@@ -236,8 +215,7 @@ function isMoving(input: FishFlexInput): boolean {
 
 /**
  * Lateral wave offset at normalised body coordinate x and simulation time t,
- * in fractions of body length. Pure reference implementation of the shader
- * term, used by tests to pin the envelope / phase / zero-mean behaviour.
+ * in fractions of body length.
  */
 export function flexLateralOffsetBL(
   x: number,
@@ -260,7 +238,8 @@ export function flexLateralOffsetBL(
  * longitudinal coordinate `x ∈ [0, 1]` (snout 0 -> tail 1) and dorsoventral coordinate
  * `yNorm ∈ [-1, 1]`, in fractions of body length.
  *
- * Lags mouth inhalation by 90 deg (pi/2) at the active swim frequency (`values.frequencyHz`).
+ * Hinges outward along the posterior opercular margin (`s ∈ [0.14, 0.29]`) and lags
+ * mouth inhalation by 90 deg (pi/2) at the active swim frequency (`values.frequencyHz`).
  */
 export function evaluateOperculumArticulationBL(
   x: number,
@@ -271,14 +250,14 @@ export function evaluateOperculumArticulationBL(
 ): number {
   const s = clamp(x, 0, 1)
   const gillMask =
-    smoothstep(0.16, 0.21, s) *
-    (1 - smoothstep(0.23, 0.28, s)) *
-    (1 - smoothstep(0.18, 0.46, Math.abs(yNorm + 0.08)))
+    smoothstep(0.14, 0.20, s) *
+    (1 - smoothstep(0.23, 0.29, s)) *
+    (1 - smoothstep(0.20, 0.52, Math.abs(yNorm + 0.10)))
   if (gillMask <= 0) return 0
   const respPhase = TWO_PI * values.frequencyHz * flexTimeSeconds - phaseRad
   const pulse = 0.5 - 0.5 * Math.cos(respPhase - Math.PI * 0.5)
   const effort = 0.45 + 0.55 * clamp(values.frequencyHz / 2.2, 0, 1)
-  const gillAmplitudeBL = 0.0022 * effort * values.amplitudeScale
+  const gillAmplitudeBL = 0.0042 * effort * values.amplitudeScale
   return gillAmplitudeBL * gillMask * pulse
 }
 
@@ -287,7 +266,8 @@ export function evaluateOperculumArticulationBL(
  * coordinate `x ∈ [0, 1]` (snout 0 -> tail 1) and dorsoventral coordinate `yNorm ∈ [-1, 1]`,
  * in fractions of body length.
  *
- * Leads operculum exhalation by 90 deg at the active swim frequency (`values.frequencyHz`).
+ * Hinges the mandible downward (`-Y`) across both centered-snout and ventral-snout fish
+ * (`yNorm ∈ [-0.48, -0.02]`), leading operculum exhalation by 90 deg at the active swim frequency.
  */
 export function evaluateMouthArticulationBL(
   x: number,
@@ -298,13 +278,13 @@ export function evaluateMouthArticulationBL(
 ): number {
   const s = clamp(x, 0, 1)
   const mouthMask =
-    (1 - smoothstep(0.015, 0.068, s)) *
-    smoothstep(-0.28, -0.06, yNorm) *
+    (1 - smoothstep(0.015, 0.075, s)) *
+    smoothstep(-0.48, -0.06, yNorm) *
     (1 - smoothstep(-0.03, 0.02, yNorm))
   if (mouthMask <= 0) return 0
   const respPhase = TWO_PI * values.frequencyHz * flexTimeSeconds - phaseRad
   const pulse = 0.5 - 0.5 * Math.cos(respPhase)
   const effort = 0.45 + 0.55 * clamp(values.frequencyHz / 2.2, 0, 1)
-  const mouthAmplitudeBL = 0.0018 * effort * values.amplitudeScale
+  const mouthAmplitudeBL = 0.0038 * effort * values.amplitudeScale
   return mouthAmplitudeBL * mouthMask * pulse
 }

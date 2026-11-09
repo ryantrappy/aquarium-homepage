@@ -63,6 +63,8 @@ export type CoralFlowUniforms = {
   uPaletteCrevice: { value: THREE.Color }
   uPaletteRegrade: { value: number }
   uRoughnessOverride: { value: number }
+  /** 0 = standard coral, 1 = anemone verrucose column & striated oral disc, 2 = anemone hydrostat tentacle crown */
+  uAnemoneMode: { value: number }
 }
 
 export type CoralMaterialOptions = {
@@ -77,6 +79,7 @@ export type CoralMaterialOptions = {
    * 1.0 preserves the current glow at the default fixture balance. */
   actinicLevel?: number
   paletteOverride?: CoralPaletteOverride
+  anemoneMode?: 'column' | 'tentacles'
   paused?: boolean
   reducedMotion?: boolean
 }
@@ -357,6 +360,7 @@ uniform vec3 uPaletteTip;
 uniform vec3 uPaletteCrevice;
 uniform float uPaletteRegrade;
 uniform float uRoughnessOverride;
+uniform float uAnemoneMode;
 varying vec4 vCoralMask;
 varying vec3 vCoralViewDir;
 varying vec3 vCoralLocalPos;
@@ -413,11 +417,38 @@ naturalGrad *= (0.86 + 0.22 * texLuma + 0.16 * (polypHighlight - 0.4));
 float coralLuma = dot(naturalGrad, vec3(0.299, 0.587, 0.114));
 naturalGrad = mix(vec3(coralLuma), naturalGrad, ${CORAL_TISSUE_SATURATION_BOOST.toFixed(2)});
 naturalGrad = min(naturalGrad, vec3(${CORAL_TISSUE_HIGHLIGHT_CEILING.toFixed(2)}));
-diffuseColor.rgb = mix(diffuseColor.rgb, naturalGrad, clamp(uPaletteRegrade, 0.0, 1.0));
 
-// Blend basal attachment seamlessly into deep actinic indigo rock shadow so no dark saucer rim is visible
-float rockBaseBlend = smoothstep(0.001, 0.018, vCoralLocalPos.y);
-diffuseColor.rgb = mix(vec3(0.14, 0.12, 0.24), diffuseColor.rgb, rockBaseBlend);
+if (uAnemoneMode > 1.5) {
+  // Anemone_Tentacle_Crown: preserve the Blender 4-band PBR texture detail (longitudinal basal flutes,
+  // per-tentacle hue/luminance variation, and sub-terminal ring) while grading along true tentacle
+  // arc-length h = vCoralMask.r (0 = creamy-ivory fluted root on oral disc -> mid hydrostat shaft -> 1 = glowing acrosphere tip).
+  float hTent = clamp(vCoralMask.r, 0.0, 1.0);
+  float phaseVar = clamp(vCoralMask.b, 0.0, 1.0);
+  vec3 rootCol = uPaletteCrevice * (0.90 + 0.20 * texLuma);
+  vec3 shaftTint = mix(uPaletteBase, uPaletteTip, 0.22 * phaseVar);
+  vec3 shaftCol = mix(diffuseColor.rgb, shaftTint * (0.76 + 0.44 * texLuma), clamp(uPaletteRegrade, 0.0, 1.0));
+  vec3 ringCol = mix(uPaletteCrevice, uPaletteTip, 0.35);
+  float ringBand = exp(-pow((hTent - 0.885) / 0.038, 2.0));
+  vec3 tentCol = mix(rootCol, shaftCol, smoothstep(0.04, 0.32, hTent));
+  tentCol = mix(tentCol, ringCol, ringBand * 0.32);
+  tentCol = mix(tentCol, uPaletteTip, smoothstep(0.86, 0.97, hTent));
+  diffuseColor.rgb = tentCol;
+} else if (uAnemoneMode > 0.5) {
+  // Anemone_Column_Disc: preserve the Blender-baked micro-pebbled verrucae on the 5-lobed pedal column
+  // and the 54 creamy-ivory radial mesentery striations on the oral disc, lightly tinting the column morph.
+  float discMask = smoothstep(0.10, 0.36, coralTipMask);
+  vec3 colTarget = mix(uPaletteCrevice, uPaletteBase, smoothstep(0.18, 0.68, texLuma)) * (0.78 + 0.45 * texLuma);
+  vec3 discTarget = mix(diffuseColor.rgb, uPaletteTip * (0.75 + 0.35 * texLuma), 0.25);
+  vec3 target = mix(colTarget, discTarget, discMask);
+  diffuseColor.rgb = mix(diffuseColor.rgb, target, clamp(uPaletteRegrade, 0.0, 1.0));
+  float footBlend = smoothstep(-0.024, -0.014, vCoralLocalPos.y);
+  diffuseColor.rgb = mix(vec3(0.14, 0.12, 0.24), diffuseColor.rgb, footBlend);
+} else {
+  diffuseColor.rgb = mix(diffuseColor.rgb, naturalGrad, clamp(uPaletteRegrade, 0.0, 1.0));
+  // Blend basal attachment seamlessly into deep actinic indigo rock shadow so no dark saucer rim is visible
+  float rockBaseBlend = smoothstep(0.001, 0.018, vCoralLocalPos.y);
+  diffuseColor.rgb = mix(vec3(0.14, 0.12, 0.24), diffuseColor.rgb, rockBaseBlend);
+}
 `,
   )
 
@@ -434,12 +465,14 @@ if (uRoughnessOverride > 0.0) {
     '#include <normal_fragment_maps>',
     `#include <normal_fragment_maps>
 // Velvety micro-polyp normal bump breaks up smooth specular reflections on domes & branches
+// (skipped on smooth hydrostat anemone tentacles & verrucose column which carry dedicated Blender normal maps)
 float pEps = 0.0025;
 float p0 = coralNoise3D(vCoralLocalPos * 210.0);
 float px = coralNoise3D((vCoralLocalPos + vec3(pEps, 0.0, 0.0)) * 210.0);
 float py = coralNoise3D((vCoralLocalPos + vec3(0.0, pEps, 0.0)) * 210.0);
 float pz = coralNoise3D((vCoralLocalPos + vec3(0.0, 0.0, pEps)) * 210.0);
-normal = normalize(normal - vec3(px - p0, py - p0, pz - p0) * 0.28);
+float bumpScale = uAnemoneMode > 0.5 ? 0.03 : 0.28;
+normal = normalize(normal - vec3(px - p0, py - p0, pz - p0) * bumpScale);
 `,
   )
 
@@ -683,6 +716,7 @@ export function applyCoralRawMaskMaterial(
     uPaletteCrevice: { value: new THREE.Color(pal?.creviceColor ?? CORAL_DEFAULT_PALETTE.creviceColor) },
     uPaletteRegrade: { value: pal?.regradeStrength ?? CORAL_DEFAULT_REGRADE },
     uRoughnessOverride: { value: pal?.roughness ?? (options.role === 'coral-soft' ? 0.74 : 0.78) },
+    uAnemoneMode: { value: options.anemoneMode === 'tentacles' ? 2 : options.anemoneMode === 'column' ? 1 : 0 },
   }
 
   const cacheKey = `coral-raw-masks-v1:${options.role}`

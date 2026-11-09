@@ -15,9 +15,9 @@ import { SPECIES_LOCOMOTION_SIGNATURES } from './species-locomotion-extensions'
  *
  * A post-skinning `onBeforeCompile` patch on each fish's `SkinnedMesh`
  * material displaces vertices laterally (object-space X) with the
- * Lighthill travelling wave from `fish-body-flex.ts`, plus subtle
- * swim-synchronized operculum (gill-cover) flare and lower-jaw mouth
- * ventilation (AQ-74 AC #2 & #3).
+ * Lighthill travelling wave from `fish-body-flex.ts`, plus natural
+ * swim-synchronized operculum (gill-cover) abduction and mandibular
+ * lower-jaw hinge opening (AQ-74 AC #2 & #3).
  */
 
 export type FishFlexUniforms = {
@@ -86,31 +86,25 @@ const FLEX_VERTEX_DISPLACEMENT = `
   float flexFin = uFlexFinRippleAmp * flexFinMask * sin(flexPhase - 1.57079632679);
 
   // AQ-74 buccal-opercular ventilation synchronized to the swim cycle:
-  // Mouth inhalation leads operculum (gill-cover) lateral flare by 90 deg (pi/2).
+  // Mouth inhalation (mandibular hinge opening) leads operculum lateral abduction by 90 deg (pi/2).
   float flexRespPhase = 6.283185307179586 * uFlexFrequencyHz * uFlexTime - uFlexPhase;
-  float flexGillMask = smoothstep(0.16, 0.21, flexS) * (1.0 - smoothstep(0.23, 0.28, flexS))
-    * (1.0 - smoothstep(0.18, 0.46, abs(flexYNorm + 0.08)));
+  float flexGillMask = smoothstep(0.14, 0.20, flexS) * (1.0 - smoothstep(0.23, 0.29, flexS))
+    * (1.0 - smoothstep(0.20, 0.52, abs(flexYNorm + 0.10)));
   float flexGillPulse = 0.5 - 0.5 * cos(flexRespPhase - 1.57079632679);
   float flexSideSign = transformed.x >= 0.0 ? 1.0 : -1.0;
   float flexGill = flexSideSign * uFlexGillAmplitude * flexGillMask * flexGillPulse;
 
-  float flexMouthMask = (1.0 - smoothstep(0.015, 0.068, flexS))
-    * smoothstep(-0.28, -0.06, flexYNorm) * (1.0 - smoothstep(-0.03, 0.02, flexYNorm));
+  float flexMouthMask = (1.0 - smoothstep(0.015, 0.075, flexS))
+    * smoothstep(-0.48, -0.06, flexYNorm) * (1.0 - smoothstep(-0.03, 0.02, flexYNorm));
   float flexMouthPulse = 0.5 - 0.5 * cos(flexRespPhase);
   float flexMouth = uFlexMouthAmplitude * flexMouthMask * flexMouthPulse;
 
   transformed.x += (flexWave + flexFin + flexGill) * uFlexEnabled;
   transformed.y -= flexMouth * uFlexEnabled;
+  transformed.z -= flexMouth * 0.35 * uFlexEnabled;
 }
 `
 
-/**
- * Applies the flex patch to a compiled shader. Exported for tests: feeds
- * it `THREE.ShaderLib.standard.vertexShader` and asserts the injection
- * lands after `#include <skinning_vertex>`. Returns false (shader left
- * unchanged) when the skinning include is absent — displacement must never
- * be applied before skinning, where the bone matrices would rotate it.
- */
 export function patchFishFlexShader(
   shader: { vertexShader: string; uniforms: Record<string, unknown> },
   uniforms: FishFlexUniforms,
@@ -163,12 +157,6 @@ type FlexMeshRecord = {
   clonedMaterial: THREE.MeshStandardMaterial
 }
 
-/**
- * Binds body flex to a cloned fish model root. Clones every
- * `MeshStandardMaterial` on its skinned meshes (one per fish instance),
- * measures the body from the mesh bounding boxes, and returns a binding
- * whose `update` drives the shared per-fish uniforms.
- */
 export function bindFishFlexToModel(
   root: THREE.Object3D,
   speciesId: string,
@@ -240,9 +228,6 @@ export function bindFishFlexToModel(
       uniforms.uFlexTime.value = flexTimeSeconds
       uniforms.uFlexFrequencyHz.value = values.frequencyHz
       uniforms.uFlexWaveNumber.value = values.waveNumber
-      // Compensate uFlexPhase so that `2π * uFlexFrequencyHz * uFlexTime - uFlexPhase`
-      // equals `accumulatedWavePhaseRad - phaseRad`, preserving C0 phase continuity
-      // whenever `values.frequencyHz` changes with speed or swim state.
       const targetPhase =
         phaseRad +
         ((TWO_PI * values.frequencyHz * flexTimeSeconds - accumulatedWavePhaseRad) % TWO_PI)
@@ -257,10 +242,10 @@ export function bindFishFlexToModel(
         0.45 + 0.55 * Math.min(1, Math.max(0, values.frequencyHz / 2.2))
       uniforms.uFlexGillAmplitude.value = reducedMotion
         ? 0
-        : 0.0022 * respEffort * amplitudeScale * bodyLength
+        : 0.0042 * respEffort * amplitudeScale * bodyLength
       uniforms.uFlexMouthAmplitude.value = reducedMotion
         ? 0
-        : 0.0018 * respEffort * amplitudeScale * bodyLength
+        : 0.0038 * respEffort * amplitudeScale * bodyLength
       uniforms.uFlexEnabled.value = reducedMotion ? 0 : 1
     },
     dispose(): void {
@@ -274,7 +259,6 @@ export function bindFishFlexToModel(
   })
 }
 
-/** Convenience: evaluates the gait and updates a binding for one frame. */
 export function updateFishFlex(
   binding: FishFlexBinding,
   speciesId: string,

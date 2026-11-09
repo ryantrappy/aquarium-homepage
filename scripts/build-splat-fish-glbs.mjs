@@ -1,9 +1,9 @@
 /**
  * Photorealistic Self-Contained 3D Reef Fish Generator (`reef-asset-v1`)
  *
- * Reconstructs watertight, sleek C-infinity lenticular 3D-volumetric, rigged & animated `.glb`
- * fish models directly from the project-original photorealistic cutouts in `public/fish/<id>.webp`
- * (documented in `docs/fish-art-provenance.json`), verified visually in Blender 5.2.3 LTS.
+ * Reconstructs watertight, fusiform C-infinity 3D-volumetric, rigged & animated `.glb`
+ * fish models from `public/fish/<id>.webp` or manual Blender overrides in
+ * `src/rendering/assets/splat-fish/overrides/<id>.glb`, verified in Blender 5.2.3 LTS.
  */
 
 import { execFileSync } from 'node:child_process'
@@ -59,16 +59,33 @@ function smoothstep(edge0, edge1, x) {
 }
 
 /**
- * Evaluates streamlined, C2-continuous 3D anatomical head relief (AQ-74):
- * - Low-profile convex 3D eye cornea dome (+5.8mm) + subtle orbital socket recess
- * - Raised 3D operculum (gill-cover) plate + recessed posterior gill-slit crease
- * - Raised 3D upper premaxillary & lower mandibular lip ridges + recessed buccal mouth cleft
- * Fades smoothly to 0 at the silhouette boundary (`dNorm -> 0`) so the midline seam stays watertight.
+ * Natural teleost top-down fusiform longitudinal half-width profile (`s in [0, 1]`, tail 0 -> snout 1):
+ * - Slender caudal fin & peduncle (`s <= 0.20`)
+ * - Continuous hydrodynamic taper from maximum width at the opercular shoulder (`s = 0.74`)
+ *   down to the caudal peduncle (`s = 0.20`), eliminating the uniform-thickness slab look!
+ * - Convex ogive snout taper from the opercular shoulder (`s = 0.74`) to the snout lips (`s = 1.0`).
  */
+function evaluateFusiformLongitudinalHalfWidth(s, maxHalfW) {
+  if (s <= 0.18) {
+    const uTail = s / 0.18
+    return maxHalfW * lerp(0.025, 0.14, smoothstep(0.0, 1.0, Math.pow(uTail, 1.25)))
+  }
+  if (s <= 0.74) {
+    // Hydrodynamic teardrop rise from peduncle (0.18) to opercular shoulder peak (0.74)
+    const uTrunk = (s - 0.18) / 0.56
+    const teardrop = Math.pow(Math.sin(uTrunk * Math.PI * 0.5), 0.78)
+    return maxHalfW * lerp(0.14, 1.0, teardrop)
+  }
+  // Ogive head/snout taper from shoulder peak (0.74) to snout tip (1.0)
+  const uHead = (1.0 - s) / 0.26
+  const ogive = Math.pow(Math.sin(clamp(uHead, 0, 1) * Math.PI * 0.5), 0.62)
+  return maxHalfW * (0.16 + 0.84 * ogive)
+}
+
 function evaluateAnatomicalHeadRelief(u, v, dNorm = 1.0) {
   const boundaryFade = smoothstep(0.03, 0.16, dNorm)
 
-  // 1. Streamlined C2-Continuous Convex 3D Eye Cornea Dome & Orbital Rim at (u = 0.858, v = 0.376)
+  // 1. Protruding C2-Continuous Convex 3D Eye Cornea Hemisphere & Recessed Circumorbital Socket Rim
   const uEye = 0.858
   const vEye = 0.376
   const ruEye = 0.034
@@ -79,13 +96,13 @@ function evaluateAnatomicalHeadRelief(u, v, dNorm = 1.0) {
 
   let eyeDx = 0.0
   if (rEye < 1.0) {
-    const c2Dome = Math.pow(0.5 + 0.5 * Math.cos(rEye * Math.PI), 1.4)
-    eyeDx += 0.0058 * c2Dome * smoothstep(0.08, 0.24, dNorm)
+    const c2Dome = Math.pow(0.5 + 0.5 * Math.cos(rEye * Math.PI), 1.3)
+    eyeDx += 0.0075 * c2Dome * smoothstep(0.06, 0.22, dNorm)
   }
-  if (rEye > 0.82 && rEye < 1.26) {
-    const tRim = (rEye - 0.82) / 0.44
+  if (rEye > 0.82 && rEye < 1.28) {
+    const tRim = (rEye - 0.82) / 0.46
     const c2Rim = Math.pow(Math.sin(tRim * Math.PI), 2.0)
-    eyeDx -= 0.0012 * c2Rim * boundaryFade
+    eyeDx -= 0.0018 * c2Rim * boundaryFade
   }
 
   // 2. C2-Smooth Sculpted 3D Operculum (Gill-Cover) Plate & Recessed Posterior Gill Slit
@@ -98,10 +115,10 @@ function evaluateAnatomicalHeadRelief(u, v, dNorm = 1.0) {
     if (duGill > -0.002 && duGill < 0.052) {
       const tPlate = (duGill + 0.002) / 0.054
       const c2Plate = Math.pow(Math.sin(tPlate * Math.PI), 2.0) * (1.0 - 0.35 * tPlate)
-      gillDx += 0.0052 * vGillMask * c2Plate * boundaryFade
+      gillDx += 0.0055 * vGillMask * c2Plate * boundaryFade
     }
     const slitBell = Math.exp(-Math.pow((duGill + 0.0038) / 0.0050, 2))
-    gillDx -= 0.0045 * vGillMask * slitBell * boundaryFade
+    gillDx -= 0.0048 * vGillMask * slitBell * boundaryFade
   }
 
   // 3. Sculpted 3D Mouth Cleft & Upper/Lower Lip Ridges at Snout Tip
@@ -113,7 +130,7 @@ function evaluateAnatomicalHeadRelief(u, v, dNorm = 1.0) {
     const cleftBell = Math.exp(-Math.pow(dvMouth / 0.0052, 2))
     const upperLipBell = Math.exp(-Math.pow((dvMouth + 0.0135) / 0.0062, 2))
     const lowerLipBell = Math.exp(-Math.pow((dvMouth - 0.0135) / 0.0062, 2))
-    mouthDx = uMouthMask * boundaryFade * (-0.0038 * cleftBell + 0.0032 * upperLipBell + 0.0030 * lowerLipBell)
+    mouthDx = uMouthMask * boundaryFade * (-0.0042 * cleftBell + 0.0036 * upperLipBell + 0.0034 * lowerLipBell)
   }
 
   return {
@@ -585,54 +602,48 @@ function buildPhotorealPbrTextures(dilatedRgba, srcW, srcH, size = 512, specId =
       const idx = (py * size + px) * 4
 
       const relC = evaluateAnatomicalHeadRelief(u, v, 1.0)
-
       let ao = 248.0
-      let rough = 0.45
+      let rough = 0.42
 
-      // 1. Wet cornea roughness (0.03) + subtle natural surgeonfish iris & catchlight inside the eye only
+      // Subtle ctenoid scale & fin-ray micro-roughness/AO modulation
+      const isFinBand = (1.0 - smoothstep(0.16, 0.28, v)) + smoothstep(0.72, 0.84, v) + (1.0 - smoothstep(0.15, 0.24, u))
+      if (isFinBand > 0.05) {
+        const finRay = Math.sin((u * 42.0 + v * 18.0) * Math.PI * 2.0)
+        ao -= finRay * 6.0 * clamp(isFinBand, 0, 1)
+        rough = lerp(rough, 0.34, clamp(isFinBand, 0, 1) * (0.5 + 0.5 * finRay))
+      } else if (u > 0.24 && u < 0.78) {
+        // Imbricated diamond ctenoid scale micro-sheen
+        const sA = Math.sin((u * 56.0 + v * 34.0) * Math.PI * 2.0)
+        const sB = Math.sin((u * 56.0 - v * 34.0) * Math.PI * 2.0)
+        const scaleCell = sA * sB
+        ao -= Math.max(0, -scaleCell) * 7.0
+        rough = lerp(rough, 0.36, Math.max(0, scaleCell) * 0.35)
+      }
+
+      // 1. Wet cornea roughness (0.03) over the eye
       if (relC.rEye < 0.94) {
         const corneaMask = 1.0 - smoothstep(0.72, 0.94, relC.rEye)
         rough = lerp(rough, 0.03, corneaMask)
         ao = lerp(ao, 255.0, corneaMask)
-        if (specId === 'blue-tang') {
-          if (relC.rEye < 0.44) {
-            const pupilT = smoothstep(0.30, 0.44, relC.rEye)
-            r = lerp(6, r, pupilT * 0.35)
-            g = lerp(9, g, pupilT * 0.35)
-            b = lerp(18, b, pupilT * 0.35)
-          } else if (relC.rEye < 0.78) {
-            const irisRing = Math.sin(((relC.rEye - 0.44) / 0.34) * Math.PI) * corneaMask
-            r = lerp(r, 188, irisRing * 0.30)
-            g = lerp(g, 152, irisRing * 0.30)
-            b = lerp(b, 64, irisRing * 0.22)
-          }
-          const dGlint = Math.hypot((u - 0.864) / 0.0065, (v - 0.355) / 0.0115)
-          if (dGlint < 1.0) {
-            const glint = Math.pow(1.0 - dGlint, 2.4) * 0.85
-            r = lerp(r, 250, glint)
-            g = lerp(g, 253, glint)
-            b = lerp(b, 255, glint)
-          }
-        }
       }
 
-      // 2. Subtle operculum gill-slit AO & edge sheen
+      // 2. Operculum gill-slit AO & edge sheen
       if (relC.vGillMask > 0.001) {
         const slitDepth = Math.exp(-Math.pow((relC.duGill + 0.0038) / 0.0048, 2)) * relC.vGillMask
         const plateRim = Math.exp(-Math.pow((relC.duGill - 0.0070) / 0.0070, 2)) * relC.vGillMask
-        ao = lerp(ao, 145.0, slitDepth * 0.75)
-        rough = lerp(rough, 0.30, plateRim * 0.50)
+        ao = lerp(ao, 138.0, slitDepth * 0.78)
+        rough = lerp(rough, 0.28, plateRim * 0.55)
       }
 
-      // 3. Subtle mouth cleft AO & lip sheen
+      // 3. Mouth cleft AO & lip sheen
       if (relC.uMouthMask > 0.001) {
         const cleftDepth = Math.exp(-Math.pow(relC.dvMouth / 0.0050, 2)) * relC.uMouthMask
         const lipHighlight = (
           Math.exp(-Math.pow((relC.dvMouth + 0.0135) / 0.0062, 2)) +
           Math.exp(-Math.pow((relC.dvMouth - 0.0135) / 0.0062, 2))
         ) * relC.uMouthMask
-        ao = lerp(ao, 140.0, cleftDepth * 0.78)
-        rough = lerp(rough, 0.28, lipHighlight * 0.55)
+        ao = lerp(ao, 132.0, cleftDepth * 0.80)
+        rough = lerp(rough, 0.26, lipHighlight * 0.58)
       }
 
       baseRgba[idx + 0] = clamp(Math.round(r), 0, 255)
@@ -652,19 +663,11 @@ function buildPhotorealPbrTextures(dilatedRgba, srcW, srcH, size = 512, specId =
     }
   }
 
-  const basePng = encodeRgbaPng(size, size, baseRgba)
-  const normPng = encodeRgbaPng(size, size, normRgba)
-  const ormPng = encodeRgbaPng(size, size, ormRgba)
-
-  if (specId === 'blue-tang') {
-    const outTexDir = path.join(REPO_ROOT, '.output/blue_tang_photoreal')
-    fs.mkdirSync(outTexDir, { recursive: true })
-    fs.writeFileSync(path.join(outTexDir, 'base.png'), basePng)
-    fs.writeFileSync(path.join(outTexDir, 'norm.png'), normPng)
-    fs.writeFileSync(path.join(outTexDir, 'orm.png'), ormPng)
+  return {
+    basePng: encodeRgbaPng(size, size, baseRgba),
+    normPng: encodeRgbaPng(size, size, normRgba),
+    ormPng: encodeRgbaPng(size, size, ormRgba),
   }
-
-  return { basePng, normPng, ormPng }
 }
 
 function buildPhotoreal3DMesh(spec) {
@@ -776,26 +779,21 @@ function buildPhotoreal3DMesh(spec) {
       const vNorm = clamp(((v * (height - 1)) - yMin) / bboxH, 0, 1)
       const dNorm = clamp(gSdf[i] / (maxDistIn * 0.92), 0, 1)
 
-      const lenticularArch = Math.pow(Math.sin(dNorm * Math.PI * 0.5), 1.42)
-      const isCranium = smoothstep(0.66, 0.80, s) * smoothstep(0.16, 0.28, vNorm) * (1.0 - smoothstep(0.72, 0.84, vNorm))
+      // Pterygiophore fin-base step: dorsal (vNorm < 0.22) and anal (vNorm > 0.78) fins
+      // pinch rapidly to a thin ribbed membrane while the central muscular trunk rounds out.
+      const inTrunkBand = smoothstep(0.16, 0.28, vNorm) * (1.0 - smoothstep(0.72, 0.84, vNorm))
+      const finBladeArch = 0.18 * Math.pow(Math.sin(dNorm * Math.PI * 0.5), 1.65)
+      const trunkArch = Math.pow(Math.sin(dNorm * Math.PI * 0.5), 0.95)
+      const lenticularArch = lerp(finBladeArch, trunkArch, inTrunkBand)
+
+      const isCranium = smoothstep(0.66, 0.80, s) * inTrunkBand
       const dCranium = clamp(gSdf[i] / (maxDistIn * 0.21), 0, 1)
       const craniumArch = Math.pow(Math.sin(dCranium * Math.PI * 0.5), 0.52)
       const verticalCrown = Math.pow(Math.sin(clamp((vNorm - 0.12) / 0.76, 0.05, 0.95) * Math.PI), 0.62)
       const crossArch = lerp(lenticularArch, craniumArch * verticalCrown, isCranium)
 
-      let longHw
-      if (s <= 0.21) {
-        const uTail = s / 0.21
-        longHw = lerp(0.002, 0.022, smoothstep(0.0, 1.0, Math.pow(uTail, 1.2)))
-      } else {
-        const uBody = (s - 0.21) / 0.79
-        if (uBody < 0.58) {
-          longHw = lerp(0.022, spec.maxHalfW, smoothstep(0.0, 1.0, Math.pow(uBody / 0.58, 0.85)))
-        } else {
-          const tHead = (1.0 - uBody) / 0.42
-          longHw = spec.maxHalfW * Math.pow(Math.sin(clamp(tHead, 0, 1) * Math.PI * 0.5), 0.58)
-        }
-      }
+      // Natural top-down fusiform teardrop profile (peaks at opercular shoulder s=0.74, tapers to tail and snout)
+      const longHw = evaluateFusiformLongitudinalHalfWidth(s, spec.maxHalfW)
       const guideMult = sampleLearnedGuideMultiplier(spec.id, s, v)
       const effectiveGuide = lerp(guideMult, 1.0, isCranium * 0.85)
       gThick[i] = Math.max(0.0015 * Math.pow(dNorm, 0.6), longHw * crossArch * effectiveGuide)
@@ -859,8 +857,6 @@ function buildPhotoreal3DMesh(spec) {
     const yNorm = (0.5 - (v - vMin) / vSpan) * 2.0 * aspectY
     const x = isBoundaryVert[i] ? 0 : gThick[i]
 
-    // Strictly window the anterior forehead bridge UV shift to the vertical eye band (`v in [0.312, 0.448]`)
-    // so the dorsal black stripe above the eye (`v < 0.312`) remains 100% continuous and uncut!
     let uTex = u
     if (spec.id === 'blue-tang' && u > 0.80 && v > 0.310 && v < 0.452) {
       const vEyeBand = smoothstep(0.310, 0.338, v) * (1.0 - smoothstep(0.420, 0.452, v))
@@ -999,15 +995,18 @@ function buildPhotoreal3DMesh(spec) {
     weights: new Float32Array(weights),
     indices: new Uint16Array(indices),
     rootFlankX,
+    pectoralZ: spec.pectoral.z,
+    pectoralY: spec.pectoral.y,
+    normalScale: 0.08,
     ...pbr,
   }
 }
 
-function buildOriginalRigAndAnimation(spec, rootFlankX) {
+function buildOriginalRigAndAnimation(spec, rootFlankX, pectoralZ = spec.pectoral.z, pectoralY = spec.pectoral.y) {
   const s2 = Math.SQRT1_2
   const pectX = Number(rootFlankX.toFixed(4))
-  const pectY = Number((0.48 - spec.pectoral.z).toFixed(4))
-  const pectZ = Number(spec.pectoral.y.toFixed(4))
+  const pectY = Number((0.48 - pectoralZ).toFixed(4))
+  const pectZ = Number(pectoralY.toFixed(4))
 
   const jointSpecs = [
     { name: 'spine_0', parent: -1, translation: [0, 0, 1.0], rotation: [-s2, 0, 0, s2], children: [1] },
@@ -1075,7 +1074,12 @@ function buildOriginalRigAndAnimation(spec, rootFlankX) {
 }
 
 function buildSelfContainedContractGlb(spec, meshData, sourceSha256) {
-  const { jointSpecs, ibmFloats, times, quatTracks } = buildOriginalRigAndAnimation(spec, meshData.rootFlankX)
+  const { jointSpecs, ibmFloats, times, quatTracks } = buildOriginalRigAndAnimation(
+    spec,
+    meshData.rootFlankX,
+    meshData.pectoralZ ?? spec.pectoral.z,
+    meshData.pectoralY ?? spec.pectoral.y,
+  )
 
   const posMin = [Infinity, Infinity, Infinity]
   const posMax = [-Infinity, -Infinity, -Infinity]
@@ -1256,7 +1260,7 @@ function buildSelfContainedContractGlb(spec, meshData, sourceSha256) {
           metallicFactor: 0.0,
           roughnessFactor: 1.0,
         },
-        normalTexture: { index: 1, scale: 0.05 },
+        normalTexture: { index: 1, scale: meshData.normalScale ?? 0.08 },
         occlusionTexture: { index: 2, strength: 1.0 },
       },
     ],
@@ -1426,12 +1430,64 @@ function loadManualOverrideGlb(spec, overrideGlbPath, proceduralMeshData, source
     return out
   }
 
+  function extractTextureBuffer(texInfo) {
+    if (!texInfo || typeof texInfo.index !== 'number') return null
+    const tex = doc.textures?.[texInfo.index]
+    if (!tex || typeof tex.source !== 'number') return null
+    const img = doc.images?.[tex.source]
+    if (!img || typeof img.bufferView !== 'number') return null
+    const bv = doc.bufferViews?.[img.bufferView]
+    if (!bv) return null
+    return Buffer.from(binBuf.subarray(bv.byteOffset ?? 0, (bv.byteOffset ?? 0) + bv.byteLength))
+  }
+
   const positions = readFloatAccessor(prim.attributes.POSITION, 3) ?? proceduralMeshData.positions
   const normals = readFloatAccessor(prim.attributes.NORMAL, 3) ?? proceduralMeshData.normals
   const uvs = readFloatAccessor(prim.attributes.TEXCOORD_0, 2) ?? proceduralMeshData.uvs
   const joints = readJointsAccessor(prim.attributes.JOINTS_0) ?? proceduralMeshData.joints
   const weights = readFloatAccessor(prim.attributes.WEIGHTS_0, 4) ?? proceduralMeshData.weights
   const indices = readIndicesAccessor(prim.indices) ?? proceduralMeshData.indices
+
+  // Preserve custom textures embedded in the manual override GLB (e.g. dual-island 1024x1024 PBR maps)
+  const mat = doc.materials?.[prim.material ?? 0]
+  const overrideBasePng = extractTextureBuffer(mat?.pbrMetallicRoughness?.baseColorTexture)
+  const overrideNormPng = extractTextureBuffer(mat?.normalTexture)
+  const overrideOrmPng = extractTextureBuffer(mat?.pbrMetallicRoughness?.metallicRoughnessTexture ?? mat?.occlusionTexture)
+
+  // Measure pectoral_L (joint 6) root socket from the override mesh so the rig pivot matches the geometry
+  const pectPts = []
+  const vertCount = positions.length / 3
+  for (let i = 0; i < vertCount; i++) {
+    let wPect = 0
+    for (let c = 0; c < 4; c++) {
+      if (joints[i * 4 + c] === 6) wPect += weights[i * 4 + c]
+    }
+    if (wPect > 0.1) {
+      pectPts.push({
+        x: Math.abs(positions[i * 3 + 0]),
+        y: positions[i * 3 + 1],
+        z: positions[i * 3 + 2],
+      })
+    }
+  }
+  let rootFlankX = proceduralMeshData.rootFlankX
+  let pectoralZ = proceduralMeshData.pectoralZ ?? spec.pectoral.z
+  let pectoralY = proceduralMeshData.pectoralY ?? spec.pectoral.y
+  if (pectPts.length > 0) {
+    pectPts.sort((a, b) => a.x - b.x)
+    const rootSample = pectPts.slice(0, Math.max(1, Math.floor(pectPts.length * 0.2)))
+    const avg = rootSample.reduce(
+      (acc, p) => ({
+        x: acc.x + p.x / rootSample.length,
+        y: acc.y + p.y / rootSample.length,
+        z: acc.z + p.z / rootSample.length,
+      }),
+      { x: 0, y: 0, z: 0 },
+    )
+    rootFlankX = Math.max(0.04, avg.x)
+    pectoralZ = avg.z
+    pectoralY = avg.y
+  }
 
   const overrideMeshData = {
     ...proceduralMeshData,
@@ -1441,6 +1497,13 @@ function loadManualOverrideGlb(spec, overrideGlbPath, proceduralMeshData, source
     joints,
     weights,
     indices,
+    rootFlankX,
+    pectoralZ,
+    pectoralY,
+    basePng: overrideBasePng ?? proceduralMeshData.basePng,
+    normPng: overrideNormPng ?? proceduralMeshData.normPng,
+    ormPng: overrideOrmPng ?? proceduralMeshData.ormPng,
+    normalScale: overrideNormPng ? 0.65 : proceduralMeshData.normalScale,
   }
 
   const built = buildSelfContainedContractGlb(spec, overrideMeshData, sourceSha256)
