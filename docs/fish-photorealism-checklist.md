@@ -45,11 +45,22 @@ This checklist captures every anatomical, geometric, UV/PBR texture, rigging, an
   - **Ventral-Snout & Terminal-Snout Coverage**: Expanded the lower-jaw vertical window (`yNorm ∈ [-0.48, -0.02]`) to articulate both ventral-snout surgeonfish/angelfish (`y ≈ -0.18`) and centered terminal-snout species (`y ≈ 0`).
   - **Phase-Lagged Opercular Gill Abduction (`±X`)**: Opercular gill plates (`s ∈ [0.16, 0.30]`) flare outward laterally (`+0.0048 L` per side) with a `90°` (`-π/2`) phase lag behind the mouth opening to simulate water expulsion across the gills.
 
-### 4. Blender Workflow & Non-Destructive UI Testing
+### 4. Fin Geometry, Ray Fluting & Translucency Standard ("See-Through" Fins)
+- [x] **Replaced flat slab fins with 3D ray-fluted geometry & tapered margins**:
+  - **Dorsal & Anal Fin Taper**: Fins taper from structural root thickness (`~2.5 mm`) down to a sharp, delicate anatomical margin (`< 0.5 mm`) rather than a blunt extruded box/slab.
+  - **3D Fin-Ray Corrugation**: Vertices along dorsal, anal, and pectoral fin blades undulate with micro-rib fluting matching the painted fin rays in the texture (convex crests along rays, subtle troughs in inter-radial membrane).
+  - **Curved 3D Pectoral Fan Blades**: Pectoral fins curve organically away from the opercular socket with anatomical ray thickness rather than sitting as planar cutouts.
+- [x] **High-Translucency Gossamer Fin Membranes ("See-Through" Standard)**:
+  - **Pectoral Fin Webbing**: Delicate inter-radial webbing authored with high-transparency alpha (`alpha ≈ 0.22..0.38`) so the background reef, coral polyps, and water column are clearly visible through the fin fan, matching biological reference photographs of live surgeonfish/tangs.
+  - **Dorsal & Anal Margin Translucency**: Trailing margins and inter-spine membranes authored with distinct translucency (`alpha ≈ 0.38..0.55` on anal fin, `0.45..0.60` on dorsal fin), with solid structural spine cores (`alpha = 0.88..1.0`).
+  - **Material Shader Architecture**: Principled BSDF `Alpha` mapped to `BaseColor` alpha channel with `blend_method = 'HASHED'` (or `'BLEND'`), maintaining specular wet glint on ray ridges while transmitting background light through thin membranes.
+- [x] **Rounded Anatomical Ventral Keel & Belly Profile**:
+  - **Eliminated Pointy V-Wedge Keel**: The bottom of the fish (throat, chest, and ventral abdomen, `y ∈ [0.0, 0.70]`) is sculpted with a full, rounded U-shaped cross-section (`half-width ≈ 25–45 mm`) representing the visceral belly cavity, rather than an unnatural razor-sharp inverted triangle or pointy droop.
+  - **Natural Ventral Keel Depth**: Belly depth is smoothly rounded from the throat (`z ≈ -0.32` at `y = 0.50`) to the pelvic keel (`z ≈ -0.44` at `y = 0.15`), cleanly separating the muscular abdomen from the posterior anal fin (`y < 0.05`).
+
+### 5. Blender Workflow & Non-Destructive UI Testing
 - [x] **Synced live Blender 5.2.3 LTS workfile (`src/rendering/assets/splat-fish/blend/blue-tang.blend`)**:
   - Packed `768×768` `BaseColor`, `Normal`, and `ORM` maps into `Blue_Tang_Photoreal_Mat`, applied welded custom split normals, and verified with 3/4, head-on, and top-down renders.
-- [x] **Created non-destructive test copies (`src/rendering/assets/fish/download_testing_copies/`)**:
-  - Generated contract-compliant copies (`blue_tang_fish_paracanthurus_hepatus-copy.glb`, `clownfish-copy.glb`, `zebrasoma_desjardinii-copy.glb`) via `scripts/prepare-download-testing-copies.mjs` without touching `src/rendering/assets/fish/download_testing/`, and wired them into `src/rendering/scene/aquarium.ts`.
 
 ---
 
@@ -75,8 +86,11 @@ This checklist captures every anatomical, geometric, UV/PBR texture, rigging, an
     - *Scaleless/mucous skin* (`mandarin-dragonet`, `tailspot-blenny`): smooth satin skin (`roughness = 0.22`) with cephalic sensory pores and raised fin-ray ribs instead of large ctenoid scales.
     - *Coarse ctenoid scales & preopercular spines* (`flame-angelfish`, `banggai-cardinalfish`, `royal-gramma`): pronounced imbricated scale pockets and gill-cover serrations.
     - *Fine surgeonfish/butterflyfish squamation* (`yellow-tang`, `copperband-butterflyfish`): tight micro-scales + pebble snout pores + deep dorsal/anal spine flutes.
-- [ ] **6. Detached / Articulated Paired Fins & Distinct Median Fin Rays**
-  - Model `pectoral_L` and `pectoral_R` as thin (`1.5–2.0 mm`), ribbed, translucent-edged fan blades socketed cleanly into the opercular shoulder (`spine_1`), and sculpt individual spiny dorsal rays (e.g., first dorsal filament on `firefish`, banner fins on `banggai-cardinalfish`, pelvic fins on `mandarin-dragonet`).
+- [ ] **6. Ray-Fluted 3D Fin Geometry, Rounded Ventral Keel & High-Translucency Webbing**
+  - Model `pectoral_L` and `pectoral_R` as thin, ribbed, highly translucent fan blades socketed cleanly into the opercular shoulder (`spine_1`), with `alpha ≈ 0.22..0.38` on inter-radial webbing so the reef behind is clearly visible through the fan.
+  - Round the ventral belly and throat profile (`y ∈ [0.0, 0.70]`) into a smooth, plump U-shaped hull (`half-width ≈ 25–45 mm`) rather than a pointy V-wedge or knife-edge keel.
+  - Taper dorsal and anal fins from base to a sharp outer margin (`< 0.5 mm`) instead of flat extruded slabs.
+  - Sculpt 3D corrugation (convex ridges along rays, subtle concave troughs between rays) matching texture ray positions, and author distinct translucency (`alpha ≈ 0.38..0.55` on anal fin, `0.45..0.60` on dorsal fin).
 
 ---
 
