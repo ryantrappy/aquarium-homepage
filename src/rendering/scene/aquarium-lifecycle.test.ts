@@ -280,7 +280,11 @@ describe('camera zoom (AQ-62)', () => {
     expect(controller.getCameraZoom().distance).toBeCloseTo(4.5, 2)
     expect(controller.resetZoom()).toBe(false)
     expect(controller.isZoomed()).toBe(false)
-  }, 15000)
+  }, 30000) // AQ-70.3 drive-by, same root cause as the AQ-90 15 s raise:
+  // async GLB start() under full-suite load. This test takes ~14.2 s on
+  // the clean base (94% of 15 s); the added budget-test worker tips it
+  // over. The test itself is synchronous once start() returns; no test
+  // logic changed.
 
   it('zooms to a named focal area and back to the overview', async () => {
     await start()
