@@ -1,0 +1,257 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900">
+<defs><linearGradient id="water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b3d66"/><stop offset="0.55" stop-color="#0a2c4c"/><stop offset="1" stop-color="#061a30"/></linearGradient><linearGradient id="rock" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a5148"/><stop offset="1" stop-color="#2e2822"/></linearGradient><linearGradient id="sand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8ddc2"/><stop offset="1" stop-color="#c9b898"/></linearGradient></defs>
+<rect x="0" y="0" width="1200" height="900" fill="#0a0f14"/>
+<text x="30" y="34" font-size="20" font-weight="700" text-anchor="start" fill="#e8f1f8" font-family="sans-serif">AQ-70.13 — Front-on aquascape layout (rule-of-thirds plan view)</text>
+<text x="30" y="56" font-size="13" font-weight="400" text-anchor="start" fill="#9fb6c6" font-family="sans-serif">Virtual tank ~120 × 60 × 60 cm  •  front-on, viewer at the glass  •  not to scale — proportions follow the AQ-70.13 research</text>
+<rect x="20" y="70" width="1160" height="600" rx="10" fill="url(#water)" stroke="#3a4a5a" stroke-width="3"/>
+<polygon points="180,70 260,70 200,670 120,670" fill="#ffffff" opacity="0.04"/>
+<polygon points="700,70 760,70 700,670 640,670" fill="#ffffff" opacity="0.04"/>
+<polygon points="980,70 1030,70 990,670 940,670" fill="#ffffff" opacity="0.03"/>
+<line x1="407" y1="70" x2="407" y2="670" stroke="#ffffff" stroke-width="1" stroke-dasharray="6 6" opacity="0.28"/>
+<line x1="793" y1="70" x2="793" y2="670" stroke="#ffffff" stroke-width="1" stroke-dasharray="6 6" opacity="0.28"/>
+<line x1="20" y1="270" x2="1180" y2="270" stroke="#ffffff" stroke-width="1" stroke-dasharray="6 6" opacity="0.28"/>
+<line x1="20" y1="470" x2="1180" y2="470" stroke="#ffffff" stroke-width="1" stroke-dasharray="6 6" opacity="0.28"/>
+<text x="407" y="92" font-size="11" font-weight="400" text-anchor="start" fill="#ffffff" font-family="sans-serif">⅓</text>
+<text x="793" y="92" font-size="11" font-weight="400" text-anchor="start" fill="#ffffff" font-family="sans-serif">⅔</text>
+<path d="M150 620 L170 480 L230 400 L300 340 L380 330 L440 380 L480 480 L500 620 Z" fill="#1d2733" opacity="0.85"/>
+<path d="M760 620 L790 500 L850 420 L930 390 L1010 410 L1060 490 L1080 620 Z" fill="#1d2733" opacity="0.85"/>
+<path d="M20 600 Q 300 585 600 598 Q 900 612 1180 596 L1180 670 L20 670 Z" fill="#d9cba6"/>
+<path d="M20 622 Q 400 610 800 624 Q 1000 630 1180 620 L1180 670 L20 670 Z" fill="#c4b28a" opacity="0.7"/>
+<text x="600" y="655" font-size="12" font-weight="600" text-anchor="middle" fill="#5a4a2a" font-family="sans-serif">OPEN SAND FOREGROUND — no rock, no coral; keeps the scape reading as islands, not a wall</text>
+<path d="M70 600 L92 470 L140 380 L185 300 L245 235 L305 195 L365 190 L425 235 L465 310 L500 430 L520 600 Z" fill="url(#rock)" stroke="#1c1712" stroke-width="2"/>
+<path d="M120 420 L300 400 L470 430" stroke="#1c1712" stroke-width="2" fill="none" opacity="0.6"/>
+<path d="M150 500 L320 490 L480 510" stroke="#1c1712" stroke-width="2" fill="none" opacity="0.6"/>
+<path d="M210 300 L360 290" stroke="#1c1712" stroke-width="2" fill="none" opacity="0.6"/>
+<ellipse cx="330" cy="470" rx="34" ry="16" fill="#0a1016"/>
+<text x="330" y="475" font-size="11" font-weight="600" text-anchor="middle" fill="#7fa8c9" font-family="sans-serif">cave</text>
+<path d="M700 600 L722 480 L762 400 L805 340 L862 292 L925 272 L985 282 L1040 330 L1080 420 L1120 520 L1140 600 Z" fill="url(#rock)" stroke="#1c1712" stroke-width="2"/>
+<path d="M740 470 L900 450 L1080 480" stroke="#1c1712" stroke-width="2" fill="none" opacity="0.6"/>
+<path d="M850 600 L860 430 Q 925 380 990 430 L1000 600 Z" fill="#070d14"/>
+<path d="M845 440 Q 925 372 1005 440 L990 470 Q 925 415 860 470 Z" fill="url(#rock)" stroke="#1c1712" stroke-width="2"/>
+<line x1="905" y1="405" x2="898" y2="388" stroke="#c77dff" stroke-width="1.8" stroke-linecap="round"/><line x1="901" y1="396" x2="905" y2="392" stroke="#c77dff" stroke-width="1.1" stroke-linecap="round"/><line x1="905" y1="405" x2="898" y2="380" stroke="#c77dff" stroke-width="1.8" stroke-linecap="round"/><line x1="901" y1="391" x2="906" y2="387" stroke="#c77dff" stroke-width="1.1" stroke-linecap="round"/><line x1="905" y1="405" x2="902" y2="384" stroke="#c77dff" stroke-width="1.8" stroke-linecap="round"/><line x1="903" y1="393" x2="908" y2="389" stroke="#c77dff" stroke-width="1.1" stroke-linecap="round"/><line x1="905" y1="405" x2="905" y2="376" stroke="#c77dff" stroke-width="1.8" stroke-linecap="round"/><line x1="905" y1="389" x2="909" y2="385" stroke="#c77dff" stroke-width="1.1" stroke-linecap="round"/><line x1="905" y1="405" x2="908" y2="381" stroke="#c77dff" stroke-width="1.8" stroke-linecap="round"/><line x1="907" y1="392" x2="911" y2="388" stroke="#c77dff" stroke-width="1.1" stroke-linecap="round"/><line x1="905" y1="405" x2="910" y2="386" stroke="#c77dff" stroke-width="1.8" stroke-linecap="round"/><line x1="908" y1="395" x2="912" y2="391" stroke="#c77dff" stroke-width="1.1" stroke-linecap="round"/><line x1="905" y1="405" x2="916" y2="380" stroke="#c77dff" stroke-width="1.8" stroke-linecap="round"/><line x1="911" y1="391" x2="915" y2="388" stroke="#c77dff" stroke-width="1.1" stroke-linecap="round"/>
+<circle cx="905" cy="405" r="3" fill="#c77dff"/>
+<line x1="950" y1="400" x2="943" y2="384" stroke="#90e0a0" stroke-width="1.6" stroke-linecap="round"/><line x1="946" y1="391" x2="950" y2="388" stroke="#90e0a0" stroke-width="1.0" stroke-linecap="round"/><line x1="950" y1="400" x2="944" y2="377" stroke="#90e0a0" stroke-width="1.6" stroke-linecap="round"/><line x1="947" y1="387" x2="951" y2="384" stroke="#90e0a0" stroke-width="1.0" stroke-linecap="round"/><line x1="950" y1="400" x2="947" y2="381" stroke="#90e0a0" stroke-width="1.6" stroke-linecap="round"/><line x1="949" y1="389" x2="953" y2="386" stroke="#90e0a0" stroke-width="1.0" stroke-linecap="round"/><line x1="950" y1="400" x2="950" y2="374" stroke="#90e0a0" stroke-width="1.6" stroke-linecap="round"/><line x1="950" y1="385" x2="954" y2="382" stroke="#90e0a0" stroke-width="1.0" stroke-linecap="round"/><line x1="950" y1="400" x2="953" y2="378" stroke="#90e0a0" stroke-width="1.6" stroke-linecap="round"/><line x1="952" y1="388" x2="956" y2="385" stroke="#90e0a0" stroke-width="1.0" stroke-linecap="round"/><line x1="950" y1="400" x2="955" y2="383" stroke="#90e0a0" stroke-width="1.6" stroke-linecap="round"/><line x1="953" y1="391" x2="957" y2="387" stroke="#90e0a0" stroke-width="1.0" stroke-linecap="round"/><line x1="950" y1="400" x2="960" y2="377" stroke="#90e0a0" stroke-width="1.6" stroke-linecap="round"/><line x1="955" y1="388" x2="959" y2="384" stroke="#90e0a0" stroke-width="1.0" stroke-linecap="round"/>
+<circle cx="950" cy="400" r="2" fill="#90e0a0"/>
+<text x="925" y="540" font-size="12" font-weight="700" text-anchor="middle" fill="#e8f1f8" font-family="sans-serif">ARCH / swim-through</text>
+<text x="925" y="558" font-size="11" font-weight="400" text-anchor="middle" fill="#9fb6c6" font-family="sans-serif">dark void frames depth</text>
+<path d="M540 600 L560 470 L600 380 L650 380 L680 470 L700 600 Z" fill="#0a2c4c" opacity="0.0"/>
+<line x1="600" y1="640" x2="600" y2="400" stroke="#ffd60a" stroke-width="2" stroke-dasharray="10 6" opacity="0.8"/>
+<polygon points="600,392 592,410 608,410" fill="#ffd60a" opacity="0.9"/>
+<text x="600" y="625" font-size="11" font-weight="700" text-anchor="middle" fill="#ffd60a" font-family="sans-serif">VALLEY</text>
+<text x="600" y="330" font-size="12" font-weight="600" text-anchor="middle" fill="#ffd60a" font-family="sans-serif">swim lane</text>
+<circle cx="793" cy="232" r="12" fill="none" stroke="#ffd60a" stroke-width="2" stroke-dasharray="4 3"/>
+<circle cx="793" cy="232" r="3" fill="#ffd60a"/>
+<text x="793" y="348" font-size="13" font-weight="700" text-anchor="middle" fill="#ffd60a" font-family="sans-serif">FOCAL POINT</text>
+<text x="793" y="366" font-size="11" font-weight="400" text-anchor="middle" fill="#ffd60a" font-family="sans-serif">golden section ≈ ⅔ across</text>
+<line x1="300" y1="205" x2="285" y2="169" stroke="#39d353" stroke-width="3.7" stroke-linecap="round"/><line x1="292" y1="185" x2="301" y2="177" stroke="#39d353" stroke-width="2.3" stroke-linecap="round"/><line x1="300" y1="205" x2="285" y2="152" stroke="#39d353" stroke-width="3.7" stroke-linecap="round"/><line x1="292" y1="176" x2="301" y2="168" stroke="#39d353" stroke-width="2.3" stroke-linecap="round"/><line x1="300" y1="205" x2="294" y2="161" stroke="#39d353" stroke-width="3.7" stroke-linecap="round"/><line x1="297" y1="181" x2="306" y2="173" stroke="#39d353" stroke-width="2.3" stroke-linecap="round"/><line x1="300" y1="205" x2="300" y2="144" stroke="#39d353" stroke-width="3.7" stroke-linecap="round"/><line x1="300" y1="171" x2="309" y2="163" stroke="#39d353" stroke-width="2.3" stroke-linecap="round"/><line x1="300" y1="205" x2="307" y2="155" stroke="#39d353" stroke-width="3.7" stroke-linecap="round"/><line x1="304" y1="177" x2="313" y2="169" stroke="#39d353" stroke-width="2.3" stroke-linecap="round"/><line x1="300" y1="205" x2="311" y2="166" stroke="#39d353" stroke-width="3.7" stroke-linecap="round"/><line x1="306" y1="184" x2="315" y2="176" stroke="#39d353" stroke-width="2.3" stroke-linecap="round"/><line x1="300" y1="205" x2="322" y2="153" stroke="#39d353" stroke-width="3.7" stroke-linecap="round"/><line x1="312" y1="176" x2="321" y2="168" stroke="#39d353" stroke-width="2.3" stroke-linecap="round"/>
+<circle cx="300" cy="205" r="6" fill="#39d353"/>
+<line x1="255" y1="215" x2="244" y2="190" stroke="#7ee081" stroke-width="2.6" stroke-linecap="round"/><line x1="249" y1="201" x2="256" y2="196" stroke="#7ee081" stroke-width="1.6" stroke-linecap="round"/><line x1="255" y1="215" x2="245" y2="178" stroke="#7ee081" stroke-width="2.6" stroke-linecap="round"/><line x1="249" y1="195" x2="256" y2="189" stroke="#7ee081" stroke-width="1.6" stroke-linecap="round"/><line x1="255" y1="215" x2="251" y2="184" stroke="#7ee081" stroke-width="2.6" stroke-linecap="round"/><line x1="253" y1="198" x2="259" y2="192" stroke="#7ee081" stroke-width="1.6" stroke-linecap="round"/><line x1="255" y1="215" x2="255" y2="173" stroke="#7ee081" stroke-width="2.6" stroke-linecap="round"/><line x1="255" y1="192" x2="261" y2="186" stroke="#7ee081" stroke-width="1.6" stroke-linecap="round"/><line x1="255" y1="215" x2="260" y2="180" stroke="#7ee081" stroke-width="2.6" stroke-linecap="round"/><line x1="258" y1="196" x2="264" y2="190" stroke="#7ee081" stroke-width="1.6" stroke-linecap="round"/><line x1="255" y1="215" x2="262" y2="188" stroke="#7ee081" stroke-width="2.6" stroke-linecap="round"/><line x1="259" y1="200" x2="265" y2="195" stroke="#7ee081" stroke-width="1.6" stroke-linecap="round"/><line x1="255" y1="215" x2="270" y2="179" stroke="#7ee081" stroke-width="2.6" stroke-linecap="round"/><line x1="263" y1="195" x2="270" y2="190" stroke="#7ee081" stroke-width="1.6" stroke-linecap="round"/>
+<circle cx="255" cy="215" r="4" fill="#7ee081"/>
+<line x1="355" y1="215" x2="346" y2="193" stroke="#2fbf71" stroke-width="2.2" stroke-linecap="round"/><line x1="350" y1="203" x2="355" y2="198" stroke="#2fbf71" stroke-width="1.4" stroke-linecap="round"/><line x1="355" y1="215" x2="346" y2="183" stroke="#2fbf71" stroke-width="2.2" stroke-linecap="round"/><line x1="350" y1="197" x2="356" y2="192" stroke="#2fbf71" stroke-width="1.4" stroke-linecap="round"/><line x1="355" y1="215" x2="351" y2="188" stroke="#2fbf71" stroke-width="2.2" stroke-linecap="round"/><line x1="353" y1="200" x2="359" y2="195" stroke="#2fbf71" stroke-width="1.4" stroke-linecap="round"/><line x1="355" y1="215" x2="355" y2="178" stroke="#2fbf71" stroke-width="2.2" stroke-linecap="round"/><line x1="355" y1="195" x2="361" y2="190" stroke="#2fbf71" stroke-width="1.4" stroke-linecap="round"/><line x1="355" y1="215" x2="359" y2="184" stroke="#2fbf71" stroke-width="2.2" stroke-linecap="round"/><line x1="357" y1="198" x2="363" y2="193" stroke="#2fbf71" stroke-width="1.4" stroke-linecap="round"/><line x1="355" y1="215" x2="361" y2="191" stroke="#2fbf71" stroke-width="2.2" stroke-linecap="round"/><line x1="359" y1="202" x2="364" y2="197" stroke="#2fbf71" stroke-width="1.4" stroke-linecap="round"/><line x1="355" y1="215" x2="368" y2="183" stroke="#2fbf71" stroke-width="2.2" stroke-linecap="round"/><line x1="362" y1="198" x2="368" y2="193" stroke="#2fbf71" stroke-width="1.4" stroke-linecap="round"/>
+<circle cx="355" cy="215" r="4" fill="#2fbf71"/>
+<text x="300" y="136" font-size="12" font-weight="600" text-anchor="middle" fill="#bfe9c9" font-family="sans-serif">SPS crest — Acropora staghorn</text>
+<line x1="880" y1="285" x2="869" y2="258" stroke="#e879f9" stroke-width="2.7" stroke-linecap="round"/><line x1="874" y1="270" x2="881" y2="264" stroke="#e879f9" stroke-width="1.7" stroke-linecap="round"/><line x1="880" y1="285" x2="869" y2="246" stroke="#e879f9" stroke-width="2.7" stroke-linecap="round"/><line x1="874" y1="263" x2="881" y2="257" stroke="#e879f9" stroke-width="1.7" stroke-linecap="round"/><line x1="880" y1="285" x2="876" y2="252" stroke="#e879f9" stroke-width="2.7" stroke-linecap="round"/><line x1="878" y1="267" x2="884" y2="261" stroke="#e879f9" stroke-width="1.7" stroke-linecap="round"/><line x1="880" y1="285" x2="880" y2="240" stroke="#e879f9" stroke-width="2.7" stroke-linecap="round"/><line x1="880" y1="260" x2="887" y2="254" stroke="#e879f9" stroke-width="1.7" stroke-linecap="round"/><line x1="880" y1="285" x2="885" y2="248" stroke="#e879f9" stroke-width="2.7" stroke-linecap="round"/><line x1="883" y1="265" x2="890" y2="259" stroke="#e879f9" stroke-width="1.7" stroke-linecap="round"/><line x1="880" y1="285" x2="888" y2="256" stroke="#e879f9" stroke-width="2.7" stroke-linecap="round"/><line x1="884" y1="269" x2="891" y2="263" stroke="#e879f9" stroke-width="1.7" stroke-linecap="round"/><line x1="880" y1="285" x2="896" y2="247" stroke="#e879f9" stroke-width="2.7" stroke-linecap="round"/><line x1="889" y1="264" x2="896" y2="258" stroke="#e879f9" stroke-width="1.7" stroke-linecap="round"/>
+<circle cx="880" cy="285" r="4" fill="#e879f9"/>
+<line x1="1010" y1="300" x2="1001" y2="278" stroke="#f0abfc" stroke-width="2.2" stroke-linecap="round"/><line x1="1005" y1="288" x2="1010" y2="283" stroke="#f0abfc" stroke-width="1.4" stroke-linecap="round"/><line x1="1010" y1="300" x2="1001" y2="268" stroke="#f0abfc" stroke-width="2.2" stroke-linecap="round"/><line x1="1005" y1="282" x2="1011" y2="277" stroke="#f0abfc" stroke-width="1.4" stroke-linecap="round"/><line x1="1010" y1="300" x2="1006" y2="273" stroke="#f0abfc" stroke-width="2.2" stroke-linecap="round"/><line x1="1008" y1="285" x2="1014" y2="280" stroke="#f0abfc" stroke-width="1.4" stroke-linecap="round"/><line x1="1010" y1="300" x2="1010" y2="263" stroke="#f0abfc" stroke-width="2.2" stroke-linecap="round"/><line x1="1010" y1="280" x2="1016" y2="275" stroke="#f0abfc" stroke-width="1.4" stroke-linecap="round"/><line x1="1010" y1="300" x2="1014" y2="269" stroke="#f0abfc" stroke-width="2.2" stroke-linecap="round"/><line x1="1012" y1="283" x2="1018" y2="278" stroke="#f0abfc" stroke-width="1.4" stroke-linecap="round"/><line x1="1010" y1="300" x2="1016" y2="276" stroke="#f0abfc" stroke-width="2.2" stroke-linecap="round"/><line x1="1014" y1="287" x2="1019" y2="282" stroke="#f0abfc" stroke-width="1.4" stroke-linecap="round"/><line x1="1010" y1="300" x2="1023" y2="268" stroke="#f0abfc" stroke-width="2.2" stroke-linecap="round"/><line x1="1017" y1="283" x2="1023" y2="278" stroke="#f0abfc" stroke-width="1.4" stroke-linecap="round"/>
+<circle cx="1010" cy="300" r="4" fill="#f0abfc"/>
+<ellipse cx="900" cy="420" rx="42" ry="10" fill="#f5d0a9"/>
+<ellipse cx="900" cy="414" rx="30" ry="7" fill="#f7e0c0"/>
+<text x="900" y="445" font-size="11" font-weight="400" text-anchor="middle" fill="#e8f1f8" font-family="sans-serif">plating Montipora</text>
+<line x1="793" y1="300" x2="767" y2="273" stroke="#e5383b" stroke-width="3.0" stroke-linecap="round"/>
+<line x1="793" y1="300" x2="769" y2="264" stroke="#e5383b" stroke-width="3.0" stroke-linecap="round"/>
+<line x1="793" y1="300" x2="775" y2="255" stroke="#e5383b" stroke-width="3.0" stroke-linecap="round"/>
+<line x1="793" y1="300" x2="783" y2="247" stroke="#e5383b" stroke-width="3.0" stroke-linecap="round"/>
+<line x1="793" y1="300" x2="793" y2="241" stroke="#e5383b" stroke-width="3.0" stroke-linecap="round"/>
+<line x1="793" y1="300" x2="803" y2="247" stroke="#e5383b" stroke-width="3.0" stroke-linecap="round"/>
+<line x1="793" y1="300" x2="811" y2="255" stroke="#e5383b" stroke-width="3.0" stroke-linecap="round"/>
+<line x1="793" y1="300" x2="817" y2="264" stroke="#e5383b" stroke-width="3.0" stroke-linecap="round"/>
+<line x1="793" y1="300" x2="819" y2="273" stroke="#e5383b" stroke-width="3.0" stroke-linecap="round"/>
+<path d="M 747 276 Q 793 230 839 276" stroke="#e5383b" fill="none" stroke-width="2.2" opacity="0.8"/>
+<text x="793" y="200" font-size="12" font-weight="700" text-anchor="middle" fill="#ff8a80" font-family="sans-serif">RED GORGONIAN</text>
+<circle cx="395" cy="380" r="26" fill="#9d4edd" opacity="0.95"/>
+<circle cx="383" cy="372" r="6" fill="#e8c8ff" opacity="0.85"/>
+<circle cx="405" cy="368" r="6" fill="#e8c8ff" opacity="0.85"/>
+<circle cx="395" cy="383" r="6" fill="#e8c8ff" opacity="0.85"/>
+<circle cx="392" cy="366" r="6" fill="#e8c8ff" opacity="0.85"/>
+<circle cx="408" cy="389" r="6" fill="#e8c8ff" opacity="0.85"/>
+<circle cx="381" cy="389" r="6" fill="#e8c8ff" opacity="0.85"/>
+<circle cx="445" cy="405" r="20" fill="#c77dff" opacity="0.95"/>
+<circle cx="436" cy="399" r="4" fill="#e8c8ff" opacity="0.85"/>
+<circle cx="453" cy="396" r="4" fill="#e8c8ff" opacity="0.85"/>
+<circle cx="445" cy="407" r="4" fill="#e8c8ff" opacity="0.85"/>
+<circle cx="443" cy="394" r="4" fill="#e8c8ff" opacity="0.85"/>
+<circle cx="455" cy="412" r="4" fill="#e8c8ff" opacity="0.85"/>
+<circle cx="434" cy="412" r="4" fill="#e8c8ff" opacity="0.85"/>
+<circle cx="770" cy="430" r="22" fill="#ff70a6" opacity="0.95"/>
+<circle cx="760" cy="423" r="5" fill="#e8c8ff" opacity="0.85"/>
+<circle cx="779" cy="420" r="5" fill="#e8c8ff" opacity="0.85"/>
+<circle cx="770" cy="432" r="5" fill="#e8c8ff" opacity="0.85"/>
+<circle cx="768" cy="418" r="5" fill="#e8c8ff" opacity="0.85"/>
+<circle cx="781" cy="438" r="5" fill="#e8c8ff" opacity="0.85"/>
+<circle cx="758" cy="438" r="5" fill="#e8c8ff" opacity="0.85"/>
+<text x="420" y="350" font-size="12" font-weight="600" text-anchor="middle" fill="#e0c8f5" font-family="sans-serif">LPS mid — Euphyllia torch / hammer</text>
+<circle cx="148" cy="530" r="8" fill="#ff5d8f"/>
+<circle cx="148" cy="530" r="4" fill="#fff" opacity="0.8"/>
+<circle cx="170" cy="530" r="8" fill="#39d353"/>
+<circle cx="170" cy="530" r="4" fill="#fff" opacity="0.8"/>
+<circle cx="192" cy="530" r="8" fill="#ff5d8f"/>
+<circle cx="192" cy="530" r="4" fill="#fff" opacity="0.8"/>
+<circle cx="148" cy="545" r="8" fill="#39d353"/>
+<circle cx="148" cy="545" r="4" fill="#fff" opacity="0.8"/>
+<circle cx="170" cy="545" r="8" fill="#ff5d8f"/>
+<circle cx="170" cy="545" r="4" fill="#fff" opacity="0.8"/>
+<circle cx="192" cy="545" r="8" fill="#39d353"/>
+<circle cx="192" cy="545" r="4" fill="#fff" opacity="0.8"/>
+<circle cx="148" cy="560" r="8" fill="#ff5d8f"/>
+<circle cx="148" cy="560" r="4" fill="#fff" opacity="0.8"/>
+<circle cx="170" cy="560" r="8" fill="#39d353"/>
+<circle cx="170" cy="560" r="4" fill="#fff" opacity="0.8"/>
+<circle cx="192" cy="560" r="8" fill="#ff5d8f"/>
+<circle cx="192" cy="560" r="4" fill="#fff" opacity="0.8"/>
+<circle cx="1050" cy="531" r="7" fill="#ffb703"/>
+<circle cx="1050" cy="531" r="3" fill="#fff" opacity="0.8"/>
+<circle cx="1070" cy="531" r="7" fill="#c77dff"/>
+<circle cx="1070" cy="531" r="3" fill="#fff" opacity="0.8"/>
+<circle cx="1090" cy="531" r="7" fill="#ffb703"/>
+<circle cx="1090" cy="531" r="3" fill="#fff" opacity="0.8"/>
+<circle cx="1050" cy="545" r="7" fill="#c77dff"/>
+<circle cx="1050" cy="545" r="3" fill="#fff" opacity="0.8"/>
+<circle cx="1070" cy="545" r="7" fill="#ffb703"/>
+<circle cx="1070" cy="545" r="3" fill="#fff" opacity="0.8"/>
+<circle cx="1090" cy="545" r="7" fill="#c77dff"/>
+<circle cx="1090" cy="545" r="3" fill="#fff" opacity="0.8"/>
+<circle cx="1050" cy="559" r="7" fill="#ffb703"/>
+<circle cx="1050" cy="559" r="3" fill="#fff" opacity="0.8"/>
+<circle cx="1070" cy="559" r="7" fill="#c77dff"/>
+<circle cx="1070" cy="559" r="3" fill="#fff" opacity="0.8"/>
+<circle cx="1090" cy="559" r="7" fill="#ffb703"/>
+<circle cx="1090" cy="559" r="3" fill="#fff" opacity="0.8"/>
+<text x="170" y="590" font-size="11" font-weight="400" text-anchor="middle" fill="#e8f1f8" font-family="sans-serif">zoanthid mat</text>
+<text x="1070" y="590" font-size="11" font-weight="400" text-anchor="middle" fill="#e8f1f8" font-family="sans-serif">zoanthid mat</text>
+<ellipse cx="755" cy="545" rx="34" ry="16" fill="#6a994e"/>
+<ellipse cx="755" cy="536" rx="22" ry="10" fill="#8ab661"/>
+<line x1="470" y1="525" x2="470" y2="504" stroke="#7ee081" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="470" cy="504" r="3" fill="#c084fc"/>
+<line x1="470" y1="525" x2="481" y2="506" stroke="#7ee081" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="481" cy="506" r="3" fill="#c084fc"/>
+<line x1="470" y1="525" x2="490" y2="512" stroke="#7ee081" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="490" cy="512" r="3" fill="#c084fc"/>
+<line x1="470" y1="525" x2="495" y2="520" stroke="#7ee081" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="495" cy="520" r="3" fill="#c084fc"/>
+<line x1="470" y1="525" x2="495" y2="530" stroke="#7ee081" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="495" cy="530" r="3" fill="#c084fc"/>
+<line x1="470" y1="525" x2="490" y2="538" stroke="#7ee081" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="490" cy="538" r="3" fill="#c084fc"/>
+<line x1="470" y1="525" x2="481" y2="544" stroke="#7ee081" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="481" cy="544" r="3" fill="#c084fc"/>
+<line x1="470" y1="525" x2="470" y2="546" stroke="#7ee081" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="470" cy="546" r="3" fill="#c084fc"/>
+<line x1="470" y1="525" x2="459" y2="544" stroke="#7ee081" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="459" cy="544" r="3" fill="#c084fc"/>
+<line x1="470" y1="525" x2="450" y2="538" stroke="#7ee081" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="450" cy="538" r="3" fill="#c084fc"/>
+<line x1="470" y1="525" x2="445" y2="530" stroke="#7ee081" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="445" cy="530" r="3" fill="#c084fc"/>
+<line x1="470" y1="525" x2="445" y2="520" stroke="#7ee081" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="445" cy="520" r="3" fill="#c084fc"/>
+<line x1="470" y1="525" x2="450" y2="512" stroke="#7ee081" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="450" cy="512" r="3" fill="#c084fc"/>
+<line x1="470" y1="525" x2="459" y2="506" stroke="#7ee081" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="459" cy="506" r="3" fill="#c084fc"/>
+<circle cx="470" cy="525" r="7" fill="#2e7d32"/>
+<line x1="34" y1="200" x2="34" y2="320" stroke="#e8f1f8" stroke-width="2"/>
+<line x1="34" y1="200" x2="44" y2="200" stroke="#e8f1f8" stroke-width="2"/>
+<line x1="34" y1="320" x2="44" y2="320" stroke="#e8f1f8" stroke-width="2"/>
+<text x="48" y="264" font-size="11" font-weight="700" fill="#e8f1f8" font-family="sans-serif" transform="rotate(-90 48 260)" text-anchor="middle">SPS — UPPER</text>
+<line x1="34" y1="320" x2="34" y2="470" stroke="#e8f1f8" stroke-width="2"/>
+<line x1="34" y1="320" x2="44" y2="320" stroke="#e8f1f8" stroke-width="2"/>
+<line x1="34" y1="470" x2="44" y2="470" stroke="#e8f1f8" stroke-width="2"/>
+<text x="48" y="399" font-size="11" font-weight="700" fill="#e8f1f8" font-family="sans-serif" transform="rotate(-90 48 395)" text-anchor="middle">LPS — MID</text>
+<line x1="34" y1="470" x2="34" y2="600" stroke="#e8f1f8" stroke-width="2"/>
+<line x1="34" y1="470" x2="44" y2="470" stroke="#e8f1f8" stroke-width="2"/>
+<line x1="34" y1="600" x2="44" y2="600" stroke="#e8f1f8" stroke-width="2"/>
+<text x="48" y="539" font-size="11" font-weight="700" fill="#e8f1f8" font-family="sans-serif" transform="rotate(-90 48 535)" text-anchor="middle">SOFTIES — LOW</text>
+<line x1="90" y1="120" x2="1110" y2="120" stroke="#7fd4ff" stroke-width="2" stroke-dasharray="12 8" opacity="0.7"/>
+<polygon points="1110,120 1092,112 1092,128" fill="#7fd4ff" opacity="0.8"/>
+<polygon points="90,120 108,112 108,128" fill="#7fd4ff" opacity="0.8"/>
+<text x="600" y="108" font-size="12" font-weight="600" text-anchor="middle" fill="#7fd4ff" font-family="sans-serif">OPEN SWIMMING LANE — schooling + open-water fish (≥ ~20% open water)</text>
+<g transform="translate(215 165) rotate(-6) scale(0.75)"><polygon points="-16,0 -28,-9 -28,9" fill="#2a9d8f"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#3ec5a7"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#a7f3d0" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#3ec5a7"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(250 150) rotate(-1) scale(0.75)"><polygon points="-16,0 -28,-9 -28,9" fill="#2a9d8f"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#3ec5a7"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#a7f3d0" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#3ec5a7"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(285 168) rotate(4) scale(0.75)"><polygon points="-16,0 -28,-9 -28,9" fill="#2a9d8f"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#3ec5a7"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#a7f3d0" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#3ec5a7"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(320 150) rotate(-6) scale(0.75)"><polygon points="-16,0 -28,-9 -28,9" fill="#2a9d8f"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#3ec5a7"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#a7f3d0" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#3ec5a7"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(350 168) rotate(-1) scale(0.75)"><polygon points="-16,0 -28,-9 -28,9" fill="#2a9d8f"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#3ec5a7"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#a7f3d0" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#3ec5a7"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(860 235) rotate(4) scale(0.8)"><polygon points="-16,0 -28,-9 -28,9" fill="#e36414"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#fb8500"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#ffb703" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#fb8500"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(905 220) rotate(-4) scale(0.8)"><polygon points="-16,0 -28,-9 -28,9" fill="#e36414"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#fb8500"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#ffb703" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#fb8500"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(950 238) rotate(4) scale(0.8)"><polygon points="-16,0 -28,-9 -28,9" fill="#e36414"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#fb8500"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#ffb703" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#fb8500"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(995 222) rotate(-4) scale(0.8)"><polygon points="-16,0 -28,-9 -28,9" fill="#e36414"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#fb8500"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#ffb703" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#fb8500"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(600 300) rotate(8) scale(1.05)"><polygon points="-16,0 -28,-9 -28,9" fill="#ffd60a"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#4361ee"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#4cc9f0" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#4361ee"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(500 460) rotate(35) scale(1.0)"><polygon points="-16,0 -28,-9 -28,9" fill="#eab308"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#ffd60a"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#ffee99" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#ffd60a"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(470 500) rotate(-15) scale(0.8)"><polygon points="-16,0 -28,-9 -28,9" fill="#e36414"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#fb8500"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#ffffff" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#fb8500"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(330 445) rotate(195) scale(0.7)"><polygon points="-16,0 -28,-9 -28,9" fill="#7b2cbf"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#9d4edd"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#ffb703" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#9d4edd"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(850 380) rotate(-10) scale(0.75)"><polygon points="-16,0 -28,-9 -28,9" fill="#adb5bd"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#e9ecef"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#ffffff" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#e9ecef"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(640 575) rotate(75) scale(0.7)"><polygon points="-16,0 -28,-9 -28,9" fill="#e5383b"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#f8f9fa"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#ff6b6b" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#f8f9fa"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(770 600) rotate(-5) scale(0.7)"><polygon points="-16,0 -28,-9 -28,9" fill="#eab308"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#ffd60a"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#ffee99" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#ffd60a"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(255 585) rotate(10) scale(0.65)"><polygon points="-16,0 -28,-9 -28,9" fill="#118ab2"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#2ec4b6"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#ff9f1c" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#2ec4b6"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(295 415) rotate(-8) scale(0.55)"><polygon points="-16,0 -28,-9 -28,9" fill="#6c757d"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#8d99ae"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#edf2f4" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#8d99ae"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(720 480) rotate(20) scale(0.6)"><polygon points="-16,0 -28,-9 -28,9" fill="#e36414"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#ff8500"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#4361ee" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#ff8500"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(1010 185) rotate(-12) scale(0.7)"><polygon points="-16,0 -28,-9 -28,9" fill="#d90429"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#ef476f"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#ff9f1c" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#ef476f"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(1060 470) rotate(15) scale(0.75)"><polygon points="-16,0 -28,-9 -28,9" fill="#d90429"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#ef233c"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#ff8500" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#ef233c"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g transform="translate(545 520) rotate(30) scale(0.75)"><polygon points="-16,0 -28,-9 -28,9" fill="#ffd60a"/><ellipse cx="0" cy="0" rx="17" ry="8" fill="#f8f9fa"/><ellipse cx="2" cy="3" rx="12" ry="4.5" fill="#ffd60a" opacity="0.7"/><polygon points="-2,-7 4,-13 8,-6" fill="#f8f9fa"/><circle cx="10" cy="-2" r="1.8" fill="#101418"/></g>
+<g><circle cx="498" cy="492" r="11" fill="#ffd60a" stroke="#101418" stroke-width="1.5"/><text x="498" y="496" font-size="12" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">1</text></g>
+<g><circle cx="285" cy="165" r="11" fill="#ffd60a" stroke="#101418" stroke-width="1.5"/><text x="285" y="169" font-size="12" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">2</text></g>
+<g><circle cx="925" cy="228" r="11" fill="#ffd60a" stroke="#101418" stroke-width="1.5"/><text x="925" y="232" font-size="12" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">3</text></g>
+<g><circle cx="330" cy="445" r="11" fill="#ffd60a" stroke="#101418" stroke-width="1.5"/><text x="330" y="449" font-size="12" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">4</text></g>
+<g><circle cx="828" cy="402" r="11" fill="#ffd60a" stroke="#101418" stroke-width="1.5"/><text x="828" y="406" font-size="12" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">5</text></g>
+<g><circle cx="640" cy="575" r="11" fill="#ffd60a" stroke="#101418" stroke-width="1.5"/><text x="640" y="579" font-size="12" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">6</text></g>
+<g><circle cx="770" cy="600" r="11" fill="#ffd60a" stroke="#101418" stroke-width="1.5"/><text x="770" y="604" font-size="12" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">7</text></g>
+<g><circle cx="255" cy="585" r="11" fill="#ffd60a" stroke="#101418" stroke-width="1.5"/><text x="255" y="589" font-size="12" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">8</text></g>
+<g><circle cx="295" cy="415" r="11" fill="#ffd60a" stroke="#101418" stroke-width="1.5"/><text x="295" y="419" font-size="12" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">9</text></g>
+<g><circle cx="528" cy="438" r="11" fill="#ffd60a" stroke="#101418" stroke-width="1.5"/><text x="528" y="442" font-size="12" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">10</text></g>
+<g><circle cx="720" cy="480" r="11" fill="#ffd60a" stroke="#101418" stroke-width="1.5"/><text x="720" y="484" font-size="12" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">11</text></g>
+<g><circle cx="568" cy="545" r="11" fill="#ffd60a" stroke="#101418" stroke-width="1.5"/><text x="568" y="549" font-size="12" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">12</text></g>
+<g><circle cx="1088" cy="452" r="11" fill="#ffd60a" stroke="#101418" stroke-width="1.5"/><text x="1088" y="456" font-size="12" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">13</text></g>
+<rect x="20" y="690" width="1160" height="190" rx="8" fill="#101820" stroke="#3a4a5a" stroke-width="1.5"/>
+<text x="40" y="722" font-size="14" font-weight="700" text-anchor="start" fill="#e8f1f8" font-family="sans-serif">INTERACTION HOTSPOTS — where each species lives and what it does (research: AQ-45)</text>
+<circle cx="48" cy="744" r="8" fill="#ffd60a"/>
+<text x="48" y="748" font-size="10" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">1</text>
+<text x="64" y="748" font-size="11.5" fill="#dbe7ef" font-family="sans-serif">Clownfish hosts in bubble-tip anemone (low, left island) — obligate symbiosis; defends its anemone.</text>
+<circle cx="48" cy="762" r="8" fill="#ffd60a"/>
+<text x="48" y="766" font-size="10" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">2</text>
+<text x="64" y="766" font-size="11.5" fill="#dbe7ef" font-family="sans-serif">Blue-green chromis school above branching Acropora — dive into branches when startled.</text>
+<circle cx="48" cy="780" r="8" fill="#ffd60a"/>
+<text x="48" y="784" font-size="10" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">3</text>
+<text x="64" y="784" font-size="11.5" fill="#dbe7ef" font-family="sans-serif">Lyretail anthias shoal above the right crest — open-water plankton pickers; Acropora is their bunker.</text>
+<circle cx="48" cy="798" r="8" fill="#ffd60a"/>
+<text x="48" y="802" font-size="10" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">4</text>
+<text x="64" y="802" font-size="11.5" fill="#dbe7ef" font-family="sans-serif">Royal gramma claims a cave / ledge — belly-to-rock, often upside-down under the ceiling.</text>
+<circle cx="48" cy="816" r="8" fill="#ffd60a"/>
+<text x="48" y="820" font-size="10" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">5</text>
+<text x="64" y="820" font-size="11.5" fill="#dbe7ef" font-family="sans-serif">Banggai cardinalfish hovers by branching coral — slow, cover-bound; retreats into branches.</text>
+<circle cx="48" cy="834" r="8" fill="#ffd60a"/>
+<text x="48" y="838" font-size="10" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">6</text>
+<text x="64" y="838" font-size="11.5" fill="#dbe7ef" font-family="sans-serif">Firefish hovers above its sand burrow in the valley — darts in at the first sign of danger.</text>
+<circle cx="48" cy="852" r="8" fill="#ffd60a"/>
+<text x="48" y="856" font-size="10" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">7</text>
+<text x="64" y="856" font-size="11.5" fill="#dbe7ef" font-family="sans-serif">Yellow watchman goby stands lookout at its burrow mouth — shared burrow with a pistol shrimp.</text>
+<circle cx="628" cy="744" r="8" fill="#ffd60a"/>
+<text x="628" y="748" font-size="10" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">8</text>
+<text x="644" y="748" font-size="11.5" fill="#dbe7ef" font-family="sans-serif">Mandarin dragonet hops across low rubble — slow copepod hunter, hugging the substrate.</text>
+<circle cx="628" cy="762" r="8" fill="#ffd60a"/>
+<text x="628" y="766" font-size="10" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">9</text>
+<text x="644" y="766" font-size="11.5" fill="#dbe7ef" font-family="sans-serif">Tailspot blenny perches on a rock ledge — grazes film algae, darts into a hole when startled.</text>
+<circle cx="628" cy="780" r="8" fill="#ffd60a"/>
+<text x="628" y="784" font-size="10" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">10</text>
+<text x="644" y="784" font-size="11.5" fill="#dbe7ef" font-family="sans-serif">Yellow tang grazes algae along the rock face — daytime grazer, rests in a crevice at night.</text>
+<circle cx="628" cy="798" r="8" fill="#ffd60a"/>
+<text x="628" y="802" font-size="10" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">11</text>
+<text x="644" y="802" font-size="11.5" fill="#dbe7ef" font-family="sans-serif">Six-line wrasse patrols crevices — stop-and-go hunting loops through the rockwork.</text>
+<circle cx="628" cy="816" r="8" fill="#ffd60a"/>
+<text x="628" y="820" font-size="10" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">12</text>
+<text x="644" y="820" font-size="11.5" fill="#dbe7ef" font-family="sans-serif">Copperband butterflyfish probes crevices with its long snout — picks at polyps and pests.</text>
+<circle cx="628" cy="834" r="8" fill="#ffd60a"/>
+<text x="628" y="838" font-size="10" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">13</text>
+<text x="644" y="838" font-size="11.5" fill="#dbe7ef" font-family="sans-serif">Flame angelfish grazes rock and sponge — roams the reef face, nips fleshy coral (with caution).</text>
+<circle cx="628" cy="852" r="8" fill="#ffd60a"/>
+<text x="628" y="856" font-size="10" font-weight="700" text-anchor="middle" fill="#101418" font-family="sans-serif">★</text>
+<text x="644" y="856" font-size="11.5" fill="#dbe7ef" font-family="sans-serif">Blue tang (valley lane) — open-water cruiser; juveniles shelter in branching coral.</text>
+</svg>
