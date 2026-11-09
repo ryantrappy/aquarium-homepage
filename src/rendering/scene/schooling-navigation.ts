@@ -14,7 +14,19 @@ export type SchoolingPeer = Readonly<{
   position: Vec3
   yaw: number
   speed: number
+  /**
+   * Legacy habitat-obstacle clearance (fish.clearance, >= 0.5). Used ONLY
+   * for segment safety against rocks/walls — never for fish-to-fish
+   * separation (AQ-85).
+   */
   clearanceRadius: number
+  /**
+   * Physical body radius for fish-to-fish personal-space separation
+   * (AQ-85; see `fishBodyRadiusM` in fish-scale.ts). Species-proportional,
+   * ~0.04–0.08, so two fish separate by their actual body radii plus a
+   * small buffer instead of the legacy >= 1.12m clearance bubbles.
+   */
+  bodyRadiusM: number
   startleSeconds: number
 }>
 
@@ -75,6 +87,24 @@ export const SPECIES_SOCIAL_GROUPING_MODE: Readonly<
 })
 
 const MAX_STEERING_OFFSET_PER_SEC = 0.45
+
+/**
+ * AQ-85: buffer added to the two physical body radii for the personal-space
+ * minimum separation, so `minSep = self.bodyRadiusM + peer.bodyRadiusM +
+ * SCHOOLING_SEPARATION_BUFFER_M` (~0.14m–0.22m) instead of the legacy
+ * `clearanceRadius + clearanceRadius + 0.12` (>= 1.12m).
+ */
+export const SCHOOLING_SEPARATION_BUFFER_M = 0.06
+
+/**
+ * AQ-85: cap on the accumulated separation vector (pre-combined-clamp
+ * steering units). A single fully-overlapping neighbor contributes at most
+ * sqrt(0.55^2 + 0.35^2 + 0.55^2) ~= 0.85, so capping the total at 1.0 means
+ * a tight cluster can never push an approaching fish harder than about one
+ * fish at full overlap — the multi-neighbor repulsion wall is gone, while
+ * a lone overlapping neighbor still separates at full strength.
+ */
+export const MAX_SEPARATION_MAGNITUDE = 1
 
 function clamp(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) return min
@@ -168,7 +198,10 @@ export function evaluateSchoolingSteering(input: {
     const dist = Math.hypot(rx, ry, rz)
     if (dist <= 1e-6) continue
 
-    const minSep = self.clearanceRadius + peer.clearanceRadius + 0.12
+    // AQ-85: personal-space separation uses the physical body radii, not
+    // the legacy habitat-obstacle clearance — a school of fish spaced
+    // 0.3m–0.8m apart must not fuse into one multi-meter exclusion zone.
+    const minSep = self.bodyRadiusM + peer.bodyRadiusM + SCHOOLING_SEPARATION_BUFFER_M
     if (dist < minSep) {
       const weight = (minSep - dist) / minSep
       sepX += (rx / dist) * weight * 0.55
@@ -195,6 +228,19 @@ export function evaluateSchoolingSteering(input: {
       groupNeighbors++
       totalNeighbors++
     }
+  }
+
+  // AQ-85: cap the accumulated separation vector before combining, so an
+  // approaching fish near a tight cluster feels at most ~one fish worth of
+  // repulsion instead of one push per school member. The cap only binds
+  // when several neighbors pile onto the same side; a lone overlapping
+  // neighbor still separates at full strength.
+  const rawSepMag = Math.hypot(sepX, sepY, sepZ)
+  if (rawSepMag > MAX_SEPARATION_MAGNITUDE) {
+    const capScale = MAX_SEPARATION_MAGNITUDE / rawSepMag
+    sepX *= capScale
+    sepY *= capScale
+    sepZ *= capScale
   }
 
   // AQ-84: keep the three steering components separate so callers can route
@@ -298,6 +344,7 @@ export function benchmarkSchoolingStep(
     yaw: (i * 0.4) % (Math.PI * 2),
     speed: 0.45,
     clearanceRadius: 0.5,
+    bodyRadiusM: 0.04,
     startleSeconds: 0,
   }))
 

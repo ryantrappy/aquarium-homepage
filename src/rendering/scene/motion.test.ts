@@ -540,8 +540,11 @@ describe('school stepping and group disturbance (AQ-41/AQ-44)', () => {
   })
 
   it('separates overlapping schoolmates without ever moving through the reef (AC #3)', () => {
+    // AQ-85: 0.1 apart is inside the physical minSep for a chromis pair
+    // (0.072 + 0.072 + 0.06 = 0.204); the legacy 1.12m range would have
+    // separated fish 0.3m apart, which is now ordinary school spacing.
     const closeA = createSwimmingFish('school-close-a', 'blue-green-chromis', { x: 0, y: 0.8, z: 1.0 }, .5)
-    const closeB = createSwimmingFish('school-close-b', 'blue-green-chromis', { x: 0.3, y: 0.8, z: 1.0 }, .5)
+    const closeB = createSwimmingFish('school-close-b', 'blue-green-chromis', { x: 0.1, y: 0.8, z: 1.0 }, .5)
     const initial = distance(closeA.position, closeB.position)
     for (let frame = 0; frame < 60; frame++) {
       const previousA = { ...closeA.position }, previousB = { ...closeB.position }
@@ -556,7 +559,9 @@ describe('school stepping and group disturbance (AQ-41/AQ-44)', () => {
     const [a, b] = chromisPair()
     for (let frame = 0; frame < 300; frame++) stepSwimmingSchool([a, b], habitat, 1 / 30)
     expect(distance(a.position, b.position)).toBeLessThan(2.2)
-    expect(distance(a.position, b.position)).toBeGreaterThan(0.2)
+    // AQ-85: schoolmates may group down to ~their 0.2 physical minSep, so
+    // the floor guards against collapse/interpenetration, not close grouping.
+    expect(distance(a.position, b.position)).toBeGreaterThan(0.15)
   })
 
   it('holds a stopped fish still while it still counts as a peer (AQ-44 AC #4)', () => {
@@ -609,7 +614,7 @@ describe('schooling steering through heading kinematics (AQ-84)', () => {
   // peer is stopped (still counts as a peer) so the school heading is fixed.
   function outerFishNoRoute() {
     // 1.5 units apart: inside the shoal neighbor radius (2.2) and outside
-    // the separation range (1.12), so only cohesion/alignment act.
+    // the separation range (~0.2, AQ-85), so only cohesion/alignment act.
     const outer = createSwimmingFish('aq84-outer', 'blue-green-chromis', { x: -0.6, y: 0.8, z: 1.0 }, .5)
     outer.yaw = 0
     outer.route = []

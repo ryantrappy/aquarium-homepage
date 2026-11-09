@@ -5,6 +5,7 @@ import { createFishExtensionRuntime, EMPTY_FISH_EXTENSIONS, type FishExtensionCo
 import { findWaterRoute, isWaterSegmentSafe, resolveHabitatRoute, type AxisAlignedBox, type HabitatAnchorLocation, type SolidObstacleVolume, type Vec3 } from '../../simulation/habitat-navigation'
 import { findMeshRoute, type CapsuleClearanceQuery, type MeshNavigationBudget, type MeshNavigationWorkBudget, type MeshNavigationWorkReport } from '../../simulation/mesh-navigation'
 import { simulationSubsteps } from './clock'
+import { fishBodyRadiusM } from './fish-scale'
 import {
   SHARP_TURN_THRESHOLD_RAD,
   computeCurvilinearStepVector,
@@ -290,6 +291,10 @@ function schoolingPeer(fish: SwimmingFish): SchoolingPeer {
     yaw: fish.yaw,
     speed: fish.speed,
     clearanceRadius: fish.clearance,
+    // AQ-85: fish-to-fish separation uses the species-proportional physical
+    // body radius; `clearance` stays the habitat-obstacle envelope and is
+    // only used for segment safety against rocks/walls.
+    bodyRadiusM: fishBodyRadiusM(fish.speciesId),
     startleSeconds: fish.startleSeconds,
   }
 }
