@@ -151,3 +151,22 @@ Measured on `gemini_control` at the AQ-76 implementation (base tip `85e7623`, PR
 **Adaptive quality.** Tiers: High (pixel ratio min(devicePixelRatio, 1.5), shadows on), Balanced (pixel ratio 1.0), Low (pixel ratio 1.0 + `keyLight.castShadow = false`, LOD bands tightened 15%). Step down after 2 consecutive ~2 s windows with EMA > 19 ms or p95 > 22 ms; step up after 3 consecutive windows with EMA < 13 ms; 5 s cooldown; hidden/paused/reduced-motion frames never count as load. The shadow toggle is not a no-op: reef meshes set `castShadow = true` (`reef-assembly.ts`, rock/coral assembly).
 
 **Not yet measured.** Browser frame intervals (median/p95) and `renderer.info.render` triangle counts before/after at 1440×900 and 402×874, time-to-first-fish, and screenshot pairs for LOD transitions and sprite→GLB swaps still need a live browser run and Root visual review; the unit tests cover the controller thresholds, hysteresis, queue ordering, and failure isolation, not live frame rates.
+
+## Asset delivery budgets (AQ-70.3)
+
+Performance and asset-delivery budgets for photoreal assets live in
+[photorealism-budgets.md](photorealism-budgets.md) with the machine-readable
+form in `src/rendering/assets/budgets.ts` and enforcement in
+`src/rendering/assets/budgets.test.ts` (part of `npm test`). Caps per asset
+class (file bytes, triangles, texture size/count, GPU memory), download
+totals (Phase 0 3.5 MiB, total fish 24 MiB, total scene GLB 40 MiB,
+runtime GPU texture memory 256 MiB) and frame-time targets (p50 ≤ 16.7 ms,
+sustained p95 ≤ 22 ms) are measured from the checked-in files at commit
+`c38674f`. New photoreal assets must ship KTX2 textures; the 29 manifest
+assets that predate the budget are grandfathered by id. One recorded
+tension: full 15-hero-fish promotion at 1024 px textures does not fit the
+256 MiB GPU cap and requires KTX2 delivery or 512 px maps. Frame-time
+p50/p95 at both viewports are still pending the AQ-70.2 look-dev capture
+baseline; the budgets doc records the asset-side baseline and the one
+existing 60-sample main-page observation (median 33.3 ms, p95 35.0 ms,
+desktop host) with its caveats.
