@@ -14,6 +14,13 @@ export function AquariumScene({ services, paused, focusFallbackRef, fpsCounterEn
   const current = useRef({ services, paused, focusFallbackRef }); current.current = { services, paused, focusFallbackRef }
   const [status, setStatus] = useState<SceneStatus>('loading')
   const [zoomed, setZoomed] = useState(false)
+  // Debug FPS counter (AQ-83): the badge renders only after mount, so the
+  // server HTML and the first client render agree (no badge) even when the
+  // counter is enabled in localStorage. Rendering it on the first client
+  // pass made hydration fail with React error #418 (badge present on the
+  // client, absent in the SSR HTML) while React recovered and kept working.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
   const acknowledgments = useRef(new Set<ReturnType<typeof setTimeout>>())
   // Camera zoom reset (AQ-62 AC #3): Esc returns to the full-tank overview,
   // unless a dialog is open — then Esc belongs to the dialog.
@@ -126,7 +133,7 @@ export function AquariumScene({ services, paused, focusFallbackRef, fpsCounterEn
           </a>
         })}
       </div>
-      {fpsCounterEnabled && <div ref={fpsBadgeRef} className="fps-counter-badge" aria-hidden="true">—</div>}
+      {mounted && fpsCounterEnabled && <div ref={fpsBadgeRef} className="fps-counter-badge" aria-hidden="true">—</div>}
       {status === 'ready' && <div className="aquarium-zoom-controls" role="group" aria-label="Camera zoom">
         <button className="scene-control icon-control" type="button" onClick={() => { const isZoomed = controller.current?.zoomIn(); if (isZoomed !== undefined) setZoomed(isZoomed) }} aria-label="Zoom in" title="Zoom in"><span aria-hidden="true">+</span></button>
         <button className="scene-control icon-control" type="button" onClick={() => { const isZoomed = controller.current?.zoomOut(); if (isZoomed !== undefined) setZoomed(isZoomed) }} aria-label="Zoom out" title="Zoom out"><span aria-hidden="true">−</span></button>

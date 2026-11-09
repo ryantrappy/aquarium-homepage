@@ -2,49 +2,92 @@ import * as THREE from 'three'
 import { DEFAULT_AQUARIUM_OPTICS_CONFIG } from './underwater-optics'
 
 /**
- * Real, animated caustics (AQ-14.2 AC #2, AQ-39): a single procedural,
- * tileable caustic texture generated at runtime (no external asset, $0
- * budget) sampled in the sand, live-rock, and coral shaders via a shared
- * `onBeforeCompile` patch.
+ * Real, animated caustics (AQ-14.2 AC #2, AQ-39, AQ-70.6): a single
+ * procedural, tileable caustic texture generated at runtime (no external
+ * asset, $0 budget) sampled in the sand, live-rock, coral, and fish
+ * shaders via a shared `onBeforeCompile` patch.
+ *
+ * AQ-70.6: the texture is a true cellular (Voronoi) network — bright ridges
+ * where two cells' feature points are equidistant (F2 - F1 ≈ 0) on a mostly
+ * dark field — not the sine-wave interference web it replaced, which read
+ * as soft stripes. The same texture is the one shared chunk for every lit
+ * surface; the sand shader's own sine ridge network and the coral shader's
+ * sine caustic shimmer were removed so the scene can never show two
+ * disagreeing caustic systems.
  *
  * This is a shader texture, NOT a literal `THREE.SpotLight` projector: a
  * projector would light all surfaces uniformly (no upward-normal or depth
  * masking), fight the key light and its shadow map, and add a second
  * shadow/projector pass for no gain.
  *
- * Scope, deliberately: sand, live rock, and coral only — AQ-14.2 AC #2
- * covers exactly those three. Fish are excluded: they are skinned GLBs
- * with stock PBR and no custom shader, and a world-space pattern on a
- * swimming fish reads as the texture swimming, not light moving. Fish
- * keep the existing global key/fill shimmer from
- * `createRestrainedCausticLightController`. Backdrop, water surface, and
- * glass are excluded as well. No Snell's-law ray convergence is
- * implemented; this is a surface-space approximation whose physical
- * coherence comes from reusing the ripple frequencies (0.22 / 0.37 Hz),
- * the upward-normal mask, and the depth envelope from
- * `evaluateCausticIntensity`.
+ * Scope: sand, live rock, coral, and fish (skinned, via the post-skinning
+ * world-position hook in `applyCaustics`). Backdrop, water surface, and
+ * glass are excluded. No Snell's-law ray convergence is implemented; this
+ * is a surface-space approximation whose physical coherence comes from
+ * reusing the ripple frequencies (0.22 / 0.37 Hz), the upward-normal mask,
+ * and the depth envelope from `evaluateCausticIntensity`.
  */
-
-const TWO_PI = Math.PI * 2
 
 /** Default caustic texture resolution (pixels per side). */
 export const CAUSTIC_TEXTURE_SIZE = 512
 
+/** Voronoi cells per tile side in the cellular caustic texture (AQ-70.6):
+ * one tile spans ~2.9 m at the default layer-A scale, so a cell is ~0.7 m
+ * across; the two scrolling layers at different scales multiply, which
+ * breaks the regularity into finer structure. */
+export const CAUSTIC_VORONOI_CELLS = 4
+/** Voronoi edge width in cell units: F2 - F1 below this reads as a bright
+ * ridge. Tuned so the texture is ~8% bright ridge on ~73% dark field. */
+export const CAUSTIC_VORONOI_EDGE_WIDTH = 0.22
+
 /**
- * Pure, tileable caustic web value at texture coordinates `u, v` in [0, 1).
- * All spatial frequencies are integer multiples of 2π across the tile, so
- * the pattern wraps seamlessly: `value(0, v) === value(1, v)` and
- * `value(u, 0) === value(u, 1)`. Two warped interference fields are
- * multiplied and sharpened, giving bright ridged webs on a mostly dark
- * field — the texture is a light multiplier, not albedo.
+ * Deterministic feature-point offset in [0, 1)^2 for Voronoi cell
+ * `(ix, iy)` (already wrapped into [0, CAUSTIC_VORONOI_CELLS)). Sin-hash,
+ * like the other procedural fields in this scene; the wrapped inputs make
+ * the pattern tile seamlessly.
+ */
+function voronoiFeaturePoint(ix: number, iy: number): [number, number] {
+  const fx = Math.sin(ix * 127.1 + iy * 311.7) * 43758.5453123
+  const fy = Math.sin(ix * 269.5 + iy * 183.3) * 28001.8384
+  return [fx - Math.floor(fx), fy - Math.floor(fy)]
+}
+
+/**
+ * Pure, tileable cellular caustic value at texture coordinates `u, v` in
+ * [0, 1). A Voronoi F2 - F1 edge field: bright ridges where the two nearest
+ * feature points are equidistant, dark cell interiors. All feature points
+ * are periodic in the tile, so `value(0, v) === value(1, v)` and
+ * `value(u, 0) === value(u, 1)` exactly. The texture is a light multiplier,
+ * not albedo.
  */
 export function evaluateCausticTextureValue(u: number, v: number): number {
-  const w1 =
-    Math.sin(TWO_PI * (4 * u + 3 * v) + 1.3 * Math.sin(TWO_PI * (2 * u - 5 * v)))
-  const w2 =
-    Math.cos(TWO_PI * (3 * u - 4 * v) + 1.1 * Math.cos(TWO_PI * (5 * u + 2 * v)))
-  const web = Math.abs(w1 * w2)
-  return Math.pow(web, 2.5)
+  const cells = CAUSTIC_VORONOI_CELLS
+  const x = u * cells
+  const y = v * cells
+  const cx = Math.floor(x)
+  const cy = Math.floor(y)
+  let f1 = Infinity
+  let f2 = Infinity
+  for (let dx = -1; dx <= 1; dx++) {
+    for (let dy = -1; dy <= 1; dy++) {
+      const nx = cx + dx
+      const ny = cy + dy
+      const wx = ((nx % cells) + cells) % cells
+      const wy = ((ny % cells) + cells) % cells
+      const [ox, oy] = voronoiFeaturePoint(wx, wy)
+      const px = nx + ox
+      const py = ny + oy
+      const d = Math.hypot(x - px, y - py)
+      if (d < f1) {
+        f2 = f1
+        f1 = d
+      } else if (d < f2) {
+        f2 = d
+      }
+    }
+  }
+  const edge = Math.max(0, 1 - (f2 - f1) / CAUSTIC_VORONOI_EDGE_WIDTH)
+  return edge * edge
 }
 
 /**
@@ -124,9 +167,20 @@ export type ApplyCausticsOptions = {
   scaleB?: number
   /** Maximum additive brightness; default from the optics config (0.35). */
   maxAdd?: number
+  /**
+   * Skinned meshes (AQ-70.6 AC #1: fish): hook the world position and normal
+   * after skinning instead of at `begin_vertex` / `beginnormal_vertex`,
+   * which run on the bind pose. At `#include <project_vertex>` the
+   * `transformed` position is already skinned (and flex-displaced), and at
+   * `#include <defaultnormal_vertex>` `objectNormal` is already skinned.
+   * The pattern then stays fixed in world space while the fish swims
+   * through it, instead of swimming with the fish.
+   */
+  skinned?: boolean
 }
 
 const CAUSTIC_CACHE_KEY_SUFFIX = ':caustics-v1'
+const CAUSTIC_SKINNED_CACHE_KEY_SUFFIX = ':caustics-skinned-v1'
 
 /**
  * Patches a `MeshStandardMaterial` so the caustic texture is sampled in its
@@ -135,12 +189,14 @@ const CAUSTIC_CACHE_KEY_SUFFIX = ':caustics-v1'
  * `uCausticMaxAdd` additive on direct diffuse light.
  *
  * The existing `onBeforeCompile` is preserved (chained) — sand, coral, and
- * live-rock materials all already patch their shaders — and the
+ * live-rock materials all already patch their shaders, and fish flex
+ * replaces the fish material's hook after cloning, so the caustics patch
+ * must be applied after flex binding on fish — and the
  * `customProgramCacheKey` is suffixed so the patched program can never
  * collide with the unpatched one. The hook is `#include <opaque_fragment>`
  * (with the caustic code injected just before it): that include is untouched
- * by the sand / coral / rock patches, which replace other chunks, so the
- * injection lands regardless of patch order. Depth materials are never
+ * by the sand / coral / rock / flex patches, which replace other chunks, so
+ * the injection lands regardless of patch order. Depth materials are never
  * patched: caustics affect colour only, never shadows.
  *
  * Safe to call twice on the same material: the second call is a no-op.
@@ -160,19 +216,34 @@ export function applyCaustics(
   }
   const previousOnBeforeCompile = material.onBeforeCompile
   const previousCacheKey = material.customProgramCacheKey
+  const skinned = Boolean(options.skinned)
   material.onBeforeCompile = (shader, renderer) => {
     previousOnBeforeCompile.call(material, shader, renderer)
     Object.assign(shader.uniforms, caustics.uniforms, perMaterialUniforms)
     shader.vertexShader =
       'varying vec3 vCausticWorldPos;\nvarying vec3 vCausticWorldNormal;\n' + shader.vertexShader
-    shader.vertexShader = shader.vertexShader.replace(
-      '#include <beginnormal_vertex>',
-      '#include <beginnormal_vertex>\nvCausticWorldNormal = normalize(mat3(modelMatrix) * objectNormal);',
-    )
-    shader.vertexShader = shader.vertexShader.replace(
-      '#include <begin_vertex>',
-      '#include <begin_vertex>\nvCausticWorldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;',
-    )
+    if (skinned) {
+      // Post-skinning hooks (AQ-70.6): `transformed` is skinned and
+      // flex-displaced by the time `project_vertex` runs, and
+      // `objectNormal` is skinned by `defaultnormal_vertex`.
+      shader.vertexShader = shader.vertexShader.replace(
+        '#include <defaultnormal_vertex>',
+        '#include <defaultnormal_vertex>\nvCausticWorldNormal = normalize(mat3(modelMatrix) * objectNormal);',
+      )
+      shader.vertexShader = shader.vertexShader.replace(
+        '#include <project_vertex>',
+        '#include <project_vertex>\nvCausticWorldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;',
+      )
+    } else {
+      shader.vertexShader = shader.vertexShader.replace(
+        '#include <beginnormal_vertex>',
+        '#include <beginnormal_vertex>\nvCausticWorldNormal = normalize(mat3(modelMatrix) * objectNormal);',
+      )
+      shader.vertexShader = shader.vertexShader.replace(
+        '#include <begin_vertex>',
+        '#include <begin_vertex>\nvCausticWorldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;',
+      )
+    }
     shader.fragmentShader =
       'uniform sampler2D uCausticMap;\nuniform float uCausticTime;\nuniform float uCausticScaleA;\nuniform float uCausticScaleB;\nuniform float uCausticMaxAdd;\nvarying vec3 vCausticWorldPos;\nvarying vec3 vCausticWorldNormal;\n' +
       shader.fragmentShader
@@ -183,17 +254,25 @@ export function applyCaustics(
       `// Animated caustic texture (AQ-14.2 AC #2): two world-space layers
 // scrolling in opposite directions, masked to upward faces and faded
 // with depth, capped at uCausticMaxAdd additive on direct diffuse light.
+// The layers combine by MAX, not product: the cellular texture is a
+// mostly-dark field (mean ~0.16), so a product's mean is ~0.027 and the
+// old smoothstep(0.25, 0.85) left only ~2.7% of any surface with any
+// pattern at all (mean additive +0.004) — the "no dapple discernible"
+// visual-check finding. Max keeps the cellular network shape (union of
+// ridges): ~32% of the surface shows pattern, mean additive +0.07 before
+// the upward-normal and depth masks, still restrained under the +0.35 cap.
 vec2 causticUvA = vCausticWorldPos.xz * uCausticScaleA + vec2(uCausticTime * 0.022, -uCausticTime * 0.0132);
 vec2 causticUvB = vCausticWorldPos.xz * uCausticScaleB + vec2(-uCausticTime * 0.0296, uCausticTime * 0.0185);
-float causticP = texture2D(uCausticMap, causticUvA).r * texture2D(uCausticMap, causticUvB).r;
-causticP = smoothstep(0.25, 0.85, causticP);
+float causticP = max(texture2D(uCausticMap, causticUvA).r, texture2D(uCausticMap, causticUvB).r);
+causticP = smoothstep(0.35, 0.9, causticP);
 float causticMask = max(vCausticWorldNormal.y, 0.0) * (1.0 - 0.35 * clamp((2.8 - vCausticWorldPos.y) / 5.6, 0.0, 1.0));
 reflectedLight.directDiffuse += diffuseColor.rgb * (causticP * causticMask * uCausticMaxAdd);
 #include <opaque_fragment>`,
     )
   }
+  const cacheKeySuffix = skinned ? CAUSTIC_SKINNED_CACHE_KEY_SUFFIX : CAUSTIC_CACHE_KEY_SUFFIX
   material.customProgramCacheKey = () =>
-    `${typeof previousCacheKey === 'function' ? previousCacheKey.call(material) : 'default'}${CAUSTIC_CACHE_KEY_SUFFIX}`
+    `${typeof previousCacheKey === 'function' ? previousCacheKey.call(material) : 'default'}${cacheKeySuffix}`
   material.userData.causticsApplied = true
   material.userData.causticsPreviousOnBeforeCompile = previousOnBeforeCompile
   material.userData.causticsPreviousCacheKey = previousCacheKey

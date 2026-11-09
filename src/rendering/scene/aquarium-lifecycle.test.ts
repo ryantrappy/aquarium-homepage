@@ -139,6 +139,31 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     const anchor = overlay.querySelector<HTMLAnchorElement>('[data-service-id="first"]')!
     expect(anchor.href).toBe(edited.url + '/'); expect(anchor.title).toContain('Latest name'); expect(anchor.getAttribute('aria-label')).toContain('Latest name')
   })
+  it('uses VSM soft shadows, not the removed PCFSoftShadowMap (AQ-70.4 AC #3)', async () => {
+    await start()
+    const renderer = state.renderer as unknown as { shadowMap: { enabled: boolean; type: number } }
+    expect(renderer.shadowMap.enabled).toBe(true)
+    expect(renderer.shadowMap.type).toBe(THREE.VSMShadowMap)
+    expect(renderer.shadowMap.type).not.toBe(THREE.PCFSoftShadowMap)
+  })
+  it('keeps the depth-haze and shaft planes tall enough that no plane edge crosses the water (visual band)', async () => {
+    await start()
+    const planes: THREE.Mesh[] = []
+    state.renderer!.scene!.traverse(object => {
+      if (object instanceof THREE.Mesh && object.material instanceof THREE.ShaderMaterial) {
+        const uniforms = object.material.uniforms as Record<string, { value: unknown } | undefined>
+        if (uniforms.uHazeAlpha || uniforms.uShaftAlpha) planes.push(object)
+      }
+    })
+    expect(planes).toHaveLength(2)
+    for (const plane of planes) {
+      const height = (plane.geometry as THREE.PlaneGeometry).parameters.height
+      const top = plane.position.y + height / 2
+      // The overview frame tops out near y 4.8 at the haze depth; a plane
+      // top inside the frame reads as a hard horizontal band across the tank.
+      expect(top).toBeGreaterThan(4.8)
+    }
+  })
   it('initializes the fish heading and first extension snapshot with the same seeded yaw', async () => {
     const snapshots: FishExtensionSnapshot[] = []
     const capture = {

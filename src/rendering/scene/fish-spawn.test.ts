@@ -224,6 +224,21 @@ describe('safe aquarium fish spawning', () => {
     expect(Math.hypot(position!.x, position!.y, position!.z)).toBeGreaterThan(0)
   })
 
+  it('spaces spawns by body radius when both sides supply one, instead of the legacy clearance sum (PR #28 follow-up)', () => {
+    const bounds: AxisAlignedBox = { min: { x: -2, y: -2, z: -2 }, max: { x: 2, y: 2, z: 2 } }
+    const clearance = 0.56 // legacy clearance sum would demand 1.12 m
+    const occupied: OccupiedFishSpawn[] = [{ position: { x: 0, y: 0, z: 0 }, clearance, bodyRadiusM: 0.07 }]
+    // 0.3 m from the occupant: blocked under the legacy sum, clear under
+    // body radii (0.07 + 0.07 + 0.06 = 0.20 m), so the preferred point stands.
+    expect(findSafeFishSpawn({ x: 0.3, y: 0, z: 0 }, bounds, [], clearance, occupied, undefined, 0.07)).toEqual({ x: 0.3, y: 0, z: 0 })
+    // A 0.1 m overlap still pushes apart under body radii.
+    expect(findSafeFishSpawn({ x: 0.1, y: 0, z: 0 }, bounds, [], clearance, occupied, undefined, 0.07)).not.toEqual({ x: 0.1, y: 0, z: 0 })
+    // Same geometry without body radii keeps the legacy behaviour.
+    expect(findSafeFishSpawn({ x: 0.3, y: 0, z: 0 }, bounds, [], clearance, [{ position: { x: 0, y: 0, z: 0 }, clearance }])).not.toEqual({ x: 0.3, y: 0, z: 0 })
+    // One-sided radii fall back to the legacy sum.
+    expect(findSafeFishSpawn({ x: 0.3, y: 0, z: 0 }, bounds, [], clearance, occupied)).not.toEqual({ x: 0.3, y: 0, z: 0 })
+  })
+
   it('ignores invalid crowding hints when a solid-clear water point exists', () => {
     const bounds: AxisAlignedBox = { min: { x: -2, y: -2, z: -2 }, max: { x: 2, y: 2, z: 2 } }
     const invalid = [{ position: { x: Number.NaN, y: 0, z: 0 }, clearance: .5 }]

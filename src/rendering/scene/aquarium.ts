@@ -23,6 +23,8 @@ import {
   createRestrainedCausticLightController,
   evaluateBubblePosition,
   evaluateDepthTintedColor,
+  evaluateFixtureIntensities,
+  evaluateFluorescenceActinicFactor,
   evaluateSurfaceRippleOffset,
   evaluateSuspendedParticlePosition,
 } from './underwater-optics'
@@ -32,7 +34,7 @@ import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquarium
 import { createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
 import { createReefMeshNavigation, MESH_NAVIGATION_COLLISION_RADIUS_M, type ReefMeshIslandInput } from './reef-mesh-navigation'
 import { applyFishTurningRigOverlay, bindFishTurningRig, evaluateSpriteTurnScaleX, type FishTurningRig } from './fish-turning'
-import { SPRITE_PLANE_WIDTH, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale } from './fish-scale'
+import { SPRITE_PLANE_WIDTH, fishBodyRadiusM, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale } from './fish-scale'
 import { canRunFishSceneLoop, findSafeFishHeading, findSafeFishSpawn, fishSceneStatus, fishSpawnPreference, isSafeFishPosition } from './fish-spawn'
 import { EMPTY_FISH_EXTENSIONS, type FishExtensionConfig } from '../../simulation/fish-extensions'
 import { consumeFrameSteps, createFrameClock, SIMULATION_STEP_SECONDS, suspendFrameClock } from './clock'
@@ -103,7 +105,16 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   renderer.toneMapping = THREE.ACESFilmicToneMapping
   renderer.toneMappingExposure = 1.02
   renderer.shadowMap.enabled = true
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap
+  // AQ-70.4 AC #3: Variance Shadow Maps for soft reef-fixture penumbras.
+  // A reef LED fixture is a wide multi-emitter source, not a single sun:
+  // VSM blurs the shadow map (radius + blurSamples) so sand/rock shadows
+  // get soft penumbras instead of sharp outdoor-sun silhouettes. This also
+  // removes the PCFSoftShadowMap deprecation warning three r187 emits.
+  // Trade-off, judged acceptable: VSM can light-bleed where a bright lit
+  // surface sits directly behind a thin occluder; the scene's occluders are
+  // chunky live rock and the bias below keeps the bleed restrained.
+  // The 2048 map (was 1024) keeps the blur from turning into mush.
+  renderer.shadowMap.type = THREE.VSMShadowMap
 
   // Underwater optics are the single source of truth for the water column
   // (AQ-39 AC #2): background, fog, light intensities, and ripple amplitude
@@ -155,11 +166,24 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   // 1) Balanced sky-to-indigo-crevice HemisphereLight so overhangs & caves retain deep actinic shadow contrast
   const hemiLight = new THREE.HemisphereLight('#88ccff', '#1b1636', 0.40)
   scene.add(hemiLight)
-  // 2) Crisp 14,000K overhead reef daylight key light with soft shadow map
-  const keyLight = new THREE.DirectionalLight('#f6faff', optics.keyLightIntensity)
+  // 2) Crisp 14,000K overhead reef daylight key light with soft shadow map.
+  // AQ-70.6 AC #2: the key/fill split is derived from the fixture
+  // white/blue balance and total output in the optics config, so tuning
+  // the fixture re-balances both lights (and the coral fluorescence) at
+  // once. At the default balance the resolved intensities are exactly the
+  // long-standing 2.1 / 0.95.
+  const fixture = evaluateFixtureIntensities(optics.fixtureWhiteBalance, optics.fixtureTotalIntensity)
+  const keyLight = new THREE.DirectionalLight('#f6faff', fixture.keyLightIntensity)
   keyLight.position.set(1.2, 6.8, 4.6)
   keyLight.castShadow = true
-  keyLight.shadow.mapSize.set(1024, 1024)
+  keyLight.shadow.mapSize.set(2048, 2048)
+  // VSM blur: radius in shadow-map texels and the number of blur samples.
+  // radius 8 at 2048px gives a penumbra of roughly 8 texels (~2.5 cm at
+  // the 13 m shadow frustum) — soft, not mushy. blurSamples 16 is the
+  // three.js VSM default quality step; raising it further costs a second
+  // blur pass for diminishing returns at this map size.
+  keyLight.shadow.radius = 8
+  keyLight.shadow.blurSamples = 16
   keyLight.shadow.camera.near = 1.0
   keyLight.shadow.camera.far = 16.0
   keyLight.shadow.camera.left = -6.5
@@ -170,7 +194,7 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   keyLight.shadow.normalBias = 0.015
   scene.add(keyLight)
   // 3) Royal-blue actinic fill light + soft top-back rim light
-  const fillLight = new THREE.DirectionalLight('#5a98ff', optics.fillLightIntensity)
+  const fillLight = new THREE.DirectionalLight('#5a98ff', fixture.fillLightIntensity)
   fillLight.position.set(-4.2, 2.8, 3.2)
   scene.add(fillLight)
   const rimLight = new THREE.DirectionalLight('#b4dcff', 0.45)
@@ -178,13 +202,14 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   scene.add(rimLight)
 
   const causticLightController = createRestrainedCausticLightController(keyLight, fillLight, {
-    keyLightIntensity: optics.keyLightIntensity,
-    fillLightIntensity: optics.fillLightIntensity,
+    keyLightIntensity: fixture.keyLightIntensity,
+    fillLightIntensity: fixture.fillLightIntensity,
   })
 
-  // Real caustic texture (AQ-14.2 AC #2): one shared procedural texture and
-  // time uniform for the sand, live-rock, and coral shaders (see caustics.ts).
-  // Fish, backdrop, and water surface are deliberately not patched.
+  // Real caustic texture (AQ-14.2 AC #2, AQ-70.6 AC #1): one shared
+  // procedural cellular texture and time uniform for the sand, live-rock,
+  // coral, and fish shaders (see caustics.ts). Backdrop and water surface
+  // are deliberately not patched.
   const caustics = createCaustics()
 
   // Photoreal aragonite sand bed (AQ-73 / AQ-70.12): the generated PBR
@@ -192,10 +217,12 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   // rock-base contact AO, talus mounding, and rear-rising aquascaping slope
   // live in aragonite-sand.ts. This replaces the old inline 256x256 LCG-noise
   // texture with its hard-coded indigo AO blobs, which made the islands read
-  // as floating. The bed's own shader already carries its caustic network,
-  // so the shared caustic texture is not chained on top of it.
+  // as floating. AQ-70.6: the sand's own caustic ridge network was removed;
+  // the shared cellular caustic chunk is applied here instead, so the sand
+  // shows the same caustic system as the rock, coral, and fish.
   const sandBed = createAragoniteSandBed({ narrow: false })
   const sand = sandBed.sandMesh
+  applyCaustics(sand.material as THREE.MeshStandardMaterial, caustics)
   scene.add(sandBed.group)
 
   // Layered Reef-Tank Backdrop (AQ-14.6 & AQ-39): eliminates the flat paint-bucket wall & sharp horizon line
@@ -268,8 +295,14 @@ diffuseColor.rgb = waterCol;
         gl_FragColor = vec4(hazeColor, alpha);
       }`,
   })
-  const hazePlane = new THREE.Mesh(new THREE.PlaneGeometry(16, 5.4), hazeMaterial)
-  hazePlane.position.set(0, -0.08, (DEPTH_HAZE_START_Z + DEPTH_HAZE_END_Z) / 2)
+  const hazePlane = new THREE.Mesh(new THREE.PlaneGeometry(16, 10), hazeMaterial)
+  // The plane spans y -4.1..5.9: its top edge sits above the visible frame
+  // at both viewports (the overview frame tops out near y 4.8 at this depth;
+  // zoomed views see less), so no hard haze edge can cross the water. The
+  // old 5.4 m plane topped out at y 2.62 — about 23% down the 1440x900 frame
+  // — and its top edge read as a dark horizontal band across the whole tank.
+  // The bottom edge is hidden behind the sand bed.
+  hazePlane.position.set(0, 0.9, (DEPTH_HAZE_START_Z + DEPTH_HAZE_END_Z) / 2)
   hazePlane.renderOrder = 1
   hazePlane.raycast = () => {}
   scene.add(hazePlane)
@@ -306,8 +339,11 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
         gl_FragColor = vec4(vec3(0.55, 0.80, 0.95) * alpha, alpha);
       }`,
   })
-  const shaftPlane = new THREE.Mesh(new THREE.PlaneGeometry(16, 5.4), shaftMaterial)
-  shaftPlane.position.set(0, -0.08, DEPTH_HAZE_START_Z - 0.3)
+  const shaftPlane = new THREE.Mesh(new THREE.PlaneGeometry(16, 10), shaftMaterial)
+  // Same full-frame height as the haze plane (see above): the old 5.4 m
+  // plane ended at the same ~23% screen height and its top edge could read
+  // as a faint bright line across the tank.
+  shaftPlane.position.set(0, 0.9, DEPTH_HAZE_START_Z - 0.3)
   shaftPlane.renderOrder = 2
   shaftPlane.raycast = () => {}
   scene.add(shaftPlane)
@@ -381,9 +417,15 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
   bubbleGeometry.setAttribute('position', bubblePositionAttr)
   const bubbleMaterial = new THREE.PointsMaterial({
     color: '#eaf7ff',
-    size: 0.035,
+    // Visual-check fix: at 0.035 m / 0.4 opacity the bubbles were ~5 px
+    // pale squares, indistinguishable from the motes (0.02–0.03 m) — no
+    // streams were discernible at the island bases. 0.06 m / 0.6 reads as a
+    // dotted rising stream (~8 px at the 9 m overview distance) while
+    // staying inside AQ-43's amended restraint (≤16 per stream, normal
+    // blending, no additive specular dots). Counts are unchanged.
+    size: 0.06,
     transparent: true,
-    opacity: 0.4,
+    opacity: 0.6,
     depthWrite: false,
   })
   const bubbles = new THREE.Points(bubbleGeometry, bubbleMaterial)
@@ -531,13 +573,16 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
       const assembled = assembleCoralsOnRockSockets(reef, coralTemplates, mounts, {
         paused: paused || document.hidden,
         reducedMotion,
+        // AQ-70.6 AC #3: coral fluorescence scales with the fixture's
+        // actinic share.
+        actinicLevel: evaluateFluorescenceActinicFactor(optics.fixtureWhiteBalance),
       })
       reefControllers.push(assembled)
       // Real caustics on live rock and coral (AQ-14.2 AC #2). Assembly clones
       // the rock/coral materials per island, so each rebuild patches fresh
       // material instances; applyCaustics also guards against double-patching.
       // Rock gets a broader pattern (fewer, wider webs) than sand/coral.
-      // Fish materials are never touched here.
+      // Fish materials are patched in bindGlbToInhabitant, not here.
       reef.traverse(object => {
         if (!(object instanceof THREE.Mesh)) return
         for (const mat of Array.isArray(object.material) ? object.material : [object.material]) {
@@ -579,10 +624,10 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
             { ...result.meshNavigation.movementBudget },
           ).status === 'clear'
         const allInhabitants = [...fish, ...schoolmates]
-        const occupiedForRelocation: Array<{ position: SwimmingFish['position']; clearance: number }> = []
+        const occupiedForRelocation: Array<{ position: SwimmingFish['position']; clearance: number; bodyRadiusM?: number }> = []
         for (const item of allInhabitants) {
           if (isSafeCurrentInhabitantPosition(item)) {
-            occupiedForRelocation.push({ position: item.motion.position, clearance: item.motion.clearance })
+            occupiedForRelocation.push({ position: item.motion.position, clearance: item.motion.clearance, bodyRadiusM: fishBodyRadiusM(item.service.fishId) })
           }
         }
         for (const item of allInhabitants) {
@@ -594,13 +639,14 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
             item.motion.clearance,
             occupiedForRelocation,
             meshCheck,
+            fishBodyRadiusM(item.service.fishId),
           )
           if (relocated) {
             item.motion.position = relocated
             item.motion.route = []
             item.motion.speed = 0
             item.root.position.set(relocated.x, relocated.y, relocated.z)
-            occupiedForRelocation.push({ position: relocated, clearance: item.motion.clearance })
+            occupiedForRelocation.push({ position: relocated, clearance: item.motion.clearance, bodyRadiusM: fishBodyRadiusM(item.service.fishId) })
           }
         }
         console.info('Mesh navigation ready', result.diagnostics)
@@ -651,6 +697,18 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
         console.warn('Fish animation unsupported; retaining static service fish', item.service.fishId, error)
       }
     } else console.warn('Fish animation requires one clip; retaining static service fish', item.service.fishId)
+    // AQ-70.6 AC #1 / AQ-70.8 AC #3: the shared cellular caustic chunk is
+    // applied after flex binding (flex replaces onBeforeCompile, so the
+    // caustics patch must chain on top of it), with the skinned hook so the
+    // pattern stays fixed in world space while the fish swims through it.
+    // Fish also cast shadows onto the sand and rock now.
+    model.traverse(object => {
+      if (!(object instanceof THREE.Mesh)) return
+      object.castShadow = true
+      for (const mat of Array.isArray(object.material) ? object.material : [object.material]) {
+        if (mat instanceof THREE.MeshStandardMaterial) applyCaustics(mat, caustics, { skinned: true })
+      }
+    })
   }
   // Build the thumbnail sprite for an inhabitant. Used for the no-GLB
   // fallback (`lodOnly: false`, stored as `item.artwork`) and for the far
@@ -781,7 +839,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
    */
   function reconcileSchoolmates(
     nextServices: readonly ServiceConfig[],
-    occupied: Array<{ position: SwimmingFish['position']; clearance: number }>,
+    occupied: Array<{ position: SwimmingFish['position']; clearance: number; bodyRadiusM?: number }>,
     meshSpawnCheck: ((candidate: SwimmingFish['position']) => boolean) | undefined,
     spawns: Map<string, FishSpawn>,
   ) {
@@ -801,14 +859,14 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
       if (existing && existing.service.fishId === mate.speciesId
         && isSafeCurrentInhabitantPosition(existing)) {
         nextMates.push(existing)
-        occupied.push({ position: existing.motion.position, clearance: existing.motion.clearance })
+        occupied.push({ position: existing.motion.position, clearance: existing.motion.clearance, bodyRadiusM: fishBodyRadiusM(existing.service.fishId) })
         continue
       }
       const species = getFishById(mate.speciesId)!
       const clearance = fishClearanceRadius(mate.speciesId)
       const offset = schoolmateSpawnOffset(mate.id, mate.speciesId, tankWidth, mate.index, SCHOOL_TOTAL_COUNT[mate.speciesId] - 1)
       const preferred = { x: lead.x + offset.x, y: lead.y + offset.y, z: lead.z + offset.z }
-      const position = findSafeFishSpawn(preferred, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck)
+      const position = findSafeFishSpawn(preferred, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(mate.speciesId))
       if (!position) continue
       const yaw = findSafeFishHeading(position, Math.atan2(offset.x, offset.z), habitat.bounds, habitat.obstacles, clearance)
       if (yaw === undefined) continue
@@ -818,7 +876,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
         undefined,
         true,
       ))
-      occupied.push({ position, clearance })
+      occupied.push({ position, clearance, bodyRadiusM: fishBodyRadiusM(mate.speciesId) })
     }
     for (const old of schoolmates) if (!nextMates.includes(old)) disposeInhabitant(old)
     schoolmates = nextMates
@@ -831,10 +889,10 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
     const horizontalOrder = [...nextServices].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : a.fishId < b.fishId ? -1 : a.fishId > b.fishId ? 1 : 0)
     const horizontalSlots = new Map(horizontalOrder.map((service, index) => [service.id, { index, count: horizontalOrder.length }]))
     const spawns = new Map<string, FishSpawn>()
-    const occupied: Array<{ position: SwimmingFish['position']; clearance: number }> = nextServices.flatMap(next => {
+    const occupied: Array<{ position: SwimmingFish['position']; clearance: number; bodyRadiusM?: number }> = nextServices.flatMap(next => {
       const retained = current.get(next.id)
       return retained?.service.fishId === next.fishId
-        ? [{ position: retained.motion.position, clearance: retained.motion.clearance }]
+        ? [{ position: retained.motion.position, clearance: retained.motion.clearance, bodyRadiusM: fishBodyRadiusM(retained.service.fishId) }]
         : []
     })
     const refreshRetainedLinks = () => nextServices.forEach(next => {
@@ -856,7 +914,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
       const species = getFishById(service.fishId)!
       const clearance = fishClearanceRadius(service.fishId)
       const preference = fishSpawnPreference(service.id, service.fishId, habitat.bounds, clearance, horizontalSlots.get(service.id))
-      const position = preference && findSafeFishSpawn(preference.position, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck)
+      const position = preference && findSafeFishSpawn(preference.position, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(service.fishId))
       if (!position || !preference) {
         // Keep existing instances intact during the truthful full-native fallback.
         // A later fitting configuration can reuse their exact poses and clocks.
@@ -869,7 +927,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
         spawnUnavailable = true; syncLoop(); return false
       }
       spawns.set(service.id, { species, clearance, position, yaw })
-      occupied.push({ position, clearance })
+      occupied.push({ position, clearance, bodyRadiusM: fishBodyRadiusM(service.fishId) })
     }
     try {
       fish = reconcileFishInhabitants(fish, nextServices, {

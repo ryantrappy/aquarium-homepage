@@ -54,6 +54,10 @@ export type CoralFlowUniforms = {
   uSubsurfaceStrength: { value: number }
   uFluorescenceStrength: { value: number }
   uFluorescenceTint: { value: THREE.Color }
+  /** Actinic scaling of the mask-driven fluorescence (AQ-70.6 AC #3):
+   * 1.0 at the default fixture white balance; the aquarium passes
+   * `evaluateFluorescenceActinicFactor(fixtureWhiteBalance)` here. */
+  uActinicLevel: { value: number }
   uPaletteBase: { value: THREE.Color }
   uPaletteTip: { value: THREE.Color }
   uPaletteCrevice: { value: THREE.Color }
@@ -69,6 +73,9 @@ export type CoralMaterialOptions = {
   subsurfaceStrength?: number
   fluorescenceStrength?: number
   fluorescenceTint?: THREE.ColorRepresentation
+  /** Actinic scaling of the mask-driven fluorescence (AQ-70.6 AC #3);
+   * 1.0 preserves the current glow at the default fixture balance. */
+  actinicLevel?: number
   paletteOverride?: CoralPaletteOverride
   paused?: boolean
   reducedMotion?: boolean
@@ -288,7 +295,6 @@ uniform float uRoleIsSoft;
 varying vec4 vCoralMask;
 varying vec3 vCoralViewDir;
 varying vec3 vCoralLocalPos;
-varying vec3 vCoralWorldPos;
 ` + shader.vertexShader
 
   // Depth shaders put <beginnormal_vertex> inside USE_DISPLACEMENTMAP.
@@ -326,8 +332,6 @@ transformed.y -= (1.0 - skirtTuck) * 0.008;
 transformed.x += coralSwayX * coralFlex;
 transformed.z += coralSwayZ * coralFlex;
 transformed.y += -0.18 * (abs(coralSwayX) + abs(coralSwayZ)) * coralFlex * coralFlex;
-vec4 coralWp = modelMatrix * vec4(transformed, 1.0);
-vCoralWorldPos = coralWp.xyz;
 `,
   )
 
@@ -347,6 +351,7 @@ uniform float uMotionScale;
 uniform float uSubsurfaceStrength;
 uniform float uFluorescenceStrength;
 uniform vec3 uFluorescenceTint;
+uniform float uActinicLevel;
 uniform vec3 uPaletteBase;
 uniform vec3 uPaletteTip;
 uniform vec3 uPaletteCrevice;
@@ -355,7 +360,6 @@ uniform float uRoughnessOverride;
 varying vec4 vCoralMask;
 varying vec3 vCoralViewDir;
 varying vec3 vCoralLocalPos;
-varying vec3 vCoralWorldPos;
 
 float coralHash31(vec3 p) {
   p = fract(p * vec3(0.1031, 0.1030, 0.0973));
@@ -447,16 +451,16 @@ reflectedLight.indirectSpecular *= coralContactAo * 0.35;
 reflectedLight.directSpecular *= 0.28;
 reflectedLight.directDiffuse *= coralContactAo;
 
-// Restrained upward-facing reef caustic shimmer (AQ-14.2)
-float cTime = uTime * uMotionScale;
-float cWave1 = sin(cTime * 1.38 + vCoralWorldPos.x * 2.1 + vCoralWorldPos.z * 1.7);
-float cWave2 = cos(cTime * 2.32 - vCoralWorldPos.x * 1.6 + vCoralWorldPos.z * 2.3);
-float causticBand = smoothstep(0.15, 0.88, 0.5 + 0.25 * (cWave1 + cWave2)) * max(0.0, normal.y);
-reflectedLight.directDiffuse *= (1.0 + 0.16 * causticBand);
-
+// Restrained upward-facing reef caustic shimmer (AQ-14.2) was removed in
+// AQ-70.6: the shared cellular caustic chunk (caustics.ts, applied to
+// coral materials in rebuildHabitat) is now the one caustic system, so the
+// scene can never show two disagreeing caustic patterns on the same coral.
 float coralRim = pow(1.0 - clamp(dot(normal, normalize(vCoralViewDir)), 0.0, 1.0), 1.85);
 vec3 coralSss = diffuseColor.rgb * (0.45 + 0.55 * coralTipMask) * coralRim * uSubsurfaceStrength * coralContactAo;
-vec3 coralGlow = uFluorescenceTint * pow(max(coralTipMask, polypHighlight * 0.65), 1.35) * (0.40 + 0.60 * coralRim) * uFluorescenceStrength * coralContactAo;
+// AQ-70.6 AC #3: fluorescence stays mask-driven (COLOR_0.g tip mask +
+// polyp highlight) and now scales with the fixture's actinic share via
+// uActinicLevel; no blanket emissive is added anywhere.
+vec3 coralGlow = uFluorescenceTint * pow(max(coralTipMask, polypHighlight * 0.65), 1.35) * (0.40 + 0.60 * coralRim) * uFluorescenceStrength * uActinicLevel * coralContactAo;
 totalEmissiveRadiance += coralSss + coralGlow;
 `,
   )
@@ -662,6 +666,12 @@ export function applyCoralRawMaskMaterial(
     uRoleIsSoft: { value: roleIsSoft },
     uSubsurfaceStrength: { value: pal?.subsurfaceStrength ?? options.subsurfaceStrength ?? (options.role === 'coral-soft' ? 0.38 : 0.28) },
     uFluorescenceStrength: { value: pal?.fluorescenceStrength ?? options.fluorescenceStrength ?? (options.role === 'coral-soft' ? 0.16 : 0.10) },
+    uActinicLevel: {
+      value:
+        options.actinicLevel !== undefined && Number.isFinite(options.actinicLevel)
+          ? Math.min(2, Math.max(0, options.actinicLevel))
+          : 1,
+    },
     uFluorescenceTint: {
       value: new THREE.Color(options.fluorescenceTint ?? (pal?.tipColor ?? (options.role === 'coral-soft' ? '#f0d5e4' : '#e2d4f0'))),
     },

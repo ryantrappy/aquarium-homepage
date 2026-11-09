@@ -269,6 +269,33 @@ describe('coral-raw-masks-v1 material and shader adapter (AQ-53 / AQ-42)', () =>
     expect(mockShader.fragmentShader).not.toContain('totalEmissiveRadiance += uPaletteBase')
   })
 
+  it('scales mask-driven fluorescence with the fixture actinic level and removes the sine caustic shimmer (AQ-70.6 AC #1/#3)', () => {
+    const binding = applyCoralRawMaskMaterial(new THREE.MeshStandardMaterial(), { role: 'coral-soft' })
+    expect(binding.uniforms.uActinicLevel.value).toBe(1)
+    const dimmed = applyCoralRawMaskMaterial(new THREE.MeshStandardMaterial(), { role: 'coral-soft', actinicLevel: 0.5 })
+    expect(dimmed.uniforms.uActinicLevel.value).toBe(0.5)
+    const clamped = applyCoralRawMaskMaterial(new THREE.MeshStandardMaterial(), { role: 'coral-soft', actinicLevel: 4 })
+    expect(clamped.uniforms.uActinicLevel.value).toBe(2)
+    const nonFinite = applyCoralRawMaskMaterial(new THREE.MeshStandardMaterial(), { role: 'coral-soft', actinicLevel: Number.NaN })
+    expect(nonFinite.uniforms.uActinicLevel.value).toBe(1)
+
+    const material = new THREE.MeshStandardMaterial()
+    const shaderBinding = applyCoralRawMaskMaterial(material, { role: 'coral-soft' })
+    const mockShader: THREE.WebGLProgramParametersWithUniforms = {
+      uniforms: {},
+      vertexShader: THREE.ShaderLib.standard.vertexShader,
+      fragmentShader: THREE.ShaderLib.standard.fragmentShader,
+    } as unknown as THREE.WebGLProgramParametersWithUniforms
+    shaderBinding.material.onBeforeCompile(mockShader, {} as THREE.WebGLRenderer)
+    expect(mockShader.fragmentShader).toContain('uFluorescenceStrength * uActinicLevel')
+    // The old sine caustic shimmer is gone: the shared cellular caustic
+    // chunk is the one caustic system on coral now.
+    expect(mockShader.fragmentShader).not.toContain('causticBand')
+    expect(mockShader.fragmentShader).not.toContain('cWave1')
+    expect(mockShader.fragmentShader).not.toContain('cWave2')
+    expect(mockShader.fragmentShader).not.toContain('vCoralWorldPos')
+  })
+
   it('grades the healthy default palette saturated and the old pale palette better than the pre-AQ-88 grade (AQ-88 AC #1)', () => {
     const saturation = (c: { r: number; g: number; b: number }) =>
       (Math.max(c.r, c.g, c.b) - Math.min(c.r, c.g, c.b)) / Math.max(c.r, c.g, c.b)

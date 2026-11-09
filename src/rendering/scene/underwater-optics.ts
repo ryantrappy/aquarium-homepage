@@ -16,8 +16,24 @@ export type AquariumOpticsConfig = Readonly<{
   backgroundHex: string
   fogNear: number
   fogFar: number
+  /** Resolved white key intensity (AQ-70.6): equals
+   * `fixtureTotalIntensity * fixtureWhiteBalance`. Kept as a field so
+   * existing consumers (caustic controller, tests) keep working; the
+   * tunable knobs are `fixtureWhiteBalance` / `fixtureTotalIntensity`,
+   * and a test asserts the resolved fields equal the derivation. */
   keyLightIntensity: number
+  /** Resolved royal-blue actinic fill intensity (AQ-70.6): equals
+   * `fixtureTotalIntensity * (1 - fixtureWhiteBalance)`. */
   fillLightIntensity: number
+  /**
+   * Overhead LED fixture white/blue balance (AQ-70.6 AC #2): fraction of
+   * total fixture output that is white (14,000K daylight key); the rest is
+   * royal-blue actinic fill. Tunable; the chosen default matches the
+   * current scene intensities exactly (2.1 white / 0.95 blue).
+   */
+  fixtureWhiteBalance: number
+  /** Total overhead LED fixture output (AQ-70.6 AC #2): white + blue. */
+  fixtureTotalIntensity: number
   causticBaseIntensity: number
   causticModulationAmplitude: number
   causticPrimaryHz: number
@@ -63,6 +79,13 @@ export type AquariumOpticsConfig = Readonly<{
  * defaults ('#155c73', fog 15-32, key 3.0, fill 1.0, ripple 0.008 m) matched
  * the stale AQ-39 plan's line references, not the scene.
  */
+/** Default overhead LED fixture white share (AQ-70.6 AC #2): 2.1 / 3.05,
+ * so the resolved key/fill intensities are exactly the long-standing
+ * scene values (white 2.1, royal-blue actinic 0.95). */
+export const DEFAULT_FIXTURE_WHITE_BALANCE = 2.1 / 3.05
+/** Default total overhead LED fixture output (AQ-70.6 AC #2). */
+export const DEFAULT_FIXTURE_TOTAL_INTENSITY = 3.05
+
 export const DEFAULT_AQUARIUM_OPTICS_CONFIG: AquariumOpticsConfig = Object.freeze({
   backgroundHex: '#183654',
   fogNear: 18,
@@ -70,8 +93,12 @@ export const DEFAULT_AQUARIUM_OPTICS_CONFIG: AquariumOpticsConfig = Object.freez
   // AQ-71: re-tuned down to compensate for the added PMREM/IBL ambient
   // light. aquarium.ts reads these via the optics config, so the key/fill
   // constructors and the caustic-controller bases all follow.
+  // AQ-70.6: these are the resolved values of fixtureTotalIntensity (3.05)
+  // split by fixtureWhiteBalance (2.1/3.05 white, the rest actinic blue).
   keyLightIntensity: 2.1,
   fillLightIntensity: 0.95,
+  fixtureWhiteBalance: DEFAULT_FIXTURE_WHITE_BALANCE,
+  fixtureTotalIntensity: DEFAULT_FIXTURE_TOTAL_INTENSITY,
   causticBaseIntensity: 2.45,
   causticModulationAmplitude: 0.18,
   causticPrimaryHz: 0.22,
@@ -97,6 +124,44 @@ export const DEFAULT_AQUARIUM_OPTICS_CONFIG: AquariumOpticsConfig = Object.freez
   depthHazeMaxAlpha: 0.22,
   lightShaftMaxAlpha: 0.16,
 })
+
+/**
+ * Resolves the overhead LED fixture white/blue split (AQ-70.6 AC #2) from
+ * the tunable balance and total output: white key = total * balance,
+ * royal-blue actinic fill = total * (1 - balance). Non-finite or
+ * out-of-range inputs fall back to the defaults, so a bad config can never
+ * produce a negative light or a NaN intensity.
+ */
+export function evaluateFixtureIntensities(
+  whiteBalance: number,
+  totalIntensity: number,
+): { keyLightIntensity: number; fillLightIntensity: number } {
+  const balance = Number.isFinite(whiteBalance)
+    ? clamp(whiteBalance, 0, 1)
+    : DEFAULT_FIXTURE_WHITE_BALANCE
+  const total = Number.isFinite(totalIntensity)
+    ? Math.max(0, totalIntensity)
+    : DEFAULT_FIXTURE_TOTAL_INTENSITY
+  return {
+    keyLightIntensity: total * balance,
+    fillLightIntensity: total * (1 - balance),
+  }
+}
+
+/**
+ * Scales coral fluorescence with the actinic (blue) share of the fixture
+ * (AQ-70.6 AC #3): 1.0 at the default white balance, 0 when the fixture is
+ * all white, 2.0 (capped) when the blue share is twice the default. The
+ * coral shader multiplies its mask-driven glow by this factor, so
+ * fluorescence follows the fixture instead of being a fixed constant.
+ */
+export function evaluateFluorescenceActinicFactor(whiteBalance: number): number {
+  const balance = Number.isFinite(whiteBalance)
+    ? clamp(whiteBalance, 0, 1)
+    : DEFAULT_FIXTURE_WHITE_BALANCE
+  const defaultActinicShare = 1 - DEFAULT_FIXTURE_WHITE_BALANCE
+  return clamp((1 - balance) / defaultActinicShare, 0, 2)
+}
 
 const TWO_PI = Math.PI * 2
 

@@ -739,7 +739,7 @@ function sculptOrganicRockContour(rockRoot: THREE.Object3D) {
 function bindCoralInstanceMaterials(
   instance: THREE.Object3D,
   paletteOverride: CoralPaletteOverride | undefined,
-  options: { paused?: boolean; reducedMotion?: boolean } | undefined,
+  options: { paused?: boolean; reducedMotion?: boolean; actinicLevel?: number } | undefined,
   materialControllers: Array<ReturnType<typeof applyCoralRawMaskMaterial>>,
   geometryBindings: CoralMaterialBoundBinding[],
 ) {
@@ -766,6 +766,7 @@ function bindCoralInstanceMaterials(
         paletteOverride,
         paused: options?.paused,
         reducedMotion: options?.reducedMotion,
+        actinicLevel: options?.actinicLevel,
       })
       ensureCoralShaderBounds(child.geometry, role, binding.uniforms.uFlowAmplitudeM.value)
       geometryBindings.push({ geometry: child.geometry, role, binding })
@@ -786,7 +787,7 @@ export function assembleCoralsOnRockSockets(
   rockRoot: THREE.Object3D,
   coralTemplates: ReadonlyMap<string, THREE.Object3D>,
   mounts: readonly ModularCoralMountEntry[],
-  options?: { paused?: boolean; reducedMotion?: boolean },
+  options?: { paused?: boolean; reducedMotion?: boolean; actinicLevel?: number },
 ): {
   mountedCorals: AssembledCoralBinding[]
   update(timeSeconds: number, paused?: boolean, reducedMotion?: boolean): void

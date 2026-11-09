@@ -118,6 +118,30 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     }
   })
 
+  it('forwards the fixture actinic level to every mounted coral material, defaulting to 1 (AQ-70.6 AC #3)', () => {
+    const templates = buildMockCoralTemplates()
+    const leftRock = buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json')
+
+    const assembly = assembleCoralsOnRockSockets(leftRock, templates, DEFAULT_LEFT_ISLAND_MOUNTS, {
+      actinicLevel: 0.5,
+    })
+    expect(assembly.mountedCorals.length).toBeGreaterThan(0)
+    for (const mounted of assembly.mountedCorals) {
+      expect(mounted.materialControllers.length).toBeGreaterThan(0)
+      for (const ctrl of mounted.materialControllers) {
+        expect(ctrl.uniforms.uActinicLevel.value).toBe(0.5)
+      }
+    }
+
+    const defaultRock = buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json')
+    const defaultAssembly = assembleCoralsOnRockSockets(defaultRock, templates, DEFAULT_LEFT_ISLAND_MOUNTS)
+    for (const mounted of defaultAssembly.mountedCorals) {
+      for (const ctrl of mounted.materialControllers) {
+        expect(ctrl.uniforms.uActinicLevel.value).toBe(1)
+      }
+    }
+  })
+
   it('bounds shader-displaced soft vertices and grows shared cached geometry only once across clones and amplitude changes', () => {
     const templates = buildMockCoralTemplates()
     const template = templates.get('coral-euphyllia-torch')!

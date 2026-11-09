@@ -16,7 +16,19 @@ export const FISH_SPAWN_DEPTH_PLANES: readonly number[] = Object.freeze([0.28, 0
 /** Small deterministic jitter around a depth plane, as a z-range fraction. */
 export const FISH_SPAWN_DEPTH_PLANE_JITTER = 0.03
 
-export type OccupiedFishSpawn = { position: Vec3; clearance: number }
+/**
+ * An occupied spawn point. `clearance` is the legacy AABB/segment safety
+ * radius (still used for wall and obstacle safety). `bodyRadiusM` is the
+ * AQ-85 physical body radius (15% of nose-to-tail length); when both the
+ * spawning fish and the occupant supply it, fish-vs-fish spacing uses the
+ * body-radius separation (`self + other + 0.06`) instead of the legacy
+ * clearance sum (≥1.0 m), so a tight school region no longer reads as
+ * blocked water. Omit it to keep the legacy behaviour.
+ */
+export type OccupiedFishSpawn = { position: Vec3; clearance: number; bodyRadiusM?: number }
+
+/** Gap added to the two body radii for fish-vs-fish spawn separation (AQ-85: minSep = self + peer + 0.06). */
+export const SPAWN_BODY_RADIUS_GAP_M = 0.06
 export type FishSpawnPreference = { position: Vec3; yaw: number }
 
 export function fishSceneStatus(spawnUnavailable: boolean): 'ready' | 'failed' {
@@ -157,6 +169,12 @@ export function findSafeFishSpawn(
    * returns true. A throwing check fails closed for that candidate.
    */
   isSafe?: (position: Vec3) => boolean,
+  /**
+   * The spawning fish's AQ-85 body radius. When given (and the occupant
+   * supplies one too), fish-vs-fish spacing uses `self + other + 0.06`
+   * instead of the legacy `clearance + other.clearance` sum.
+   */
+  spawningBodyRadiusM?: number,
 ): Vec3 | undefined {
   const coordinates = [preferred.x, preferred.y, preferred.z,
     waterBounds.min.x, waterBounds.min.y, waterBounds.min.z,
@@ -195,8 +213,16 @@ export function findSafeFishSpawn(
   const safeCandidates = candidates.filter(candidate => isSafeFishPosition(candidate, clearance, waterBounds, obstacles))
   if (!safeCandidates.length) return undefined
   const targetDistance = (candidate: Vec3) => (candidate.x - clamped.x) ** 2 + (candidate.y - clamped.y) ** 2 + (candidate.z - clamped.z) ** 2
+  // Fish-vs-fish separation (PR #28 follow-up): body radii when both sides
+  // supply them, otherwise the legacy clearance sum. `clearance` itself is
+  // untouched — it still governs wall/obstacle safety above.
+  const spawningRadius = Number.isFinite(spawningBodyRadiusM) && (spawningBodyRadiusM as number) >= 0 ? (spawningBodyRadiusM as number) : undefined
+  const minimumSeparation = (other: OccupiedFishSpawn) =>
+    spawningRadius !== undefined && other.bodyRadiusM !== undefined && Number.isFinite(other.bodyRadiusM) && other.bodyRadiusM >= 0
+      ? spawningRadius + other.bodyRadiusM + SPAWN_BODY_RADIUS_GAP_M
+      : clearance + other.clearance
   const isClearOfFish = (candidate: Vec3) => validOccupied.every(other => {
-    const minimumDistance = clearance + other.clearance
+    const minimumDistance = minimumSeparation(other)
     return Math.hypot(candidate.x - other.position.x, candidate.y - other.position.y, candidate.z - other.position.z) >= minimumDistance
   })
   const unoccupied = safeCandidates.filter(isClearOfFish)
@@ -204,7 +230,7 @@ export function findSafeFishSpawn(
   ranked.sort((a, b) => {
     if (!unoccupied.length) {
       const crowding = (candidate: Vec3) => validOccupied.reduce((total, other) => {
-        const minimumDistance = clearance + other.clearance
+        const minimumDistance = minimumSeparation(other)
         const distance = Math.hypot(candidate.x - other.position.x, candidate.y - other.position.y, candidate.z - other.position.z)
         return total + Math.max(0, minimumDistance - distance)
       }, 0)

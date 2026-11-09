@@ -106,6 +106,26 @@ describe('photoreal aragonite sand bed (AQ-70.12)', () => {
     bed.dispose()
   })
 
+  it('keeps the albedo mean warm cream but with a wide enough tonal swing to read as granular sand, not flat white (visual-check fix)', () => {
+    const { albedoTexture } = createAragoniteSandPbrTextures(64)
+    const data = albedoTexture.image.data as Uint8Array
+    let sum = 0
+    let min = 255
+    let max = 0
+    const n = data.length / 4
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i]!
+      sum += r
+      if (r < min) min = r
+      if (r > max) max = r
+    }
+    const mean = sum / n
+    expect(mean).toBeGreaterThan(210)
+    expect(mean).toBeLessThan(245)
+    expect(max - min).toBeGreaterThan(35)
+    albedoTexture.dispose()
+  })
+
   it('keeps CPU contact factors in parity with shader footprint strengths and removes indigo tint (AC #2)', () => {
     const bed = createAragoniteSandBed({ textureSize: 64, narrow: false })
     const shader = compileSandShader(bed)
@@ -114,38 +134,29 @@ describe('photoreal aragonite sand bed (AQ-70.12)', () => {
     expect(shader.fragmentShader).not.toContain('vec3(0.16, 0.17, 0.34)')
     expect(shader.fragmentShader).toContain('warmDetritus')
     expect(shader.fragmentShader).toContain('rockContactAo')
-    expect(shader.fragmentShader).toContain('1.0 - 0.42 * (1.0 - smoothstep(0.62, 1.12, rLeft))')
-    expect(shader.fragmentShader).toContain('1.0 - 0.40 * (1.0 - smoothstep(0.62, 1.12, rRight))')
+    expect(shader.fragmentShader).toContain('1.0 - 0.55 * (1.0 - smoothstep(0.55, 1.30, rLeft))')
+    expect(shader.fragmentShader).toContain('1.0 - 0.52 * (1.0 - smoothstep(0.55, 1.30, rRight))')
 
     // Contact factor darkens tightly at rock footprints and stays 1.0 in open foreground sand
     expect(evaluateRockBaseContactFactor(0, 1.5, false)).toBe(1.0)
-    expect(evaluateRockBaseContactFactor(-2.35, -1.35, false)).toBeCloseTo(0.58, 2)
-    expect(evaluateRockBaseContactFactor(2.65, -1.20, false)).toBeCloseTo(0.60, 2)
-    expect(evaluateRockBaseContactFactor(-0.15, -1.35, true)).toBeCloseTo(0.58, 2)
+    expect(evaluateRockBaseContactFactor(-2.35, -1.35, false)).toBeCloseTo(0.45, 2)
+    expect(evaluateRockBaseContactFactor(2.65, -1.20, false)).toBeCloseTo(0.48, 2)
+    expect(evaluateRockBaseContactFactor(-0.15, -1.35, true)).toBeCloseTo(0.45, 2)
 
     bed.dispose()
   })
 
-  it('holds caustic phase when paused or reduced while allowing an explicit frozen capture time', () => {
+  it('carries no private caustic clock or ridge network: the shared cellular caustic chunk is the one caustic system (AQ-70.6 AC #1)', () => {
     const bed = createAragoniteSandBed({ textureSize: 64, narrow: false })
     const shader = compileSandShader(bed)
-    const sandTime = shader.uniforms.uSandTime
-
-    bed.update(12.5, false, false)
-    expect(sandTime.value).toBe(12.5)
-
-    bed.update(24, true, false)
-    expect(sandTime.value).toBe(12.5)
-    bed.update(24, false, true)
-    expect(sandTime.value).toBe(12.5)
-    bed.update(12.5, false, false)
-    expect(sandTime.value).toBe(12.5)
-
-    // AQ-70.2 drives an explicit capture time through the active update path.
-    bed.update(37, false, false)
-    expect(sandTime.value).toBe(37)
-    bed.update(Number.NaN, false, false)
-    expect(sandTime.value).toBe(37)
+    expect(shader.uniforms.uSandTime).toBeUndefined()
+    expect(shader.fragmentShader).not.toContain('uSandTime')
+    expect(shader.fragmentShader).not.toContain('causticNet')
+    expect(shader.fragmentShader).not.toContain('ridge1')
+    // update() is a no-op for time now (the shared caustics chunk freezes
+    // at t=0 on pause/reduced-motion); it must not throw or reintroduce a clock.
+    expect(() => bed.update(12.5, false, false)).not.toThrow()
+    expect(shader.uniforms.uSandTime).toBeUndefined()
 
     bed.dispose()
   })

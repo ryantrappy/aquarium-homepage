@@ -283,6 +283,15 @@ describe('debug FPS counter badge (AQ-83 AC #2/#3/#4)', () => {
     expect(badge()).toBeNull()
   })
 
+  it('renders no badge in server HTML even when the counter is enabled (hydration #418)', async () => {
+    // SSR runs no effects, so `mounted` stays false and the badge is
+    // absent — exactly what the first client render must produce, or React
+    // hydration fails (badge present on the client, absent in SSR HTML).
+    const { renderToString } = await import('react-dom/server')
+    const html = renderToString(<AquariumScene services={services} paused={false} fpsCounterEnabled />)
+    expect(html).not.toContain('fps-counter-badge')
+  })
+
   it('renders a compact badge with a dash before the first sample', async () => {
     await act(async () => { root.render(<AquariumScene services={services} paused={false} fpsCounterEnabled />) })
     expect(badge()).not.toBeNull()
