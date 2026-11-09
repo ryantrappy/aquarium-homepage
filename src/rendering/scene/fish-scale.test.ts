@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { REEF_FISH as fishData } from '../../lib/fish'
 import {
   FISH_RENDER_LENGTH_INCHES, MIN_FISH_CLEARANCE, MODEL_SWIM_AXIS_LENGTH, SPRITE_ARTWORK_LENGTH_FRACTION, SPRITE_PLANE_WIDTH, TANK_UNITS_PER_INCH,
-  fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale,
+  fishBodyRadiusM, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale,
 } from './fish-scale'
 
 const root = resolve(__dirname, '../../..')
@@ -127,5 +127,28 @@ describe('true relative fish sizing', () => {
       expect(radius).toBeGreaterThanOrEqual(MIN_FISH_CLEARANCE)
       expect(radius).toBeGreaterThan(fishRenderLength(fish.id) / 2)
     }
+  })
+
+  it('scales the fish-to-fish body radius to physical size within the AQ-85 envelope', () => {
+    // Every roster species lands in [0.04, 0.08]: an order of magnitude
+    // below the legacy 0.5 clearance, so school separation bubbles can no
+    // longer fuse into one multi-meter exclusion zone.
+    for (const fish of fishData) {
+      const radius = fishBodyRadiusM(fish.id)
+      expect(radius, fish.id).toBeGreaterThanOrEqual(0.04)
+      expect(radius, fish.id).toBeLessThanOrEqual(0.08)
+    }
+    // Largest species clamps at the envelope ceiling; smallest sits near
+    // the floor; a mid-size clownfish is 15% of its 0.48-unit length.
+    expect(fishBodyRadiusM('blue-tang')).toBe(0.08)
+    expect(fishBodyRadiusM('tailspot-blenny')).toBeCloseTo(0.054, 6)
+    expect(fishBodyRadiusM('ocellaris-clownfish')).toBeCloseTo(0.072, 6)
+    // Non-decreasing with render length, so bigger fish keep bigger space.
+    const byLength = [...fishData].sort((a, b) => FISH_RENDER_LENGTH_INCHES[a.id] - FISH_RENDER_LENGTH_INCHES[b.id])
+    for (let i = 1; i < byLength.length; i++) {
+      expect(fishBodyRadiusM(byLength[i].id)).toBeGreaterThanOrEqual(fishBodyRadiusM(byLength[i - 1].id))
+    }
+    // Unknown species fall back to the 3in render length.
+    expect(fishBodyRadiusM('unknown-species')).toBeCloseTo(0.072, 6)
   })
 })

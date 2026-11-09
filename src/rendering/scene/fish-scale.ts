@@ -100,3 +100,25 @@ export const MIN_FISH_CLEARANCE = .5
 export function fishClearanceRadius(speciesId: string): number {
   return Math.max(MIN_FISH_CLEARANCE, fishRenderLength(speciesId) / 2 + .05)
 }
+
+/**
+ * Physical body radius used for fish-to-fish personal-space separation (AQ-85).
+ *
+ * This is deliberately NOT `fishClearanceRadius`: clearance is the legacy
+ * habitat-obstacle envelope (>= 0.5) and must stay that way for rocks and
+ * tank walls, while two fish only need each other's actual body radius plus
+ * a small buffer. The radius is species-proportional: the body half-width
+ * estimate is 15% of the rendered nose-to-tail length, clamped into the
+ * AQ-85 body-radius envelope [0.04, 0.08] so the largest species (blue tang,
+ * 1.44 units long, raw 0.216) cannot reintroduce an oversized separation
+ * bubble, and the smallest species stay above the 0.04 floor. Resulting
+ * pairwise minimum separations (two radii + the 0.06 AQ-85 buffer) run
+ * ~0.14m–0.22m instead of the legacy >= 1.12m.
+ */
+export const MIN_FISH_BODY_RADIUS_M = .04
+export const MAX_FISH_BODY_RADIUS_M = .08
+export const FISH_BODY_RADIUS_LENGTH_FRACTION = .15
+export function fishBodyRadiusM(speciesId: string): number {
+  const raw = fishRenderLength(speciesId) * FISH_BODY_RADIUS_LENGTH_FRACTION
+  return Math.min(MAX_FISH_BODY_RADIUS_M, Math.max(MIN_FISH_BODY_RADIUS_M, raw))
+}
