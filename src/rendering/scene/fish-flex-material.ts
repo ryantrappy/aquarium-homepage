@@ -11,40 +11,13 @@ import { SPECIES_BEHAVIOR_IDS, type SpeciesBehaviorId } from '../../lib/fish-beh
 import { SPECIES_LOCOMOTION_SIGNATURES } from './species-locomotion-extensions'
 
 /**
- * GPU vertex flex for fish (AQ-12 / AQ-49, tracker #8).
+ * GPU vertex flex & buccal-opercular articulation for fish (AQ-12 / AQ-49 / AQ-74).
  *
  * A post-skinning `onBeforeCompile` patch on each fish's `SkinnedMesh`
  * material displaces vertices laterally (object-space X) with the
- * Lighthill travelling wave from `fish-body-flex.ts`:
- *
- *   y(s, t) = A_tail * (a + (1-a) * s^p) * sin(k*s - ω*t + φ)
- *
- * where s ∈ [0, 1] is the normalised body coordinate, snout (object-space
- * +Z, measured from the mesh bounding box) → tail (−Z). The long axis is Z
- * and the lateral axis is X on every runtime asset: the spine chain runs
- * spine_0 (z ≈ +1) → spine_5 (z ≈ −0.8) and the mesh z-extent is ≈ 2.0
- * units, versus ≈ 0.3–0.6 in X and ≈ 0.9–1.4 in Y. Root must still verify
- * the axis/sign on the real assets at visual review — a wrong axis would
- * read as roll instead of lateral undulation.
- *
- * Vertex density is the known risk: the proof clownfish has only ~950
- * vertices (~35–165 per 0.2-body-length slice), so its wave is coarse;
- * the splat-fish GLBs are denser (3.6k–9.8k verts). The displacement is
- * continuous in s, so a coarse mesh reads as a smooth bend rather than a
- * kink, but a subdivision / re-export decision is out of scope here.
- *
- * Dorsal/anal fins: NO dorsal/anal fin bones are bound anywhere in the
- * repo (only spine_* and pectoral_L/R), so no fin bone names are invented.
- * The median-fin ripple below is a shader-mask FALLBACK: vertices above /
- * below the body midline ripple with a quarter-cycle lag, amplitude
- * falling to zero at the fin base so the fin cannot detach from the body.
- * It is off (amplitude 0) for every species except the angelfish /
- * butterflyfish, whose gait table enables a small ripple.
- *
- * One cloned material per fish instance (uniforms are per-fish: phase,
- * frequency, amplitude). The shared program is reused via a fixed
- * `customProgramCacheKey`. The original shared materials from the model
- * bases are never mutated and are restored on dispose.
+ * Lighthill travelling wave from `fish-body-flex.ts`, plus subtle
+ * swim-synchronized operculum (gill-cover) flare and lower-jaw mouth
+ * ventilation (AQ-74 AC #2 & #3).
  */
 
 export type FishFlexUniforms = {
@@ -60,6 +33,8 @@ export type FishFlexUniforms = {
   uFlexBodyLength: { value: number }
   uFlexBodyHalfHeight: { value: number }
   uFlexFinRippleAmp: { value: number }
+  uFlexGillAmplitude: { value: number }
+  uFlexMouthAmplitude: { value: number }
   uFlexEnabled: { value: number }
 }
 
@@ -95,6 +70,8 @@ uniform float uFlexTailZ;
 uniform float uFlexBodyLength;
 uniform float uFlexBodyHalfHeight;
 uniform float uFlexFinRippleAmp;
+uniform float uFlexGillAmplitude;
+uniform float uFlexMouthAmplitude;
 uniform float uFlexEnabled;
 `
 
@@ -104,9 +81,26 @@ const FLEX_VERTEX_DISPLACEMENT = `
   float flexEnv = uFlexTailAmplitude * (uFlexEnvelopeA + (1.0 - uFlexEnvelopeA) * pow(flexS, uFlexEnvelopeP));
   float flexPhase = uFlexWaveNumber * flexS - 6.283185307179586 * uFlexFrequencyHz * uFlexTime + uFlexPhase;
   float flexWave = flexEnv * sin(flexPhase);
-  float flexFinMask = smoothstep(0.55, 0.95, abs(transformed.y) / uFlexBodyHalfHeight);
+  float flexYNorm = transformed.y / uFlexBodyHalfHeight;
+  float flexFinMask = smoothstep(0.55, 0.95, abs(flexYNorm));
   float flexFin = uFlexFinRippleAmp * flexFinMask * sin(flexPhase - 1.57079632679);
-  transformed.x += (flexWave + flexFin) * uFlexEnabled;
+
+  // AQ-74 buccal-opercular ventilation synchronized to the swim cycle:
+  // Mouth inhalation leads operculum (gill-cover) lateral flare by 90 deg (pi/2).
+  float flexRespPhase = 6.283185307179586 * uFlexFrequencyHz * uFlexTime - uFlexPhase;
+  float flexGillMask = smoothstep(0.16, 0.21, flexS) * (1.0 - smoothstep(0.23, 0.28, flexS))
+    * (1.0 - smoothstep(0.18, 0.46, abs(flexYNorm + 0.08)));
+  float flexGillPulse = 0.5 - 0.5 * cos(flexRespPhase - 1.57079632679);
+  float flexSideSign = transformed.x >= 0.0 ? 1.0 : -1.0;
+  float flexGill = flexSideSign * uFlexGillAmplitude * flexGillMask * flexGillPulse;
+
+  float flexMouthMask = (1.0 - smoothstep(0.015, 0.068, flexS))
+    * smoothstep(-0.28, -0.06, flexYNorm) * (1.0 - smoothstep(-0.03, 0.02, flexYNorm));
+  float flexMouthPulse = 0.5 - 0.5 * cos(flexRespPhase);
+  float flexMouth = uFlexMouthAmplitude * flexMouthMask * flexMouthPulse;
+
+  transformed.x += (flexWave + flexFin + flexGill) * uFlexEnabled;
+  transformed.y -= flexMouth * uFlexEnabled;
 }
 `
 
@@ -157,6 +151,8 @@ function createFlexUniforms(
     uFlexBodyLength: { value: bodyLength },
     uFlexBodyHalfHeight: { value: Math.max(1e-6, bodyHalfHeight) },
     uFlexFinRippleAmp: { value: 0 },
+    uFlexGillAmplitude: { value: 0 },
+    uFlexMouthAmplitude: { value: 0 },
     uFlexEnabled: { value: 1 },
   }
 }
@@ -172,11 +168,6 @@ type FlexMeshRecord = {
  * `MeshStandardMaterial` on its skinned meshes (one per fish instance),
  * measures the body from the mesh bounding boxes, and returns a binding
  * whose `update` drives the shared per-fish uniforms.
- *
- * Returns undefined (fish keeps its bone-only animation) when the model
- * has no skinned mesh with a standard material, or when the measured body
- * length is degenerate. Never throws for a missing/odd model — the caller
- * logs and continues without flex.
  */
 export function bindFishFlexToModel(
   root: THREE.Object3D,
@@ -221,8 +212,6 @@ export function bindFishFlexToModel(
     cloned.onBeforeCompile = shader => {
       patchFishFlexShader(shader, uniforms)
     }
-    // Clone only the standard material; any other material slots on the
-    // mesh are preserved untouched.
     const originalMaterial = mesh.material
     mesh.material = Array.isArray(mesh.material)
       ? materials.map((material, index) => (index === standardIndex ? cloned : material))
@@ -264,6 +253,14 @@ export function bindFishFlexToModel(
       uniforms.uFlexFinRippleAmp.value = reducedMotion
         ? 0
         : values.finRippleAmpBL * amplitudeScale * bodyLength
+      const respEffort =
+        0.45 + 0.55 * Math.min(1, Math.max(0, values.frequencyHz / 2.2))
+      uniforms.uFlexGillAmplitude.value = reducedMotion
+        ? 0
+        : 0.0022 * respEffort * amplitudeScale * bodyLength
+      uniforms.uFlexMouthAmplitude.value = reducedMotion
+        ? 0
+        : 0.0018 * respEffort * amplitudeScale * bodyLength
       uniforms.uFlexEnabled.value = reducedMotion ? 0 : 1
     },
     dispose(): void {

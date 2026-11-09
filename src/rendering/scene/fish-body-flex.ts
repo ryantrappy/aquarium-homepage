@@ -254,3 +254,57 @@ export function flexLateralOffsetBL(
     Math.sin(values.waveNumber * s - TWO_PI * values.frequencyHz * flexTimeSeconds + phaseRad)
   )
 }
+
+/**
+ * Buccal-opercular (gill-cover) lateral flare offset (AQ-74 AC #2) at normalised
+ * longitudinal coordinate `x ∈ [0, 1]` (snout 0 -> tail 1) and dorsoventral coordinate
+ * `yNorm ∈ [-1, 1]`, in fractions of body length.
+ *
+ * Lags mouth inhalation by 90 deg (pi/2) at the active swim frequency (`values.frequencyHz`).
+ */
+export function evaluateOperculumArticulationBL(
+  x: number,
+  yNorm: number,
+  flexTimeSeconds: number,
+  values: FishFlexValues,
+  phaseRad: number,
+): number {
+  const s = clamp(x, 0, 1)
+  const gillMask =
+    smoothstep(0.16, 0.21, s) *
+    (1 - smoothstep(0.23, 0.28, s)) *
+    (1 - smoothstep(0.18, 0.46, Math.abs(yNorm + 0.08)))
+  if (gillMask <= 0) return 0
+  const respPhase = TWO_PI * values.frequencyHz * flexTimeSeconds - phaseRad
+  const pulse = 0.5 - 0.5 * Math.cos(respPhase - Math.PI * 0.5)
+  const effort = 0.45 + 0.55 * clamp(values.frequencyHz / 2.2, 0, 1)
+  const gillAmplitudeBL = 0.0022 * effort * values.amplitudeScale
+  return gillAmplitudeBL * gillMask * pulse
+}
+
+/**
+ * Lower-jaw mouth ventilation vertical drop (AQ-74 AC #3) at normalised longitudinal
+ * coordinate `x ∈ [0, 1]` (snout 0 -> tail 1) and dorsoventral coordinate `yNorm ∈ [-1, 1]`,
+ * in fractions of body length.
+ *
+ * Leads operculum exhalation by 90 deg at the active swim frequency (`values.frequencyHz`).
+ */
+export function evaluateMouthArticulationBL(
+  x: number,
+  yNorm: number,
+  flexTimeSeconds: number,
+  values: FishFlexValues,
+  phaseRad: number,
+): number {
+  const s = clamp(x, 0, 1)
+  const mouthMask =
+    (1 - smoothstep(0.015, 0.068, s)) *
+    smoothstep(-0.28, -0.06, yNorm) *
+    (1 - smoothstep(-0.03, 0.02, yNorm))
+  if (mouthMask <= 0) return 0
+  const respPhase = TWO_PI * values.frequencyHz * flexTimeSeconds - phaseRad
+  const pulse = 0.5 - 0.5 * Math.cos(respPhase)
+  const effort = 0.45 + 0.55 * clamp(values.frequencyHz / 2.2, 0, 1)
+  const mouthAmplitudeBL = 0.0018 * effort * values.amplitudeScale
+  return mouthAmplitudeBL * mouthMask * pulse
+}

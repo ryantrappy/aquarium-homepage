@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import * as THREE from 'three'
-import { evaluateLighthillFlexParams } from './fish-body-flex'
+import {
+  evaluateLighthillFlexParams,
+  evaluateMouthArticulationBL,
+  evaluateOperculumArticulationBL,
+} from './fish-body-flex'
 import {
   bindFishFlexToModel,
   patchFishFlexShader,
@@ -38,8 +42,8 @@ const swimInput = {
   startleSeconds: 0,
 }
 
-describe('fish flex material (AQ-12 / AQ-49)', () => {
-  it('injects the travelling-wave displacement after skinning, never before it', () => {
+describe('fish flex material (AQ-12 / AQ-49 / AQ-74)', () => {
+  it('injects the travelling-wave and buccal-opercular displacement after skinning, never before it', () => {
     const shader = {
       vertexShader: THREE.ShaderLib.standard.vertexShader,
       uniforms: {},
@@ -57,16 +61,21 @@ describe('fish flex material (AQ-12 / AQ-49)', () => {
       uFlexBodyLength: { value: 2 },
       uFlexBodyHalfHeight: { value: 0.3 },
       uFlexFinRippleAmp: { value: 0 },
+      uFlexGillAmplitude: { value: 0.004 },
+      uFlexMouthAmplitude: { value: 0.003 },
       uFlexEnabled: { value: 1 },
     }
     expect(patchFishFlexShader(shader, uniforms)).toBe(true)
     expect(shader.vertexShader).toContain('uniform float uFlexTime;')
-    expect(shader.vertexShader).toContain('transformed.x += (flexWave + flexFin) * uFlexEnabled;')
+    expect(shader.vertexShader).toContain('uniform float uFlexGillAmplitude;')
+    expect(shader.vertexShader).toContain('uniform float uFlexMouthAmplitude;')
+    expect(shader.vertexShader).toContain('transformed.x += (flexWave + flexFin + flexGill) * uFlexEnabled;')
+    expect(shader.vertexShader).toContain('transformed.y -= flexMouth * uFlexEnabled;')
     const skinningIndex = shader.vertexShader.indexOf('#include <skinning_vertex>')
     const displacementIndex = shader.vertexShader.indexOf('flexS = clamp((uFlexSnoutZ - transformed.z)')
     expect(skinningIndex).toBeGreaterThan(-1)
     expect(displacementIndex).toBeGreaterThan(skinningIndex)
-    // The wave is lateral (X) and posterior-weighted; it never moves the snout.
+    // The wave is lateral (X) and posterior-weighted; it never moves the snout laterally.
     expect(shader.vertexShader).toContain('uFlexSnoutZ - transformed.z')
   })
 
@@ -99,20 +108,18 @@ describe('fish flex material (AQ-12 / AQ-49)', () => {
     expect(bindFishFlexToModel(root, 'not-a-species', 1)).toBeUndefined()
   })
 
-  it('advances flex time with dt, freezes it on dt = 0, and neutralises amplitude under reduced motion', () => {
+  it('advances flex time with dt, freezes it on dt = 0, and neutralises body/gill/mouth amplitudes under reduced motion', () => {
     const { root } = makeSkinnedFish()
-    const binding = bindFishFlexToModel(root, 'ocellaris-clownfish', 7)!
-    const gait = SPECIES_LOCOMOTION_SIGNATURES['ocellaris-clownfish'].gait
+    const binding = bindFishFlexToModel(root, 'blue-tang', 7)!
+    const gait = SPECIES_LOCOMOTION_SIGNATURES['blue-tang'].gait
     const values = evaluateLighthillFlexParams(gait, swimInput)
-    updateFishFlex(binding, 'ocellaris-clownfish', swimInput, 1 / 60, false)
+    updateFishFlex(binding, 'blue-tang', swimInput, 1 / 60, false)
     expect(binding.flexTimeSeconds).toBeCloseTo(1 / 60, 10)
-    updateFishFlex(binding, 'ocellaris-clownfish', swimInput, 0, false)
+    updateFishFlex(binding, 'blue-tang', swimInput, 0, false)
     expect(binding.flexTimeSeconds).toBeCloseTo(1 / 60, 10)
     // Reduced motion: time frozen and amplitude neutralised, without throwing.
-    updateFishFlex(binding, 'ocellaris-clownfish', swimInput, 1 / 60, true)
+    updateFishFlex(binding, 'blue-tang', swimInput, 1 / 60, true)
     expect(binding.flexTimeSeconds).toBeCloseTo(1 / 60, 10)
-    // The uniforms object is shared, so patching a scratch shader exposes
-    // the live values the renderer would see.
     const mesh = root.children[0] as THREE.SkinnedMesh
     const material = mesh.material as THREE.MeshStandardMaterial
     const scratch = {
@@ -123,25 +130,40 @@ describe('fish flex material (AQ-12 / AQ-49)', () => {
     expect(scratch.uniforms.uFlexTime.value).toBeCloseTo(1 / 60, 10)
     expect(scratch.uniforms.uFlexEnabled.value).toBe(0)
     expect(scratch.uniforms.uFlexTailAmplitude.value).toBe(0)
+    expect(scratch.uniforms.uFlexGillAmplitude.value).toBe(0)
+    expect(scratch.uniforms.uFlexMouthAmplitude.value).toBe(0)
 
-    // Verify uFlexTime advances on the uniform and frequency changes remain phase-continuous.
+    // Verify uFlexTime, gill/mouth amplitudes, and phase continuity when active.
     for (let i = 0; i < 60; i++) {
-      updateFishFlex(binding, 'ocellaris-clownfish', swimInput, 1 / 60, false)
+      updateFishFlex(binding, 'blue-tang', swimInput, 1 / 60, false)
     }
     expect(scratch.uniforms.uFlexTime.value).toBeCloseTo(61 / 60, 6)
+    expect(scratch.uniforms.uFlexGillAmplitude.value).toBeGreaterThan(0)
+    expect(scratch.uniforms.uFlexMouthAmplitude.value).toBeGreaterThan(0)
     const evalWavePhase = () =>
       -Math.PI * 2 * scratch.uniforms.uFlexFrequencyHz.value * scratch.uniforms.uFlexTime.value +
       scratch.uniforms.uFlexPhase.value
     const phaseBeforeSpeedChange = evalWavePhase()
     const slowInput = { ...swimInput, speedNorm: 0.2 }
     // Updating at dt = 0 with a new speed/frequency must not jump the shader wave phase.
-    updateFishFlex(binding, 'ocellaris-clownfish', slowInput, 0, false)
+    updateFishFlex(binding, 'blue-tang', slowInput, 0, false)
     const phaseAfterSpeedChange = evalWavePhase()
     const phaseDelta = Math.atan2(
       Math.sin(phaseAfterSpeedChange - phaseBeforeSpeedChange),
       Math.cos(phaseAfterSpeedChange - phaseBeforeSpeedChange),
     )
     expect(Math.abs(phaseDelta)).toBeLessThan(1e-6)
+
+    // Verify buccal-opercular respiratory phase lag: mouth peaks at T/2, operculum peaks 90 deg later at 3T/4
+    const period = 1 / values.frequencyHz
+    const mouthPeak = evaluateMouthArticulationBL(0.02, -0.14, period * 0.5, values, 0)
+    const mouthClosed = evaluateMouthArticulationBL(0.02, -0.14, 0, values, 0)
+    expect(mouthPeak).toBeGreaterThan(0.001)
+    expect(mouthClosed).toBeCloseTo(0, 8)
+    const gillPeak = evaluateOperculumArticulationBL(0.22, -0.08, period * 0.75, values, 0)
+    const gillAtMouthClosed = evaluateOperculumArticulationBL(0.22, -0.08, period * 0.25, values, 0)
+    expect(gillPeak).toBeGreaterThan(0.001)
+    expect(gillAtMouthClosed).toBeCloseTo(0, 8)
 
     binding.dispose()
     expect(values.frequencyHz).toBeGreaterThan(0)

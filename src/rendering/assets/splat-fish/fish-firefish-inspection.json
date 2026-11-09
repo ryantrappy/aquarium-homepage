@@ -15,7 +15,7 @@
       "provenance": {
         "license": "original",
         "creator": "Aquarium project",
-        "sourceSha256": "e45a59ca0bfdc686aca6cd022918a02cfcc43e192dea373922c3be77e33965e4",
+        "sourceSha256": "6e8f2e4dfe512a408565878dc70788a99d3d50c7457e916a87cc781f1fc0cf27",
         "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
         "attribution": "Original photorealistic 3D rigged and animated fish asset (Nemateleotris magnifica (Firefish / Magnificent Dartfish)) reconstructed from project-original public/fish/firefish.webp with embedded PBR textures."
       }
