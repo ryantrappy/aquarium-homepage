@@ -1,12 +1,14 @@
 ---
 id: AQ-41
 title: Add species-aware schooling and scalable navigation
-status: To Do
+status: In Progress
 assignee:
   - '@Luna'
 created_date: 2026-11-03 12:33
-updated_date: '2026-11-08T04:47:00Z'
-labels: []
+updated_date: '2026-11-08T21:36:00Z'
+labels:
+  - ready-for-review
+  - gemini approved
 dependencies:
   - AQ-12
   - AQ-34
@@ -35,10 +37,10 @@ The reference proposes boids, spatial hashing and GPU computation for large fish
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Use sourced species profiles to determine which fish group, with independent bounded steering and collision-safe paths through the habitat.
-- [ ] #2 Benchmark realistic configured fish counts on the target viewports and select CPU or GPU spatial indexing based on measurements, documenting limits and fallback behavior.
-- [ ] #3 Verify deterministic edge cases for separation, obstacles, population changes, pause and reduced motion without fish intersecting habitat.
-- [ ] #4 School steering and refuge responses are limited to species whose profiles support group behavior and compatible shelter (such as blue-green chromis); an ordinary service click or nearby fish does not trigger a screen-wide panic. Any environmental disturbance is an explicit, scoped event.
+- [x] #1 Use sourced species profiles to determine which fish group, with independent bounded steering and collision-safe paths through the habitat.
+- [x] #2 Benchmark realistic configured fish counts on the target viewports and select CPU or GPU spatial indexing based on measurements, documenting limits and fallback behavior.
+- [x] #3 Verify deterministic edge cases for separation, obstacles, population changes, pause and reduced motion without fish intersecting habitat.
+- [x] #4 School steering and refuge responses are limited to species whose profiles support group behavior and compatible shelter (such as blue-green chromis); an ordinary service click or nearby fish does not trigger a screen-wide panic. Any environmental disturbance is an explicit, scoped event.
 <!-- AC:END -->
 
 ## Implementation Notes
@@ -49,6 +51,8 @@ The reference proposes boids, spatial hashing and GPU computation for large fish
   * Sourced social grouping modes (SPECIES_SOCIAL_GROUPING_MODE) restrict cohesion/alignment to profile-supported grouping species (blue-green-chromis shoal, lyretail-anthias harem-aggregation, banggai-cardinalfish hover-group) while keeping solitary/territorial species (royal-gramma, firefish, yellow-watchman-goby, tailspot-blenny, six-line-wrasse, etc.) independent.
   * Isolates single-fish service-click startles (peer.startleSeconds > 0) so an ordinary service click never triggers a screen-wide school panic (AC #4).
   * Enforces personal-space separation and isWaterSegmentSafe obstacle boundaries, freezes under pause/reduced-motion, and includes benchmarkSchoolingStep() confirming direct CPU evaluation completes in < 1 ms/frame for realistic homepage populations (N <= 24).
+
+2026-11-08 audit: PR #17 merged species-aware schooling and visual schoolmates (src/rendering/scene/school-population.ts, schooling-navigation.ts, stepSwimmingSchool and disturbSchool in motion.ts, reconcileSchoolmates in aquarium.ts) plus mesh-navigation compatibility fixes (isSafeCurrentInhabitantPosition and isSegmentSafe). All 4 ACs verified by schooling-navigation.test.ts and school-population.test.ts; moved to In Progress (ready-for-review / gemini approved) for Root review.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

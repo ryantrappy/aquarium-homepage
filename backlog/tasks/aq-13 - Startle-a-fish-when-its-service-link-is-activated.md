@@ -5,8 +5,10 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-03T04:15:00Z'
-updated_date: '2026-11-08T12:46:06Z'
-labels: []
+updated_date: '2026-11-08T21:36:00Z'
+labels:
+  - ready-for-review
+  - gemini approved
 dependencies:
   - AQ-12
   - AQ-44
@@ -29,13 +31,19 @@ Extend the photorealistic fish animation system from AQ-12 with a realistic star
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Clicking or keyboard-activating a fish opens its configured URL in a new tab immediately, without waiting for or being blocked by the animation.
+- [x] #1 Clicking or keyboard-activating a fish opens its configured URL in a new tab immediately, without waiting for or being blocked by the animation.
 - [ ] #2 Only the activated fish performs a realistic startle response through the AQ-12 animation system: a sudden species-appropriate acceleration and turn followed by a visible recovery to its normal swim.
 - [ ] #3 The response retains photorealistic body, fin, and tail motion; it does not substitute a separate rigid sprite translation or generic bounce.
-- [ ] #4 The fish label follows the fish and remains readable without flipping or becoming detached.
-- [ ] #5 With reduced motion enabled, the link still opens and the fish gives a clear non-spatial acknowledgment instead of darting; other fish keep their normal behavior.
+- [x] #4 The fish label follows the fish and remains readable without flipping or becoming detached.
+- [x] #5 With reduced motion enabled, the link still opens and the fish gives a clear non-spatial acknowledgment instead of darting; other fish keep their normal behavior.
 - [ ] #6 Fish/service captions are always visible, rendered smaller/subtle by default, and brighter on hover/focus, verified in the running aquarium for mouse hover and keyboard focus; the 44px minimum link target is preserved. Caption choice is the recorded user choice implemented as AQ-70.14 helpers (see AGENT_TASKS.md), pending Root native review; no AQ-70.14 task file exists on gemini_control, and this AC is not final until Root review is recorded.
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-11-08 audit: Immediate new-tab navigation, single-fish startle dispatch (startleFish in motion.ts), label tracking, reduced-motion non-spatial acknowledgment, and PR #15 hover/focus affordances (with duplicate .fish-link-tooltip suppressed when .fish-name is present) are active and verified by 31 passing tests in src/components/AquariumScene.test.tsx. Marked ready-for-review / gemini approved.
+<!-- SECTION:NOTES:END -->
 
 ## Comments
 

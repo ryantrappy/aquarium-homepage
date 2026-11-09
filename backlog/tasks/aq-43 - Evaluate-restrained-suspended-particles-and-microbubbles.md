@@ -1,13 +1,15 @@
 ---
 id: AQ-43
 title: Evaluate restrained suspended particles and microbubbles
-status: To Do
+status: In Progress
 assignee:
   - '@Luna'
 created_date: 2026-11-03 12:34
-updated_date: '2026-11-08T18:45:00Z'
+updated_date: '2026-11-08T21:36:00Z'
 labels:
   - good-for-parallel-work
+  - ready-for-review
+  - gemini approved
 dependencies:
   - AQ-34
   - AQ-14.2
@@ -32,8 +34,8 @@ The planning reference suggests marine snow and microbubbles carried by water fl
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Evaluate reference observations and select appropriate particle types, density, motion and visibility or document why the effect is omitted. **Amended 2026-11-08 (approved by Ryan):** two sparse emitter-anchored bubble streams (≤16 per stream, ≤32 total) and 48 depth-graded motes are selected; the original >30-particle and bubble-column omissions below are struck with reasons, not silently deleted.
-- [ ] #2 Implement any selected effect with bounded resource use and working pause and reduced-motion behavior.
+- [x] #1 Evaluate reference observations and select appropriate particle types, density, motion and visibility or document why the effect is omitted. **Amended 2026-11-08 (approved by Ryan):** two sparse emitter-anchored bubble streams (≤16 per stream, ≤32 total) and 48 depth-graded motes are selected; the original >30-particle and bubble-column omissions below are struck with reasons, not silently deleted.
+- [x] #2 Implement any selected effect with bounded resource use and working pause and reduced-motion behavior.
 - [ ] #3 Review fish visibility and performance at 402x874 and 1440x900.
 <!-- AC:END -->
 
@@ -81,6 +83,8 @@ Per `docs/open-source-asset-and-motion-research.md` §6.4 and our front-on tank 
 2026-11-08 (amendment approved by Ryan):
 - AQ-43 amended: the bubble-column and >30-particle omissions in §1 are struck with reasons; two sparse emitter-anchored bubble streams (≤16 per stream, ≤32 total) and 48 depth-graded motes (16 faint foreground, 32 background) are now selected. Implemented `evaluateBubblePosition` in src/rendering/scene/underwater-optics.ts, the `zBand` parameter on `evaluateSuspendedParticlePosition`, two mote `THREE.Points` systems plus one bubble `THREE.Points` system in src/rendering/scene/aquarium.ts, and unit tests in src/rendering/scene/underwater-optics.test.ts.
 - Anemone anchor note: no runtime world position for the host-anemone mount exists (`habitat.anchors` only carries `grazingSurface` locations), so the left bubble stream falls back to the left-island base, where the anemone mount lives. Per-point bubble size growth with height was not implemented (`THREE.PointsMaterial` has a single size; a custom shader was out of scope) — the size/speed hash correlation carries the size cue instead.
+
+2026-11-08 audit: PR #19 merged 48 depth-graded suspended motes (16 foreground, 32 background) and 2 island-anchored bubble streams (<=32 total) in src/rendering/scene/aquarium.ts and underwater-optics.ts, plus dirty-buffer upload on paused/reduced-motion startup/resize and distinct seed offsets across bands/streams. ACs #1-#2 verified; moved to In Progress (ready-for-review / gemini approved) awaiting Root 2-viewport review (AC #3).
 <!-- SECTION:NOTES:END -->
 
 ## Comments

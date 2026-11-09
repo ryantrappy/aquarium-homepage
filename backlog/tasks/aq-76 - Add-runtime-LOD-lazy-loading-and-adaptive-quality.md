@@ -1,11 +1,11 @@
 ---
 id: AQ-76
 title: Add runtime LOD, lazy loading, and adaptive quality
-status: To Do
+status: In Progress
 assignee:
   - '@Luna'
 created_date: 2026-11-08 00:30
-updated_date: '2026-11-08T20:35:00Z'
+updated_date: '2026-11-08T21:37:00Z'
 labels:
   - performance
   - rendering

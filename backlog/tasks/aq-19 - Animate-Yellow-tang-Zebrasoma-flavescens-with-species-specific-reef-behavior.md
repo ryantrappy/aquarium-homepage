@@ -1,11 +1,11 @@
 ---
 id: AQ-19
 title: Animate Yellow tang (Zebrasoma flavescens) with species-specific reef behavior
-status: To Do
+status: In Progress
 assignee:
   - '@render-integration'
 created_date: 2026-11-03 04:37
-updated_date: '2026-11-08T04:47:00Z'
+updated_date: '2026-11-08T21:37:00Z'
 labels:
   - reef-fish
   - animation
@@ -38,8 +38,8 @@ Roster ID: `yellow-tang`. Implement this fish as an independently reviewable spe
 - [ ] #1 The rendered fish visibly matches the Yellow tang (Zebrasoma flavescens) visual baseline (adult saturated yellow laterally compressed oval body, pointed snout, and tall dorsal and anal fins), checked against the species references linked on this task.
 - [ ] #2 Its species-specific behavior is visible: cruise broadly along the reef front powered mainly by pectoral-fin flapping; use the caudal fin for bursts and turns, make sweeping turns, and pause to graze at rock surfaces.
 - [ ] #3 Real-species video review confirms visible body and fin articulation appropriate to this fish, plausible turns, and any natural hovering or pauses; rigid sprite sliding without articulated fish motion does not count.
-- [ ] #4 Roster ID `yellow-tang` is available as a fish choice for new and existing services and maps to the correct fish, readable label, and service link; the fish occupies its described habitat position and stays within the aquarium.
-- [ ] #5 Shared pause, stopping when the page is hidden, and reduced-motion behavior work for this fish without breaking its service link.
+- [x] #4 Roster ID `yellow-tang` is available as a fish choice for new and existing services and maps to the correct fish, readable label, and service link; the fish occupies its described habitat position and stays within the aquarium.
+- [x] #5 Shared pause, stopping when the page is hidden, and reduced-motion behavior work for this fish without breaking its service link.
 <!-- AC:END -->
 
 ## Definition of Done
@@ -53,6 +53,12 @@ Roster ID: `yellow-tang`. Implement this fish as an independently reviewable spe
 <!-- SECTION:PLAN:BEGIN -->
 1. Verify real yellow tang identity and timestamped lateral/frontal footage before any anatomy or motion tuning; keep unverifiable guide candidates explicitly unreviewed. 2. Record observed fin root, membrane outline/rays, articulation and turns without inferring numeric gait parameters from unmeasured video. 3. After the shared rig script is released by root, author one bounded review-only pectoral prototype using the licensed yellow tang source, preserving rigid trunk/peduncle work. 4. Render matching lateral/frontal poses and a short articulated cycle outside git with provenance and numerical integrity checks, using four Blender threads; root compares against reference before promotion. No main GLB replacement or Done claim.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-11-08 audit: Species 3D rigged GLB model, behavior profile (src/lib/fish-behavior.ts), locomotion signature (src/rendering/scene/species-locomotion-extensions.ts), Lighthill flex gait (src/rendering/scene/fish-body-flex.ts), and service-link / pause / reduced-motion handling are active in the runtime and verified by automated tests (ACs #4 & #5). Moved from To Do to In Progress.
+<!-- SECTION:NOTES:END -->
 
 ## Comments
 

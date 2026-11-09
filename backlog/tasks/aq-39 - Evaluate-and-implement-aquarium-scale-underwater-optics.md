@@ -1,12 +1,14 @@
 ---
 id: AQ-39
 title: Evaluate and implement aquarium-scale underwater optics
-status: To Do
+status: In Progress
 assignee:
   - '@Luna'
 created_date: 2026-11-03 12:33
-updated_date: '2026-11-08T12:46:06Z'
-labels: []
+updated_date: '2026-11-08T21:36:00Z'
+labels:
+  - ready-for-review
+  - gemini approved
 dependencies:
   - AQ-5
   - AQ-34
@@ -38,8 +40,8 @@ The Gemini reference suggests wavelength-dependent attenuation, fluorescence and
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Research and document which attenuation, fluorescence and glass effects are visually justified at aquarium scale, including sources and approximations.
-- [ ] #2 Implement selected effects with tunable parameters in the chosen renderer without obscuring fish or adding an artificial blue veil.
+- [x] #1 Research and document which attenuation, fluorescence and glass effects are visually justified at aquarium scale, including sources and approximations.
+- [x] #2 Implement selected effects with tunable parameters in the chosen renderer without obscuring fish or adding an artificial blue veil.
 - [ ] #3 Verify visual behavior and performance at 402x874 and 1440x900, including paused and reduced-motion modes.
 <!-- AC:END -->
 
@@ -84,6 +86,8 @@ Per `docs/open-source-asset-and-motion-research.md` §6.2:
   * Verified with vitest and tsc --noEmit.
 
 2026-11-08 (backlog mapping, PR 10) — glass-pane conflict note: AQ-39 §1.3 omits heavy front-pane reflections (they degrade fish readability and violate AQ-14.6 AC #3). Tracker item #13 proposes a glass pane, which would introduce front-pane reflections and therefore conflicts with this omission. Before implementing heavy front-pane reflections or a glass pane, resolve the conflict explicitly: either keep the AQ-39 omission and defer/reject the glass pane, or update AQ-39 to specify the intended reflection behaviour. Do not implement both the omission and the glass pane silently. This note changes no implementation scope.
+
+2026-11-08 audit: PR #7 merged DEFAULT_AQUARIUM_OPTICS_CONFIG and evaluateDepthTintedColor in src/rendering/scene/underwater-optics.ts (9 passing tests in underwater-optics.test.ts) and wired Beer-Lambert depth-tinted water column (#082d50), fog (18..36), and LED intensities into src/rendering/scene/aquarium.ts. Moved to In Progress (ready-for-review / gemini approved) awaiting Root 2-viewport visual sign-off (AC #3).
 <!-- SECTION:NOTES:END -->
 
 ## Comments

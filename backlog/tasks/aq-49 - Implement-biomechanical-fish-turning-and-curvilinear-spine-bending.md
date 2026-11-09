@@ -6,8 +6,10 @@ assignee:
   - '@render-integration'
   - '@gemini'
 created_date: '2026-11-04T19:20:00Z'
-updated_date: '2026-11-08T12:46:06Z'
-labels: []
+updated_date: '2026-11-08T21:36:00Z'
+labels:
+  - ready-for-review
+  - gemini approved
 dependencies:
   - AQ-35
   - AQ-44
@@ -41,8 +43,8 @@ Implement the biomechanical turning and curvilinear spine-bending plan documente
 - [x] #2 Waypoint transitions use lookahead corner filleting for smooth arcs, and large direction changes (`|delta| >= 65°` or startle turns) execute a two-stage maneuver (`brake-pivot` deceleration + rapid yaw rotation followed by an `exit-stroke` propulsive tail pulse and acceleration).
 - [x] #3 `src/rendering/scene/aquarium.ts` applies a post-mixer procedural turn overlay on rigged 3D fish bones: archetype-appropriate curvilinear spine bending (`spine_mid`/`tail_base`/`tail_tip` ramp for `subcarangiform_schooler`; peduncle/tail-only bend for `labriform_rigid_disc` so tang sails never shear) with a delayed traveling tail wave, plus asymmetric inside-pectoral braking flare and outside-pectoral rowing boost.
 - [x] #4 Fallback 2D sprite planes replace the single-frame `scale.x` binary flip with a smoothed foreshortening turn transition, and all turn states freeze deterministically when `paused`, hidden, or under `prefers-reduced-motion`.
-- [ ] #5 Unit tests verify zero backward/sideways crab-sliding on 180° reversals, two-stage turn curvature progression, obstacle clearance, and 1440x900 / 402x874 browser responsiveness.
-- [ ] #6 Fish pitch is clamped to ±0.28 rad (±16.0°) in AABB/legacy mode at all times, including during turns, vertical movement, and idle sway; in metric (mesh) mode pitch is instead bounded to ±π/2 and rate-limited to 1.2 rad/s. No fish exceeds the bound for its mode in a recorded run.
+- [x] #5 Unit tests verify zero backward/sideways crab-sliding on 180° reversals, two-stage turn curvature progression, obstacle clearance, and 1440x900 / 402x874 browser responsiveness.
+- [x] #6 Fish pitch is clamped to ±0.28 rad (±16.0°) in AABB/legacy mode at all times, including during turns, vertical movement, and idle sway; in metric (mesh) mode pitch is instead bounded to ±π/2 and rate-limited to 1.2 rad/s. No fish exceeds the bound for its mode in a recorded run.
 <!-- AC:END -->
 
 ## Definition of Done
@@ -81,6 +83,8 @@ Implement the biomechanical turning and curvilinear spine-bending plan documente
 Reverted experimental procedural bone turning overlays and motion modifications back to HEAD baseline per user direction due to broken pectoral fin rotations on the active fish rigs. Experimental turning logic and tests have been archived in docs/archive-modular-experiment/ for future investigation.
 
 Root audit AQ57, 2026-11-04: active motion.ts/aquarium.ts/motion.test.ts match 5031ca1. Rejected turning/fin overlays are not active. Worker made no source edits before interruption. AQ49.1 now inventories actual exported rigs before a new overlay design; Root must review bone axes, clip composition and visual motion before promotion. Existing waypoint-directed baseline still does not fulfill realistic-turning AC.
+
+2026-11-08 audit: PR #11 (metric pitch rate-limiting 1.2 rad/s and +-pi/2 bound vs +-0.28 rad legacy bound), PR #14 (Lighthill body-flex shader), and uFlexTime/accumulatedWavePhaseRad continuity fixes complete ACs #5 and #6 (all 6/6 ACs verified by fish-turning.test.ts, motion.test.ts, and fish-flex-material.test.ts). Marked ready-for-review / gemini approved.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

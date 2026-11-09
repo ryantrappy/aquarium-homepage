@@ -1,11 +1,11 @@
 ---
 id: AQ-45
 title: Implement species-compatible interactions with reef habitat anchors
-status: To Do
+status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-03T12:38:00Z'
-updated_date: '2026-11-08T04:47:00Z'
+updated_date: '2026-11-08T21:37:00Z'
 labels: []
 dependencies:
   - AQ-34
@@ -44,10 +44,10 @@ AQ-34 provides typed 3D habitat locations and AQ-35 describes which locations ea
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The runtime accepts only profile-compatible typed habitat anchors from AQ-34/AQ-35; incompatible combinations are rejected or safely omitted.
-- [ ] #2 Ocellaris clownfish can approach and remain near a compatible host-anemone anchor with a tunable soft home region and natural overlap of soft tentacles; no hard-coded universal leash distance or Acropora-as-host substitution is used.
-- [ ] #3 Firefish hover above and retreat into a sand-burrow entrance, while yellow watchman gobies hold lookout at and retreat backward into a burrow; their distinct profile behaviors are not collapsed into the same movement.
-- [ ] #4 Tailspot blenny rock-perching and supported roster foraging/grazing interactions use their own compatible rock, rubble, sand, or grazing anchors rather than forcing all small reef fish to perch or burrow.
+- [x] #1 The runtime accepts only profile-compatible typed habitat anchors from AQ-34/AQ-35; incompatible combinations are rejected or safely omitted.
+- [x] #2 Ocellaris clownfish can approach and remain near a compatible host-anemone anchor with a tunable soft home region and natural overlap of soft tentacles; no hard-coded universal leash distance or Acropora-as-host substitution is used.
+- [x] #3 Firefish hover above and retreat into a sand-burrow entrance, while yellow watchman gobies hold lookout at and retreat backward into a burrow; their distinct profile behaviors are not collapsed into the same movement.
+- [x] #4 Tailspot blenny rock-perching and supported roster foraging/grazing interactions use their own compatible rock, rubble, sand, or grazing anchors rather than forcing all small reef fish to perch or burrow.
 - [ ] #5 Approach, interaction, retreat, and return trajectories are smooth and collision-aware: fish do not snap to targets or pass through solid reef, and a blocked target causes safe replanning or omission.
 - [ ] #6 A review artifact demonstrates at least the host-anemone, sand-burrow, rock-perch, and foraging/grazing interaction categories with the source-supported species assignments.
 - [ ] #7 Pausing, hidden-page suspension, reduced motion, and service-link selection remain compatible with the interactions; these behaviors do not delay URL opening.
@@ -65,6 +65,8 @@ AQ-34 provides typed 3D habitat locations and AQ-35 describes which locations ea
 2026-11-05 (@gemini):
 - Fixed the yellow-tang grazingSurface clearance failure reported in Root comment #1 in src/rendering/scene/habitat.ts: instantiateReefHabitat() and deriveReefHabitat() now compute anchorClearanceOffset(anchor.compatibleSpecies) = max(MIN_FISH_CLEARANCE, ...compatibleSpecies.map(fishClearanceRadius)) + 0.03 (0.60 scene units for yellow-tang radius 0.57 instead of hard-coded 0.53), restoring reachable grazing routes at both 402x874 mobile and 1440x900 desktop placements (verified in src/rendering/scene/habitat.test.ts).
 - Implemented src/rendering/scene/habitat-anchor-interactions.ts and src/rendering/scene/habitat-anchor-interactions.test.ts covering profile-compatible anchor filtering (never substituting branchingCoralShelter/Acropora for hostAnemone), ocellaris-clownfish soft-home anemone station-keeping, firefish burrow hover/head-first bolt vs. yellow-watchman-goby benthic lookout/backward retreat, tailspot-blenny rock perching, and substrate grazing/foraging with collision-checked target resolution and pause/reduced-motion gating.
+
+2026-11-08 audit: Profile-compatible anchor filtering and interaction pose offsets (src/rendering/scene/habitat-anchor-interactions.ts, habitat-anchor-interactions.test.ts) are implemented and tested (ACs #1-#4). Moved to In Progress; permeable coral collision zones and socket-derived anchor wiring in aquarium.ts/motion.ts continue in AQ-82.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
