@@ -46,6 +46,19 @@ import { SCHOOL_TOTAL_COUNT, resolveSchoolPopulation, schoolmateSpawnOffset } fr
 import { applyCaustics, createCaustics } from './caustics'
 import { AdaptiveQualityController, LAZY_MAX_CONCURRENT_LOADS, QUALITY_TIERS, lodAnimationFrameSkip, orderLazyLoadQueue, phase0SpeciesIds, projectedFishLengthPx, selectFishLod, type FishLod, type QualityTier } from './runtime-quality'
 import { FRAME_RATE_PUSH_INTERVAL_MS, FrameRateSampler, type FrameRateSample } from './frame-rate'
+import {
+  DEFAULT_CAMERA_DISTANCE_M,
+  DEFAULT_CAMERA_ZOOM_STATE,
+  clampCameraZoomState,
+  dampCameraZoomState,
+  isOverviewZoomState,
+  panCameraZoomState,
+  stepZoomDistance,
+  zoomStateForFocalArea,
+  zoomToCursor,
+  type CameraZoomState,
+  type FocalAreaId,
+} from './camera-zoom'
 
 const modelUrls: Record<string, string> = {
   'ocellaris-clownfish': new URL('../proof/candidate-real-clown.glb', import.meta.url).href,
@@ -65,7 +78,7 @@ const modelUrls: Record<string, string> = {
   'copperband-butterflyfish': new URL('../assets/splat-fish/copperband-butterflyfish.glb', import.meta.url).href,
 }
 export type SceneStatus = 'loading' | 'ready' | 'failed'
-export type AquariumController = { update(services: ServiceConfig[], paused: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void }
+export type AquariumController = { update(services: ServiceConfig[], paused: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void; zoomIn(): boolean; zoomOut(): boolean; zoomToFocalArea(id: FocalAreaId): boolean; resetZoom(): boolean; isZoomed(): boolean; getCameraZoom(): CameraZoomState }
 type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; flex?: FishFlexBinding; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean; schoolmate: boolean; lod: FishLod; lodModel?: THREE.Object3D; lodSprite?: THREE.Mesh }
 
 function disposeTree(root: THREE.Object3D) {
@@ -108,6 +121,29 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   scene.background = new THREE.Color(waterColumnColor)
   scene.fog = new THREE.Fog(waterColumnColor, optics.fogNear, optics.fogFar)
   const camera = new THREE.PerspectiveCamera(42, 1, .1, 60); camera.position.set(0, .15, 9); camera.lookAt(0, .15, 0)
+
+  // Camera zoom into focal areas (AQ-62 AC #1/#2): the camera stays front-on
+  // and dollies toward a focal target inside the water volume. `current` is
+  // what is rendered; `desired` is what the user asked for. render() damps
+  // current toward desired each frame, so zooming is a smooth interpolated
+  // transition — unless prefers-reduced-motion is set, in which case the
+  // camera snaps instantly (AQ-62 AC #5). Labels and raycast picking read
+  // the live camera every frame (projectFishLinkBounds / nearest), so they
+  // stay accurate at every zoom state by construction (AQ-62 AC #4).
+  let cameraZoomCurrent: CameraZoomState = { ...DEFAULT_CAMERA_ZOOM_STATE }
+  let cameraZoomDesired: CameraZoomState = { ...DEFAULT_CAMERA_ZOOM_STATE }
+  function applyCameraZoom() {
+    camera.position.set(cameraZoomCurrent.targetX, cameraZoomCurrent.targetY, cameraZoomCurrent.targetZ + cameraZoomCurrent.distance)
+    camera.lookAt(cameraZoomCurrent.targetX, cameraZoomCurrent.targetY, cameraZoomCurrent.targetZ)
+    camera.updateProjectionMatrix()
+  }
+  function setCameraZoomDesired(next: CameraZoomState) {
+    cameraZoomDesired = clampCameraZoomState(next)
+    // Apply once immediately so zoom responds while paused (no animation
+    // loop): render() snaps when the loop is stopped, and damps when it runs.
+    render(0, true)
+    return !isOverviewZoomState(cameraZoomDesired)
+  }
 
   // Runtime-generated PMREM environment map (AQ-71): procedural IBL from the
   // tank's own palette, generated once here. scene.background stays the
@@ -916,6 +952,14 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
   function render(steps: number, forceLabels = false) {
     const habitatStopped = paused || document.hidden
     const reducedMotion = Boolean(reducedMotionQuery?.matches)
+    // Camera zoom (AQ-62 AC #1/#5): damp toward the desired state while the
+    // scene is running; snap instantly on reduced motion or while paused /
+    // hidden, so zoom still responds with no animation loop. A single
+    // render(0, true) while running leaves the current state alone — the
+    // next tick damps it — so button/wheel zooms stay smooth.
+    if (reducedMotion || habitatStopped) cameraZoomCurrent = { ...cameraZoomDesired }
+    else if (steps > 0) cameraZoomCurrent = dampCameraZoomState(cameraZoomCurrent, cameraZoomDesired, steps * SIMULATION_STEP_SECONDS)
+    applyCameraZoom()
     if (!habitatStopped && !reducedMotion && steps > 0) {
       coralElapsedSec = (coralElapsedSec + steps * SIMULATION_STEP_SECONDS) % 3600
     }
@@ -1126,7 +1170,10 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
     camera.aspect = width / height; camera.updateProjectionMatrix(); renderer.setSize(width, height, false)
     // The nearest fish depth controls the safe horizontal envelope, so depth
     // changes cannot send an otherwise in-bounds fish beyond the view edge.
-    const halfWidth = Math.min(5.0, (camera.position.z - 2.8) * Math.tan(THREE.MathUtils.degToRad(21)) * camera.aspect * .96)
+    // AQ-62: the envelope is measured from the overview camera distance,
+    // not the live camera — zooming in must not shrink the fish roaming
+    // volume or trigger a habitat rebuild.
+    const halfWidth = Math.min(5.0, (DEFAULT_CAMERA_DISTANCE_M - 2.8) * Math.tan(THREE.MathUtils.degToRad(21)) * camera.aspect * .96)
     habitat.bounds = { min: { x: -halfWidth, y: -2.25, z: -4.6 }, max: { x: halfWidth, y: 2.8, z: 2.8 } }
     const newNarrow = width < 600
     const recoveringFromUnavailableSpawn = spawnUnavailable
@@ -1143,6 +1190,95 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
   }
   const observer = new ResizeObserver(resize); observer.observe(canvas.parentElement!); resize()
   document.addEventListener('visibilitychange', syncLoop, { signal: abort.signal })
+  // Camera zoom input (AQ-62 AC #1/#2): wheel zooms toward the cursor,
+  // drag pans while zoomed, pinch zooms on touch. The canvas itself has
+  // pointer-events: none, so listeners live on the section (the canvas
+  // parent), which also receives events bubbling from the link layer. A drag
+  // never starts on a fish link (event target closest('a')), so panning
+  // cannot steal a click; a drag that ends over a link is suppressed by a
+  // capture-phase click guard. At the overview, drag does nothing — the
+  // scene behaves exactly as before zooming existed.
+  const zoomHost = canvas.parentElement!
+  const zoomPointers = new Map<number, { x: number; y: number }>()
+  let zoomDragged = false
+  let zoomDragDistancePx = 0
+  let zoomPinchDistance: number | undefined
+  let zoomPinchMidpoint: { x: number; y: number } | undefined
+  function zoomNdc(clientX: number, clientY: number) {
+    const box = canvas.getBoundingClientRect()
+    // A degenerate rect (zero size) falls back to the scene's known size so
+    // cursor math never divides by zero.
+    const w = box.width > 0 ? box.width : width
+    const h = box.height > 0 ? box.height : height
+    const left = box.width > 0 ? box.left : 0
+    const top = box.height > 0 ? box.top : 0
+    // A wheel event without cursor coordinates (some synthetic dispatchers)
+    // zooms about the screen centre instead of producing NaN targets.
+    const x = Number.isFinite(clientX) ? clientX : left + w / 2
+    const y = Number.isFinite(clientY) ? clientY : top + h / 2
+    return { x: ((x - left) / w) * 2 - 1, y: 1 - ((y - top) / h) * 2 }
+  }
+  zoomHost.addEventListener('wheel', event => {
+    event.preventDefault()
+    const ndc = zoomNdc(event.clientX, event.clientY)
+    const nextDistance = cameraZoomDesired.distance * Math.exp(event.deltaY * 0.0012)
+    setCameraZoomDesired(zoomToCursor(cameraZoomDesired, camera.aspect, camera.fov, ndc.x, ndc.y, nextDistance))
+  }, { passive: false, signal: abort.signal })
+  zoomHost.addEventListener('pointerdown', event => {
+    if (event.target instanceof Element && event.target.closest('a')) return
+    if (zoomPointers.size === 0) { zoomDragged = false; zoomDragDistancePx = 0 }
+    zoomPointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
+    if (zoomPointers.size === 2) {
+      const [first, second] = [...zoomPointers.values()]
+      zoomPinchDistance = Math.hypot(first!.x - second!.x, first!.y - second!.y)
+      zoomPinchMidpoint = { x: (first!.x + second!.x) / 2, y: (first!.y + second!.y) / 2 }
+    }
+  }, { signal: abort.signal })
+  zoomHost.addEventListener('pointermove', event => {
+    const previous = zoomPointers.get(event.pointerId)
+    if (!previous) return
+    const moved = { x: event.clientX - previous.x, y: event.clientY - previous.y }
+    zoomPointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
+    if (zoomPointers.size === 2 && zoomPinchDistance !== undefined && zoomPinchMidpoint !== undefined) {
+      const [first, second] = [...zoomPointers.values()]
+      const nextDistance = Math.hypot(first!.x - second!.x, first!.y - second!.y)
+      if (nextDistance <= 0 || zoomPinchDistance <= 0) return
+      const midpoint = { x: (first!.x + second!.x) / 2, y: (first!.y + second!.y) / 2 }
+      const ndc = zoomNdc(midpoint.x, midpoint.y)
+      const next = zoomToCursor(cameraZoomDesired, camera.aspect, camera.fov, ndc.x, ndc.y, cameraZoomDesired.distance * (zoomPinchDistance / nextDistance))
+      // Pinch also pans toward the midpoint's drift so the content tracks
+      // both fingers instead of only zooming about the screen centre.
+      const panned = panCameraZoomState(next, camera.fov, height, midpoint.x - zoomPinchMidpoint.x, midpoint.y - zoomPinchMidpoint.y)
+      zoomPinchDistance = nextDistance
+      zoomPinchMidpoint = midpoint
+      zoomDragged = true
+      setCameraZoomDesired(panned)
+      return
+    }
+    if (zoomPointers.size !== 1 || isOverviewZoomState(cameraZoomDesired)) return
+    zoomDragDistancePx += Math.abs(moved.x) + Math.abs(moved.y)
+    if (zoomDragDistancePx > 6) zoomDragged = true
+    setCameraZoomDesired(panCameraZoomState(cameraZoomDesired, camera.fov, height, moved.x, moved.y))
+  }, { signal: abort.signal })
+  function zoomEndPointer(event: PointerEvent) {
+    zoomPointers.delete(event.pointerId)
+    if (zoomPointers.size < 2) { zoomPinchDistance = undefined; zoomPinchMidpoint = undefined }
+    if (zoomPointers.size === 0) {
+      zoomDragDistancePx = 0
+      // The click guard below clears zoomDragged when it suppresses a click;
+      // this timeout covers a drag with no following click (release outside
+      // the section) so a later genuine click is never swallowed.
+      setTimeout(() => { zoomDragged = false }, 350)
+    }
+  }
+  zoomHost.addEventListener('pointerup', zoomEndPointer, { signal: abort.signal })
+  zoomHost.addEventListener('pointercancel', zoomEndPointer, { signal: abort.signal })
+  zoomHost.addEventListener('click', event => {
+    if (!zoomDragged) return
+    zoomDragged = false
+    event.preventDefault()
+    event.stopPropagation()
+  }, { capture: true, signal: abort.signal })
   canvas.addEventListener('webglcontextlost', event => { event.preventDefault(); failed = true; renderer.setAnimationLoop(null); status('failed') }, { signal: abort.signal })
   // Per-asset fish load with failure isolation (AQ-76 AC #2): a single GLB
   // failure logs a warning and leaves that species on its thumbnail sprite
@@ -1245,6 +1381,18 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
       syncLoop()
     },
     activate(id) { const item = fish.find(item => item.service.id === id); if (!item || paused || document.hidden) return; item.releasedFocus = true; startleFish(item.motion, habitat) },
+    // Camera zoom (AQ-62 AC #1/#3): each returns whether the camera is
+    // zoomed after the action, so the UI can enable the Reset control.
+    zoomIn() { return setCameraZoomDesired({ ...cameraZoomDesired, distance: stepZoomDistance(cameraZoomDesired.distance, 'in') }) },
+    zoomOut() { return setCameraZoomDesired({ ...cameraZoomDesired, distance: stepZoomDistance(cameraZoomDesired.distance, 'out') }) },
+    zoomToFocalArea(id) {
+      const next = zoomStateForFocalArea(id)
+      if (!next) return !isOverviewZoomState(cameraZoomDesired)
+      return setCameraZoomDesired(next)
+    },
+    resetZoom() { return setCameraZoomDesired({ ...DEFAULT_CAMERA_ZOOM_STATE }) },
+    isZoomed() { return !isOverviewZoomState(cameraZoomDesired) },
+    getCameraZoom() { return { ...cameraZoomCurrent } },
     serviceAt: nearest,
     canActivate(id, x, y) { const item = fish.find(item => item.service.id === id); return Boolean(item && (x === undefined || y === undefined ? updateVisibility(item) : nearest(x, y) === id)) },
     dispose() {
