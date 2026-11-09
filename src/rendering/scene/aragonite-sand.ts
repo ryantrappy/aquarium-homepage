@@ -36,8 +36,8 @@ const MOBILE_ROCK_FOOTPRINTS: readonly RockFootprint[] = Object.freeze([
   { x: -0.15, z: -1.35, radiusX: 1.45, radiusZ: 0.95 },
 ])
 
-const LEFT_CONTACT_AO_STRENGTH = 0.42
-const RIGHT_CONTACT_AO_STRENGTH = 0.40
+const LEFT_CONTACT_AO_STRENGTH = 0.55
+const RIGHT_CONTACT_AO_STRENGTH = 0.52
 
 export function getRockFootprintsForViewport(narrow: boolean): readonly RockFootprint[] {
   return narrow ? MOBILE_ROCK_FOOTPRINTS : DESKTOP_ROCK_FOOTPRINTS
@@ -129,11 +129,16 @@ function generateAragoniteSandPixels(dim: number): AragoniteSandPixels {
       const grainBump = 0.38 * fine + 0.34 * meso + 0.16 * macro + 0.12 * r0
       heightField[idx] = grainBump
 
-      // Warm cream-ivory calcium carbonate base (#EFE8D8 .. #E2D8C3), strictly R >= G >= B
-      const baseWarmth = (grainBump - 0.5) * 34 + (r0 - 0.5) * 14
-      let r = 236 + baseWarmth
-      let g = 227 + baseWarmth * 0.94
-      let b = 208 + baseWarmth * 0.85
+      // Warm cream-ivory calcium carbonate base (#E6DCC8 mean, #D0C2B0..#FCF2DC
+      // across the grain field), strictly R >= G >= B. The swing is wide
+      // enough to read as granular sand at overview distance: the old
+      // ±17-step base (mean #EFE8D8) averaged out to flat white under the
+      // key + hemi + env light, which is the "flat white sand" visual
+      // finding. The speckles below add the pink/tan/white grain accents.
+      const baseWarmth = (grainBump - 0.5) * 44 + (r0 - 0.5) * 14
+      let r = 230 + baseWarmth
+      let g = 220 + baseWarmth * 0.94
+      let b = 200 + baseWarmth * 0.85
 
       if (r1 < 0.055) {
         // 5.5% pink/lilac coralline & Homotrema rubrum foraminifera specks
@@ -262,8 +267,12 @@ export function evaluateAragoniteSandElevation(
 
 /**
  * Evaluates tight physical rock-base contact ambient occlusion (`1.0` in open sand,
- * darkening smoothly to `0.56` right where the live-rock base meets the aragonite bed).
- * Replaces the old oversized hand-painted indigo blobs.
+ * darkening smoothly to `0.45` right where the live-rock base meets the aragonite bed).
+ * Replaces the old oversized hand-painted indigo blobs. The strengths were
+ * raised from 0.42/0.40 (visual-check fix): the old grounding ring was too
+ * weak to read under the bright sand, so the islands looked like they were
+ * floating on white. The fade is also wider (0.55..1.30) so the ring extends
+ * visibly beyond the rock edge instead of hiding underneath it.
  */
 export function evaluateRockBaseContactFactor(
   worldX: number,
@@ -278,7 +287,7 @@ export function evaluateRockBaseContactFactor(
     const nz = (worldZ - fp.z) / (fp.radiusZ * 0.92)
     const r = Math.hypot(nx, nz)
     const strength = i === 0 ? LEFT_CONTACT_AO_STRENGTH : RIGHT_CONTACT_AO_STRENGTH
-    const contact = 1.0 - strength * (1.0 - smoothstep(0.62, 1.12, r))
+    const contact = 1.0 - strength * (1.0 - smoothstep(0.55, 1.3, r))
     factor = Math.min(factor, contact)
   }
   return factor
@@ -465,7 +474,7 @@ export function createAragoniteSandBed(config: AragoniteSandConfig = {}): Aragon
   const sandMaterial = new THREE.MeshStandardMaterial({
     map: albedoTexture,
     normalMap: normalTexture,
-    normalScale: new THREE.Vector2(0.55, 0.55),
+    normalScale: new THREE.Vector2(0.8, 0.8),
     roughnessMap: roughnessTexture,
     roughness: 0.92,
     metalness: 0.0,
@@ -508,11 +517,11 @@ diffuseColor *= sampledDiffuseColor;
 // Macro warm aragonite variation & natural olive-tan detritus settling near rock bases (AQ-70.12 AC #1 & #2)
 vec2 dLeft = (vSandWorldPos.xz - uLeftFootprint.xy) / (uLeftFootprint.zw * 0.92);
 float rLeft = length(dLeft);
-float aoLeft = 1.0 - ${LEFT_CONTACT_AO_STRENGTH.toFixed(2)} * (1.0 - smoothstep(0.62, 1.12, rLeft));
+float aoLeft = 1.0 - ${LEFT_CONTACT_AO_STRENGTH.toFixed(2)} * (1.0 - smoothstep(0.55, 1.30, rLeft));
 
 vec2 dRight = (vSandWorldPos.xz - uRightFootprint.xy) / (uRightFootprint.zw * 0.92);
 float rRight = length(dRight);
-float aoRight = mix(1.0 - ${RIGHT_CONTACT_AO_STRENGTH.toFixed(2)} * (1.0 - smoothstep(0.62, 1.12, rRight)), 1.0, uSingleIslandMode);
+float aoRight = mix(1.0 - ${RIGHT_CONTACT_AO_STRENGTH.toFixed(2)} * (1.0 - smoothstep(0.55, 1.30, rRight)), 1.0, uSingleIslandMode);
 float rockContactAo = min(aoLeft, aoRight);
 
 // Subtle warm detritus & dampened aragonite near rock bases and ripple troughs (never blue-grey or indigo)

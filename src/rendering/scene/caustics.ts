@@ -254,10 +254,17 @@ export function applyCaustics(
       `// Animated caustic texture (AQ-14.2 AC #2): two world-space layers
 // scrolling in opposite directions, masked to upward faces and faded
 // with depth, capped at uCausticMaxAdd additive on direct diffuse light.
+// The layers combine by MAX, not product: the cellular texture is a
+// mostly-dark field (mean ~0.16), so a product's mean is ~0.027 and the
+// old smoothstep(0.25, 0.85) left only ~2.7% of any surface with any
+// pattern at all (mean additive +0.004) — the "no dapple discernible"
+// visual-check finding. Max keeps the cellular network shape (union of
+// ridges): ~32% of the surface shows pattern, mean additive +0.07 before
+// the upward-normal and depth masks, still restrained under the +0.35 cap.
 vec2 causticUvA = vCausticWorldPos.xz * uCausticScaleA + vec2(uCausticTime * 0.022, -uCausticTime * 0.0132);
 vec2 causticUvB = vCausticWorldPos.xz * uCausticScaleB + vec2(-uCausticTime * 0.0296, uCausticTime * 0.0185);
-float causticP = texture2D(uCausticMap, causticUvA).r * texture2D(uCausticMap, causticUvB).r;
-causticP = smoothstep(0.25, 0.85, causticP);
+float causticP = max(texture2D(uCausticMap, causticUvA).r, texture2D(uCausticMap, causticUvB).r);
+causticP = smoothstep(0.35, 0.9, causticP);
 float causticMask = max(vCausticWorldNormal.y, 0.0) * (1.0 - 0.35 * clamp((2.8 - vCausticWorldPos.y) / 5.6, 0.0, 1.0));
 reflectedLight.directDiffuse += diffuseColor.rgb * (causticP * causticMask * uCausticMaxAdd);
 #include <opaque_fragment>`,

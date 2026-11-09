@@ -16,7 +16,13 @@ function ReefHome() {
   const [servicesOpen, setServicesOpen] = useState(false)
   const [paused, setPaused] = useState(false)
   // Debug FPS counter (AQ-83 AC #1): opt-in, default off, persisted locally.
-  const [fpsCounterEnabled, setFpsCounterEnabled] = useState(() => readFpsCounterEnabled())
+  // SSR-safe: the stored value is read after mount, so the first client
+  // render matches the server HTML (no badge, checkbox unchecked) and the
+  // hydration mismatch (React error #418) from a render-time localStorage
+  // read is gone. The badge itself is also mount-gated in AquariumScene.
+  const [fpsCounterEnabled, setFpsCounterEnabled] = useState(false)
+
+  useEffect(() => { setFpsCounterEnabled(readFpsCounterEnabled()) }, [])
   const [reducedBySystem, setReducedBySystem] = useState(false)
   const servicesTrigger = useRef<HTMLButtonElement | null>(null)
   const managerTrigger = useRef<HTMLElement | null>(null)

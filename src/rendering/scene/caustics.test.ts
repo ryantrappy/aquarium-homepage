@@ -133,6 +133,12 @@ describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
     expect(shader.vertexShader).toContain('vCausticWorldPos')
     expect(shader.vertexShader).toContain('vCausticWorldNormal')
     expect(shader.fragmentShader).toContain('uCausticMap')
+    // Layers combine by max, not product (visual-check fix): a product of
+    // two mostly-dark cellular layers is ~0.027 mean and invisible through
+    // the old smoothstep; max keeps the ridge network visible.
+    expect(shader.fragmentShader).toContain('max(texture2D(uCausticMap, causticUvA).r, texture2D(uCausticMap, causticUvB).r)')
+    expect(shader.fragmentShader).toContain('smoothstep(0.35, 0.9, causticP)')
+    expect(shader.fragmentShader).not.toContain('texture2D(uCausticMap, causticUvA).r * texture2D(uCausticMap, causticUvB).r')
     expect(shader.fragmentShader).toContain('causticUvA')
     expect(shader.fragmentShader).toContain('causticUvB')
     expect(shader.fragmentShader).toContain('uCausticMaxAdd')
