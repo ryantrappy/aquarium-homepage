@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-03T12:38:00Z'
-updated_date: '2026-11-09T17:55:00Z'
+updated_date: '2026-11-09T19:42:56Z'
 labels: []
 dependencies:
   - AQ-34
@@ -81,6 +81,28 @@ Mechanisms (no new systems; build on what exists): AQ-35 profiles (per-species d
 ### Implementation plan — interaction architecture (2026-11-09)
 
 The implementation plan for this task is `docs/aq45-interaction-architecture.md`: a single typed event bus, one FSM, one fixed tick order, and everything else as data. It names the code hierarchy (profiles → FSM → bus → navigation → steering → pose → presentation), the full trigger catalog, the animation pathway (decision → state → steering → gait/flex → pose), the Opportunity Scheduler that replaces the inline yellow-tang check in `motion.ts`, and the pose stage that finally wires `evaluateAnchorInteractionOffset()` into the live scene (AQ-82 AC #4). Phasing: Phase 0 foundations (bus, scheduler, pose stage) → Phase 1 hosting/perching/burrows → Phase 2 schooling positions → Phase 3 grazing/probing patrols → Phase 4 display/territory. No code is changed by the design doc; Root review of the doc is required before Phase 0 implementation.
+
+## Blocked by / unblock path (2026-11-09)
+
+Why this task is blocked today, what is already done vs. what is bookkeeping, and the sequence that unblocks it.
+
+**What blocks AQ-45 today**
+- **AQ-34 not Done** — notably AC #3, the typed interaction locations (crevices, hideouts, perches, host anemones, foraging surfaces). AQ-45's whole job is connecting fish to those anchors, so without them there is nothing to connect to.
+- **AQ-44 not Done** — notably AC #4 (event hooks distinguishing a single-fish activation from a group/environment disturbance) and AC #5 (navigation requesting compatible typed anchors through AQ-34). Phase 2's school-dive and Phase 4's clownfish defence both need the AC #4 distinction.
+- **AQ-82 To Do** — permeable coral zones and socket-derived habitat anchors. Per the design doc (`docs/aq45-interaction-architecture.md`), AQ-82 is a prerequisite for Phases 1–2: without permeable zones the chromis/anthias school has no thicket to dive into, and without socket-derived anchors there are no anemone/refuge/perch/burrow anchors to stage.
+- **Design-doc Root acceptance** — PR #35 merged the design doc into `gemini_control` on 2026-11-09, but merging is not Root acceptance: the doc remains a draft until Root accepts it, and Phase 0 implementation must not start before that acceptance.
+
+**What is already done vs. what is bookkeeping**
+- Much of AQ-34 and AQ-44 is implemented: PR #12 delivered mesh navigation with animated collision envelopes (AQ-34), and the lightweight per-fish behavior state runtime exists with ACs #1/#2/#3/#6 checked (AQ-44). AQ-45 ACs #1–#4 are implemented and tested (`habitat-anchor-interactions.ts`).
+- The files stay In Progress because only Root marks tasks Done, and Root review is itself an AC on both AQ-34 and AQ-44. The "blocked" status is therefore partly bookkeeping (awaiting Root review of work that exists) and partly real (the ACs listed above are genuinely open).
+
+**Unblock sequence, in order**
+1. Root accepts the `docs/aq45-interaction-architecture.md` design doc (merged via PR #35) → Phase 0 foundations (event bus, Opportunity Scheduler, pose stage) can start.
+2. AQ-44 AC #4 and AC #5 land (or are accepted) → the group-disturbance and anchor-request paths exist.
+3. AQ-34 AC #3 anchors exist → AQ-45 has typed locations to connect fish to; Phase 1 staging can proceed.
+4. AQ-82 lands → permeable coral zones and socket-derived anchors exist → Phases 1–2 fully unblocked; Phases 3–4 follow on the same foundations.
+
+Phase 0 must not start before step 1. No implementation is started by this note.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
