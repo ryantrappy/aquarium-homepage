@@ -30,10 +30,21 @@ export type LabelDeconflictResult = Readonly<{
   id: string
   /** Extra downward shift in px to apply to this caption (0 = no shift). */
   dy: number
+  /** Horizontal shift in px from the caption's CSS-centred position
+   * (centred under the link box). The scene applies it as
+   * `--fish-label-dx`; without it the layout's horizontal decisions
+   * never reach the page, because the align classes can only anchor the
+   * caption to the link box — and a box near (or partly past) the frame
+   * edge can still leave the caption hanging off-screen. */
+  dx: number
   /** True when no shift can clear the overlap: the caption is faded out
-   * (the native link and its 44px target stay usable). */
+   * (the native link and its 44px target stay usable). Fading also
+   * applies when clearing would need a shift past
+   * FISH_LABEL_MAX_SHIFT_PX — a caption that far from its fish is
+   * detached, not anchored. */
   faded: boolean
-  /** Horizontal alignment of the caption relative to its anchor box. */
+  /** Horizontal alignment of the caption relative to its anchor box
+   * (a layout decision; the placement itself is carried by `dx`). */
   align: 'center' | 'left' | 'right'
 }>
 
@@ -44,7 +55,11 @@ export const FISH_LABEL_CAPTION_MAX_WIDTH_PX = 150
 /** Minimum gap kept between a de-conflicted caption and what it cleared. */
 export const FISH_LABEL_CLEARANCE_PX = 2
 /** Largest anchoring lift: the caption never climbs onto the fish body. */
-export const FISH_LABEL_MAX_LIFT_PX = 34
+export const FISH_LABEL_MAX_LIFT_PX = 48
+/** A caption shifted further than this from its fish is detached, not
+ * anchored — fade it instead (AQ-89's existing fallback), exactly as
+ * for a caption that cannot clear before the viewport bottom edge. */
+export const FISH_LABEL_MAX_SHIFT_PX = 3 * FISH_LABEL_CAPTION_HEIGHT_PX
 
 /**
  * Anchoring lift in px for a caption under a link box of `linkHeightPx`
@@ -86,8 +101,12 @@ function shiftBelow(caption: LabelRect, obstacle: LabelRect): number {
  * captions are placed first and never move for a farther fish. A caption
  * that would cover another fish's body or an already-placed caption shifts
  * down until it clears; if it cannot clear before the viewport bottom edge
- * it fades out instead (the link itself is untouched). Captions that would
- * clip past a frame edge align inward (left / right) instead of centring.
+ * — or without shifting further than FISH_LABEL_MAX_SHIFT_PX, past which
+ * the caption reads as detached from its fish — it fades out instead (the
+ * link itself is untouched). Captions that would clip past a frame edge
+ * align inward (left / right) instead of centring, and are then clamped
+ * inside the viewport; the horizontal shift from the centred position is
+ * reported as `dx` so the scene can apply it as `--fish-label-dx`.
  * Results are returned in input order.
  */
 export function resolveLabelDeconflicts(
@@ -108,6 +127,13 @@ export function resolveLabelDeconflicts(
       align = 'right'
       caption = { ...caption, x: item.body.x + item.body.width - caption.width }
     }
+    // Clamp the caption inside the viewport: aligning to the link box is
+    // not enough when the box itself sits near (or partly past) the frame
+    // edge — the caption would still hang off-screen (mobile zoomed
+    // WatchMyBirds). The clamp runs before the overlap pass so the shift
+    // math sees the rect that will actually render.
+    const maxCaptionX = Math.max(4, viewport.width - 4 - caption.width)
+    caption = { ...caption, x: Math.min(Math.max(caption.x, 4), maxCaptionX) }
 
     let dy = 0
     let faded = false
@@ -123,7 +149,10 @@ export function resolveLabelDeconflicts(
       const obstacle = blockingBody?.body ?? blockingCaption?.caption
       if (!obstacle) break
       const nextDy = dy + shiftBelow(shifted, obstacle)
-      if (caption.y + nextDy + caption.height > viewport.height - 4) {
+      if (
+        nextDy > FISH_LABEL_MAX_SHIFT_PX ||
+        caption.y + nextDy + caption.height > viewport.height - 4
+      ) {
         faded = true
         dy = 0
         break
@@ -133,7 +162,10 @@ export function resolveLabelDeconflicts(
 
     const resolved: LabelRect = faded ? caption : { ...caption, y: caption.y + dy }
     placed.push({ caption: resolved, body: item.body })
-    results.set(item.id, { id: item.id, dy: faded ? 0 : dy, faded, align })
+    // Horizontal shift from the CSS-centred position (centred under the
+    // link box) to the clamped, aligned position.
+    const centredX = item.body.x + item.body.width / 2 - caption.width / 2
+    results.set(item.id, { id: item.id, dy: faded ? 0 : dy, dx: caption.x - centredX, faded, align })
   }
 
   return placements.map(item => results.get(item.id)!)

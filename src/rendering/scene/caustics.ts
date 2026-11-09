@@ -28,8 +28,15 @@ import { DEFAULT_AQUARIUM_OPTICS_CONFIG } from './underwater-optics'
  * and the depth envelope from `evaluateCausticIntensity`.
  */
 
-/** Default caustic texture resolution (pixels per side). */
-export const CAUSTIC_TEXTURE_SIZE = 512
+/** Default caustic texture resolution (pixels per side). 256, not 512:
+ * the Voronoi field is generated on the main thread at startup (the
+ * 512 default cost ~600 ms there; 256 costs ~130 ms) and the texture is
+ * linearly filtered and mipmapped, so 64 px per cell still renders the
+ * same soft ridge network — the saved ~470 ms is the one cheap startup
+ * win in the batch's wake. The >180 s first render under SwiftShader is
+ * not this: it is software rasterization of the whole scene (PMREM +
+ * VSM shadow passes + full-frame shaders on the CPU), not JS startup. */
+export const CAUSTIC_TEXTURE_SIZE = 256
 
 /** Voronoi cells per tile side in the cellular caustic texture (AQ-70.6):
  * one tile spans ~2.9 m at the default layer-A scale, so a cell is ~0.7 m
@@ -168,6 +175,15 @@ export type ApplyCausticsOptions = {
   /** Maximum additive brightness; default from the optics config (0.35). */
   maxAdd?: number
   /**
+   * Lower edge of the ridge smoothstep; default 0.35. Lowering it widens
+   * the visible ridge network on that material without raising the peak
+   * (the +0.35 cap is untouched): the sand uses 0.22 because it is both
+   * the deepest surface (the depth envelope gives it ×0.65 vs ×0.89 on
+   * the rock) and the brightest (the same absolute add is a smaller
+   * relative change), so its dapple reads faint at overview distance.
+   */
+  threshold?: number
+  /**
    * Skinned meshes (AQ-70.6 AC #1: fish): hook the world position and normal
    * after skinning instead of at `begin_vertex` / `beginnormal_vertex`,
    * which run on the bind pose. At `#include <project_vertex>` the
@@ -213,6 +229,7 @@ export function applyCaustics(
     uCausticScaleA: { value: options.scaleA ?? cfg.causticTextureScaleA },
     uCausticScaleB: { value: options.scaleB ?? cfg.causticTextureScaleB },
     uCausticMaxAdd: { value: options.maxAdd ?? cfg.causticMaxAdd },
+    uCausticThreshold: { value: options.threshold ?? 0.35 },
   }
   const previousOnBeforeCompile = material.onBeforeCompile
   const previousCacheKey = material.customProgramCacheKey
@@ -245,7 +262,7 @@ export function applyCaustics(
       )
     }
     shader.fragmentShader =
-      'uniform sampler2D uCausticMap;\nuniform float uCausticTime;\nuniform float uCausticScaleA;\nuniform float uCausticScaleB;\nuniform float uCausticMaxAdd;\nvarying vec3 vCausticWorldPos;\nvarying vec3 vCausticWorldNormal;\n' +
+      'uniform sampler2D uCausticMap;\nuniform float uCausticTime;\nuniform float uCausticScaleA;\nuniform float uCausticScaleB;\nuniform float uCausticMaxAdd;\nuniform float uCausticThreshold;\nvarying vec3 vCausticWorldPos;\nvarying vec3 vCausticWorldNormal;\n' +
       shader.fragmentShader
     // UV scroll mirrors evaluateCausticPatternUV exactly (0.22 Hz layer A,
     // 0.37 Hz layer B, opposite drift directions). Keep the two in sync.
@@ -264,7 +281,7 @@ export function applyCaustics(
 vec2 causticUvA = vCausticWorldPos.xz * uCausticScaleA + vec2(uCausticTime * 0.022, -uCausticTime * 0.0132);
 vec2 causticUvB = vCausticWorldPos.xz * uCausticScaleB + vec2(-uCausticTime * 0.0296, uCausticTime * 0.0185);
 float causticP = max(texture2D(uCausticMap, causticUvA).r, texture2D(uCausticMap, causticUvB).r);
-causticP = smoothstep(0.35, 0.9, causticP);
+causticP = smoothstep(uCausticThreshold, 0.9, causticP);
 float causticMask = max(vCausticWorldNormal.y, 0.0) * (1.0 - 0.35 * clamp((2.8 - vCausticWorldPos.y) / 5.6, 0.0, 1.0));
 reflectedLight.directDiffuse += diffuseColor.rgb * (causticP * causticMask * uCausticMaxAdd);
 #include <opaque_fragment>`,

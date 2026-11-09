@@ -134,14 +134,19 @@ describe('photoreal aragonite sand bed (AQ-70.12)', () => {
     expect(shader.fragmentShader).not.toContain('vec3(0.16, 0.17, 0.34)')
     expect(shader.fragmentShader).toContain('warmDetritus')
     expect(shader.fragmentShader).toContain('rockContactAo')
-    expect(shader.fragmentShader).toContain('1.0 - 0.55 * (1.0 - smoothstep(0.55, 1.30, rLeft))')
-    expect(shader.fragmentShader).toContain('1.0 - 0.52 * (1.0 - smoothstep(0.55, 1.30, rRight))')
+    expect(shader.fragmentShader).toContain('1.0 - 0.55 * (1.0 - smoothstep(0.55, 1.55, rLeft))')
+    expect(shader.fragmentShader).toContain('1.0 - 0.52 * (1.0 - smoothstep(0.55, 1.55, rRight))')
+    // The macro luminance modulation survives mipmapping at overview distance (visual-check fix)
+    expect(shader.fragmentShader).toContain('0.90 + 0.20 * sandMacroBlend')
 
     // Contact factor darkens tightly at rock footprints and stays 1.0 in open foreground sand
     expect(evaluateRockBaseContactFactor(0, 1.5, false)).toBe(1.0)
     expect(evaluateRockBaseContactFactor(-2.35, -1.35, false)).toBeCloseTo(0.45, 2)
     expect(evaluateRockBaseContactFactor(2.65, -1.20, false)).toBeCloseTo(0.48, 2)
     expect(evaluateRockBaseContactFactor(-0.15, -1.35, true)).toBeCloseTo(0.45, 2)
+    // The wider fade (0.55..1.55) extends the grounding ring beyond the rock edge: at r 1.45 the
+    // factor is still darkened, where the old 1.30 fade had already returned to 1.0.
+    expect(evaluateRockBaseContactFactor(-2.35 + 1.45 * 1.85 * 0.92, -1.35, false)).toBeLessThan(1.0)
 
     bed.dispose()
   })

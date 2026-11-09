@@ -271,7 +271,7 @@ export function evaluateAragoniteSandElevation(
  * Replaces the old oversized hand-painted indigo blobs. The strengths were
  * raised from 0.42/0.40 (visual-check fix): the old grounding ring was too
  * weak to read under the bright sand, so the islands looked like they were
- * floating on white. The fade is also wider (0.55..1.30) so the ring extends
+ * floating on white. The fade is also wider (0.55..1.55) so the ring extends
  * visibly beyond the rock edge instead of hiding underneath it.
  */
 export function evaluateRockBaseContactFactor(
@@ -287,7 +287,7 @@ export function evaluateRockBaseContactFactor(
     const nz = (worldZ - fp.z) / (fp.radiusZ * 0.92)
     const r = Math.hypot(nx, nz)
     const strength = i === 0 ? LEFT_CONTACT_AO_STRENGTH : RIGHT_CONTACT_AO_STRENGTH
-    const contact = 1.0 - strength * (1.0 - smoothstep(0.55, 1.3, r))
+    const contact = 1.0 - strength * (1.0 - smoothstep(0.55, 1.55, r))
     factor = Math.min(factor, contact)
   }
   return factor
@@ -517,15 +517,15 @@ diffuseColor *= sampledDiffuseColor;
 // Macro warm aragonite variation & natural olive-tan detritus settling near rock bases (AQ-70.12 AC #1 & #2)
 vec2 dLeft = (vSandWorldPos.xz - uLeftFootprint.xy) / (uLeftFootprint.zw * 0.92);
 float rLeft = length(dLeft);
-float aoLeft = 1.0 - ${LEFT_CONTACT_AO_STRENGTH.toFixed(2)} * (1.0 - smoothstep(0.55, 1.30, rLeft));
+float aoLeft = 1.0 - ${LEFT_CONTACT_AO_STRENGTH.toFixed(2)} * (1.0 - smoothstep(0.55, 1.55, rLeft));
 
 vec2 dRight = (vSandWorldPos.xz - uRightFootprint.xy) / (uRightFootprint.zw * 0.92);
 float rRight = length(dRight);
-float aoRight = mix(1.0 - ${RIGHT_CONTACT_AO_STRENGTH.toFixed(2)} * (1.0 - smoothstep(0.55, 1.30, rRight)), 1.0, uSingleIslandMode);
+float aoRight = mix(1.0 - ${RIGHT_CONTACT_AO_STRENGTH.toFixed(2)} * (1.0 - smoothstep(0.55, 1.55, rRight)), 1.0, uSingleIslandMode);
 float rockContactAo = min(aoLeft, aoRight);
 
 // Subtle warm detritus & dampened aragonite near rock bases and ripple troughs (never blue-grey or indigo)
-float detritusMask = (1.0 - smoothstep(0.70, 1.35, min(rLeft, mix(rRight, 99.0, uSingleIslandMode)))) * 0.38;
+float detritusMask = (1.0 - smoothstep(0.70, 1.60, min(rLeft, mix(rRight, 99.0, uSingleIslandMode)))) * 0.50;
 vec3 warmDetritus = vec3(0.76, 0.70, 0.58);
 diffuseColor.rgb = mix(diffuseColor.rgb, warmDetritus, detritusMask);
 
@@ -533,6 +533,11 @@ diffuseColor.rgb = mix(diffuseColor.rgb, warmDetritus, detritusMask);
 float rearFade = smoothstep(-5.4, 0.8, vSandWorldPos.z);
 vec3 rearWaterTint = vec3(0.56, 0.66, 0.72);
 diffuseColor.rgb = mix(diffuseColor.rgb * rearWaterTint, diffuseColor.rgb, 0.48 + 0.52 * rearFade);
+// Visual-check fix: the dual-scale UV blend only swaps grain phase, so at
+// overview distance (mipmapped) both samples average to the same mean and
+// the field reads flat white. Modulate luminance by the same macro signal
+// so broad warm patches (±10%, zero mean change) survive at any distance.
+diffuseColor.rgb *= 0.90 + 0.20 * sandMacroBlend;
 diffuseColor.rgb *= rockContactAo;
 // AQ-70.6: the sand's own caustic ridge network was removed. The shared
 // cellular caustic chunk (caustics.ts) is applied to the sand material in
