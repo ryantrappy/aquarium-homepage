@@ -13,7 +13,20 @@ export function AquariumScene({ services, paused, focusFallbackRef, fpsCounterEn
   const controller = useRef<AquariumController | undefined>(undefined)
   const current = useRef({ services, paused, focusFallbackRef }); current.current = { services, paused, focusFallbackRef }
   const [status, setStatus] = useState<SceneStatus>('loading')
+  const [zoomed, setZoomed] = useState(false)
   const acknowledgments = useRef(new Set<ReturnType<typeof setTimeout>>())
+  // Camera zoom reset (AQ-62 AC #3): Esc returns to the full-tank overview,
+  // unless a dialog is open — then Esc belongs to the dialog.
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape' || event.defaultPrevented) return
+      if (document.querySelector('dialog[open]')) return
+      const isZoomed = controller.current?.resetZoom()
+      if (isZoomed !== undefined) setZoomed(isZoomed)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
   useEffect(() => {
     let cancelled = false
     void import('../rendering/scene/aquarium').then(({ createAquarium }) => {
@@ -114,6 +127,11 @@ export function AquariumScene({ services, paused, focusFallbackRef, fpsCounterEn
         })}
       </div>
       {fpsCounterEnabled && <div ref={fpsBadgeRef} className="fps-counter-badge" aria-hidden="true">—</div>}
+      {status === 'ready' && <div className="aquarium-zoom-controls" role="group" aria-label="Camera zoom">
+        <button className="scene-control icon-control" type="button" onClick={() => { const isZoomed = controller.current?.zoomIn(); if (isZoomed !== undefined) setZoomed(isZoomed) }} aria-label="Zoom in" title="Zoom in"><span aria-hidden="true">+</span></button>
+        <button className="scene-control icon-control" type="button" onClick={() => { const isZoomed = controller.current?.zoomOut(); if (isZoomed !== undefined) setZoomed(isZoomed) }} aria-label="Zoom out" title="Zoom out"><span aria-hidden="true">−</span></button>
+        <button className="scene-control" type="button" onClick={() => { const isZoomed = controller.current?.resetZoom(); if (isZoomed !== undefined) setZoomed(isZoomed) }} disabled={!zoomed} aria-label="Reset view to full tank overview" title="Reset view (Esc)">Reset view</button>
+      </div>}
       {status === 'failed' && <p className="aquarium-load-notice" role="status">Aquarium visuals unavailable. Your service links and Settings still work.</p>}
     </section>
   )

@@ -34,6 +34,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .page-shell { position: fixed; inset: 0; width: 100%; height: 100vh; height: 100dvh; overflow: hidden; background: #07577b; }
 .aquarium-scene { position: absolute; inset: 0; overflow: hidden; isolation: isolate; background: #0877a5 url('/reef-tank-front.webp') center center / cover no-repeat; }
 .aquarium-controls { position: absolute; z-index: 5; top: max(14px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); display: flex; align-items: center; gap: 6px; padding: 5px; border: 1px solid rgba(232,248,246,.28); border-radius: 11px; background: rgba(3, 31, 42, .78); box-shadow: 0 8px 28px rgba(0, 23, 36, .24); }
+/* Camera zoom controls (AQ-62 AC #3/#6). Bottom-left, clear of the
+ * bottom-right FPS badge and the top-right controls; only rendered once the
+ * scene is ready, so they never overlap the bottom-left load notice that
+ * shows when the scene failed. 44px targets, safe-area aware. */
+.aquarium-zoom-controls { position: absolute; z-index: 5; left: max(14px, env(safe-area-inset-left)); bottom: max(12px, env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 6px; padding: 5px; border: 1px solid rgba(232,248,246,.28); border-radius: 11px; background: rgba(3, 31, 42, .78); box-shadow: 0 8px 28px rgba(0, 23, 36, .24); }
+.aquarium-zoom-controls .scene-control span { font-size: 20px; line-height: 1; }
 .scene-control { height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 11px; border: 1px solid transparent; border-radius: 7px; color: #f4fcfa; background: transparent; cursor: pointer; transition: background .16s ease, border-color .16s ease; }
 .scene-control:hover:not(:disabled) { border-color: rgba(225,249,238,.3); background: rgba(216,244,236,.12); }
 .scene-control:disabled { opacity: .82; cursor: default; }
@@ -165,6 +171,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 @media (max-width: 760px) {
   .aquarium-controls { top: max(10px, env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right)); gap: 3px; padding: 4px; }
+  .aquarium-zoom-controls { left: max(10px, env(safe-area-inset-left)); bottom: max(10px, env(safe-area-inset-bottom)); gap: 3px; padding: 4px; }
   .scene-control { min-width: 44px; height: 44px; }
   .icon-control { width: 44px; }
   .services-dialog { width: calc(100vw - 22px); max-height: calc(100dvh - 22px); }

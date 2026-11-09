@@ -243,3 +243,120 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     expect(old.texture.dispose).toHaveBeenCalledTimes(1)
   })
 })
+
+
+describe('camera zoom (AQ-62)', () => {
+  // advance() replays timestamps 0 and 50, so the frame clock yields steps
+  // only on the first call. Drive the mocked loop with increasing
+  // timestamps here so camera smoothing actually runs.
+  let now = 1000
+  // 100 ms per frame = 6 simulation steps, so the camera damps ~45% of the
+  // remaining distance each frame and settles in about a dozen frames.
+  function tickFrames(count: number) {
+    for (let i = 0; i < count; i++) { now += 100; state.renderer!.loop?.(now) }
+  }
+  function settle() { tickFrames(12) }
+
+  it('starts at the full-tank overview and is not zoomed', async () => {
+    await start()
+    expect(controller.isZoomed()).toBe(false)
+    expect(controller.getCameraZoom().distance).toBe(9)
+    expect(controller.getCameraZoom().targetX).toBe(0)
+  })
+
+  it('zooms in and out in steps, clamps at the limits, and resets', async () => {
+    await start()
+    expect(controller.zoomIn()).toBe(true)
+    expect(controller.isZoomed()).toBe(true)
+    settle()
+    expect(controller.getCameraZoom().distance).toBeCloseTo(9 / 1.35, 2)
+    expect(controller.zoomOut()).toBe(false)
+    expect(controller.isZoomed()).toBe(false)
+    settle()
+    expect(controller.getCameraZoom().distance).toBeCloseTo(9, 2)
+    // Repeated zoom-ins stop at the closest distance, never inside the reef.
+    for (let i = 0; i < 10; i++) controller.zoomIn()
+    settle()
+    expect(controller.getCameraZoom().distance).toBeCloseTo(4.5, 2)
+    expect(controller.resetZoom()).toBe(false)
+    expect(controller.isZoomed()).toBe(false)
+  }, 15000)
+
+  it('zooms to a named focal area and back to the overview', async () => {
+    await start()
+    expect(controller.zoomToFocalArea('left-reef')).toBe(true)
+    settle()
+    const zoomed = controller.getCameraZoom()
+    expect(zoomed.targetX).toBeCloseTo(-2.35, 2)
+    expect(zoomed.distance).toBeCloseTo(5.5, 2)
+    expect(controller.zoomToFocalArea('overview')).toBe(false)
+    expect(controller.isZoomed()).toBe(false)
+    expect(controller.zoomToFocalArea('not-a-reef' as never)).toBe(false)
+  }, 15000)
+
+  it('smoothly interpolates toward the desired state on following frames', async () => {
+    await start()
+    controller.zoomIn()
+    // The first frame primes the frame clock with 0 steps; the second moves
+    // the rendered camera part-way, not all the way.
+    tickFrames(2)
+    const mid = controller.getCameraZoom().distance
+    expect(mid).toBeGreaterThan(9 / 1.35)
+    expect(mid).toBeLessThan(9)
+    settle()
+    expect(controller.getCameraZoom().distance).toBeCloseTo(9 / 1.35, 2)
+  }, 15000)
+
+  it('snaps instantly under prefers-reduced-motion (AQ-62 AC #5)', async () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener() {}, removeEventListener() {} }))
+    await start()
+    controller.zoomIn()
+    // No frames advanced: a reduced-motion camera is already at the target.
+    expect(controller.getCameraZoom().distance).toBeCloseTo(9 / 1.35, 2)
+  })
+
+  it('wheel zoom targets the point under the cursor', async () => {
+    await start()
+    const section = host
+    // Cursor at the left reef (x = 25% across, y = 60% down the 1440x900 view).
+    // happy-dom's WheelEvent drops clientX/clientY, so dispatch a MouseEvent
+    // typed as a wheel event with deltaY attached; real browsers populate
+    // all three fields on WheelEvent.
+    const wheel = new MouseEvent('wheel', { clientX: 360, clientY: 540, bubbles: true, cancelable: true }) as WheelEvent
+    Object.defineProperty(wheel, 'deltaY', { value: -240 })
+    section.dispatchEvent(wheel)
+    expect(controller.isZoomed()).toBe(true)
+    settle()
+    const zoomed = controller.getCameraZoom()
+    expect(zoomed.targetX).toBeLessThan(0)
+    expect(zoomed.distance).toBeLessThan(9)
+  }, 15000)
+
+  it('dragging while zoomed pans the focal target without moving fish links', async () => {
+    await start()
+    controller.zoomToFocalArea('left-reef')
+    settle()
+    const before = controller.getCameraZoom()
+    const section = host
+    const down = new PointerEvent('pointerdown', { pointerId: 1, clientX: 700, clientY: 400, bubbles: true })
+    const move = new PointerEvent('pointermove', { pointerId: 1, clientX: 800, clientY: 400, bubbles: true })
+    const up = new PointerEvent('pointerup', { pointerId: 1, clientX: 800, clientY: 400, bubbles: true })
+    section.dispatchEvent(down)
+    section.dispatchEvent(move)
+    section.dispatchEvent(up)
+    settle()
+    const after = controller.getCameraZoom()
+    // Dragging right pans the view right: the focal target moves left.
+    expect(after.targetX).toBeLessThan(before.targetX)
+    expect(after.distance).toBeCloseTo(before.distance, 1)
+  }, 15000)
+
+  it('dragging at the overview does nothing', async () => {
+    await start()
+    const section = host
+    section.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, clientX: 700, clientY: 400, bubbles: true }))
+    section.dispatchEvent(new PointerEvent('pointermove', { pointerId: 1, clientX: 900, clientY: 400, bubbles: true }))
+    section.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: 900, clientY: 400, bubbles: true }))
+    expect(controller.isZoomed()).toBe(false)
+  })
+})
