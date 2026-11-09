@@ -4,9 +4,10 @@ on:
   push:
     branches:
       - gemini_control
+      - main
   pull_request:
     branches:
-      - gemini_control
+      - main
   workflow_dispatch:
 
 permissions:

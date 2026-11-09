@@ -43,7 +43,7 @@ For a production Node build, `npm run build` uses the Nitro Vite plugin and `npm
 
 ## Continuous integration
 
-Every pull request to `gemini_control` (and every push to it) runs the same checks in GitHub Actions (`.github/workflows/ci.yml`): `npm ci`, `npm run typecheck`, `npm run build`, and `npm test`. The `ci` check is a required status check on `gemini_control`, so a PR cannot be merged while it is failing — a repo admin enables that in GitHub under Settings → Branches → branch protection rule for `gemini_control` → "Require status checks to pass" → select `ci`. (AQ-90)
+Every pull request to `gemini_control` (and every push to it) runs the same checks in GitHub Actions (`.github/workflows/ci.yml`): `npm ci`, `npm run typecheck`, `npm test`, and `npm run build`. To block merges when a check fails, a repository admin must require the workflow's **Tests, typecheck, and build** status check for `gemini_control` in Settings → Branches → branch protection rules. (AQ-90)
 
 ## Backlog
 
@@ -55,4 +55,3 @@ On the `gemini_control` branch, **Gemini Argon** acts as the short-term lead dev
 
 - **Task Status Policy**: Do not mark tasks as fully complete (`Done`). Instead, mark reviewed tasks as `gemini approved` and leave their status as `In Progress`.
 - **Codex Return & Final Completion**: Only the Codex designated lead can move tasks to `Done` (completed). When the Codex lead returns and takes control back after Gemini Argon has worked for a while, it must check and review the `gemini approved` items first.
-
