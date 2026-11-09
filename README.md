@@ -41,6 +41,10 @@ npm run build
 
 For a production Node build, `npm run build` uses the Nitro Vite plugin and `npm start` serves `.output/server/index.mjs`. See [deployment notes](docs/deployment.md) before exposing it on a network.
 
+## Continuous integration
+
+Every pull request to `gemini_control` (and every push to it) runs the same checks in GitHub Actions (`.github/workflows/ci.yml`): `npm ci`, `npm run typecheck`, `npm run build`, and `npm test`. The `ci` check is a required status check on `gemini_control`, so a PR cannot be merged while it is failing — a repo admin enables that in GitHub under Settings → Branches → branch protection rule for `gemini_control` → "Require status checks to pass" → select `ci`. (AQ-90)
+
 ## Backlog
 
 Project work is tracked in `backlog/` with the Backlog.md CLI. At the start of a work session, read all of [AGENTS.md](AGENTS.md), then [AGENT_TASKS.md](AGENT_TASKS.md) for the current checkpoint and task order. The active Backlog task is authoritative for its scope and acceptance criteria. Use `npm run backlog -- instructions overview`, `npm run backlog -- task list --plain`, `npm run backlog -- task view AQ-50 --plain`, and `npm run backlog -- task edit ...` to inspect or update work. Follow the dependency order in [AGENT_TASKS.md](AGENT_TASKS.md); mark tasks Done only after root review.

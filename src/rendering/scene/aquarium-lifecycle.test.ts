@@ -167,7 +167,7 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     expect(rootFor('second')).toBeUndefined(); expect(rootFor('first')).toBe(firstRoot)
     update([service('first', 'blue-tang'), service('third', 'royal-gramma')])
     expect(first.extensions.dispose).toHaveBeenCalledTimes(1); expect(rootFor('first')).not.toBe(firstRoot); expect(state.created).toHaveLength(4)
-  })
+  }, 15000) // AQ-90: async GLB start() exceeds the 5 s default under full-suite load; passes in isolation.
   it('retains prior fish on a true no-fit update and reuses them when configuration fits again', async () => {
     await start(); advance(); const prior = state.created[0], root = rootFor('first'), pose = { ...prior.position }
     state.blockedSpawn = true; update([service('first'), service('second', 'yellow-tang'), service('new')])
