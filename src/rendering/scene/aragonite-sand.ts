@@ -445,7 +445,6 @@ export function createAragoniteSandBed(config: AragoniteSandConfig = {}): Aragon
   applySandGeometryElevation(sandGeometry, narrow)
 
   const sandUniforms = {
-    uSandTime: { value: 0 },
     uLeftFootprint: { value: new THREE.Vector4(-2.35, -1.35, 1.85, 1.15) },
     uRightFootprint: { value: new THREE.Vector4(2.65, -1.20, 1.75, 1.10) },
     uSingleIslandMode: { value: narrow ? 1 : 0 },
@@ -481,7 +480,7 @@ export function createAragoniteSandBed(config: AragoniteSandConfig = {}): Aragon
       `#include <begin_vertex>\nvec4 sandWp = modelMatrix * vec4(transformed, 1.0);\nvSandWorldPos = sandWp.xyz;\nvSandRawUv = uv;`,
     )
     shader.fragmentShader =
-      `uniform float uSandTime;\nuniform vec4 uLeftFootprint;\nuniform vec4 uRightFootprint;\nuniform float uSingleIslandMode;\nvarying vec3 vSandWorldPos;\nvarying vec2 vSandRawUv;\n` +
+      `uniform vec4 uLeftFootprint;\nuniform vec4 uRightFootprint;\nuniform float uSingleIslandMode;\nvarying vec3 vSandWorldPos;\nvarying vec2 vSandRawUv;\n` +
       shader.fragmentShader
     shader.fragmentShader = shader.fragmentShader.replace(
       '#include <clipping_planes_fragment>',
@@ -526,14 +525,10 @@ float rearFade = smoothstep(-5.4, 0.8, vSandWorldPos.z);
 vec3 rearWaterTint = vec3(0.56, 0.66, 0.72);
 diffuseColor.rgb = mix(diffuseColor.rgb * rearWaterTint, diffuseColor.rgb, 0.48 + 0.52 * rearFade);
 diffuseColor.rgb *= rockContactAo;
-
-// Two-layer intersecting Voronoi-like refraction caustic network (AQ-70.12)
-vec2 cUv1 = vSandWorldPos.xz * 1.65 + vec2(uSandTime * 0.42, -uSandTime * 0.31);
-vec2 cUv2 = (mat2(0.866, -0.5, 0.5, 0.866) * vSandWorldPos.xz) * 2.15 + vec2(-uSandTime * 0.36, uSandTime * 0.48);
-float ridge1 = 1.0 - abs(sin(cUv1.x) * cos(cUv1.y));
-float ridge2 = 1.0 - abs(sin(cUv2.x) * cos(cUv2.y));
-float causticNet = pow(clamp(ridge1 * ridge2, 0.0, 1.0), 2.4) * rockContactAo * (0.35 + 0.65 * rearFade);
-diffuseColor.rgb += vec3(0.20, 0.21, 0.18) * causticNet;
+// AQ-70.6: the sand's own caustic ridge network was removed. The shared
+// cellular caustic chunk (caustics.ts) is applied to the sand material in
+// rebuildHabitat, so the sand, rock, coral, and fish all show the one
+// caustic system instead of two disagreeing patterns.
 `,
     )
     shader.fragmentShader = shader.fragmentShader.replace(
@@ -648,10 +643,14 @@ normal = perturbNormalArb(-vViewPosition, normal, dHdxy_fwd(), faceDirection);
     albedoTexture,
     normalTexture,
     roughnessTexture,
-    update(elapsedSeconds: number, paused: boolean, reducedMotion: boolean) {
-      if (!paused && !reducedMotion && Number.isFinite(elapsedSeconds)) {
-        sandUniforms.uSandTime.value = elapsedSeconds % 3600
-      }
+// AQ-70.6: the sand no longer carries its own caustic clock or ridge
+// network. The shared cellular caustic chunk (caustics.ts) is applied to
+// the sand material in rebuildHabitat and drives the pattern from the one
+// frozen/shared caustic time, so the sand can never disagree with the
+// rock, coral, and fish caustics. The update hook is kept (it is part of
+// the bed's interface) but is now a no-op for time.
+    update(_elapsedSeconds: number, _paused: boolean, _reducedMotion: boolean) {
+      // No-op: sand caustics now come from the shared caustics chunk.
     },
     setLayout(nextNarrow: boolean) {
       if (narrow === nextNarrow) return

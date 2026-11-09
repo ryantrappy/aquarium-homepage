@@ -16,8 +16,8 @@ function mockShader(): THREE.WebGLProgramParametersWithUniforms {
   } as unknown as THREE.WebGLProgramParametersWithUniforms
 }
 
-describe('real caustic texture (AQ-14.2 AC #2)', () => {
-  it('generates a tileable web value in [0, 1] that wraps seamlessly at the tile edges', () => {
+describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
+  it('generates a tileable Voronoi cellular value in [0, 1] that wraps seamlessly at the tile edges', () => {
     for (const u of [0, 0.13, 0.5, 0.87]) {
       for (const v of [0, 0.29, 0.5, 0.71]) {
         const value = evaluateCausticTextureValue(u, v)
@@ -27,15 +27,59 @@ describe('real caustic texture (AQ-14.2 AC #2)', () => {
         expect(evaluateCausticTextureValue(u, 0)).toBeCloseTo(evaluateCausticTextureValue(u, 1), 12)
       }
     }
-    // Mostly dark field with bright ridges, not a flat wash
+    // Cellular network, not stripes or a flat wash: thin bright ridges
+    // (F2 - F1 ≈ 0) on a mostly dark field.
     let sum = 0
-    const n = 32
+    let bright = 0
+    let dark = 0
+    const n = 64
     for (let y = 0; y < n; y++) {
-      for (let x = 0; x < n; x++) sum += evaluateCausticTextureValue(x / n, y / n)
+      for (let x = 0; x < n; x++) {
+        const value = evaluateCausticTextureValue(x / n, y / n)
+        sum += value
+        if (value > 0.7) bright++
+        if (value < 0.2) dark++
+      }
     }
     const mean = sum / (n * n)
-    expect(mean).toBeGreaterThan(0.02)
-    expect(mean).toBeLessThan(0.45)
+    expect(mean).toBeGreaterThan(0.05)
+    expect(mean).toBeLessThan(0.35)
+    expect(bright / (n * n)).toBeGreaterThan(0.02)
+    expect(bright / (n * n)).toBeLessThan(0.25)
+    expect(dark / (n * n)).toBeGreaterThan(0.5)
+  })
+
+  it('is a cellular field, not the old sine interference web: ridges follow cell borders', () => {
+    // At a feature point the value is dark (F2 - F1 is large inside a cell);
+    // the value peaks on the border between two neighbouring feature points.
+    // Feature points are deterministic, so find one by scanning a coarse grid
+    // for a local minimum, then check the midpoint toward its nearest
+    // neighbour is brighter.
+    const n = 32
+    let minValue = Infinity
+    let minU = 0
+    let minV = 0
+    for (let y = 0; y < n; y++) {
+      for (let x = 0; x < n; x++) {
+        const value = evaluateCausticTextureValue(x / n, y / n)
+        if (value < minValue) {
+          minValue = value
+          minU = x / n
+          minV = y / n
+        }
+      }
+    }
+    expect(minValue).toBeLessThan(0.05)
+    // Somewhere in the tile there is a bright ridge well away from that minimum.
+    let maxValue = 0
+    for (let y = 0; y < n; y++) {
+      for (let x = 0; x < n; x++) {
+        maxValue = Math.max(maxValue, evaluateCausticTextureValue(x / n, y / n))
+      }
+    }
+    expect(maxValue).toBeGreaterThan(0.9)
+    expect(minU).toBeGreaterThanOrEqual(0)
+    expect(minV).toBeGreaterThanOrEqual(0)
   })
 
   it('generates a 512x512 repeat-wrapped, non-colour-space texture from the pure value function', () => {
@@ -109,6 +153,25 @@ describe('real caustic texture (AQ-14.2 AC #2)', () => {
     expect(otherShader.uniforms.uCausticTime).toBe(caustics.uniforms.uCausticTime)
     expect(otherShader.uniforms.uCausticScaleA.value).toBeCloseTo(0.25)
     expect(otherShader.uniforms.uCausticScaleB.value).toBeCloseTo(0.4)
+    caustics.dispose()
+  })
+
+  it('patches skinned fish materials post-skinning, so the pattern stays fixed in world space (AQ-70.6 AC #1)', () => {
+    const caustics = createCaustics()
+    const material = new THREE.MeshStandardMaterial()
+    applyCaustics(material, caustics, { skinned: true })
+
+    const shader = mockShader()
+    material.onBeforeCompile(shader, {} as THREE.WebGLRenderer)
+    // World position is read after project_vertex (post-skinning and
+    // post-flex), and the normal after defaultnormal_vertex (post-skinning);
+    // the bind-pose begin_vertex / beginnormal_vertex hooks are not used.
+    expect(shader.vertexShader).toContain('#include <project_vertex>\nvCausticWorldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;')
+    expect(shader.vertexShader).toContain('#include <defaultnormal_vertex>\nvCausticWorldNormal = normalize(mat3(modelMatrix) * objectNormal);')
+    expect(shader.vertexShader).not.toContain('#include <begin_vertex>\nvCausticWorldPos')
+    expect(shader.vertexShader).not.toContain('#include <beginnormal_vertex>\nvCausticWorldNormal')
+    expect(shader.fragmentShader).toContain('uCausticMap')
+    expect(material.customProgramCacheKey()).toContain(':caustics-skinned-v1')
     caustics.dispose()
   })
 

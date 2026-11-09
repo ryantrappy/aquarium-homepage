@@ -23,6 +23,8 @@ import {
   createRestrainedCausticLightController,
   evaluateBubblePosition,
   evaluateDepthTintedColor,
+  evaluateFixtureIntensities,
+  evaluateFluorescenceActinicFactor,
   evaluateSurfaceRippleOffset,
   evaluateSuspendedParticlePosition,
 } from './underwater-optics'
@@ -155,8 +157,14 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   // 1) Balanced sky-to-indigo-crevice HemisphereLight so overhangs & caves retain deep actinic shadow contrast
   const hemiLight = new THREE.HemisphereLight('#88ccff', '#1b1636', 0.40)
   scene.add(hemiLight)
-  // 2) Crisp 14,000K overhead reef daylight key light with soft shadow map
-  const keyLight = new THREE.DirectionalLight('#f6faff', optics.keyLightIntensity)
+  // 2) Crisp 14,000K overhead reef daylight key light with soft shadow map.
+  // AQ-70.6 AC #2: the key/fill split is derived from the fixture
+  // white/blue balance and total output in the optics config, so tuning
+  // the fixture re-balances both lights (and the coral fluorescence) at
+  // once. At the default balance the resolved intensities are exactly the
+  // long-standing 2.1 / 0.95.
+  const fixture = evaluateFixtureIntensities(optics.fixtureWhiteBalance, optics.fixtureTotalIntensity)
+  const keyLight = new THREE.DirectionalLight('#f6faff', fixture.keyLightIntensity)
   keyLight.position.set(1.2, 6.8, 4.6)
   keyLight.castShadow = true
   keyLight.shadow.mapSize.set(1024, 1024)
@@ -170,7 +178,7 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   keyLight.shadow.normalBias = 0.015
   scene.add(keyLight)
   // 3) Royal-blue actinic fill light + soft top-back rim light
-  const fillLight = new THREE.DirectionalLight('#5a98ff', optics.fillLightIntensity)
+  const fillLight = new THREE.DirectionalLight('#5a98ff', fixture.fillLightIntensity)
   fillLight.position.set(-4.2, 2.8, 3.2)
   scene.add(fillLight)
   const rimLight = new THREE.DirectionalLight('#b4dcff', 0.45)
@@ -178,13 +186,14 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   scene.add(rimLight)
 
   const causticLightController = createRestrainedCausticLightController(keyLight, fillLight, {
-    keyLightIntensity: optics.keyLightIntensity,
-    fillLightIntensity: optics.fillLightIntensity,
+    keyLightIntensity: fixture.keyLightIntensity,
+    fillLightIntensity: fixture.fillLightIntensity,
   })
 
-  // Real caustic texture (AQ-14.2 AC #2): one shared procedural texture and
-  // time uniform for the sand, live-rock, and coral shaders (see caustics.ts).
-  // Fish, backdrop, and water surface are deliberately not patched.
+  // Real caustic texture (AQ-14.2 AC #2, AQ-70.6 AC #1): one shared
+  // procedural cellular texture and time uniform for the sand, live-rock,
+  // coral, and fish shaders (see caustics.ts). Backdrop and water surface
+  // are deliberately not patched.
   const caustics = createCaustics()
 
   // Photoreal aragonite sand bed (AQ-73 / AQ-70.12): the generated PBR
@@ -192,10 +201,12 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   // rock-base contact AO, talus mounding, and rear-rising aquascaping slope
   // live in aragonite-sand.ts. This replaces the old inline 256x256 LCG-noise
   // texture with its hard-coded indigo AO blobs, which made the islands read
-  // as floating. The bed's own shader already carries its caustic network,
-  // so the shared caustic texture is not chained on top of it.
+  // as floating. AQ-70.6: the sand's own caustic ridge network was removed;
+  // the shared cellular caustic chunk is applied here instead, so the sand
+  // shows the same caustic system as the rock, coral, and fish.
   const sandBed = createAragoniteSandBed({ narrow: false })
   const sand = sandBed.sandMesh
+  applyCaustics(sand.material as THREE.MeshStandardMaterial, caustics)
   scene.add(sandBed.group)
 
   // Layered Reef-Tank Backdrop (AQ-14.6 & AQ-39): eliminates the flat paint-bucket wall & sharp horizon line
@@ -531,13 +542,16 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
       const assembled = assembleCoralsOnRockSockets(reef, coralTemplates, mounts, {
         paused: paused || document.hidden,
         reducedMotion,
+        // AQ-70.6 AC #3: coral fluorescence scales with the fixture's
+        // actinic share.
+        actinicLevel: evaluateFluorescenceActinicFactor(optics.fixtureWhiteBalance),
       })
       reefControllers.push(assembled)
       // Real caustics on live rock and coral (AQ-14.2 AC #2). Assembly clones
       // the rock/coral materials per island, so each rebuild patches fresh
       // material instances; applyCaustics also guards against double-patching.
       // Rock gets a broader pattern (fewer, wider webs) than sand/coral.
-      // Fish materials are never touched here.
+      // Fish materials are patched in bindGlbToInhabitant, not here.
       reef.traverse(object => {
         if (!(object instanceof THREE.Mesh)) return
         for (const mat of Array.isArray(object.material) ? object.material : [object.material]) {
@@ -651,6 +665,18 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
         console.warn('Fish animation unsupported; retaining static service fish', item.service.fishId, error)
       }
     } else console.warn('Fish animation requires one clip; retaining static service fish', item.service.fishId)
+    // AQ-70.6 AC #1 / AQ-70.8 AC #3: the shared cellular caustic chunk is
+    // applied after flex binding (flex replaces onBeforeCompile, so the
+    // caustics patch must chain on top of it), with the skinned hook so the
+    // pattern stays fixed in world space while the fish swims through it.
+    // Fish also cast shadows onto the sand and rock now.
+    model.traverse(object => {
+      if (!(object instanceof THREE.Mesh)) return
+      object.castShadow = true
+      for (const mat of Array.isArray(object.material) ? object.material : [object.material]) {
+        if (mat instanceof THREE.MeshStandardMaterial) applyCaustics(mat, caustics, { skinned: true })
+      }
+    })
   }
   // Build the thumbnail sprite for an inhabitant. Used for the no-GLB
   // fallback (`lodOnly: false`, stored as `item.artwork`) and for the far

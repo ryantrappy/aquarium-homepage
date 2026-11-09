@@ -13,6 +13,8 @@ import {
   evaluateDepthHazeFactor,
   evaluateDepthTintedColor,
   evaluateDepthTransmittance,
+  evaluateFixtureIntensities,
+  evaluateFluorescenceActinicFactor,
   evaluateLightShaftIntensity,
   evaluateSurfaceRippleOffset,
   evaluateSuspendedParticlePosition,
@@ -220,6 +222,41 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
     expect(DEFAULT_AQUARIUM_OPTICS_CONFIG.depthHazeMaxAlpha).toBeLessThanOrEqual(0.25)
     expect(DEFAULT_AQUARIUM_OPTICS_CONFIG.lightShaftMaxAlpha).toBeLessThanOrEqual(0.2)
     expect(evaluateDepthHazeFactor(NaN, 0)).toBe(0)
+  })
+
+  it('derives key/fill intensities from the fixture white/blue balance, preserving the current scene values at the default (AQ-70.6 AC #2)', () => {
+    const defaults = evaluateFixtureIntensities(
+      DEFAULT_AQUARIUM_OPTICS_CONFIG.fixtureWhiteBalance,
+      DEFAULT_AQUARIUM_OPTICS_CONFIG.fixtureTotalIntensity,
+    )
+    expect(defaults.keyLightIntensity).toBeCloseTo(DEFAULT_AQUARIUM_OPTICS_CONFIG.keyLightIntensity, 6)
+    expect(defaults.fillLightIntensity).toBeCloseTo(DEFAULT_AQUARIUM_OPTICS_CONFIG.fillLightIntensity, 6)
+    expect(defaults.keyLightIntensity).toBeCloseTo(2.1, 6)
+    expect(defaults.fillLightIntensity).toBeCloseTo(0.95, 6)
+    // All white / all actinic endpoints split the same total.
+    expect(evaluateFixtureIntensities(1, 3)).toEqual({ keyLightIntensity: 3, fillLightIntensity: 0 })
+    expect(evaluateFixtureIntensities(0, 3)).toEqual({ keyLightIntensity: 0, fillLightIntensity: 3 })
+    expect(evaluateFixtureIntensities(0.5, 4)).toEqual({ keyLightIntensity: 2, fillLightIntensity: 2 })
+    // Out-of-range and non-finite inputs fall back instead of producing
+    // negative or NaN light.
+    const clamped = evaluateFixtureIntensities(1.5, 3)
+    expect(clamped.keyLightIntensity).toBe(3)
+    expect(clamped.fillLightIntensity).toBe(0)
+    const fallback = evaluateFixtureIntensities(Number.NaN, Number.NaN)
+    expect(fallback.keyLightIntensity).toBeCloseTo(2.1, 6)
+    expect(fallback.fillLightIntensity).toBeCloseTo(0.95, 6)
+  })
+
+  it('scales coral fluorescence with the fixture actinic share: 1 at the default balance, 0 all-white, capped at 2 (AQ-70.6 AC #3)', () => {
+    expect(evaluateFluorescenceActinicFactor(DEFAULT_AQUARIUM_OPTICS_CONFIG.fixtureWhiteBalance)).toBeCloseTo(1, 6)
+    expect(evaluateFluorescenceActinicFactor(1)).toBe(0)
+    expect(evaluateFluorescenceActinicFactor(0)).toBe(2)
+    // A lower white balance raises the blue share: at balance 0.5 the
+    // actinic share is 0.5 vs the default ~0.31, so the factor is ~1.6.
+    const moreActinic = evaluateFluorescenceActinicFactor(0.5)
+    expect(moreActinic).toBeGreaterThan(1)
+    expect(moreActinic).toBeLessThan(2)
+    expect(evaluateFluorescenceActinicFactor(Number.NaN)).toBeCloseTo(1, 6)
   })
 
   it('projects soft volumetric shafts that weaken with depth and freeze on pause (AQ-86 AC #2)', () => {

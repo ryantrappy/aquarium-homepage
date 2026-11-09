@@ -126,26 +126,17 @@ describe('photoreal aragonite sand bed (AQ-70.12)', () => {
     bed.dispose()
   })
 
-  it('holds caustic phase when paused or reduced while allowing an explicit frozen capture time', () => {
+  it('carries no private caustic clock or ridge network: the shared cellular caustic chunk is the one caustic system (AQ-70.6 AC #1)', () => {
     const bed = createAragoniteSandBed({ textureSize: 64, narrow: false })
     const shader = compileSandShader(bed)
-    const sandTime = shader.uniforms.uSandTime
-
-    bed.update(12.5, false, false)
-    expect(sandTime.value).toBe(12.5)
-
-    bed.update(24, true, false)
-    expect(sandTime.value).toBe(12.5)
-    bed.update(24, false, true)
-    expect(sandTime.value).toBe(12.5)
-    bed.update(12.5, false, false)
-    expect(sandTime.value).toBe(12.5)
-
-    // AQ-70.2 drives an explicit capture time through the active update path.
-    bed.update(37, false, false)
-    expect(sandTime.value).toBe(37)
-    bed.update(Number.NaN, false, false)
-    expect(sandTime.value).toBe(37)
+    expect(shader.uniforms.uSandTime).toBeUndefined()
+    expect(shader.fragmentShader).not.toContain('uSandTime')
+    expect(shader.fragmentShader).not.toContain('causticNet')
+    expect(shader.fragmentShader).not.toContain('ridge1')
+    // update() is a no-op for time now (the shared caustics chunk freezes
+    // at t=0 on pause/reduced-motion); it must not throw or reintroduce a clock.
+    expect(() => bed.update(12.5, false, false)).not.toThrow()
+    expect(shader.uniforms.uSandTime).toBeUndefined()
 
     bed.dispose()
   })
