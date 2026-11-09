@@ -217,6 +217,19 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .aquarium-three.is-fallback .aquarium-fish-link { position: relative; visibility: visible !important; transform: none !important; width: min(180px, 28vw) !important; height: 100px !important; }
 .aquarium-three.is-fallback .aquarium-fish-link > .fish-figure { height: 100%; filter: drop-shadow(0 6px 8px #06303e55); }
 .aquarium-load-notice { position: absolute; left: 16px; bottom: 12px; max-width: 350px; padding: 9px 12px; border-radius: 8px; color: #e6f2ef; background: #092e40db; font-size: 12px; }
+
+/* Debug FPS / frame-time badge (AQ-83 AC #2/#3). Bottom-right, clear of the
+ * bottom-left load notice and the top-right controls; pointer-events: none
+ * so it never intercepts fish-link clicks, captions, context menus, or
+ * keyboard focus at 1440x900 or 402x874. */
+.fps-counter-badge { position: absolute; right: 12px; bottom: 12px; z-index: 4; padding: 5px 9px; border: 1px solid rgba(220, 247, 231, .25); border-radius: 99px; color: #dcebe1; background: rgba(7, 29, 35, .72); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; line-height: 1.2; white-space: nowrap; pointer-events: none; }
+
+/* Debug settings in the Settings modal (AQ-83 AC #1). */
+.debug-settings { padding: 16px 0 4px; border-top: 1px solid var(--line); }
+.debug-settings h3 { margin: 0 0 9px; color: #dfefe4; font-family: var(--font-ui); font-size: 16px; letter-spacing: -.02em; }
+.debug-setting { display: flex; align-items: center; gap: 9px; min-height: 44px; color: #e8f4ec; font-size: 12px; cursor: pointer; }
+.debug-setting input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--seafoam); }
+.debug-settings p { margin: 6px 0 0; color: #a7c7c0; font-size: 11px; line-height: 1.45; }
 @media (max-width: 599px) { .aquarium-fish-link .fish-name { min-height: 32px; padding: 4px 7px; font-size: 10px; } .aquarium-three.is-fallback .aquarium-fish-link { width: 38vw !important; height: 90px !important; } }
 .manager-footer a.text-action { display: inline-flex; align-items: center; text-decoration: none; }
 .manager-footer { flex-wrap: wrap; }

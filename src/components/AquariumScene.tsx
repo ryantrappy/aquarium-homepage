@@ -3,11 +3,13 @@ import type { ServiceConfig } from '../lib/services'
 import { getFishById } from '../lib/fish'
 import { FishFigure } from './FishFigure'
 import type { AquariumController, SceneStatus } from '../rendering/scene/aquarium'
+import { formatFrameRate, type FrameRateSample } from '../rendering/scene/frame-rate'
 
-type AquariumSceneProps = { services: ServiceConfig[]; paused: boolean; focusFallbackRef?: RefObject<HTMLElement | null> }
+type AquariumSceneProps = { services: ServiceConfig[]; paused: boolean; focusFallbackRef?: RefObject<HTMLElement | null>; fpsCounterEnabled?: boolean }
 
-export function AquariumScene({ services, paused, focusFallbackRef }: AquariumSceneProps) {
+export function AquariumScene({ services, paused, focusFallbackRef, fpsCounterEnabled = false }: AquariumSceneProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null), overlayRef = useRef<HTMLDivElement>(null)
+  const fpsBadgeRef = useRef<HTMLDivElement>(null)
   const controller = useRef<AquariumController | undefined>(undefined)
   const current = useRef({ services, paused, focusFallbackRef }); current.current = { services, paused, focusFallbackRef }
   const [status, setStatus] = useState<SceneStatus>('loading')
@@ -16,7 +18,15 @@ export function AquariumScene({ services, paused, focusFallbackRef }: AquariumSc
     let cancelled = false
     void import('../rendering/scene/aquarium').then(({ createAquarium }) => {
       if (cancelled || !canvasRef.current || !overlayRef.current) return
-      controller.current = createAquarium(canvasRef.current, overlayRef.current, current.current.services, current.current.paused, value => { if (!cancelled) setStatus(value) }, () => current.current.focusFallbackRef?.current ?? null)
+      // Debug FPS counter (AQ-83 AC #2): the renderer pushes smoothed samples
+      // at ~3 Hz; the badge text is written imperatively by ref, so sampling
+      // never triggers a React re-render.
+      const onFrameRate = (sample: FrameRateSample | null) => {
+        const badge = fpsBadgeRef.current
+        if (!badge) return
+        badge.textContent = formatFrameRate(sample, { paused: current.current.paused, hidden: document.hidden })
+      }
+      controller.current = createAquarium(canvasRef.current, overlayRef.current, current.current.services, current.current.paused, value => { if (!cancelled) setStatus(value) }, () => current.current.focusFallbackRef?.current ?? null, undefined, onFrameRate)
     }).catch(error => { console.error('Aquarium renderer unavailable', error); if (!cancelled) setStatus('failed') })
     return () => { cancelled = true; controller.current?.dispose(); controller.current = undefined; acknowledgments.current.forEach(clearTimeout); acknowledgments.current.clear() }
   }, [])
@@ -103,6 +113,7 @@ export function AquariumScene({ services, paused, focusFallbackRef }: AquariumSc
           </a>
         })}
       </div>
+      {fpsCounterEnabled && <div ref={fpsBadgeRef} className="fps-counter-badge" aria-hidden="true">—</div>}
       {status === 'failed' && <p className="aquarium-load-notice" role="status">Aquarium visuals unavailable. Your service links and Settings still work.</p>}
     </section>
   )
