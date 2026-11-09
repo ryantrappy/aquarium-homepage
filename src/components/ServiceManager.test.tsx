@@ -25,6 +25,8 @@ function props(overrides: Partial<ComponentProps<typeof ServiceManager>> = {}) {
     onExport: vi.fn(),
     onRetryLoad: vi.fn<() => Promise<void>>().mockResolvedValue(undefined),
     onReset: vi.fn<() => Promise<void>>().mockResolvedValue(undefined),
+    fpsCounterEnabled: false,
+    onToggleFpsCounter: vi.fn<(enabled: boolean) => void>(),
     ...overrides,
   }
 }
@@ -160,5 +162,38 @@ describe('ServiceManager async persistence', () => {
     expect(url.value).toBe('')
     expect(view.querySelector<HTMLInputElement>(`input[type="radio"][value="${REEF_FISH[0].id}"]`)?.checked).toBe(true)
     expect(view.querySelector('[role="status"]')?.textContent).toBe('Service added.')
+  })
+})
+
+describe('ServiceManager FPS counter toggle (AQ-83 AC #1)', () => {
+  function fpsToggle(view: HTMLDivElement) {
+    return view.querySelector<HTMLInputElement>('input[type="checkbox"]')
+  }
+
+  it('shows the toggle unchecked by default', async () => {
+    const view = await renderManager(props())
+    const toggle = fpsToggle(view)
+    expect(toggle).not.toBeNull()
+    expect(toggle!.checked).toBe(false)
+    expect(toggle!.closest('label')?.textContent).toContain('Show FPS and frame-time counter')
+  })
+
+  it('reflects an enabled counter from props', async () => {
+    const view = await renderManager(props({ fpsCounterEnabled: true }))
+    expect(fpsToggle(view)!.checked).toBe(true)
+  })
+
+  it('reports enabling the counter through the toggle callback', async () => {
+    const onToggleFpsCounter = vi.fn<(enabled: boolean) => void>()
+    const view = await renderManager(props({ onToggleFpsCounter }))
+    await act(async () => { fpsToggle(view)!.click() })
+    expect(onToggleFpsCounter).toHaveBeenCalledExactlyOnceWith(true)
+  })
+
+  it('reports disabling the counter through the toggle callback', async () => {
+    const onToggleFpsCounter = vi.fn<(enabled: boolean) => void>()
+    const view = await renderManager(props({ fpsCounterEnabled: true, onToggleFpsCounter }))
+    await act(async () => { fpsToggle(view)!.click() })
+    expect(onToggleFpsCounter).toHaveBeenCalledExactlyOnceWith(false)
   })
 })

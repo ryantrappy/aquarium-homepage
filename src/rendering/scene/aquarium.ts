@@ -45,6 +45,7 @@ import { reconcileFishInhabitants, refreshFishLink } from './fish-inhabitants'
 import { SCHOOL_TOTAL_COUNT, resolveSchoolPopulation, schoolmateSpawnOffset } from './school-population'
 import { applyCaustics, createCaustics } from './caustics'
 import { AdaptiveQualityController, LAZY_MAX_CONCURRENT_LOADS, QUALITY_TIERS, lodAnimationFrameSkip, orderLazyLoadQueue, phase0SpeciesIds, projectedFishLengthPx, selectFishLod, type FishLod, type QualityTier } from './runtime-quality'
+import { FRAME_RATE_PUSH_INTERVAL_MS, FrameRateSampler, type FrameRateSample } from './frame-rate'
 
 const modelUrls: Record<string, string> = {
   'ocellaris-clownfish': new URL('../proof/candidate-real-clown.glb', import.meta.url).href,
@@ -82,7 +83,7 @@ function disposeTree(root: THREE.Object3D) {
   textures.forEach(value => { value.dispose(); if (typeof ImageBitmap !== 'undefined' && value.source.data instanceof ImageBitmap) value.source.data.close() })
 }
 
-export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, initialServices: ServiceConfig[], initialPaused: boolean, status: (status: SceneStatus) => void, focusFallback: () => HTMLElement | null = () => null, fishExtensions: FishExtensionConfig = EMPTY_FISH_EXTENSIONS): AquariumController {
+export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, initialServices: ServiceConfig[], initialPaused: boolean, status: (status: SceneStatus) => void, focusFallback: () => HTMLElement | null = () => null, fishExtensions: FishExtensionConfig = EMPTY_FISH_EXTENSIONS, onFrameRate?: (sample: FrameRateSample | null) => void): AquariumController {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' })
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5))
   renderer.outputColorSpace = THREE.SRGBColorSpace
@@ -1080,11 +1081,23 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
     keyLight.castShadow = spec.shadows
     resize()
   }
+  // Debug FPS counter (AQ-83 AC #2/#4): a read-only observer of the same
+  // frame intervals the adaptive-quality controller already consumes. It
+  // pushes a smoothed sample at ~3 Hz and never touches animation rates,
+  // LOD, or the tick loop's structure.
+  const frameRateSampler = new FrameRateSampler()
+  let lastFrameRatePushMs = 0
   function tick(now: number) {
     const steps = consumeFrameSteps(clock, now)
     if (lastTickTimestamp !== undefined && now > lastTickTimestamp) {
+      const intervalMs = now - lastTickTimestamp
       const excluded = document.hidden || paused || Boolean(reducedMotionQuery?.matches)
-      qualityController.recordFrameInterval(now - lastTickTimestamp, now, excluded)
+      qualityController.recordFrameInterval(intervalMs, now, excluded)
+      frameRateSampler.record(intervalMs, excluded)
+      if (onFrameRate && now - lastFrameRatePushMs >= FRAME_RATE_PUSH_INTERVAL_MS) {
+        lastFrameRatePushMs = now
+        onFrameRate(frameRateSampler.sample())
+      }
       const nextTier = qualityController.evaluate(now)
       if (nextTier !== qualityTier) applyQualityTier(nextTier)
     }
@@ -1096,6 +1109,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
     suspendFrameClock(clock)
     if (!canRunFishSceneLoop(paused, document.hidden, spawnUnavailable)) {
       renderer.setAnimationLoop(null)
+      // Sampling stops with the loop; report the suspension so the HUD
+      // badge shows Paused / Suspended instead of a frozen FPS value.
+      onFrameRate?.(null)
       if (!document.hidden && !spawnUnavailable) render(0, true)
     }
     else renderer.setAnimationLoop(tick)

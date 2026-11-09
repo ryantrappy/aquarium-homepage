@@ -11,7 +11,8 @@ const mock = vi.hoisted(() => ({
   update: vi.fn(), activate: vi.fn(), serviceAt: vi.fn<(x: number, y: number) => string | undefined>(), canActivate: vi.fn(() => true), dispose: vi.fn(),
 }))
 const focusHandoff = vi.hoisted(() => ({ get: undefined as (() => HTMLElement | null) | undefined, status: undefined as ((value: string) => void) | undefined }))
-vi.mock('../rendering/scene/aquarium', () => ({ createAquarium: (_canvas: unknown, _overlay: unknown, _services: unknown, _paused: unknown, status: (value: string) => void, fallback: () => HTMLElement | null) => { focusHandoff.get = fallback; focusHandoff.status = status; status('ready'); return mock } }))
+const frameRateHandoff = vi.hoisted(() => ({ onFrameRate: undefined as ((sample: { fps: number; frameTimeMs: number } | null) => void) | undefined }))
+vi.mock('../rendering/scene/aquarium', () => ({ createAquarium: (_canvas: unknown, _overlay: unknown, _services: unknown, _paused: unknown, status: (value: string) => void, fallback: () => HTMLElement | null, _extensions: unknown, onFrameRate?: (sample: { fps: number; frameTimeMs: number } | null) => void) => { focusHandoff.get = fallback; focusHandoff.status = status; frameRateHandoff.onFrameRate = onFrameRate; status('ready'); return mock } }))
 const services: ServiceConfig[] = [
   { id: 'clown', fishId: 'ocellaris-clownfish', name: 'Home', url: 'https://home.example.test', isExample: false },
   { id: 'tang', fishId: 'yellow-tang', name: 'Photos', url: 'https://photos.example.test', isExample: false },
@@ -272,5 +273,57 @@ describe('AQ-13 hover/focus affordances', () => {
     expect(link.rel).toBe('noreferrer')
     expect(link.href).toBe(services[1].url + '/')
     expect(link.querySelectorAll('.fish-link-tooltip')).toHaveLength(1)
+  })
+})
+
+describe('debug FPS counter badge (AQ-83 AC #2/#3/#4)', () => {
+  function badge() { return container.querySelector<HTMLElement>('.fps-counter-badge') }
+
+  it('renders no badge when the counter is disabled', () => {
+    expect(badge()).toBeNull()
+  })
+
+  it('renders a compact badge with a dash before the first sample', async () => {
+    await act(async () => { root.render(<AquariumScene services={services} paused={false} fpsCounterEnabled />) })
+    expect(badge()).not.toBeNull()
+    expect(badge()!.textContent).toBe('—')
+    expect(badge()!.getAttribute('aria-hidden')).toBe('true')
+  })
+
+  it('updates the badge text from renderer samples without a React re-render', async () => {
+    await act(async () => { root.render(<AquariumScene services={services} paused={false} fpsCounterEnabled />) })
+    const push = frameRateHandoff.onFrameRate!
+    expect(push).toBeDefined()
+    act(() => { push({ fps: 60, frameTimeMs: 16.7 }) })
+    expect(badge()!.textContent).toBe('60 FPS · 16.7 ms')
+    act(() => { push({ fps: 30, frameTimeMs: 33.3 }) })
+    expect(badge()!.textContent).toBe('30 FPS · 33.3 ms')
+  })
+
+  it('shows Paused when sampling stops while paused', async () => {
+    await act(async () => { root.render(<AquariumScene services={services} paused fpsCounterEnabled />) })
+    act(() => { frameRateHandoff.onFrameRate!(null) })
+    expect(badge()!.textContent).toBe('Paused')
+  })
+
+  it('shows Suspended when sampling stops while the tab is hidden', async () => {
+    await act(async () => { root.render(<AquariumScene services={services} paused={false} fpsCounterEnabled />) })
+    Object.defineProperty(document, 'hidden', { configurable: true, value: true })
+    try {
+      act(() => { frameRateHandoff.onFrameRate!(null) })
+      expect(badge()!.textContent).toBe('Suspended')
+    } finally {
+      Object.defineProperty(document, 'hidden', { configurable: true, value: false })
+    }
+  })
+
+  it('does not interfere with fish-link activation while the badge is mounted', async () => {
+    await act(async () => { root.render(<AquariumScene services={services} paused={false} fpsCounterEnabled />) })
+    act(() => { frameRateHandoff.onFrameRate!({ fps: 60, frameTimeMs: 16.7 }) })
+    mock.serviceAt.mockReturnValue('clown')
+    const event = pointerClick(anchor('clown'))
+    expect(event.defaultPrevented).toBe(false)
+    expect(mock.activate).toHaveBeenCalledExactlyOnceWith('clown')
+    expect(badge()!.textContent).toBe('60 FPS · 16.7 ms')
   })
 })

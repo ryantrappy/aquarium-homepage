@@ -16,6 +16,8 @@ type ServiceManagerProps = {
   loadError?: string
   onRetryLoad: () => Promise<void>
   onReset: () => Promise<void>
+  fpsCounterEnabled: boolean
+  onToggleFpsCounter: (enabled: boolean) => void
 }
 
 const blankDraft: ServiceDraft = { name: '', url: '', fishId: REEF_FISH[0].id }
@@ -37,7 +39,7 @@ function readableError(error: unknown) {
   return error instanceof Error ? error.message : 'The service list could not be saved.'
 }
 
-export function ServiceManager({ services, onClose, onAdd, onUpdate, onDelete, onImport, onExport, loadError, onRetryLoad, onReset }: ServiceManagerProps) {
+export function ServiceManager({ services, onClose, onAdd, onUpdate, onDelete, onImport, onExport, loadError, onRetryLoad, onReset, fpsCounterEnabled, onToggleFpsCounter }: ServiceManagerProps) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [draft, setDraft] = useState<ServiceDraft>(blankDraft)
   const [formError, setFormError] = useState('')
@@ -233,6 +235,14 @@ export function ServiceManager({ services, onClose, onAdd, onUpdate, onDelete, o
           </fieldset>
           <div className="form-actions"><button type="button" className="quiet-button" onClick={() => { resetForm(); focusNameInput() }} disabled={busy !== null}>{editingId ? 'Cancel edit' : 'Clear'}</button><button className="save-button" type="submit" disabled={formDisabled}>{busy === 'save' ? 'Saving…' : editingId ? 'Save changes' : 'Add to the reef'}</button></div>
         </form>
+        <section className="debug-settings" aria-labelledby="debug-settings-title">
+          <h3 id="debug-settings-title">Debug</h3>
+          <label className="debug-setting">
+            <input type="checkbox" checked={fpsCounterEnabled} onChange={(event) => onToggleFpsCounter(event.target.checked)} />
+            <span>Show FPS and frame-time counter</span>
+          </label>
+          <p>Shows a small FPS and frame-time badge on the aquarium. Off by default; your choice is saved on this device.</p>
+        </section>
         <footer className="manager-footer">
           <a className="text-action" href={assetCreditsUrl} target="_blank" rel="noreferrer">Asset credits</a>
           <button type="button" className="text-action" onClick={() => { try { onExport(); setNotice('Service list downloaded.') } catch (error) { setFormError(readableError(error)); focusFormError() } }} disabled={busy !== null}>Export list</button>
