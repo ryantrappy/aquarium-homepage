@@ -6,6 +6,7 @@ import {
   LIGHT_SHAFT_SLANT_PER_M,
   LIGHT_SHAFT_SWAY_AMPLITUDE_M,
   createRestrainedCausticLightController,
+  bubbleEmitterForRockFootprint,
   evaluateBubblePosition,
   evaluateCausticIntensity,
   evaluateCausticPatternUV,
@@ -189,6 +190,25 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
     expect(frozen1).toEqual(frozen2)
     expect(frozen1.y).toBe(emitter.y)
     expect(evaluateBubblePosition(2, emitter, bounds, 15.0, { reducedMotion: true })).toEqual(frozen1)
+  })
+
+  it('places bubble emitters on the islands front faces, clear of the rock (visual-check fix)', () => {
+    const cfg = DEFAULT_AQUARIUM_OPTICS_CONFIG
+    // Desktop left island: centre z -1.35 + radiusZ 1.15 + 0.15 clearance.
+    const left = bubbleEmitterForRockFootprint({ x: -2.35, z: -1.35, radiusZ: 1.15 })
+    expect(left.x).toBe(-2.35)
+    expect(left.y).toBe(cfg.bubbleEmitterBaseY)
+    expect(left.z).toBeCloseTo(-0.05, 9)
+    // Desktop right island.
+    const right = bubbleEmitterForRockFootprint({ x: 2.65, z: -1.2, radiusZ: 1.1 })
+    expect(right.x).toBe(2.65)
+    expect(right.y).toBe(cfg.bubbleEmitterBaseY)
+    expect(right.z).toBeCloseTo(0.05, 9)
+    // Narrow single island.
+    const narrow = bubbleEmitterForRockFootprint({ x: -0.15, z: -1.35, radiusZ: 0.95 })
+    expect(narrow.x).toBe(-0.15)
+    expect(narrow.y).toBe(cfg.bubbleEmitterBaseY)
+    expect(narrow.z).toBeCloseTo(-0.25, 9)
   })
 
   it('modulates directional key/fill lights and restores exact base intensity and position when paused', () => {

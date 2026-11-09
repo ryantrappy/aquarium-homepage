@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import * as THREE from 'three'
 import {
+  CAUSTIC_TEXTURE_SIZE,
   applyCaustics,
   createCaustics,
   disposeCaustics,
@@ -82,15 +83,15 @@ describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
     expect(minV).toBeGreaterThanOrEqual(0)
   })
 
-  it('generates a 512x512 repeat-wrapped, non-colour-space texture from the pure value function', () => {
+  it('generates a 256x256 repeat-wrapped, non-colour-space texture from the pure value function', () => {
     const texture = generateCausticsTexture()
-    expect(texture.image.width).toBe(512)
-    expect(texture.image.height).toBe(512)
+    expect(texture.image.width).toBe(CAUSTIC_TEXTURE_SIZE)
+    expect(texture.image.height).toBe(CAUSTIC_TEXTURE_SIZE)
     expect(texture.wrapS).toBe(THREE.RepeatWrapping)
     expect(texture.wrapT).toBe(THREE.RepeatWrapping)
     expect(texture.colorSpace).toBe(THREE.NoColorSpace)
     const data = texture.image.data as Uint8Array
-    expect(data.length).toBe(512 * 512 * 4)
+    expect(data.length).toBe(CAUSTIC_TEXTURE_SIZE * CAUSTIC_TEXTURE_SIZE * 4)
     // Sampled range check (a per-byte expect() over 1M entries is too slow)
     let min = 255
     let max = 0
@@ -137,7 +138,9 @@ describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
     // two mostly-dark cellular layers is ~0.027 mean and invisible through
     // the old smoothstep; max keeps the ridge network visible.
     expect(shader.fragmentShader).toContain('max(texture2D(uCausticMap, causticUvA).r, texture2D(uCausticMap, causticUvB).r)')
-    expect(shader.fragmentShader).toContain('smoothstep(0.35, 0.9, causticP)')
+    // The ridge threshold is a per-material uniform (default 0.35), so
+    // the sand can widen its dapple without raising the +0.35 peak.
+    expect(shader.fragmentShader).toContain('smoothstep(uCausticThreshold, 0.9, causticP)')
     expect(shader.fragmentShader).not.toContain('texture2D(uCausticMap, causticUvA).r * texture2D(uCausticMap, causticUvB).r')
     expect(shader.fragmentShader).toContain('causticUvA')
     expect(shader.fragmentShader).toContain('causticUvB')
@@ -147,6 +150,7 @@ describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
     expect(shader.uniforms.uCausticMap).toBe(caustics.uniforms.uCausticMap)
     expect(shader.uniforms.uCausticTime).toBe(caustics.uniforms.uCausticTime)
     expect(shader.uniforms.uCausticMaxAdd.value).toBeCloseTo(0.35)
+    expect(shader.uniforms.uCausticThreshold.value).toBeCloseTo(0.35)
     expect(shader.uniforms.uCausticScaleA.value).toBeCloseTo(0.35)
     expect(shader.uniforms.uCausticScaleB.value).toBeCloseTo(0.55)
     expect(material.customProgramCacheKey()).toContain(':caustics-v1')
@@ -159,6 +163,19 @@ describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
     expect(otherShader.uniforms.uCausticTime).toBe(caustics.uniforms.uCausticTime)
     expect(otherShader.uniforms.uCausticScaleA.value).toBeCloseTo(0.25)
     expect(otherShader.uniforms.uCausticScaleB.value).toBeCloseTo(0.4)
+    caustics.dispose()
+  })
+
+  it('accepts a per-material ridge threshold (sand dapple) without moving the +0.35 peak', () => {
+    const caustics = createCaustics()
+    const material = new THREE.MeshStandardMaterial()
+    applyCaustics(material, caustics, { threshold: 0.22 })
+    const shader = mockShader()
+    material.onBeforeCompile(shader, {} as THREE.WebGLRenderer)
+    expect(shader.uniforms.uCausticThreshold.value).toBeCloseTo(0.22)
+    // The peak add is unchanged: the threshold only widens the network.
+    expect(shader.uniforms.uCausticMaxAdd.value).toBeCloseTo(0.35)
+    expect(shader.fragmentShader).toContain('smoothstep(uCausticThreshold, 0.9, causticP)')
     caustics.dispose()
   })
 

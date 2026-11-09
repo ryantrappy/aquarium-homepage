@@ -30,7 +30,7 @@ describe('tight service-label anchoring and overlap de-conflict (AQ-89)', () => 
     expect(labelLiftPx(44)).toBe(11)
     expect(labelLiftPx(120)).toBe(30)
     // A close-range yellow tang box would ask for more; the cap holds the caption below the belly.
-    expect(labelLiftPx(200)).toBe(34)
+    expect(labelLiftPx(200)).toBe(48)
   })
 
   it('estimates the caption directly under the link box after the lift', () => {
@@ -52,8 +52,8 @@ describe('tight service-label anchoring and overlap de-conflict (AQ-89)', () => 
       VIEWPORT,
     )
     expect(results).toEqual([
-      { id: 'a', dy: 0, faded: false, align: 'center' },
-      { id: 'b', dy: 0, faded: false, align: 'center' },
+      { id: 'a', dy: 0, dx: 0, faded: false, align: 'center' },
+      { id: 'b', dy: 0, dx: 0, faded: false, align: 'center' },
     ])
   })
 
@@ -68,7 +68,7 @@ describe('tight service-label anchoring and overlap de-conflict (AQ-89)', () => 
     const results = resolveLabelDeconflicts([far, near], VIEWPORT)
     const nearResult = results.find(result => result.id === 'near')!
     const farResult = results.find(result => result.id === 'far')!
-    expect(nearResult).toEqual({ id: 'near', dy: 0, faded: false, align: 'center' })
+    expect(nearResult).toEqual({ id: 'near', dy: 0, dx: 0, faded: false, align: 'center' })
     // Shifted below the near body (bottom 400 + 2px) and then below the
     // near caption (bottom 403 + 2px): 355 + 50 = 405.
     expect(farResult.dy).toBe(50)
@@ -100,6 +100,38 @@ describe('tight service-label anchoring and overlap de-conflict (AQ-89)', () => 
     expect(results.find(result => result.id === 'right')!.align).toBe('right')
     expect(results.find(result => result.id === 'mid')!.align).toBe('center')
     expect(results.every(result => !result.faded)).toBe(true)
+    // The clamped positions reach the DOM as dx, measured from the
+    // centred position: left nudges +4 (gutter), right pulls back -24.
+    expect(results.find(result => result.id === 'left')!.dx).toBe(4)
+    expect(results.find(result => result.id === 'right')!.dx).toBe(-24)
+    expect(results.find(result => result.id === 'mid')!.dx).toBe(0)
+  })
+
+  it('clamps a lone caption inside the frame when its fish sits partly past the right edge (mobile zoomed WatchMyBirds)', () => {
+    const mobile = { width: 402, height: 874 }
+    const results = resolveLabelDeconflicts(
+      [placement('watch', { x: 390, y: 300, width: 60, height: 80 }, 1.0)],
+      mobile,
+    )
+    const result = results[0]!
+    expect(result.align).toBe('right')
+    expect(result.faded).toBe(false)
+    expect(result.dy).toBe(0)
+    // Centred it would sit at x 390..450, hanging 48px past the 402px
+    // frame; clamped to the 4px gutter it sits at 338..398, a -52px dx.
+    expect(result.dx).toBe(-52)
+  })
+
+  it('fades a caption that would need a shift past the detachment cap instead of letting it drift from its fish', () => {
+    // A tall nearer body (y 300..440): clearing it needs +87px, past the
+    // 84px cap, even though the viewport bottom (900) would allow it.
+    const near = placement('near', { x: 500, y: 300, width: 160, height: 140 }, 1.0)
+    const far = placement('far', { x: 520, y: 295, width: 140, height: 80 }, 0.0)
+    const results = resolveLabelDeconflicts([far, near], VIEWPORT)
+    const farResult = results.find(result => result.id === 'far')!
+    expect(farResult.faded).toBe(true)
+    expect(farResult.dy).toBe(0)
+    expect(results.find(result => result.id === 'near')!.faded).toBe(false)
   })
 
   it('returns results in input order with the nearer fish winning every conflict', () => {

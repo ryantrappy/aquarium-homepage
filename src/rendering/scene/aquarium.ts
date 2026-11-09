@@ -21,6 +21,7 @@ import {
   LIGHT_SHAFT_SWAY_AMPLITUDE_M,
   LIGHT_SHAFT_SWAY_HZ,
   createRestrainedCausticLightController,
+  bubbleEmitterForRockFootprint,
   evaluateBubblePosition,
   evaluateDepthTintedColor,
   evaluateFixtureIntensities,
@@ -28,7 +29,7 @@ import {
   evaluateSurfaceRippleOffset,
   evaluateSuspendedParticlePosition,
 } from './underwater-optics'
-import { createAragoniteSandBed } from './aragonite-sand'
+import { createAragoniteSandBed, getRockFootprintsForViewport } from './aragonite-sand'
 import { estimateCaptionRect, labelLiftPx, resolveLabelDeconflicts } from './fish-label-layout'
 import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
 import { createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
@@ -222,7 +223,13 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   // shows the same caustic system as the rock, coral, and fish.
   const sandBed = createAragoniteSandBed({ narrow: false })
   const sand = sandBed.sandMesh
-  applyCaustics(sand.material as THREE.MeshStandardMaterial, caustics)
+  // Visual-check fix: the sand dapple is faint at overview distance
+  // because the sand is both the deepest surface (the depth envelope
+  // gives it ×0.65 vs ×0.89 on the rock) and the brightest (the same
+  // absolute add is a smaller relative change). The lower ridge
+  // threshold (0.22 vs the 0.35 default) widens the dapple network on
+  // the sand only — same +0.35 cap, same texture, no brighter peak.
+  applyCaustics(sand.material as THREE.MeshStandardMaterial, caustics, { threshold: 0.22 })
   scene.add(sandBed.group)
 
   // Layered Reef-Tank Backdrop (AQ-14.6 & AQ-39): eliminates the flat paint-bucket wall & sharp horizon line
@@ -362,6 +369,29 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
     depthWrite: false,
   })
   waterSurfaceMaterial.envMapIntensity = ENVIRONMENT_MAP_INTENSITY.waterSurface
+  // Visual-check fix: the surface plane runs to the rear glass (local y
+  // -6, world z -7.2, behind the backdrop at z -5.5), so its visible
+  // edge is the hard surface/backdrop junction at y 2.66 — a faint
+  // horizontal line ~27% down the overview frame, the mobile residual
+  // after the haze-plane fix. Fade the surface alpha to zero over the
+  // last metre before that junction (local y -4.3 is the junction,
+  // -3.3 is one metre in front of it), so no hard edge can read. The
+  // fade keys off local y, which the ripple displacement never touches
+  // (ripples move local z), and it is a plain alpha fade — no fog, veil,
+  // vignette, or blur (AQ-39 §1.1, AQ-14.6 AC #3, AQ-14.2 AC #4).
+  waterSurfaceMaterial.onBeforeCompile = shader => {
+    shader.vertexShader = `varying float vSurfaceLocalY;\n${shader.vertexShader}`
+    shader.vertexShader = shader.vertexShader.replace(
+      '#include <begin_vertex>',
+      '#include <begin_vertex>\nvSurfaceLocalY = position.y;',
+    )
+    shader.fragmentShader = `varying float vSurfaceLocalY;\n${shader.fragmentShader}`
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <color_fragment>',
+      `#include <color_fragment>
+diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
+    )
+  }
   const waterSurface = new THREE.Mesh(waterSurfaceGeometry, waterSurfaceMaterial)
   waterSurface.rotation.x = Math.PI / 2
   waterSurface.position.set(0, 2.66, -1.2)
@@ -560,11 +590,22 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
     // no runtime world position for the anemone exists to resolve — the
     // left-island base is the fallback the spec allows, and it is where
     // the anemone sits.
-    bubbleEmitters = placements.map(placement => ({
-      x: placement.position.x,
-      y: DEFAULT_AQUARIUM_OPTICS_CONFIG.bubbleEmitterBaseY,
-      z: placement.position.z,
-    }))
+    // Visual-check fix: the emitter sits on the island's FRONT face
+    // (bubbleEmitterForRockFootprint), not at the island centre — a
+    // centre emitter hides most of the rise inside the rock mass, so no
+    // stream was discernible. Counts and sizes are unchanged (≤16/stream,
+    // ≤32 total, 0.06 m / 0.6 opacity).
+    const rockFootprints = getRockFootprintsForViewport(width < 600)
+    bubbleEmitters = placements.map((placement, index) => {
+      const footprint = rockFootprints[index]
+      return footprint
+        ? bubbleEmitterForRockFootprint(footprint)
+        : {
+            x: placement.position.x,
+            y: DEFAULT_AQUARIUM_OPTICS_CONFIG.bubbleEmitterBaseY,
+            z: placement.position.z,
+          }
+    })
     bubbleGeometry.setDrawRange(0, bubbleEmitters.length * bubblesPerStream)
     const meshIslands: ReefMeshIslandInput[] = []
     for (const [i, placement] of placements.entries()) {
@@ -979,7 +1020,14 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
       anchor.classList.toggle('fish-link-tooltip-left', tooltipCenterX < 110)
       anchor.classList.toggle('fish-link-tooltip-right', tooltipCenterX > width - 110)
     }
-    if (placedLabels.length > 1) {
+    // Visual-check fix: the de-conflict pass also runs for a lone label —
+    // the old `length > 1` guard meant a single visible fish (common in a
+    // zoomed mobile view) never got its caption clamped into the frame,
+    // so WatchMyBirds clipped at the right edge. The resolved horizontal
+    // shift reaches the DOM as --fish-label-dx (the align classes alone
+    // anchor the caption to the link box, which can itself sit partly
+    // past the frame edge).
+    if (placedLabels.length >= 1) {
       const resolved = resolveLabelDeconflicts(
         placedLabels.map(entry => ({
           id: entry.id,
@@ -993,18 +1041,11 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
         const entry = placedLabels.find(candidate => candidate.id === result.id)
         if (!entry) continue
         entry.anchor.style.setProperty('--fish-label-dy', `${result.dy}px`)
+        entry.anchor.style.setProperty('--fish-label-dx', `${result.dx}px`)
         entry.anchor.classList.toggle('fish-label-deconflicted', result.faded)
         entry.anchor.classList.toggle('fish-label-align-left', result.align === 'left')
         entry.anchor.classList.toggle('fish-label-align-right', result.align === 'right')
       }
-    } else if (placedLabels.length === 1) {
-      // A lone label never needs a shift, but a stale de-conflict from a
-      // busier frame must not linger on it.
-      const entry = placedLabels[0]!
-      entry.anchor.style.setProperty('--fish-label-dy', '0px')
-      entry.anchor.classList.remove('fish-label-deconflicted')
-      entry.anchor.classList.remove('fish-label-align-left')
-      entry.anchor.classList.remove('fish-label-align-right')
     }
   }
   function render(steps: number, forceLabels = false) {

@@ -445,6 +445,36 @@ export function evaluateSuspendedParticlePosition(
 }
 
 /**
+ * Clearance in front of a live-rock island's front face for a bubble
+ * emitter (visual-check fix): an emitter at the island centre sits
+ * inside the rock mass, so most of the rise is hidden and no stream is
+ * discernible. Placing the emitter just off the front face keeps the
+ * whole rise in open water; the ±0.05 m wobble can never push a bubble
+ * back into the rock.
+ */
+export const BUBBLE_EMITTER_FACE_CLEARANCE_M = 0.15
+
+/**
+ * Derives a bubble-stream emitter from a live-rock island's sand
+ * footprint: centred on the island's front face (the +z face toward the
+ * camera), `BUBBLE_EMITTER_FACE_CLEARANCE_M` clear of the rock, at the
+ * configured emitter height just above the sand bed. The footprint is
+ * the same ellipse the sand bed uses for its talus mounding, so the
+ * emitter tracks the island if the aquascape moves.
+ */
+export function bubbleEmitterForRockFootprint(footprint: Readonly<{
+  x: number
+  z: number
+  radiusZ: number
+}>): { x: number; y: number; z: number } {
+  return {
+    x: footprint.x,
+    y: DEFAULT_AQUARIUM_OPTICS_CONFIG.bubbleEmitterBaseY,
+    z: footprint.z + footprint.radiusZ + BUBBLE_EMITTER_FACE_CLEARANCE_M,
+  }
+}
+
+/**
  * Evaluates one bubble in a sparse, emitter-anchored stream (`AQ-43` as
  * amended 2026-11-08): rises from its emitter at a deterministic,
  * size-hashed speed (larger bubbles rise faster), wobbles sinusoidally in
