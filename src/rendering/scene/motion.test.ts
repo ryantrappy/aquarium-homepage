@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 import { BoxGeometry } from 'three'
-import { MAX_PITCH_RAD_LEGACY, MAX_PITCH_RAD_METRIC, MAX_PITCH_RATE_RAD_PER_SEC_METRIC, createSwimmingFish, distance, disturbSchool, startleFish, stepSwimmingFish, stepSwimmingSchool, type WaterHabitat } from './motion'
+import { MAX_PITCH_RAD_LEGACY, MAX_PITCH_RAD_METRIC, MAX_PITCH_RATE_RAD_PER_SEC_METRIC, anchorApproachClearanceM, createSwimmingFish, distance, disturbSchool, startleFish, stepSwimmingFish, stepSwimmingSchool, type WaterHabitat } from './motion'
 import { instantiateModularReefHabitat } from './reef-assembly'
 import { fishClearanceRadius } from './fish-scale'
 import { findSafeFishSpawn } from './fish-spawn'
 import { EXAMPLE_SERVICES } from '../../lib/services'
-import { findWaterRoute, isWaterSegmentSafe } from '../../simulation/habitat-navigation'
+import { findWaterRoute, isWaterSegmentSafe, resolveHabitatRoute } from '../../simulation/habitat-navigation'
 import { buildMeshCollider } from '../../simulation/mesh-collision'
 import { createMeshClearanceQuery } from '../../simulation/mesh-habitat'
 import { findMeshRoute, type CapsuleClearanceQuery, type MeshNavigationBudget } from '../../simulation/mesh-navigation'
@@ -691,5 +691,104 @@ describe('schooling steering through heading kinematics (AQ-84)', () => {
     expect(schoolB.yaw).toBe(soloB.yaw)
     expect(schoolA.position).toEqual(soloA.position)
     expect(schoolB.position).toEqual(soloB.position)
+  })
+})
+
+describe('socket-derived anchor interactions (AQ-82)', () => {
+  const reefBounds: WaterHabitat['bounds'] = { min: { x: -4, y: -2.25, z: -4.6 }, max: { x: 4, y: 2.8, z: 2.8 } }
+  function reefHabitat() {
+    const left = instantiateModularReefHabitat('left', 4.5, { x: -2.35, y: -2.7, z: -1.35 }, 'reef-0', 0.08)
+    const right = instantiateModularReefHabitat('right', 4.3, { x: 2.65, y: -2.7, z: -1.2 }, 'reef-1', -0.1)
+    return {
+      left,
+      right,
+      habitat: {
+        bounds: reefBounds,
+        obstacles: [...left.obstacles, ...right.obstacles],
+        anchors: [...left.anchors, ...right.anchors],
+      } satisfies WaterHabitat,
+    }
+  }
+
+  it('routes a clownfish to its host anemone with body-radius clearance where the legacy clearance blocks it (AC #3)', () => {
+    const { habitat, left } = reefHabitat()
+    const anemone = left.anchors.find(anchor => anchor.anchor === 'hostAnemone')!
+    const request = { instanceId: 'aq82-clown-route', speciesId: 'ocellaris-clownfish', state: 'idle' as const, anchor: 'hostAnemone' as const, cue: 'Hold and bob within the host tentacles.', generation: 1 }
+    const start = { x: 0, y: 1.0, z: 1.5 }
+    const blocked = resolveHabitatRoute({ request, start, waterBounds: reefBounds, obstacles: habitat.obstacles, anchorLocations: habitat.anchors, fishClearanceRadius: 0.5 })
+    expect(blocked.status).toBe('blocked')
+    const fish = createSwimmingFish('aq82-clown-route', 'ocellaris-clownfish', start, 0.5)
+    const routed = resolveHabitatRoute({ request, start, waterBounds: reefBounds, obstacles: habitat.obstacles, anchorLocations: habitat.anchors, fishClearanceRadius: anchorApproachClearanceM(fish) })
+    expect(routed.status).toBe('route')
+    if (routed.status === 'route') expect(routed.locationId).toBe(anemone.id)
+  })
+
+  it('holds a clownfish at its host anemone instead of wandering off mid-state (AC #4)', () => {
+    const { habitat, left } = reefHabitat()
+    const anemone = left.anchors.find(anchor => anchor.anchor === 'hostAnemone')!
+    const fish = createSwimmingFish('aq82-clown-hold', 'ocellaris-clownfish', { x: anemone.position.x, y: anemone.position.y + 1.2, z: anemone.position.z + 1 }, 0.5)
+    let minDistance = Infinity
+    for (let frame = 0; frame < 1200; frame++) {
+      stepSwimmingFish(fish, habitat, 1 / 30)
+      expect(Number.isFinite(fish.position.x + fish.position.y + fish.position.z)).toBe(true)
+      minDistance = Math.min(minDistance, distance(fish.position, anemone.position))
+    }
+    expect(minDistance).toBeLessThan(0.5)
+    expect(distance(fish.position, anemone.position)).toBeLessThan(0.8)
+  })
+
+  it('grazes nose-down at a foraging anchor without penetrating rigid rock (AC #4)', () => {
+    // The ledge grazing anchors sit inside the coral envelope (and the
+    // expanded rock AABB) by design, so this uses a socket-derived
+    // foraging patch — same nose-down interaction (-0.22 rad) as grazing.
+    const { habitat, left } = reefHabitat()
+    const forage = left.anchors.find(anchor => anchor.anchor === 'foragingPatch')!
+    const fish = createSwimmingFish('aq82-gramma-graze', 'royal-gramma', { x: forage.position.x, y: forage.position.y + 0.03, z: forage.position.z + 0.04 }, 0.57)
+    // Drive the FSM to forage deterministically: advance through idle, then
+    // take the foraging opportunity once swimming near the anchor.
+    for (let i = 0; i < 200 && fish.behavior.state !== 'forage'; i++) {
+      fish.behavior = advanceFishBehavior(fish.behavior, 0.5)
+      if (fish.behavior.state === 'swim') {
+        fish.behavior = dispatchBehaviorEvent(fish.behavior, { type: 'behavior-opportunity', instanceId: fish.id, trigger: 'foraging-opportunity' })
+      }
+    }
+    expect(fish.behavior.state).toBe('forage')
+    expect(fish.behavior.targetAnchor).toBe('foragingPatch')
+    let forageMinDistance = Infinity
+    // The forage bout is short (~2.5 s) and the route to the anchor eats
+    // most of it, so the nose-down pose lands while the fish HOLDS at the
+    // patch (its idle state targets the same anchor) rather than mid-bout.
+    let holdMinPitch = 0
+    for (let frame = 0; frame < 600; frame++) {
+      const previous = { ...fish.position }
+      stepSwimmingFish(fish, habitat, 1 / 30)
+      const dist = distance(fish.position, forage.position)
+      if (fish.behavior.state === 'forage') {
+        forageMinDistance = Math.min(forageMinDistance, dist)
+      }
+      if (fish.behavior.targetAnchor === 'foragingPatch' && dist < 0.8) {
+        holdMinPitch = Math.min(holdMinPitch, fish.pitch)
+      }
+      // Never penetrates rigid rock, even at body-radius clearance.
+      expect(isWaterSegmentSafe({ start: previous, target: fish.position, waterBounds: reefBounds, obstacles: habitat.obstacles, fishClearanceRadius: anchorApproachClearanceM(fish) })).toBe(true)
+    }
+    expect(forageMinDistance).toBeLessThan(0.35)
+    expect(holdMinPitch).toBeLessThan(-0.15)
+  })
+
+  it('escapes the legacy envelope after nestling at an anchor instead of stalling (AC #3)', () => {
+    // A blue tang placed at a foraging patch (its own refuge is the
+    // branching coral, so it has no reason to stay) must wander off.
+    const { habitat, left } = reefHabitat()
+    const forage = left.anchors.find(anchor => anchor.anchor === 'foragingPatch')!
+    const fish = createSwimmingFish('aq82-tang-escape', 'blue-tang', { ...forage.position }, 0.57)
+    let maxDistance = 0
+    for (let frame = 0; frame < 600; frame++) {
+      const previous = { ...fish.position }
+      stepSwimmingFish(fish, habitat, 1 / 30)
+      maxDistance = Math.max(maxDistance, distance(fish.position, forage.position))
+      expect(isWaterSegmentSafe({ start: previous, target: fish.position, waterBounds: reefBounds, obstacles: habitat.obstacles, fishClearanceRadius: anchorApproachClearanceM(fish) })).toBe(true)
+    }
+    expect(maxDistance).toBeGreaterThan(1)
   })
 })

@@ -127,4 +127,36 @@ describe('species-compatible reef habitat anchor interactions (AQ-45)', () => {
     })
     expect(safeTarget).toBeDefined()
   })
+
+  it('resolves an anemone interaction with reduced clearance where the legacy clearance blocks it (AQ-82 AC #3)', () => {
+    // Rigid rock slab (top y = 0, front z = 0). The anemone anchor sits at
+    // the tentacle fringe just proud of the face: inside the legacy 0.5 m
+    // envelope, outside the body-radius envelope.
+    const obstacles = [{ id: 'rock-face', bounds: { min: { x: -2, y: -2, z: -2 }, max: { x: 2, y: 0, z: 0 } } }]
+    const fringe: HabitatAnchorLocation = { id: 'anemone-fringe', anchor: 'hostAnemone', position: { x: -1.2, y: 0.15, z: 0.3 }, compatibleSpecies: ['ocellaris-clownfish'] }
+    const offset = evaluateAnchorInteractionOffset({
+      speciesId: 'ocellaris-clownfish',
+      location: fringe,
+      state: 'swim',
+      elapsedSeconds: 0,
+    })!
+    expect(offset.softTentacleOverlapAllowed).toBe(true)
+    const input = {
+      currentPosition: { x: -1.2, y: 1.5, z: 1.5 },
+      location: fringe,
+      offset,
+      waterBounds: { min: { x: -4, y: -2.2, z: -4 }, max: { x: 4, y: 2.8, z: 2.8 } },
+      obstacles,
+      fishClearanceRadius: 0.57,
+    }
+    // Legacy clearance: the fringe point is inside the expanded slab, so
+    // neither the offset target nor the base anchor resolves.
+    expect(resolveSafeAnchorInteractionTarget(input)).toBeUndefined()
+    // Body-radius clearance: the same point resolves at the tentacle fringe.
+    const resolved = resolveSafeAnchorInteractionTarget({ ...input, interactionClearanceRadius: 0.1 })
+    expect(resolved).toBeDefined()
+    expect(resolved!.x).toBeCloseTo(fringe.position.x + offset.positionOffset.x, 6)
+    expect(resolved!.y).toBeCloseTo(fringe.position.y + offset.positionOffset.y, 6)
+    expect(resolved!.z).toBeCloseTo(fringe.position.z + offset.positionOffset.z, 6)
+  })
 })

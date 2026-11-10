@@ -24,6 +24,7 @@ const runtimeModels: Record<string, string> = {
   'lyretail-anthias': 'src/rendering/assets/splat-fish/lyretail-anthias.glb',
   'flame-angelfish': 'src/rendering/assets/splat-fish/flame-angelfish.glb',
   'copperband-butterflyfish': 'src/rendering/assets/splat-fish/copperband-butterflyfish.glb',
+  'desjardins-sailfin-tang': 'src/rendering/assets/fish/download_testing_copies/zebrasoma_desjardinii-copy.glb',
 }
 
 type GltfJson = { meshes: { primitives: { attributes: { POSITION: number } }[] }[]; accessors: { min?: number[]; max?: number[] }[]; nodes: { mesh?: number; skin?: number }[] }

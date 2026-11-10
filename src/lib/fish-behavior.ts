@@ -22,6 +22,7 @@ export const SPECIES_BEHAVIOR_IDS = [
   'lyretail-anthias',
   'flame-angelfish',
   'copperband-butterflyfish',
+  'desjardins-sailfin-tang',
 ] as const
 
 export type SpeciesBehaviorId = typeof SPECIES_BEHAVIOR_IDS[number]
@@ -457,6 +458,30 @@ const profiles = {
     ]),
     individuality: { phaseOffsetRadians: [0, Math.PI * 2], homeOffsetTankWidths: [0.008, 0.04] },
     evidence: { kind: 'documented-behavior', summary: 'Solitary/paired crevice prey search with its long snout is documented; patrol cadence and turning values are scene tuning.', sourceRefs: ['https://dwazoo.com/animal/copperband-butterflyfish/', 'https://zoo.ch/en/conservation/animal-and-plant-encyclopedia/copperband-butterflyfish'] },
+  },
+  // Desjardins' sailfin tang: the second Zebrasoma in the tank, kept distinct
+  // from the yellow tang (deeper band, slower cruise for its size, longer
+  // graze pauses). Adults usually occur in pairs over lagoon/seaward reef
+  // slopes; juveniles shelter among staghorn coral. Same grazer guild as the
+  // yellow tang: pectoral cruise with a body-caudal transition at speed.
+  'desjardins-sailfin-tang': {
+    speciesId: 'desjardins-sailfin-tang', habitatMode: 'open-reef-cruise', preferredZone: 'reef-edge', depthRange: [0.24, 0.74],
+    anchors: ['grazingSurface'],
+    locomotion: { gait: 'pectoral-cruise', speedTankWidthsPerSecond: [0.04, 0.11], turnDegreesPerSecond: [32, 78], higherEffortGaits: ['body-caudal-undulation', 'burst-and-coast'] },
+    states: {
+      idle: { cue: 'Pause in a steady hover near reef structure, sails raised.', durationSeconds: [1.6, 4.4], speedMultiplier: 0.15 },
+      swim: { cue: 'Cruise steadily with pectoral-driven fin beats, sails tall.', durationSeconds: [3.8, 9.2], speedMultiplier: 1 },
+      forage: { cue: 'Make long algae-grazing pecks at a rock surface.', durationSeconds: [1.8, 5.2], anchor: 'grazingSurface', speedMultiplier: 0.32 },
+      burst: { cue: 'Use a brief high-effort burst-and-coast, then return to cruise.', durationSeconds: [0.4, 1.1], speedMultiplier: 2.3 },
+    },
+    transitions: transitionsFor([
+      { from: 'swim', to: 'forage', trigger: 'foraging-opportunity', selectionWeight: 0.46 },
+      { from: 'forage', to: 'swim', trigger: 'foraging-window-complete', selectionWeight: 0.9 },
+      { from: 'swim', to: 'burst', trigger: 'high-effort-cue', selectionWeight: 0.07 },
+      { from: 'burst', to: 'swim', trigger: 'effort-window-complete', selectionWeight: 1 },
+    ]),
+    individuality: { phaseOffsetRadians: [0, Math.PI * 2], homeOffsetTankWidths: [0.03, 0.09] },
+    evidence: { kind: 'documented-behavior', summary: 'Algae grazing, paired adult occurrence over reef slopes, and pectoral cruise are documented for this sailfin tang; numeric ranges are visual tuning.', sourceRefs: ['https://www.fishbase.se/summary/Zebrasoma-desjardinii', 'https://en.wikipedia.org/wiki/Zebrasoma_desjardinii'] },
   },
 } as const satisfies Record<SpeciesBehaviorId, SpeciesBehaviorProfile>
 

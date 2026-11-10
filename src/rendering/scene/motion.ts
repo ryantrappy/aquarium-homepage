@@ -1,11 +1,12 @@
 import { getSpeciesBehaviorProfile, type HabitatAnchor } from '../../lib/fish-behavior'
 import { advanceFishBehavior, createFishBehaviorInstance, dispatchBehaviorEvent, getMotionIntent, getNavigationRequest, reportNavigationOutcome, type FishBehaviorInstance } from '../../simulation/behavior-runtime'
 import { evaluateSchoolingSteering, isGroupSchoolingSpecies, type SchoolingPeer } from './schooling-navigation'
+import { evaluateAnchorInteractionOffset, isSpeciesCompatibleWithAnchor, resolveSafeAnchorInteractionTarget } from './habitat-anchor-interactions'
 import { createFishExtensionRuntime, EMPTY_FISH_EXTENSIONS, type FishExtensionConfig, type FishExtensionSnapshot } from '../../simulation/fish-extensions'
 import { findWaterRoute, isWaterSegmentSafe, resolveHabitatRoute, type AxisAlignedBox, type HabitatAnchorLocation, type SolidObstacleVolume, type Vec3 } from '../../simulation/habitat-navigation'
 import { findMeshRoute, type CapsuleClearanceQuery, type MeshNavigationBudget, type MeshNavigationWorkBudget, type MeshNavigationWorkReport } from '../../simulation/mesh-navigation'
 import { simulationSubsteps } from './clock'
-import { fishBodyRadiusM } from './fish-scale'
+import { fishBodyRadiusM, ANCHOR_APPROACH_MARGIN_M } from './fish-scale'
 import {
   SHARP_TURN_THRESHOLD_RAD,
   computeCurvilinearStepVector,
@@ -44,8 +45,121 @@ export const MAX_PITCH_RAD_LEGACY = 0.28
 export const MAX_PITCH_RAD_METRIC = Math.PI / 2
 export const MAX_PITCH_RATE_RAD_PER_SEC_METRIC = 1.2
 export function seedForId(id: string) { let seed = 2166136261; for (const char of id) seed = Math.imul(seed ^ char.charCodeAt(0), 16777619); return seed >>> 0 }
+
+/**
+ * Anchor-approach clearance (AQ-82 AC #3): navigation to and holding at a
+ * habitat anchor uses the fish's physical body radius plus a small margin,
+ * not the legacy 0.5 m habitat clearance. The anchor is a measured point
+ * (socket-derived, or a ledge/burrow placed proud of the rock), so the
+ * comfort envelope would strand the fish outside the interaction zone it
+ * is supposed to enter; the body radius is the true collision size (AQ-85).
+ */
+export function anchorApproachClearanceM(fish: SwimmingFish): number {
+  return fishBodyRadiusM(fish.speciesId) + ANCHOR_APPROACH_MARGIN_M
+}
+/** A fish within this distance of a compatible anchor counts as "at" it. */
+export const ANCHOR_HOLD_RADIUS_M = 0.8
+/** How often a fish holding at an anchor re-checks that it should stay. */
+export const ANCHOR_HOLD_REFRESH_SECONDS = 0.25
+
+/**
+ * Nearest compatible anchor location of `anchor` within holding range, or
+ * undefined. Compatibility is the profile check from AQ-45 (never a
+ * substituted anchor type), plus the location's own species list.
+ */
+function nearestCompatibleAnchor(fish: SwimmingFish, habitat: WaterHabitat, anchor: HabitatAnchor): HabitatAnchorLocation | undefined {
+  let best: HabitatAnchorLocation | undefined
+  let bestDistance = Infinity
+  for (const location of habitat.anchors) {
+    if (location.anchor !== anchor || !isSpeciesCompatibleWithAnchor(fish.speciesId, location)) continue
+    const dist = distance(location.position, fish.position)
+    if (dist < bestDistance) { best = location; bestDistance = dist }
+  }
+  return bestDistance <= ANCHOR_HOLD_RADIUS_M ? best : undefined
+}
+
+/**
+ * Clearance for this fish's navigation right now (AABB mode only; mesh mode
+ * already navigates with the physical capsule radius). Reduced while the
+ * fish is en route to an anchor, while it is holding at one, and while it
+ * is already inside the legacy envelope (escape rule: a fish that nestled
+ * close to the rock must be able to swim back out with body clearance
+ * instead of being stranded by its own comfort envelope).
+ */
+function effectiveClearanceM(fish: SwimmingFish, habitat: WaterHabitat): number {
+  if (habitat.meshNavigation !== undefined) return fish.clearance
+  if (fish.navigationAnchor) return anchorApproachClearanceM(fish)
+  if (fish.behavior.targetAnchor && nearestCompatibleAnchor(fish, habitat, fish.behavior.targetAnchor)) {
+    return anchorApproachClearanceM(fish)
+  }
+  if (!isWaterSegmentSafe({ start: fish.position, target: fish.position, waterBounds: habitat.bounds, obstacles: habitat.obstacles, fishClearanceRadius: fish.clearance })) {
+    return anchorApproachClearanceM(fish)
+  }
+  return fish.clearance
+}
+
+/**
+ * Applies the species-specific anchor-interaction pose (AQ-82 AC #4) when a
+ * fish is holding at a compatible anchor: nestling in a host anemone,
+ * sheltering among branching coral, perching on a rock ledge, grazing near
+ * a coral base, or hovering at a sand burrow. The fish drifts toward the
+ * collision-checked interaction target in small bounded steps (never a snap,
+ * never forced through rock), its pitch blends toward the interaction pose,
+ * and a burrow lookout yaw-locks facing the open water in front of the tank
+ * (yaw 0 = +z, toward the viewer). Runs only with no active route and no
+ * startle: a travelling or fleeing fish is not mid-interaction. Reduced
+ * motion freezes the interaction cycle (a fixed pose, not travel).
+ */
+function applyAnchorInteraction(fish: SwimmingFish, habitat: WaterHabitat, dt: number, reducedMotion = false): void {
+  if (fish.startleSeconds > 0) return
+  if (fish.route.length > 0 && fish.waypoint < fish.route.length) return
+  const targetAnchor = fish.behavior.targetAnchor
+  if (!targetAnchor) return
+  const location = nearestCompatibleAnchor(fish, habitat, targetAnchor)
+  if (!location) return
+  const offset = evaluateAnchorInteractionOffset({
+    speciesId: fish.speciesId,
+    location,
+    state: fish.behavior.state,
+    elapsedSeconds: fish.behavior.stateElapsedSeconds,
+    paused: false,
+    reducedMotion,
+  })
+  if (!offset) return
+  const clearance = anchorApproachClearanceM(fish)
+  const target = resolveSafeAnchorInteractionTarget({
+    currentPosition: fish.position,
+    location,
+    offset,
+    waterBounds: habitat.bounds,
+    obstacles: habitat.obstacles,
+    fishClearanceRadius: fish.clearance,
+    interactionClearanceRadius: clearance,
+  })
+  if (!target) return
+  const profile = getSpeciesBehaviorProfile(fish.speciesId)!
+  const cruise = fish.behavior.variation.cruiseSpeedTankWidthsPerSecond * (habitat.bounds.max.x - habitat.bounds.min.x)
+  const maxStep = Math.max(0.005, cruise * dt * 0.5)
+  const dx = target.x - fish.position.x, dy = target.y - fish.position.y, dz = target.z - fish.position.z
+  const dist = Math.hypot(dx, dy, dz)
+  if (dist > 1e-9) {
+    const step = Math.min(dist, maxStep)
+    const candidate = {
+      x: fish.position.x + (dx / dist) * step,
+      y: fish.position.y + (dy / dist) * step,
+      z: fish.position.z + (dz / dist) * step,
+    }
+    if (movementSafety(fish, habitat, candidate, clearance) === 'clear') fish.position = candidate
+  }
+  fish.pitch += (offset.pitchOffsetRad - fish.pitch) * Math.min(1, dt * 2)
+  if (offset.yawLockToEntrance) {
+    const delta = Math.atan2(Math.sin(0 - fish.yaw), Math.cos(0 - fish.yaw))
+    const maxTurn = fish.behavior.variation.turnDegreesPerSecond * Math.PI / 180 * dt
+    fish.yaw += clamp(delta, -maxTurn, maxTurn)
+  }
+}
 function random(fish: SwimmingFish) { fish.random = (Math.imul(fish.random, 1664525) + 1013904223) >>> 0; return fish.random / 4294967296 }
-function routeInput(fish: SwimmingFish, habitat: WaterHabitat, target: Vec3) { return { start: fish.position, target, waterBounds: habitat.bounds, obstacles: habitat.obstacles, fishClearanceRadius: fish.clearance } }
+function routeInput(fish: SwimmingFish, habitat: WaterHabitat, target: Vec3, clearanceOverride?: number) { return { start: fish.position, target, waterBounds: habitat.bounds, obstacles: habitat.obstacles, fishClearanceRadius: clearanceOverride ?? fish.clearance } }
 function validMeshNavigation(fish: SwimmingFish, habitat: WaterHabitat): habitat is WaterHabitat & { meshNavigation: MeshNavigationConfig } {
   const config = habitat.meshNavigation
   const budgetKeys: readonly (keyof MeshNavigationBudget)[] = ['maxLatticeNodes', 'maxExpandedNodes', 'maxCollisionQueries', 'maxNodeVisits', 'maxTriangleTests']
@@ -189,6 +303,17 @@ function planMesh(fish: SwimmingFish, habitat: WaterHabitat) {
     return
   }
 
+  // AQ-82 AC #4 (mesh mode): same hold-at-anchor rule as the AABB planner —
+  // a fish that arrived at its state's anchor stays there until the state
+  // changes, with the interaction pose applied per substep.
+  if (request && fish.routeGeneration === request.generation && fish.startleSeconds <= 0
+    && fish.behavior.targetAnchor === request.anchor
+    && nearestCompatibleAnchor(fish, habitat, request.anchor)) {
+    fish.route = []
+    fish.targetWait = ANCHOR_HOLD_REFRESH_SECONDS
+    return
+  }
+
   const profile = getSpeciesBehaviorProfile(fish.speciesId)!
   const { min, max } = habitat.bounds, r = radiusM
   for (let attempt = 0; attempt < 12; attempt++) {
@@ -211,10 +336,24 @@ function plan(fish: SwimmingFish, habitat: WaterHabitat) {
   if (habitat.meshNavigation !== undefined) { planMesh(fish, habitat); return }
   const request = getNavigationRequest(fish.behavior)
   if (request && fish.routeGeneration !== request.generation && fish.startleSeconds <= 0) {
-    const result = resolveHabitatRoute({ request, start: fish.position, waterBounds: habitat.bounds, obstacles: habitat.obstacles, anchorLocations: habitat.anchors, fishClearanceRadius: fish.clearance })
+    // AQ-82 AC #3: anchor routes use body-radius clearance — the anchor is a
+    // measured point, and the legacy 0.5 m envelope would strand the fish
+    // outside the interaction zone it is supposed to enter.
+    const result = resolveHabitatRoute({ request, start: fish.position, waterBounds: habitat.bounds, obstacles: habitat.obstacles, anchorLocations: habitat.anchors, fishClearanceRadius: anchorApproachClearanceM(fish) })
     fish.routeGeneration = request.generation
     if (result.status === 'route') { fish.route = result.path; fish.waypoint = 1; fish.navigationAnchor = request.anchor; return }
     fish.behavior = reportNavigationOutcome(fish.behavior, request.generation, request.anchor, result.status)
+  }
+  // AQ-82 AC #4: a fish that has already arrived at its state's anchor stays
+  // there — holding, with the interaction pose applied per substep — instead
+  // of wandering off to a random target mid-state. The hold refreshes on a
+  // short timer so a state change re-routes promptly.
+  if (request && fish.routeGeneration === request.generation && fish.startleSeconds <= 0
+    && fish.behavior.targetAnchor === request.anchor
+    && nearestCompatibleAnchor(fish, habitat, request.anchor)) {
+    fish.route = []
+    fish.targetWait = ANCHOR_HOLD_REFRESH_SECONDS
+    return
   }
   const profile = getSpeciesBehaviorProfile(fish.speciesId)!
   const { min, max } = habitat.bounds, r = fish.clearance + .08
@@ -225,13 +364,16 @@ function plan(fish: SwimmingFish, habitat: WaterHabitat) {
       ? { x: clamp(fish.position.x + Math.sin(evasiveYaw) * 1.4, min.x + r, max.x - r), y: clamp(fish.position.y + .15, min.y + r, max.y - r), z: clamp(fish.position.z + Math.cos(evasiveYaw) * 1.4, min.z + r, max.z - r) }
       : { x: min.x + r + random(fish) * (max.x - min.x - 2 * r), y: clamp(max.y - depth * (max.y - min.y), min.y + r, max.y - r), z: min.z + r + random(fish) * (max.z - min.z - 2 * r) }
     if (distance(fish.position, target) < .7) continue
-    const path = findWaterRoute(routeInput(fish, habitat, target))
+    // AQ-82: a fish leaving an anchor zone it nestled into routes out with
+    // the same body-radius clearance it arrived with (escape rule); open
+    // water keeps the legacy envelope.
+    const path = findWaterRoute(routeInput(fish, habitat, target, effectiveClearanceM(fish, habitat)))
     if (path) { fish.route = path; fish.waypoint = 1; fish.navigationAnchor = undefined; return }
   }
   fish.targetWait = .7
 }
-function movementSafety(fish: SwimmingFish, habitat: WaterHabitat, target: Vec3): 'clear' | 'blocked' | 'unavailable' {
-  if (habitat.meshNavigation === undefined) return isWaterSegmentSafe(routeInput(fish, habitat, target)) ? 'clear' : 'blocked'
+function movementSafety(fish: SwimmingFish, habitat: WaterHabitat, target: Vec3, clearanceOverride?: number): 'clear' | 'blocked' | 'unavailable' {
+  if (habitat.meshNavigation === undefined) return isWaterSegmentSafe(routeInput(fish, habitat, target, clearanceOverride)) ? 'clear' : 'blocked'
   if (!validMeshNavigation(fish, habitat)) return 'unavailable'
   const start = { ...fish.position }, end = { ...target }, radiusM = fish.collisionRadiusM!
   // The mesh oracle checks rock geometry; the glass boundary remains a separate constraint.
@@ -255,11 +397,13 @@ function stepFishExtensions(fish: SwimmingFish, dt: number) {
   for (const intent of result.behaviorIntents) fish.behavior = dispatchBehaviorEvent(fish.behavior, { ...intent, instanceId: fish.id })
 }
 
-export function stepSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, elapsed: number, stopped = false) {
+export function stepSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, elapsed: number, stopped = false, options: { reducedMotion?: boolean } = {}) {
   if (stopped) return
   for (const dt of simulationSubsteps(elapsed)) {
     integrateSwimmingFish(fish, habitat, dt)
     stepFishExtensions(fish, dt)
+    // AQ-82 AC #4: nestle/shelter/perch/graze while holding at an anchor.
+    applyAnchorInteraction(fish, habitat, dt, options.reducedMotion)
   }
 }
 
@@ -365,6 +509,9 @@ export function stepSwimmingSchool(
         if (movementSafety(fish, habitat, candidate) === 'clear') fish.position = candidate
       }
       stepFishExtensions(fish, dt)
+      // AQ-82 AC #4: school members holding at an anchor get the same
+      // interaction pose as solitary fish (nestle/shelter/perch/graze).
+      applyAnchorInteraction(fish, habitat, dt, options.reducedMotion)
     })
   }
 }
@@ -414,6 +561,10 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   }
   fish.behavior = advanceFishBehavior(fish.behavior, dt)
   const profile = getSpeciesBehaviorProfile(fish.speciesId)!
+  // AQ-82 AC #3: while en route to an anchor, holding at one, or escaping
+  // the legacy envelope after nestling close to the rock, this fish navigates
+  // with body-radius clearance instead of the 0.5 m comfort envelope.
+  const effectiveClearance = effectiveClearanceM(fish, habitat)
   // AQ-84: rotate the heading toward the schooling direction first, within
   // the species turn limit for this substep. The route turn below is then
   // capped by the remaining budget, so the total turn in one substep never
@@ -445,7 +596,7 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   const meshWaypointWithinSubstep = habitat.meshNavigation === undefined || rawRemaining <= .015 * dt + 1e-12
   if (turnWaypointReady && meshWaypointWithinSubstep) {
     if (habitat.meshNavigation !== undefined) {
-      const clearance = movementSafety(fish, habitat, rawTarget)
+      const clearance = movementSafety(fish, habitat, rawTarget, effectiveClearance)
       if (clearance !== 'clear') {
         fish.route = []; fish.speed = 0; fish.targetWait = clearance === 'blocked' ? .2 : .7
         if (fish.navigationAnchor) {
@@ -509,11 +660,11 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   const stepVec = computeCurvilinearStepVector(fish.yaw, fish.pitch, chordDir, delta, travel, rawRemaining)
   const headingNext = { x: fish.position.x + stepVec.x, y: fish.position.y + stepVec.y, z: fish.position.z + stepVec.z }
   const chordNext = { x: fish.position.x + chordDir.x * travel, y: fish.position.y + chordDir.y * travel, z: fish.position.z + chordDir.z * travel }
-  const headingSafety = movementSafety(fish, habitat, headingNext)
-  const chordSafety = movementSafety(fish, habitat, chordNext)
+  const headingSafety = movementSafety(fish, habitat, headingNext, effectiveClearance)
+  const chordSafety = movementSafety(fish, habitat, chordNext, effectiveClearance)
   if (habitat.meshNavigation !== undefined && fish.waypoint + 1 < fish.route.length
     && turnWaypointReady && rawRemaining <= .025 && headingSafety === 'clear'
-    && movementSafety(fish, habitat, rawTarget) === 'clear') {
+    && movementSafety(fish, habitat, rawTarget, effectiveClearance) === 'clear') {
     // A close metric waypoint may be acknowledged after a verified forward
     // proposal clears, without snapping the fish sideways onto the node.
     completeRouteWaypoint(fish)

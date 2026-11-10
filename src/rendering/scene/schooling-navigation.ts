@@ -57,13 +57,14 @@ export type SchoolingSteeringVector = Readonly<{
 }>
 
 /**
- * Sourced social grouping classification across the 15-species reef roster (`AQ-41` AC #1 & #4):
+ * Sourced social grouping classification across the 16-species reef roster (`AQ-41` AC #1 & #4):
  * - `blue-green-chromis`: open-water / branching-coral shoaler (`shoal`)
  * - `lyretail-anthias`: current-facing planktivore aggregation/harem (`harem-aggregation`)
  * - `banggai-cardinalfish`: calm mid/lower hovering group (`hover-group`)
  * - Solitary / territorial / pair-bonded reef inhabitants (`yellow-tang`, `blue-tang`, `royal-gramma`,
  *   `firefish`, `yellow-watchman-goby`, `mandarin-dragonet`, `tailspot-blenny`, `six-line-wrasse`,
- *   `mccoskers-flasher-wrasse`, `flame-angelfish`, `copperband-butterflyfish`, `ocellaris-clownfish`)
+ *   `mccoskers-flasher-wrasse`, `flame-angelfish`, `copperband-butterflyfish`, `ocellaris-clownfish`,
+ *   `desjardins-sailfin-tang`)
  *   are never forced into artificial schools (`pair-or-solitary`), though all species respect personal-space separation.
  */
 export const SPECIES_SOCIAL_GROUPING_MODE: Readonly<
@@ -84,6 +85,7 @@ export const SPECIES_SOCIAL_GROUPING_MODE: Readonly<
   'mccoskers-flasher-wrasse': 'pair-or-solitary',
   'flame-angelfish': 'pair-or-solitary',
   'copperband-butterflyfish': 'pair-or-solitary',
+  'desjardins-sailfin-tang': 'pair-or-solitary',
 })
 
 const MAX_STEERING_OFFSET_PER_SEC = 0.45
