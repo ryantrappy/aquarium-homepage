@@ -137,6 +137,7 @@ export function fishTurningEnvelopeContract(rig: FishTurningRig): FishTurningEnv
 export function getRigArchetypeForSpecies(speciesId: string): FishRigArchetype {
   switch (speciesId) {
     case 'yellow-tang':
+    case 'desjardins-sailfin-tang':
       return 'labriform_rigid_disc'
     case 'blue-tang':
       return 'labriform_cruiser'

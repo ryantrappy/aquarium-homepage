@@ -43,7 +43,7 @@ For a production Node build, `npm run build` uses the Nitro Vite plugin and `npm
 
 ## Continuous integration
 
-Every pull request to `gemini_control` (and every push to it) runs the same checks in GitHub Actions (`.github/workflows/ci.yml`): `npm ci`, `npm run typecheck`, `npm test`, and `npm run build`. To block merges when a check fails, a repository admin must require the workflow's **Tests, typecheck, and build** status check for `gemini_control` in Settings → Branches → branch protection rules. (AQ-90)
+Every pull request (and every push to `gemini_control` or `main`) runs the same checks in GitHub Actions (`.github/workflows/ci.yml`): `npm ci`, `npm run typecheck`, `npm test`, and `npm run build`. To block merges when a check fails, a repository admin must require the workflow's **Tests, typecheck, and build** status check for `gemini_control` in Settings → Branches → branch protection rules. (AQ-90)
 
 ## Backlog
 

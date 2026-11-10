@@ -112,6 +112,13 @@ export const REEF_FISH: ReefFish[] = [
     habitat: 'Rocky shores, sheltered reefs, and sandy inner-reef areas.',
     thumbnail: '/fish/copperband-butterflyfish.webp',
   },
+  {
+    id: 'desjardins-sailfin-tang',
+    commonName: 'Desjardins’ sailfin tang',
+    scientificName: 'Zebrasoma desjardinii',
+    habitat: 'Reef slopes and lagoons of the Indo-Pacific, grazing algae over rock and coral.',
+    thumbnail: '/fish/desjardins-sailfin-tang.webp',
+  },
 ]
 
 export function getFishById(id: string) {

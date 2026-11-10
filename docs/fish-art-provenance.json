@@ -189,6 +189,23 @@
       "exact_prompt": "not retained in the linked project docs; this manifest does not reconstruct it",
       "status": "frozen tracked WebP canonical output",
       "alpha_visible_width_fraction": 0.983333
+    },
+    {
+      "species_id": "desjardins-sailfin-tang",
+      "path": "public/fish/desjardins-sailfin-tang.webp",
+      "sha256": "33ecc974160b4cb2edd05e5fa1646361316ed9f3f1632c727b887b6433a06bdc",
+      "bytes": 52770,
+      "dimensions_px": [
+        600,
+        400
+      ],
+      "generation_date": "2026-11-09",
+      "generation_method": "Muse media-pipeline image generation (project-original imagegen output), side-profile illustration generated for the sailfin roster entry",
+      "history_record": "Added 2026-11-09 with the sailfin roster entry (Ryan's sailfin decision); no earlier linked project doc records this image.",
+      "source_png_path": "not recorded in the repository; do not infer a raw-source filename",
+      "exact_prompt": "not retained; this manifest does not reconstruct it",
+      "status": "frozen tracked WebP canonical output",
+      "alpha_visible_width_fraction": 0.898333
     }
   ],
   "legacy_unverified_webp": [
@@ -444,5 +461,5 @@
     }
   ],
   "archived_original_png_total_bytes": 6446063,
-  "active_fish_thumbnail_total_bytes": 630998
+  "active_fish_thumbnail_total_bytes": 683768
 }

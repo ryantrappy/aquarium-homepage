@@ -13,7 +13,7 @@ const openHabitat: WaterHabitat = {
 }
 
 describe('species-specific reef locomotion and behavior extensions (AQ-18..AQ-32)', () => {
-  it('registers distinct, bounded locomotion cadences and opportunity triggers for all 15 reef fish species', () => {
+  it('registers distinct, bounded locomotion cadences and opportunity triggers for all 16 reef fish species', () => {
     expect(Object.keys(SPECIES_LOCOMOTION_SIGNATURES).sort()).toEqual([...SPECIES_BEHAVIOR_IDS].sort())
 
     const playbackSamples = new Map<string, number>()

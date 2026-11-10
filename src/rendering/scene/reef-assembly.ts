@@ -1,7 +1,8 @@
 import * as THREE from 'three'
 import type { CoralSocket } from '../assets/contract'
-import type { HabitatAnchorLocation, SolidObstacleVolume, Vec3 } from '../../simulation/habitat-navigation'
-import { MIN_FISH_CLEARANCE, fishClearanceRadius } from './fish-scale'
+import type { HabitatAnchor, SpeciesBehaviorId } from '../../lib/fish-behavior'
+import type { AxisAlignedBox, HabitatAnchorLocation, SolidObstacleVolume, Vec3 } from '../../simulation/habitat-navigation'
+import { ANCHOR_APPROACH_MARGIN_M, MAX_FISH_BODY_RADIUS_M, MIN_FISH_CLEARANCE, fishClearanceRadius } from './fish-scale'
 import {
   applyCoralRawMaskMaterial,
   applyLiveRockMaterial,
@@ -742,12 +743,10 @@ const LEFT_ISLAND_LOCAL_OBSTACLES_M: ReadonlyArray<{ id: string; min: [number, n
   { id: 'rock-part-05', min: [-0.495452, 0.0875, -0.271264], max: [-0.046669, 0.13725, 0.265537] },
   { id: 'rock-part-06', min: [0.047677, 0.0875, -0.271264], max: [0.515826, 0.13725, 0.265537] },
   { id: 'rock-part-07', min: [-0.495452, 0.13725, -0.271264], max: [0.515826, 0.386, 0.265537] },
-  { id: 'coral-canopy-crest', min: [-0.32, 0.34, -0.28], max: [0.32, 0.68, -0.02] },
 ]
 
 const RIGHT_ISLAND_LOCAL_OBSTACLES_M: ReadonlyArray<{ id: string; min: [number, number, number]; max: [number, number, number] }> = [
   { id: 'rock-part-01', min: [-0.467889, -0.012, -0.251368], max: [0.49856, 0.336, 0.260176] },
-  { id: 'coral-canopy-crest', min: [-0.30, 0.29, -0.26], max: [0.32, 0.62, -0.02] },
 ]
 
 const LEFT_ISLAND_LOCAL_GRAZING_LEDGES_M: ReadonlyArray<{ id: string; pos: [number, number, number] }> = [
@@ -761,6 +760,154 @@ const RIGHT_ISLAND_LOCAL_GRAZING_LEDGES_M: ReadonlyArray<{ id: string; pos: [num
   { id: 'ledge-center-mid', pos: [0.01, 0.22, 0.05] },
   { id: 'ledge-right-mid', pos: [0.24, 0.19, 0.06] },
 ]
+
+/**
+ * Socket-derived habitat anchors (AQ-82 AC #1/#2). The monolithic
+ * `coral-canopy-crest` obstacle boxes are gone: the rigid geometry is now
+ * only the measured rock parts above plus one tight calcified-base box per
+ * branching-SPS crest mount (see `CORAL_BASE_*_M`), so fish can swim close
+ * to — and shelter among — the permeable coral crowns without clipping
+ * solid rock. Soft coral crowns, tentacles and branch envelopes are never
+ * obstacles; only rock and calcified stalks are.
+ *
+ * Socket positions are measured, not invented: they are copied verbatim
+ * from the socket-support inspection reports
+ * `src/rendering/assets/corals/live-rock-island-left-socket-report.json`
+ * (source SHA ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5)
+ * and `...-right-socket-report.json`
+ * (source SHA ab7b756344c6a0a879d254b6ca06a20c63c4246b0a19b76394cc532c61abfbee).
+ * `reef-assembly.test.ts` asserts this table still matches those reports,
+ * so a rock re-export that moves a socket fails loudly instead of silently
+ * misplacing an anchor. Mount `offsetM` values are applied at derivation
+ * time from the mounts actually assembled (see
+ * `instantiateModularReefHabitat`); the table below holds socket positions
+ * only.
+ *
+ * Anchor placement (island-local metres, before the island transform):
+ * - Front-face anchors (host anemone, foraging patches) sit proud of the
+ *   rock front face (`FRONT_PROUD_Z_LOCAL_M` = 0.40 — past the yaw-grown
+ *   rotated rock AABB front plus the reduced anchor-approach clearance).
+ *   The AABB rock slab cannot represent the anemone crevice, so the
+ *   clownfish hovers at the tentacle fringe rather than inside the slab;
+ *   the true rock surface (mesh navigation, when ready) lets it closer.
+ * - Grazing/perch ledge anchors hover ABOVE their ledge (ledge world y
+ *   + legacy clearance + 0.03, world units), inside the coral canopy — the
+ *   established geometry pinned by reef-mesh-navigation.test.ts. A point
+ *   just above the rock face cannot be AABB-safe, and the front plane
+ *   would put the grazer ~1.3 m world in front of the ledge.
+ * - Branching-coral shelter/refuge anchors sit above the crest sockets,
+ *   inside the measured staghorn crown envelope (template height 0.221 m
+ *   x mount scale 1.70-1.85 = 0.38-0.41 m above the socket). Shelter rides
+ *   0.05 m above refuge so the two are distinct locations; refuge is
+ *   tucked 0.03 m deeper among the branches.
+ * - Sand-burrow anchors sit on open sand in front of each island at the
+ *   lowest swimmable plane (`SAND_BURROW_WORLD_Y_M`); no burrow mesh
+ *   exists yet, so the entrance is a notional sand feature, not a hole.
+ * `rockCrevice` is deliberately NOT derived here: the left island's
+ * pass-through cave has no measured mouth coordinates, and socket names
+ * alone never create habitat anchors (AQ-14.3 AC #3).
+ */
+export const SOCKET_ANCHOR_POSITIONS_M: Readonly<Record<'left' | 'right', Readonly<Record<string, readonly [number, number, number]>>>> = {
+  left: {
+    socket_anemone_crevice_01: [0.0359, 0.236, 0.0147],
+    socket_brain_apron_01: [-0.3121, 0.118, 0.156],
+    socket_brain_apron_02: [0.2777, 0.096, 0.1576],
+    socket_lps_mid_01: [-0.2432, 0.216, 0.0146],
+    socket_lps_mid_02: [0.2467, 0.256, 0.0094],
+    socket_lps_mid_03: [-0.0952, 0.236, 0.0227],
+    socket_plate_ledge_01: [-0.3457, 0.268, -0.0948],
+    socket_plate_ledge_02: [0.3433, 0.204, -0.096],
+    socket_soft_mat_01: [-0.1817, 0.118, 0.1687],
+    socket_sps_crest_01: [-0.1516, 0.386, -0.1455],
+    socket_sps_crest_02: [0.0172, 0.348, -0.1651],
+    socket_sps_crest_03: [0.1666, 0.372, -0.1369],
+  },
+  right: {
+    socket_brain_apron_03: [-0.2635, 0.114, 0.1557],
+    socket_brain_apron_04: [0.2658, 0.102, 0.1545],
+    socket_lps_mid_04: [-0.2159, 0.184, 0.0142],
+    socket_lps_mid_05: [0.2164, 0.174, 0.0091],
+    socket_lps_mid_06: [0.0075, 0.212, 0.022],
+    socket_plate_ledge_03: [-0.3258, 0.226, -0.0881],
+    socket_plate_ledge_04: [0.3243, 0.206, -0.0878],
+    socket_soft_mat_02: [0.0015, 0.084, 0.1672],
+    socket_sps_crest_04: [0.0103, 0.294, -0.1594],
+    socket_sps_crest_05: [0.153, 0.318, -0.1382],
+    socket_sps_crest_06: [-0.1505, 0.336, -0.1464],
+  },
+}
+
+/** Rock-front proud plane (local m): past the rock AABB front face (0.266).
+ * 0.40, not 0.31: the island yaw grows the rotated rock AABB's front past
+ * the unrotated face (up to |x| * sin(yaw)), so a 0.31 plane still sits
+ * inside the yaw-grown AABB at the outer sockets. 0.40 clears it at every
+ * production placement with margin; the standoff (~0.6 m world) is the
+ * price of AABB navigation — mesh navigation uses the true rock surface. */
+export const FRONT_PROUD_Z_LOCAL_M = 0.4
+/** Tight calcified-base box around each branching-SPS crest stalk (local m). */
+export const CORAL_BASE_HALF_EXTENT_M = 0.07
+export const CORAL_BASE_HEIGHT_M = 0.06
+/** Sand-burrow anchor plane (world m): lowest swimmable plane, bounds min y + margin. */
+export const SAND_BURROW_WORLD_Y_M = -2.13
+/** Sand-burrow anchor offset in front of the rock front face (local m). */
+export const SAND_BURROW_FRONT_Z_LOCAL_M = 0.45
+
+/** Production swimming volume; must match the habitat bounds in aquarium.ts. */
+export const AQUARIUM_WATER_BOUNDS: AxisAlignedBox = {
+  min: { x: -4, y: -2.25, z: -4.6 },
+  max: { x: 4, y: 2.8, z: 2.8 },
+}
+
+type SocketAnchorSpec = Readonly<{
+  socket: string
+  anchor: HabitatAnchor
+  compatibleSpecies: readonly SpeciesBehaviorId[]
+  /** Local lift above the mounted socket (island metres). */
+  liftM: number
+  /** 'front' pins local z to FRONT_PROUD_Z_LOCAL_M; 'socket' keeps socket z. */
+  zMode: 'front' | 'socket'
+  /** Extra local z shift applied after the z mode (refuge tucks deeper). */
+  zShiftM?: number
+}>
+
+const FORAGING_SPECIES: readonly SpeciesBehaviorId[] = [
+  'royal-gramma',
+  'banggai-cardinalfish',
+  'six-line-wrasse',
+  'mandarin-dragonet',
+  'lyretail-anthias',
+  'copperband-butterflyfish',
+]
+
+const SOCKET_ANCHOR_SPECS: Readonly<Record<'left' | 'right', readonly SocketAnchorSpec[]>> = {
+  left: [
+    { socket: 'socket_anemone_crevice_01', anchor: 'hostAnemone', compatibleSpecies: ['ocellaris-clownfish'], liftM: 0.06, zMode: 'front' },
+    { socket: 'socket_sps_crest_01', anchor: 'branchingCoralShelter', compatibleSpecies: ['banggai-cardinalfish', 'six-line-wrasse'], liftM: 0.17, zMode: 'socket' },
+    { socket: 'socket_sps_crest_01', anchor: 'branchingCoralRefuge', compatibleSpecies: ['blue-tang', 'blue-green-chromis'], liftM: 0.12, zMode: 'socket', zShiftM: -0.03 },
+    { socket: 'socket_sps_crest_02', anchor: 'branchingCoralShelter', compatibleSpecies: ['banggai-cardinalfish', 'six-line-wrasse'], liftM: 0.17, zMode: 'socket' },
+    { socket: 'socket_sps_crest_02', anchor: 'branchingCoralRefuge', compatibleSpecies: ['blue-tang', 'blue-green-chromis'], liftM: 0.12, zMode: 'socket', zShiftM: -0.03 },
+    { socket: 'socket_sps_crest_03', anchor: 'branchingCoralShelter', compatibleSpecies: ['banggai-cardinalfish', 'six-line-wrasse'], liftM: 0.17, zMode: 'socket' },
+    { socket: 'socket_sps_crest_03', anchor: 'branchingCoralRefuge', compatibleSpecies: ['blue-tang', 'blue-green-chromis'], liftM: 0.12, zMode: 'socket', zShiftM: -0.03 },
+    { socket: 'socket_plate_ledge_01', anchor: 'foragingPatch', compatibleSpecies: FORAGING_SPECIES, liftM: 0.06, zMode: 'front' },
+    { socket: 'socket_plate_ledge_02', anchor: 'foragingPatch', compatibleSpecies: FORAGING_SPECIES, liftM: 0.06, zMode: 'front' },
+    { socket: 'socket_soft_mat_01', anchor: 'foragingPatch', compatibleSpecies: FORAGING_SPECIES, liftM: 0.06, zMode: 'front' },
+    { socket: 'socket_brain_apron_01', anchor: 'foragingPatch', compatibleSpecies: FORAGING_SPECIES, liftM: 0.06, zMode: 'front' },
+    { socket: 'socket_brain_apron_02', anchor: 'foragingPatch', compatibleSpecies: FORAGING_SPECIES, liftM: 0.06, zMode: 'front' },
+  ],
+  right: [
+    { socket: 'socket_sps_crest_04', anchor: 'branchingCoralShelter', compatibleSpecies: ['banggai-cardinalfish', 'six-line-wrasse'], liftM: 0.17, zMode: 'socket' },
+    { socket: 'socket_sps_crest_04', anchor: 'branchingCoralRefuge', compatibleSpecies: ['blue-tang', 'blue-green-chromis'], liftM: 0.12, zMode: 'socket', zShiftM: -0.03 },
+    { socket: 'socket_sps_crest_05', anchor: 'branchingCoralShelter', compatibleSpecies: ['banggai-cardinalfish', 'six-line-wrasse'], liftM: 0.17, zMode: 'socket' },
+    { socket: 'socket_sps_crest_05', anchor: 'branchingCoralRefuge', compatibleSpecies: ['blue-tang', 'blue-green-chromis'], liftM: 0.12, zMode: 'socket', zShiftM: -0.03 },
+    { socket: 'socket_sps_crest_06', anchor: 'branchingCoralShelter', compatibleSpecies: ['banggai-cardinalfish', 'six-line-wrasse'], liftM: 0.17, zMode: 'socket' },
+    { socket: 'socket_sps_crest_06', anchor: 'branchingCoralRefuge', compatibleSpecies: ['blue-tang', 'blue-green-chromis'], liftM: 0.12, zMode: 'socket', zShiftM: -0.03 },
+    { socket: 'socket_plate_ledge_03', anchor: 'foragingPatch', compatibleSpecies: FORAGING_SPECIES, liftM: 0.06, zMode: 'front' },
+    { socket: 'socket_plate_ledge_04', anchor: 'foragingPatch', compatibleSpecies: FORAGING_SPECIES, liftM: 0.06, zMode: 'front' },
+    { socket: 'socket_soft_mat_02', anchor: 'foragingPatch', compatibleSpecies: FORAGING_SPECIES, liftM: 0.06, zMode: 'front' },
+    { socket: 'socket_brain_apron_03', anchor: 'foragingPatch', compatibleSpecies: FORAGING_SPECIES, liftM: 0.06, zMode: 'front' },
+    { socket: 'socket_brain_apron_04', anchor: 'foragingPatch', compatibleSpecies: FORAGING_SPECIES, liftM: 0.06, zMode: 'front' },
+  ],
+}
 
 export function inferSocketArchetype(socketName: string): CoralArchetype | undefined {
   const match = /^socket_([a-z_]+)_\d{2}$/.exec(socketName)
@@ -1009,11 +1156,21 @@ export function assembleCoralsOnRockSockets(
     },
   }
 }
-
 /**
- * Instantiates 3D obstacle volumes (preserving the left island's pass-through cave arch)
- * and species-compatible grazing anchors for an assembled modular live-rock + coral island
- * at uniform proportion-preserving scale (`uniformScale`).
+ * Instantiates rigid 3D obstacle volumes and socket-derived species-compatible
+ * habitat anchors for an assembled modular live-rock + coral island at
+ * uniform proportion-preserving scale (`uniformScale`).
+ *
+ * AQ-82: the rigid volumes are the measured rock parts plus one tight
+ * calcified-base box per branching-SPS crest mount — the old monolithic
+ * `coral-canopy-crest` boxes are gone, so fish can swim close to and shelter
+ * among the permeable coral crowns. Anchors are derived from the measured
+ * socket positions (`SOCKET_ANCHOR_POSITIONS_M`) plus the mount offsets of
+ * the `mounts` actually assembled (defaults to the island's default mounts),
+ * the rock ledges, and one sand burrow per island. An anchor is emitted
+ * only when its socket has a mount: an unmounted socket is a bare rock
+ * feature, not a coral interaction. `rockCrevice` is not derived (no
+ * measured cave-mouth coordinates; AQ-14.3 AC #3).
  */
 export function instantiateModularReefHabitat(
   islandKind: 'left' | 'right',
@@ -1021,6 +1178,8 @@ export function instantiateModularReefHabitat(
   position: Vec3,
   prefix: string,
   yaw = 0,
+  mounts: readonly ModularCoralMountEntry[] = islandKind === 'left' ? DEFAULT_LEFT_ISLAND_MOUNTS : DEFAULT_RIGHT_ISLAND_MOUNTS,
+  waterBounds: AxisAlignedBox = AQUARIUM_WATER_BOUNDS,
 ): {
   obstacles: SolidObstacleVolume[]
   anchors: HabitatAnchorLocation[]
@@ -1033,8 +1192,37 @@ export function instantiateModularReefHabitat(
     z: (-pt.x * sinY + pt.z * cosY) * uniformScale + position.z,
   })
 
+  const mountBySocket = new Map(mounts.map(mount => [mount.socketName, mount]))
+  // The islands extend past the swimming volume at the tank edges, so an
+  // anchor derived from an outer socket can land outside swimmable water.
+  // Clamp every anchor into the bounds shrunk by the largest
+  // anchor-approach clearance (0.08 body radius + 0.03 margin), so every
+  // emitted anchor is a safe point for every species under AQ-82's reduced
+  // clearance. The clamp moves an outer anchor at most ~0.2 m inward along
+  // one axis; height and depth stay at the socket.
+  const anchorMargin = MAX_FISH_BODY_RADIUS_M + ANCHOR_APPROACH_MARGIN_M
+  const clampAnchor = (pt: Vec3): Vec3 => ({
+    x: Math.min(Math.max(pt.x, waterBounds.min.x + anchorMargin), waterBounds.max.x - anchorMargin),
+    y: Math.min(Math.max(pt.y, waterBounds.min.y + anchorMargin), waterBounds.max.y - anchorMargin),
+    z: Math.min(Math.max(pt.z, waterBounds.min.z + anchorMargin), waterBounds.max.z - anchorMargin),
+  })
   const rawObstacles = islandKind === 'left' ? LEFT_ISLAND_LOCAL_OBSTACLES_M : RIGHT_ISLAND_LOCAL_OBSTACLES_M
-  const obstacles: SolidObstacleVolume[] = rawObstacles.map(part => {
+  const localObstacles: Array<{ id: string; min: [number, number, number]; max: [number, number, number] }> = [...rawObstacles]
+  // Tight calcified-base boxes for the branching-SPS crest stalks: the only
+  // rigid coral geometry. Each protrudes above the rock top (crest sockets
+  // sit at/above it); plate/brain stalks sit inside the rock AABB already
+  // and need no separate box. Soft anemone/Euphyllia columns are not rigid.
+  for (const socket of Object.keys(SOCKET_ANCHOR_POSITIONS_M[islandKind])) {
+    if (!socket.startsWith('socket_sps_crest_')) continue
+    if (!mountBySocket.has(socket)) continue
+    const [sx, sy, sz] = SOCKET_ANCHOR_POSITIONS_M[islandKind][socket]!
+    localObstacles.push({
+      id: `coral-base-${socket}`,
+      min: [sx - CORAL_BASE_HALF_EXTENT_M, sy, sz - CORAL_BASE_HALF_EXTENT_M],
+      max: [sx + CORAL_BASE_HALF_EXTENT_M, sy + CORAL_BASE_HEIGHT_M, sz + CORAL_BASE_HALF_EXTENT_M],
+    })
+  }
+  const obstacles: SolidObstacleVolume[] = localObstacles.map(part => {
     const corners: Vec3[] = []
     for (const x of [part.min[0], part.max[0]]) {
       for (const y of [part.min[1], part.max[1]]) {
@@ -1060,21 +1248,71 @@ export function instantiateModularReefHabitat(
     }
   })
 
-  const compatibleSpecies = ['yellow-tang'] as const
-  const clearanceOffset = Math.max(MIN_FISH_CLEARANCE, fishClearanceRadius('yellow-tang')) + 0.03
+  const anchors: HabitatAnchorLocation[] = []
+  const socketPositions = SOCKET_ANCHOR_POSITIONS_M[islandKind]
+  for (const spec of SOCKET_ANCHOR_SPECS[islandKind]) {
+    const mount = mountBySocket.get(spec.socket)
+    if (!mount) continue
+    const socketPos = socketPositions[spec.socket]
+    if (!socketPos) continue
+    const offset = mount.offsetM ?? [0, 0, 0]
+    const local: Vec3 = {
+      x: socketPos[0] + offset[0],
+      y: socketPos[1] + offset[1] + spec.liftM,
+      z: (spec.zMode === 'front' ? FRONT_PROUD_Z_LOCAL_M : socketPos[2] + offset[2]) + (spec.zShiftM ?? 0),
+    }
+    anchors.push({
+      id: `${prefix}-anchor-${spec.socket}-${spec.anchor}`,
+      anchor: spec.anchor,
+      compatibleSpecies: [...spec.compatibleSpecies],
+      position: clampAnchor(transform(local)),
+    })
+  }
+
+  // Rock ledges serve two roles: grazing surfaces (tang, angelfish) and
+  // perches (blenny). Both hover ABOVE the ledge, not in front of it:
+  // the established grazing geometry is the ledge position raised by the
+  // legacy clearance plus a small margin, in WORLD units (0.60 m above
+  // the ledge — inside the coral canopy, clear of the rock alone; pinned
+  // by reef-mesh-navigation.test.ts, which expects the grazing anchor
+  // inside the coral envelope). A point just above the rock face cannot
+  // be AABB-safe — the rock slab AABB fills it — so the front plane used
+  // for socket anchors would put the grazer ~1.3 m world in front of the
+  // ledge instead of above it. The grazing anchor keeps its historical
+  // id (`${prefix}-${ledge.id}`); the perch shares the same hover point
+  // with its own id. NOTE: these two anchors are the documented
+  // exception to the "every anchor is an AABB safe point" rule — they sit
+  // inside the expanded rock AABB (and inside the coral envelope) by
+  // design, so AABB routing approaches them via the interaction offset
+  // rather than onto them; the safe-point test below skips them.
   const rawLedges = islandKind === 'left' ? LEFT_ISLAND_LOCAL_GRAZING_LEDGES_M : RIGHT_ISLAND_LOCAL_GRAZING_LEDGES_M
-  const anchors: HabitatAnchorLocation[] = rawLedges.map(ledge => {
+  const grazeClearanceOffsetM = Math.max(MIN_FISH_CLEARANCE, fishClearanceRadius('yellow-tang')) + 0.03
+  for (const ledge of rawLedges) {
     const worldPt = transform({ x: ledge.pos[0], y: ledge.pos[1], z: ledge.pos[2] })
-    return {
+    const hover = clampAnchor({ x: worldPt.x, y: worldPt.y + grazeClearanceOffsetM, z: worldPt.z })
+    anchors.push({
       id: `${prefix}-${ledge.id}`,
       anchor: 'grazingSurface',
-      compatibleSpecies: [...compatibleSpecies],
-      position: {
-        x: worldPt.x,
-        y: worldPt.y + clearanceOffset,
-        z: worldPt.z,
-      },
-    }
+      compatibleSpecies: ['yellow-tang', 'flame-angelfish'],
+      position: hover,
+    })
+    anchors.push({
+      id: `${prefix}-anchor-${ledge.id}-rockPerch`,
+      anchor: 'rockPerch',
+      compatibleSpecies: ['tailspot-blenny'],
+      position: hover,
+    })
+  }
+
+  // Sand burrow entrance on open sand in front of the island, at the lowest
+  // swimmable plane. Local y is derived from the world target so the anchor
+  // lands on the same plane at every island scale.
+  const burrowLocalY = (SAND_BURROW_WORLD_Y_M - position.y) / uniformScale
+  anchors.push({
+    id: `${prefix}-anchor-sand-burrow`,
+    anchor: 'sandBurrowEntrance',
+    compatibleSpecies: ['firefish', 'yellow-watchman-goby'],
+    position: clampAnchor(transform({ x: 0, y: burrowLocalY, z: SAND_BURROW_FRONT_Z_LOCAL_M })),
   })
 
   return { obstacles, anchors }

@@ -5,7 +5,7 @@ import { getFishById, REEF_FISH } from './fish'
 
 describe('reef fish catalog', () => {
   it('contains the complete roster with stable unique IDs and matching thumbnail files', () => {
-    expect(REEF_FISH).toHaveLength(15)
+    expect(REEF_FISH).toHaveLength(16)
     expect(new Set(REEF_FISH.map((fish) => fish.id)).size).toBe(REEF_FISH.length)
 
     for (const fish of REEF_FISH) {

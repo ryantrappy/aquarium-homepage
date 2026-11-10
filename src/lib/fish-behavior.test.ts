@@ -12,7 +12,7 @@ describe('reef fish behavior profiles', () => {
   it('covers every catalog stable ID with a distinct profile', () => {
     expect([...SPECIES_BEHAVIOR_IDS].sort()).toEqual(REEF_FISH.map(({ id }) => id).sort())
     expect(Object.keys(SPECIES_BEHAVIOR_PROFILES).sort()).toEqual(REEF_FISH.map(({ id }) => id).sort())
-    expect(new Set(Object.values(SPECIES_BEHAVIOR_PROFILES).map((profile) => JSON.stringify(profile))).size).toBe(15)
+    expect(new Set(Object.values(SPECIES_BEHAVIOR_PROFILES).map((profile) => JSON.stringify(profile))).size).toBe(16)
     expect(validateSpeciesBehaviorProfiles()).toEqual({ success: true })
   })
 

@@ -64,7 +64,7 @@ Directory of project documentation and verification evidence:
 | [`modular-coral-and-live-rock-spec.md`](modular-coral-and-live-rock-spec.md) | **Canonical** | Binding | `AQ-14.3`, `AQ-42` | Technical specification for 8 modular coral archetypes and 2 live-rock foundations (left cave, right shelf). |
 | [`behavior-runtime-contract.md`](behavior-runtime-contract.md) | **Canonical** | Binding | `AQ-44` | Engine-independent behavior state machine (swim, hover, dart, feed, rest, school, avoid, burst). |
 | [`habitat-navigation-core-contract.md`](habitat-navigation-core-contract.md) | **Canonical** | Binding | `AQ-45` | Navigation contracts: spatial zones (open water, crevice, cave, substrate), waypoint steering, boundary clamps. |
-| [`fish-scale-reference.md`](fish-scale-reference.md) | **Canonical** | Binding | `AQ-60` | Adult biological lengths and render scales for all 15 roster species (parsed by `fish-scale.test.ts`). |
+| [`fish-scale-reference.md`](fish-scale-reference.md) | **Canonical** | Binding | `AQ-60` | Adult biological lengths and render scales for all 16 roster species (parsed by `fish-scale.test.ts`). |
 | [`fish-behavior-design.md`](fish-behavior-design.md) | **Canonical** | Binding | `AQ-35` | Biological behavior profiles, swimming speed ranges, schooling affinities, and depth bounds for all species. |
 | [`reef-fish-roster.md`](reef-fish-roster.md) | **Canonical** | Binding | `AQ-35` | Biological taxonomic index of all 15 supported species, morphological archetypes, and color briefs. |
 
@@ -126,6 +126,9 @@ Directory of project documentation and verification evidence:
 | [`mesh2motion-review.md`](mesh2motion-review.md) | **Complete** | Informational | `AQ-37` | Investigation into Mesh2Motion retargeting and Chrome browser file-URL security blocks. |
 | [`network-traffic-source.md`](network-traffic-source.md) | **Complete** | Informational | `AQ-17` | Investigation of `/proc/net/dev` and Docker container network interface metrics. |
 | [`gemini-research-links.md`](gemini-research-links.md) | **Active** | Informational | `AQ-5` | Research links and biological reference materials for coral and fish anatomy. |
+| [`photorealism-reference.md`](photorealism-reference.md) | **Active** | Informational | `AQ-70.1` | Photoreal reef-tank reference set: 27 verified references (fish, coral, rock, sand, water, glass, lighting) plus the CC0/CC-BY 4.0 asset-source shortlist with explicit rejections. |
+| [`photorealism-rubric.md`](photorealism-rubric.md) | **Active** | Informational | `AQ-70.1` | Measurable realism rubric: visual pass/fail per category, numeric targets from measured references, the `measure-capture-histograms.mjs` method, the baseline gap table, and the real-time-vs-baked recommendation. |
+| [`baked-lighting-spike.md`](baked-lighting-spike.md) | **Active** | Informational | `AQ-70.7` | Hybrid baked/real-time pipeline spike: feasibility, Three.js lightmap integration, Blender Cycles workflow, recommendation (pilot one island) and follow-up breakdown. |
 
 ---
 
