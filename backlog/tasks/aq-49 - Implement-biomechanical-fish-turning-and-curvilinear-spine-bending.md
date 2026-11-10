@@ -6,7 +6,7 @@ assignee:
   - '@render-integration'
   - '@gemini'
 created_date: '2026-11-04T19:20:00Z'
-updated_date: '2026-11-08T21:36:00Z'
+updated_date: '2026-11-10T05:01:00Z'
 labels:
   - ready-for-review
   - gemini approved
@@ -85,6 +85,12 @@ Reverted experimental procedural bone turning overlays and motion modifications 
 Root audit AQ57, 2026-11-04: active motion.ts/aquarium.ts/motion.test.ts match 5031ca1. Rejected turning/fin overlays are not active. Worker made no source edits before interruption. AQ49.1 now inventories actual exported rigs before a new overlay design; Root must review bone axes, clip composition and visual motion before promotion. Existing waypoint-directed baseline still does not fulfill realistic-turning AC.
 
 2026-11-08 audit: PR #11 (metric pitch rate-limiting 1.2 rad/s and +-pi/2 bound vs +-0.28 rad legacy bound), PR #14 (Lighthill body-flex shader), and uFlexTime/accumulatedWavePhaseRad continuity fixes complete ACs #5 and #6 (all 6/6 ACs verified by fish-turning.test.ts, motion.test.ts, and fish-flex-material.test.ts). Marked ready-for-review / gemini approved.
+
+2026-11-09/10 — waypoint-arrival "passed" rule (spiral fix, no ACs ticked, Root review still pending):
+- Diagnosis: a fish that meets its waypoint at an angle orbits it in a slowly tightening spiral instead of arriving. Its turn radius at approach speed (v/ω ≈ 0.2–0.6 m) dwarfs the arrival radius (0.025 m AABB; 0.00025 m for a mesh-mode final waypoint), so it flies past, then must loop ~360° to re-approach. Reproduced deterministically: a slow-turning (58°/s), fast-cruising (1.12 m/s) blue tang meeting a waypoint 90° off its heading turned ~650° and took ~4.3 s per waypoint; a 135° approach never arrived in 6 s. In a 40 s trace of the live habitat the blue tang looped 359° and 447° around two route ends (total turn 1801°). This is the "fish stuck in a spiral" from Ryan's 2026-11-09 recording: the blue tang circling one patch of water, turning head-on to the camera on every orbit, at constant height (the earlier vertical-loop reading was a mask artifact — frame-differencing shows height constant, motion is horizontal pacing + head-on turns).
+- Fix (`src/rendering/scene/motion.ts`, `integrateSwimmingFish`): a waypoint more than 60° off the fish's heading, inside the 0.35 m approach corridor, while the fish is actually travelling (speed > 0.05 m/s), counts as arrived in both AABB and mesh mode. The fish swims on instead of circling back; per-substep movement-safety checks stay the collision guard, so passing a waypoint early can only cut a corner the lookahead fillet could already cut. After the fix the same 40 s trace turns 948° total with 11 waypoint captures (was 1801° / 5), and the probe geometries complete in 1.0–2.9 s with 75–230° of turning (was up to 4.3 s / 672°, one never completing).
+- Regression test: `src/rendering/scene/motion.test.ts` "does not spiral around a waypoint it approaches at an angle (AQ-49)" — asserts the probe geometry completes within 3 s with < 270° total turn, in both AABB and mesh mode. Verified it fails on the pre-fix code (route never completes in 3 s) and passes with the fix.
+- Not changed: cruise speeds, turn rates, the proximity speed law, the capture radii themselves, LOD/sprite code, or any anchor-hold behavior. A fresh recording after merge (same view) is the visual check.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
