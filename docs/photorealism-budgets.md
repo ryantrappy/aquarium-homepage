@@ -127,8 +127,10 @@ loaded via three.js `KTX2Loader`. Geometry compression (meshopt or Draco,
 e.g. via glTF-Transform) is recommended for the same rebuilds but is not
 yet a enforced requirement — no such tooling exists in the repo today, and
 inventing a requirement nobody can run would make the check dishonest.
-LODs follow the AQ-76 mechanism (LOD2 thumbnail sprite replaces a
-7k–19k-triangle GLB); no decimated `*_lod1.glb` assets are generated.
+LODs follow the AQ-76 mechanism, which is animation-rate only: there is no
+distance sprite swap (the LOD2 thumbnail-sprite tier was removed 2026-11-09
+at Ryan's direction — fish keep their full GLB at every depth); no decimated
+`*_lod1.glb` assets are generated.
 
 **Grandfathering.** All 29 manifest assets predate this budget and ship
 PNG textures — 0 of 29 use KTX2, 19,378,852 B of embedded PNG in total.

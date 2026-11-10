@@ -5,10 +5,8 @@ import {
   AdaptiveQualityController,
   LAZY_PHASE0_MAX_SPECIES,
   LOD_DEPTH_HYSTERESIS_M,
-  LOD_FAR_DEPTH_M,
   LOD_MIN_PROJECTED_PX,
   LOD_NEAR_DEPTH_M,
-  LOD_SPRITE_PROJECTED_PX,
   QUALITY_TIERS,
   lodAnimationFrameSkip,
   orderLazyLoadQueue,
@@ -25,7 +23,7 @@ describe('projectedFishLengthPx (AQ-76)', () => {
     expect(px).toBeLessThan(200)
     // A 1.44-unit blue-tang up close is ~272 px; a 0.36-unit blenny far is ~24 px.
     expect(projectedFishLengthPx(1.44, 900, 42, 6.2)).toBeGreaterThan(LOD_MIN_PROJECTED_PX)
-    expect(projectedFishLengthPx(0.36, 900, 42, 13.6)).toBeLessThan(LOD_SPRITE_PROJECTED_PX)
+    expect(projectedFishLengthPx(0.36, 900, 42, 13.6)).toBeLessThan(LOD_MIN_PROJECTED_PX)
   })
 
   it('returns 0 for invalid depth', () => {
@@ -36,35 +34,35 @@ describe('projectedFishLengthPx (AQ-76)', () => {
 })
 
 describe('selectFishLod (AQ-76 AC #1)', () => {
-  it('uses the 6.2-13.6 depth bands, not generic 10/20/50 distances', () => {
+  it('uses the 6.2-13.6 depth band, not generic 10/20/50 distances', () => {
     expect(selectFishLod(7, 100, 0)).toBe(0)
     expect(selectFishLod(9.5, 100, 0)).toBe(1)
-    expect(selectFishLod(12.5, 100, 0)).toBe(2)
+    // There is no sprite tier any more: the farthest fish only ever drops
+    // to LOD1 (full GLB, half clip rate), never to a flat sprite.
+    expect(selectFishLod(12.5, 100, 0)).toBe(1)
+    expect(selectFishLod(13.6, 100, 1)).toBe(1)
     // Mid-range depths are the common case for this tank, not "far".
     expect(selectFishLod(LOD_NEAR_DEPTH_M, 100, 0)).toBe(0)
-    expect(selectFishLod(LOD_FAR_DEPTH_M, 100, 1)).toBe(1)
   })
 
-  it('does not flicker at a band boundary (hysteresis)', () => {
+  it('does not flicker at the band boundary (hysteresis)', () => {
     const justPastNear = LOD_NEAR_DEPTH_M + LOD_DEPTH_HYSTERESIS_M + 0.01
     expect(selectFishLod(justPastNear, 100, 0)).toBe(1)
     // Same depth coming back from LOD1 does not immediately step back up.
     expect(selectFishLod(justPastNear, 100, 1)).toBe(1)
     expect(selectFishLod(LOD_NEAR_DEPTH_M - LOD_DEPTH_HYSTERESIS_M - 0.01, 100, 1)).toBe(0)
-    const justPastFar = LOD_FAR_DEPTH_M + LOD_DEPTH_HYSTERESIS_M + 0.01
-    expect(selectFishLod(justPastFar, 100, 1)).toBe(2)
-    expect(selectFishLod(justPastFar, 100, 2)).toBe(2)
-    expect(selectFishLod(LOD_FAR_DEPTH_M - LOD_DEPTH_HYSTERESIS_M - 0.01, 100, 2)).toBe(1)
   })
 
   it('lets projected screen size override depth', () => {
     // A big fish at far depth still reads large on screen.
-    expect(selectFishLod(13, 200, 2)).toBe(0)
-    // A tiny fish up close still drops to the sprite.
-    expect(selectFishLod(6.5, 40, 0)).toBe(2)
+    expect(selectFishLod(13, 200, 1)).toBe(0)
+    // A tiny fish at far depth only halves its clip rate now — it never
+    // becomes a sprite, however small it projects.
+    expect(selectFishLod(13.6, 40, 1)).toBe(1)
+    expect(selectFishLod(13.6, 1, 1)).toBe(1)
   })
 
-  it('tightens both bands under the Low-tier bias', () => {
+  it('tightens the near band under the Low-tier bias', () => {
     expect(selectFishLod(9.5, 100, 0, 0.15)).toBe(1)
     expect(selectFishLod(9.5, 100, 0, 0)).toBe(1)
     // 7.5 m is LOD0 at rest but LOD1 when the Low tier tightens the near band to ~7.2 m + hysteresis.
@@ -74,10 +72,9 @@ describe('selectFishLod (AQ-76 AC #1)', () => {
 })
 
 describe('lodAnimationFrameSkip (AQ-76 AC #1)', () => {
-  it('halves the clip rate at LOD1 and stops it at LOD2', () => {
+  it('halves the clip rate at LOD1 and never stops it outright', () => {
     expect(lodAnimationFrameSkip(0)).toBe(1)
     expect(lodAnimationFrameSkip(1)).toBe(2)
-    expect(lodAnimationFrameSkip(2)).toBe(Number.POSITIVE_INFINITY)
   })
 })
 

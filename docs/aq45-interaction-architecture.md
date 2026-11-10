@@ -684,9 +684,11 @@ Rules for the pose stage:
 - It never writes behavior state and never dispatches events. If the
   offset cannot be resolved safely, it does nothing. Silence is the
   correct failure mode for a pose.
-- It is LOD-aware: at LOD2 (sprite) the offset is skipped — a sprite
-  cannot nestle. At LOD1 the offset applies at half rate, matching the
-  clip cadence.
+- It is LOD-aware: at LOD1 the offset applies at half rate, matching the
+  clip cadence. (There is no sprite tier any more — the LOD2
+  thumbnail-sprite swap was removed 2026-11-09 at Ryan's direction, so
+  every fish keeps its full 3D model at all distances and the offset is
+  never skipped for LOD.)
 - It respects pause / hidden / focus / reduced-motion exactly as the
   clip and flex stages do (frozen time → frozen pose; reduced motion →
   offsets scale to zero, like flex amplitude).
