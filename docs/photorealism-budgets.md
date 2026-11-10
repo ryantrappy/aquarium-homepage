@@ -95,6 +95,16 @@ count the sailfin — the automated test stays green while the true totals
 grow as recorded here. Any future test that recomputes the totals from the
 live manifest must include the display fish.
 
+**Update 2026-11-09 (same day) — sailfin removed from the default scene.**
+Ryan had the sailfin taken out of the tank: a hero fish with no link reads
+as a missing link. The sailfin stays a roster species and an optional add
+for a new service, but it no longer loads by default — so the true runtime
+totals return to the PR #30 baseline: total fish GLBs **19,210,848 B**,
+total scene GLBs **35,287,324 B**, GPU texture memory **205,520,866 B
+(~196.0 MiB)**, scene triangles **361,079**. All caps still hold. If a
+service is ever mapped to the sailfin, the totals become the addendum
+figures above (20,699,092 B fish GLBs, 214,958,050 B GPU).
+
 ## 3. Frame-time budgets (both viewports)
 
 | Metric | Budget | Mechanism |
