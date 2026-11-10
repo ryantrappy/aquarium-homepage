@@ -8,16 +8,16 @@
       "upAxis": "+Y",
       "origin": "local",
       "dimensionsM": [
-        0.508044,
-        0.758724,
+        0.252702,
+        0.758601,
         2
       ],
       "provenance": {
         "license": "original",
         "creator": "Aquarium project",
-        "sourceSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+        "sourceSha256": "7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd",
         "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
-        "attribution": "Original photorealistic 3D rigged and animated fish asset (Nemateleotris magnifica (Firefish / Magnificent Dartfish)) reconstructed from project-original public/fish/firefish.webp with embedded 512x512 BaseColor, Normal, and ORM PBR textures."
+        "attribution": "Original photorealistic 3D rigged and animated fish asset (Nemateleotris magnifica (Firefish / Magnificent Dartfish)) reconstructed from project-original public/fish/firefish.webp with embedded PBR textures."
       }
     }
   },
@@ -41,13 +41,13 @@
   },
   "boundsM": {
     "min": [
-      -0.254022,
-      -0.368581,
+      -0.126351,
+      -0.369795,
       -1
     ],
     "max": [
-      0.254022,
-      0.390143,
+      0.126351,
+      0.388806,
       1
     ]
   },
@@ -55,16 +55,16 @@
     {
       "id": "firefish_body",
       "role": "fish",
-      "vertexCount": 3685,
+      "vertexCount": 4313,
       "boundsM": {
         "min": [
-          -0.254022,
-          -0.368581,
+          -0.126351,
+          -0.369795,
           -1
         ],
         "max": [
-          0.254022,
-          0.390143,
+          0.126351,
+          0.388806,
           1
         ]
       },

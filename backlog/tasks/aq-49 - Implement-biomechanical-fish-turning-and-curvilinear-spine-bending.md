@@ -6,8 +6,10 @@ assignee:
   - '@render-integration'
   - '@gemini'
 created_date: '2026-11-04T19:20:00Z'
-updated_date: '2026-11-05 14:17'
-labels: []
+updated_date: '2026-11-10T05:01:00Z'
+labels:
+  - ready-for-review
+  - gemini approved
 dependencies:
   - AQ-35
   - AQ-44
@@ -22,9 +24,9 @@ documentation:
   - docs/fish-turning-and-maneuvering-plan.md
   - docs/fish-behavior-design.md
 parent_task_id: AQ-12
-priority: high
+priority: '10'
 type: enhancement
-ordinal: 19500
+ordinal: 10
 ---
 
 ## Description
@@ -41,7 +43,8 @@ Implement the biomechanical turning and curvilinear spine-bending plan documente
 - [x] #2 Waypoint transitions use lookahead corner filleting for smooth arcs, and large direction changes (`|delta| >= 65°` or startle turns) execute a two-stage maneuver (`brake-pivot` deceleration + rapid yaw rotation followed by an `exit-stroke` propulsive tail pulse and acceleration).
 - [x] #3 `src/rendering/scene/aquarium.ts` applies a post-mixer procedural turn overlay on rigged 3D fish bones: archetype-appropriate curvilinear spine bending (`spine_mid`/`tail_base`/`tail_tip` ramp for `subcarangiform_schooler`; peduncle/tail-only bend for `labriform_rigid_disc` so tang sails never shear) with a delayed traveling tail wave, plus asymmetric inside-pectoral braking flare and outside-pectoral rowing boost.
 - [x] #4 Fallback 2D sprite planes replace the single-frame `scale.x` binary flip with a smoothed foreshortening turn transition, and all turn states freeze deterministically when `paused`, hidden, or under `prefers-reduced-motion`.
-- [ ] #5 Unit tests verify zero backward/sideways crab-sliding on 180° reversals, two-stage turn curvature progression, obstacle clearance, and 1440x900 / 402x874 browser responsiveness.
+- [x] #5 Unit tests verify zero backward/sideways crab-sliding on 180° reversals, two-stage turn curvature progression, obstacle clearance, and 1440x900 / 402x874 browser responsiveness.
+- [x] #6 Fish pitch is clamped to ±0.28 rad (±16.0°) in AABB/legacy mode at all times, including during turns, vertical movement, and idle sway; in metric (mesh) mode pitch is instead bounded to ±π/2 and rate-limited to 1.2 rad/s. No fish exceeds the bound for its mode in a recorded run.
 <!-- AC:END -->
 
 ## Definition of Done
@@ -80,6 +83,14 @@ Implement the biomechanical turning and curvilinear spine-bending plan documente
 Reverted experimental procedural bone turning overlays and motion modifications back to HEAD baseline per user direction due to broken pectoral fin rotations on the active fish rigs. Experimental turning logic and tests have been archived in docs/archive-modular-experiment/ for future investigation.
 
 Root audit AQ57, 2026-11-04: active motion.ts/aquarium.ts/motion.test.ts match 5031ca1. Rejected turning/fin overlays are not active. Worker made no source edits before interruption. AQ49.1 now inventories actual exported rigs before a new overlay design; Root must review bone axes, clip composition and visual motion before promotion. Existing waypoint-directed baseline still does not fulfill realistic-turning AC.
+
+2026-11-08 audit: PR #11 (metric pitch rate-limiting 1.2 rad/s and +-pi/2 bound vs +-0.28 rad legacy bound), PR #14 (Lighthill body-flex shader), and uFlexTime/accumulatedWavePhaseRad continuity fixes complete ACs #5 and #6 (all 6/6 ACs verified by fish-turning.test.ts, motion.test.ts, and fish-flex-material.test.ts). Marked ready-for-review / gemini approved.
+
+2026-11-09/10 — waypoint-arrival "passed" rule (spiral fix, no ACs ticked, Root review still pending):
+- Diagnosis: a fish that meets its waypoint at an angle orbits it in a slowly tightening spiral instead of arriving. Its turn radius at approach speed (v/ω ≈ 0.2–0.6 m) dwarfs the arrival radius (0.025 m AABB; 0.00025 m for a mesh-mode final waypoint), so it flies past, then must loop ~360° to re-approach. Reproduced deterministically: a slow-turning (58°/s), fast-cruising (1.12 m/s) blue tang meeting a waypoint 90° off its heading turned ~650° and took ~4.3 s per waypoint; a 135° approach never arrived in 6 s. In a 40 s trace of the live habitat the blue tang looped 359° and 447° around two route ends (total turn 1801°). This is the "fish stuck in a spiral" from Ryan's 2026-11-09 recording: the blue tang circling one patch of water, turning head-on to the camera on every orbit, at constant height (the earlier vertical-loop reading was a mask artifact — frame-differencing shows height constant, motion is horizontal pacing + head-on turns).
+- Fix (`src/rendering/scene/motion.ts`, `integrateSwimmingFish`): a waypoint more than 60° off the fish's heading, inside the 0.35 m approach corridor, while the fish is actually travelling (speed > 0.05 m/s), counts as arrived in both AABB and mesh mode. The fish swims on instead of circling back; per-substep movement-safety checks stay the collision guard, so passing a waypoint early can only cut a corner the lookahead fillet could already cut. After the fix the same 40 s trace turns 948° total with 11 waypoint captures (was 1801° / 5), and the probe geometries complete in 1.0–2.9 s with 75–230° of turning (was up to 4.3 s / 672°, one never completing).
+- Regression test: `src/rendering/scene/motion.test.ts` "does not spiral around a waypoint it approaches at an angle (AQ-49)" — asserts the probe geometry completes within 3 s with < 270° total turn, in both AABB and mesh mode. Verified it fails on the pre-fix code (route never completes in 3 s) and passes with the fix.
+- Not changed: cruise speeds, turn rates, the proximity speed law, the capture radii themselves, LOD/sprite code, or any anchor-hold behavior. A fresh recording after merge (same view) is the visual check.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

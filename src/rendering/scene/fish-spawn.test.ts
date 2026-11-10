@@ -7,7 +7,7 @@ import { EMPTY_FISH_EXTENSIONS } from '../../simulation/fish-extensions'
 import { fishClearanceRadius, fishRenderLength } from './fish-scale'
 import { projectFishLinkBounds } from './fish-link-projection'
 import { createSwimmingFish, stepSwimmingFish } from './motion'
-import { canRunFishSceneLoop, findSafeFishHeading, findSafeFishSpawn, fishSceneStatus, fishSpawnPreference, isSafeFishPosition, type OccupiedFishSpawn } from './fish-spawn'
+import { canRunFishSceneLoop, findSafeFishHeading, findSafeFishSpawn, fishSceneStatus, fishSpawnPreference, isSafeFishPosition, FISH_SPAWN_DEPTH_PLANES, FISH_SPAWN_DEPTH_PLANE_JITTER, type OccupiedFishSpawn } from './fish-spawn'
 import { instantiateModularReefHabitat } from './reef-assembly'
 
 function waterBounds(width: number, height: number): AxisAlignedBox {
@@ -197,6 +197,24 @@ describe('safe aquarium fish spawning', () => {
     expect(clearance).toBe(.77)
   })
 
+  it('applies an extra mesh check to spawns and fails closed when it rejects everything', () => {
+    const bounds: AxisAlignedBox = { min: { x: -2, y: -2, z: -2 }, max: { x: 2, y: 2, z: 2 } }
+    const preferred = { x: 0, y: 0, z: 0 }
+    // Reject the preferred point only: the spawn moves to the next candidate.
+    const moved = findSafeFishSpawn(preferred, bounds, [], 0.5, [], (candidate) => !(candidate.x === 0 && candidate.y === 0 && candidate.z === 0))
+    expect(moved).toBeDefined()
+    expect(moved).not.toEqual(preferred)
+    // Reject everything: no spawn, rather than an unchecked one.
+    expect(findSafeFishSpawn(preferred, bounds, [], 0.5, [], () => false)).toBeUndefined()
+    // A throwing check fails closed for that candidate only.
+    const throwing = findSafeFishSpawn(preferred, bounds, [], 0.5, [], (candidate) => {
+      if (candidate.x === 0 && candidate.y === 0 && candidate.z === 0) throw new Error('mesh query failed')
+      return true
+    })
+    expect(throwing).toBeDefined()
+    expect(throwing).not.toEqual(preferred)
+  })
+
   it('uses a best safe fallback rather than declaring no fit when only the fish-to-fish spacing is infeasible', () => {
     const bounds: AxisAlignedBox = { min: { x: -1, y: -1, z: -1 }, max: { x: 1, y: 1, z: 1 } }
     const occupied = [{ position: { x: 0, y: 0, z: 0 }, clearance: .77 }]
@@ -204,6 +222,21 @@ describe('safe aquarium fish spawning', () => {
     expect(position).toBeDefined()
     expect(isSafeFishPosition(position!, .77, bounds, [])).toBe(true)
     expect(Math.hypot(position!.x, position!.y, position!.z)).toBeGreaterThan(0)
+  })
+
+  it('spaces spawns by body radius when both sides supply one, instead of the legacy clearance sum (PR #28 follow-up)', () => {
+    const bounds: AxisAlignedBox = { min: { x: -2, y: -2, z: -2 }, max: { x: 2, y: 2, z: 2 } }
+    const clearance = 0.56 // legacy clearance sum would demand 1.12 m
+    const occupied: OccupiedFishSpawn[] = [{ position: { x: 0, y: 0, z: 0 }, clearance, bodyRadiusM: 0.07 }]
+    // 0.3 m from the occupant: blocked under the legacy sum, clear under
+    // body radii (0.07 + 0.07 + 0.06 = 0.20 m), so the preferred point stands.
+    expect(findSafeFishSpawn({ x: 0.3, y: 0, z: 0 }, bounds, [], clearance, occupied, undefined, 0.07)).toEqual({ x: 0.3, y: 0, z: 0 })
+    // A 0.1 m overlap still pushes apart under body radii.
+    expect(findSafeFishSpawn({ x: 0.1, y: 0, z: 0 }, bounds, [], clearance, occupied, undefined, 0.07)).not.toEqual({ x: 0.1, y: 0, z: 0 })
+    // Same geometry without body radii keeps the legacy behaviour.
+    expect(findSafeFishSpawn({ x: 0.3, y: 0, z: 0 }, bounds, [], clearance, [{ position: { x: 0, y: 0, z: 0 }, clearance }])).not.toEqual({ x: 0.3, y: 0, z: 0 })
+    // One-sided radii fall back to the legacy sum.
+    expect(findSafeFishSpawn({ x: 0.3, y: 0, z: 0 }, bounds, [], clearance, occupied)).not.toEqual({ x: 0.3, y: 0, z: 0 })
   })
 
   it('ignores invalid crowding hints when a solid-clear water point exists', () => {
@@ -238,5 +271,40 @@ describe('safe aquarium fish spawning', () => {
       expect(Math.hypot(item.position.x - initial[index].x, item.position.y - initial[index].y, item.position.z - initial[index].z), item.id).toBeGreaterThan(.01)
       expect(isSafeFishPosition(item.position, item.clearance, bounds, obstacles), item.id).toBe(true)
     })
+  })
+
+  it.each([['phone 402x874', 402, 874], ['laptop 1440x900', 1440, 900]])('quantizes starter spawns onto distinct depth planes spanning the water column at %s (AQ-87 AC #1/#2)', (_label, width, height) => {
+    const { bounds, placements } = planStarters(Number(width), Number(height))
+    const columnHeight = bounds.max.y - bounds.min.y
+
+    // Spawn intent sits on one of the AQ-87 depth planes (outer lanes on the
+    // near plane), not on a continuous front-plane draw.
+    const planeOf = (preference: { position: Vec3 }, clearance: number) => {
+      const safeMinZ = bounds.min.z + clearance
+      const safeMaxZ = bounds.max.z - clearance
+      const fraction = (preference.position.z - safeMinZ) / (safeMaxZ - safeMinZ)
+      let nearest = 0
+      for (let i = 1; i < FISH_SPAWN_DEPTH_PLANES.length; i++) {
+        if (Math.abs(FISH_SPAWN_DEPTH_PLANES[i]! - fraction) < Math.abs(FISH_SPAWN_DEPTH_PLANES[nearest]! - fraction)) nearest = i
+      }
+      expect(Math.abs(fraction - FISH_SPAWN_DEPTH_PLANES[nearest]!), `spawn z fraction ${fraction}`).toBeLessThanOrEqual(FISH_SPAWN_DEPTH_PLANE_JITTER + 0.02)
+      return nearest
+    }
+    const planes = new Set(placements.map(item => planeOf(item.preference, item.clearance)))
+    expect(planes.size).toBeGreaterThanOrEqual(2)
+
+    // The five starters' spawn depths span most of the water column
+    // (their declared depthRanges cover 0.18..0.88); no species is
+    // confined to the top half by default.
+    const depths = placements.map(item => (bounds.max.y - item.preference.position.y) / columnHeight)
+    expect(Math.max(...depths) - Math.min(...depths)).toBeGreaterThanOrEqual(0.45)
+    expect(Math.min(...depths)).toBeLessThanOrEqual(0.3)
+    expect(Math.max(...depths)).toBeGreaterThanOrEqual(0.6)
+
+    // The safe positions actually staged keep the depth separation: the
+    // bounded grid search may nudge a fish off its plane, but the school
+    // must not collapse back onto one plane.
+    const zs = placements.map(item => item.position.z)
+    expect(Math.max(...zs) - Math.min(...zs)).toBeGreaterThan(1.5)
   })
 })

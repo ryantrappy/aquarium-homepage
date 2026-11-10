@@ -8,16 +8,16 @@
       "upAxis": "+Y",
       "origin": "local",
       "dimensionsM": [
-        0.588744,
-        0.737195,
+        0.278296,
+        0.737555,
         2
       ],
       "provenance": {
         "license": "original",
         "creator": "Aquarium project",
-        "sourceSha256": "df177846225132d4285f7fc135c1e54159650bad4a8e197d9e13cf28b1216568",
+        "sourceSha256": "7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd",
         "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
-        "attribution": "Original photorealistic 3D rigged and animated fish asset (Pseudocheilinus hexataenia (Six-Line Wrasse)) reconstructed from project-original public/fish/six-line-wrasse.webp with embedded 512x512 BaseColor, Normal, and ORM PBR textures."
+        "attribution": "Original photorealistic 3D rigged and animated fish asset (Pseudocheilinus hexataenia (Six-Line Wrasse)) reconstructed from project-original public/fish/six-line-wrasse.webp with embedded PBR textures."
       }
     }
   },
@@ -41,13 +41,13 @@
   },
   "boundsM": {
     "min": [
-      -0.294372,
-      -0.37008,
+      -0.139148,
+      -0.368869,
       -1
     ],
     "max": [
-      0.294372,
-      0.367115,
+      0.139148,
+      0.368686,
       1
     ]
   },
@@ -55,16 +55,16 @@
     {
       "id": "six_line_wrasse_body",
       "role": "fish",
-      "vertexCount": 5231,
+      "vertexCount": 6159,
       "boundsM": {
         "min": [
-          -0.294372,
-          -0.37008,
+          -0.139148,
+          -0.368869,
           -1
         ],
         "max": [
-          0.294372,
-          0.367115,
+          0.139148,
+          0.368686,
           1
         ]
       },

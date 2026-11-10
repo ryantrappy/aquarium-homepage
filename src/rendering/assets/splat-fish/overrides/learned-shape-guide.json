@@ -1,0 +1,97 @@
+{
+  "schema": "splat-fish-learned-shape-guide-v1",
+  "note": "Extracted from hand-edited Blender .glb overrides in src/rendering/assets/splat-fish/overrides/ to guide procedural fish generation across species.",
+  "updatedAt": "2026-11-09T06:27:37.669Z",
+  "guidesBySpecies": {
+    "blue-tang": {
+      "sourceSpeciesId": "blue-tang",
+      "archetypeGroup": "laterally_compressed_disc",
+      "extractedAt": "2026-11-09T06:27:37.667Z",
+      "measuredMaxHalfWidthM": 0.13911,
+      "nS": 16,
+      "nV": 10,
+      "longitudinalMultipliers": [
+        1.1672,
+        1.2429,
+        1.1753,
+        1.45,
+        1.45,
+        1.45,
+        1.4158,
+        1.3085,
+        1.246,
+        1.1286,
+        1.0189,
+        1.0123,
+        1.0601,
+        1.1694,
+        1.3627,
+        1.45
+      ],
+      "dorsoventralMultipliers": [
+        0.75,
+        0.75,
+        0.7754,
+        0.8434,
+        0.9082,
+        1.0021,
+        1.1781,
+        1.35,
+        1.35,
+        1.35
+      ],
+      "pectoralGuide": {
+        "zRoot": 0.6308,
+        "length": 0.197,
+        "spreadY": 0.3329,
+        "maxOutX": 0.1744
+      }
+    }
+  },
+  "guidesByArchetype": {
+    "laterally_compressed_disc": {
+      "sourceSpeciesId": "blue-tang",
+      "archetypeGroup": "laterally_compressed_disc",
+      "extractedAt": "2026-11-09T06:27:37.667Z",
+      "measuredMaxHalfWidthM": 0.13911,
+      "nS": 16,
+      "nV": 10,
+      "longitudinalMultipliers": [
+        1.1672,
+        1.2429,
+        1.1753,
+        1.45,
+        1.45,
+        1.45,
+        1.4158,
+        1.3085,
+        1.246,
+        1.1286,
+        1.0189,
+        1.0123,
+        1.0601,
+        1.1694,
+        1.3627,
+        1.45
+      ],
+      "dorsoventralMultipliers": [
+        0.75,
+        0.75,
+        0.7754,
+        0.8434,
+        0.9082,
+        1.0021,
+        1.1781,
+        1.35,
+        1.35,
+        1.35
+      ],
+      "pectoralGuide": {
+        "zRoot": 0.6308,
+        "length": 0.197,
+        "spreadY": 0.3329,
+        "maxOutX": 0.1744
+      }
+    }
+  }
+}

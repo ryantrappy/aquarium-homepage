@@ -16,31 +16,170 @@ export type AquariumOpticsConfig = Readonly<{
   backgroundHex: string
   fogNear: number
   fogFar: number
+  /** Resolved white key intensity (AQ-70.6): equals
+   * `fixtureTotalIntensity * fixtureWhiteBalance`. Kept as a field so
+   * existing consumers (caustic controller, tests) keep working; the
+   * tunable knobs are `fixtureWhiteBalance` / `fixtureTotalIntensity`,
+   * and a test asserts the resolved fields equal the derivation. */
   keyLightIntensity: number
+  /** Resolved royal-blue actinic fill intensity (AQ-70.6): equals
+   * `fixtureTotalIntensity * (1 - fixtureWhiteBalance)`. */
   fillLightIntensity: number
+  /**
+   * Overhead LED fixture white/blue balance (AQ-70.6 AC #2): fraction of
+   * total fixture output that is white (14,000K daylight key); the rest is
+   * royal-blue actinic fill. Tunable; the chosen default matches the
+   * current scene intensities exactly (2.1 white / 0.95 blue).
+   */
+  fixtureWhiteBalance: number
+  /** Total overhead LED fixture output (AQ-70.6 AC #2): white + blue. */
+  fixtureTotalIntensity: number
   causticBaseIntensity: number
   causticModulationAmplitude: number
   causticPrimaryHz: number
   causticSecondaryHz: number
+  /** World-space UV scale (UV per metre) of the two scrolling caustic texture layers. */
+  causticTextureScaleA: number
+  causticTextureScaleB: number
+  /** Maximum additive caustic brightness added to direct diffuse light (0..1). */
+  causticMaxAdd: number
   surfaceRippleAmplitudeM: number
   maxSuspendedParticles: number
+  /** Depth-graded mote split (AQ-43 as amended 2026-11-08): foreground band
+   * (z -1.5..+2.8, the fish volume) is faintest; background band
+   * (z -4.6..-1.5, behind the fish volume) carries the density. The two
+   * bands sum to maxSuspendedParticles. */
+  foregroundSuspendedParticles: number
+  backgroundSuspendedParticles: number
+  /** Bubble budget (AQ-43 as amended 2026-11-08): two sparse streams of at
+   * most 16 bubbles each, 32 total. */
+  maxBubbles: number
+  bubbleRiseSpeedMinMPerSec: number
+  bubbleRiseSpeedMaxMPerSec: number
+  bubbleWobbleAmplitudeM: number
+  /** Bubble spawn height, just above the sand bed (y = -2.8). */
+  bubbleEmitterBaseY: number
+  /** Bubbles recycle to their emitter above this height, below the water
+   * surface plane (y = 2.66). */
+  bubbleRecycleTopY: number
+  /** Maximum alpha of the restrained rear depth-haze plane (AQ-86): haze
+   * starts behind the fish volume (z < -1.5) and never veils foreground
+   * fish. This is not open-ocean fog (forbidden by AQ-39 §1.1). */
+  depthHazeMaxAlpha: number
+  /** Maximum alpha of the volumetric light-shaft plane (AQ-86): soft
+   * additive shafts from the surface, weakening with depth. */
+  lightShaftMaxAlpha: number
 }>
 
+/**
+ * Canonical scene values (AQ-39): these were aligned with the values
+ * `createAquarium` in aquarium.ts actually uses, so the optics config is the
+ * single source of truth for background, fog, light intensities, and ripple
+ * amplitude instead of a second, divergent set of literals. The previous
+ * defaults ('#155c73', fog 15-32, key 3.0, fill 1.0, ripple 0.008 m) matched
+ * the stale AQ-39 plan's line references, not the scene.
+ */
+/** Default overhead LED fixture white share (AQ-70.6 AC #2): 2.1 / 3.05,
+ * so the resolved key/fill intensities are exactly the long-standing
+ * scene values (white 2.1, royal-blue actinic 0.95). */
+export const DEFAULT_FIXTURE_WHITE_BALANCE = 2.1 / 3.05
+/** Default total overhead LED fixture output (AQ-70.6 AC #2). */
+export const DEFAULT_FIXTURE_TOTAL_INTENSITY = 3.05
+
 export const DEFAULT_AQUARIUM_OPTICS_CONFIG: AquariumOpticsConfig = Object.freeze({
-  backgroundHex: '#155c73',
-  fogNear: 15,
-  fogFar: 32,
-  keyLightIntensity: 3.0,
-  fillLightIntensity: 1.0,
-  causticBaseIntensity: 3.0,
+  backgroundHex: '#183654',
+  fogNear: 18,
+  fogFar: 36,
+  // AQ-71: re-tuned down to compensate for the added PMREM/IBL ambient
+  // light. aquarium.ts reads these via the optics config, so the key/fill
+  // constructors and the caustic-controller bases all follow.
+  // AQ-70.6: these are the resolved values of fixtureTotalIntensity (3.05)
+  // split by fixtureWhiteBalance (2.1/3.05 white, the rest actinic blue).
+  keyLightIntensity: 2.1,
+  fillLightIntensity: 0.95,
+  fixtureWhiteBalance: DEFAULT_FIXTURE_WHITE_BALANCE,
+  fixtureTotalIntensity: DEFAULT_FIXTURE_TOTAL_INTENSITY,
+  causticBaseIntensity: 2.45,
   causticModulationAmplitude: 0.18,
   causticPrimaryHz: 0.22,
   causticSecondaryHz: 0.37,
-  surfaceRippleAmplitudeM: 0.008,
-  maxSuspendedParticles: 24,
+  causticTextureScaleA: 0.35,
+  causticTextureScaleB: 0.55,
+  causticMaxAdd: 0.35,
+  surfaceRippleAmplitudeM: 0.032,
+  // AQ-43 as amended 2026-11-08 (Ryan-approved): 48 depth-graded motes
+  // (16 faint foreground + 32 background) and two sparse bubble streams
+  // of at most 16 bubbles each (32 total).
+  maxSuspendedParticles: 48,
+  foregroundSuspendedParticles: 16,
+  backgroundSuspendedParticles: 32,
+  maxBubbles: 32,
+  bubbleRiseSpeedMinMPerSec: 0.25,
+  bubbleRiseSpeedMaxMPerSec: 0.45,
+  bubbleWobbleAmplitudeM: 0.05,
+  bubbleEmitterBaseY: -2.5,
+  bubbleRecycleTopY: 2.5,
+  // AQ-86: restrained rear depth haze + volumetric shafts. Both stay well
+  // below full opacity so the tank keeps crisp deep focus (AQ-14.2 AC #4).
+  depthHazeMaxAlpha: 0.22,
+  lightShaftMaxAlpha: 0.16,
 })
 
+/**
+ * Resolves the overhead LED fixture white/blue split (AQ-70.6 AC #2) from
+ * the tunable balance and total output: white key = total * balance,
+ * royal-blue actinic fill = total * (1 - balance). Non-finite or
+ * out-of-range inputs fall back to the defaults, so a bad config can never
+ * produce a negative light or a NaN intensity.
+ */
+export function evaluateFixtureIntensities(
+  whiteBalance: number,
+  totalIntensity: number,
+): { keyLightIntensity: number; fillLightIntensity: number } {
+  const balance = Number.isFinite(whiteBalance)
+    ? clamp(whiteBalance, 0, 1)
+    : DEFAULT_FIXTURE_WHITE_BALANCE
+  const total = Number.isFinite(totalIntensity)
+    ? Math.max(0, totalIntensity)
+    : DEFAULT_FIXTURE_TOTAL_INTENSITY
+  return {
+    keyLightIntensity: total * balance,
+    fillLightIntensity: total * (1 - balance),
+  }
+}
+
+/**
+ * Scales coral fluorescence with the actinic (blue) share of the fixture
+ * (AQ-70.6 AC #3): 1.0 at the default white balance, 0 when the fixture is
+ * all white, 2.0 (capped) when the blue share is twice the default. The
+ * coral shader multiplies its mask-driven glow by this factor, so
+ * fluorescence follows the fixture instead of being a fixed constant.
+ */
+export function evaluateFluorescenceActinicFactor(whiteBalance: number): number {
+  const balance = Number.isFinite(whiteBalance)
+    ? clamp(whiteBalance, 0, 1)
+    : DEFAULT_FIXTURE_WHITE_BALANCE
+  const defaultActinicShare = 1 - DEFAULT_FIXTURE_WHITE_BALANCE
+  return clamp((1 - balance) / defaultActinicShare, 0, 2)
+}
+
 const TWO_PI = Math.PI * 2
+
+/** Rear boundary of the primary fish swimming volume (AQ-43 zBand, AQ-86):
+ * depth haze starts behind this plane and never veils foreground fish. */
+export const DEPTH_HAZE_START_Z = -1.5
+/** Rear wall of the water column; haze reaches full strength here. */
+export const DEPTH_HAZE_END_Z = -4.6
+/** World-space x centres of the three volumetric light-shaft bands at the surface (AQ-86). */
+export const LIGHT_SHAFT_BAND_CENTERS: readonly number[] = Object.freeze([-2.2, 0.2, 2.4])
+/** Gaussian half-width of one shaft band, in metres. */
+export const LIGHT_SHAFT_BAND_WIDTH_M = 0.55
+/** How far a shaft band slants sideways per metre of depth (slanting away from the surface). */
+export const LIGHT_SHAFT_SLANT_PER_M = 0.35
+/** Slow lateral sway amplitude of a shaft band, in metres. */
+export const LIGHT_SHAFT_SWAY_AMPLITUDE_M = 0.15
+/** Slow lateral sway frequency of a shaft band, in Hz. */
+export const LIGHT_SHAFT_SWAY_HZ = 0.05
 
 function clamp(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) return min
@@ -65,6 +204,93 @@ export function evaluateDepthTransmittance(depthMeters: number): {
 }
 
 /**
+ * Applies Beer-Lambert depth transmittance to a background colour (`AQ-39`
+ * AC #2): returns the colour of `backgroundHex` after travelling
+ * `depthMeters` through the water column. At depth 0 the colour is unchanged,
+ * so foreground fish are never veiled; at the rear-wall path depth red is
+ * attenuated most, giving the fog/background a restrained depth tint.
+ * A malformed hex is returned unchanged.
+ */
+export function evaluateDepthTintedColor(backgroundHex: string, depthMeters: number): string {
+  const match = /^#([0-9a-fA-F]{6})$/.exec(backgroundHex.trim())
+  if (!match) return backgroundHex
+  const t = evaluateDepthTransmittance(depthMeters)
+  const n = parseInt(match[1], 16)
+  const r = Math.round(((n >> 16) & 0xff) * t.r)
+  const g = Math.round(((n >> 8) & 0xff) * t.g)
+  const b = Math.round((n & 0xff) * t.b)
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
+}
+
+/**
+ * Evaluates the restrained rear depth-haze factor at a water-column point
+ * (`AQ-86` AC #1): 0 everywhere inside the primary fish volume
+ * (z >= -1.5), ramping to 1 at the rear wall (z = -4.6), and stronger with
+ * depth (0.55 at the surface, 1.0 at the sand). The haze is a rear-water
+ * depth cue only — it never veils foreground or mid-tank fish, and it is
+ * not open-ocean fog (forbidden by AQ-39 §1.1) or a blue veil.
+ */
+export function evaluateDepthHazeFactor(z: number, y: number): number {
+  if (!Number.isFinite(z) || !Number.isFinite(y)) return 0
+  const zFactor = clamp((DEPTH_HAZE_START_Z - z) / (DEPTH_HAZE_START_Z - DEPTH_HAZE_END_Z), 0, 1)
+  const depthFactor = 0.55 + 0.45 * clamp((2.8 - y) / 5.6, 0, 1)
+  return zFactor * depthFactor
+}
+
+/**
+ * Evaluates soft volumetric light-shaft intensity at a water-column point
+ * (`AQ-86` AC #2): three slanted Gaussian bands descending from the
+ * surface, weakening with depth (15% of surface strength at the sand),
+ * swaying slowly sideways. Freezes at the static t=0 phase when `paused`
+ * or `reducedMotion` is active, and never flickers. The GLSL in
+ * `aquarium.ts` mirrors these constants; keep the two in sync.
+ */
+export function evaluateLightShaftIntensity(
+  x: number,
+  y: number,
+  timeSeconds: number,
+  options?: {
+    paused?: boolean
+    reducedMotion?: boolean
+  },
+): number {
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return 0
+  const effectiveTime =
+    options?.paused || options?.reducedMotion || !Number.isFinite(timeSeconds)
+      ? 0
+      : timeSeconds % 3600
+  const depthFromTop = clamp((2.8 - y) / 5.6, 0, 1)
+  const depthEnvelope = 1 - 0.85 * depthFromTop
+  let total = 0
+  for (const center of LIGHT_SHAFT_BAND_CENTERS) {
+    const sway = LIGHT_SHAFT_SWAY_AMPLITUDE_M * Math.sin(effectiveTime * TWO_PI * LIGHT_SHAFT_SWAY_HZ + center)
+    const bandCenter = center + (2.8 - y) * LIGHT_SHAFT_SLANT_PER_M + sway
+    const d = (x - bandCenter) / LIGHT_SHAFT_BAND_WIDTH_M
+    total += Math.exp(-(d * d))
+  }
+  return Math.min(1, total) * depthEnvelope
+}
+
+/**
+ * Shared caustic surface mask: caustics only fall on upward-facing surfaces
+ * and fade with depth, from the top of the tank (+2.8) down to the sand
+ * (-2.8). Used by both the scalar light modulation below and the spatial
+ * caustic texture pattern (`evaluateCausticPatternUV` / `caustics.ts`), so
+ * the two channels can never disagree about where caustics may appear.
+ */
+export function evaluateCausticSurfaceMask(
+  position: Readonly<{ x: number; y: number; z: number }>,
+  normalY: number,
+): number {
+  const upwardFactor = clamp(normalY, 0, 1)
+  if (upwardFactor <= 0) return 0
+  // Depth attenuation of surface caustics from top of tank (+2.8) down to sand (-2.8)
+  const depthFromTop = clamp((2.8 - position.y) / 5.6, 0, 1)
+  const depthEnvelope = 1 - 0.35 * depthFromTop
+  return upwardFactor * depthEnvelope
+}
+
+/**
  * Evaluates coherent dual-wave caustic light intensity on upward-facing reef/sand
  * surfaces (`AQ-14.2` AC #2 & #5). Freezes at the static t=0 phase when `paused`
  * or `reducedMotion` is active, and never flickers.
@@ -80,8 +306,8 @@ export function evaluateCausticIntensity(
   },
 ): number {
   const cfg = { ...DEFAULT_AQUARIUM_OPTICS_CONFIG, ...options?.config }
-  const upwardFactor = clamp(normalY, 0, 1)
-  if (upwardFactor <= 0) return 0
+  const surfaceMask = evaluateCausticSurfaceMask(position, normalY)
+  if (surfaceMask <= 0) return 0
 
   const effectiveTime =
     options?.paused || options?.reducedMotion || !Number.isFinite(timeSeconds)
@@ -98,15 +324,45 @@ export function evaluateCausticIntensity(
     position.z * 2.05
 
   const waveInterference = 0.5 * (Math.sin(phase1) + Math.cos(phase2))
-  // Depth attenuation of surface caustics from top of tank (+2.8) down to sand (-2.8)
-  const depthFromTop = clamp((2.8 - position.y) / 5.6, 0, 1)
-  const depthEnvelope = 1 - 0.35 * depthFromTop
 
-  return (
-    upwardFactor *
-    depthEnvelope *
-    (1 + cfg.causticModulationAmplitude * waveInterference)
-  )
+  return surfaceMask * (1 + cfg.causticModulationAmplitude * waveInterference)
+}
+
+/**
+ * Evaluates the two scrolled world-space UV pairs that sample the caustic
+ * texture in `caustics.ts` (`AQ-14.2` AC #2). The layers scroll in opposite
+ * directions at the existing optics frequencies (0.22 Hz and 0.37 Hz); the
+ * 0.10 / 0.06 and 0.08 / 0.05 factors are the UV drift per cycle, so the
+ * pattern moves slowly rather than panning across the tank. Freezes at the
+ * static t=0 UVs when `paused` or `reducedMotion` is active, exactly like
+ * `evaluateCausticIntensity`. The GLSL in `caustics.ts` mirrors these
+ * constants; keep the two in sync.
+ */
+export function evaluateCausticPatternUV(
+  worldX: number,
+  worldZ: number,
+  timeSeconds: number,
+  options?: {
+    paused?: boolean
+    reducedMotion?: boolean
+    config?: Partial<AquariumOpticsConfig>
+  },
+): { a: { u: number; v: number }; b: { u: number; v: number } } {
+  const cfg = { ...DEFAULT_AQUARIUM_OPTICS_CONFIG, ...options?.config }
+  const effectiveTime =
+    options?.paused || options?.reducedMotion || !Number.isFinite(timeSeconds)
+      ? 0
+      : timeSeconds % 3600
+  return {
+    a: {
+      u: worldX * cfg.causticTextureScaleA + effectiveTime * cfg.causticPrimaryHz * 0.1,
+      v: worldZ * cfg.causticTextureScaleA - effectiveTime * cfg.causticPrimaryHz * 0.06,
+    },
+    b: {
+      u: worldX * cfg.causticTextureScaleB - effectiveTime * cfg.causticSecondaryHz * 0.08,
+      v: worldZ * cfg.causticTextureScaleB + effectiveTime * cfg.causticSecondaryHz * 0.05,
+    },
+  }
 }
 
 /**
@@ -147,6 +403,10 @@ export function evaluateSuspendedParticlePosition(
   options?: {
     paused?: boolean
     reducedMotion?: boolean
+    /** Depth band the mote's base depth is drawn from (AQ-43 as amended:
+     * foreground z -1.5..+2.8, background z -4.6..-1.5). Without it the
+     * mote is drawn from the full bounds, as before. */
+    zBand?: Readonly<{ min: number; max: number }>
   },
 ): { x: number; y: number; z: number } {
   const hash = (n: number) => {
@@ -163,7 +423,9 @@ export function evaluateSuspendedParticlePosition(
 
   const baseX = bounds.min.x + 0.08 * spanX + uX * 0.84 * spanX
   const baseY = bounds.min.y + 0.08 * spanY + uY * 0.84 * spanY
-  const baseZ = bounds.min.z + 0.08 * spanZ + uZ * 0.84 * spanZ
+  const baseZ = options?.zBand
+    ? options.zBand.min + uZ * (options.zBand.max - options.zBand.min)
+    : bounds.min.z + 0.08 * spanZ + uZ * 0.84 * spanZ
 
   if (options?.paused || options?.reducedMotion || !Number.isFinite(timeSeconds)) {
     return { x: baseX, y: baseY, z: baseZ }
@@ -179,6 +441,99 @@ export function evaluateSuspendedParticlePosition(
     x: clamp(baseX + driftX, bounds.min.x, bounds.max.x),
     y: clamp(baseY + driftY, bounds.min.y, bounds.max.y),
     z: clamp(baseZ + driftZ, bounds.min.z, bounds.max.z),
+  }
+}
+
+/**
+ * Clearance in front of a live-rock island's front face for a bubble
+ * emitter (visual-check fix): an emitter at the island centre sits
+ * inside the rock mass, so most of the rise is hidden and no stream is
+ * discernible. Placing the emitter just off the front face keeps the
+ * whole rise in open water; the ±0.05 m wobble can never push a bubble
+ * back into the rock.
+ */
+export const BUBBLE_EMITTER_FACE_CLEARANCE_M = 0.15
+
+/**
+ * Derives a bubble-stream emitter from a live-rock island's sand
+ * footprint: centred on the island's front face (the +z face toward the
+ * camera), `BUBBLE_EMITTER_FACE_CLEARANCE_M` clear of the rock, at the
+ * configured emitter height just above the sand bed. The footprint is
+ * the same ellipse the sand bed uses for its talus mounding, so the
+ * emitter tracks the island if the aquascape moves.
+ */
+export function bubbleEmitterForRockFootprint(footprint: Readonly<{
+  x: number
+  z: number
+  radiusZ: number
+}>): { x: number; y: number; z: number } {
+  return {
+    x: footprint.x,
+    y: DEFAULT_AQUARIUM_OPTICS_CONFIG.bubbleEmitterBaseY,
+    z: footprint.z + footprint.radiusZ + BUBBLE_EMITTER_FACE_CLEARANCE_M,
+  }
+}
+
+/**
+ * Evaluates one bubble in a sparse, emitter-anchored stream (`AQ-43` as
+ * amended 2026-11-08): rises from its emitter at a deterministic,
+ * size-hashed speed (larger bubbles rise faster), wobbles sinusoidally in
+ * X/Z, and recycles to the emitter once it passes `bubbleRecycleTopY`
+ * (below the water surface plane at y = 2.66). Freezes at the static
+ * emitter position when `paused` or `reducedMotion` is active; X/Z never
+ * leave the water column bounds and Y never leaves [emitter.y,
+ * recycleTopY]. Per-bubble size growth with height is
+ * not modelled: `THREE.PointsMaterial` has a single size, and a custom
+ * shader for per-point size was out of scope for this restrained design;
+ * the size/speed hash correlation (faster bubbles are the larger ones)
+ * carries the size cue instead.
+ */
+export function evaluateBubblePosition(
+  seedIndex: number,
+  emitter: Readonly<{ x: number; y: number; z: number }>,
+  bounds: Readonly<{ min: { x: number; y: number; z: number }; max: { x: number; y: number; z: number } }>,
+  timeSeconds: number,
+  options?: {
+    paused?: boolean
+    reducedMotion?: boolean
+    config?: Partial<AquariumOpticsConfig>
+  },
+): { x: number; y: number; z: number } {
+  const cfg = { ...DEFAULT_AQUARIUM_OPTICS_CONFIG, ...options?.config }
+  const hash = (n: number) => {
+    const x = Math.sin(n * 127.1 + 311.7) * 43758.5453123
+    return x - Math.floor(x)
+  }
+  const sizeHash = hash(seedIndex * 3 + 1)
+  const phase = hash(seedIndex * 3 + 2) * TWO_PI
+  const cycleOffset = hash(seedIndex * 3 + 3)
+  const wobble = cfg.bubbleWobbleAmplitudeM
+
+  // Frozen bubbles rest at the emitter with their t=0 wobble offset, so
+  // each bubble keeps a distinct static position instead of stacking.
+  // Note y is clamped to [emitter.y, recycleTopY], not to bounds: the
+  // emitter sits at y = -2.5, just above the sand bed (-2.8) but below
+  // the fish-navigation bounds' min y (-2.25); clamping to bounds would
+  // lift every bubble off its emitter.
+  if (options?.paused || options?.reducedMotion || !Number.isFinite(timeSeconds)) {
+    return {
+      x: clamp(emitter.x + wobble * Math.sin(phase), bounds.min.x, bounds.max.x),
+      y: emitter.y,
+      z: clamp(emitter.z + wobble * Math.cos(phase), bounds.min.z, bounds.max.z),
+    }
+  }
+
+  const riseSpeed =
+    cfg.bubbleRiseSpeedMinMPerSec +
+    sizeHash * (cfg.bubbleRiseSpeedMaxMPerSec - cfg.bubbleRiseSpeedMinMPerSec)
+  const span = cfg.bubbleRecycleTopY - emitter.y
+  const t = timeSeconds % 3600
+  const progress = (cycleOffset + (t * riseSpeed) / span) % 1
+  const wobblePhase = t * TWO_PI * 0.6 + phase
+  return {
+    x: clamp(emitter.x + wobble * Math.sin(wobblePhase), bounds.min.x, bounds.max.x),
+    y: clamp(emitter.y + progress * span, emitter.y, cfg.bubbleRecycleTopY),
+    z: clamp(emitter.z + wobble * Math.cos(wobblePhase), bounds.min.z, bounds.max.z),
   }
 }
 

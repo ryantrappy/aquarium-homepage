@@ -274,6 +274,16 @@ export function evaluateAnchorInteractionOffset(input: {
 /**
  * Computes a collision-checked target position for an anchor interaction, falling back
  * to the base anchor coordinate if the offset would intersect an obstacle (`AQ-45` AC #5).
+ *
+ * AQ-82 AC #3: anchor interactions use a reduced clearance
+ * (`interactionClearanceRadius`, normally the fish's physical body radius
+ * plus a small margin) instead of the legacy 0.5 m habitat clearance, so a
+ * compatible fish can enter a permeable coral interaction zone — the
+ * clownfish nestling into its host anemone's tentacles
+ * (`softTentacleOverlapAllowed`), or a damselfish/cardinalfish/wrasse
+ * sheltering among branching SPS — while the segment check still prevents
+ * penetration into rigid rock or stony bases. When the caller omits
+ * `interactionClearanceRadius` the legacy `fishClearanceRadius` applies.
  */
 export function resolveSafeAnchorInteractionTarget(input: {
   currentPosition: Vec3
@@ -282,8 +292,10 @@ export function resolveSafeAnchorInteractionTarget(input: {
   waterBounds: AxisAlignedBox
   obstacles: readonly SolidObstacleVolume[]
   fishClearanceRadius: number
+  interactionClearanceRadius?: number
 }): Vec3 | undefined {
   const { currentPosition, location, offset, waterBounds, obstacles, fishClearanceRadius } = input
+  const interactionClearance = input.interactionClearanceRadius ?? fishClearanceRadius
   const candidate: Vec3 = {
     x: location.position.x + offset.positionOffset.x,
     y: location.position.y + offset.positionOffset.y,
@@ -295,7 +307,7 @@ export function resolveSafeAnchorInteractionTarget(input: {
       target: candidate,
       waterBounds,
       obstacles,
-      fishClearanceRadius,
+      fishClearanceRadius: interactionClearance,
     })
   ) {
     return candidate
@@ -306,7 +318,7 @@ export function resolveSafeAnchorInteractionTarget(input: {
       target: location.position,
       waterBounds,
       obstacles,
-      fishClearanceRadius,
+      fishClearanceRadius: interactionClearance,
     })
   ) {
     return { ...location.position }

@@ -125,3 +125,48 @@ For AQ-38 AC #3, the combined research evaluates Babylon's actual two-species sk
 The fish meshes and motion remain technical baselines with baked shading, approximate fins and no independently articulated eyes, gills or mouth. The study does not establish production-quality anatomy, equivalent reef lighting, underwater optics, full-school performance, habitat-aware navigation, service-link accessibility, or renderer lifecycle integration with the application. Translating a still image alone remains insufficient for the product's realistic-fish goal.
 
 Detailed earlier asset comparisons, local rig and Mesh2Motion experiments, calibration notes, and historical limitations are preserved in [rendering-research-history.md](rendering-research-history.md); they are not current entrypoints or claims that those historical prototypes ship.
+
+## WebGPU evaluation (AQ-77, 2026-11-08)
+
+**Decision: DEFER — stay on `WebGLRenderer`.** The full evaluation is in
+[research/webgpu-evaluation-aq77.md](research/webgpu-evaluation-aq77.md).
+Three.js r187 (the pinned version) already ships `WebGPURenderer` + TSL with an
+automatic WebGL 2 fallback, and browser support is ~84% full, but the renderer
+is still experimental per the three.js manual, the scene's 30 `onBeforeCompile`
+GLSL patches would all need TSL ports, and the volumetric-water / refraction /
+SSS gains are gated on rigged/sculpted fish assets (AQ-78) and fin work (AQ-72)
+that do not exist yet. No measured GPU bottleneck exists — the 33.3 ms median
+frame interval is a host frame interval, not a GPU timing. Re-evaluate once the
+in-flight realism work (AQ-39 optics, AQ-76 LOD, AQ-78 assets) has landed and
+either `WebGPURenderer` leaves experimental status or a measured GPU bottleneck
+appears. No production renderer code was changed by this evaluation (AQ-38 AC7).
+## Runtime LOD, lazy loading, and adaptive quality (AQ-76)
+
+Measured on `gemini_control` at the AQ-76 implementation (base tip `85e7623`, PR #15 merged), from the checked-in files — not a browser session.
+
+**Blocking fish bytes, before vs. after.** Before, `initialize()` blocked first paint on a single `Promise.all` loading all 15 fish GLBs regardless of configuration: 18,537,700 B total (proof clown 5,973,300 B + proof tang 1,316,848 B + 13 splat-fish 11,247,552 B). After, Phase 0 blocks on rocks, corals, and the first 3 configured species only. With the default 5-service configuration (yellow-tang, banggai-cardinalfish, royal-gramma, ocellaris-clownfish, blue-tang, in service order), Phase 0 fish bytes are 2,786,052 B (tang 1,316,848 + banggai 647,476 + royal-gramma 821,728) — an 85% reduction in blocking fish bytes vs. loading all 15, and 73% vs. loading all 5 configured species (10,446,212 B). The remaining 2 configured species load in the background after `ready`; the 10 unconfigured species (8,091,488 B) never load. A single GLB failure now degrades that species to its thumbnail sprite instead of failing the whole scene.
+
+**Distance LOD.** The single band is calibrated to the real camera geometry (camera z = 9, fish z in −4.6…2.8, depth 6.2–13.6): LOD0 full GLB below ~8.5 m, LOD1 full GLB at half clip rate beyond ~8.5 m, with ±0.75 m hysteresis and a projected-screen-size override (≥140 px stays LOD0). There is no sprite tier any more: the LOD2 thumbnail-sprite swap (far fish replaced by a flat 2D sprite above ~11 m) was removed 2026-11-09 at Ryan's direction — it read as a visible snap from a lifelike 3D fish to a flat model. Fish keep their full GLB at every depth; LOD is animation-rate only, so the scene renders ~133k triangles regardless of fish distance. The thumbnail sprite survives only as the no-GLB fallback before a lazy load lands. No decimated `*_lod1.glb` assets are generated: decimating skinned GLBs risks breaking the skeleton/clip/turning-rig binding, and LOD1 is animation-rate only by design.
+
+**Adaptive quality.** Tiers: High (pixel ratio min(devicePixelRatio, 1.5), shadows on), Balanced (pixel ratio 1.0), Low (pixel ratio 1.0 + `keyLight.castShadow = false`, LOD bands tightened 15%). Step down after 2 consecutive ~2 s windows with EMA > 19 ms or p95 > 22 ms; step up after 3 consecutive windows with EMA < 13 ms; 5 s cooldown; hidden/paused/reduced-motion frames never count as load. The shadow toggle is not a no-op: reef meshes set `castShadow = true` (`reef-assembly.ts`, rock/coral assembly).
+
+**Not yet measured.** Browser frame intervals (median/p95) and `renderer.info.render` triangle counts before/after at 1440×900 and 402×874, time-to-first-fish, and screenshot pairs for LOD transitions and sprite→GLB swaps still need a live browser run and Root visual review; the unit tests cover the controller thresholds, hysteresis, queue ordering, and failure isolation, not live frame rates.
+
+## Asset delivery budgets (AQ-70.3)
+
+Performance and asset-delivery budgets for photoreal assets live in
+[photorealism-budgets.md](photorealism-budgets.md) with the machine-readable
+form in `src/rendering/assets/budgets.ts` and enforcement in
+`src/rendering/assets/budgets.test.ts` (part of `npm test`). Caps per asset
+class (file bytes, triangles, texture size/count, GPU memory), download
+totals (Phase 0 3.5 MiB, total fish 24 MiB, total scene GLB 40 MiB,
+runtime GPU texture memory 256 MiB) and frame-time targets (p50 ≤ 16.7 ms,
+sustained p95 ≤ 22 ms) are measured from the checked-in files at commit
+`c38674f`. New photoreal assets must ship KTX2 textures; the 29 manifest
+assets that predate the budget are grandfathered by id. One recorded
+tension: full 15-hero-fish promotion at 1024 px textures does not fit the
+256 MiB GPU cap and requires KTX2 delivery or 512 px maps. Frame-time
+p50/p95 at both viewports are still pending the AQ-70.2 look-dev capture
+baseline; the budgets doc records the asset-side baseline and the one
+existing 60-sample main-page observation (median 33.3 ms, p95 35.0 ms,
+desktop host) with its caveats.

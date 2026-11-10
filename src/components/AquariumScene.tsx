@@ -3,20 +3,50 @@ import type { ServiceConfig } from '../lib/services'
 import { getFishById } from '../lib/fish'
 import { FishFigure } from './FishFigure'
 import type { AquariumController, SceneStatus } from '../rendering/scene/aquarium'
+import { formatFrameRate, type FrameRateSample } from '../rendering/scene/frame-rate'
 
-type AquariumSceneProps = { services: ServiceConfig[]; paused: boolean; focusFallbackRef?: RefObject<HTMLElement | null> }
+type AquariumSceneProps = { services: ServiceConfig[]; paused: boolean; focusFallbackRef?: RefObject<HTMLElement | null>; fpsCounterEnabled?: boolean }
 
-export function AquariumScene({ services, paused, focusFallbackRef }: AquariumSceneProps) {
+export function AquariumScene({ services, paused, focusFallbackRef, fpsCounterEnabled = false }: AquariumSceneProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null), overlayRef = useRef<HTMLDivElement>(null)
+  const fpsBadgeRef = useRef<HTMLDivElement>(null)
   const controller = useRef<AquariumController | undefined>(undefined)
   const current = useRef({ services, paused, focusFallbackRef }); current.current = { services, paused, focusFallbackRef }
   const [status, setStatus] = useState<SceneStatus>('loading')
+  const [zoomed, setZoomed] = useState(false)
+  // Debug FPS counter (AQ-83): the badge renders only after mount, so the
+  // server HTML and the first client render agree (no badge) even when the
+  // counter is enabled in localStorage. Rendering it on the first client
+  // pass made hydration fail with React error #418 (badge present on the
+  // client, absent in the SSR HTML) while React recovered and kept working.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
   const acknowledgments = useRef(new Set<ReturnType<typeof setTimeout>>())
+  // Camera zoom reset (AQ-62 AC #3): Esc returns to the full-tank overview,
+  // unless a dialog is open — then Esc belongs to the dialog.
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape' || event.defaultPrevented) return
+      if (document.querySelector('dialog[open]')) return
+      const isZoomed = controller.current?.resetZoom()
+      if (isZoomed !== undefined) setZoomed(isZoomed)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
   useEffect(() => {
     let cancelled = false
     void import('../rendering/scene/aquarium').then(({ createAquarium }) => {
       if (cancelled || !canvasRef.current || !overlayRef.current) return
-      controller.current = createAquarium(canvasRef.current, overlayRef.current, current.current.services, current.current.paused, value => { if (!cancelled) setStatus(value) }, () => current.current.focusFallbackRef?.current ?? null)
+      // Debug FPS counter (AQ-83 AC #2): the renderer pushes smoothed samples
+      // at ~3 Hz; the badge text is written imperatively by ref, so sampling
+      // never triggers a React re-render.
+      const onFrameRate = (sample: FrameRateSample | null) => {
+        const badge = fpsBadgeRef.current
+        if (!badge) return
+        badge.textContent = formatFrameRate(sample, { paused: current.current.paused, hidden: document.hidden })
+      }
+      controller.current = createAquarium(canvasRef.current, overlayRef.current, current.current.services, current.current.paused, value => { if (!cancelled) setStatus(value) }, () => current.current.focusFallbackRef?.current ?? null, undefined, onFrameRate)
     }).catch(error => { console.error('Aquarium renderer unavailable', error); if (!cancelled) setStatus('failed') })
     return () => { cancelled = true; controller.current?.dispose(); controller.current = undefined; acknowledgments.current.forEach(clearTimeout); acknowledgments.current.clear() }
   }, [])
@@ -99,9 +129,16 @@ export function AquariumScene({ services, paused, focusFallbackRef }: AquariumSc
           return <a key={service.id} data-service-id={service.id} className="aquarium-fish-link" href={service.url} target="_blank" rel="noreferrer" aria-label={`Open ${service.name} in a new tab`} title={`${service.name} · ${species.commonName}`} onClick={event => activate(event, service)} onAuxClick={event => { if (event.button === 1) activate(event, service) }} onContextMenu={event => { nativeTarget(event, service) }}>
             <FishFigure fish={species} />
             <span className="fish-name"><span>{service.name}</span>{service.isExample && <small>example</small>}</span>
+            <span className="fish-link-tooltip" aria-hidden="true">{service.name}</span>
           </a>
         })}
       </div>
+      {mounted && fpsCounterEnabled && <div ref={fpsBadgeRef} className="fps-counter-badge" aria-hidden="true">—</div>}
+      {status === 'ready' && <div className="aquarium-zoom-controls" role="group" aria-label="Camera zoom">
+        <button className="scene-control icon-control" type="button" onClick={() => { const isZoomed = controller.current?.zoomIn(); if (isZoomed !== undefined) setZoomed(isZoomed) }} aria-label="Zoom in" title="Zoom in"><span aria-hidden="true">+</span></button>
+        <button className="scene-control icon-control" type="button" onClick={() => { const isZoomed = controller.current?.zoomOut(); if (isZoomed !== undefined) setZoomed(isZoomed) }} aria-label="Zoom out" title="Zoom out"><span aria-hidden="true">−</span></button>
+        <button className="scene-control" type="button" onClick={() => { const isZoomed = controller.current?.resetZoom(); if (isZoomed !== undefined) setZoomed(isZoomed) }} disabled={!zoomed} aria-label="Reset view to full tank overview" title="Reset view (Esc)">Reset view</button>
+      </div>}
       {status === 'failed' && <p className="aquarium-load-notice" role="status">Aquarium visuals unavailable. Your service links and Settings still work.</p>}
     </section>
   )

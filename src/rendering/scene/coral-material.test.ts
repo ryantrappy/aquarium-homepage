@@ -2,12 +2,16 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import * as THREE from 'three'
 import {
+  CORAL_DEFAULT_PALETTE,
+  CORAL_DEFAULT_REGRADE,
   CORAL_FLEXIBILITY_EXPONENT,
   CORAL_RAW_MASK_SCHEMA,
+  CORAL_TISSUE_HIGHLIGHT_CEILING,
   applyCoralRawMaskMaterial,
   applyLiveRockMaterial,
   evaluateCoralContactAoFactor,
   evaluateCoralFlexibilityWeight,
+  evaluateCoralTissueColor,
   evaluateCoralVertexDisplacement,
   evaluateLiveRockSurfaceSample,
   type CoralPrimitiveRole,
@@ -205,8 +209,7 @@ describe('coral-raw-masks-v1 material and shader adapter (AQ-53 / AQ-42)', () =>
     }
   })
 
-  it('shades live-rock foundations in 3D isotropic meter space with upward-normal coralline plaques and zero UV stretching', () => {
-    const rockMat = new THREE.MeshStandardMaterial({
+  it('shades live-rock foundations in 3D isotropic meter space with upward-normal coralline plaques and zero UV stretching', () => {    const rockMat = new THREE.MeshStandardMaterial({
       map: new THREE.Texture(),
       normalMap: new THREE.Texture(),
     })
@@ -230,5 +233,120 @@ describe('coral-raw-masks-v1 material and shader adapter (AQ-53 / AQ-42)', () =>
     expect(upwardCrest.corallineMask).toBeGreaterThan(verticalWall.corallineMask)
     expect(verticalWall.corallineMask).toBe(0)
     expect(upwardCrest.roughness).toBeLessThan(verticalWall.roughness)
+  })
+
+  it('grades corals without an explicit override toward a saturated healthy palette (AQ-88 AC #1/#2)', () => {
+    const binding = applyCoralRawMaskMaterial(new THREE.MeshStandardMaterial(), { role: 'coral-soft' })
+    const hex = (color: THREE.Color) => `#${color.getHexString()}`
+    expect(hex(binding.uniforms.uPaletteBase.value)).toBe(CORAL_DEFAULT_PALETTE.baseColor)
+    expect(hex(binding.uniforms.uPaletteTip.value)).toBe(CORAL_DEFAULT_PALETTE.tipColor)
+    expect(hex(binding.uniforms.uPaletteCrevice.value)).toBe(CORAL_DEFAULT_PALETTE.creviceColor)
+    // The regrade is on by default now: the raw bleached texture no longer shows through.
+    expect(binding.uniforms.uPaletteRegrade.value).toBe(CORAL_DEFAULT_REGRADE)
+    expect(binding.uniforms.uPaletteRegrade.value).toBeGreaterThan(0.9)
+    // Fluorescence stays mask-driven and unchanged: no blanket emissive.
+    expect(binding.uniforms.uFluorescenceStrength.value).toBe(0.16)
+    const rigid = applyCoralRawMaskMaterial(new THREE.MeshStandardMaterial(), { role: 'coral-rigid' })
+    expect(rigid.uniforms.uFluorescenceStrength.value).toBe(0.10)
+    expect(rigid.uniforms.uPaletteRegrade.value).toBe(CORAL_DEFAULT_REGRADE)
+  })
+
+  it('injects the AQ-88 saturation boost, pale-tip pull, and highlight ceiling into the tissue shader', () => {
+    const material = new THREE.MeshStandardMaterial()
+    const binding = applyCoralRawMaskMaterial(material, { role: 'coral-soft' })
+    const mockShader: THREE.WebGLProgramParametersWithUniforms = {
+      uniforms: {},
+      vertexShader: THREE.ShaderLib.standard.vertexShader,
+      fragmentShader: THREE.ShaderLib.standard.fragmentShader,
+    } as unknown as THREE.WebGLProgramParametersWithUniforms
+    binding.material.onBeforeCompile(mockShader, {} as THREE.WebGLRenderer)
+    expect(mockShader.fragmentShader).toContain('vec3 coralTip = mix(uPaletteTip, uPaletteBase, 0.25);')
+    expect(mockShader.fragmentShader).toContain('float coralLuma = dot(naturalGrad, vec3(0.299, 0.587, 0.114));')
+    expect(mockShader.fragmentShader).toContain('naturalGrad = mix(vec3(coralLuma), naturalGrad, 1.18);')
+    expect(mockShader.fragmentShader).toContain('naturalGrad = min(naturalGrad, vec3(0.92));')
+    // Still mask-driven only: no unconditional emissive term is added.
+    expect(mockShader.fragmentShader).toContain('totalEmissiveRadiance += coralSss + coralGlow;')
+    expect(mockShader.fragmentShader).not.toContain('totalEmissiveRadiance += uPaletteBase')
+  })
+
+  it('scales mask-driven fluorescence with the fixture actinic level and removes the sine caustic shimmer (AQ-70.6 AC #1/#3)', () => {
+    const binding = applyCoralRawMaskMaterial(new THREE.MeshStandardMaterial(), { role: 'coral-soft' })
+    expect(binding.uniforms.uActinicLevel.value).toBe(1)
+    const dimmed = applyCoralRawMaskMaterial(new THREE.MeshStandardMaterial(), { role: 'coral-soft', actinicLevel: 0.5 })
+    expect(dimmed.uniforms.uActinicLevel.value).toBe(0.5)
+    const clamped = applyCoralRawMaskMaterial(new THREE.MeshStandardMaterial(), { role: 'coral-soft', actinicLevel: 4 })
+    expect(clamped.uniforms.uActinicLevel.value).toBe(2)
+    const nonFinite = applyCoralRawMaskMaterial(new THREE.MeshStandardMaterial(), { role: 'coral-soft', actinicLevel: Number.NaN })
+    expect(nonFinite.uniforms.uActinicLevel.value).toBe(1)
+
+    const material = new THREE.MeshStandardMaterial()
+    const shaderBinding = applyCoralRawMaskMaterial(material, { role: 'coral-soft' })
+    const mockShader: THREE.WebGLProgramParametersWithUniforms = {
+      uniforms: {},
+      vertexShader: THREE.ShaderLib.standard.vertexShader,
+      fragmentShader: THREE.ShaderLib.standard.fragmentShader,
+    } as unknown as THREE.WebGLProgramParametersWithUniforms
+    shaderBinding.material.onBeforeCompile(mockShader, {} as THREE.WebGLRenderer)
+    expect(mockShader.fragmentShader).toContain('uFluorescenceStrength * uActinicLevel')
+    // The old sine caustic shimmer is gone: the shared cellular caustic
+    // chunk is the one caustic system on coral now.
+    expect(mockShader.fragmentShader).not.toContain('causticBand')
+    expect(mockShader.fragmentShader).not.toContain('cWave1')
+    expect(mockShader.fragmentShader).not.toContain('cWave2')
+    expect(mockShader.fragmentShader).not.toContain('vCoralWorldPos')
+  })
+
+  it('grades the healthy default palette saturated and the old pale palette better than the pre-AQ-88 grade (AQ-88 AC #1)', () => {
+    const saturation = (c: { r: number; g: number; b: number }) =>
+      (Math.max(c.r, c.g, c.b) - Math.min(c.r, c.g, c.b)) / Math.max(c.r, c.g, c.b)
+    const hex = (value: string) => {
+      const n = parseInt(value.slice(1), 16)
+      return { r: ((n >> 16) & 0xff) / 255, g: ((n >> 8) & 0xff) / 255, b: (n & 0xff) / 255 }
+    }
+    // Healthy defaults stay saturated through a mid-tissue grade, capped below white.
+    const healthy = evaluateCoralTissueColor({
+      baseColor: hex(CORAL_DEFAULT_PALETTE.baseColor),
+      tipColor: hex(CORAL_DEFAULT_PALETTE.tipColor),
+      creviceColor: hex(CORAL_DEFAULT_PALETTE.creviceColor),
+      heightTerm: 0.6,
+      tipTerm: 0.5,
+      texLuma: 0.5,
+      polypHighlight: 0.5,
+    })
+    expect(saturation(healthy)).toBeGreaterThan(0.3)
+    expect(healthy.r).toBeLessThanOrEqual(CORAL_TISSUE_HIGHLIGHT_CEILING)
+    expect(healthy.g).toBeLessThanOrEqual(CORAL_TISSUE_HIGHLIGHT_CEILING)
+    expect(healthy.b).toBeLessThanOrEqual(CORAL_TISSUE_HIGHLIGHT_CEILING)
+
+    // The old pale lavender palette grades more saturated than the pre-AQ-88
+    // formula (tip unpulled, no saturation boost, no ceiling) on the same input.
+    const input = {
+      baseColor: hex('#c490ab'),
+      tipColor: hex('#f2dce8'),
+      creviceColor: hex('#4a3048'),
+      heightTerm: 0.6,
+      tipTerm: 0.5,
+      texLuma: 0.8,
+      polypHighlight: 0.6,
+    }
+    const graded = evaluateCoralTissueColor(input)
+    const smoothstep = (e0: number, e1: number, x: number) => {
+      const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)))
+      return t * t * (3 - 2 * t)
+    }
+    const mix = (a: number, b: number, t: number) => a + (b - a) * t
+    const oldGrade = { r: 0, g: 0, b: 0 }
+    for (const channel of ['r', 'g', 'b'] as const) {
+      const grad = mix(
+        mix(input.creviceColor[channel], input.baseColor[channel], smoothstep(0.02, 0.34, input.heightTerm)),
+        input.tipColor[channel],
+        smoothstep(0.22, 0.92, input.tipTerm),
+      )
+      oldGrade[channel] = grad * (0.86 + 0.22 * input.texLuma + 0.16 * (input.polypHighlight - 0.4))
+    }
+    expect(saturation(graded)).toBeGreaterThan(saturation(oldGrade))
+    expect(graded.r).toBeLessThanOrEqual(CORAL_TISSUE_HIGHLIGHT_CEILING)
+    expect(graded.g).toBeLessThanOrEqual(CORAL_TISSUE_HIGHLIGHT_CEILING)
+    expect(graded.b).toBeLessThanOrEqual(CORAL_TISSUE_HIGHLIGHT_CEILING)
   })
 })

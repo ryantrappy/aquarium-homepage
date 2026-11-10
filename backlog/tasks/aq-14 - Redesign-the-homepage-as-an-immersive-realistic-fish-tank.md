@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-03T04:25:00Z'
-updated_date: '2026-11-03T13:56:00Z'
+updated_date: '2026-11-08T04:47:00Z'
 labels: []
 dependencies: []
 references:
@@ -14,9 +14,9 @@ documentation:
   - docs/requirements.md
   - docs/design-principles.md
   - docs/gemini-research-links.md
-priority: high
+priority: '14'
 type: feature
-ordinal: 21000
+ordinal: 14
 ---
 
 ## Description

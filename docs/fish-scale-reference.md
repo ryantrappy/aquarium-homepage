@@ -17,7 +17,7 @@ Downstream: src/rendering/scene/fish-scale.ts, src/rendering/scene/fish-scale.te
 > - **Status**: Canonical / Active
 > - **Authority**: Binding Specification (Parsed directly by `fish-scale.test.ts`)
 > - **Backlog Reference**: `AQ-60`
-> - **Summary**: Real-world adult dimensions and normalized render lengths (inches/meters) for all 15 roster fish species.
+> - **Summary**: Real-world adult dimensions and normalized render lengths (inches/meters) for all 16 roster fish species.
 
 Real-world adult sizes for the roster in `docs/reef-fish-roster.md`, so rendered fish can be sized relative to each other. Lengths are approximate adult **total length (snout to tail tip)** unless marked SL. Each maximum is linked to its FishBase species summary. The typical-size estimates remain uncited and unverified; do not treat them as sourced husbandry data. The render column is a project-selected target used by `src/rendering/scene/fish-scale.ts`, not a biological measurement; a test parses this table and fails if those targets drift.
 
@@ -40,8 +40,9 @@ FishBase maxima rechecked 2026-11-05 (AQ-60). Summary-page content was directly 
 | `lyretail-anthias` | Unverified; adult-female baseline (FishBase female max 2.8 / 7 TL) | [5.9 / 15 TL male/unsexed; 2.8 / 7 TL female](https://www.fishbase.se/summary/Pseudanthias-squamipinnis) | 2.5 | ~0.8× |
 | `flame-angelfish` | 3.5–4 / 9–10 | [5.9 / 15 TL](https://www.fishbase.se/summary/Centropyge-loricula) | 3.75 | 1.25× |
 | `copperband-butterflyfish` | 6–7 / 15–18 | [7.9 / 20 TL](https://www.fishbase.se/summary/Chelmon-rostratus) | 6.5 | ~2.2× |
+| `desjardins-sailfin-tang` | 12–14 / 30–35 | [15.7 / 40 TL](https://www.fishbase.se/summary/Zebrasoma-desjardinii) | 12 | 4.0× |
 
-TL = total length; SL = standard length (FishBase reports the yellow watchman goby maximum as SL, so its total length is somewhat longer). Lyretail rendering uses the project-selected 2.5 in target (6.35 cm), below the FishBase female maximum; this is a render choice, not a claim of typical adult size. The other numbers in the unverified typical-estimate column are retained as draft estimates pending row-specific husbandry sources.
+TL = total length; SL = standard length (FishBase reports the yellow watchman goby maximum as SL, so its total length is somewhat longer). Lyretail rendering uses the project-selected 2.5 in target (6.35 cm), below the FishBase female maximum; this is a render choice, not a claim of typical adult size. The other numbers in the unverified typical-estimate column are retained as draft estimates pending row-specific husbandry sources. The sailfin row was added 2026-11-09 (Ryan's sailfin decision): its FishBase maximum (40.0 cm TL) and common length (32.0 cm TL) were verified that day, and its 12 in render target follows the established pattern of sitting below the maximum (yellow tang 6.5 vs 7.9, blue tang 9 vs 12.2) while staying inside the typical adult range — the largest fish in the tank, about 1.85× the yellow tang.
 
 ## Usage notes
 

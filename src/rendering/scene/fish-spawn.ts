@@ -5,7 +5,30 @@ const SPAWN_SEARCH_DIVISIONS = 4
 const INITIAL_HEADING_ALTERNATIVES = 8
 const TWO_PI = Math.PI * 2
 
-export type OccupiedFishSpawn = { position: Vec3; clearance: number }
+/**
+ * Distinct spawn depth planes as fractions of the clearance-safe z range
+ * (AQ-87): far / mid / near. Spawn depth is quantized onto these planes
+ * instead of drawn continuously, so the school reads on multiple visibly
+ * distinct depth planes instead of one front plane. The outer horizontal
+ * lanes stay on the near plane so projected X spread survives perspective.
+ */
+export const FISH_SPAWN_DEPTH_PLANES: readonly number[] = Object.freeze([0.28, 0.55, 0.85])
+/** Small deterministic jitter around a depth plane, as a z-range fraction. */
+export const FISH_SPAWN_DEPTH_PLANE_JITTER = 0.03
+
+/**
+ * An occupied spawn point. `clearance` is the legacy AABB/segment safety
+ * radius (still used for wall and obstacle safety). `bodyRadiusM` is the
+ * AQ-85 physical body radius (15% of nose-to-tail length); when both the
+ * spawning fish and the occupant supply it, fish-vs-fish spacing uses the
+ * body-radius separation (`self + other + 0.06`) instead of the legacy
+ * clearance sum (≥1.0 m), so a tight school region no longer reads as
+ * blocked water. Omit it to keep the legacy behaviour.
+ */
+export type OccupiedFishSpawn = { position: Vec3; clearance: number; bodyRadiusM?: number }
+
+/** Gap added to the two body radii for fish-vs-fish spawn separation (AQ-85: minSep = self + peer + 0.06). */
+export const SPAWN_BODY_RADIUS_GAP_M = 0.06
 export type FishSpawnPreference = { position: Vec3; yaw: number }
 
 export function fishSceneStatus(spawnUnavailable: boolean): 'ready' | 'failed' {
@@ -79,7 +102,17 @@ export function fishSpawnPreference(instanceId: string, speciesId: string, water
   if (safeMin.x > safeMax.x || safeMin.y > safeMax.y || safeMin.z > safeMax.z) return undefined
 
   const seed = spawnSeed(instanceId, speciesId)
-  const depth = profile.depthRange[0] + seededUnit(seed, 0x9e3779b9) * (profile.depthRange[1] - profile.depthRange[0])
+  // AQ-87: a plain seeded draw inside each species' depthRange clusters the
+  // whole school in the middle of the column (the five starters' draws
+  // spanned only ~0.27 of the depth). Stratify the draw by horizontal slot
+  // — the same cohort index already stratifies X — so each fish takes a
+  // different fifth of its own declared band and the ensemble spans the
+  // full column. The draw never leaves the species' depthRange.
+  const depthUnit = seededUnit(seed, 0x9e3779b9)
+  const depthFraction = horizontalSlot
+    ? (horizontalSlot.index + depthUnit) / horizontalSlot.count
+    : depthUnit
+  const depth = profile.depthRange[0] + depthFraction * (profile.depthRange[1] - profile.depthRange[0])
   const height = waterBounds.max.y - waterBounds.min.y
   const preferredY = waterBounds.max.y - depth * height
   const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
@@ -94,13 +127,16 @@ export function fishSpawnPreference(instanceId: string, speciesId: string, water
   const xFraction = horizontalSlot ? .02 + .96 * clamp(horizontalFraction, 0, 1) : .04 + .92 * horizontalFraction
   const preferredX = safeMin.x + (safeMax.x - safeMin.x) * xFraction
   const zNoise = seededUnit(seed, 0x85ebca6b)
-  // Put only the outer fish lanes nearer the camera so projected X
-  // spread survives perspective. Interior lanes retain varied depth.
-  const zFraction = horizontalSlot && horizontalSlot.count > 1 && horizontalSlot.index === 0
-    ? .8 + .05 * zNoise
-    : horizontalSlot && horizontalSlot.count > 1 && horizontalSlot.index === horizontalSlot.count - 1
-      ? .91 + .04 * zNoise
-      : .4 + .6 * zNoise
+  // AQ-87: quantize spawn depth onto the three distinct depth planes
+  // (far / mid / near) instead of a continuous z draw. The outer
+  // horizontal lanes stay on the near plane so projected X spread survives
+  // perspective; interior lanes take a seeded plane with small jitter.
+  const isOuterLane = horizontalSlot && horizontalSlot.count > 1
+    && (horizontalSlot.index === 0 || horizontalSlot.index === horizontalSlot.count - 1)
+  const planeIndex = isOuterLane
+    ? FISH_SPAWN_DEPTH_PLANES.length - 1
+    : Math.min(FISH_SPAWN_DEPTH_PLANES.length - 1, Math.floor(zNoise * FISH_SPAWN_DEPTH_PLANES.length))
+  const zFraction = FISH_SPAWN_DEPTH_PLANES[planeIndex]! + (zNoise * 2 - 1) * FISH_SPAWN_DEPTH_PLANE_JITTER
   const preferredZ = safeMin.z + (safeMax.z - safeMin.z) * zFraction
   const safeYForProfile = clamp(preferredY, safeMin.y, safeMax.y)
   const profileLowY = clamp(waterBounds.max.y - profile.depthRange[1] * height, safeMin.y, safeMax.y)
@@ -127,6 +163,18 @@ export function findSafeFishSpawn(
   obstacles: readonly SolidObstacleVolume[],
   clearance: number,
   occupied: readonly OccupiedFishSpawn[] = [],
+  /**
+   * Optional extra clearance check (e.g. the mesh-navigation capsule query).
+   * Applied lazily to ranked candidates; a candidate passes only when it
+   * returns true. A throwing check fails closed for that candidate.
+   */
+  isSafe?: (position: Vec3) => boolean,
+  /**
+   * The spawning fish's AQ-85 body radius. When given (and the occupant
+   * supplies one too), fish-vs-fish spacing uses `self + other + 0.06`
+   * instead of the legacy `clearance + other.clearance` sum.
+   */
+  spawningBodyRadiusM?: number,
 ): Vec3 | undefined {
   const coordinates = [preferred.x, preferred.y, preferred.z,
     waterBounds.min.x, waterBounds.min.y, waterBounds.min.z,
@@ -165,8 +213,16 @@ export function findSafeFishSpawn(
   const safeCandidates = candidates.filter(candidate => isSafeFishPosition(candidate, clearance, waterBounds, obstacles))
   if (!safeCandidates.length) return undefined
   const targetDistance = (candidate: Vec3) => (candidate.x - clamped.x) ** 2 + (candidate.y - clamped.y) ** 2 + (candidate.z - clamped.z) ** 2
+  // Fish-vs-fish separation (PR #28 follow-up): body radii when both sides
+  // supply them, otherwise the legacy clearance sum. `clearance` itself is
+  // untouched — it still governs wall/obstacle safety above.
+  const spawningRadius = Number.isFinite(spawningBodyRadiusM) && (spawningBodyRadiusM as number) >= 0 ? (spawningBodyRadiusM as number) : undefined
+  const minimumSeparation = (other: OccupiedFishSpawn) =>
+    spawningRadius !== undefined && other.bodyRadiusM !== undefined && Number.isFinite(other.bodyRadiusM) && other.bodyRadiusM >= 0
+      ? spawningRadius + other.bodyRadiusM + SPAWN_BODY_RADIUS_GAP_M
+      : clearance + other.clearance
   const isClearOfFish = (candidate: Vec3) => validOccupied.every(other => {
-    const minimumDistance = clearance + other.clearance
+    const minimumDistance = minimumSeparation(other)
     return Math.hypot(candidate.x - other.position.x, candidate.y - other.position.y, candidate.z - other.position.z) >= minimumDistance
   })
   const unoccupied = safeCandidates.filter(isClearOfFish)
@@ -174,7 +230,7 @@ export function findSafeFishSpawn(
   ranked.sort((a, b) => {
     if (!unoccupied.length) {
       const crowding = (candidate: Vec3) => validOccupied.reduce((total, other) => {
-        const minimumDistance = clearance + other.clearance
+        const minimumDistance = minimumSeparation(other)
         const distance = Math.hypot(candidate.x - other.position.x, candidate.y - other.position.y, candidate.z - other.position.z)
         return total + Math.max(0, minimumDistance - distance)
       }, 0)
@@ -183,5 +239,12 @@ export function findSafeFishSpawn(
     }
     return targetDistance(a) - targetDistance(b) || a.x - b.x || a.y - b.y || a.z - b.z
   })
-  return ranked[0]
+  return ranked.find(candidate => {
+    if (!isSafe) return true
+    try {
+      return isSafe(candidate)
+    } catch {
+      return false
+    }
+  })
 }

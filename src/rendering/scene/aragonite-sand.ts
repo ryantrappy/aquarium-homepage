@@ -36,8 +36,8 @@ const MOBILE_ROCK_FOOTPRINTS: readonly RockFootprint[] = Object.freeze([
   { x: -0.15, z: -1.35, radiusX: 1.45, radiusZ: 0.95 },
 ])
 
-const LEFT_CONTACT_AO_STRENGTH = 0.42
-const RIGHT_CONTACT_AO_STRENGTH = 0.40
+const LEFT_CONTACT_AO_STRENGTH = 0.55
+const RIGHT_CONTACT_AO_STRENGTH = 0.52
 
 export function getRockFootprintsForViewport(narrow: boolean): readonly RockFootprint[] {
   return narrow ? MOBILE_ROCK_FOOTPRINTS : DESKTOP_ROCK_FOOTPRINTS
@@ -80,17 +80,27 @@ function tileableNoise(u: number, v: number, freq: number): number {
   return a + (b - a) * uy
 }
 
+type AragoniteSandPixels = Readonly<{
+  dim: number
+  albedo: Uint8Array
+  normal: Uint8Array
+  roughness: Uint8Array
+}>
+
+// The pixel data is deterministic (fixed seed + tileable noise), so it is
+// generated once per size and shared: a scene rebuild must not pay the
+// ~180 ms 512² generation again on every createAquarium call (AQ-73).
+// Each caller still gets fresh DataTexture wrappers, and dispose() only
+// releases GPU resources — the cached bytes stay valid.
+const aragoniteSandPixelCache = new Map<number, AragoniteSandPixels>()
+
 /**
- * Generates a tileable PBR map trio (albedo in sRGB, tangent-space normal in Linear,
- * roughness in Linear) calibrated to warm cream/ivory oolitic & special-grade aragonite reef sand
- * (1-2 mm calcium carbonate grains, shell flecks, and pink/lilac coralline specks).
+ * Generates the deterministic PBR pixel trio (albedo in sRGB, tangent-space
+ * normal in Linear, roughness in Linear) calibrated to warm cream/ivory
+ * oolitic & special-grade aragonite reef sand (1-2 mm calcium carbonate
+ * grains, shell flecks, and pink/lilac coralline specks).
  */
-export function createAragoniteSandPbrTextures(size = 512): {
-  albedoTexture: THREE.DataTexture
-  normalTexture: THREE.DataTexture
-  roughnessTexture: THREE.DataTexture
-} {
-  const dim = clamp(Math.trunc(size), 64, 1024)
+function generateAragoniteSandPixels(dim: number): AragoniteSandPixels {
   const pixelCount = dim * dim
   const albedoData = new Uint8Array(pixelCount * 4)
   const normalData = new Uint8Array(pixelCount * 4)
@@ -119,11 +129,16 @@ export function createAragoniteSandPbrTextures(size = 512): {
       const grainBump = 0.38 * fine + 0.34 * meso + 0.16 * macro + 0.12 * r0
       heightField[idx] = grainBump
 
-      // Warm cream-ivory calcium carbonate base (#EFE8D8 .. #E2D8C3), strictly R >= G >= B
-      const baseWarmth = (grainBump - 0.5) * 34 + (r0 - 0.5) * 14
-      let r = 236 + baseWarmth
-      let g = 227 + baseWarmth * 0.94
-      let b = 208 + baseWarmth * 0.85
+      // Warm cream-ivory calcium carbonate base (#E6DCC8 mean, #D0C2B0..#FCF2DC
+      // across the grain field), strictly R >= G >= B. The swing is wide
+      // enough to read as granular sand at overview distance: the old
+      // ±17-step base (mean #EFE8D8) averaged out to flat white under the
+      // key + hemi + env light, which is the "flat white sand" visual
+      // finding. The speckles below add the pink/tan/white grain accents.
+      const baseWarmth = (grainBump - 0.5) * 44 + (r0 - 0.5) * 14
+      let r = 230 + baseWarmth
+      let g = 220 + baseWarmth * 0.94
+      let b = 200 + baseWarmth * 0.85
 
       if (r1 < 0.055) {
         // 5.5% pink/lilac coralline & Homotrema rubrum foraminifera specks
@@ -177,6 +192,26 @@ export function createAragoniteSandPbrTextures(size = 512): {
       normalData[p4 + 3] = 255
     }
   }
+
+  return { dim, albedo: albedoData, normal: normalData, roughness: roughnessData }
+}
+
+/**
+ * Returns a tileable PBR map trio wrapping the cached deterministic pixels
+ * for `size` (fresh DataTexture objects per call, shared pixel bytes).
+ */
+export function createAragoniteSandPbrTextures(size = 512): {
+  albedoTexture: THREE.DataTexture
+  normalTexture: THREE.DataTexture
+  roughnessTexture: THREE.DataTexture
+} {
+  const dim = clamp(Math.trunc(size), 64, 1024)
+  let pixels = aragoniteSandPixelCache.get(dim)
+  if (!pixels) {
+    pixels = generateAragoniteSandPixels(dim)
+    aragoniteSandPixelCache.set(dim, pixels)
+  }
+  const { albedo: albedoData, normal: normalData, roughness: roughnessData } = pixels
 
   const configureTexture = (tex: THREE.DataTexture, srgb: boolean) => {
     tex.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.LinearSRGBColorSpace
@@ -232,8 +267,12 @@ export function evaluateAragoniteSandElevation(
 
 /**
  * Evaluates tight physical rock-base contact ambient occlusion (`1.0` in open sand,
- * darkening smoothly to `0.56` right where the live-rock base meets the aragonite bed).
- * Replaces the old oversized hand-painted indigo blobs.
+ * darkening smoothly to `0.45` right where the live-rock base meets the aragonite bed).
+ * Replaces the old oversized hand-painted indigo blobs. The strengths were
+ * raised from 0.42/0.40 (visual-check fix): the old grounding ring was too
+ * weak to read under the bright sand, so the islands looked like they were
+ * floating on white. The fade is also wider (0.55..1.55) so the ring extends
+ * visibly beyond the rock edge instead of hiding underneath it.
  */
 export function evaluateRockBaseContactFactor(
   worldX: number,
@@ -248,7 +287,7 @@ export function evaluateRockBaseContactFactor(
     const nz = (worldZ - fp.z) / (fp.radiusZ * 0.92)
     const r = Math.hypot(nx, nz)
     const strength = i === 0 ? LEFT_CONTACT_AO_STRENGTH : RIGHT_CONTACT_AO_STRENGTH
-    const contact = 1.0 - strength * (1.0 - smoothstep(0.62, 1.12, r))
+    const contact = 1.0 - strength * (1.0 - smoothstep(0.55, 1.55, r))
     factor = Math.min(factor, contact)
   }
   return factor
@@ -415,7 +454,6 @@ export function createAragoniteSandBed(config: AragoniteSandConfig = {}): Aragon
   applySandGeometryElevation(sandGeometry, narrow)
 
   const sandUniforms = {
-    uSandTime: { value: 0 },
     uLeftFootprint: { value: new THREE.Vector4(-2.35, -1.35, 1.85, 1.15) },
     uRightFootprint: { value: new THREE.Vector4(2.65, -1.20, 1.75, 1.10) },
     uSingleIslandMode: { value: narrow ? 1 : 0 },
@@ -436,7 +474,7 @@ export function createAragoniteSandBed(config: AragoniteSandConfig = {}): Aragon
   const sandMaterial = new THREE.MeshStandardMaterial({
     map: albedoTexture,
     normalMap: normalTexture,
-    normalScale: new THREE.Vector2(0.55, 0.55),
+    normalScale: new THREE.Vector2(0.8, 0.8),
     roughnessMap: roughnessTexture,
     roughness: 0.92,
     metalness: 0.0,
@@ -451,7 +489,7 @@ export function createAragoniteSandBed(config: AragoniteSandConfig = {}): Aragon
       `#include <begin_vertex>\nvec4 sandWp = modelMatrix * vec4(transformed, 1.0);\nvSandWorldPos = sandWp.xyz;\nvSandRawUv = uv;`,
     )
     shader.fragmentShader =
-      `uniform float uSandTime;\nuniform vec4 uLeftFootprint;\nuniform vec4 uRightFootprint;\nuniform float uSingleIslandMode;\nvarying vec3 vSandWorldPos;\nvarying vec2 vSandRawUv;\n` +
+      `uniform vec4 uLeftFootprint;\nuniform vec4 uRightFootprint;\nuniform float uSingleIslandMode;\nvarying vec3 vSandWorldPos;\nvarying vec2 vSandRawUv;\n` +
       shader.fragmentShader
     shader.fragmentShader = shader.fragmentShader.replace(
       '#include <clipping_planes_fragment>',
@@ -479,15 +517,15 @@ diffuseColor *= sampledDiffuseColor;
 // Macro warm aragonite variation & natural olive-tan detritus settling near rock bases (AQ-70.12 AC #1 & #2)
 vec2 dLeft = (vSandWorldPos.xz - uLeftFootprint.xy) / (uLeftFootprint.zw * 0.92);
 float rLeft = length(dLeft);
-float aoLeft = 1.0 - ${LEFT_CONTACT_AO_STRENGTH.toFixed(2)} * (1.0 - smoothstep(0.62, 1.12, rLeft));
+float aoLeft = 1.0 - ${LEFT_CONTACT_AO_STRENGTH.toFixed(2)} * (1.0 - smoothstep(0.55, 1.55, rLeft));
 
 vec2 dRight = (vSandWorldPos.xz - uRightFootprint.xy) / (uRightFootprint.zw * 0.92);
 float rRight = length(dRight);
-float aoRight = mix(1.0 - ${RIGHT_CONTACT_AO_STRENGTH.toFixed(2)} * (1.0 - smoothstep(0.62, 1.12, rRight)), 1.0, uSingleIslandMode);
+float aoRight = mix(1.0 - ${RIGHT_CONTACT_AO_STRENGTH.toFixed(2)} * (1.0 - smoothstep(0.55, 1.55, rRight)), 1.0, uSingleIslandMode);
 float rockContactAo = min(aoLeft, aoRight);
 
 // Subtle warm detritus & dampened aragonite near rock bases and ripple troughs (never blue-grey or indigo)
-float detritusMask = (1.0 - smoothstep(0.70, 1.35, min(rLeft, mix(rRight, 99.0, uSingleIslandMode)))) * 0.38;
+float detritusMask = (1.0 - smoothstep(0.70, 1.60, min(rLeft, mix(rRight, 99.0, uSingleIslandMode)))) * 0.50;
 vec3 warmDetritus = vec3(0.76, 0.70, 0.58);
 diffuseColor.rgb = mix(diffuseColor.rgb, warmDetritus, detritusMask);
 
@@ -495,15 +533,16 @@ diffuseColor.rgb = mix(diffuseColor.rgb, warmDetritus, detritusMask);
 float rearFade = smoothstep(-5.4, 0.8, vSandWorldPos.z);
 vec3 rearWaterTint = vec3(0.56, 0.66, 0.72);
 diffuseColor.rgb = mix(diffuseColor.rgb * rearWaterTint, diffuseColor.rgb, 0.48 + 0.52 * rearFade);
+// Visual-check fix: the dual-scale UV blend only swaps grain phase, so at
+// overview distance (mipmapped) both samples average to the same mean and
+// the field reads flat white. Modulate luminance by the same macro signal
+// so broad warm patches (±10%, zero mean change) survive at any distance.
+diffuseColor.rgb *= 0.90 + 0.20 * sandMacroBlend;
 diffuseColor.rgb *= rockContactAo;
-
-// Two-layer intersecting Voronoi-like refraction caustic network (AQ-70.12)
-vec2 cUv1 = vSandWorldPos.xz * 1.65 + vec2(uSandTime * 0.42, -uSandTime * 0.31);
-vec2 cUv2 = (mat2(0.866, -0.5, 0.5, 0.866) * vSandWorldPos.xz) * 2.15 + vec2(-uSandTime * 0.36, uSandTime * 0.48);
-float ridge1 = 1.0 - abs(sin(cUv1.x) * cos(cUv1.y));
-float ridge2 = 1.0 - abs(sin(cUv2.x) * cos(cUv2.y));
-float causticNet = pow(clamp(ridge1 * ridge2, 0.0, 1.0), 2.4) * rockContactAo * (0.35 + 0.65 * rearFade);
-diffuseColor.rgb += vec3(0.20, 0.21, 0.18) * causticNet;
+// AQ-70.6: the sand's own caustic ridge network was removed. The shared
+// cellular caustic chunk (caustics.ts) is applied to the sand material in
+// rebuildHabitat, so the sand, rock, coral, and fish all show the one
+// caustic system instead of two disagreeing patterns.
 `,
     )
     shader.fragmentShader = shader.fragmentShader.replace(
@@ -618,10 +657,14 @@ normal = perturbNormalArb(-vViewPosition, normal, dHdxy_fwd(), faceDirection);
     albedoTexture,
     normalTexture,
     roughnessTexture,
-    update(elapsedSeconds: number, paused: boolean, reducedMotion: boolean) {
-      if (!paused && !reducedMotion && Number.isFinite(elapsedSeconds)) {
-        sandUniforms.uSandTime.value = elapsedSeconds % 3600
-      }
+// AQ-70.6: the sand no longer carries its own caustic clock or ridge
+// network. The shared cellular caustic chunk (caustics.ts) is applied to
+// the sand material in rebuildHabitat and drives the pattern from the one
+// frozen/shared caustic time, so the sand can never disagree with the
+// rock, coral, and fish caustics. The update hook is kept (it is part of
+// the bed's interface) but is now a no-op for time.
+    update(_elapsedSeconds: number, _paused: boolean, _reducedMotion: boolean) {
+      // No-op: sand caustics now come from the shared caustics chunk.
     },
     setLayout(nextNarrow: boolean) {
       if (narrow === nextNarrow) return

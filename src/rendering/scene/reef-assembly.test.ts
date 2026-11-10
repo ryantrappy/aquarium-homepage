@@ -2,13 +2,18 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import * as THREE from 'three'
 import {
+  AQUARIUM_WATER_BOUNDS,
   DEFAULT_LEFT_ISLAND_MOUNTS,
   DEFAULT_RIGHT_ISLAND_MOUNTS,
   assembleCoralsOnRockSockets,
   inferSocketArchetype,
   instantiateModularReefHabitat,
+  SOCKET_ANCHOR_POSITIONS_M,
 } from './reef-assembly'
 import { evaluateCoralVertexDisplacement } from './coral-material'
+import { fishBodyRadiusM } from './fish-scale'
+import { isSpeciesCompatibleWithAnchor } from './habitat-anchor-interactions'
+import { isWaterSegmentSafe } from '../../simulation/habitat-navigation'
 
 function buildRockFixtureFromSocketReport(reportFile: string): THREE.Group {
   const report = JSON.parse(
@@ -118,6 +123,30 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     }
   })
 
+  it('forwards the fixture actinic level to every mounted coral material, defaulting to 1 (AQ-70.6 AC #3)', () => {
+    const templates = buildMockCoralTemplates()
+    const leftRock = buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json')
+
+    const assembly = assembleCoralsOnRockSockets(leftRock, templates, DEFAULT_LEFT_ISLAND_MOUNTS, {
+      actinicLevel: 0.5,
+    })
+    expect(assembly.mountedCorals.length).toBeGreaterThan(0)
+    for (const mounted of assembly.mountedCorals) {
+      expect(mounted.materialControllers.length).toBeGreaterThan(0)
+      for (const ctrl of mounted.materialControllers) {
+        expect(ctrl.uniforms.uActinicLevel.value).toBe(0.5)
+      }
+    }
+
+    const defaultRock = buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json')
+    const defaultAssembly = assembleCoralsOnRockSockets(defaultRock, templates, DEFAULT_LEFT_ISLAND_MOUNTS)
+    for (const mounted of defaultAssembly.mountedCorals) {
+      for (const ctrl of mounted.materialControllers) {
+        expect(ctrl.uniforms.uActinicLevel.value).toBe(1)
+      }
+    }
+  })
+
   it('bounds shader-displaced soft vertices and grows shared cached geometry only once across clones and amplitude changes', () => {
     const templates = buildMockCoralTemplates()
     const template = templates.get('coral-euphyllia-torch')!
@@ -133,7 +162,13 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     ])
     const positions = geometry.getAttribute('position').array.slice()
     const baseSphere = geometry.boundingSphere!.clone()
-    const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(entry => entry.coralAssetId === 'coral-euphyllia-torch')!
+    const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(entry => entry.coralAssetId === 'coral-euphyllia-torch') ?? {
+      socketName: 'socket_lps_mid_03',
+      coralAssetId: 'coral-euphyllia-torch',
+      archetype: 'tentaculate-lps' as const,
+      yawRad: 0.85,
+      scale: 1.45,
+    }
     const first = assembleCoralsOnRockSockets(
       buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json'),
       templates,
@@ -240,7 +275,13 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     const template = templates.get('coral-euphyllia-torch')!
     const crown = template.getObjectByName('euphyllia_polyp_crown') as THREE.Mesh
     const geometry = setMaskGeometry(crown, [[0.1, 0.08, 0.1]], [[Number.NaN, 0, 0, 0]])
-    const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(entry => entry.coralAssetId === 'coral-euphyllia-torch')!
+    const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(entry => entry.coralAssetId === 'coral-euphyllia-torch') ?? {
+      socketName: 'socket_lps_mid_03',
+      coralAssetId: 'coral-euphyllia-torch',
+      archetype: 'tentaculate-lps' as const,
+      yawRad: 0.85,
+      scale: 1.45,
+    }
     const assembly = assembleCoralsOnRockSockets(
       buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json'),
       templates,
@@ -259,7 +300,13 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     const crown = templates.get('coral-euphyllia-torch')!.getObjectByName('euphyllia_polyp_crown') as THREE.Mesh
     const geometry = setMaskGeometry(crown, [[0.1, 0, 0]], [[1, 0, 0, 0]])
     const baseRadius = geometry.boundingSphere!.radius
-    const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(entry => entry.coralAssetId === 'coral-euphyllia-torch')!
+    const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(entry => entry.coralAssetId === 'coral-euphyllia-torch') ?? {
+      socketName: 'socket_lps_mid_03',
+      coralAssetId: 'coral-euphyllia-torch',
+      archetype: 'tentaculate-lps' as const,
+      yawRad: 0.85,
+      scale: 1.45,
+    }
     const assembly = assembleCoralsOnRockSockets(
       buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json'),
       templates,
@@ -315,8 +362,13 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
 
   it('instantiates 3D modular reef obstacles preserving the left pass-through cave arch and grazing anchors', () => {
     const leftHabitat = instantiateModularReefHabitat('left', 4.2, { x: -2.65, y: -2.72, z: -1.1 }, 'reef-0', 0)
-    expect(leftHabitat.obstacles.length).toBe(8)
-    expect(leftHabitat.anchors.length).toBe(3)
+    // AQ-82: 7 measured rock parts + 3 tight calcified-base boxes for the
+    // branching-SPS crest stalks; the monolithic coral-canopy-crest box is gone.
+    expect(leftHabitat.obstacles.length).toBe(10)
+    expect(leftHabitat.obstacles.filter(obs => obs.id.includes('coral-canopy-crest'))).toHaveLength(0)
+    expect(leftHabitat.obstacles.filter(obs => obs.id.includes('coral-base-'))).toHaveLength(3)
+    // AQ-82: 12 socket-derived anchors + 6 ledge anchors (3 grazing + 3 perch) + 1 sand burrow.
+    expect(leftHabitat.anchors.length).toBe(19)
 
     // The cave opening at the center of the left island (localX=0, localY=0.06 -> worldX=-2.65, worldY=-2.468)
     // must NOT be inside any of the lower rock band obstacles (rock-part-01..06 flank left and right of the cave).
@@ -331,6 +383,115 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
         cavePoint.z <= obs.bounds.max.z,
     )
     expect(containingObstacles).toHaveLength(0)
+  })
+
+  it('derives socket anchors from the measured socket reports, not invented positions (AQ-82 AC #2)', () => {
+    for (const islandKind of ['left', 'right'] as const) {
+      const report = JSON.parse(
+        readFileSync(new URL(`../assets/corals/live-rock-island-${islandKind}-socket-report.json`, import.meta.url), 'utf8'),
+      )
+      const table = SOCKET_ANCHOR_POSITIONS_M[islandKind]
+      expect(Object.keys(table).sort()).toEqual(report.supportedSockets.map((socket: { name: string }) => socket.name).sort())
+      for (const socket of report.supportedSockets) {
+        const [x, y, z] = table[socket.name]!
+        expect(Math.abs(x - socket.positionM[0])).toBeLessThan(1e-4)
+        expect(Math.abs(y - socket.positionM[1])).toBeLessThan(1e-4)
+        expect(Math.abs(z - socket.positionM[2])).toBeLessThan(1e-4)
+      }
+    }
+  })
+
+  it('emits typed socket-derived anchors for every interaction kind and no unmounted socket (AQ-82 AC #2)', () => {
+    const leftHabitat = instantiateModularReefHabitat('left', 4.5, { x: -2.35, y: -2.7, z: -1.35 }, 'reef-0', 0.08)
+    const rightHabitat = instantiateModularReefHabitat('right', 4.3, { x: 2.65, y: -2.7, z: -1.2 }, 'reef-1', -0.1)
+    expect(rightHabitat.obstacles.length).toBe(4)
+    expect(rightHabitat.anchors.length).toBe(18)
+    const all = [...leftHabitat.anchors, ...rightHabitat.anchors]
+    const byType = (anchor: string) => all.filter(item => item.anchor === anchor)
+    expect(byType('hostAnemone')).toHaveLength(1)
+    expect(byType('hostAnemone')[0]!.id).toContain('socket_anemone_crevice_01')
+    expect(byType('branchingCoralShelter')).toHaveLength(6)
+    expect(byType('branchingCoralRefuge')).toHaveLength(6)
+    expect(byType('foragingPatch')).toHaveLength(10)
+    expect(byType('grazingSurface')).toHaveLength(6)
+    expect(byType('rockPerch')).toHaveLength(6)
+    expect(byType('sandBurrowEntrance')).toHaveLength(2)
+    // Every listed species is profile-compatible with its anchor (never a substituted type).
+    for (const anchor of all) {
+      expect(anchor.compatibleSpecies!.length).toBeGreaterThan(0)
+      for (const species of anchor.compatibleSpecies!) {
+        expect(isSpeciesCompatibleWithAnchor(species, anchor)).toBe(true)
+      }
+    }
+    // An unmounted socket is a bare rock feature, not a coral interaction:
+    // with no mounts, only the ledge + burrow anchors remain.
+    const bare = instantiateModularReefHabitat('left', 4.5, { x: -2.35, y: -2.7, z: -1.35 }, 'reef-0', 0.08, [])
+    expect(bare.obstacles.length).toBe(7)
+    expect(bare.anchors.length).toBe(7)
+    expect(bare.anchors.every(item => item.anchor === 'grazingSurface' || item.anchor === 'rockPerch' || item.anchor === 'sandBurrowEntrance')).toBe(true)
+  })
+
+  it('keeps every derived anchor a safe point under reduced anchor-approach clearance at desktop and mobile placements (AQ-82 AC #1/#3)', () => {
+    const placements = [
+      instantiateModularReefHabitat('left', 4.5, { x: -2.35, y: -2.7, z: -1.35 }, 'reef-0', 0.08),
+      instantiateModularReefHabitat('right', 4.3, { x: 2.65, y: -2.7, z: -1.2 }, 'reef-1', -0.1),
+      instantiateModularReefHabitat('left', 3.4, { x: -0.15, y: -2.7, z: -1.35 }, 'reef-0', 0.06),
+    ]
+    for (const habitat of placements) {
+      for (const anchor of habitat.anchors) {
+        // Ledge grazing/perch anchors are the documented exception: they
+        // hover 0.60 m above the ledge inside the coral canopy (and inside
+        // the expanded rock AABB) by design — pinned by
+        // reef-mesh-navigation.test.ts — so AABB routing approaches them
+        // via the interaction offset rather than onto them.
+        if (anchor.anchor === 'grazingSurface' || anchor.anchor === 'rockPerch') continue
+        // Reduced clearance is per-species; the anchor must be reachable by
+        // its largest compatible species (body radius + 0.03 margin).
+        const clearance = Math.max(...anchor.compatibleSpecies!.map(species => fishBodyRadiusM(species))) + 0.03
+        expect(
+          isWaterSegmentSafe({
+            start: anchor.position,
+            target: anchor.position,
+            waterBounds: AQUARIUM_WATER_BOUNDS,
+            obstacles: habitat.obstacles,
+            fishClearanceRadius: clearance,
+          }),
+        ).toBe(true)
+      }
+    }
+    // Combined desktop habitat: anchors must also clear the other island.
+    const combined = {
+      obstacles: [...placements[0]!.obstacles, ...placements[1]!.obstacles],
+      anchors: [...placements[0]!.anchors, ...placements[1]!.anchors],
+    }
+    expect(combined.obstacles.length).toBeLessThanOrEqual(32)
+    expect(combined.anchors.length).toBeLessThanOrEqual(128)
+    for (const anchor of combined.anchors) {
+      if (anchor.anchor === 'grazingSurface' || anchor.anchor === 'rockPerch') continue
+      const clearance = Math.max(...anchor.compatibleSpecies!.map(species => fishBodyRadiusM(species))) + 0.03
+      expect(
+        isWaterSegmentSafe({
+          start: anchor.position,
+          target: anchor.position,
+          waterBounds: AQUARIUM_WATER_BOUNDS,
+          obstacles: combined.obstacles,
+          fishClearanceRadius: clearance,
+        }),
+      ).toBe(true)
+    }
+  })
+
+  it('clamps outer-socket anchors into the swimming volume instead of emitting unreachable ones (AQ-82)', () => {
+    const leftHabitat = instantiateModularReefHabitat('left', 4.5, { x: -2.35, y: -2.7, z: -1.35 }, 'reef-0', 0.08)
+    const rightHabitat = instantiateModularReefHabitat('right', 4.3, { x: 2.65, y: -2.7, z: -1.2 }, 'reef-1', -0.1)
+    const leftPlate = leftHabitat.anchors.find(item => item.id.includes('socket_plate_ledge_01'))!
+    const rightPlate = rightHabitat.anchors.find(item => item.id.includes('socket_plate_ledge_04'))!
+    // The islands extend past the tank walls; the clamp keeps the anchor
+    // inside by the largest anchor-approach clearance (0.08 + 0.03).
+    expect(leftPlate.position.x).toBeCloseTo(AQUARIUM_WATER_BOUNDS.min.x + 0.11, 6)
+    expect(rightPlate.position.x).toBeCloseTo(AQUARIUM_WATER_BOUNDS.max.x - 0.11, 6)
+    const burrow = leftHabitat.anchors.find(item => item.anchor === 'sandBurrowEntrance')!
+    expect(burrow.position.y).toBeCloseTo(-2.13, 6)
   })
 
   it('rejects mismatched socket archetypes', () => {

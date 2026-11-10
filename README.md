@@ -41,6 +41,17 @@ npm run build
 
 For a production Node build, `npm run build` uses the Nitro Vite plugin and `npm start` serves `.output/server/index.mjs`. See [deployment notes](docs/deployment.md) before exposing it on a network.
 
+## Continuous integration
+
+Every pull request (and every push to `gemini_control` or `main`) runs the same checks in GitHub Actions (`.github/workflows/ci.yml`): `npm ci`, `npm run typecheck`, `npm test`, and `npm run build`. To block merges when a check fails, a repository admin must require the workflow's **Tests, typecheck, and build** status check for `gemini_control` in Settings → Branches → branch protection rules. (AQ-90)
+
 ## Backlog
 
 Project work is tracked in `backlog/` with the Backlog.md CLI. At the start of a work session, read all of [AGENTS.md](AGENTS.md), then [AGENT_TASKS.md](AGENT_TASKS.md) for the current checkpoint and task order. The active Backlog task is authoritative for its scope and acceptance criteria. Use `npm run backlog -- instructions overview`, `npm run backlog -- task list --plain`, `npm run backlog -- task view AQ-50 --plain`, and `npm run backlog -- task edit ...` to inspect or update work. Follow the dependency order in [AGENT_TASKS.md](AGENT_TASKS.md); mark tasks Done only after root review.
+
+### Temporary Lead Handoff (`gemini_control` branch)
+
+On the `gemini_control` branch, **Gemini Argon** acts as the short-term lead developer managing work while the Codex designated lead is out of tokens for a few days:
+
+- **Task Status Policy**: Do not mark tasks as fully complete (`Done`). Instead, mark reviewed tasks as `gemini approved` and leave their status as `In Progress`.
+- **Codex Return & Final Completion**: Only the Codex designated lead can move tasks to `Done` (completed). When the Codex lead returns and takes control back after Gemini Argon has worked for a while, it must check and review the `gemini approved` items first.

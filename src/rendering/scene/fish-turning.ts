@@ -37,7 +37,8 @@ const BASE_SPINE_BEND_SCALE_RAD = 0.68
 const STARTLE_SPINE_BEND_GAIN = 1.25
 const SPINE_SEGMENT_CLAMP_GAIN = 1.25
 const MAX_TRAVELING_WAVE_GAIN = 1.2
-const MAX_SUMMED_SPINE_BEND_RAD = BASE_SPINE_BEND_SCALE_RAD * STARTLE_SPINE_BEND_GAIN * SPINE_SEGMENT_CLAMP_GAIN * MAX_TRAVELING_WAVE_GAIN
+/** Worst-case summed spine bend (rad), including startle / segment-clamp / travelling-wave gains. */
+export const MAX_SUMMED_SPINE_BEND_RAD = BASE_SPINE_BEND_SCALE_RAD * STARTLE_SPINE_BEND_GAIN * SPINE_SEGMENT_CLAMP_GAIN * MAX_TRAVELING_WAVE_GAIN
 const MAX_PECTORAL_BRAKE_RAD = 0.42
 const MAX_PECTORAL_GAIN = 1.15
 const MAX_PECTORAL_FLARE_RAD = MAX_PECTORAL_BRAKE_RAD * MAX_PECTORAL_GAIN
@@ -136,6 +137,7 @@ export function fishTurningEnvelopeContract(rig: FishTurningRig): FishTurningEnv
 export function getRigArchetypeForSpecies(speciesId: string): FishRigArchetype {
   switch (speciesId) {
     case 'yellow-tang':
+    case 'desjardins-sailfin-tang':
       return 'labriform_rigid_disc'
     case 'blue-tang':
       return 'labriform_cruiser'

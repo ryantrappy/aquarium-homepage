@@ -3,6 +3,34 @@ import * as THREE from 'three'
 export const CORAL_RAW_MASK_SCHEMA = 'coral-raw-masks-v1' as const
 export const CORAL_FLEXIBILITY_EXPONENT = 1.8 as const
 
+/**
+ * Interim healthy-tissue grade (AQ-88): the shared saturation boost applied
+ * to the regraded coral tissue colour, pulling bleached lavender/white
+ * toward saturated tissue without touching any asset. The GLSL in
+ * `injectCoralRawMaskShader` interpolates this constant; the CPU reference
+ * `evaluateCoralTissueColor` mirrors it exactly.
+ */
+export const CORAL_TISSUE_SATURATION_BOOST = 1.18 as const
+/** How far a pale tip colour is pulled toward its base colour (AQ-88), so
+ * near-white tips stop washing the colony out. */
+export const CORAL_TIP_BASE_PULL = 0.25 as const
+/** Per-channel ceiling on graded tissue colour (AQ-88): no channel may blow
+ * out to near-white, however bright the raw texture underneath is. */
+export const CORAL_TISSUE_HIGHLIGHT_CEILING = 0.92 as const
+/** Default regrade strength (AQ-88): corals without an explicit palette
+ * override are graded toward the healthy default palette instead of
+ * showing the raw bleached texture (the old default was 0.0). */
+export const CORAL_DEFAULT_REGRADE = 0.92 as const
+/** Saturated healthy-tissue default palette (AQ-88): deep rose base and tip
+ * over a dark crevice, replacing the old pale lavender defaults
+ * (#c490ab / #f2dce8 / #4a3048). Per-mount overrides in reef-assembly.ts
+ * still win wherever they are supplied. */
+export const CORAL_DEFAULT_PALETTE = Object.freeze({
+  baseColor: '#a84a72',
+  tipColor: '#cf6f9e',
+  creviceColor: '#3d2233',
+})
+
 export type CoralPrimitiveRole = 'coral-rigid' | 'coral-soft'
 
 export type CoralPaletteOverride = {
@@ -26,11 +54,17 @@ export type CoralFlowUniforms = {
   uSubsurfaceStrength: { value: number }
   uFluorescenceStrength: { value: number }
   uFluorescenceTint: { value: THREE.Color }
+  /** Actinic scaling of the mask-driven fluorescence (AQ-70.6 AC #3):
+   * 1.0 at the default fixture white balance; the aquarium passes
+   * `evaluateFluorescenceActinicFactor(fixtureWhiteBalance)` here. */
+  uActinicLevel: { value: number }
   uPaletteBase: { value: THREE.Color }
   uPaletteTip: { value: THREE.Color }
   uPaletteCrevice: { value: THREE.Color }
   uPaletteRegrade: { value: number }
   uRoughnessOverride: { value: number }
+  /** 0 = standard coral, 1 = anemone verrucose column & striated oral disc, 2 = anemone hydrostat tentacle crown */
+  uAnemoneMode: { value: number }
 }
 
 export type CoralMaterialOptions = {
@@ -41,7 +75,11 @@ export type CoralMaterialOptions = {
   subsurfaceStrength?: number
   fluorescenceStrength?: number
   fluorescenceTint?: THREE.ColorRepresentation
+  /** Actinic scaling of the mask-driven fluorescence (AQ-70.6 AC #3);
+   * 1.0 preserves the current glow at the default fixture balance. */
+  actinicLevel?: number
   paletteOverride?: CoralPaletteOverride
+  anemoneMode?: 'column' | 'tentacles'
   paused?: boolean
   reducedMotion?: boolean
 }
@@ -86,6 +124,51 @@ export function evaluateCoralFlexibilityWeight(rawR: number, role: CoralPrimitiv
 export function evaluateCoralContactAoFactor(rawA: number): number {
   const ao = clamp01(rawA)
   return 0.28 + 0.72 * ao
+}
+
+export type CoralTissueGradeInput = Readonly<{
+  baseColor: Readonly<{ r: number; g: number; b: number }>
+  tipColor: Readonly<{ r: number; g: number; b: number }>
+  creviceColor: Readonly<{ r: number; g: number; b: number }>
+  /** `coralHeightMask * 0.55 + coralMaskAlpha * 0.45` in the shader. */
+  heightTerm: number
+  /** `coralTipMask * 0.65 + polypHighlight * 0.35` in the shader. */
+  tipTerm: number
+  /** Luminance of the raw texture texel. */
+  texLuma: number
+  /** Micro-polyp stipple highlight (0..1) from the shader noise field. */
+  polypHighlight: number
+}>
+
+/**
+ * Deterministic CPU reference for the coral tissue grade in
+ * `injectCoralRawMaskShader` (AQ-88). Mirrors the GLSL exactly: crevice →
+ * base → (tip pulled toward base) gradient, brightness factor, saturation
+ * boost, and highlight ceiling. Used for unit verification that pale
+ * lavender/white inputs grade toward saturated healthy tissue; the shader
+ * remains the runtime path. Fluorescence and subsurface terms are
+ * deliberately not part of this grade — they stay mask-driven, and no
+ * blanket emissive is added anywhere.
+ */
+export function evaluateCoralTissueColor(input: CoralTissueGradeInput): { r: number; g: number; b: number } {
+  const mix = (a: number, b: number, t: number) => a + (b - a) * clamp01(t)
+  const mix3 = (a: Readonly<{ r: number; g: number; b: number }>, b: Readonly<{ r: number; g: number; b: number }>, t: number) => ({
+    r: mix(a.r, b.r, t),
+    g: mix(a.g, b.g, t),
+    b: mix(a.b, b.b, t),
+  })
+  let grad = mix3(input.creviceColor, input.baseColor, smoothstep(0.02, 0.34, input.heightTerm))
+  const pulledTip = mix3(input.tipColor, input.baseColor, CORAL_TIP_BASE_PULL)
+  grad = mix3(grad, pulledTip, smoothstep(0.22, 0.92, input.tipTerm))
+  const brightness = 0.86 + 0.22 * input.texLuma + 0.16 * (input.polypHighlight - 0.4)
+  grad = { r: grad.r * brightness, g: grad.g * brightness, b: grad.b * brightness }
+  const luma = 0.299 * grad.r + 0.587 * grad.g + 0.114 * grad.b
+  grad = mix3({ r: luma, g: luma, b: luma }, grad, CORAL_TISSUE_SATURATION_BOOST)
+  return {
+    r: Math.min(grad.r, CORAL_TISSUE_HIGHLIGHT_CEILING),
+    g: Math.min(grad.g, CORAL_TISSUE_HIGHLIGHT_CEILING),
+    b: Math.min(grad.b, CORAL_TISSUE_HIGHLIGHT_CEILING),
+  }
 }
 
 /**
@@ -215,7 +298,6 @@ uniform float uRoleIsSoft;
 varying vec4 vCoralMask;
 varying vec3 vCoralViewDir;
 varying vec3 vCoralLocalPos;
-varying vec3 vCoralWorldPos;
 ` + shader.vertexShader
 
   // Depth shaders put <beginnormal_vertex> inside USE_DISPLACEMENTMAP.
@@ -253,8 +335,6 @@ transformed.y -= (1.0 - skirtTuck) * 0.008;
 transformed.x += coralSwayX * coralFlex;
 transformed.z += coralSwayZ * coralFlex;
 transformed.y += -0.18 * (abs(coralSwayX) + abs(coralSwayZ)) * coralFlex * coralFlex;
-vec4 coralWp = modelMatrix * vec4(transformed, 1.0);
-vCoralWorldPos = coralWp.xyz;
 `,
   )
 
@@ -274,15 +354,16 @@ uniform float uMotionScale;
 uniform float uSubsurfaceStrength;
 uniform float uFluorescenceStrength;
 uniform vec3 uFluorescenceTint;
+uniform float uActinicLevel;
 uniform vec3 uPaletteBase;
 uniform vec3 uPaletteTip;
 uniform vec3 uPaletteCrevice;
 uniform float uPaletteRegrade;
 uniform float uRoughnessOverride;
+uniform float uAnemoneMode;
 varying vec4 vCoralMask;
 varying vec3 vCoralViewDir;
 varying vec3 vCoralLocalPos;
-varying vec3 vCoralWorldPos;
 
 float coralHash31(vec3 p) {
   p = fract(p * vec3(0.1031, 0.1030, 0.0973));
@@ -325,15 +406,49 @@ float polypDots = coralNoise3D(vCoralLocalPos * 195.0) * 0.6 + coralNoise3D(vCor
 float polypHighlight = smoothstep(0.46, 0.78, polypDots);
 
 // Soft, cohesive tissue gradient (avoids harsh dark-bottom/white-tip crayon contrast)
+// AQ-88: pull pale tips toward the base, boost tissue saturation, and cap
+// highlights so bleached lavender/white grades toward healthy saturated
+// tissue instead of washing out. Fluorescence stays mask-driven below.
 float texLuma = dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114));
 vec3 naturalGrad = mix(uPaletteCrevice, uPaletteBase, smoothstep(0.02, 0.34, coralHeightMask * 0.55 + coralMaskAlpha * 0.45));
-naturalGrad = mix(naturalGrad, uPaletteTip, smoothstep(0.22, 0.92, coralTipMask * 0.65 + polypHighlight * 0.35));
+vec3 coralTip = mix(uPaletteTip, uPaletteBase, ${CORAL_TIP_BASE_PULL.toFixed(2)});
+naturalGrad = mix(naturalGrad, coralTip, smoothstep(0.22, 0.92, coralTipMask * 0.65 + polypHighlight * 0.35));
 naturalGrad *= (0.86 + 0.22 * texLuma + 0.16 * (polypHighlight - 0.4));
-diffuseColor.rgb = mix(diffuseColor.rgb, naturalGrad, clamp(uPaletteRegrade, 0.0, 1.0));
+float coralLuma = dot(naturalGrad, vec3(0.299, 0.587, 0.114));
+naturalGrad = mix(vec3(coralLuma), naturalGrad, ${CORAL_TISSUE_SATURATION_BOOST.toFixed(2)});
+naturalGrad = min(naturalGrad, vec3(${CORAL_TISSUE_HIGHLIGHT_CEILING.toFixed(2)}));
 
-// Blend basal attachment seamlessly into deep actinic indigo rock shadow so no dark saucer rim is visible
-float rockBaseBlend = smoothstep(0.001, 0.018, vCoralLocalPos.y);
-diffuseColor.rgb = mix(vec3(0.14, 0.12, 0.24), diffuseColor.rgb, rockBaseBlend);
+if (uAnemoneMode > 1.5) {
+  // Anemone_Tentacle_Crown: preserve the Blender 4-band PBR texture detail (longitudinal basal flutes,
+  // per-tentacle hue/luminance variation, and sub-terminal ring) while grading along true tentacle
+  // arc-length h = vCoralMask.r (0 = creamy-ivory fluted root on oral disc -> mid hydrostat shaft -> 1 = glowing acrosphere tip).
+  float hTent = clamp(vCoralMask.r, 0.0, 1.0);
+  float phaseVar = clamp(vCoralMask.b, 0.0, 1.0);
+  vec3 rootCol = uPaletteCrevice * (0.90 + 0.20 * texLuma);
+  vec3 shaftTint = mix(uPaletteBase, uPaletteTip, 0.22 * phaseVar);
+  vec3 shaftCol = mix(diffuseColor.rgb, shaftTint * (0.76 + 0.44 * texLuma), clamp(uPaletteRegrade, 0.0, 1.0));
+  vec3 ringCol = mix(uPaletteCrevice, uPaletteTip, 0.35);
+  float ringBand = exp(-pow((hTent - 0.885) / 0.038, 2.0));
+  vec3 tentCol = mix(rootCol, shaftCol, smoothstep(0.04, 0.32, hTent));
+  tentCol = mix(tentCol, ringCol, ringBand * 0.32);
+  tentCol = mix(tentCol, uPaletteTip, smoothstep(0.86, 0.97, hTent));
+  diffuseColor.rgb = tentCol;
+} else if (uAnemoneMode > 0.5) {
+  // Anemone_Column_Disc: preserve the Blender-baked micro-pebbled verrucae on the 5-lobed pedal column
+  // and the 54 creamy-ivory radial mesentery striations on the oral disc, lightly tinting the column morph.
+  float discMask = smoothstep(0.10, 0.36, coralTipMask);
+  vec3 colTarget = mix(uPaletteCrevice, uPaletteBase, smoothstep(0.18, 0.68, texLuma)) * (0.78 + 0.45 * texLuma);
+  vec3 discTarget = mix(diffuseColor.rgb, uPaletteTip * (0.75 + 0.35 * texLuma), 0.25);
+  vec3 target = mix(colTarget, discTarget, discMask);
+  diffuseColor.rgb = mix(diffuseColor.rgb, target, clamp(uPaletteRegrade, 0.0, 1.0));
+  float footBlend = smoothstep(-0.024, -0.014, vCoralLocalPos.y);
+  diffuseColor.rgb = mix(vec3(0.14, 0.12, 0.24), diffuseColor.rgb, footBlend);
+} else {
+  diffuseColor.rgb = mix(diffuseColor.rgb, naturalGrad, clamp(uPaletteRegrade, 0.0, 1.0));
+  // Blend basal attachment seamlessly into deep actinic indigo rock shadow so no dark saucer rim is visible
+  float rockBaseBlend = smoothstep(0.001, 0.018, vCoralLocalPos.y);
+  diffuseColor.rgb = mix(vec3(0.14, 0.12, 0.24), diffuseColor.rgb, rockBaseBlend);
+}
 `,
   )
 
@@ -350,12 +465,14 @@ if (uRoughnessOverride > 0.0) {
     '#include <normal_fragment_maps>',
     `#include <normal_fragment_maps>
 // Velvety micro-polyp normal bump breaks up smooth specular reflections on domes & branches
+// (skipped on smooth hydrostat anemone tentacles & verrucose column which carry dedicated Blender normal maps)
 float pEps = 0.0025;
 float p0 = coralNoise3D(vCoralLocalPos * 210.0);
 float px = coralNoise3D((vCoralLocalPos + vec3(pEps, 0.0, 0.0)) * 210.0);
 float py = coralNoise3D((vCoralLocalPos + vec3(0.0, pEps, 0.0)) * 210.0);
 float pz = coralNoise3D((vCoralLocalPos + vec3(0.0, 0.0, pEps)) * 210.0);
-normal = normalize(normal - vec3(px - p0, py - p0, pz - p0) * 0.28);
+float bumpScale = uAnemoneMode > 0.5 ? 0.03 : 0.28;
+normal = normalize(normal - vec3(px - p0, py - p0, pz - p0) * bumpScale);
 `,
   )
 
@@ -367,16 +484,16 @@ reflectedLight.indirectSpecular *= coralContactAo * 0.35;
 reflectedLight.directSpecular *= 0.28;
 reflectedLight.directDiffuse *= coralContactAo;
 
-// Restrained upward-facing reef caustic shimmer (AQ-14.2)
-float cTime = uTime * uMotionScale;
-float cWave1 = sin(cTime * 1.38 + vCoralWorldPos.x * 2.1 + vCoralWorldPos.z * 1.7);
-float cWave2 = cos(cTime * 2.32 - vCoralWorldPos.x * 1.6 + vCoralWorldPos.z * 2.3);
-float causticBand = smoothstep(0.15, 0.88, 0.5 + 0.25 * (cWave1 + cWave2)) * max(0.0, normal.y);
-reflectedLight.directDiffuse *= (1.0 + 0.16 * causticBand);
-
+// Restrained upward-facing reef caustic shimmer (AQ-14.2) was removed in
+// AQ-70.6: the shared cellular caustic chunk (caustics.ts, applied to
+// coral materials in rebuildHabitat) is now the one caustic system, so the
+// scene can never show two disagreeing caustic patterns on the same coral.
 float coralRim = pow(1.0 - clamp(dot(normal, normalize(vCoralViewDir)), 0.0, 1.0), 1.85);
 vec3 coralSss = diffuseColor.rgb * (0.45 + 0.55 * coralTipMask) * coralRim * uSubsurfaceStrength * coralContactAo;
-vec3 coralGlow = uFluorescenceTint * pow(max(coralTipMask, polypHighlight * 0.65), 1.35) * (0.40 + 0.60 * coralRim) * uFluorescenceStrength * coralContactAo;
+// AQ-70.6 AC #3: fluorescence stays mask-driven (COLOR_0.g tip mask +
+// polyp highlight) and now scales with the fixture's actinic share via
+// uActinicLevel; no blanket emissive is added anywhere.
+vec3 coralGlow = uFluorescenceTint * pow(max(coralTipMask, polypHighlight * 0.65), 1.35) * (0.40 + 0.60 * coralRim) * uFluorescenceStrength * uActinicLevel * coralContactAo;
 totalEmissiveRadiance += coralSss + coralGlow;
 `,
   )
@@ -580,16 +697,26 @@ export function applyCoralRawMaskMaterial(
     uPrimaryFrequencyHz: { value: options.primaryFrequencyHz ?? DEFAULT_PRIMARY_FREQ_HZ },
     uSecondaryFrequencyHz: { value: options.secondaryFrequencyHz ?? DEFAULT_SECONDARY_FREQ_HZ },
     uRoleIsSoft: { value: roleIsSoft },
-    uSubsurfaceStrength: { value: pal?.subsurfaceStrength ?? options.subsurfaceStrength ?? (options.role === 'coral-soft' ? 0.36 : 0.26) },
+    uSubsurfaceStrength: { value: pal?.subsurfaceStrength ?? options.subsurfaceStrength ?? (options.role === 'coral-soft' ? 0.38 : 0.28) },
     uFluorescenceStrength: { value: pal?.fluorescenceStrength ?? options.fluorescenceStrength ?? (options.role === 'coral-soft' ? 0.16 : 0.10) },
+    uActinicLevel: {
+      value:
+        options.actinicLevel !== undefined && Number.isFinite(options.actinicLevel)
+          ? Math.min(2, Math.max(0, options.actinicLevel))
+          : 1,
+    },
     uFluorescenceTint: {
       value: new THREE.Color(options.fluorescenceTint ?? (pal?.tipColor ?? (options.role === 'coral-soft' ? '#f0d5e4' : '#e2d4f0'))),
     },
-    uPaletteBase: { value: new THREE.Color(pal?.baseColor ?? '#c490ab') },
-    uPaletteTip: { value: new THREE.Color(pal?.tipColor ?? '#f2dce8') },
-    uPaletteCrevice: { value: new THREE.Color(pal?.creviceColor ?? '#4a3048') },
-    uPaletteRegrade: { value: pal?.regradeStrength ?? 0.0 },
-    uRoughnessOverride: { value: pal?.roughness ?? (options.role === 'coral-soft' ? 0.78 : 0.82) },
+    // AQ-88: saturated healthy-tissue defaults with the regrade on, so a
+    // coral without an explicit palette override no longer shows the raw
+    // bleached texture. Fluorescence strengths are unchanged (mask-driven).
+    uPaletteBase: { value: new THREE.Color(pal?.baseColor ?? CORAL_DEFAULT_PALETTE.baseColor) },
+    uPaletteTip: { value: new THREE.Color(pal?.tipColor ?? CORAL_DEFAULT_PALETTE.tipColor) },
+    uPaletteCrevice: { value: new THREE.Color(pal?.creviceColor ?? CORAL_DEFAULT_PALETTE.creviceColor) },
+    uPaletteRegrade: { value: pal?.regradeStrength ?? CORAL_DEFAULT_REGRADE },
+    uRoughnessOverride: { value: pal?.roughness ?? (options.role === 'coral-soft' ? 0.74 : 0.78) },
+    uAnemoneMode: { value: options.anemoneMode === 'tentacles' ? 2 : options.anemoneMode === 'column' ? 1 : 0 },
   }
 
   const cacheKey = `coral-raw-masks-v1:${options.role}`

@@ -5,16 +5,16 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-03T04:25:00Z'
-updated_date: '2026-11-05 03:34'
+updated_date: '2026-11-08T04:47:00Z'
 labels: []
 dependencies: []
 references:
   - docs/design.md
 documentation:
   - docs/requirements.md
-priority: low
+priority: '38'
 type: feature
-ordinal: 43000
+ordinal: 38
 ---
 
 ## Description

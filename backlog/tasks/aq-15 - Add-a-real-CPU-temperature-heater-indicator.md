@@ -5,16 +5,16 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-03T04:25:00Z'
-updated_date: '2026-11-03T18:36:00Z'
+updated_date: '2026-11-08T04:47:00Z'
 labels: []
 dependencies: []
 references:
   - docs/design.md
 documentation:
   - docs/requirements.md
-priority: low
+priority: '36'
 type: feature
-ordinal: 41000
+ordinal: 36
 ---
 
 ## Description

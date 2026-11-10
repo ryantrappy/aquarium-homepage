@@ -3,11 +3,11 @@ id: AQ-22
 title: >-
   Animate Banggai cardinalfish (Pterapogon kauderni) with species-specific reef
   behavior
-status: To Do
+status: In Progress
 assignee:
   - '@Luna'
 created_date: 2026-11-03 04:37
-updated_date: '2026-11-04T02:31:00Z'
+updated_date: '2026-11-08T21:37:00Z'
 labels:
   - reef-fish
   - animation
@@ -21,9 +21,9 @@ documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
   - docs/open-source-asset-and-motion-research.md
-priority: medium
+priority: '27'
 type: enhancement
-ordinal: 36000
+ordinal: 27
 ---
 
 ## Description
@@ -37,8 +37,8 @@ Roster ID: `banggai-cardinalfish`. Implement this fish as an independently revie
 - [ ] #1 The rendered fish visibly matches the Banggai cardinalfish (Pterapogon kauderni) visual baseline (non-brooding adult silver body with black bars, white spots, tasselled first dorsal fin, and long fin rays), checked against the species references linked on this task.
 - [ ] #2 Its species-specific behavior is visible: hold a composed hover with gentle fin paddling and slight vertical adjustments while keeping the long fin rays readable.
 - [ ] #3 Real-species video review confirms visible body and fin articulation appropriate to this fish, plausible turns, and any natural hovering or pauses; rigid sprite sliding without articulated fish motion does not count.
-- [ ] #4 Roster ID `banggai-cardinalfish` is available as a fish choice for new and existing services and maps to the correct fish, readable label, and service link; the fish occupies its described habitat position and stays within the aquarium.
-- [ ] #5 Shared pause, stopping when the page is hidden, and reduced-motion behavior work for this fish without breaking its service link.
+- [x] #4 Roster ID `banggai-cardinalfish` is available as a fish choice for new and existing services and maps to the correct fish, readable label, and service link; the fish occupies its described habitat position and stays within the aquarium.
+- [x] #5 Shared pause, stopping when the page is hidden, and reduced-motion behavior work for this fish without breaking its service link.
 <!-- AC:END -->
 
 ## Definition of Done
@@ -46,6 +46,12 @@ Roster ID: `banggai-cardinalfish`. Implement this fish as an independently revie
 - [ ] #1 Root agent reviewed the completed work before marking the task Done.
 - [ ] #2 Implementation follows project policy in AGENTS.md: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-11-08 audit: Species 3D rigged GLB model, behavior profile (src/lib/fish-behavior.ts), locomotion signature (src/rendering/scene/species-locomotion-extensions.ts), Lighthill flex gait (src/rendering/scene/fish-body-flex.ts), and service-link / pause / reduced-motion handling are active in the runtime and verified by automated tests (ACs #4 & #5). Moved from To Do to In Progress.
+<!-- SECTION:NOTES:END -->
 
 ## Comments
 

@@ -139,6 +139,31 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     const anchor = overlay.querySelector<HTMLAnchorElement>('[data-service-id="first"]')!
     expect(anchor.href).toBe(edited.url + '/'); expect(anchor.title).toContain('Latest name'); expect(anchor.getAttribute('aria-label')).toContain('Latest name')
   })
+  it('uses VSM soft shadows, not the removed PCFSoftShadowMap (AQ-70.4 AC #3)', async () => {
+    await start()
+    const renderer = state.renderer as unknown as { shadowMap: { enabled: boolean; type: number } }
+    expect(renderer.shadowMap.enabled).toBe(true)
+    expect(renderer.shadowMap.type).toBe(THREE.VSMShadowMap)
+    expect(renderer.shadowMap.type).not.toBe(THREE.PCFSoftShadowMap)
+  })
+  it('keeps the depth-haze and shaft planes tall enough that no plane edge crosses the water (visual band)', async () => {
+    await start()
+    const planes: THREE.Mesh[] = []
+    state.renderer!.scene!.traverse(object => {
+      if (object instanceof THREE.Mesh && object.material instanceof THREE.ShaderMaterial) {
+        const uniforms = object.material.uniforms as Record<string, { value: unknown } | undefined>
+        if (uniforms.uHazeAlpha || uniforms.uShaftAlpha) planes.push(object)
+      }
+    })
+    expect(planes).toHaveLength(2)
+    for (const plane of planes) {
+      const height = (plane.geometry as THREE.PlaneGeometry).parameters.height
+      const top = plane.position.y + height / 2
+      // The overview frame tops out near y 4.8 at the haze depth; a plane
+      // top inside the frame reads as a hard horizontal band across the tank.
+      expect(top).toBeGreaterThan(4.8)
+    }
+  })
   it('initializes the fish heading and first extension snapshot with the same seeded yaw', async () => {
     const snapshots: FishExtensionSnapshot[] = []
     const capture = {
@@ -148,6 +173,8 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     }
     const extensions: FishExtensionConfig = { defaults: { [capture.id]: { operation: 'add', extension: capture } } }
     await start([service('heading', 'yellow-tang')], extensions)
+    // One snapshot: the service fish only — the display sailfin no longer
+    // spawns by default (Ryan 2026-11-09: "take it out of the tank").
     expect(snapshots).toHaveLength(1)
     expect(state.created[0].yaw).toBe(snapshots[0].yaw)
     expect(state.created[0].yaw).toBeGreaterThanOrEqual(0)
@@ -167,7 +194,7 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     expect(rootFor('second')).toBeUndefined(); expect(rootFor('first')).toBe(firstRoot)
     update([service('first', 'blue-tang'), service('third', 'royal-gramma')])
     expect(first.extensions.dispose).toHaveBeenCalledTimes(1); expect(rootFor('first')).not.toBe(firstRoot); expect(state.created).toHaveLength(4)
-  })
+  }, 15000) // AQ-90: async GLB start() exceeds the 5 s default under full-suite load; passes in isolation.
   it('retains prior fish on a true no-fit update and reuses them when configuration fits again', async () => {
     await start(); advance(); const prior = state.created[0], root = rootFor('first'), pose = { ...prior.position }
     state.blockedSpawn = true; update([service('first'), service('second', 'yellow-tang'), service('new')])
@@ -210,6 +237,26 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     state.blockedSpawn = false; update([{ ...next, name: 'Fitting replacement' }])
     expect(status).toHaveBeenLastCalledWith('ready'); expect(pending.texture.dispose).toHaveBeenCalledTimes(1)
   })
+  it('lazy-loads species beyond the first three and swaps sprites to GLBs in place (AQ-76 AC #2)', async () => {
+    const services = [service('one', 'ocellaris-clownfish'), service('two', 'yellow-tang'), service('three', 'royal-gramma'), service('four', 'blue-tang'), service('five', 'firefish')]
+    await start(services)
+    // Drive the animation loop so the ~0.24 s label cadence re-pumps the
+    // lazy queue (the idle-callback pump alone is timing-dependent).
+    for (let i = 0; i < 6; i++) advance()
+    // Phase 0 blocks first paint on the first 3 configured species only:
+    // the 4th and 5th start as thumbnail sprites, links already clickable.
+    const rootFour = rootFor('four'), rootFive = rootFor('five')
+    expect(rootFour).toBeDefined(); expect(rootFive).toBeDefined()
+    expect(meshFor('four')).toBeUndefined(); expect(meshFor('five')).toBeUndefined()
+    expect(overlay.querySelector<HTMLAnchorElement>('[data-service-id="four"]')!.title).toContain('artwork preview')
+    // The background queue swaps each sprite to its GLB in place: same root
+    // and motion, no new inhabitant, and the preview suffix drops.
+    await vi.waitFor(() => expect(meshFor('four')).toBeDefined())
+    await vi.waitFor(() => expect(meshFor('five')).toBeDefined())
+    expect(rootFor('four')).toBe(rootFour); expect(rootFor('five')).toBe(rootFive)
+    expect(state.created).toHaveLength(5)
+    expect(overlay.querySelector<HTMLAnchorElement>('[data-service-id="four"]')!.title).not.toContain('artwork preview')
+  }, 15000)
   it('uses current metadata for delayed artwork failure and ignores callbacks from a removed generation', async () => {
     await start([service('art', 'artwork-fixture')]); const old = state.textures[0]
     update([{ ...service('art', 'artwork-fixture'), name: 'Renamed artwork', url: 'https://renamed.example.test' }])
@@ -221,5 +268,126 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     old.error?.(Error('late stale error')); old.load?.()
     expect(replacement.hasAttribute('data-artwork-error')).toBe(false); expect(replacement.title).not.toContain('unavailable')
     expect(old.texture.dispose).toHaveBeenCalledTimes(1)
+  })
+})
+
+
+describe('camera zoom (AQ-62)', () => {
+  // advance() replays timestamps 0 and 50, so the frame clock yields steps
+  // only on the first call. Drive the mocked loop with increasing
+  // timestamps here so camera smoothing actually runs.
+  let now = 1000
+  // 100 ms per frame = 6 simulation steps, so the camera damps ~45% of the
+  // remaining distance each frame and settles in about a dozen frames.
+  function tickFrames(count: number) {
+    for (let i = 0; i < count; i++) { now += 100; state.renderer!.loop?.(now) }
+  }
+  function settle() { tickFrames(12) }
+
+  it('starts at the full-tank overview and is not zoomed', async () => {
+    await start()
+    expect(controller.isZoomed()).toBe(false)
+    expect(controller.getCameraZoom().distance).toBe(9)
+    expect(controller.getCameraZoom().targetX).toBe(0)
+  })
+
+  it('zooms in and out in steps, clamps at the limits, and resets', async () => {
+    await start()
+    expect(controller.zoomIn()).toBe(true)
+    expect(controller.isZoomed()).toBe(true)
+    settle()
+    expect(controller.getCameraZoom().distance).toBeCloseTo(9 / 1.35, 2)
+    expect(controller.zoomOut()).toBe(false)
+    expect(controller.isZoomed()).toBe(false)
+    settle()
+    expect(controller.getCameraZoom().distance).toBeCloseTo(9, 2)
+    // Repeated zoom-ins stop at the closest distance, never inside the reef.
+    for (let i = 0; i < 10; i++) controller.zoomIn()
+    settle()
+    expect(controller.getCameraZoom().distance).toBeCloseTo(4.5, 2)
+    expect(controller.resetZoom()).toBe(false)
+    expect(controller.isZoomed()).toBe(false)
+  }, 30000) // AQ-70.3 drive-by, same root cause as the AQ-90 15 s raise:
+  // async GLB start() under full-suite load. This test takes ~14.2 s on
+  // the clean base (94% of 15 s); the added budget-test worker tips it
+  // over. The test itself is synchronous once start() returns; no test
+  // logic changed.
+
+  it('zooms to a named focal area and back to the overview', async () => {
+    await start()
+    expect(controller.zoomToFocalArea('left-reef')).toBe(true)
+    settle()
+    const zoomed = controller.getCameraZoom()
+    expect(zoomed.targetX).toBeCloseTo(-2.35, 2)
+    expect(zoomed.distance).toBeCloseTo(5.5, 2)
+    expect(controller.zoomToFocalArea('overview')).toBe(false)
+    expect(controller.isZoomed()).toBe(false)
+    expect(controller.zoomToFocalArea('not-a-reef' as never)).toBe(false)
+  }, 15000)
+
+  it('smoothly interpolates toward the desired state on following frames', async () => {
+    await start()
+    controller.zoomIn()
+    // The first frame primes the frame clock with 0 steps; the second moves
+    // the rendered camera part-way, not all the way.
+    tickFrames(2)
+    const mid = controller.getCameraZoom().distance
+    expect(mid).toBeGreaterThan(9 / 1.35)
+    expect(mid).toBeLessThan(9)
+    settle()
+    expect(controller.getCameraZoom().distance).toBeCloseTo(9 / 1.35, 2)
+  }, 15000)
+
+  it('snaps instantly under prefers-reduced-motion (AQ-62 AC #5)', async () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener() {}, removeEventListener() {} }))
+    await start()
+    controller.zoomIn()
+    // No frames advanced: a reduced-motion camera is already at the target.
+    expect(controller.getCameraZoom().distance).toBeCloseTo(9 / 1.35, 2)
+  })
+
+  it('wheel zoom targets the point under the cursor', async () => {
+    await start()
+    const section = host
+    // Cursor at the left reef (x = 25% across, y = 60% down the 1440x900 view).
+    // happy-dom's WheelEvent drops clientX/clientY, so dispatch a MouseEvent
+    // typed as a wheel event with deltaY attached; real browsers populate
+    // all three fields on WheelEvent.
+    const wheel = new MouseEvent('wheel', { clientX: 360, clientY: 540, bubbles: true, cancelable: true }) as WheelEvent
+    Object.defineProperty(wheel, 'deltaY', { value: -240 })
+    section.dispatchEvent(wheel)
+    expect(controller.isZoomed()).toBe(true)
+    settle()
+    const zoomed = controller.getCameraZoom()
+    expect(zoomed.targetX).toBeLessThan(0)
+    expect(zoomed.distance).toBeLessThan(9)
+  }, 15000)
+
+  it('dragging while zoomed pans the focal target without moving fish links', async () => {
+    await start()
+    controller.zoomToFocalArea('left-reef')
+    settle()
+    const before = controller.getCameraZoom()
+    const section = host
+    const down = new PointerEvent('pointerdown', { pointerId: 1, clientX: 700, clientY: 400, bubbles: true })
+    const move = new PointerEvent('pointermove', { pointerId: 1, clientX: 800, clientY: 400, bubbles: true })
+    const up = new PointerEvent('pointerup', { pointerId: 1, clientX: 800, clientY: 400, bubbles: true })
+    section.dispatchEvent(down)
+    section.dispatchEvent(move)
+    section.dispatchEvent(up)
+    settle()
+    const after = controller.getCameraZoom()
+    // Dragging right pans the view right: the focal target moves left.
+    expect(after.targetX).toBeLessThan(before.targetX)
+    expect(after.distance).toBeCloseTo(before.distance, 1)
+  }, 15000)
+
+  it('dragging at the overview does nothing', async () => {
+    await start()
+    const section = host
+    section.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, clientX: 700, clientY: 400, bubbles: true }))
+    section.dispatchEvent(new PointerEvent('pointermove', { pointerId: 1, clientX: 900, clientY: 400, bubbles: true }))
+    section.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: 900, clientY: 400, bubbles: true }))
+    expect(controller.isZoomed()).toBe(false)
   })
 })

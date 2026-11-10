@@ -25,6 +25,7 @@ export const FISH_RENDER_LENGTH_INCHES: Readonly<Record<string, number>> = Objec
   'lyretail-anthias': 2.5,
   'flame-angelfish': 3.75,
   'copperband-butterflyfish': 6.5,
+  'desjardins-sailfin-tang': 12,
 })
 
 /**
@@ -48,6 +49,7 @@ export const MODEL_SWIM_AXIS_LENGTH: Readonly<Record<string, number>> = Object.f
   'lyretail-anthias': 2, // src/rendering/assets/splat-fish/lyretail-anthias.glb, z -1 … 1
   'flame-angelfish': 2, // src/rendering/assets/splat-fish/flame-angelfish.glb, z -1 … 1
   'copperband-butterflyfish': 2, // src/rendering/assets/splat-fish/copperband-butterflyfish.glb, z -1 … 1
+  'desjardins-sailfin-tang': 1.985423, // src/rendering/assets/fish/download_testing_copies/zebrasoma_desjardinii-copy.glb, z -0.999266 … 0.986158
 })
 
 /** Fallback artwork plane width in world units before species scaling. */
@@ -73,6 +75,7 @@ export const SPRITE_ARTWORK_LENGTH_FRACTION: Readonly<Record<string, number>> = 
   'lyretail-anthias': .951667,
   'flame-angelfish': .953333,
   'copperband-butterflyfish': .983333,
+  'desjardins-sailfin-tang': .898333,
 })
 
 const FALLBACK_LENGTH_INCHES = 3
@@ -99,4 +102,28 @@ export function fishSpriteScale(speciesId: string): number {
 export const MIN_FISH_CLEARANCE = .5
 export function fishClearanceRadius(speciesId: string): number {
   return Math.max(MIN_FISH_CLEARANCE, fishRenderLength(speciesId) / 2 + .05)
+}
+
+/**
+ * Physical body radius used for fish-to-fish personal-space separation (AQ-85).
+ *
+ * This is deliberately NOT `fishClearanceRadius`: clearance is the legacy
+ * habitat-obstacle envelope (>= 0.5) and must stay that way for rocks and
+ * tank walls, while two fish only need each other's actual body radius plus
+ * a small buffer. The radius is species-proportional: the body half-width
+ * estimate is 15% of the rendered nose-to-tail length, clamped into the
+ * AQ-85 body-radius envelope [0.04, 0.08] so the largest species (blue tang,
+ * 1.44 units long, raw 0.216) cannot reintroduce an oversized separation
+ * bubble, and the smallest species stay above the 0.04 floor. Resulting
+ * pairwise minimum separations (two radii + the 0.06 AQ-85 buffer) run
+ * ~0.14m–0.22m instead of the legacy >= 1.12m.
+ */
+export const MIN_FISH_BODY_RADIUS_M = .04
+export const MAX_FISH_BODY_RADIUS_M = .08
+/** Margin added to the physical body radius for anchor-approach clearance (AQ-82). */
+export const ANCHOR_APPROACH_MARGIN_M = 0.03
+export const FISH_BODY_RADIUS_LENGTH_FRACTION = .15
+export function fishBodyRadiusM(speciesId: string): number {
+  const raw = fishRenderLength(speciesId) * FISH_BODY_RADIUS_LENGTH_FRACTION
+  return Math.min(MAX_FISH_BODY_RADIUS_M, Math.max(MIN_FISH_BODY_RADIUS_M, raw))
 }

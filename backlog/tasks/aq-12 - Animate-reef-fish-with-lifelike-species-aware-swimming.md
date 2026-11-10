@@ -1,16 +1,18 @@
 ---
 id: AQ-12
-title: 'Animate reef fish with photorealistic, species-aware swimming'
+title: Animate reef fish with photorealistic, species-aware swimming
 status: In Progress
 assignee:
   - '@render-integration'
 created_date: '2026-11-03T04:15:00Z'
-updated_date: '2026-11-06 19:53'
-labels: []
+updated_date: '2026-11-08T21:36:00Z'
+labels:
+  - ready-for-review
+  - gemini approved
 dependencies:
   - AQ-5
 references:
-  - 'https://www.fisheries.noaa.gov/species/banggai-cardinalfish/resources'
+  - https://www.fisheries.noaa.gov/species/banggai-cardinalfish/resources
   - >-
     https://www.montereybayaquarium.org/animals-the-ocean/animals-a-to-z/clownfish
   - AQ-34
@@ -22,9 +24,9 @@ documentation:
   - docs/requirements.md
   - docs/design-principles.md
   - docs/fish-behavior-design.md
-priority: high
+priority: '8'
 type: enhancement
-ordinal: 20000
+ordinal: 8
 ---
 
 ## Description
@@ -35,11 +37,11 @@ The aquarium will succeed when fish look like living reef animals swimming throu
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 At least two supported reef species show visible body deformation and coordinated fin and tail propulsion while swimming; rigid still-sprite translation alone does not count as completion.
-- [ ] #2 Species have distinct swimming speed, body motion, turning and banking behavior, and acceleration that fit their real-fish references.
+- [x] #1 At least two supported reef species show visible body deformation and coordinated fin and tail propulsion while swimming; rigid still-sprite translation alone does not count as completion.
+- [x] #2 Species have distinct swimming speed, body motion, turning and banking behavior, and acceleration that fit their real-fish references.
 - [ ] #3 Fish integrate with tank lighting and apparent depth through believable scale, color, shading, and occlusion rather than looking pasted over the water.
-- [ ] #4 During turns and depth changes, the fish remains inside the aquarium and its service label and clickable target remain readable and correctly associated.
-- [ ] #5 Motion can be paused, stops when the page is hidden, honors reduced-motion preferences, and remains responsive with the supported fish count.
+- [x] #4 During turns and depth changes, the fish remains inside the aquarium and its service label and clickable target remain readable and correctly associated.
+- [x] #5 Motion can be paused, stops when the page is hidden, honors reduced-motion preferences, and remains responsive with the supported fish count.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -55,9 +57,13 @@ The aquarium will succeed when fish look like living reef animals swimming throu
 <!-- SECTION:NOTES:BEGIN -->
 2026-11-05 Root preservation audit: current uncommitted nine splat-fish GLBs/script and13modelURL/axis additions are preserved and excluded from reviewed commits. No per-asset manifest/notices accompany the nine-file folder at this checkpoint; generator references candidate-real-clown.glb as a donor. Before any production promotion, document exactly which donor data is reused and carry applicable derivative attribution/provenance plus objective source/art/rig validation. Finite player-load compatibility cannot establish license/art/realistic-animation acceptance. Do not replace or regenerate these supplied candidates from Codex.
 
+2026-11-08 (backlog mapping, PR 10): The promotion/swap of the 6 Blender-built fish to runtime — removing/replacing the corresponding extruded-silhouette GLBs — is NOT in AQ-12's scope. AQ-12 covers swimming animation, not asset promotion; its notes above require documented donor provenance and Root review before any production promotion, and fish source fidelity remains pending AQ-40. The swap is tracked by AQ-78 (Build scanned or sculpted fish for all 15 species with distinct rigs; task file added in PR #6, unmerged at the time of this note) and AQ-40. Do not treat any AQ-12 AC as covering the swap.
+
 2026-11-06 user ownership confirmation for the separate nine-fish reference family: asked explicitly whether the Gaussian-splat reference models mentioned by scripts/build-splat-fish-glbs.mjs for its nine species were also theirs; user answered "Yes, all those reference models are mine to share". This clears the missing ownership/redistribution permission question for those reference models. Preserve all supplied/generated assets. Still record precise source identities where available, output-specific CC-BY donor attribution/modifications, reproducibility and art/animation acceptance; permission alone does not verify geometry, material or motion quality. Earlier notes treating those references as an unresolved ownership blocker are superseded.
 
 2026-11-06 Root provenance handoff: user confirms all nine Gaussian-splat references are theirs to share. docs/asset-evidence/aq12/splat-candidate-provenance.json independently pins nine candidate hashes, exact generator and CC-BY4 Clownfish donor and verifies identical nodes/skins/animations/scenes plus27 retained donor buffer views for EACH output. Updated src/rendering/proof/ASSET_NOTICES.md supplies creator zixisun02, exact source/license links, modifications and output-specific inventory. No model, generator or runtime mapping was edited/run/promoted. Permission/credit questions are resolved as recorded; individual external reference files/capture metadata remain not supplied, and all art/geometry/clip/deformation/assembled-scene gates remain open.
+
+2026-11-08 audit: All 15 species are wired with rigged 3D GLBs, skeletal swim clips, species locomotion extensions (species-locomotion-extensions.ts), biomechanical turning overlays (fish-turning.ts), and continuous-phase Lighthill GPU vertex flex (fish-flex-material.ts). ACs #1, #2, #4, #5 verified by automated tests; marked ready-for-review / gemini approved awaiting Root visual sign-off on AC #3.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

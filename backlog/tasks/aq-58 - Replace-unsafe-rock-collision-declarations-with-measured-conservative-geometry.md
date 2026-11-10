@@ -4,8 +4,8 @@ title: Replace unsafe rock collision declarations with measured conservative geo
 status: In Progress
 assignee:
   - '@collision-validation'
-created_date: '2026-11-05 03:13'
-updated_date: '2026-11-05 21:40'
+created_date: 2026-11-05 03:13
+updated_date: '2026-11-08T04:47:00Z'
 labels:
   - modeling
   - validation
@@ -20,9 +20,9 @@ references:
   - docs/asset-evidence/aq58/3d-collision-review.md
 documentation:
   - docs/asset-evidence/aq58/fish-player-review.json
-priority: high
+priority: '1'
 type: bug
-ordinal: 11925
+ordinal: 1
 ---
 
 ## Description
