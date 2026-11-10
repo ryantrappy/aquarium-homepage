@@ -80,6 +80,21 @@ maps to 512 px, or raise this cap with a measured justification. This
 budget does not silently absorb that growth; the promoting PR has to
 choose and record the answer.
 
+**Addendum 2026-11-09 — Desjardins' sailfin tang (Ryan's sailfin decision).**
+The roster grows from 15 to 16 species. The sailfin is a visual-only
+display fish: it is **not** a configured service species, so it loads
+lazily in the background and Phase 0 is unchanged at 2,786,052 B. Its GLB
+(`download_testing_copies/zebrasoma_desjardinii-copy.glb`, 1,488,244 B,
+4,760 tris, three 768×768 PNG maps = 9,437,184 B GPU) moves the true
+runtime totals to: total fish GLBs **20,699,092 B** (cap 24 MiB, ~18%
+headroom), total scene GLBs **36,775,568 B** (cap 40 MiB), GPU texture
+memory **214,958,050 B (~205.0 MiB)** (cap 256 MiB), scene triangles
+365,839. All caps still hold. Note: `budgets.test.ts`'s "loaded scene"
+test counts only the splat fish and the two proof files, so it does **not**
+count the sailfin — the automated test stays green while the true totals
+grow as recorded here. Any future test that recomputes the totals from the
+live manifest must include the display fish.
+
 ## 3. Frame-time budgets (both viewports)
 
 | Metric | Budget | Mechanism |

@@ -25,6 +25,7 @@ export const FISH_RENDER_LENGTH_INCHES: Readonly<Record<string, number>> = Objec
   'lyretail-anthias': 2.5,
   'flame-angelfish': 3.75,
   'copperband-butterflyfish': 6.5,
+  'desjardins-sailfin-tang': 12,
 })
 
 /**
@@ -48,6 +49,7 @@ export const MODEL_SWIM_AXIS_LENGTH: Readonly<Record<string, number>> = Object.f
   'lyretail-anthias': 2, // src/rendering/assets/splat-fish/lyretail-anthias.glb, z -1 … 1
   'flame-angelfish': 2, // src/rendering/assets/splat-fish/flame-angelfish.glb, z -1 … 1
   'copperband-butterflyfish': 2, // src/rendering/assets/splat-fish/copperband-butterflyfish.glb, z -1 … 1
+  'desjardins-sailfin-tang': 1.985423, // src/rendering/assets/fish/download_testing_copies/zebrasoma_desjardinii-copy.glb, z -0.999266 … 0.986158
 })
 
 /** Fallback artwork plane width in world units before species scaling. */
@@ -73,6 +75,7 @@ export const SPRITE_ARTWORK_LENGTH_FRACTION: Readonly<Record<string, number>> = 
   'lyretail-anthias': .951667,
   'flame-angelfish': .953333,
   'copperband-butterflyfish': .983333,
+  'desjardins-sailfin-tang': .898333,
 })
 
 const FALLBACK_LENGTH_INCHES = 3

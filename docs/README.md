@@ -64,7 +64,7 @@ Directory of project documentation and verification evidence:
 | [`modular-coral-and-live-rock-spec.md`](modular-coral-and-live-rock-spec.md) | **Canonical** | Binding | `AQ-14.3`, `AQ-42` | Technical specification for 8 modular coral archetypes and 2 live-rock foundations (left cave, right shelf). |
 | [`behavior-runtime-contract.md`](behavior-runtime-contract.md) | **Canonical** | Binding | `AQ-44` | Engine-independent behavior state machine (swim, hover, dart, feed, rest, school, avoid, burst). |
 | [`habitat-navigation-core-contract.md`](habitat-navigation-core-contract.md) | **Canonical** | Binding | `AQ-45` | Navigation contracts: spatial zones (open water, crevice, cave, substrate), waypoint steering, boundary clamps. |
-| [`fish-scale-reference.md`](fish-scale-reference.md) | **Canonical** | Binding | `AQ-60` | Adult biological lengths and render scales for all 15 roster species (parsed by `fish-scale.test.ts`). |
+| [`fish-scale-reference.md`](fish-scale-reference.md) | **Canonical** | Binding | `AQ-60` | Adult biological lengths and render scales for all 16 roster species (parsed by `fish-scale.test.ts`). |
 | [`fish-behavior-design.md`](fish-behavior-design.md) | **Canonical** | Binding | `AQ-35` | Biological behavior profiles, swimming speed ranges, schooling affinities, and depth bounds for all species. |
 | [`reef-fish-roster.md`](reef-fish-roster.md) | **Canonical** | Binding | `AQ-35` | Biological taxonomic index of all 15 supported species, morphological archetypes, and color briefs. |
 

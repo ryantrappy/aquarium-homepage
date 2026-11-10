@@ -78,6 +78,33 @@ export const SPECIES_LOCOMOTION_SIGNATURES: Readonly<
     opportunityTrigger: 'foraging-opportunity',
     opportunityIntervalSeconds: 6.0,
   },
+  // Second Zebrasoma: same labriform grazer gait as the yellow tang, tuned
+  // a touch slower for its size (lower cruise tail-beat, longer graze
+  // interval). The swim clip in the desjardinii copy is `zebrasoma_labriform_swim`.
+  'desjardins-sailfin-tang': {
+    speciesId: 'desjardins-sailfin-tang',
+    basePlaybackByState: { idle: 0.78, swim: 1.1, forage: 1.22, display: 1.28, burst: 1.58, retreat: 1.7 },
+    pulseAmplitude: 0.08,
+    pulseFrequencyHz: 1.0,
+    speedPlaybackGain: 0.22,
+    gait: {
+      gaitMode: 'labriform',
+      fCruiseHz: 1.0,
+      fMinHz: 0.4,
+      fMaxHz: 2.4,
+      fSpeedGainHz: 1.0,
+      tailAmplitudeCruiseBL: 0.02,
+      tailAmplitudeMaxBL: 0.06,
+      envelopeA: 0.1,
+      envelopeP: 2.0,
+      wavelengthBL: 0.9,
+      gaitTransitionSpeedNorm: 1.15,
+      gaitTransitionWidthNorm: 0.3,
+      finRippleAmpBL: 0,
+    },
+    opportunityTrigger: 'foraging-opportunity',
+    opportunityIntervalSeconds: 6.5,
+  },
   'blue-tang': {
     speciesId: 'blue-tang',
     basePlaybackByState: { idle: 0.82, swim: 1.18, forage: 1.22, display: 1.3, burst: 1.65, retreat: 1.78 },
