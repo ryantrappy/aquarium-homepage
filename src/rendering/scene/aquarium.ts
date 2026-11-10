@@ -95,7 +95,7 @@ const modelUrls: Record<string, string> = {
 }
 export type SceneStatus = 'loading' | 'ready' | 'failed'
 export type AquariumController = { update(services: ServiceConfig[], paused: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void; zoomIn(): boolean; zoomOut(): boolean; zoomToFocalArea(id: FocalAreaId): boolean; resetZoom(): boolean; isZoomed(): boolean; getCameraZoom(): CameraZoomState }
-type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; flex?: FishFlexBinding; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean; schoolmate: boolean; lod: FishLod; lodModel?: THREE.Object3D; lodSprite?: THREE.Mesh }
+type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; flex?: FishFlexBinding; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean; schoolmate: boolean; lod: FishLod; lodModel?: THREE.Object3D }
 
 function disposeTree(root: THREE.Object3D) {
   const geometries = new Set<THREE.BufferGeometry>(), materials = new Set<THREE.Material>(), textures = new Set<THREE.Texture>()
@@ -721,9 +721,6 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
     if (item.artwork) {
       ownedSprites.delete(item.artwork); spriteMasks.delete(item.artwork); disposeTree(item.artwork)
     }
-    if (item.lodSprite) {
-      ownedSprites.delete(item.lodSprite); spriteMasks.delete(item.lodSprite); disposeTree(item.lodSprite); item.lodSprite = undefined
-    }
     item.anchor?.removeAttribute('data-artwork-error')
   }
   // Bind a loaded GLB to an inhabitant: clone, scale, env intensity, and the
@@ -764,12 +761,12 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
       }
     })
   }
-  // Build the thumbnail sprite for an inhabitant. Used for the no-GLB
-  // fallback (`lodOnly: false`, stored as `item.artwork`) and for the far
-  // LOD2 sprite (`lodOnly: true`, stored as `item.lodSprite`). A failed LOD
-  // sprite only drops that fish back to its full GLB; a failed fallback
-  // sprite keeps the existing thumbnail-unavailable handling.
-  function buildSprite(item: Inhabitant, lodOnly: boolean) {
+  // Build the thumbnail sprite for an inhabitant with no GLB yet (the
+  // no-GLB fallback, stored as `item.artwork`, upgraded to the GLB by
+  // `swapFallbackToGlb` when the lazy load lands). There is no distance
+  // sprite tier any more: the LOD2 far-fish sprite swap was removed
+  // 2026-11-09 at Ryan's direction, so this is the only sprite path left.
+  function buildSprite(item: Inhabitant) {
     const species = getFishById(item.service.fishId)!
     const spriteScale = fishSpriteScale(item.service.fishId)
     // No-fit fallback retains old resources, but callbacks for a removed or
@@ -788,13 +785,6 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
       if (!document.hidden) render(0, true)
     }, undefined, error => {
       if (!acceptsArtworkCallback()) return
-      if (lodOnly) {
-        console.warn('Far-fish LOD sprite failed to load; keeping full GLB', species.thumbnail, error)
-        item.root.remove(sprite)
-        ownedSprites.delete(sprite); spriteMasks.delete(sprite); disposeTree(sprite)
-        if (item.lodSprite === sprite) { item.lodSprite = undefined; item.lod = 1 }
-        return
-      }
       item.artworkUnavailable = true
       handleArtworkTextureFailure(sprite, texture, hitMeshes, spriteMasks, item.anchor)
       sprite.material.map = null // the failure handler already disposed this owned texture
@@ -831,25 +821,6 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
       console.warn('Fish GLB swap failed; keeping thumbnail fallback', item.service.fishId, error)
     }
   }
-  // Apply a distance-LOD tier to a GLB inhabitant. LOD2 hides the skinned
-  // model and shows the cached thumbnail sprite (created on first entry);
-  // LOD0/LOD1 show the model and hide the sprite. Fallback (sprite-only)
-  // fish have no model to swap, so their tier is recorded but not applied.
-  function applyFishLod(item: Inhabitant, lod: FishLod) {
-    if (item.fallback || !item.lodModel) { item.lod = lod; return }
-    if (lod === 2) {
-      if (!item.lodSprite) {
-        item.lodSprite = buildSprite(item, true)
-        rebuildHitMeshes()
-      }
-      item.lodModel.visible = false
-      if (item.lodSprite) item.lodSprite.visible = true
-    } else {
-      item.lodModel.visible = true
-      if (item.lodSprite) item.lodSprite.visible = false
-    }
-    item.lod = lod
-  }
   function removeFish() { fish.forEach(disposeInhabitant); fish = []; schoolmates.forEach(disposeInhabitant); schoolmates = [] }
   function rebuildHitMeshes() {
     hitMeshes.length = 0
@@ -866,7 +837,7 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
     const item: Inhabitant = { service, root, motion, anchor, visible: false, fallback, releasedFocus: false, schoolmate, lod: 0 }
     try {
       if (base) bindGlbToInhabitant(item, base)
-      else item.artwork = buildSprite(item, false)
+      else item.artwork = buildSprite(item)
       root.position.set(motion.position.x, motion.position.y, motion.position.z)
       // Schoolmates are never pickable (AQ-41 AC #4 / AQ-13): only service
       // fish get a serviceId on their meshes, so picking can never resolve a
@@ -1205,11 +1176,12 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
         const stopped = stoppedFlags[index]
         if (!stopped) {
         // Animation LOD (AQ-76 AC #1): fish keep swimming at every tier, but
-        // far fish advance their swim clip at half rate (LOD1) or not at all
-        // (LOD2 sprite), and the turning-rig overlay runs only at LOD0.
-        // `animationStepIndex` is the global step counter, so the half rate
-        // is a real every-other-step cadence rather than a per-frame coin flip.
-        const animateThisStep = !stopped && item.lod !== 2 && animationStepIndex % lodAnimationFrameSkip(item.lod) === 0
+        // far fish advance their swim clip at half rate (LOD1), and the
+        // turning-rig overlay runs only at LOD0. `animationStepIndex` is
+        // the global step counter, so the half rate is a real every-other-
+        // step cadence rather than a per-frame coin flip. There is no
+        // sprite tier any more, so the clip never stops outright.
+        const animateThisStep = !stopped && animationStepIndex % lodAnimationFrameSkip(item.lod) === 0
         if (animateThisStep) {
           try {
             item.clipPlayer?.advance(SIMULATION_STEP_SECONDS * (.55 + Math.min(1.7, item.motion.speed * 2.2)) * item.motion.animationPlaybackRate)
@@ -1243,7 +1215,7 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
     }
     for (const item of [...fish, ...schoolmates]) {
       const pose = item.motion; item.root.position.set(pose.position.x, pose.position.y, pose.position.z)
-      if (item.fallback || item.lod === 2) { item.root.rotation.set(0, 0, 0); item.root.scale.x = evaluateSpriteTurnScaleX(pose.yaw) }
+      if (item.fallback) { item.root.rotation.set(0, 0, 0); item.root.scale.x = evaluateSpriteTurnScaleX(pose.yaw) }
       else { item.root.rotation.set(pose.pitch, pose.yaw, pose.bank, 'YXZ') }
     }
     scene.updateMatrixWorld(true)
@@ -1260,6 +1232,8 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
   // Distance LOD (AQ-76 AC #1), evaluated at the ~0.24 s label cadence
   // using the already-computed projection depth — no extra raycast. Depth
   // is camera z (9) minus fish z, so it spans the real 6.2-13.6 range.
+  // The tier only sets the animation rate now (LOD1 = half clip rate);
+  // there is no sprite swap any more, so a distant fish keeps its GLB.
   function evaluateFishLod() {
     const lodBias = QUALITY_TIERS[qualityTier].lodBias
     for (const item of fish) {
@@ -1267,7 +1241,7 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
       const depth = camera.position.z - item.root.position.z
       const projected = projectedFishLengthPx(fishRenderLength(item.service.fishId), height, camera.fov, depth)
       const next = selectFishLod(depth, projected, item.lod, lodBias)
-      if (next !== item.lod) applyFishLod(item, next)
+      if (next !== item.lod) item.lod = next
     }
   }
   // Adaptive quality (AQ-76 AC #3): sample every rAF interval, but never
