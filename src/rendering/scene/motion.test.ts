@@ -485,6 +485,47 @@ describe('rendered fish travel adapter', () => {
     expect(fish.position).toEqual({ x: -.7, y: .6, z: 0 })
     expect(fish.route).toEqual([])
   })
+  it('does not spiral around a waypoint it approaches at an angle (AQ-49)', () => {
+    // A slow-turning, fast-cruising fish that meets its waypoint 90° off its
+    // heading used to orbit it in a slowly tightening spiral (~650° of turning
+    // and ~4.3 s per waypoint) because its turn radius at approach speed
+    // dwarfs the 0.025 m arrival radius. The passed-waypoint rule completes
+    // the waypoint once it sits abeam inside the approach corridor instead,
+    // so the fish swims on after a normal ~90° turn.
+    const openWater: WaterHabitat = { bounds: { min: { x: -5, y: -2.4, z: -3 }, max: { x: 5, y: 2.8, z: 2.8 } }, obstacles: [], anchors: [] }
+    const approach = (habitat: WaterHabitat) => {
+      const fish = createSwimmingFish('spiral-blue-tang', 'blue-tang', { x: 0, y: 0, z: 0 }, .5, {}, { collisionRadiusM: 0.04 })
+      fish.yaw = Math.PI / 2
+      fish.speed = 1
+      fish.behavior.variation.turnDegreesPerSecond = 58
+      fish.behavior.variation.cruiseSpeedTankWidthsPerSecond = 0.14
+      fish.route = [{ x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: 1 }]
+      fish.waypoint = 1
+      fish.targetWait = 0
+      let totalTurn = 0
+      let previousYaw = fish.yaw
+      let completedAt = -1
+      for (let step = 0; step < 3 * 60; step++) {
+        stepSwimmingFish(fish, habitat, 1 / 60)
+        totalTurn += Math.abs(Math.atan2(Math.sin(fish.yaw - previousYaw), Math.cos(fish.yaw - previousYaw)))
+        previousYaw = fish.yaw
+        if (fish.waypoint >= fish.route.length) { completedAt = step / 60; break }
+      }
+      return { completedAt, totalTurnDeg: totalTurn * 180 / Math.PI }
+    }
+    const aabb = approach(openWater)
+    expect(aabb.completedAt).toBeGreaterThanOrEqual(0)
+    expect(aabb.completedAt).toBeLessThan(3)
+    expect(aabb.totalTurnDeg).toBeLessThan(270)
+    // The same arrival in mesh mode, where the final-waypoint gate is 0.25 mm
+    // instead of 0.025 m, so the passed rule is the only way an angled
+    // approach completes at all.
+    const mesh = { ...openWater, meshNavigation: { units: 'meter' as const, spacingM: 0.5, budget: { ...meshBudget }, movementBudget: { ...movementBudget }, queryCapsule: (() => ({ status: 'clear' as const, work: { nodeVisits: 0, triangleTests: 0 } })) } }
+    const meshResult = approach(mesh)
+    expect(meshResult.completedAt).toBeGreaterThanOrEqual(0)
+    expect(meshResult.completedAt).toBeLessThan(3)
+    expect(meshResult.totalTurnDeg).toBeLessThan(270)
+  })
 })
 
 describe('school stepping and group disturbance (AQ-41/AQ-44)', () => {

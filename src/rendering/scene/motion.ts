@@ -592,8 +592,31 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
     return
   }
   const rawDx = rawTarget.x - fish.position.x, rawDy = rawTarget.y - fish.position.y, rawDz = rawTarget.z - fish.position.z, rawRemaining = Math.hypot(rawDx, rawDy, rawDz)
-  const turnWaypointReady = rawRemaining < .025 || (fish.waypoint + 1 < fish.route.length && rawRemaining < .18)
-  const meshWaypointWithinSubstep = habitat.meshNavigation === undefined || rawRemaining <= .015 * dt + 1e-12
+  // A fish that arrives at its waypoint at an angle flies past it: its turn
+  // radius at approach speed (v/ω ≈ 0.2–0.6 m) dwarfs the arrival radius
+  // (0.025 m; 0.00025 m for a mesh-mode final waypoint), so without a
+  // "passed" rule it orbits the waypoint in a slowly tightening spiral —
+  // ~600° of turning and 3–4 s per waypoint — the "stuck in a spiral" a
+  // viewer sees as the fish circling one patch of water, turning head-on to
+  // the camera on every orbit. While orbiting, the waypoint sits ~90° off
+  // the fish's heading (tangent vs. radial); on a normal approach it sits
+  // within ~45°. So a waypoint more than 60° off the heading, inside the
+  // approach corridor (0.35 m, the radius that already triggers the
+  // proximity turn boost), while the fish is actually travelling, counts as
+  // arrived; the fish swims on instead of circling back. The rule is
+  // horizontal-plane only: a waypoint mostly above or below the fish
+  // (horizontal distance < half the total distance) is a climb/dive, not an
+  // orbit, so it is never passed early. The speed floor keeps a fish
+  // pivoting in place from skipping a waypoint it is about to turn toward.
+  // The per-substep movement-safety checks stay the collision guard in both
+  // modes, so passing a waypoint early can only cut a corner the fish could
+  // already cut via the lookahead fillet, never an obstacle.
+  const horizontalRemaining = Math.hypot(rawDx, rawDz)
+  const waypointAbeam = horizontalRemaining > 0.5 * rawRemaining
+    && (rawDx * Math.sin(fish.yaw) + rawDz * Math.cos(fish.yaw)) / Math.max(horizontalRemaining, 1e-9) < 0.5
+  const passedWaypoint = rawRemaining < .35 && waypointAbeam && fish.speed > .05
+  const turnWaypointReady = rawRemaining < .025 || (fish.waypoint + 1 < fish.route.length && rawRemaining < .18) || passedWaypoint
+  const meshWaypointWithinSubstep = habitat.meshNavigation === undefined || rawRemaining <= .015 * dt + 1e-12 || passedWaypoint
   if (turnWaypointReady && meshWaypointWithinSubstep) {
     if (habitat.meshNavigation !== undefined) {
       const clearance = movementSafety(fish, habitat, rawTarget, effectiveClearance)
