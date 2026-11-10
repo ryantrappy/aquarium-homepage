@@ -39,7 +39,7 @@ page" must have its license confirmed there before any use beyond looking.
 
 ## 2. Fish — the 16-species roster
 
-The roster grew from 15 to 16 species on 2026-11-09 (Desjardins' sailfin tang added as a visual-only display fish; see the sailfin section of the combined PR). No dedicated reference row exists for the sailfin yet — its documented sources are FishBase (https://www.fishbase.se/summary/Zebrasoma-desjardinii) and Wikipedia (https://en.wikipedia.org/wiki/Zebrasoma_desjardinii), recorded in `docs/reef-fish-roster.md`.
+The roster grew from 15 to 16 species on 2026-11-09 (Desjardins' sailfin tang added to the roster — auto-spawned as a visual-only display fish until Ryan had it removed the same day; retained as an optional add for a new service). No dedicated reference row exists for the sailfin yet — its documented sources are FishBase (https://www.fishbase.se/summary/Zebrasoma-desjardinii) and Wikipedia (https://en.wikipedia.org/wiki/Zebrasoma_desjardinii), recorded in `docs/reef-fish-roster.md`.
 
 | # | Subject | URL | License | What it demonstrates |
 |---|---|---|---|---|

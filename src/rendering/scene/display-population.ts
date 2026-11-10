@@ -1,18 +1,29 @@
 /**
- * Visual-only display fish (Ryan's 2026-11-09 sailfin decision).
+ * Visual-only display fish (Ryan's 2026-11-09 sailfin decision, removed
+ * from the default scene by Ryan's 2026-11-09 "take it out of the tank"
+ * decision).
  *
- * Roster species with no service link that still swim the tank. A display
- * fish is a fixed inhabitant, not a schoolmate: it has no lead service fish
- * to cluster around, so it spawns from its own species preference (like a
- * service fish) but fail-soft (like a mate) — a missing safe spawn skips it
- * instead of failing the scene. It carries no service URL and no anchor by
- * construction, and the scene creates it with the schoolmate flag, so it is
- * never pickable or focusable and never gets a label.
+ * This module is the seam for link-less display fish: `resolveDisplayPopulation`
+ * returns the fixed inhabitants that swim the tank without a service link.
+ * The population is currently EMPTY — no display fish spawns by default.
+ * Ryan's rule is that fish in the default tank are the service links, plus
+ * the chromis/anthias schoolmates he approved as ambience (PR #17); a hero
+ * fish with no link reads as a missing link. The Desjardins' sailfin tang
+ * stays a roster species (`src/lib/fish.ts`) as an optional add for a new
+ * service — see "Attaching a service" below — and the deliberate
+ * link-less-fish feature is tracked in AQ-93 (ambiance fish).
  *
- * The first (and only) display fish is the Desjardins' sailfin tang: the
- * `download_testing_copies` GLB that used to stand in for the yellow tang
- * is now its own species, while the yellow tang goes back to the licensed
- * proof candidate (`proof/candidate-real-tang.glb`).
+ * Attaching a service (no code change needed): add a service entry with
+ * `fishId: 'desjardins-sailfin-tang'` — in the Settings service editor (the
+ * fish picker already lists every roster species, sailfin included) or in
+ * `EXAMPLE_SERVICES` (`src/lib/services.ts`). The service-fish path is
+ * fully generic: the id validates against the roster
+ * (`src/lib/validation.ts`), the behavior profile, turning archetype,
+ * locomotion extension and scale tables all exist for the species, and the
+ * scene spawns it with a native anchor/label like any service fish.
+ * LICENSE FLAG (from PR #37): the sailfin GLB source is CC-BY-NC-4.0,
+ * which the project's $0 asset policy excludes — Root must clear or replace
+ * the asset before it is anything more than a placeholder.
  */
 
 export const DISPLAY_FISH_ID = 'display-desjardins-sailfin-tang'
@@ -28,7 +39,11 @@ export function isDisplayFishId(id: string): boolean {
   return id.startsWith('display-')
 }
 
-/** The display fish to spawn: one descriptor per fixed visual-only fish. */
+/**
+ * The display fish to spawn: one descriptor per fixed visual-only fish.
+ * Currently empty — see the module comment. The resolver stays so a future
+ * ambiance-fish feature (AQ-93) can repopulate it deliberately.
+ */
 export function resolveDisplayPopulation(): DisplayFishDescriptor[] {
-  return [{ id: DISPLAY_FISH_ID, speciesId: DISPLAY_SPECIES_ID }]
+  return []
 }

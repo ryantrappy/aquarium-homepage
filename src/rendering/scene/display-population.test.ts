@@ -8,16 +8,11 @@ import {
 } from './display-population'
 
 describe('display population (visual-only non-service fish)', () => {
-  it('describes exactly the Desjardins’ sailfin tang, with no service fields', () => {
-    const population = resolveDisplayPopulation()
-    expect(population).toHaveLength(1)
-    expect(population[0]).toEqual({ id: DISPLAY_FISH_ID, speciesId: DISPLAY_SPECIES_ID })
-    expect(population[0].id).toBe('display-desjardins-sailfin-tang')
-    // A display descriptor carries no link by construction: no service id,
-    // no URL, no name — it can never gain a clickable label by accident.
-    expect(population[0]).not.toHaveProperty('serviceId')
-    expect(population[0]).not.toHaveProperty('url')
-    expect(population[0]).not.toHaveProperty('name')
+  it('is empty: no display fish spawns by default (Ryan 2026-11-09)', () => {
+    // The sailfin was removed from the default scene ("take it out of the
+    // tank"): a hero fish with no link reads as a missing link. The
+    // resolver stays as the AQ-93 ambiance-fish seam.
+    expect(resolveDisplayPopulation()).toEqual([])
   })
 
   it('names a real roster species, and only display ids match the prefix', () => {

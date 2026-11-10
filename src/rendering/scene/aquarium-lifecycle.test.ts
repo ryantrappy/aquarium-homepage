@@ -132,7 +132,7 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     const saved = { position: { ...first.position }, speed: first.speed, route: first.route, random: first.random, quaternion: mesh.skeleton.bones[0].quaternion.toArray() }
     const edited = { ...service('first'), name: 'Latest name', url: 'https://new.example.test' }
     update([service('second', 'yellow-tang'), edited])
-    expect(state.created).toHaveLength(3); expect(rootFor('first')).toBe(root); expect(state.players).toHaveLength(2); expect(state.players[0]).toBe(player); expect(player.dispose).not.toHaveBeenCalled()
+    expect(state.created).toHaveLength(2); expect(rootFor('first')).toBe(root); expect(state.players).toHaveLength(2); expect(state.players[0]).toBe(player); expect(player.dispose).not.toHaveBeenCalled()
     expect(first.position).toEqual(saved.position); expect(first.speed).toBe(saved.speed); expect(first.route).toBe(saved.route); expect(first.random).toBe(saved.random)
     expect(mesh.skeleton.bones[0].quaternion.toArray()).toEqual(saved.quaternion)
     expect(first.extensions.dispose).not.toHaveBeenCalled(); expect(second.extensions.dispose).not.toHaveBeenCalled()
@@ -173,9 +173,9 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     }
     const extensions: FishExtensionConfig = { defaults: { [capture.id]: { operation: 'add', extension: capture } } }
     await start([service('heading', 'yellow-tang')], extensions)
-    // Two snapshots: the service fish, then the fixed display sailfin —
-    // every inhabitant gets the extension runtime, service fish first.
-    expect(snapshots).toHaveLength(2)
+    // One snapshot: the service fish only — the display sailfin no longer
+    // spawns by default (Ryan 2026-11-09: "take it out of the tank").
+    expect(snapshots).toHaveLength(1)
     expect(state.created[0].yaw).toBe(snapshots[0].yaw)
     expect(state.created[0].yaw).toBeGreaterThanOrEqual(0)
     expect(state.created[0].yaw).toBeLessThan(2 * Math.PI)
@@ -187,21 +187,21 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     const firstPose = { ...first.position }, firstSpeed = first.speed, firstRoute = first.route
     const skeletonDispose = vi.spyOn(secondMesh.skeleton, 'dispose'), sharedGeometryDispose = vi.spyOn(secondMesh.geometry, 'dispose')
     update([service('first'), service('second', 'yellow-tang'), service('third', 'royal-gramma')])
-    expect(state.created).toHaveLength(4); expect(rootFor('first')).toBe(firstRoot); expect(first.extensions.dispose).not.toHaveBeenCalled()
+    expect(state.created).toHaveLength(3); expect(rootFor('first')).toBe(firstRoot); expect(first.extensions.dispose).not.toHaveBeenCalled()
     expect(first.position).toEqual(firstPose); expect(first.speed).toBe(firstSpeed); expect(first.route).toBe(firstRoute)
     update([service('first'), service('third', 'royal-gramma')])
     expect(second.extensions.dispose).toHaveBeenCalledTimes(1); expect(state.players[1].dispose).toHaveBeenCalledTimes(1); expect(state.players[0].dispose).not.toHaveBeenCalled(); expect(skeletonDispose).toHaveBeenCalledTimes(1); expect(sharedGeometryDispose).not.toHaveBeenCalled()
     expect(rootFor('second')).toBeUndefined(); expect(rootFor('first')).toBe(firstRoot)
     update([service('first', 'blue-tang'), service('third', 'royal-gramma')])
-    expect(first.extensions.dispose).toHaveBeenCalledTimes(1); expect(rootFor('first')).not.toBe(firstRoot); expect(state.created).toHaveLength(5)
+    expect(first.extensions.dispose).toHaveBeenCalledTimes(1); expect(rootFor('first')).not.toBe(firstRoot); expect(state.created).toHaveLength(4)
   }, 15000) // AQ-90: async GLB start() exceeds the 5 s default under full-suite load; passes in isolation.
   it('retains prior fish on a true no-fit update and reuses them when configuration fits again', async () => {
     await start(); advance(); const prior = state.created[0], root = rootFor('first'), pose = { ...prior.position }
     state.blockedSpawn = true; update([service('first'), service('second', 'yellow-tang'), service('new')])
-    expect(status).toHaveBeenLastCalledWith('failed'); expect(state.renderer!.loop).toBeNull(); expect(state.created).toHaveLength(3)
+    expect(status).toHaveBeenLastCalledWith('failed'); expect(state.renderer!.loop).toBeNull(); expect(state.created).toHaveLength(2)
     expect(rootFor('first')).toBe(root); expect(prior.position).toEqual(pose); expect(prior.extensions.dispose).not.toHaveBeenCalled()
     state.blockedSpawn = false; update([service('first'), service('second', 'yellow-tang')])
-    expect(status).toHaveBeenLastCalledWith('ready'); expect(state.renderer!.loop).not.toBeNull(); expect(rootFor('first')).toBe(root); expect(state.created).toHaveLength(3)
+    expect(status).toHaveBeenLastCalledWith('ready'); expect(state.renderer!.loop).not.toBeNull(); expect(rootFor('first')).toBe(root); expect(state.created).toHaveLength(2)
   })
   it('cleans newly created entries on a later creation error without retiring surviving fish', async () => {
     await start(); const root = rootFor('first'); state.throwCreateForId = 'bad'
@@ -212,7 +212,7 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     }
     update([service('first'), service('new'), service('bad')])
     expect(status).toHaveBeenLastCalledWith('failed'); expect(rootFor('first')).toBe(root); expect(rootFor('new')).toBeUndefined()
-    expect(state.created[0].extensions.dispose).not.toHaveBeenCalled(); expect(state.created[3].extensions.dispose).toHaveBeenCalledTimes(1)
+    expect(state.created[0].extensions.dispose).not.toHaveBeenCalled(); expect(state.created[2].extensions.dispose).toHaveBeenCalledTimes(1)
     expect(state.players[2].dispose).toHaveBeenCalledTimes(1); expect(newSkeletonDispose).toHaveBeenCalledTimes(1); expect(sharedGeometryDispose).not.toHaveBeenCalled()
     state.throwCreateForId = ''; update([service('first')]); expect(status).toHaveBeenLastCalledWith('ready'); expect(rootFor('first')).toBe(root)
   })
@@ -254,7 +254,7 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     await vi.waitFor(() => expect(meshFor('four')).toBeDefined())
     await vi.waitFor(() => expect(meshFor('five')).toBeDefined())
     expect(rootFor('four')).toBe(rootFour); expect(rootFor('five')).toBe(rootFive)
-    expect(state.created).toHaveLength(6)
+    expect(state.created).toHaveLength(5)
     expect(overlay.querySelector<HTMLAnchorElement>('[data-service-id="four"]')!.title).not.toContain('artwork preview')
   }, 15000)
   it('uses current metadata for delayed artwork failure and ignores callbacks from a removed generation', async () => {

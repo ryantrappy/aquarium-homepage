@@ -46,7 +46,6 @@ import { createFishClipPlayer, type FishClipPlayer } from './fish-animation'
 import { bindFishFlexToModel, updateFishFlex, type FishFlexBinding } from './fish-flex-material'
 import { reconcileFishInhabitants, refreshFishLink } from './fish-inhabitants'
 import { SCHOOL_TOTAL_COUNT, resolveSchoolPopulation, schoolmateSpawnOffset } from './school-population'
-import { DISPLAY_SPECIES_ID, isDisplayFishId, resolveDisplayPopulation } from './display-population'
 import { applyCaustics, createCaustics } from './caustics'
 import { AdaptiveQualityController, LAZY_MAX_CONCURRENT_LOADS, QUALITY_TIERS, lodAnimationFrameSkip, orderLazyLoadQueue, phase0SpeciesIds, projectedFishLengthPx, selectFishLod, type FishLod, type QualityTier } from './runtime-quality'
 import { FRAME_RATE_PUSH_INTERVAL_MS, FrameRateSampler, type FrameRateSample } from './frame-rate'
@@ -71,7 +70,9 @@ const modelUrls: Record<string, string> = {
   // src/rendering/proof/ASSET_NOTICES.md). The sailfin copy that stood in
   // for it is now its own roster species below.
   'yellow-tang': new URL('../proof/candidate-real-tang.glb', import.meta.url).href,
-  // Desjardins' sailfin tang — visual-only display fish, no service link.
+  // Desjardins' sailfin tang — roster species, available as a future
+  // service fish: it loads only when a service maps to it (Ryan
+  // 2026-11-09: removed from the default scene — see display-population.ts).
   // LICENSE FLAG: the source GLB this copy derives from
   // (download_testing/zebrasoma_desjardinii.glb, ernielo18 via Sketchfab)
   // is CC-BY-NC-4.0, which the project's $0 asset policy excludes
@@ -903,52 +904,8 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
       ))
       occupied.push({ position, clearance, bodyRadiusM: fishBodyRadiusM(mate.speciesId) })
     }
-    for (const old of schoolmates) if (!nextMates.includes(old) && !isDisplayFishId(old.service.id)) disposeInhabitant(old)
-    // Display fish share the schoolmates list (visual-only, never
-    // pickable) but are reconciled by reconcileDisplayFish below, not here:
-    // carry them across so this reconcile never drops or re-spawns them.
-    schoolmates = [...nextMates, ...schoolmates.filter(item => isDisplayFishId(item.service.id))]
-  }
-  /**
-   * Reconciles the visual-only display fish (Ryan's 2026-11-09 sailfin
-   * decision) with the scene. A display fish has no lead service fish to
-   * cluster around, so it spawns from its own species preference like a
-   * service fish — but fail-soft like a mate: a missing safe spawn skips it
-   * instead of failing the whole scene, and it is never pickable (created
-   * with the schoolmate flag, no anchor, no service link). Retained across
-   * service updates when its current position is still safe, so other
-   * fishes' swimming state is never reset.
-   */
-  function reconcileDisplayFish(
-    occupied: Array<{ position: SwimmingFish['position']; clearance: number; bodyRadiusM?: number }>,
-    meshSpawnCheck: ((candidate: SwimmingFish['position']) => boolean) | undefined,
-  ) {
-    const nextDisplay: Inhabitant[] = []
-    for (const descriptor of resolveDisplayPopulation()) {
-      const existing = schoolmates.find(item => item.service.id === descriptor.id)
-      if (existing && existing.service.fishId === descriptor.speciesId
-        && isSafeCurrentInhabitantPosition(existing)) {
-        nextDisplay.push(existing)
-        occupied.push({ position: existing.motion.position, clearance: existing.motion.clearance, bodyRadiusM: fishBodyRadiusM(existing.service.fishId) })
-        continue
-      }
-      const species = getFishById(descriptor.speciesId)!
-      const clearance = fishClearanceRadius(descriptor.speciesId)
-      const preference = fishSpawnPreference(descriptor.id, descriptor.speciesId, habitat.bounds, clearance)
-      const position = preference && findSafeFishSpawn(preference.position, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(descriptor.speciesId))
-      if (!position || !preference) continue
-      const yaw = findSafeFishHeading(position, preference.yaw, habitat.bounds, habitat.obstacles, clearance)
-      if (yaw === undefined) continue
-      nextDisplay.push(createInhabitant(
-        { id: descriptor.id, name: '', url: '', fishId: descriptor.speciesId, isExample: false },
-        { species, clearance, position, yaw },
-        undefined,
-        true,
-      ))
-      occupied.push({ position, clearance, bodyRadiusM: fishBodyRadiusM(descriptor.speciesId) })
-    }
-    for (const old of schoolmates) if (isDisplayFishId(old.service.id) && !nextDisplay.includes(old)) disposeInhabitant(old)
-    schoolmates = [...schoolmates.filter(item => !isDisplayFishId(item.service.id)), ...nextDisplay]
+    for (const old of schoolmates) if (!nextMates.includes(old)) disposeInhabitant(old)
+    schoolmates = [...nextMates]
   }
   function reconcileFish(): boolean | undefined {
     if (!loaded || disposed) return undefined
@@ -1010,7 +967,6 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
       spawnUnavailable = true; rebuildHitMeshes(); syncLoop(); return false
     }
     reconcileSchoolmates(nextServices, occupied, meshSpawnCheck, spawns)
-    reconcileDisplayFish(occupied, meshSpawnCheck)
     spawnUnavailable = false; rebuildHitMeshes(); render(0, true)
     return true
   }
@@ -1428,8 +1384,7 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
   }
   // Background lazy-load queue (AQ-76 AC #2): at most 2 GLBs in flight,
   // driven by requestIdleCallback with a setTimeout fallback. Species with
-  // no configured service are never queued, except the fixed display fish
-  // (display-population.ts), which the callers enqueue explicitly. A species
+  // no configured service are never queued. A species
   // whose inhabitant is currently off-screen (no valid link projection)
   // stays queued until it re-enters; the queue is re-pumped on the ~0.24 s
   // label cadence.
@@ -1449,9 +1404,9 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
     if (disposed || failed || lazyQueue.length === 0) return
     while (lazyActiveLoads < LAZY_MAX_CONCURRENT_LOADS && lazyQueue.length > 0) {
       const id = lazyQueue[0]
-      // Service fish and visual-only inhabitants (schoolmates, display
-      // fish) share the queue; a display fish has no service link, so its
-      // off-screen check is the same pure projection as a service fish's.
+      // Service fish and visual-only schoolmates share the queue; a
+      // schoolmate has no service link, so its off-screen check is the
+      // same pure projection as a service fish's.
       const item = [...fish, ...schoolmates].find(next => next.service.fishId === id)
       if (item && !item.fallback) { lazyQueue.shift(); continue }
       if (item && !projectFishLinkBounds(item.root.position, camera, width, height, fishRenderLength(id), projected)) break
@@ -1481,8 +1436,7 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
     // Lazy loading (AQ-76 AC #2): Phase 0 blocks first paint on the rocks,
     // corals, and the first 3 configured species only. The remaining
     // configured species load in the background after `ready`; species with
-    // no configured service never load at all, except the fixed display
-    // fish (display-population.ts), which is enqueued explicitly below.
+    // no configured service never load at all.
     const configuredFishIds = [...new Set(services.map(service => service.fishId))]
     const phase0Ids = phase0SpeciesIds(configuredFishIds)
     const [rockLeft, rockRight, ...restModels] = await Promise.all([
@@ -1500,10 +1454,7 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
     const initialSpawnSucceeded = rebuildFish() === true
     status(fishSceneStatus(!initialSpawnSucceeded))
     syncLoop()
-    // The display sailfin has no service, so it is never in the configured
-    // list — enqueue it explicitly, after the configured species, so its
-    // GLB loads in the background and swaps its thumbnail sprite in place.
-    enqueueLazyFishLoads([...configuredFishIds, DISPLAY_SPECIES_ID])
+    enqueueLazyFishLoads(configuredFishIds)
   }
   void initialize().catch(error => { console.error('Aquarium assets could not load', error); failed = true; loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); if (!disposed) { renderer.setAnimationLoop(null); status('failed') } })
   syncLoop()
@@ -1516,7 +1467,7 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
         // A newly configured species starts on its thumbnail sprite and its
         // GLB joins the background queue; removing a service never evicts a
         // loaded GLB in v1 (16 species max, ~20 MB total).
-        enqueueLazyFishLoads([...next.map(service => service.fishId), DISPLAY_SPECIES_ID])
+        enqueueLazyFishLoads(next.map(service => service.fishId))
       }
       syncLoop()
     },
