@@ -40,7 +40,7 @@ import { canRunFishSceneLoop, findSafeFishHeading, findSafeFishSpawn, fishSceneS
 import { EMPTY_FISH_EXTENSIONS, type FishExtensionConfig } from '../../simulation/fish-extensions'
 import { consumeFrameSteps, createFrameClock, SIMULATION_STEP_SECONDS, suspendFrameClock } from './clock'
 import { handleArtworkTextureFailure, nearestVisibleIntersection, readArtworkAlpha, type SpriteMasks } from './alpha-picking'
-import { applyFishLinkVisibility } from './fish-link-focus'
+import { applyFishLinkVisibility, isLabelSampleExposed } from './fish-link-focus'
 import { projectFishLinkBounds } from './fish-link-projection'
 import { createFishClipPlayer, type FishClipPlayer } from './fish-animation'
 import { bindFishFlexToModel, updateFishFlex, type FishFlexBinding } from './fish-flex-material'
@@ -506,12 +506,20 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
   let lazyQueue: string[] = []
   let lazyActiveLoads = 0
   const ray = new THREE.Raycaster(), projected = new THREE.Vector3(), sample = new THREE.Vector3(), hitMeshes: THREE.Object3D[] = []
+  // Meshes belonging to no-service ambient schoolmates (sailfin, chromis,
+  // anthias). They sit in hitMeshes as occluders for click picking, but
+  // they must never hide a service fish's label: they carry no serviceId,
+  // so without this set the visibility test cannot tell them from reef.
+  const ambientMeshes = new Set<THREE.Object3D>()
   const ownedSprites = new Set<THREE.Mesh>()
   const spriteMasks: SpriteMasks = new WeakMap()
-  function nearest(x: number, y: number) {
+  function nearestHit(x: number, y: number) {
     const box = canvas.getBoundingClientRect()
     ray.setFromCamera(new THREE.Vector2((x - box.left) / box.width * 2 - 1, 1 - (y - box.top) / box.height * 2), camera)
-    return nearestVisibleIntersection(ray.intersectObjects(hitMeshes, false), spriteMasks)?.object.userData.serviceId as string | undefined
+    return nearestVisibleIntersection(ray.intersectObjects(hitMeshes, false), spriteMasks)
+  }
+  function nearest(x: number, y: number) {
+    return nearestHit(x, y)?.object.userData.serviceId as string | undefined
   }
   function updateVisibility(item: Inhabitant) {
     const rect = canvas.getBoundingClientRect()
@@ -520,7 +528,17 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
     if (!visible && !artworkUnavailable) for (const [localY, localZ] of [[0, 0], [0, .31], [0, -.31], [.13, 0], [-.13, 0]]) {
       sample.set(item.fallback ? localZ : 0, localY, item.fallback ? 0 : localZ).applyMatrix4(item.root.matrixWorld).project(camera)
       if (!Number.isFinite(sample.x) || !Number.isFinite(sample.y) || !Number.isFinite(sample.z) || Math.abs(sample.x) > .96 || Math.abs(sample.y) > .94 || sample.z < -1 || sample.z > 1) continue
-      if (nearest(rect.left + (sample.x + 1) * width / 2, rect.top + (1 - sample.y) * height / 2) === item.service.id) { visible = true; break }
+      // Label exposure, not click picking: a sample counts as exposed when
+      // the foremost hit is any fish (itself, another service fish, or an
+      // ambient schoolmate). The old `nearest(...) === item.service.id`
+      // test hid the label of a plainly visible fish whenever the sailfin
+      // or another fish covered all five sample points (PR #37 visual
+      // check: blue tang and yellow tang with no pills in mobile zoom).
+      // Reef/sand foremost still hides the label, so a fish genuinely
+      // behind rock stays unlabelled. Click picking still uses nearest()
+      // separately, so clicks keep resolving to the foremost fish.
+      const hit = nearestHit(rect.left + (sample.x + 1) * width / 2, rect.top + (1 - sample.y) * height / 2)
+      if (isLabelSampleExposed(hit ? { serviceId: hit.object.userData.serviceId as string | undefined, ambientFish: ambientMeshes.has(hit.object) } : undefined)) { visible = true; break }
     }
     item.visible = visible
     if (item.anchor) {
@@ -825,10 +843,11 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
   function removeFish() { fish.forEach(disposeInhabitant); fish = []; schoolmates.forEach(disposeInhabitant); schoolmates = [] }
   function rebuildHitMeshes() {
     hitMeshes.length = 0
+    ambientMeshes.clear()
     reefs.forEach(reef => reef.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) }))
     hitMeshes.push(sand)
     fish.forEach(item => item.root.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) }))
-    schoolmates.forEach(item => item.root.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) }))
+    schoolmates.forEach(item => item.root.traverse(object => { if (object instanceof THREE.Mesh) { hitMeshes.push(object); ambientMeshes.add(object) } }))
   }
   type FishSpawn = { species: NonNullable<ReturnType<typeof getFishById>>; clearance: number; position: SwimmingFish['position']; yaw: number }
   function createInhabitant(service: ServiceConfig, spawn: FishSpawn, anchor?: HTMLAnchorElement, schoolmate = false): Inhabitant {
@@ -974,7 +993,7 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
   function positionLabels(force = false) {
     // AQ-89: two passes — place every visible label tight under its fish,
     // then de-conflict the captions so none covers another fish or caption.
-    const placedLabels: Array<{ anchor: HTMLAnchorElement; id: string; bounds: { x: number; y: number; width: number; height: number }; lift: number; depth: number }> = []
+    const placedLabels: Array<{ anchor: HTMLAnchorElement; id: string; label: string; bounds: { x: number; y: number; width: number; height: number }; lift: number; depth: number }> = []
     for (const item of fish) {
       const anchor = item.anchor; if (!anchor) continue
       const bounds = projectFishLinkBounds(item.root.position, camera, width, height, fishRenderLength(item.service.fishId), projected)
@@ -997,7 +1016,7 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
       // caption at top: 100% would float with a visible gap.
       const lift = labelLiftPx(bounds.height)
       anchor.style.setProperty('--fish-label-lift', `${lift}px`)
-      placedLabels.push({ anchor, id: item.service.id, bounds, lift, depth: item.root.position.z })
+      placedLabels.push({ anchor, id: item.service.id, label: item.service.name, bounds, lift, depth: item.root.position.z })
       // AQ-13: keep the hover tooltip on-screen — flip it below the caption
       // near the top edge and align it inward near the left/right edges.
       const tooltipCenterX = bounds.x + bounds.width / 2
@@ -1016,9 +1035,10 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
       const resolved = resolveLabelDeconflicts(
         placedLabels.map(entry => ({
           id: entry.id,
-          caption: estimateCaptionRect(entry.bounds, entry.lift),
+          caption: estimateCaptionRect(entry.bounds, entry.lift, entry.label),
           body: entry.bounds,
           depth: entry.depth,
+          label: entry.label,
         })),
         { width, height },
       )
