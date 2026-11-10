@@ -21,6 +21,7 @@ import {
   LIGHT_SHAFT_SWAY_AMPLITUDE_M,
   LIGHT_SHAFT_SWAY_HZ,
   createRestrainedCausticLightController,
+  createParticleSprite,
   bubbleEmitterForRockFootprint,
   evaluateBubblePosition,
   evaluateDepthTintedColor,
@@ -428,6 +429,10 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
     transparent: true,
     opacity: 0.2,
     depthWrite: false,
+    // AQ-43: soft round disc sprite — without a map every mote rendered
+    // as a hard square ("tiny white squares up close", PR #37 check).
+    map: createParticleSprite('mote'),
+    alphaTest: 0.01,
   })
   const foregroundParticles = new THREE.Points(foregroundParticleGeometry, foregroundParticleMaterial)
   foregroundParticles.raycast = () => {}
@@ -442,6 +447,9 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
     transparent: true,
     opacity: 0.34,
     depthWrite: false,
+    // AQ-43: same soft round disc sprite as the foreground motes.
+    map: createParticleSprite('mote'),
+    alphaTest: 0.01,
   })
   const backgroundParticles = new THREE.Points(backgroundParticleGeometry, backgroundParticleMaterial)
   backgroundParticles.raycast = () => {}
@@ -461,16 +469,18 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
   bubbleGeometry.setAttribute('position', bubblePositionAttr)
   const bubbleMaterial = new THREE.PointsMaterial({
     color: '#eaf7ff',
-    // Visual-check fix: at 0.035 m / 0.4 opacity the bubbles were ~5 px
-    // pale squares, indistinguishable from the motes (0.02–0.03 m) — no
-    // streams were discernible at the island bases. 0.06 m / 0.6 reads as a
-    // dotted rising stream (~8 px at the 9 m overview distance) while
-    // staying inside AQ-43's amended restraint (≤16 per stream, normal
-    // blending, no additive specular dots). Counts are unchanged.
+    // AQ-43: the 0.06 m / 0.6 opacity bump from the PR #32 round only made
+    // bigger pale squares — without a map every bubble rendered as a hard
+    // square, indistinguishable from the motes. The ring sprite below
+    // reads as a rising bubble outline instead, while staying inside the
+    // amended restraint (≤16 per stream, normal blending, no additive
+    // specular dots). Counts are unchanged.
     size: 0.06,
     transparent: true,
     opacity: 0.6,
     depthWrite: false,
+    map: createParticleSprite('bubble'),
+    alphaTest: 0.01,
   })
   const bubbles = new THREE.Points(bubbleGeometry, bubbleMaterial)
   bubbles.raycast = () => {}
