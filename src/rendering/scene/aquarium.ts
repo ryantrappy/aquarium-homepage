@@ -17,9 +17,11 @@ import {
   DEPTH_HAZE_START_Z,
   LIGHT_SHAFT_BAND_CENTERS,
   LIGHT_SHAFT_BAND_WIDTH_M,
+  LIGHT_SHAFT_REACH_FADE_M,
   LIGHT_SHAFT_SLANT_PER_M,
   LIGHT_SHAFT_SWAY_AMPLITUDE_M,
-  LIGHT_SHAFT_SWAY_HZ,
+  SUN_DIRECTION,
+  WATER_SURFACE_Y,
   createRestrainedCausticLightController,
   createParticleSprite,
   bubbleEmitterForRockFootprint,
@@ -27,9 +29,11 @@ import {
   evaluateDepthTintedColor,
   evaluateFixtureIntensities,
   evaluateFluorescenceActinicFactor,
-  evaluateSurfaceRippleOffset,
   evaluateSuspendedParticlePosition,
+  lightShaftBandReach,
 } from './underwater-optics'
+import { SURFACE_WAVE_GLSL } from './surface-waves'
+import { RaymarchedShaftPass, SHAFT_BEAM_GLSL } from './light-shafts'
 import { createAragoniteSandBed, getRockFootprintsForViewport } from './aragonite-sand'
 import { estimateCaptionRect, labelLiftPx, resolveLabelDeconflicts } from './fish-label-layout'
 import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
@@ -48,7 +52,7 @@ import { bindFishFlexToModel, updateFishFlex, type FishFlexBinding } from './fis
 import { reconcileFishInhabitants, refreshFishLink } from './fish-inhabitants'
 import { SCHOOL_TOTAL_COUNT, resolveSchoolPopulation, schoolmateSpawnOffset } from './school-population'
 import { applyCaustics, createCaustics } from './caustics'
-import { AdaptiveQualityController, LAZY_MAX_CONCURRENT_LOADS, QUALITY_TIERS, lodAnimationFrameSkip, orderLazyLoadQueue, phase0SpeciesIds, projectedFishLengthPx, selectFishLod, type FishLod, type QualityTier } from './runtime-quality'
+import { AdaptiveQualityController, LAZY_MAX_CONCURRENT_LOADS, QUALITY_TIERS, lodAnimationFrameSkip, orderLazyLoadQueue, phase0SpeciesIds, projectedFishLengthPx, selectFishLod, shaftModeForTier, type FishLod, type QualityTier } from './runtime-quality'
 import { FRAME_RATE_PUSH_INTERVAL_MS, FrameRateSampler, type FrameRateSample } from './frame-rate'
 import {
   DEFAULT_CAMERA_DISTANCE_M,
@@ -237,27 +241,30 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   // shows the same caustic system as the rock, coral, and fish.
   const sandBed = createAragoniteSandBed({ narrow: false })
   const sand = sandBed.sandMesh
-  // Visual-check fix: the sand dapple is faint at overview distance
-  // because the sand is both the deepest surface (the depth envelope
-  // gives it ×0.65 vs ×0.89 on the rock) and the brightest (the same
-  // absolute add is a smaller relative change). The lower ridge
-  // threshold (0.22 vs the 0.35 default) widens the dapple network on
-  // the sand only — same +0.35 cap, same texture, no brighter peak.
-  applyCaustics(sand.material as THREE.MeshStandardMaterial, caustics, { threshold: 0.22 })
+  // Surface-driven lighting (AQ-96 / AQ-70.6): the sand threshold is
+  // re-tuned from the 0.22 visual-check workaround back toward the 0.35
+  // default (now `causticSandThreshold: 0.30` in the optics config) now
+  // that the wave-field focus term does the work of making the dapple
+  // strong — same +0.35 cap, same texture, no brighter peak.
+  applyCaustics(sand.material as THREE.MeshStandardMaterial, caustics, { threshold: optics.causticSandThreshold })
   scene.add(sandBed.group)
 
   // Layered Reef-Tank Backdrop (AQ-14.6 & AQ-39): eliminates the flat paint-bucket wall & sharp horizon line
-  const rearUniforms = { uRearTime: { value: 0 } }
+  // NOTE (AQ-96): the backdrop's old independent sine sunbeams (0.45 Hz /
+  // 0.32 Hz) are DELETED — they were a third shaft system disagreeing
+  // with the shaft plane and the caustic scroll. The backdrop now carries
+  // only the gradient + patina + sand seam; all beams come from the one
+  // shared wave field (shaft plane / raymarched pass). There is no
+  // uRearTime any more: the backdrop is static, as it should be.
   const rearMaterial = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.96, metalness: 0.0 })
   rearMaterial.envMapIntensity = ENVIRONMENT_MAP_INTENSITY.backdrop
   rearMaterial.onBeforeCompile = shader => {
-    Object.assign(shader.uniforms, rearUniforms)
     shader.vertexShader = `varying vec3 vRearWorldPos;\n` + shader.vertexShader
     shader.vertexShader = shader.vertexShader.replace(
       '#include <begin_vertex>',
       `#include <begin_vertex>\nvec4 rearWp = modelMatrix * vec4(transformed, 1.0);\nvRearWorldPos = rearWp.xyz;`,
     )
-    shader.fragmentShader = `uniform float uRearTime;\nvarying vec3 vRearWorldPos;\n` + shader.fragmentShader
+    shader.fragmentShader = `varying vec3 vRearWorldPos;\n` + shader.fragmentShader
     shader.fragmentShader = shader.fragmentShader.replace(
       '#include <color_fragment>',
       `#include <color_fragment>
@@ -275,13 +282,6 @@ float patinaNoise = 0.5 + 0.28 * sin(vRearWorldPos.x * 1.7 + cos(vRearWorldPos.y
 float patinaMask = smoothstep(0.42, 0.82, patinaNoise) * (1.0 - smoothstep(0.65, 0.96, hNorm)) * 0.28;
 vec3 cCorallineGlass = vec3(0.24, 0.16, 0.34);
 waterCol = mix(waterCol, cCorallineGlass, patinaMask);
-
-// Soft overhead LED light shafts / sunbeams filtering down from the top water surface
-float beamCoord = vRearWorldPos.x * 0.85 - vRearWorldPos.y * 0.22;
-float beam1 = 0.5 + 0.5 * sin(beamCoord * 2.4 + uRearTime * 0.45);
-float beam2 = 0.5 + 0.5 * cos(beamCoord * 3.9 - uRearTime * 0.32 + 1.4);
-float sunbeams = pow(beam1 * 0.6 + beam2 * 0.4, 2.2) * smoothstep(0.18, 0.98, hNorm);
-waterCol += vec3(0.10, 0.16, 0.24) * sunbeams * 0.55;
 
 // AQ-86: soften the hard horizontal background/sand seam — the lowest band
 // of the backdrop eases toward the warm aragonite sand tone instead of
@@ -328,15 +328,23 @@ diffuseColor.rgb = waterCol;
   hazePlane.raycast = () => {}
   scene.add(hazePlane)
 
-  // Soft volumetric light shafts (AQ-86 AC #2): one additive plane just
-  // behind the fish volume carrying the three slanted bands from
-  // underwater-optics.ts (mirrored by evaluateLightShaftIntensity, so the
-  // CPU reference and the shader can never disagree). Bands weaken with
-  // depth and freeze at the t=0 phase on pause / reduced-motion / hidden,
-  // exactly like the caustic and ripple channels.
+  // Soft volumetric light shafts (AQ-86 AC #2, upgraded AQ-96/AQ-98):
+  // one additive plane just behind the fish volume carrying the three
+  // slanted bands from underwater-optics.ts (mirrored by
+  // evaluateLightShaftIntensity, so the CPU reference and the shader can
+  // never disagree). The upgrade: band sway is driven by the shared
+  // surface wave field sampled at each band root (no independent clock),
+  // each band fades out past its own hashed depth reach (the centre band
+  // over the open arch reaches deepest), a value-noise breakup keeps the
+  // beams from reading as solid columns, and a view-angle fade dims them
+  // when the camera looks up the beam axis. Bands weaken with depth and
+  // freeze at the t=0 phase on pause / reduced-motion / hidden, exactly
+  // like the caustic and ripple channels. This plane is the
+  // Balanced/Low tier fallback; on High the raymarched pass replaces it.
   const shaftUniforms = {
     uShaftTime: { value: 0 },
     uShaftAlpha: { value: optics.lightShaftMaxAlpha },
+    uSunDir: { value: new THREE.Vector3(SUN_DIRECTION.x, SUN_DIRECTION.y, SUN_DIRECTION.z) },
   }
   const shaftMaterial = new THREE.ShaderMaterial({
     transparent: true,
@@ -347,16 +355,30 @@ diffuseColor.rgb = waterCol;
     fragmentShader: `
       uniform float uShaftTime;
       uniform float uShaftAlpha;
+      uniform vec3 uSunDir;
       varying vec3 vShaftWorldPos;
       varying vec2 vShaftUv;
+      ${SURFACE_WAVE_GLSL}
+      ${SHAFT_BEAM_GLSL}
       void main() {
         float depthFromTop = clamp((2.8 - vShaftWorldPos.y) / 5.6, 0.0, 1.0);
         float depthEnvelope = 1.0 - 0.85 * depthFromTop;
         float edgeFade = smoothstep(0.0, 0.06, vShaftUv.x) * smoothstep(1.0, 0.94, vShaftUv.x);
         float shaft = 0.0;
-${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = ${LIGHT_SHAFT_SWAY_AMPLITUDE_M.toFixed(2)} * sin(uShaftTime * ${(2 * Math.PI * LIGHT_SHAFT_SWAY_HZ).toFixed(4)} + ${center.toFixed(2)});
-        shaft += exp(-pow((vShaftWorldPos.x - (${center.toFixed(2)} + (2.8 - vShaftWorldPos.y) * ${LIGHT_SHAFT_SLANT_PER_M.toFixed(2)} + sway${index})) / ${LIGHT_SHAFT_BAND_WIDTH_M.toFixed(2)}, 2.0));`).join('\n')}
-        float alpha = min(shaft, 1.0) * depthEnvelope * edgeFade * uShaftAlpha;
+${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
+  const reach = lightShaftBandReach(center)
+  return `        float sway${center === LIGHT_SHAFT_BAND_CENTERS[0] ? 0 : center === LIGHT_SHAFT_BAND_CENTERS[1] ? 1 : 2} = ${LIGHT_SHAFT_SWAY_AMPLITUDE_M.toFixed(2)} * surfaceWaveHeight(vec2(${center.toFixed(2)}, -1.8), uShaftTime);
+        float reachFade${center === LIGHT_SHAFT_BAND_CENTERS[0] ? 0 : center === LIGHT_SHAFT_BAND_CENTERS[1] ? 1 : 2} = clamp(1.0 - (depthFromTop - ${reach.toFixed(4)}) / ${LIGHT_SHAFT_REACH_FADE_M.toFixed(2)}, 0.0, 1.0);
+        shaft += exp(-pow((vShaftWorldPos.x - (${center.toFixed(2)} + (2.8 - vShaftWorldPos.y) * ${LIGHT_SHAFT_SLANT_PER_M.toFixed(2)} + sway${center === LIGHT_SHAFT_BAND_CENTERS[0] ? 0 : center === LIGHT_SHAFT_BAND_CENTERS[1] ? 1 : 2})) / ${LIGHT_SHAFT_BAND_WIDTH_M.toFixed(2)}, 2.0)) * reachFade${center === LIGHT_SHAFT_BAND_CENTERS[0] ? 0 : center === LIGHT_SHAFT_BAND_CENTERS[1] ? 1 : 2};`
+}).join('\n')}
+        // Internal breakup: a slow value-noise layer in the same tilted
+        // coordinate space, so beams are not solid columns.
+        float breakup = 0.75 + 0.25 * shaftValueNoise(vec2(vShaftWorldPos.x * 0.8 + vShaftWorldPos.y * 0.3, uShaftTime * 0.05));
+        // View-angle fade: beams read from the side, not when looking up
+        // the beam axis (zoomed-in / looking up), where they would band.
+        vec3 shaftViewDir = normalize(vShaftWorldPos - cameraPosition);
+        float axisFade = 1.0 - smoothstep(0.75, 0.95, abs(dot(shaftViewDir, uSunDir)));
+        float alpha = min(shaft, 1.0) * depthEnvelope * edgeFade * breakup * axisFade * uShaftAlpha;
         gl_FragColor = vec4(vec3(0.55, 0.80, 0.95) * alpha, alpha);
       }`,
   })
@@ -369,46 +391,105 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center, index) => `        float sway${index} = 
   shaftPlane.raycast = () => {}
   scene.add(shaftPlane)
 
-  // Visible Rippling Top Water Surface / Meniscus (AQ-14.2 AC #1 & AQ-14.6 AC #2)
-  const waterSurfaceGeometry = new THREE.PlaneGeometry(32, 12, 48, 20)
-  const waterSurfaceMaterial = new THREE.MeshStandardMaterial({
-    color: '#88c8f2',
-    emissive: '#382458',
-    emissiveIntensity: 0.32,
-    roughness: 0.18,
-    metalness: 0.1,
-    transparent: true,
-    opacity: 0.26,
-    side: THREE.DoubleSide,
-    depthWrite: false,
-  })
-  waterSurfaceMaterial.envMapIntensity = ENVIRONMENT_MAP_INTENSITY.waterSurface
-  // Visual-check fix: the surface plane runs to the rear glass (local y
-  // -6, world z -7.2, behind the backdrop at z -5.5), so its visible
-  // edge is the hard surface/backdrop junction at y 2.66 — a faint
-  // horizontal line ~27% down the overview frame, the mobile residual
-  // after the haze-plane fix. Fade the surface alpha to zero over the
-  // last metre before that junction (local y -4.3 is the junction,
-  // -3.3 is one metre in front of it), so no hard edge can read. The
-  // fade keys off local y, which the ripple displacement never touches
-  // (ripples move local z), and it is a plain alpha fade — no fog, veil,
-  // vignette, or blur (AQ-39 §1.1, AQ-14.6 AC #3, AQ-14.2 AC #4).
-  waterSurfaceMaterial.onBeforeCompile = shader => {
-    shader.vertexShader = `varying float vSurfaceLocalY;\n${shader.vertexShader}`
-    shader.vertexShader = shader.vertexShader.replace(
-      '#include <begin_vertex>',
-      '#include <begin_vertex>\nvSurfaceLocalY = position.y;',
-    )
-    shader.fragmentShader = `varying float vSurfaceLocalY;\n${shader.fragmentShader}`
-    shader.fragmentShader = shader.fragmentShader.replace(
-      '#include <color_fragment>',
-      `#include <color_fragment>
-diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
-    )
+  // Visible Rippling Top Water Surface / Meniscus (AQ-14.2 AC #1 & AQ-14.6 AC #2,
+  // rebuilt AQ-96): a custom ShaderMaterial driven by the shared surface
+  // wave field — GPU vertex displacement (the old per-frame CPU loop over
+  // 1,029 vertices is deleted) + per-pixel analytic normals + glitter +
+  // Snell's-window brightening + Fresnel grazing brightening. The surface
+  // is a light-emitting boundary seen from below, not a PBR object, so a
+  // MeshStandardMaterial (whose flat normal could never glitter) buys
+  // nothing here; `envMapIntensity.waterSurface` is no longer consumed
+  // by the surface (the key stays in environment-map.ts for API compat).
+  // uTime freezes at 0 on pause / reduced-motion / hidden, exactly like
+  // uCausticTime and uShaftTime.
+  const surfaceUniforms = {
+    uTime: { value: 0 },
+    uSunDir: { value: new THREE.Vector3(SUN_DIRECTION.x, SUN_DIRECTION.y, SUN_DIRECTION.z) },
   }
+  const waterSurfaceGeometry = new THREE.PlaneGeometry(32, 12, 48, 20)
+  const waterSurfaceMaterial = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+    uniforms: surfaceUniforms,
+    vertexShader: `
+      uniform float uTime;
+      varying vec3 vSurfaceWorldPos;
+      varying float vSurfaceLocalY;
+      ${SURFACE_WAVE_GLSL}
+      void main() {
+        vSurfaceLocalY = position.y;
+        vec4 wp = modelMatrix * vec4(position, 1.0);
+        // Local +z maps to world -y under rotation.x = PI/2, so the
+        // heightfield displaces local -z to raise the world surface.
+        vec3 displaced = position;
+        displaced.z -= surfaceWaveHeight(wp.xz, uTime);
+        vec4 displacedWp = modelMatrix * vec4(displaced, 1.0);
+        vSurfaceWorldPos = displacedWp.xyz;
+        gl_Position = projectionMatrix * viewMatrix * displacedWp;
+      }`,
+    fragmentShader: `
+      uniform float uTime;
+      uniform vec3 uSunDir;
+      varying vec3 vSurfaceWorldPos;
+      varying float vSurfaceLocalY;
+      ${SURFACE_WAVE_GLSL}
+      void main() {
+        vec2 p = vSurfaceWorldPos.xz;
+        vec3 n = surfaceWaveNormal(p, uTime);
+        float focus = surfaceWaveFocus(p, uTime);
+        // Ray from camera to surface: its up-component drives the Snell
+        // window (bright looking straight up, ~48 deg critical cone).
+        vec3 rayDir = normalize(vSurfaceWorldPos - cameraPosition);
+        float upness = clamp(rayDir.y, 0.0, 1.0);
+        float snell = smoothstep(0.55, 0.85, upness);
+        // Facets tilted toward the sun go bright blue-white; facets
+        // tilted away go deep blue — the ripple-cell structure.
+        float sunFace = max(dot(n, uSunDir), 0.0);
+        // Tight sun glitter from the key-light direction.
+        vec3 viewToCamera = normalize(cameraPosition - vSurfaceWorldPos);
+        vec3 halfVec = normalize(uSunDir + viewToCamera);
+        float glitter = pow(max(dot(n, halfVec), 0.0), 90.0);
+        // Fresnel grazing: looking along the surface toward the rear
+        // junction it goes more reflective/bright — the top of the frame
+        // is the most grazing, which matches the reference's brightest
+        // band at the very top.
+        float grazing = pow(1.0 - upness, 2.0);
+        vec3 deep = vec3(0.02, 0.10, 0.20);
+        vec3 bright = vec3(0.55, 0.80, 1.00);
+        // Look-dev (2026-11-11): the flat Snell term was washing the whole
+        // top band pale — the reference surface is bright CELLS on deep
+        // blue, not a uniform ceiling. Weight the facet term (sunFace)
+        // over the flat Snell term, and keep the alpha restrained so the
+        // deep-blue backdrop still reads through the band.
+        vec3 col = deep
+          + bright * (0.50 * sunFace + 0.28 * snell)
+          + bright * 0.35 * grazing
+          + bright * 0.25 * max(focus, 0.0)
+          + vec3(0.90, 0.97, 1.00) * glitter * 1.2;
+        float cellBright = clamp(0.50 * sunFace + 0.28 * snell + 0.35 * grazing, 0.0, 1.0);
+        float alpha = clamp(0.22 + 0.40 * cellBright, 0.0, 0.85);
+        // Rear-junction fade (visual-check fix, kept): the surface plane
+        // runs to the rear glass (local y -6, world z -7.2, behind the
+        // backdrop at z -5.5), so its visible edge is the hard
+        // surface/backdrop junction at y 2.66. Fade the alpha to zero over
+        // the last metre before that junction — a plain alpha fade, no
+        // fog, veil, vignette, or blur (AQ-39 §1.1, AQ-14.6 AC #3,
+        // AQ-14.2 AC #4).
+        alpha *= smoothstep(-4.3, -3.3, vSurfaceLocalY);
+        // Near-edge fade (look-dev 2026-11-11): the surface plane's near
+        // edge (local y +6, world z 4.8, closest to the camera) projects
+        // as a hard horizontal line ~28% down the overview frame. Fade
+        // the alpha out over the last 1.5 m before it, same plain fade.
+        alpha *= smoothstep(6.0, 4.5, vSurfaceLocalY);
+        gl_FragColor = vec4(col, alpha);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+      }`,
+  })
   const waterSurface = new THREE.Mesh(waterSurfaceGeometry, waterSurfaceMaterial)
   waterSurface.rotation.x = Math.PI / 2
-  waterSurface.position.set(0, 2.66, -1.2)
+  waterSurface.position.set(0, WATER_SURFACE_Y, -1.2)
   waterSurface.raycast = () => {}
   scene.add(waterSurface)
 
@@ -508,6 +589,11 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
   // half-rate clip cadence, and the adaptive tier controller + active tier.
   let animationStepIndex = 0
   let qualityTier: QualityTier = 'high'
+  // Raymarched shaft pass (AQ-98): lazily constructed on the High tier
+  // only, disposed on failure (the shaft plane is the fallback). The
+  // non-occluders are wired in render() where the pass is created.
+  let shaftPass: RaymarchedShaftPass | null = null
+  let shaftPassFailed = false
   const qualityController = new AdaptiveQualityController()
   // AQ-76 lazy-load queue state lives with the other scene state (not beside
   // initialize): resize() -> render() can pump the queue during setup, before
@@ -1105,23 +1191,22 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
     // AQ-73: the aragonite bed owns its sand time; its caustic network
     // freezes at its last phase on pause / reduced-motion / hidden.
     sandBed.update(coralElapsedSec, habitatStopped, reducedMotion)
-    rearUniforms.uRearTime.value = effectiveEnvTime
     // AQ-86: the shaft sway freezes at its t=0 phase with everything else.
     shaftUniforms.uShaftTime.value = effectiveEnvTime
+    // AQ-96: the water surface time freezes at 0 with everything else.
+    surfaceUniforms.uTime.value = effectiveEnvTime
+    // Shaft tier (AQ-98 / AQ-76): High runs the raymarched pass and
+    // hides the plane; Balanced shows the upgraded plane; Low shows it
+    // at half alpha. The tier is the adaptive controller's, with the
+    // same step-down/step-up thresholds as everything else.
+    const shaftMode = shaftModeForTier(qualityTier)
+    shaftPlane.visible = shaftMode !== 'raymarch'
+    shaftUniforms.uShaftAlpha.value =
+      shaftMode === 'reduced' ? optics.lightShaftMaxAlpha * 0.5 : optics.lightShaftMaxAlpha
     causticLightController.update(coralElapsedSec, habitatStopped, reducedMotion)
     // The caustic texture time freezes at 0 on pause / reduced-motion,
     // exactly like the scalar shimmer above.
     caustics.update(coralElapsedSec, habitatStopped, reducedMotion)
-
-    // Update top water-surface ripple displacement (AQ-14.2 AC #1 & #5)
-    if (!habitatStopped && !reducedMotion && steps > 0) {
-      const surfPos = waterSurfaceGeometry.getAttribute('position')
-      for (let i = 0; i < surfPos.count; i++) {
-        const wx = surfPos.getX(i), wz = surfPos.getY(i)
-        surfPos.setZ(i, evaluateSurfaceRippleOffset(wx, wz, coralElapsedSec, { paused: habitatStopped, reducedMotion, amplitudeM: optics.surfaceRippleAmplitudeM }))
-      }
-      surfPos.needsUpdate = true
-    }
 
     // Update depth-graded water-column motes (AQ-43 AC #2 as amended):
     // foreground motes stay in the fish volume, background motes behind it.
@@ -1242,7 +1327,50 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
     }
     positionLabels(refreshLabels)
     if (labelClock > .24) labelClock = 0
+    // Raymarched shafts (AQ-98, High tier only): the depth-only pre-pass
+    // runs before the main render, the additive half-res quad after it.
+    // Construction is lazy and failure is a fallback, never a scene
+    // failure: if the pass cannot be built or a render throws, it is
+    // disposed and the upgraded shaft plane takes over.
+    if (shaftMode === 'raymarch' && !shaftPassFailed) {
+      if (!shaftPass) {
+        try {
+          shaftPass = new RaymarchedShaftPass(renderer, {
+            nonOccluders: [waterSurface, shaftPlane, hazePlane, foregroundParticles, backgroundParticles, bubbles],
+          })
+          const bufferSize = renderer.getDrawingBufferSize(new THREE.Vector2())
+          shaftPass.setSize(bufferSize.x, bufferSize.y)
+        } catch (error) {
+          console.warn('Raymarched shafts unavailable; falling back to the shaft plane', error)
+          shaftPassFailed = true
+          shaftPass = null
+        }
+      }
+      if (shaftPass) {
+        shaftPass.update(coralElapsedSec, camera, habitatStopped, reducedMotion)
+        try {
+          shaftPass.renderDepth(scene, camera)
+        } catch (error) {
+          console.warn('Raymarched shaft depth pass failed; falling back to the shaft plane', error)
+          shaftPassFailed = true
+          shaftPass.dispose()
+          shaftPass = null
+          shaftPlane.visible = true
+        }
+      }
+    }
     renderer.render(scene, camera)
+    if (shaftMode === 'raymarch' && shaftPass) {
+      try {
+        shaftPass.renderShafts()
+      } catch (error) {
+        console.warn('Raymarched shaft pass failed; falling back to the shaft plane', error)
+        shaftPassFailed = true
+        shaftPass.dispose()
+        shaftPass = null
+        shaftPlane.visible = true
+      }
+    }
   }
   // Distance LOD (AQ-76 AC #1), evaluated at the ~0.24 s label cadence
   // using the already-computed projection depth — no extra raycast. Depth
@@ -1314,6 +1442,10 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
     if (sizeChanged) particleBuffersDirty = true
     width = nextWidth; height = nextHeight
     camera.aspect = width / height; camera.updateProjectionMatrix(); renderer.setSize(width, height, false)
+    if (shaftPass) {
+      const bufferSize = renderer.getDrawingBufferSize(new THREE.Vector2())
+      shaftPass.setSize(bufferSize.x, bufferSize.y)
+    }
     // The nearest fish depth controls the safe horizontal envelope, so depth
     // changes cannot send an otherwise in-bounds fish beyond the view edge.
     // AQ-62: the envelope is measured from the overview camera distance,
@@ -1547,7 +1679,7 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
     canActivate(id, x, y) { const item = fish.find(item => item.service.id === id); return Boolean(item && (x === undefined || y === undefined ? updateVisibility(item) : nearest(x, y) === id)) },
     dispose() {
       if (disposed) return; disposed = true; abort.abort(); observer.disconnect(); renderer.setAnimationLoop(null); lazyQueue = []
-      removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sandBed.dispose(); rear.geometry.dispose(); rear.material.dispose(); hazePlane.geometry.dispose(); hazeMaterial.dispose(); shaftPlane.geometry.dispose(); shaftMaterial.dispose(); waterSurfaceGeometry.dispose(); waterSurfaceMaterial.dispose(); foregroundParticleGeometry.dispose(); foregroundParticleMaterial.dispose(); backgroundParticleGeometry.dispose(); backgroundParticleMaterial.dispose(); bubbleGeometry.dispose(); bubbleMaterial.dispose(); caustics.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
+      removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sandBed.dispose(); rear.geometry.dispose(); rear.material.dispose(); hazePlane.geometry.dispose(); hazeMaterial.dispose(); shaftPlane.geometry.dispose(); shaftMaterial.dispose(); waterSurfaceGeometry.dispose(); waterSurfaceMaterial.dispose(); shaftPass?.dispose(); shaftPass = null; foregroundParticleGeometry.dispose(); foregroundParticleMaterial.dispose(); backgroundParticleGeometry.dispose(); backgroundParticleMaterial.dispose(); bubbleGeometry.dispose(); bubbleMaterial.dispose(); caustics.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
     },
   }
 }

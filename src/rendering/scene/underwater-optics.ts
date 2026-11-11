@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { evaluateSurfaceFocus, evaluateSurfaceHeight } from './surface-waves'
 
 /**
  * Pure-water absorption coefficients (m^-1) from Pope & Fry (1997) at representative
@@ -69,6 +70,39 @@ export type AquariumOpticsConfig = Readonly<{
   /** Maximum alpha of the volumetric light-shaft plane (AQ-86): soft
    * additive shafts from the surface, weakening with depth. */
   lightShaftMaxAlpha: number
+  /** Height of the water surface plane (AQ-14.2): the y the surface
+   * shader, the shaft roots, and the caustic sun-slant projection share. */
+  surfaceY: number
+  /** Unit direction from the water toward the overhead fixture (the key
+   * light at (1.2, 6.8, 4.6), normalised): the sun-slant direction for
+   * caustic projection and the shaft slant axis. */
+  sunDirection: Readonly<{ x: number; y: number; z: number }>
+  /** Gain of the shared wave-field focus term on caustics (AQ-70.6 /
+   * AQ-96): the caustic pattern is multiplied by
+   * `1 + surfaceFocusGain * focus`, so the sand dapple breathes with
+   * the surface instead of scrolling on an independent clock. */
+  surfaceFocusGain: number
+  /** Ridge smoothstep threshold for the sand caustic layer (AQ-70.12):
+   * re-tuned from the 0.22 visual-check workaround back toward the
+   * 0.35 default now that the focus term does the work; the +0.35 cap
+   * (causticMaxAdd) is untouched. */
+  causticSandThreshold: number
+  /** Raymarched shaft pass (AQ-98, High tier only): steps per pixel
+   * along the view ray at `shaftRenderScale` resolution. */
+  shaftRaymarchSteps: number
+  /** Peak additive alpha of the raymarched shaft pass (High tier).
+   * Higher than the shaft plane's 0.16 cap: the raymarch is
+   * depth-occluded light, not a flat overlay, so the same alpha reads
+   * weaker — look-dev (2026-11-11) set 0.28 so the columns read as
+   * volumetric shafts against the mid-water, not a faint haze. */
+  shaftRaymarchAlpha: number
+  /** Render scale of the raymarched shaft buffer (0.5 = half resolution;
+   * shafts are low-frequency light, so half-res is visually lossless). */
+  shaftRenderScale: number
+  /** Exponential soft-clamp on the accumulated shaft light
+   * (`1 - exp(-accum * shaftSoftClamp)`), so overlapping beams blend
+   * instead of spiking. */
+  shaftSoftClamp: number
 }>
 
 /**
@@ -85,6 +119,23 @@ export type AquariumOpticsConfig = Readonly<{
 export const DEFAULT_FIXTURE_WHITE_BALANCE = 2.1 / 3.05
 /** Default total overhead LED fixture output (AQ-70.6 AC #2). */
 export const DEFAULT_FIXTURE_TOTAL_INTENSITY = 3.05
+
+/** Overhead key-light position (aquarium.ts): the sun direction is the
+ * normalised vector from the origin toward this position. */
+export const KEY_LIGHT_POSITION = Object.freeze({ x: 1.2, y: 6.8, z: 4.6 })
+/** Unit sun direction toward the key light: (0.1446, 0.8196, 0.5544). */
+export const SUN_DIRECTION: Readonly<{ x: number; y: number; z: number }> = Object.freeze(
+  (() => {
+    const len = Math.hypot(KEY_LIGHT_POSITION.x, KEY_LIGHT_POSITION.y, KEY_LIGHT_POSITION.z)
+    return {
+      x: KEY_LIGHT_POSITION.x / len,
+      y: KEY_LIGHT_POSITION.y / len,
+      z: KEY_LIGHT_POSITION.z / len,
+    }
+  })(),
+)
+/** Height of the water surface plane (AQ-14.2). */
+export const WATER_SURFACE_Y = 2.66
 
 export const DEFAULT_AQUARIUM_OPTICS_CONFIG: AquariumOpticsConfig = Object.freeze({
   backgroundHex: '#183654',
@@ -123,6 +174,17 @@ export const DEFAULT_AQUARIUM_OPTICS_CONFIG: AquariumOpticsConfig = Object.freez
   // below full opacity so the tank keeps crisp deep focus (AQ-14.2 AC #4).
   depthHazeMaxAlpha: 0.22,
   lightShaftMaxAlpha: 0.16,
+  // Lighting + water surface (AQ-96 / AQ-98 / AQ-70.6): the surface-driven
+  // lighting work adds no assets, so no budget cap moves — these are
+  // shader/tier parameters only, governed by the adaptive quality tiers.
+  surfaceY: 2.66,
+  sunDirection: SUN_DIRECTION,
+  surfaceFocusGain: 0.6,
+  causticSandThreshold: 0.3,
+  shaftRaymarchSteps: 14,
+  shaftRaymarchAlpha: 0.28,
+  shaftRenderScale: 0.5,
+  shaftSoftClamp: 1.8,
 })
 
 /**
@@ -176,10 +238,30 @@ export const LIGHT_SHAFT_BAND_CENTERS: readonly number[] = Object.freeze([-2.2, 
 export const LIGHT_SHAFT_BAND_WIDTH_M = 0.55
 /** How far a shaft band slants sideways per metre of depth (slanting away from the surface). */
 export const LIGHT_SHAFT_SLANT_PER_M = 0.35
-/** Slow lateral sway amplitude of a shaft band, in metres. */
-export const LIGHT_SHAFT_SWAY_AMPLITUDE_M = 0.15
-/** Slow lateral sway frequency of a shaft band, in Hz. */
-export const LIGHT_SHAFT_SWAY_HZ = 0.05
+/** Slow lateral sway amplitude of a shaft band, in metres. Now the
+ * scale applied to the shared wave-field height sampled at the band
+ * root (surface-waves.ts): the bands drift with the surface instead of
+ * on an independent 0.05 Hz sine. */
+export const LIGHT_SHAFT_SWAY_AMPLITUDE_M = 4.5
+/** Depth (as a fraction of the 5.6 m water column) over which a shaft
+ * band fades out past its per-band reach. */
+export const LIGHT_SHAFT_REACH_FADE_M = 0.35
+
+/**
+ * Per-band depth reach (fraction of the water column, 0..1) from a
+ * deterministic hash of the band centre: most beams stop well above
+ * the sand and only the longest reach the bed. The +1.3 hash offset is
+ * chosen so the CENTRE band (x = 0.2, over the open centre arch of the
+ * aquascape) has the longest reach (0.85) and the left/right bands stop
+ * higher (0.56 / 0.79) — the longest shaft belongs over the open arch,
+ * not over rock. The GLSL in `aquarium.ts` mirrors this formula
+ * exactly; keep the two in sync.
+ */
+export function lightShaftBandReach(center: number): number {
+  const hash = Math.sin((center + 1.3) * 12.9898) * 43758.5453
+  const fract = hash - Math.floor(hash)
+  return 0.55 + 0.45 * fract
+}
 
 function clamp(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) return min
@@ -239,9 +321,13 @@ export function evaluateDepthHazeFactor(z: number, y: number): number {
 
 /**
  * Evaluates soft volumetric light-shaft intensity at a water-column point
- * (`AQ-86` AC #2): three slanted Gaussian bands descending from the
- * surface, weakening with depth (15% of surface strength at the sand),
- * swaying slowly sideways. Freezes at the static t=0 phase when `paused`
+ * (`AQ-86` AC #2, upgraded AQ-96/AQ-98): three slanted Gaussian bands
+ * descending from the surface, weakening with depth (15% of surface
+ * strength at the sand), each band fading out past its own hashed depth
+ * reach so most beams stop above the sand and only the longest reach
+ * the bed. Band sway is driven by the shared surface wave field sampled
+ * at the band root — the bands drift because the surface moves, not on
+ * an independent clock. Freezes at the static t=0 phase when `paused`
  * or `reducedMotion` is active, and never flickers. The GLSL in
  * `aquarium.ts` mirrors these constants; keep the two in sync.
  */
@@ -263,10 +349,14 @@ export function evaluateLightShaftIntensity(
   const depthEnvelope = 1 - 0.85 * depthFromTop
   let total = 0
   for (const center of LIGHT_SHAFT_BAND_CENTERS) {
-    const sway = LIGHT_SHAFT_SWAY_AMPLITUDE_M * Math.sin(effectiveTime * TWO_PI * LIGHT_SHAFT_SWAY_HZ + center)
+    // Wave-driven sway: the shared field height at the band root on the
+    // shaft plane (z = -1.8), scaled to the old ±0.15 m sway range.
+    const sway = LIGHT_SHAFT_SWAY_AMPLITUDE_M * evaluateSurfaceHeight(center, -1.8, effectiveTime)
     const bandCenter = center + (2.8 - y) * LIGHT_SHAFT_SLANT_PER_M + sway
     const d = (x - bandCenter) / LIGHT_SHAFT_BAND_WIDTH_M
-    total += Math.exp(-(d * d))
+    const reach = lightShaftBandReach(center)
+    const reachFade = clamp(1 - (depthFromTop - reach) / LIGHT_SHAFT_REACH_FADE_M, 0, 1)
+    total += Math.exp(-(d * d)) * reachFade
   }
   return Math.min(1, total) * depthEnvelope
 }
@@ -337,6 +427,23 @@ export function evaluateCausticIntensity(
  * static t=0 UVs when `paused` or `reducedMotion` is active, exactly like
  * `evaluateCausticIntensity`. The GLSL in `caustics.ts` mirrors these
  * constants; keep the two in sync.
+ *
+ * With `options.slant` (worldY of the fragment + sun direction), the UVs
+ * are projected from the surface point the light actually passed through:
+ * `surfacePoint = xz + sunDir.xz * (surfaceY - y) / sunDir.y`, so the
+ * dapple on tall rock and high coral shifts along the light direction
+ * and lines up with the shafts above it. The return also carries the
+ * shared wave-field focus at that surface point (`focus`, in [-1, 1]),
+ * which the shader multiplies the pattern by — this is the coupling
+ * that makes the dapple breathe with the surface. Without `slant` the
+ * legacy vertical projection is returned (UVs from world XZ directly),
+ * which is what the existing tests cover.
+ *
+ * Note on the two clocks: the caustic scroll rates (0.22 / 0.37 Hz) are
+ * deliberately NOT equated to the wave field's dispersion frequencies
+ * (0.66–1.49 Hz) — equating them would make the dapple scroll visibly
+ * too fast. The scroll is the slow envelope; the coupling to the surface
+ * is the shared frozen clock plus the focus term, not a shared frequency.
  */
 export function evaluateCausticPatternUV(
   worldX: number,
@@ -346,28 +453,58 @@ export function evaluateCausticPatternUV(
     paused?: boolean
     reducedMotion?: boolean
     config?: Partial<AquariumOpticsConfig>
+    slant?: {
+      worldY: number
+      sunDir?: Readonly<{ x: number; y: number; z: number }>
+      surfaceY?: number
+    }
   },
-): { a: { u: number; v: number }; b: { u: number; v: number } } {
+): {
+  a: { u: number; v: number }
+  b: { u: number; v: number }
+  /** Surface point the light passed through (the slanted footpoint). */
+  surfacePoint: { x: number; z: number }
+  /** Shared wave-field focus at the surface point, in [-1, 1]. */
+  focus: number
+} {
   const cfg = { ...DEFAULT_AQUARIUM_OPTICS_CONFIG, ...options?.config }
   const effectiveTime =
     options?.paused || options?.reducedMotion || !Number.isFinite(timeSeconds)
       ? 0
       : timeSeconds % 3600
+  let surfacePoint = { x: worldX, z: worldZ }
+  if (options?.slant) {
+    const sunDir = options.slant.sunDir ?? cfg.sunDirection
+    const surfaceY = options.slant.surfaceY ?? cfg.surfaceY
+    const dist = (surfaceY - options.slant.worldY) / Math.max(sunDir.y, 0.2)
+    surfacePoint = {
+      x: worldX + sunDir.x * dist,
+      z: worldZ + sunDir.z * dist,
+    }
+  }
+  const focus = evaluateSurfaceFocus(surfacePoint.x, surfacePoint.z, effectiveTime)
   return {
     a: {
-      u: worldX * cfg.causticTextureScaleA + effectiveTime * cfg.causticPrimaryHz * 0.1,
-      v: worldZ * cfg.causticTextureScaleA - effectiveTime * cfg.causticPrimaryHz * 0.06,
+      u: surfacePoint.x * cfg.causticTextureScaleA + effectiveTime * cfg.causticPrimaryHz * 0.1,
+      v: surfacePoint.z * cfg.causticTextureScaleA - effectiveTime * cfg.causticPrimaryHz * 0.06,
     },
     b: {
-      u: worldX * cfg.causticTextureScaleB - effectiveTime * cfg.causticSecondaryHz * 0.08,
-      v: worldZ * cfg.causticTextureScaleB + effectiveTime * cfg.causticSecondaryHz * 0.05,
+      u: surfacePoint.x * cfg.causticTextureScaleB - effectiveTime * cfg.causticSecondaryHz * 0.08,
+      v: surfacePoint.z * cfg.causticTextureScaleB + effectiveTime * cfg.causticSecondaryHz * 0.05,
     },
+    surfacePoint,
+    focus,
   }
 }
 
 /**
  * Evaluates subtle water-surface ripple vertical displacement (`AQ-14.2` AC #1 & #5).
  * Returns 0 when `paused` or `reducedMotion` is active.
+ *
+ * SUPERSEDED by the shared wave field in `surface-waves.ts` (AQ-96):
+ * the surface shader now displaces on the GPU from that field, and this
+ * two-sine function is kept only as the tested legacy mirror — no call
+ * site remains in `aquarium.ts`. Do not build new behaviour on it.
  */
 export function evaluateSurfaceRippleOffset(
   x: number,

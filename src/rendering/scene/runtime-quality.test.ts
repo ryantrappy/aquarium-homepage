@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   ADAPTIVE_COOLDOWN_MS,
+  ADAPTIVE_STEP_DOWN_EMA_MS,
+  ADAPTIVE_STEP_DOWN_P95_MS,
   ADAPTIVE_WINDOW_FRAMES,
   AdaptiveQualityController,
   LAZY_PHASE0_MAX_SPECIES,
@@ -13,7 +15,9 @@ import {
   phase0SpeciesIds,
   projectedFishLengthPx,
   selectFishLod,
+  shaftModeForTier,
 } from './runtime-quality'
+import { FRAME_TIME_BUDGET } from '../assets/budgets'
 
 describe('projectedFishLengthPx (AQ-76)', () => {
   it('matches the projectFishLinkBounds pixels-per-unit formula', () => {
@@ -158,10 +162,21 @@ describe('AdaptiveQualityController (AQ-76 AC #3)', () => {
   })
 
   it('tiers apply the documented pixel-ratio and shadow settings', () => {
-    expect(QUALITY_TIERS.high).toEqual({ pixelRatioCap: 1.5, shadows: true, lodBias: 0 })
-    expect(QUALITY_TIERS.balanced).toEqual({ pixelRatioCap: 1.0, shadows: true, lodBias: 0 })
+    expect(QUALITY_TIERS.high).toEqual({ pixelRatioCap: 1.5, shadows: true, lodBias: 0, shafts: 'raymarch' })
+    expect(QUALITY_TIERS.balanced).toEqual({ pixelRatioCap: 1.0, shadows: true, lodBias: 0, shafts: 'plane' })
     expect(QUALITY_TIERS.low.shadows).toBe(false)
     expect(QUALITY_TIERS.low.pixelRatioCap).toBe(1.0)
     expect(QUALITY_TIERS.low.lodBias).toBeGreaterThan(0)
+    expect(QUALITY_TIERS.low.shafts).toBe('reduced')
+  })
+
+  it('gates the shaft pass by tier: raymarch on High, plane on Balanced, reduced plane on Low', () => {
+    expect(shaftModeForTier('high')).toBe('raymarch')
+    expect(shaftModeForTier('balanced')).toBe('plane')
+    expect(shaftModeForTier('low')).toBe('reduced')
+    // The tier thresholds that govern the shaft step-down are still the
+    // frame-time budget — the shaft pass never gets its own governor.
+    expect(ADAPTIVE_STEP_DOWN_EMA_MS).toBe(FRAME_TIME_BUDGET.stepDownEmaMs)
+    expect(ADAPTIVE_STEP_DOWN_P95_MS).toBe(FRAME_TIME_BUDGET.p95MaxMs)
   })
 })
