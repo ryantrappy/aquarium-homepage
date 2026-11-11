@@ -146,9 +146,42 @@ describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
     expect(shader.fragmentShader).toContain('causticUvB')
     expect(shader.fragmentShader).toContain('uCausticMaxAdd')
     expect(shader.fragmentShader).toContain('#include <opaque_fragment>')
+    expect(shader.fragmentShader).toContain('#include <aomap_fragment>')
     expect(shader.fragmentShader).toContain('reflectedLight.directDiffuse +=')
+    // Regression guard for the dead-code injection bug (2026-11-11):
+    // in three r187 `outgoingLight` is formed from `reflectedLight`
+    // before `opaque_fragment`, so the caustic writes must land between
+    // `lights_fragment_end` and the `outgoingLight` sum, or they never
+    // reach the pixels.
+    expect(shader.fragmentShader.indexOf('causticSurf')).toBeGreaterThan(
+      shader.fragmentShader.indexOf('#include <lights_fragment_end>'),
+    )
+    expect(shader.fragmentShader.indexOf('causticSurf')).toBeLessThan(
+      shader.fragmentShader.indexOf('vec3 outgoingLight'),
+    )
     expect(shader.uniforms.uCausticMap).toBe(caustics.uniforms.uCausticMap)
     expect(shader.uniforms.uCausticTime).toBe(caustics.uniforms.uCausticTime)
+    // Sun-slant + focus uniforms are shared with every patched material.
+    expect(shader.uniforms.uSunDir).toBe(caustics.uniforms.uSunDir)
+    expect(shader.uniforms.uSurfaceY).toBe(caustics.uniforms.uSurfaceY)
+    expect(shader.uniforms.uFocusGain).toBe(caustics.uniforms.uFocusGain)
+    expect(caustics.uniforms.uSurfaceY.value).toBeCloseTo(2.66)
+    expect(caustics.uniforms.uFocusGain.value).toBeCloseTo(0.6)
+    expect(Math.hypot(
+      caustics.uniforms.uSunDir.value.x,
+      caustics.uniforms.uSunDir.value.y,
+      caustics.uniforms.uSunDir.value.z,
+    )).toBeCloseTo(1, 9)
+    // The shader samples UVs at the slanted surface footpoint and
+    // modulates the pattern by the shared wave-field focus there.
+    expect(shader.fragmentShader).toContain('causticSurf')
+    expect(shader.fragmentShader).toContain('surfaceWaveFocus(causticSurf, uCausticTime)')
+    expect(shader.fragmentShader).toContain('1.0 + uFocusGain * surfaceWaveFocus')
+    // Light redistribution: the field between ridges is dimmed (the
+    // light in the web came from around it), so the dapple reads on
+    // bright surfaces instead of clipping away.
+    expect(shader.fragmentShader).toContain('reflectedLight.directDiffuse *= 1.0 - 0.40 * (1.0 - causticP) * causticMask')
+    expect(shader.fragmentShader).toContain('surfaceWaveHeight')
     expect(shader.uniforms.uCausticMaxAdd.value).toBeCloseTo(0.35)
     expect(shader.uniforms.uCausticThreshold.value).toBeCloseTo(0.35)
     expect(shader.uniforms.uCausticScaleA.value).toBeCloseTo(0.35)

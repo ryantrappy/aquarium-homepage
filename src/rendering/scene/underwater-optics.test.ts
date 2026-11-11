@@ -5,6 +5,8 @@ import {
   LIGHT_SHAFT_BAND_CENTERS,
   LIGHT_SHAFT_SLANT_PER_M,
   LIGHT_SHAFT_SWAY_AMPLITUDE_M,
+  SUN_DIRECTION,
+  WATER_SURFACE_Y,
   createRestrainedCausticLightController,
   createParticleSprite,
   PARTICLE_SPRITE_SIZE_PX,
@@ -21,7 +23,9 @@ import {
   evaluateLightShaftIntensity,
   evaluateSurfaceRippleOffset,
   evaluateSuspendedParticlePosition,
+  lightShaftBandReach,
 } from './underwater-optics'
+import { evaluateSurfaceFocus, evaluateSurfaceHeight } from './surface-waves'
 
 describe('aquarium-scale underwater optics, restrained caustics, and suspended particles (AQ-39 / AQ-14.2 / AQ-43)', () => {
   it('computes Pope & Fry (1997) spectral transmittance bounded to home-aquarium depth without an artificial blue veil', () => {
@@ -283,14 +287,20 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
 
   it('projects soft volumetric shafts that weaken with depth and freeze on pause (AQ-86 AC #2)', () => {
     const firstBand = LIGHT_SHAFT_BAND_CENTERS[0]!
-    // On a band centre at the surface: strong.
-    const surfaceCenter = firstBand + LIGHT_SHAFT_SWAY_AMPLITUDE_M * Math.sin(firstBand)
+    // On a band centre at the surface: strong. The band centre at t=0
+    // includes the wave-driven sway (shared field height at the band
+    // root, scaled), not the old independent 0.05 Hz sine.
+    const surfaceCenter =
+      firstBand + LIGHT_SHAFT_SWAY_AMPLITUDE_M * evaluateSurfaceHeight(firstBand, -1.8, 0)
     const onBand = evaluateLightShaftIntensity(surfaceCenter, 2.8, 0)
     expect(onBand).toBeGreaterThan(0.5)
     // Far from every band: ~0.
     expect(evaluateLightShaftIntensity(5.5, 2.8, 0)).toBeLessThan(0.05)
     // The same band at the sand is 15% of its surface strength (slant included).
-    const sandCenter = firstBand + 5.6 * LIGHT_SHAFT_SLANT_PER_M + LIGHT_SHAFT_SWAY_AMPLITUDE_M * Math.sin(firstBand)
+    const sandCenter =
+      firstBand +
+      5.6 * LIGHT_SHAFT_SLANT_PER_M +
+      LIGHT_SHAFT_SWAY_AMPLITUDE_M * evaluateSurfaceHeight(firstBand, -1.8, 0)
     const atSand = evaluateLightShaftIntensity(sandCenter, -2.8, 0)
     expect(atSand).toBeGreaterThan(0)
     expect(atSand).toBeLessThanOrEqual(onBand * 0.2)
@@ -309,6 +319,64 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
       expect(value).toBeGreaterThanOrEqual(0)
       expect(value).toBeLessThanOrEqual(1)
     }
+    // Per-band depth stagger: reaches are hashed, in (0.55, 1.0), and
+    // differ between bands, so most beams stop above the sand.
+    const reaches = LIGHT_SHAFT_BAND_CENTERS.map(lightShaftBandReach)
+    for (const reach of reaches) {
+      expect(reach).toBeGreaterThan(0.55)
+      expect(reach).toBeLessThan(1)
+    }
+    expect(new Set(reaches).size).toBe(reaches.length)
+  })
+
+  it('carries the surface-driven lighting config: sun direction, surface height, focus gain, raymarch tiers', () => {
+    const cfg = DEFAULT_AQUARIUM_OPTICS_CONFIG
+    expect(cfg.surfaceY).toBe(WATER_SURFACE_Y)
+    expect(cfg.surfaceY).toBe(2.66)
+    expect(Math.hypot(cfg.sunDirection.x, cfg.sunDirection.y, cfg.sunDirection.z)).toBeCloseTo(1, 9)
+    expect(cfg.sunDirection).toEqual(SUN_DIRECTION)
+    expect(cfg.sunDirection.y).toBeGreaterThan(0.8)
+    expect(cfg.surfaceFocusGain).toBe(0.6)
+    expect(cfg.causticSandThreshold).toBe(0.3)
+    expect(cfg.causticMaxAdd).toBe(0.35)
+    expect(cfg.shaftRaymarchSteps).toBe(14)
+    expect(cfg.shaftRaymarchAlpha).toBe(0.28)
+    expect(cfg.shaftRenderScale).toBe(0.5)
+    expect(cfg.shaftSoftClamp).toBe(1.8)
+    // Every existing default is untouched by the extension.
+    expect(cfg.causticPrimaryHz).toBe(0.22)
+    expect(cfg.causticSecondaryHz).toBe(0.37)
+    expect(cfg.lightShaftMaxAlpha).toBe(0.16)
+  })
+
+  it('slant-projects caustic UVs from the surface footpoint and reports the wave-field focus there', () => {
+    // A fragment on the sand (y = -2.8) under a slanted sun: the
+    // footpoint shifts along +sunDir.xz by (2.66 - (-2.8)) / sunDir.y.
+    const slanted = evaluateCausticPatternUV(0, 0, 0, { slant: { worldY: -2.8 } })
+    const dist = (2.66 - -2.8) / SUN_DIRECTION.y
+    expect(slanted.surfacePoint.x).toBeCloseTo(SUN_DIRECTION.x * dist, 9)
+    expect(slanted.surfacePoint.z).toBeCloseTo(SUN_DIRECTION.z * dist, 9)
+    expect(slanted.a.u).toBeCloseTo(
+      slanted.surfacePoint.x * DEFAULT_AQUARIUM_OPTICS_CONFIG.causticTextureScaleA,
+      9,
+    )
+    // The focus is the shared wave-field focus at the footpoint, not at
+    // the fragment: it agrees with the field evaluated there.
+    expect(slanted.focus).toBeCloseTo(
+      evaluateSurfaceFocus(slanted.surfacePoint.x, slanted.surfacePoint.z, 0),
+      9,
+    )
+    expect(slanted.focus).toBeGreaterThanOrEqual(-1)
+    expect(slanted.focus).toBeLessThanOrEqual(1)
+    // At the surface itself the slant vanishes: footpoint == fragment.
+    const atSurface = evaluateCausticPatternUV(1.2, -0.8, 0, { slant: { worldY: 2.66 } })
+    expect(atSurface.surfacePoint).toEqual({ x: 1.2, z: -0.8 })
+    // Without slant the legacy vertical projection is unchanged.
+    const legacy = evaluateCausticPatternUV(1.2, -0.8, 0)
+    expect(legacy.surfacePoint).toEqual({ x: 1.2, z: -0.8 })
+    // Slant + pause freezes at the t=0 footpoint/focus.
+    const paused = evaluateCausticPatternUV(0, 0, 5, { paused: true, slant: { worldY: -2.8 } })
+    expect(paused).toEqual(slanted)
   })
   it('renders motes as a soft round disc, not a hard square (AQ-43 visual-check fix)', () => {
     const sprite = createParticleSprite('mote')
