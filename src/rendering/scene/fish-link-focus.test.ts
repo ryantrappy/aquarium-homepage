@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { applyFishLinkVisibility } from './fish-link-focus'
+import { applyFishLinkVisibility, isLabelSampleExposed, type LabelSampleHit } from './fish-link-focus'
 
 function fixture() {
   const anchor = document.createElement('a')
@@ -67,5 +67,38 @@ describe('focused fish exposure', () => {
       expect(anchor.getAttribute('aria-hidden')).toBe('false'); expect(anchor.tabIndex).toBe(0)
       expect(label.style.visibility).toBe('visible')
     }
+  })
+})
+
+describe('label exposure from one raycast sample (PR #37 visual check)', () => {
+  const self: LabelSampleHit = { serviceId: 'ombi' }
+  const otherFish: LabelSampleHit = { serviceId: 'komodo' }
+  const ambientFish: LabelSampleHit = { ambientFish: true }
+  const reef: LabelSampleHit = {}
+  const noHit: LabelSampleHit = undefined
+
+  it('exposes the label when the nearest hit is the fish itself', () => {
+    expect(isLabelSampleExposed(self)).toBe(true)
+  })
+
+  it('exposes the label when another service fish is foremost — a partly covered fish stays labelled', () => {
+    // Mobile zoom: the yellow tang sits partly behind the blue tang, yet
+    // is plainly visible; the old rule hid its pill because no sample
+    // resolved to the tang itself.
+    expect(isLabelSampleExposed(otherFish)).toBe(true)
+  })
+
+  it('exposes the label when a no-service ambient fish is foremost — the sailfin never hides a service label', () => {
+    // Schoolmates carry no serviceId, so nearest() returned undefined for
+    // every sample covered by the sailfin and the blue tang lost its pill.
+    expect(isLabelSampleExposed(ambientFish)).toBe(true)
+  })
+
+  it('keeps the label hidden when reef or sand is foremost — a fish genuinely behind rock stays unlabelled', () => {
+    expect(isLabelSampleExposed(reef)).toBe(false)
+  })
+
+  it('keeps the label hidden when the sample ray hits nothing', () => {
+    expect(isLabelSampleExposed(noHit)).toBe(false)
   })
 })
