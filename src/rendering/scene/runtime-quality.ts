@@ -63,11 +63,26 @@ export const ADAPTIVE_LOW_LOD_BIAS = 0.15
 export type FishLod = 0 | 1
 export type QualityTier = 'high' | 'balanced' | 'low'
 
-export const QUALITY_TIERS: Readonly<Record<QualityTier, { pixelRatioCap: number; shadows: boolean; lodBias: number }>> = Object.freeze({
-  high: { pixelRatioCap: 1.5, shadows: true, lodBias: 0 },
-  balanced: { pixelRatioCap: 1.0, shadows: true, lodBias: 0 },
-  low: { pixelRatioCap: 1.0, shadows: false, lodBias: ADAPTIVE_LOW_LOD_BIAS },
+/** Light-shaft rendering mode per quality tier (AQ-98 / AQ-86, tiered
+ * by the same adaptive thresholds as everything else — see
+ * `FRAME_TIME_BUDGET` in budgets.ts, which asserts the step-down
+ * thresholds still equal the frame-time budget):
+ * - `raymarch`: the depth-occluded screen-space raymarched shafts
+ *   (High only — the most expensive light in the scene).
+ * - `plane`: the upgraded wave-driven shaft plane (Balanced fallback).
+ * - `reduced`: the same plane at half alpha (Low — shafts cost ~0). */
+export type ShaftMode = 'raymarch' | 'plane' | 'reduced'
+
+export const QUALITY_TIERS: Readonly<Record<QualityTier, { pixelRatioCap: number; shadows: boolean; lodBias: number; shafts: ShaftMode }>> = Object.freeze({
+  high: { pixelRatioCap: 1.5, shadows: true, lodBias: 0, shafts: 'raymarch' },
+  balanced: { pixelRatioCap: 1.0, shadows: true, lodBias: 0, shafts: 'plane' },
+  low: { pixelRatioCap: 1.0, shadows: false, lodBias: ADAPTIVE_LOW_LOD_BIAS, shafts: 'reduced' },
 })
+
+/** Shaft rendering mode for a tier (the tier contract's shaft half). */
+export function shaftModeForTier(tier: QualityTier): ShaftMode {
+  return QUALITY_TIERS[tier].shafts
+}
 
 const DEG_TO_RAD = Math.PI / 180
 
