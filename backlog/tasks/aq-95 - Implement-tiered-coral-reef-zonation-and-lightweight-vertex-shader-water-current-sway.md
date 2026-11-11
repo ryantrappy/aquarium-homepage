@@ -1,13 +1,13 @@
 ---
 id: AQ-95
 title: >-
-  Implement smart coral instancing via THREE.InstancedMesh with multi-frequency
-  vertex sway and actinic Fresnel rim glow
+  Build modular coral asset library with biologically convincing morphologies,
+  instancing, and actinic shaders
 status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-11 04:55'
-updated_date: '2026-11-11 05:08'
+updated_date: '2026-11-11 05:16'
 labels:
   - corals
   - shaders
@@ -30,22 +30,28 @@ ordinal: 101000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Architect the coral rendering pipeline for maximum biological realism and WebGL performance:
-1. THREE.InstancedMesh for Coral Colonies:
-   - Rather than exporting hundreds of individual polyps from Blender, author and export 10–12 distinct hero coral meshes (e.g. Acropora branch cluster, Montipora plate, Zoanthid polyp cluster, Torch coral tentacle cluster, Brain coral dome, Anemone base).
-   - Use THREE.InstancedMesh (or <Instances>) to scatter, scale, and rotate instances across the rock foundations according to biological zonation (SPS high, LPS mid, soft/anemones low), maintaining near-zero CPU overhead and minimal draw calls.
-2. Custom Vertex Sway & Fluorescence Shader (material.onBeforeCompile):
-   - Inject a custom shader chunk adding multi-frequency vertex sway (e.g. sin(time + position.x) * heightMask) so soft corals and anemone tentacles ripple organically with simulated water currents.
-   - Actinic Emissive Rim (Fresnel): Real corals glow under blue actinic LEDs. Add a subtle Fresnel-based emissive glow in cyan, magenta, and neon green for authentic actinic pop without requiring expensive real-time GI.
-3. Contracts & Controls:
-   - Ensure sway freezes on pause, reduced motion, and page blur; preserve socket anchors and COLOR_0 contracts.
+Architect the modular coral asset library and rendering shaders to make the reef feel like an ecosystem growing on natural rock:
+1. Reusable Modular Coral Asset Library (Blender):
+   - Branching Corals (Acropora/Stylophora, 3–4 variations): Irregular, tapering, slightly crooked growth with visible axial/radial corallites rather than repeated cylinders.
+   - Plating Corals (Montipora, 2–3 variations): Broad, thin, uneven overlapping shelves with detailed growth edges that attach to plateau ledges.
+   - Fleshy LPS Corals (Hammer, Torch, 3 variations): Rounded inflated tissue, fine tentacles, and visible skeletal bases.
+   - Colonial Polyps (Zoanthids, mushrooms, 2 variations): Dense low clusters and discs.
+   - Brain Corals (Diploria, Favia, 2 variations): Meandering valley ridges with muted tones.
+   - Encrusting Corals: Map/shade encrusting patches directly onto the live-rock surface rather than floating separate meshes.
+2. Controlled Color Palette:
+   - Base colors limited to natural dominant hues: muted violet, teal, green, and peach.
+   - Occasional intensely fluorescent specimens popping under blue actinic lighting.
+3. Three.js Instancing & Shader Features:
+   - Populate colonies across the rock using THREE.InstancedMesh with randomized scale/orientation to minimize draw calls.
+   - Inject multi-frequency vertex sway (sin(time + position.x) * heightMask) via material.onBeforeCompile for organic water current rippling.
+   - Add subtle Fresnel-based actinic rim glow in cyan, magenta, and neon green for authentic reef-tank pop.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 10–12 distinct hero coral archetypes are exported and populated across the reef using THREE.InstancedMesh with randomized scale/rotation, keeping draw calls minimal
-- [ ] #2 material.onBeforeCompile injects multi-frequency vertex sway driven by vertex height and position for organic water current motion
-- [ ] #3 A subtle Fresnel-based actinic emissive rim glow (cyan, magenta, neon green) is applied to simulate blue LED coral fluorescence
-- [ ] #4 Vertex sway animation halts synchronously on pause, under prefers-reduced-motion, and when the document is hidden
-- [ ] #5 Automated tests verify that modular socket alignment, flexibility contracts, and 60fps frame rates are maintained
+- [ ] #1 Blender library includes modular coral archetypes: 3–4 branching, 2–3 plating, 3 fleshy LPS, 2 colonial polyps, and 2 brain corals
+- [ ] #2 Branching corals feature irregular crooked growth, plating corals form thin overlapping shelves, and encrusting corals texture rock patches directly
+- [ ] #3 Color palette adheres to muted violet, teal, green, and peach with selective intensely fluorescent specimens
+- [ ] #4 THREE.InstancedMesh is used to scatter and orient coral variations across the scape with minimal draw calls
+- [ ] #5 Shaders inject multi-frequency vertex sway for current motion and Fresnel actinic rim glow that freezes on pause/reduced-motion
 <!-- AC:END -->

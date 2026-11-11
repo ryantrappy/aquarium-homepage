@@ -1,13 +1,13 @@
 ---
 id: AQ-94
 title: >-
-  Author Negative Space Aquascape (NSA) with arch, pinnacle canyon, and single
-  2048px live-rock trim sheet
+  Author Negative Space Aquascape (NSA) with 5–8 modular rock pieces, pinnacle
+  canyon, and 2048px trim sheet
 status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-11 04:55'
-updated_date: '2026-11-11 05:08'
+updated_date: '2026-11-11 05:16'
 labels:
   - modeling
   - blender
@@ -29,23 +29,23 @@ ordinal: 100000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Architect the live rock aquascape from scratch using Negative Space Aquascaping (NSA) principles and efficient modular trim sheet baking:
-1. Negative Space Aquascaping (NSA):
-   - Rather than solid mounds of rock, construct an asymmetrical sweeping arch on the left that rises into a high pinnacle near the water surface, paired with a smaller, lower secondary island on the right.
-   - This creates a natural "canyon" in the middle that draws the eye inward, establishes dramatic depth, and provides natural 3D swim paths for fish to navigate through.
-2. Single Texture Atlas / Trim Sheet:
-   - Sculpt 4–5 modular live rock pieces in Blender with high-poly porous cavities, crevice details, and plateau shelves.
-   - Bake high-poly porous details (tangent-space Normal, Roughness, and Ambient Occlusion maps) onto a single shared 2048×2048 texture atlas / trim sheet.
-   - Assemble the entire reef structure using instances of these modular rocks, keeping the exported .glb under 5 MB and minimizing draw calls.
+Architect the live rock aquascape from scratch using Negative Space Aquascaping (NSA) principles and a modular 5–8 piece library:
+1. Negative Space Aquascaping (NSA) & Upper Water Negative Space:
+   - Rather than solid rock mounds, construct an asymmetrical sweeping arch on the left rising into a high pinnacle near the surface, paired with a lower secondary bommie on the right, creating a central swim canyon.
+   - Preserve substantial negative space in the upper half of the water column so open-water cruisers and service labels remain uncluttered and easy to interact with.
+2. Modular 5–8 Piece Live-Rock Library & Trim Sheet:
+   - Sculpt 5–8 modular live-rock pieces in Blender with porous cavities, crevice details, plateau shelves, and dedicated encrusting coral rock patches.
+   - Bake high-poly porous details (Normal, Roughness, AO) onto a single 2048×2048 texture atlas / trim sheet.
+   - Assemble the primary pinnacle formation and secondary island from instances of these modular pieces, keeping the exported .glb under 5 MB with minimal draw calls.
 3. Substrate Grounding:
    - Add subtle dunes, shell fragments, and small rubble where the rock meets the sand bed to anchor the scape seamlessly.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The aquascape forms an asymmetrical Negative Space Aquascape (NSA) featuring a left sweeping arch rising to a high pinnacle, a lower right island, and a central swim canyon
-- [ ] #2 The reef structure is assembled from 4–5 modular sculpted rock assets sharing a single 2048x2048 PBR texture atlas (Normal, Roughness, AO)
-- [ ] #3 Total exported .glb asset size for the assembled live-rock foundations remains under 5 MB with minimal draw calls
-- [ ] #4 Plateau shelves on the spire and substrate rubble at the sand bed base ground the structure naturally
-- [ ] #5 Exported assets pass manifest validation and collision geometry probes without breaking fish navigation clearance
+- [ ] #1 Aquascape forms an asymmetrical Negative Space Aquascape (NSA) with a left arch rising to a high pinnacle, lower right island, and central swim canyon
+- [ ] #2 Reef is assembled from a reusable library of 5–8 modular sculpted rock pieces sharing a single 2048x2048 PBR texture atlas (Normal, Roughness, AO)
+- [ ] #3 Upper half of the water column preserves open negative space for unobstructed fish swimming and label visibility
+- [ ] #4 Total exported .glb asset size for assembled foundations remains under 5 MB with minimal draw calls
+- [ ] #5 Substrate dunes, shell fragments, and rubble eliminate hard intersecting seams at the sand bed base
 <!-- AC:END -->
