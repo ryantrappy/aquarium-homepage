@@ -33,8 +33,8 @@ export type AssembledCoralBinding = {
 }
 
 export const LIVE_ROCK_ISLAND_URLS: Readonly<Record<'left' | 'right', string>> = Object.freeze({
-  left: new URL('../assets/corals/live-rock-island-left.glb', import.meta.url).href,
-  right: new URL('../assets/corals/live-rock-island-right.glb', import.meta.url).href,
+  left: new URL('../assets/corals/live-rock-island-left.glb?v=asym-2', import.meta.url).href,
+  right: new URL('../assets/corals/live-rock-island-right.glb?v=asym-2', import.meta.url).href,
 })
 
 export const MODULAR_CORAL_ASSET_URLS: Readonly<Record<string, string>> = Object.freeze({
@@ -194,7 +194,25 @@ function ensureCoralShaderBounds(
   geometry.boundingSphere!.radius += state.maxMargin
 }
 
-// Cohesive, velvety actinic-daylight reef palettes for branching SPS, plating Montipora, and GSP carpets:
+// Cohesive, velvety actinic-daylight reef palettes for branching SPS, plating Montipora, and GSP carpets (AQ-70.13):
+const PALETTE_NEON_GREEN_STAGHORN_SPS: CoralPaletteOverride = {
+  baseColor: '#34cc58',
+  tipColor: '#88f792',
+  creviceColor: '#164d24',
+  regradeStrength: 0.92,
+  roughness: 0.78,
+  subsurfaceStrength: 0.40,
+  fluorescenceStrength: 0.26,
+}
+const PALETTE_CRIMSON_GORGONIAN_FOCAL: CoralPaletteOverride = {
+  baseColor: '#d93238',
+  tipColor: '#ff857a',
+  creviceColor: '#521016',
+  regradeStrength: 0.93,
+  roughness: 0.80,
+  subsurfaceStrength: 0.42,
+  fluorescenceStrength: 0.22,
+}
 const PALETTE_MAUVE_GORGONIAN_PLUME: CoralPaletteOverride = {
   baseColor: '#c48ca8',
   tipColor: '#f2d8e6',
@@ -363,7 +381,7 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
     tiltXRad: 0.16,
     tiltZRad: 0.24,
     offsetM: [-0.03, 0.01, 0.0],
-    paletteOverride: PALETTE_DUSTY_LAVENDER_SPS,
+    paletteOverride: PALETTE_NEON_GREEN_STAGHORN_SPS,
   },
   {
     socketName: 'socket_sps_crest_02',
@@ -374,7 +392,7 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
     tiltXRad: 0.20,
     tiltZRad: -0.10,
     offsetM: [0.01, 0.02, 0.02],
-    paletteOverride: PALETTE_MAUVE_GORGONIAN_PLUME,
+    paletteOverride: PALETTE_DUSTY_LAVENDER_SPS,
   },
   {
     socketName: 'socket_sps_crest_03',
@@ -385,7 +403,7 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
     tiltXRad: 0.18,
     tiltZRad: -0.26,
     offsetM: [0.04, 0.02, 0.01],
-    paletteOverride: PALETTE_MAUVE_GORGONIAN_PLUME,
+    paletteOverride: PALETTE_NEON_GREEN_STAGHORN_SPS,
   },
   // Broad scrolling Montipora whorl ledges jutting out from the mid-reef shelves
   {
@@ -496,13 +514,13 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
 ] as const
 
 export const DEFAULT_RIGHT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
-  // Giant upper-right branching Mauve-Pink, Powder-Blue, and Dusty-Lavender colonies
+  // Upper-right arch & pillar: focal red gorgonian/staghorn plume at golden section, low plating shelf over the arch
   {
     socketName: 'socket_sps_crest_04',
-    coralAssetId: 'coral-acropora-staghorn',
+    coralAssetId: 'coral-acropora-table',
     archetype: 'branching-sps',
     yawRad: 0.18,
-    scale: 1.82,
+    scale: 1.15,
     tiltXRad: 0.16,
     tiltZRad: 0.10,
     offsetM: [0.0, 0.02, 0.01],
@@ -513,7 +531,7 @@ export const DEFAULT_RIGHT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
     coralAssetId: 'coral-acropora-staghorn',
     archetype: 'branching-sps',
     yawRad: -0.6,
-    scale: 1.75,
+    scale: 1.25,
     tiltXRad: 0.16,
     tiltZRad: -0.22,
     offsetM: [0.04, 0.02, 0.01],
@@ -521,14 +539,14 @@ export const DEFAULT_RIGHT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
   },
   {
     socketName: 'socket_sps_crest_06',
-    coralAssetId: 'coral-acropora-table',
+    coralAssetId: 'coral-acropora-staghorn',
     archetype: 'branching-sps',
-    yawRad: 1.1,
-    scale: 1.62,
-    tiltXRad: 0.20,
-    tiltZRad: 0.18,
-    offsetM: [-0.04, 0.01, 0.02],
-    paletteOverride: PALETTE_MAUVE_GORGONIAN_PLUME,
+    yawRad: 0.85,
+    scale: 1.78,
+    tiltXRad: 0.14,
+    tiltZRad: 0.22,
+    offsetM: [-0.03, 0.02, 0.02],
+    paletteOverride: PALETTE_CRIMSON_GORGONIAN_FOCAL,
   },
   // Scrolling Montipora & leather folds on the left and right flanks
   {

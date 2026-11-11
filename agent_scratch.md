@@ -37,3 +37,17 @@
 - On the `gemini_control` branch, Gemini Argon is the short-term "lead" dev who manages work while the Codex designated lead is out of tokens for a few days.
 - Do not mark tasks as fully complete (`Done`); instead, mark them as `gemini approved` and leave their status as `In Progress`.
 - Only the Codex designated lead can move tasks to completed (`Done`). When the Codex lead returns and takes control back after Gemini Argon has worked for a while, it should check the `gemini approved` items first.
+
+### 2026-11-10 — Core photorealism & technical upgrade task queue
+*Gemini Flash review 2026-11-10: Actioned; all prior standing entries inspected and retained as current policy/pending.*
+- Created and augmented 7 structured Backlog tasks detailing the user's architectural plan across Blender and Three.js:
+  - AQ-94 (High, @gemini, modeling): Negative Space Aquascape (NSA) with sweeping left arch, high pinnacle, central swim canyon, and single 2048px live-rock trim sheet (Normal, Roughness, AO) with sub-5MB GLB budget.
+  - AQ-95 (High, @Luna, corals/shaders): Smart coral instancing via THREE.InstancedMesh (10–12 hero archetypes) with custom onBeforeCompile multi-frequency vertex sway and actinic Fresnel rim glow (cyan, magenta, neon green).
+  - AQ-96 (High, @Luna, lighting/optics): High-Kelvin (14,000K–20,000K) reef spectrum lighting, scrolling dual-layer caustics masked by upward surface normal, and floating marine snow / microbubbles particle system (300–500 particles).
+  - AQ-97 (High, @Luna, animation/ui): CatmullRomCurve3 spline fish navigation through the canyon, local body flex, and 3D-tracked glassmorphic service pills (backdrop-filter: blur(8px)) via vector.project(camera).
+  - AQ-98 (High, @Luna, lighting/camera): Volumetric god ray cones (scrolling noise, AdditiveBlending, view-dot-normal edge fade) and upward-angled camera framing (FOV 45°–50°) for vertical scale.
+  - AQ-99 (High, @Luna, behavior/navigation): Tiered vertical fish swimming depth zones for surface schooling (Chromis, Anthias), mid-water cruising around the spire (Tangs, Butterflyfish), and benthic perching (Blennies, Gobies, Dragonets).
+  - AQ-100 (High, @Luna, camera/ui): Click-to-focus camera dolly transitions and glassmorphic inspect cards with smooth full-tank panorama reset.
+
+
+

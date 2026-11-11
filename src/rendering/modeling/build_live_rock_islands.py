@@ -54,17 +54,17 @@ LEFT_SOCKET_SPECS = [
 ]
 
 RIGHT_SOCKET_SPECS = [
-    # Upper asymmetric carbonate spires (0.288 m .. 0.338 m)
+    # Upper asymmetric carbonate spires (0.288 m .. 0.338 m), with socket_sps_crest_06 at the golden-section focal point
     ('socket_sps_crest_06',       (-0.150,  0.145, 0.336)),
     ('socket_sps_crest_04',       ( 0.010,  0.160, 0.294)),
     ('socket_sps_crest_05',       ( 0.155,  0.140, 0.318)),
-    # Mid staggered boulder ledges (0.168 m .. 0.232 m)
+    # Mid staggered boulder ledges & arch bridge (0.168 m .. 0.232 m)
     ('socket_plate_ledge_03',     (-0.325,  0.090, 0.226)),
     ('socket_lps_mid_04',         (-0.215, -0.015, 0.184)),
     ('socket_lps_mid_06',         ( 0.005, -0.020, 0.212)),
     ('socket_lps_mid_05',         ( 0.220, -0.010, 0.174)),
     ('socket_plate_ledge_04',     ( 0.325,  0.085, 0.206)),
-    # Lower apron outcrops (0.082 m .. 0.118 m)
+    # Lower apron outcrops flanking the right-island arch/swim-through (0.082 m .. 0.118 m)
     ('socket_brain_apron_03',     (-0.265, -0.155, 0.114)),
     ('socket_soft_mat_02',        ( 0.005, -0.168, 0.084)),
     ('socket_brain_apron_04',     ( 0.265, -0.155, 0.102)),
@@ -198,88 +198,113 @@ def voronoi_pores_3d(x, y, z, scale=28.0, seed=0):
 
 def evaluate_raw_rock_surfaces(x, y, island_kind, socket_specs):
     """
-    Evaluate raw (z_top, z_bot) in Blender meters (Z-up) from distinct, jagged 3D carbonate
-    boulders separated by deep fissures (avoiding flat horizontal terrace sheets).
+    Evaluate raw (z_top, z_bot) in Blender meters (Z-up) for a truly asymmetrical reef aquascape (AQ-70.13):
+    - Left Island (Dominant Mountain Bommie, ~60% visual weight):
+      A tall, soaring, continuous carbonate alpine-reef mountain peaking at ~0.52m on the rear-left,
+      cascading down through stepped ledges into the canyon. Solid, heavy rock face with a deep
+      shadowed cave tunnel at the substrate (z_bot=0.088m for AQ-58 clearance) under a thick rock brow.
+    - Right Island (Low Arch & Coral Table Formation, ~35% visual weight):
+      A much lower (~0.31m peak, ~40% lower!), horizontal, open formation featuring a prominent
+      focal pillar at the golden section, a grand open swim-through archway (z_bot=0.178m) framing
+      the dark void, and a low sprawling apron stepping down to the sand.
     """
     seed = 11 if island_kind == 'left' else 73
-    crag_macro = ridged_3d(x * 4.8, y * 5.2, 0.35, octaves=3, seed=seed) - 0.48
-    crag_med = ridged_3d(x * 11.5, y * 12.0, 0.85, octaves=3, seed=seed + 19) - 0.50
-    pore_f1, fissure_edge = voronoi_pores_3d(x, y, 0.25, scale=9.5, seed=seed + 41)
-    fissure_carve = -0.038 * (1.0 - smoothstep(0.0, 0.22, fissure_edge))
-    pit_carve = -0.014 * (1.0 - smoothstep(0.08, 0.34, pore_f1))
+    crag_macro = ridged_3d(x * 5.2, y * 5.6, 0.35, octaves=3, seed=seed) - 0.48
+    crag_med = ridged_3d(x * 12.5, y * 13.0, 0.85, octaves=3, seed=seed + 19) - 0.50
+    pore_f1, fissure_edge = voronoi_pores_3d(x, y, 0.25, scale=10.5, seed=seed + 41)
+    fissure_carve = -0.052 * (1.0 - smoothstep(0.0, 0.18, fissure_edge))
+    pit_carve = -0.018 * (1.0 - smoothstep(0.08, 0.34, pore_f1))
 
-    # Irregular basal reef rubble skirt
-    z_top = 0.026 + 0.022 * crag_macro + 0.010 * crag_med
-
-    # Distinct craggy boulder mounds for each socket (narrower radii so deep clefts form between boulders)
-    for idx, (s_name, (sx, sy, sz)) in enumerate(socket_specs):
-        meta = SOCKET_ARCHETYPES[socket_prefix(s_name)]
-        r_pad = meta['footprint'] + 0.008
-        ang = math.atan2(y - sy, x - sx)
-        # Strong irregular angular boulder lobes
-        boulder_lobe = (
-            1.0
-            + 0.24 * math.sin(ang * 3.0 + idx * 1.9)
-            + 0.17 * math.cos(ang * 5.0 - idx * 2.7)
-            + 0.11 * math.sin(ang * 7.0 + idx * 0.8)
-        )
-        aniso_x = 0.92 + 0.16 * ((idx * 37) % 5) / 4.0
-        aniso_y = 0.94 + 0.16 * ((idx * 53) % 5) / 4.0
-        d_eff = math.hypot((x - sx) * aniso_x, (y - sy) * aniso_y) / boulder_lobe
-
-        # Steeper, rocky boulder falloff so adjacent boulders don't merge into a flat shelf
-        falloff_span = 0.105 + 0.032 * ((idx * 19) % 4) / 3.0
-        boulder_env = 1.0 - smoothstep(r_pad, r_pad + falloff_span, d_eff)
-        flank_mask = smoothstep(r_pad * 0.85, r_pad + 0.038, d_eff)
-        flank_crag = (0.044 * crag_macro + 0.024 * crag_med + fissure_carve + pit_carve) * flank_mask
-        boulder_z = (sz + flank_crag) * boulder_env
-        z_top = smax(z_top, boulder_z, k=0.018)
-
-    # Secondary jagged rock spurs & diagonal reef buttresses (non-horizontal!)
     if island_kind == 'left':
-        # Diagonal craggy spine over the arch bridge (tilted and notched with deep clefts)
-        diag_spine = math.exp(-((y - (0.06 + 0.18 * x)) / 0.11) ** 2) * (1.0 - smoothstep(0.28, 0.42, abs(x)))
-        cleft1 = 1.0 - 0.42 * math.exp(-((x + 0.07) / 0.048) ** 2 - ((y - 0.12) / 0.07) ** 2)
-        cleft2 = 1.0 - 0.38 * math.exp(-((x - 0.09) / 0.052) ** 2 - ((y - 0.08) / 0.07) ** 2)
-        z_spine = (0.275 + 0.065 * crag_macro + 0.032 * crag_med + fissure_carve) * diag_spine * cleft1 * cleft2
-        z_top = smax(z_top, z_spine, k=0.022)
+        # Base slope rising from front-right to rear-left
+        base_slope = 0.12 * smoothstep(-0.25, 0.22, y) - 0.08 * smoothstep(-0.20, 0.35, x)
+        z_top = 0.038 + base_slope + 0.032 * crag_macro + 0.015 * crag_med
 
-        # Left and right lower craggy boulder buttresses framing the cave arch
-        left_knuckle = math.exp(-((x + 0.25) / 0.14) ** 2 - ((y + 0.09) / 0.13) ** 2)
-        right_knuckle = math.exp(-((x - 0.26) / 0.14) ** 2 - ((y + 0.08) / 0.13) ** 2)
-        z_knuckles = (0.145 + 0.052 * crag_macro + 0.024 * crag_med + pit_carve) * max(left_knuckle, right_knuckle)
-        z_top = smax(z_top, z_knuckles, k=0.020)
+        # Single dramatic alpine-reef summit peaking at 0.515m on the back-left
+        peak_x, peak_y = -0.12, 0.16
+        dist_ridge = math.hypot((x - peak_x) * 1.2, (y - peak_y) * 1.4)
+        z_peak = (0.515 + 0.055 * crag_macro) * (1.0 - smoothstep(0.0, 0.28, dist_ridge))
+        z_top = smax(z_top, z_peak, k=0.030)
 
-        max_crest = 0.392
+        # Solid contiguous mountain body across center - eliminates any wishbone bridge appearance
+        mountain_bulk = (1.0 - smoothstep(0.0, 0.36, math.hypot(x + 0.05, y - 0.08)))
+        z_bulk = (0.380 + 0.045 * crag_macro + 0.025 * crag_med + fissure_carve) * mountain_bulk
+        z_top = smax(z_top, z_bulk, k=0.035)
+
+        # Diagonal terrace cascading into the valley
+        valley_shelf = math.exp(-((x - 0.18) / 0.16) ** 2 - ((y - 0.02) / 0.18) ** 2)
+        z_top = smax(z_top, (0.245 + 0.035 * crag_med) * valley_shelf, k=0.025)
+
+        # Local socket pads (tight footprint so they don't form cylinders)
+        for idx, (s_name, (sx, sy, sz)) in enumerate(socket_specs):
+            meta = SOCKET_ARCHETYPES[socket_prefix(s_name)]
+            r_pad = meta['footprint'] + 0.004
+            d = math.hypot(x - sx, y - sy)
+            if d < r_pad + 0.045:
+                w = 1.0 - smoothstep(r_pad, r_pad + 0.045, d)
+                z_top = smax(z_top, sz * w, k=0.012)
+
+        max_crest = 0.525
         z_top = max(0.024, min(max_crest, z_top))
 
-        # Pass-through cave arch in x in (-0.122, +0.122) from front to back:
-        # Preserves > 0.065 m clearance around (x=0, y=0.08) for AQ-58 while adding craggy vault relief
-        arch_half_w = 0.120 + 0.009 * math.sin(y * 11.0 + 0.4)
+        # Low cave tunnel at substrate for AQ-58 clearance at (0, 0.08)
+        arch_half_w = 0.095 + 0.007 * math.sin(y * 11.0 + 0.4)
         ax = abs(x)
         if ax < arch_half_w:
             u_arch = ax / arch_half_w
-            arch_profile = math.cos(u_arch * math.pi * 0.5) ** 1.08
-            vault_crag = 0.010 * (crag_med - 0.15) * (1.0 - u_arch * u_arch)
-            z_bot = -0.012 + (0.198 * arch_profile) + vault_crag
-            z_top = max(z_top, z_bot + 0.046)
+            arch_profile = math.cos(u_arch * math.pi * 0.5) ** 1.6
+            z_bot = -0.012 + (0.152 * arch_profile)
+            z_top = max(z_top, 0.33)
             z_top = min(max_crest, z_top)
-            z_bot = min(z_bot, z_top - 0.042)
+            z_bot = min(z_bot, z_top - 0.040)
         else:
             z_bot = -0.012
-    else:
-        # Right island: irregular diagonal reef ridge + stepped boulder knuckles + deep central canyon cleft
-        diag_ridge = math.exp(-((y - (0.04 - 0.16 * x)) / 0.12) ** 2) * (1.0 - smoothstep(0.26, 0.40, abs(x)))
-        canyon_notch = 1.0 - 0.46 * math.exp(-((x + 0.06) / 0.055) ** 2 - ((y - 0.04) / 0.085) ** 2)
-        z_ridge = (0.235 + 0.058 * crag_macro + 0.028 * crag_med + fissure_carve) * diag_ridge * canyon_notch
-        z_top = smax(z_top, z_ridge, k=0.022)
 
-        max_crest = 0.342
+    else:
+        # RIGHT ISLAND: Pillar, Arch & Low Reef Shelf (~0.31m peak)
+        z_top = 0.024 + 0.018 * crag_macro + 0.008 * crag_med
+
+        # 1. Main Left Focal Pillar at x = -0.15, height 0.31m (golden section)
+        pillar_d = math.hypot((x + 0.15) * 1.3, (y - 0.11) * 1.4)
+        z_pillar = (0.315 + 0.035 * crag_macro) * (1.0 - smoothstep(0.0, 0.20, pillar_d))
+        z_top = smax(z_top, z_pillar, k=0.020)
+
+        # 2. Arch bridge connecting pillar to right terrace
+        bridge_d = math.hypot((x - 0.05) * 0.9, (y - 0.05) * 1.8)
+        z_bridge = (0.225 + 0.025 * crag_med) * (1.0 - smoothstep(0.0, 0.22, bridge_d))
+        z_top = smax(z_top, z_bridge, k=0.018)
+
+        # 3. Sprawling low right terrace
+        right_d = math.hypot((x - 0.26) * 0.9, (y + 0.01) * 1.2)
+        z_right = (0.155 + 0.022 * crag_macro) * (1.0 - smoothstep(0.0, 0.26, right_d))
+        z_top = smax(z_top, z_right, k=0.016)
+
+        for idx, (s_name, (sx, sy, sz)) in enumerate(socket_specs):
+            meta = SOCKET_ARCHETYPES[socket_prefix(s_name)]
+            r_pad = meta['footprint'] + 0.004
+            d = math.hypot(x - sx, y - sy)
+            if d < r_pad + 0.040:
+                w = 1.0 - smoothstep(r_pad, r_pad + 0.040, d)
+                z_top = smax(z_top, sz * w, k=0.012)
+
+        max_crest = 0.320
         z_top = max(0.024, min(max_crest, z_top))
-        z_bot = -0.012
+
+        # Grand open arch window
+        arch_cx = 0.055
+        arch_half_w = 0.112 + 0.008 * math.cos(y * 8.0)
+        ax = abs(x - arch_cx)
+        if ax < arch_half_w:
+            u_arch = ax / arch_half_w
+            arch_prof = math.cos(u_arch * math.pi * 0.5) ** 1.08
+            z_bot = -0.012 + (0.178 * arch_prof)
+            z_top = max(z_top, z_bot + 0.046)
+            z_top = min(max_crest, z_top)
+            z_bot = min(z_bot, z_top - 0.038)
+        else:
+            z_bot = -0.012
 
     return z_top, z_bot
-
 
 def build_live_rock_textures_from_surface(size, x_grid, y_grid, z_top_grid, normals_top, island_kind):
     """
@@ -686,13 +711,13 @@ def build_reef_foundation_mesh(name, island_kind='left'):
 
     # Keep pad_margin tight to the coral plug footprint so only the immediate socket pad is planar,
     # leaving surrounding boulders craggy and uneven instead of creating wide flat terrace rings!
-    pad_margin = 0.018
-    clear_margin = 0.014
+    pad_margin = 0.012
+    clear_margin = 0.012
 
     for s_name, (sx, sy, sz) in socket_specs:
         meta = SOCKET_ARCHETYPES[socket_prefix(s_name)]
         r_pad = meta['footprint'] + pad_margin
-        r_blend = r_pad + 0.022
+        r_blend = r_pad + 0.016
         for i in range(nx):
             for j in range(ny):
                 d = math.hypot(x_grid[i][j] - sx, y_grid[i][j] - sy)
@@ -764,10 +789,10 @@ def build_reef_foundation_mesh(name, island_kind='left'):
 
     # Cumulative 3D surface arc-length parameterization across columns i and rows j
     # expands steep interior boulder slopes in UV space while keeping a strictly monotonic non-overlapping grid.
-    atlas_size = 1024
-    density = 450.0
-    margin = 8.0
-    gutter = 12.0
+    atlas_size = 512
+    density = 210.0
+    margin = 4.0
+    gutter = 6.0
 
     def cumulative_3d_axes(idx_fn, target_w_px, target_h_px):
         du = [0.0]

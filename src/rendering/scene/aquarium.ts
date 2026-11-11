@@ -192,14 +192,13 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   const keyLight = new THREE.DirectionalLight('#f6faff', fixture.keyLightIntensity)
   keyLight.position.set(1.2, 6.8, 4.6)
   keyLight.castShadow = true
-  keyLight.shadow.mapSize.set(2048, 2048)
+  keyLight.shadow.mapSize.set(1024, 1024)
   // VSM blur: radius in shadow-map texels and the number of blur samples.
-  // radius 8 at 2048px gives a penumbra of roughly 8 texels (~2.5 cm at
-  // the 13 m shadow frustum) — soft, not mushy. blurSamples 16 is the
-  // three.js VSM default quality step; raising it further costs a second
-  // blur pass for diminishing returns at this map size.
-  keyLight.shadow.radius = 8
-  keyLight.shadow.blurSamples = 16
+  // radius 4 at 1024px preserves the exact ~2.5 cm penumbra at the 13 m
+  // shadow frustum (4/1024 == 8/2048) while reducing shadow blur texture
+  // taps by 88% and fragment fill by 75% for 60 FPS performance.
+  keyLight.shadow.radius = 4
+  keyLight.shadow.blurSamples = 8
   keyLight.shadow.camera.near = 1.0
   keyLight.shadow.camera.far = 16.0
   keyLight.shadow.camera.left = -6.5
@@ -516,6 +515,8 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
   let lazyQueue: string[] = []
   let lazyActiveLoads = 0
   const ray = new THREE.Raycaster(), projected = new THREE.Vector3(), sample = new THREE.Vector3(), hitMeshes: THREE.Object3D[] = []
+  const reefMeshes: THREE.Object3D[] = []
+  const fishMeshes: THREE.Object3D[] = []
   // Meshes belonging to no-service ambient schoolmates (sailfin, chromis,
   // anthias). They sit in hitMeshes as occluders for click picking, but
   // they must never hide a service fish's label: they carry no serviceId,
@@ -523,32 +524,37 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
   const ambientMeshes = new Set<THREE.Object3D>()
   const ownedSprites = new Set<THREE.Mesh>()
   const spriteMasks: SpriteMasks = new WeakMap()
+  const ndcSample = new THREE.Vector2()
+  function raycastNdc(ndc: THREE.Vector2) {
+    ray.setFromCamera(ndc, camera)
+    return nearestVisibleIntersection(ray.intersectObjects(hitMeshes, false), spriteMasks)
+  }
   function nearestHit(x: number, y: number) {
     const box = canvas.getBoundingClientRect()
-    ray.setFromCamera(new THREE.Vector2((x - box.left) / box.width * 2 - 1, 1 - (y - box.top) / box.height * 2), camera)
-    return nearestVisibleIntersection(ray.intersectObjects(hitMeshes, false), spriteMasks)
+    return raycastNdc(ndcSample.set((x - box.left) / box.width * 2 - 1, 1 - (y - box.top) / box.height * 2))
   }
   function nearest(x: number, y: number) {
     return nearestHit(x, y)?.object.userData.serviceId as string | undefined
   }
   function updateVisibility(item: Inhabitant) {
-    const rect = canvas.getBoundingClientRect()
     const artworkUnavailable = Boolean(item.artworkUnavailable)
     let visible = artworkUnavailable && Boolean(projectFishLinkBounds(item.root.position, camera, width, height, fishRenderLength(item.service.fishId), projected))
     if (!visible && !artworkUnavailable) for (const [localY, localZ] of [[0, 0], [0, .31], [0, -.31], [.13, 0], [-.13, 0]]) {
-      sample.set(item.fallback ? localZ : 0, localY, item.fallback ? 0 : localZ).applyMatrix4(item.root.matrixWorld).project(camera)
+      sample.set(item.fallback ? localZ : 0, localY, item.fallback ? 0 : localZ).applyMatrix4(item.root.matrixWorld)
+      const distToFish = camera.position.distanceTo(sample)
+      sample.project(camera)
       if (!Number.isFinite(sample.x) || !Number.isFinite(sample.y) || !Number.isFinite(sample.z) || Math.abs(sample.x) > .96 || Math.abs(sample.y) > .94 || sample.z < -1 || sample.z > 1) continue
-      // Label exposure, not click picking: a sample counts as exposed when
-      // the foremost hit is any fish (itself, another service fish, or an
-      // ambient schoolmate). The old `nearest(...) === item.service.id`
-      // test hid the label of a plainly visible fish whenever the sailfin
-      // or another fish covered all five sample points (PR #37 visual
-      // check: blue tang and yellow tang with no pills in mobile zoom).
-      // Reef/sand foremost still hides the label, so a fish genuinely
-      // behind rock stays unlabelled. Click picking still uses nearest()
-      // separately, so clicks keep resolving to the foremost fish.
-      const hit = nearestHit(rect.left + (sample.x + 1) * width / 2, rect.top + (1 - sample.y) * height / 2)
-      if (isLabelSampleExposed(hit ? { serviceId: hit.object.userData.serviceId as string | undefined, ambientFish: ambientMeshes.has(hit.object) } : undefined)) { visible = true; break }
+      // Occlusion check against reef/sand: test whether rock or sand sits between
+      // the camera and this point on the fish. By setting ray.far = distToFish - 0.05,
+      // Three.js bounding-sphere checks instantly skip all background reef/sand
+      // geometry when the fish is swimming in open water in front of the reef.
+      ndcSample.set(sample.x, sample.y)
+      ray.setFromCamera(ndcSample, camera)
+      ray.far = distToFish - 0.05
+      const occluders = ray.intersectObjects(reefMeshes, false)
+      const occludedByRock = Boolean(nearestVisibleIntersection(occluders, spriteMasks))
+      ray.far = Infinity
+      if (!occludedByRock) { visible = true; break }
     }
     item.visible = visible
     if (item.anchor) {
@@ -591,7 +597,7 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
     const generation = meshNavigationGeneration
     habitat.meshNavigation = undefined
     particleBuffersDirty = true
-    reefs.forEach(reef => { scene.remove(reef) }); reefs.length = 0; hitMeshes.length = 0
+    reefs.forEach(reef => { scene.remove(reef) }); reefs.length = 0; hitMeshes.length = 0; reefMeshes.length = 0; fishMeshes.length = 0
     reefControllers = []; habitat.obstacles = []; habitat.anchors = []
     if (!rockIslandLeftBase || !rockIslandRightBase || coralTemplates.size === 0) return
     const reducedMotion = Boolean(reducedMotionQuery?.matches)
@@ -853,11 +859,14 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
   function removeFish() { fish.forEach(disposeInhabitant); fish = []; schoolmates.forEach(disposeInhabitant); schoolmates = [] }
   function rebuildHitMeshes() {
     hitMeshes.length = 0
+    reefMeshes.length = 0
+    fishMeshes.length = 0
     ambientMeshes.clear()
-    reefs.forEach(reef => reef.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) }))
-    hitMeshes.push(sand)
-    fish.forEach(item => item.root.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) }))
-    schoolmates.forEach(item => item.root.traverse(object => { if (object instanceof THREE.Mesh) { hitMeshes.push(object); ambientMeshes.add(object) } }))
+    reefs.forEach(reef => reef.traverse(object => { if (object instanceof THREE.Mesh) reefMeshes.push(object) }))
+    reefMeshes.push(sand)
+    fish.forEach(item => item.root.traverse(object => { if (object instanceof THREE.Mesh) fishMeshes.push(object) }))
+    schoolmates.forEach(item => item.root.traverse(object => { if (object instanceof THREE.Mesh) { fishMeshes.push(object); ambientMeshes.add(object) } }))
+    hitMeshes.push(...fishMeshes, ...reefMeshes)
   }
   type FishSpawn = { species: NonNullable<ReturnType<typeof getFishById>>; clearance: number; position: SwimmingFish['position']; yaw: number }
   function createInhabitant(service: ServiceConfig, spawn: FishSpawn, anchor?: HTMLAnchorElement, schoolmate = false): Inhabitant {
@@ -1018,14 +1027,23 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
       // can receive focus, keep its last visible label position for now.
       if (force || anchor.contains(document.activeElement)) updateVisibility(item)
       if (!item.visible && anchor.contains(document.activeElement)) continue
-      anchor.style.visibility = 'visible'
-      anchor.style.transform = `translate3d(${bounds.x}px,${bounds.y}px,0)`; anchor.style.width = `${bounds.width}px`; anchor.style.height = `${bounds.height}px`
-      anchor.style.zIndex = String(Math.round((item.root.position.z + 10) * 100))
+      if (anchor.style.visibility !== 'visible') anchor.style.visibility = 'visible'
+      const transformVal = `translate3d(${bounds.x}px,${bounds.y}px,0)`
+      if (anchor.style.transform !== transformVal) anchor.style.transform = transformVal
+      const widthVal = `${bounds.width}px`
+      if (anchor.style.width !== widthVal) anchor.style.width = widthVal
+      const heightVal = `${bounds.height}px`
+      if (anchor.style.height !== heightVal) anchor.style.height = heightVal
+      const zIndexVal = String(Math.round((item.root.position.z + 10) * 100))
+      if (anchor.style.zIndex !== zIndexVal) anchor.style.zIndex = zIndexVal
       // AQ-89 AC #1: tuck the caption tight under the fish's belly — the
       // link box is centred on the fish and taller than the body, so a
       // caption at top: 100% would float with a visible gap.
       const lift = labelLiftPx(bounds.height)
-      anchor.style.setProperty('--fish-label-lift', `${lift}px`)
+      const liftVal = `${lift}px`
+      if (anchor.style.getPropertyValue('--fish-label-lift') !== liftVal) {
+        anchor.style.setProperty('--fish-label-lift', liftVal)
+      }
       placedLabels.push({ anchor, id: item.service.id, label: item.service.name, bounds, lift, depth: item.root.position.z })
       // AQ-13: keep the hover tooltip on-screen — flip it below the caption
       // near the top edge and align it inward near the left/right edges.
@@ -1055,8 +1073,14 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
       for (const result of resolved) {
         const entry = placedLabels.find(candidate => candidate.id === result.id)
         if (!entry) continue
-        entry.anchor.style.setProperty('--fish-label-dy', `${result.dy}px`)
-        entry.anchor.style.setProperty('--fish-label-dx', `${result.dx}px`)
+        const dyVal = `${result.dy}px`
+        if (entry.anchor.style.getPropertyValue('--fish-label-dy') !== dyVal) {
+          entry.anchor.style.setProperty('--fish-label-dy', dyVal)
+        }
+        const dxVal = `${result.dx}px`
+        if (entry.anchor.style.getPropertyValue('--fish-label-dx') !== dxVal) {
+          entry.anchor.style.setProperty('--fish-label-dx', dxVal)
+        }
         entry.anchor.classList.toggle('fish-label-deconflicted', result.faded)
         entry.anchor.classList.toggle('fish-label-align-left', result.align === 'left')
         entry.anchor.classList.toggle('fish-label-align-right', result.align === 'right')
@@ -1090,12 +1114,14 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
     caustics.update(coralElapsedSec, habitatStopped, reducedMotion)
 
     // Update top water-surface ripple displacement (AQ-14.2 AC #1 & #5)
-    const surfPos = waterSurfaceGeometry.getAttribute('position')
-    for (let i = 0; i < surfPos.count; i++) {
-      const wx = surfPos.getX(i), wz = surfPos.getY(i)
-      surfPos.setZ(i, evaluateSurfaceRippleOffset(wx, wz, coralElapsedSec, { paused: habitatStopped, reducedMotion, amplitudeM: optics.surfaceRippleAmplitudeM }))
+    if (!habitatStopped && !reducedMotion && steps > 0) {
+      const surfPos = waterSurfaceGeometry.getAttribute('position')
+      for (let i = 0; i < surfPos.count; i++) {
+        const wx = surfPos.getX(i), wz = surfPos.getY(i)
+        surfPos.setZ(i, evaluateSurfaceRippleOffset(wx, wz, coralElapsedSec, { paused: habitatStopped, reducedMotion, amplitudeM: optics.surfaceRippleAmplitudeM }))
+      }
+      surfPos.needsUpdate = true
     }
-    surfPos.needsUpdate = true
 
     // Update depth-graded water-column motes (AQ-43 AC #2 as amended):
     // foreground motes stay in the fish volume, background motes behind it.
@@ -1104,45 +1130,47 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
     // base positions, so there is nothing new to upload.
     const motesMoving = !habitatStopped && !reducedMotion
     const uploadParticles = motesMoving || particleBuffersDirty
-    for (let i = 0; i < foregroundParticleCount; i++) {
-      const pt = evaluateSuspendedParticlePosition(i, habitat.bounds, coralElapsedSec, {
-        paused: habitatStopped,
-        reducedMotion,
-        zBand: { min: -1.5, max: 2.8 },
-      })
-      foregroundParticlePositions[i * 3] = pt.x
-      foregroundParticlePositions[i * 3 + 1] = pt.y
-      foregroundParticlePositions[i * 3 + 2] = pt.z
-    }
-    if (uploadParticles) foregroundParticlePositionAttr.needsUpdate = true
-    for (let i = 0; i < backgroundParticleCount; i++) {
-      const pt = evaluateSuspendedParticlePosition(foregroundParticleCount + i, habitat.bounds, coralElapsedSec, {
-        paused: habitatStopped,
-        reducedMotion,
-        zBand: { min: -4.6, max: -1.5 },
-      })
-      backgroundParticlePositions[i * 3] = pt.x
-      backgroundParticlePositions[i * 3 + 1] = pt.y
-      backgroundParticlePositions[i * 3 + 2] = pt.z
-    }
-    if (uploadParticles) backgroundParticlePositionAttr.needsUpdate = true
+    if (uploadParticles) {
+      for (let i = 0; i < foregroundParticleCount; i++) {
+        const pt = evaluateSuspendedParticlePosition(i, habitat.bounds, coralElapsedSec, {
+          paused: habitatStopped,
+          reducedMotion,
+          zBand: { min: -1.5, max: 2.8 },
+        })
+        foregroundParticlePositions[i * 3] = pt.x
+        foregroundParticlePositions[i * 3 + 1] = pt.y
+        foregroundParticlePositions[i * 3 + 2] = pt.z
+      }
+      foregroundParticlePositionAttr.needsUpdate = true
+      for (let i = 0; i < backgroundParticleCount; i++) {
+        const pt = evaluateSuspendedParticlePosition(foregroundParticleCount + i, habitat.bounds, coralElapsedSec, {
+          paused: habitatStopped,
+          reducedMotion,
+          zBand: { min: -4.6, max: -1.5 },
+        })
+        backgroundParticlePositions[i * 3] = pt.x
+        backgroundParticlePositions[i * 3 + 1] = pt.y
+        backgroundParticlePositions[i * 3 + 2] = pt.z
+      }
+      backgroundParticlePositionAttr.needsUpdate = true
 
-    // Update sparse bubble streams (AQ-43 AC #2 as amended): slots 0..15
-    // belong to the first emitter, the rest to the second; the draw range
-    // set in rebuildHabitat() hides slots with no emitter (narrow view).
-    for (let i = 0; i < DEFAULT_AQUARIUM_OPTICS_CONFIG.maxBubbles; i++) {
-      const streamIndex = i < bubblesPerStream ? 0 : 1
-      const emitter = bubbleEmitters[streamIndex] ?? bubbleEmitters[0] ?? { x: 0, y: DEFAULT_AQUARIUM_OPTICS_CONFIG.bubbleEmitterBaseY, z: 0 }
-      const bubble = evaluateBubblePosition(i, emitter, habitat.bounds, coralElapsedSec, {
-        paused: habitatStopped,
-        reducedMotion,
-      })
-      bubblePositions[i * 3] = bubble.x
-      bubblePositions[i * 3 + 1] = bubble.y
-      bubblePositions[i * 3 + 2] = bubble.z
+      // Update sparse bubble streams (AQ-43 AC #2 as amended): slots 0..15
+      // belong to the first emitter, the rest to the second; the draw range
+      // set in rebuildHabitat() hides slots with no emitter (narrow view).
+      for (let i = 0; i < DEFAULT_AQUARIUM_OPTICS_CONFIG.maxBubbles; i++) {
+        const streamIndex = i < bubblesPerStream ? 0 : 1
+        const emitter = bubbleEmitters[streamIndex] ?? bubbleEmitters[0] ?? { x: 0, y: DEFAULT_AQUARIUM_OPTICS_CONFIG.bubbleEmitterBaseY, z: 0 }
+        const bubble = evaluateBubblePosition(i, emitter, habitat.bounds, coralElapsedSec, {
+          paused: habitatStopped,
+          reducedMotion,
+        })
+        bubblePositions[i * 3] = bubble.x
+        bubblePositions[i * 3 + 1] = bubble.y
+        bubblePositions[i * 3 + 2] = bubble.z
+      }
+      bubblePositionAttr.needsUpdate = true
+      particleBuffersDirty = false
     }
-    if (uploadParticles) bubblePositionAttr.needsUpdate = true
-    particleBuffersDirty = false
 
     for (const controller of reefControllers) {
       controller.update(coralElapsedSec, habitatStopped, reducedMotion)
@@ -1203,8 +1231,9 @@ diffuseColor.a *= smoothstep(-4.3, -3.3, vSurfaceLocalY);`,
       const pose = item.motion; item.root.position.set(pose.position.x, pose.position.y, pose.position.z)
       if (item.fallback) { item.root.rotation.set(0, 0, 0); item.root.scale.x = evaluateSpriteTurnScaleX(pose.yaw) }
       else { item.root.rotation.set(pose.pitch, pose.yaw, pose.bank, 'YXZ') }
+      item.root.updateMatrix()
+      item.root.updateMatrixWorld()
     }
-    scene.updateMatrixWorld(true)
     labelClock += steps * SIMULATION_STEP_SECONDS
     const refreshLabels = forceLabels || labelClock > .24
     if (refreshLabels) {

@@ -3,7 +3,7 @@ id: AQ-90
 title: Add a GitHub Actions CI check that runs tests and build before a PR can be merged
 status: To Do
 assignee:
-  - @Luna
+  - '@Luna'
 created_date: 2026-11-08
 updated_date: 2026-11-08
 labels:
