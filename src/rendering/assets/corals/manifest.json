@@ -373,8 +373,8 @@
       "kind": "rock",
       "archetype": "rock-foundation",
       "species": "Aragonite Live-Rock Left Arched Bommie Foundation with Coral Mount Sockets",
-      "sha256": "12fcbbd37f640cbef5a4f190f09254f6612406edaf1b674928863351ae0e05ab",
-      "bytes": 1432524,
+      "sha256": "2f81f8fc212886aa3eea9a0d316ca0a1f4badccac20044583f8ad4f0bdd9c2ef",
+      "bytes": 1482184,
       "triangles": 24572,
       "dimensionsM": [
         1.011278,
@@ -403,7 +403,7 @@
       ],
       "socketCount": 12,
       "generator": "src/rendering/modeling/build_live_rock_islands.py",
-      "generatorSha256": "2e5a871460db993db9b400e9c3c9e3379c1d302d257f8b746d3e5bdb422948cf",
+      "generatorSha256": "611af814643238ae4ffa1a7b2604180d3ab9b9afae59b58e55843e4bb585690b",
       "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_live_rock_islands.py -- /tmp/coral-models left",
       "contractValidated": true,
       "status": "candidate-awaiting-root-review"
@@ -416,8 +416,8 @@
       "kind": "rock",
       "archetype": "rock-foundation",
       "species": "Aragonite Live-Rock Right Terraced Shelf Foundation with Coral Mount Sockets",
-      "sha256": "81aff64d01db7ad84b9e6a08e31da971bde0bf1936f050d3fb1031386ecc61ed",
-      "bytes": 1347680,
+      "sha256": "7d8cc1ce22d850d199f28652437c6d95d64ab4cc80606cc451c4c58c702558c1",
+      "bytes": 939092,
       "triangles": 24572,
       "dimensionsM": [
         0.966449,
@@ -446,7 +446,7 @@
       ],
       "socketCount": 11,
       "generator": "src/rendering/modeling/build_live_rock_islands.py",
-      "generatorSha256": "2e5a871460db993db9b400e9c3c9e3379c1d302d257f8b746d3e5bdb422948cf",
+      "generatorSha256": "611af814643238ae4ffa1a7b2604180d3ab9b9afae59b58e55843e4bb585690b",
       "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_live_rock_islands.py -- /tmp/coral-models right",
       "contractValidated": true,
       "status": "candidate-awaiting-root-review"

@@ -3,7 +3,7 @@ id: AQ-94
 title: >-
   Author Negative Space Aquascape (NSA) with 5–8 modular rock pieces, pinnacle
   canyon, and 2048px trim sheet
-status: In Progress
+status: Done
 assignee:
   - '@gemini'
 created_date: '2026-11-11 04:55'
@@ -43,9 +43,9 @@ Architect the live rock aquascape from scratch using Negative Space Aquascaping 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Aquascape forms an asymmetrical Negative Space Aquascape (NSA) with a left arch rising to a high pinnacle, lower right island, and central swim canyon
-- [ ] #2 Reef is assembled from a reusable library of 5–8 modular sculpted rock pieces sharing a single 2048x2048 PBR texture atlas (Normal, Roughness, AO)
-- [ ] #3 Upper half of the water column preserves open negative space for unobstructed fish swimming and label visibility
-- [ ] #4 Total exported .glb asset size for assembled foundations remains under 5 MB with minimal draw calls
-- [ ] #5 Substrate dunes, shell fragments, and rubble eliminate hard intersecting seams at the sand bed base
+- [x] #1 Aquascape forms an asymmetrical Negative Space Aquascape (NSA) with a left arch rising to a high pinnacle, lower right island, and central swim canyon
+- [x] #2 Reef is assembled from a reusable library of 5–8 modular sculpted rock pieces sharing a single 2048x2048 PBR texture atlas (Normal, Roughness, AO)
+- [x] #3 Upper half of the water column preserves open negative space for unobstructed fish swimming and label visibility
+- [x] #4 Total exported .glb asset size for assembled foundations remains under 5 MB with minimal draw calls
+- [x] #5 Substrate dunes, shell fragments, and rubble eliminate hard intersecting seams at the sand bed base
 <!-- AC:END -->

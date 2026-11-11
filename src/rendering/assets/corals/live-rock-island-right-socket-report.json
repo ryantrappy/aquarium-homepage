@@ -1,7 +1,7 @@
 {
   "schema": "socket-support-inspection-v1",
   "assetId": "live-rock-island-right",
-  "sourceSha256": "81aff64d01db7ad84b9e6a08e31da971bde0bf1936f050d3fb1031386ecc61ed",
+  "sourceSha256": "7d8cc1ce22d850d199f28652437c6d95d64ab4cc80606cc451c4c58c702558c1",
   "method": {
     "contactToleranceM": 0.002,
     "upNormalVectorTolerance": 0.002,
@@ -61,7 +61,7 @@
         "freeRadiusM": 0.075,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "81aff64d01db7ad84b9e6a08e31da971bde0bf1936f050d3fb1031386ecc61ed",
+          "geometrySha256": "7d8cc1ce22d850d199f28652437c6d95d64ab4cc80606cc451c4c58c702558c1",
           "report": "src/rendering/assets/corals/live-rock-island-right-socket-report.json"
         }
       }
@@ -104,7 +104,7 @@
         "freeRadiusM": 0.075,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "81aff64d01db7ad84b9e6a08e31da971bde0bf1936f050d3fb1031386ecc61ed",
+          "geometrySha256": "7d8cc1ce22d850d199f28652437c6d95d64ab4cc80606cc451c4c58c702558c1",
           "report": "src/rendering/assets/corals/live-rock-island-right-socket-report.json"
         }
       }
@@ -147,7 +147,7 @@
         "freeRadiusM": 0.075,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "81aff64d01db7ad84b9e6a08e31da971bde0bf1936f050d3fb1031386ecc61ed",
+          "geometrySha256": "7d8cc1ce22d850d199f28652437c6d95d64ab4cc80606cc451c4c58c702558c1",
           "report": "src/rendering/assets/corals/live-rock-island-right-socket-report.json"
         }
       }
@@ -190,7 +190,7 @@
         "freeRadiusM": 0.075,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "81aff64d01db7ad84b9e6a08e31da971bde0bf1936f050d3fb1031386ecc61ed",
+          "geometrySha256": "7d8cc1ce22d850d199f28652437c6d95d64ab4cc80606cc451c4c58c702558c1",
           "report": "src/rendering/assets/corals/live-rock-island-right-socket-report.json"
         }
       }
@@ -233,7 +233,7 @@
         "freeRadiusM": 0.075,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "81aff64d01db7ad84b9e6a08e31da971bde0bf1936f050d3fb1031386ecc61ed",
+          "geometrySha256": "7d8cc1ce22d850d199f28652437c6d95d64ab4cc80606cc451c4c58c702558c1",
           "report": "src/rendering/assets/corals/live-rock-island-right-socket-report.json"
         }
       }
@@ -276,7 +276,7 @@
         "freeRadiusM": 0.08,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "81aff64d01db7ad84b9e6a08e31da971bde0bf1936f050d3fb1031386ecc61ed",
+          "geometrySha256": "7d8cc1ce22d850d199f28652437c6d95d64ab4cc80606cc451c4c58c702558c1",
           "report": "src/rendering/assets/corals/live-rock-island-right-socket-report.json"
         }
       }
@@ -319,7 +319,7 @@
         "freeRadiusM": 0.08,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "81aff64d01db7ad84b9e6a08e31da971bde0bf1936f050d3fb1031386ecc61ed",
+          "geometrySha256": "7d8cc1ce22d850d199f28652437c6d95d64ab4cc80606cc451c4c58c702558c1",
           "report": "src/rendering/assets/corals/live-rock-island-right-socket-report.json"
         }
       }
@@ -362,7 +362,7 @@
         "freeRadiusM": 0.07,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "81aff64d01db7ad84b9e6a08e31da971bde0bf1936f050d3fb1031386ecc61ed",
+          "geometrySha256": "7d8cc1ce22d850d199f28652437c6d95d64ab4cc80606cc451c4c58c702558c1",
           "report": "src/rendering/assets/corals/live-rock-island-right-socket-report.json"
         }
       }
@@ -405,7 +405,7 @@
         "freeRadiusM": 0.085,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "81aff64d01db7ad84b9e6a08e31da971bde0bf1936f050d3fb1031386ecc61ed",
+          "geometrySha256": "7d8cc1ce22d850d199f28652437c6d95d64ab4cc80606cc451c4c58c702558c1",
           "report": "src/rendering/assets/corals/live-rock-island-right-socket-report.json"
         }
       }
@@ -448,7 +448,7 @@
         "freeRadiusM": 0.085,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "81aff64d01db7ad84b9e6a08e31da971bde0bf1936f050d3fb1031386ecc61ed",
+          "geometrySha256": "7d8cc1ce22d850d199f28652437c6d95d64ab4cc80606cc451c4c58c702558c1",
           "report": "src/rendering/assets/corals/live-rock-island-right-socket-report.json"
         }
       }
@@ -491,7 +491,7 @@
         "freeRadiusM": 0.085,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "81aff64d01db7ad84b9e6a08e31da971bde0bf1936f050d3fb1031386ecc61ed",
+          "geometrySha256": "7d8cc1ce22d850d199f28652437c6d95d64ab4cc80606cc451c4c58c702558c1",
           "report": "src/rendering/assets/corals/live-rock-island-right-socket-report.json"
         }
       }

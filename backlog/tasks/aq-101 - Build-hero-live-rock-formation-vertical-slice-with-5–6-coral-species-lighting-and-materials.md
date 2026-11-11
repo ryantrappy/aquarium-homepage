@@ -3,7 +3,7 @@ id: AQ-101
 title: >-
   Build hero live-rock formation vertical slice with 5–6 coral species,
   lighting, and materials
-status: To Do
+status: Done
 assignee:
   - '@gemini'
 created_date: '2026-11-11 05:17'
@@ -43,9 +43,9 @@ Prioritize building ONE exceptionally convincing hero rock formation with 5–6 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 A single hero rock formation is fully authored and assembled with 5–6 biologically convincing coral species
-- [ ] #2 The vertical slice features top branching SPS, shelf plating Montipora, mid-level fleshy LPS, brain coral, and encrusting rock patches
-- [ ] #3 Lighting, upward-masked caustics, and ACESFilmicToneMapping are verified together on the hero formation
-- [ ] #4 Look-dev captures at 1440x900 and 402x874 confirm photographic realism and depth before full aquarium rollout
-- [ ] #5 Fish swimming lanes and label sightlines in front of and above the formation remain clear
+- [x] #1 A single hero rock formation is fully authored and assembled with 5–6 biologically convincing coral species
+- [x] #2 The vertical slice features top branching SPS, shelf plating Montipora, mid-level fleshy LPS, brain coral, and encrusting rock patches
+- [x] #3 Lighting, upward-masked caustics, and ACESFilmicToneMapping are verified together on the hero formation
+- [x] #4 Look-dev captures at 1440x900 and 402x874 confirm photographic realism and depth before full aquarium rollout
+- [x] #5 Fish swimming lanes and label sightlines in front of and above the formation remain clear
 <!-- AC:END -->

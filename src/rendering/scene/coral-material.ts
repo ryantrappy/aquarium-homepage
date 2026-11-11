@@ -632,7 +632,18 @@ vec3 cCorRosePink = vec3(0.64, 0.40, 0.62);
 vec3 corColor = mix(cCorDeepViolet, cCorPlumMagenta, smoothstep(0.30, 0.68, medCrag));
 corColor = mix(corColor, cCorRosePink, smoothstep(0.62, 0.88, cragRidge) * 0.70);
 
-vec3 finalRockColor = mix(carbColor, corColor, corMask * 0.80);
+// Direct encrusting coral & Ricordea mushroom rock patches on sunlit mid-slope shelves (AQ-95 AC #2 & AQ-101 AC #2)
+float encCell = rockNoise3D(wPos * 22.0 + vec3(-3.1, 5.4, 1.8));
+float polypBead = smoothstep(0.42, 0.82, rockNoise3D(rPos * 165.0));
+float shelfZone = smoothstep(0.36, 0.78, rNorm.y) * smoothstep(0.32, 0.72, rockCavityAo);
+float encTealMask = smoothstep(0.65, 0.78, encCell) * shelfZone;
+float encGoldMask = smoothstep(0.67, 0.80, 1.0 - encCell) * shelfZone;
+vec3 cEncTeal = mix(vec3(0.08, 0.38, 0.36), vec3(0.18, 0.72, 0.58), polypBead);
+vec3 cEncGold = mix(vec3(0.48, 0.18, 0.08), vec3(0.86, 0.42, 0.14), polypBead);
+
+vec3 finalRockColor = mix(carbColor, corColor, corMask * 0.82);
+finalRockColor = mix(finalRockColor, cEncTeal, encTealMask * 0.76);
+finalRockColor = mix(finalRockColor, cEncGold, encGoldMask * 0.74);
 finalRockColor *= (0.88 + 0.24 * (0.6 * finePores + 0.4 * microGrain));
 
 diffuseColor.rgb = finalRockColor;
