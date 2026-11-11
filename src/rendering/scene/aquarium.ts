@@ -243,7 +243,7 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   // absolute add is a smaller relative change). The lower ridge
   // threshold (0.22 vs the 0.35 default) widens the dapple network on
   // the sand only — same +0.35 cap, same texture, no brighter peak.
-  applyCaustics(sand.material as THREE.MeshStandardMaterial, caustics, { threshold: 0.22 })
+  applyCaustics(sand.material as THREE.MeshStandardMaterial, caustics, { threshold: 0.18, maxAdd: 0.52, scaleA: 0.42, scaleB: 0.68 })
   scene.add(sandBed.group)
 
   // Layered Reef-Tank Backdrop (AQ-14.6 & AQ-39): eliminates the flat paint-bucket wall & sharp horizon line

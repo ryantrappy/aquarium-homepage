@@ -248,9 +248,9 @@ export function evaluateAragoniteSandElevation(
   const backProgress = clamp((2.8 - worldZ) / 8.2, 0, 1)
   const backSlope = 0.25 * Math.pow(backProgress, 1.25)
 
-  const ripple1 = 0.024 * Math.sin(worldX * 1.15 + worldZ * 0.45 + 0.35 * Math.sin(worldZ * 0.8))
-  const ripple2 = 0.016 * Math.cos(worldZ * 1.65 - worldX * 0.52)
-  const duneUndulation = 0.028 * Math.sin(worldX * 0.42 - 0.6) * Math.cos(worldZ * 0.35)
+  const ripple1 = 0.030 * Math.sin(worldX * 1.35 + worldZ * 0.55 + 0.40 * Math.sin(worldZ * 0.9))
+  const ripple2 = 0.020 * Math.cos(worldZ * 1.85 - worldX * 0.62)
+  const duneUndulation = 0.032 * Math.sin(worldX * 0.45 - 0.6) * Math.cos(worldZ * 0.38)
 
   const footprints = getRockFootprintsForViewport(narrow)
   let rockTalus = 0
@@ -474,7 +474,7 @@ export function createAragoniteSandBed(config: AragoniteSandConfig = {}): Aragon
   const sandMaterial = new THREE.MeshStandardMaterial({
     map: albedoTexture,
     normalMap: normalTexture,
-    normalScale: new THREE.Vector2(0.8, 0.8),
+    normalScale: new THREE.Vector2(1.05, 1.05),
     roughnessMap: roughnessTexture,
     roughness: 0.92,
     metalness: 0.0,
@@ -524,10 +524,21 @@ float rRight = length(dRight);
 float aoRight = mix(1.0 - ${RIGHT_CONTACT_AO_STRENGTH.toFixed(2)} * (1.0 - smoothstep(0.55, 1.55, rRight)), 1.0, uSingleIslandMode);
 float rockContactAo = min(aoLeft, aoRight);
 
+// Flow-sculpted sand ripple crests & troughs + under-arch shadow pockets (AQ-70.12, AQ-73, AQ-94)
+float rippleWave = 0.5 + 0.34 * sin(vSandWorldPos.x * 2.45 + vSandWorldPos.z * 1.15 + 0.45 * sin(vSandWorldPos.z * 1.5)) + 0.16 * cos(vSandWorldPos.z * 3.2 - vSandWorldPos.x * 1.3);
+float troughMask = (1.0 - smoothstep(0.24, 0.56, rippleWave)) * 0.36;
+float crestHighlight = smoothstep(0.58, 0.88, rippleWave) * 0.08;
+
 // Subtle warm detritus & dampened aragonite near rock bases and ripple troughs (never blue-grey or indigo)
-float detritusMask = (1.0 - smoothstep(0.70, 1.60, min(rLeft, mix(rRight, 99.0, uSingleIslandMode)))) * 0.50;
+float detritusMask = clamp((1.0 - smoothstep(0.70, 1.60, min(rLeft, mix(rRight, 99.0, uSingleIslandMode)))) * 0.50 + troughMask, 0.0, 0.68);
 vec3 warmDetritus = vec3(0.76, 0.70, 0.58);
 diffuseColor.rgb = mix(diffuseColor.rgb, warmDetritus, detritusMask);
+diffuseColor.rgb *= (1.0 + crestHighlight);
+
+// Deep under-arch & cave-mouth contact shadow pockets framing the swim-through channels
+float leftCaveShadow = exp(-pow((vSandWorldPos.x + 2.35) / 0.55, 2.0) - pow((vSandWorldPos.z + 1.15) / 0.50, 2.0)) * 0.28;
+float rightArchShadow = exp(-pow((vSandWorldPos.x - 2.35) / 0.68, 2.0) - pow((vSandWorldPos.z + 1.05) / 0.52, 2.0)) * 0.32 * (1.0 - uSingleIslandMode);
+rockContactAo *= (1.0 - max(leftCaveShadow, rightArchShadow));
 
 // Gentle rear-water depth attenuation preserving warm cream foreground
 float rearFade = smoothstep(-5.4, 0.8, vSandWorldPos.z);
@@ -552,6 +563,10 @@ diffuseColor.rgb *= rockContactAo;
 vec4 roughnessPrimary = texture2D(roughnessMap, uvPrimary);
 vec4 roughnessSecondary = texture2D(roughnessMap, uvSecondary);
 roughnessFactor *= mix(roughnessPrimary.g, roughnessSecondary.g, sandMacroBlend);
+// Calcite & shell grain micro-sparkle at close range (AQ-73 AC #1)
+float sparkleSignal = fract(sin(dot(floor(vSandWorldPos.xz * 180.0), vec2(127.1, 311.7))) * 43758.5453);
+float sparkleGlint = step(0.965, sparkleSignal) * smoothstep(0.52, 0.85, rippleWave);
+roughnessFactor = mix(roughnessFactor, 0.32, sparkleGlint * 0.65);
 #endif`,
     )
     shader.fragmentShader = shader.fragmentShader.replace(
