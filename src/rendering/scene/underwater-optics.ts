@@ -538,6 +538,72 @@ export function evaluateBubblePosition(
 }
 
 /**
+ * Pixel size of the generated particle sprites (AQ-43). 64x64 is plenty
+ * for a point sprite that renders a few pixels across at overview
+ * distance, and the texture is generated once at startup — no asset,
+ * no network, no budget cost.
+ */
+export const PARTICLE_SPRITE_SIZE_PX = 64
+
+export type ParticleSpriteKind = 'mote' | 'bubble'
+
+function spriteSmoothstep(edge0: number, edge1: number, x: number): number {
+  const t = clamp((x - edge0) / (edge1 - edge0), 0, 1)
+  return t * t * (3 - 2 * t)
+}
+
+/**
+ * Builds a soft round point sprite for the suspended-particle systems
+ * (AQ-43 visual-check fix, PR #37 check section 6a/6b and "Other notes"):
+ * `THREE.PointsMaterial` without a map renders every point as a hard
+ * square, so the 48 marine-snow motes read as "tiny white squares up
+ * close" and the 0.06 m bubbles as "pale squares, indistinguishable
+ * from the motes" — the size/opacity bump in the PR #32 round only made
+ * bigger squares. A generated radial sprite makes each point a soft
+ * round shape instead, with no asset and no new dependency:
+ * - `mote`: a soft disc — full alpha at the centre, smooth falloff to
+ *   transparent at the rim, so marine snow reads as a faint round speck.
+ * - `bubble`: a thin bright ring — transparent at the centre, peak
+ *   alpha at ~0.7 radius, transparent at the rim — so a bubble reads as
+ *   a rising ring, distinct from a mote at a glance.
+ * Returns a `THREE.DataTexture` (generated RGBA pixels, white RGB so
+ * the material colour tints it) so the profile is unit-testable in node
+ * with no DOM canvas. Counts, sizes, opacities and blending are
+ * unchanged; only the point shape changes.
+ */
+export function createParticleSprite(kind: ParticleSpriteKind): THREE.DataTexture {
+  const size = PARTICLE_SPRITE_SIZE_PX
+  const data = new Uint8Array(size * size * 4)
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const nx = ((x + 0.5) / size) * 2 - 1
+      const ny = ((y + 0.5) / size) * 2 - 1
+      const r = Math.hypot(nx, ny)
+      let alpha: number
+      if (kind === 'bubble') {
+        // Gaussian ring centred at r = 0.68, sigma 0.16: ~0 at the
+        // centre, 1 at the rim, ~0.02 at the outer edge.
+        const d = (r - 0.68) / 0.16
+        alpha = Math.exp(-d * d)
+      } else {
+        // Soft disc: full alpha inside r = 0.3, smooth falloff to 0 at r = 1.
+        alpha = 1 - spriteSmoothstep(0.3, 1, r)
+      }
+      const i = (y * size + x) * 4
+      data[i] = 255
+      data[i + 1] = 255
+      data[i + 2] = 255
+      data[i + 3] = Math.round(clamp(alpha, 0, 1) * 255)
+    }
+  }
+  const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat)
+  texture.magFilter = THREE.LinearFilter
+  texture.minFilter = THREE.LinearFilter
+  texture.needsUpdate = true
+  return texture
+}
+
+/**
  * Controller that modulates key and fill directional lights with restrained,
  * physically coherent caustic shimmer while freezing cleanly on pause or reduced-motion.
  */

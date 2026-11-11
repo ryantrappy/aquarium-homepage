@@ -106,6 +106,12 @@ async function start(services = [service('first'), service('second', 'yellow-tan
   await vi.waitFor(() => expect(status).toHaveBeenLastCalledWith('ready'))
 }
 function advance() { state.renderer!.loop?.(0); state.renderer!.loop?.(50) }
+function spriteAlphaAt(texture: THREE.DataTexture, fx: number, fy: number): number {
+  const image = texture.image as { width: number; height: number; data: Uint8Array }
+  const x = Math.min(image.width - 1, Math.max(0, Math.floor((fx * 0.5 + 0.5) * image.width)))
+  const y = Math.min(image.height - 1, Math.max(0, Math.floor((fy * 0.5 + 0.5) * image.height)))
+  return image.data[(y * image.width + x) * 4 + 3]!
+}
 
 beforeEach(() => {
   state.created = []; state.players = []; state.sources = []; state.textures = []; state.blockedSpawn = false; state.throwCreateForId = ''; state.beforeCreateFailure = undefined
@@ -145,6 +151,38 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     expect(renderer.shadowMap.enabled).toBe(true)
     expect(renderer.shadowMap.type).toBe(THREE.VSMShadowMap)
     expect(renderer.shadowMap.type).not.toBe(THREE.PCFSoftShadowMap)
+  })
+  it('renders motes and bubbles as soft round sprites, not hard squares (AQ-43 visual-check fix)', async () => {
+    await start()
+    const points: THREE.Points[] = []
+    state.renderer!.scene!.traverse(object => { if (object instanceof THREE.Points) points.push(object) })
+    expect(points).toHaveLength(3)
+    const bySize = new Map(points.map(point => {
+      const material = point.material as THREE.PointsMaterial
+      return [material.size, { point, material }] as const
+    }))
+    const foreground = bySize.get(0.02)!
+    const background = bySize.get(0.03)!
+    const bubbles = bySize.get(0.06)!
+    // Counts, sizes and opacities are unchanged by the sprite fix.
+    expect((foreground.point.geometry.getAttribute('position') as THREE.BufferAttribute).count).toBe(16)
+    expect((background.point.geometry.getAttribute('position') as THREE.BufferAttribute).count).toBe(32)
+    expect((bubbles.point.geometry.getAttribute('position') as THREE.BufferAttribute).count).toBe(32)
+    expect(foreground.material.opacity).toBe(0.2)
+    expect(background.material.opacity).toBe(0.34)
+    expect(bubbles.material.opacity).toBe(0.6)
+    // Every system carries a generated round sprite map and discards
+    // fully-transparent corners, so no point renders as a hard square.
+    for (const { material } of [foreground, background, bubbles]) {
+      expect(material.map).toBeInstanceOf(THREE.DataTexture)
+      expect(material.alphaTest).toBeGreaterThan(0)
+    }
+    // Motes are soft discs (solid centre); bubbles are hollow rings.
+    const moteMap = foreground.material.map as THREE.DataTexture
+    const bubbleMap = bubbles.material.map as THREE.DataTexture
+    expect(spriteAlphaAt(moteMap, 0, 0)).toBe(255)
+    expect(spriteAlphaAt(bubbleMap, 0, 0)).toBeLessThan(10)
+    expect(spriteAlphaAt(bubbleMap, 0.68, 0)).toBeGreaterThan(200)
   })
   it('keeps the depth-haze and shaft planes tall enough that no plane edge crosses the water (visual band)', async () => {
     await start()

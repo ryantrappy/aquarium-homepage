@@ -6,6 +6,8 @@ import {
   LIGHT_SHAFT_SLANT_PER_M,
   LIGHT_SHAFT_SWAY_AMPLITUDE_M,
   createRestrainedCausticLightController,
+  createParticleSprite,
+  PARTICLE_SPRITE_SIZE_PX,
   bubbleEmitterForRockFootprint,
   evaluateBubblePosition,
   evaluateCausticIntensity,
@@ -308,4 +310,49 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
       expect(value).toBeLessThanOrEqual(1)
     }
   })
+  it('renders motes as a soft round disc, not a hard square (AQ-43 visual-check fix)', () => {
+    const sprite = createParticleSprite('mote')
+    expect(sprite.image.width).toBe(PARTICLE_SPRITE_SIZE_PX)
+    expect(sprite.image.height).toBe(PARTICLE_SPRITE_SIZE_PX)
+    expect(sprite.format).toBe(THREE.RGBAFormat)
+    // Setting needsUpdate bumps the upload version (three.js resets the
+    // flag itself); version > 0 proves the texture is queued for upload.
+    expect(sprite.version).toBeGreaterThan(0)
+    // Full alpha at the centre, ~half at mid-radius, transparent at the rim and corners.
+    expect(spriteAlphaAt(sprite, 0, 0)).toBe(255)
+    const mid = spriteAlphaAt(sprite, 0.65, 0)
+    expect(mid).toBeGreaterThan(80)
+    expect(mid).toBeLessThan(180)
+    expect(spriteAlphaAt(sprite, 0.99, 0)).toBe(0)
+    expect(spriteAlphaAt(sprite, 0.99, 0.99)).toBe(0)
+    // RGB is white so the material colour tints it; alpha carries the shape.
+    const image = sprite.image as { width: number; height: number; data: Uint8Array }
+    const centre = (Math.floor(image.height / 2) * image.width + Math.floor(image.width / 2)) * 4
+    expect(image.data[centre]).toBe(255)
+    expect(image.data[centre + 1]).toBe(255)
+    expect(image.data[centre + 2]).toBe(255)
+    // Deterministic: two builds are byte-identical, so the scene looks the same every load.
+    const again = createParticleSprite('mote')
+    expect(Array.from((again.image as { data: Uint8Array }).data)).toEqual(Array.from(image.data))
+  })
+  it('renders bubbles as a thin bright ring, distinct from a mote disc (AQ-43 visual-check fix)', () => {
+    const sprite = createParticleSprite('bubble')
+    expect(sprite.image.width).toBe(PARTICLE_SPRITE_SIZE_PX)
+    expect(sprite.image.height).toBe(PARTICLE_SPRITE_SIZE_PX)
+    expect(sprite.format).toBe(THREE.RGBAFormat)
+    // Transparent centre, bright rim at ~0.7 radius, transparent outer edge and corners.
+    expect(spriteAlphaAt(sprite, 0, 0)).toBeLessThan(10)
+    expect(spriteAlphaAt(sprite, 0.68, 0)).toBeGreaterThan(200)
+    expect(spriteAlphaAt(sprite, 0.99, 0)).toBeLessThan(15)
+    expect(spriteAlphaAt(sprite, 0.99, 0.99)).toBe(0)
+    // The ring differs from the disc at the centre: a bubble is hollow, a mote is solid.
+    expect(spriteAlphaAt(createParticleSprite('mote'), 0, 0)).toBe(255)
+  })
 })
+
+function spriteAlphaAt(texture: THREE.DataTexture, fx: number, fy: number): number {
+  const image = texture.image as { width: number; height: number; data: Uint8Array }
+  const x = Math.min(image.width - 1, Math.max(0, Math.floor((fx * 0.5 + 0.5) * image.width)))
+  const y = Math.min(image.height - 1, Math.max(0, Math.floor((fy * 0.5 + 0.5) * image.height)))
+  return image.data[(y * image.width + x) * 4 + 3]!
+}
