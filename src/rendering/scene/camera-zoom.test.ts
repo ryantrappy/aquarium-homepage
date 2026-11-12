@@ -6,6 +6,7 @@ import {
   dampCameraZoomState,
   DEFAULT_CAMERA_DISTANCE_M,
   DEFAULT_CAMERA_ZOOM_STATE,
+  DEFAULT_FISH_FOCUS_DISTANCE_M,
   FOCAL_AREAS,
   isOverviewZoomState,
   MAX_CAMERA_DISTANCE_M,
@@ -13,6 +14,8 @@ import {
   MIN_CAMERA_POSITION_Z_M,
   panCameraZoomState,
   stepZoomDistance,
+  trackFocusedFishCameraState,
+  zoomStateForFishPosition,
   zoomStateForFocalArea,
   zoomToCursor,
   type CameraZoomState,
@@ -149,5 +152,25 @@ describe('fish links under a zoomed camera (AQ-62 AC #4)', () => {
     const zoomed = projectFishLinkBounds(farFish, cameraFor(zoomStateForFocalArea('left-reef')!), 1440, 900, 0.2, scratch)
     // Either it no longer projects, or its link box is entirely off-screen.
     if (zoomed) expect(zoomed.x > 1440 || zoomed.x + zoomed.width < 0 || zoomed.y > 900 || zoomed.y + zoomed.height < 0).toBe(true)
+  })
+})
+
+describe('click-to-focus fish camera dolly and tracking (AQ-100 AC #1, #2, #4)', () => {
+  it('computes a clamped focus zoom state and smoothly dollies toward a swimming fish', () => {
+    const fishPos = { x: -1.4, y: 0.4, z: -0.8 }
+    const desired = zoomStateForFishPosition(fishPos)
+    expect(desired.targetX).toBeCloseTo(-1.4, 5)
+    expect(desired.targetY).toBeCloseTo(0.4, 5)
+    expect(desired.targetZ).toBeCloseTo(-0.8, 5)
+    expect(desired.distance).toBeCloseTo(DEFAULT_FISH_FOCUS_DISTANCE_M, 5)
+    expect(desired.targetZ + desired.distance).toBeGreaterThanOrEqual(MIN_CAMERA_POSITION_Z_M)
+
+    const stepped = trackFocusedFishCameraState(DEFAULT_CAMERA_ZOOM_STATE, fishPos, 1 / 60)
+    expect(stepped.distance).toBeLessThan(DEFAULT_CAMERA_DISTANCE_M)
+    expect(stepped.distance).toBeGreaterThan(desired.distance)
+
+    // Under prefers-reduced-motion or paused, transitions cut immediately without dolly motion
+    expect(trackFocusedFishCameraState(DEFAULT_CAMERA_ZOOM_STATE, fishPos, 1 / 60, { reducedMotion: true })).toEqual(desired)
+    expect(trackFocusedFishCameraState(DEFAULT_CAMERA_ZOOM_STATE, fishPos, 1 / 60, { paused: true })).toEqual(desired)
   })
 })

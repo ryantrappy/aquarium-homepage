@@ -3,10 +3,11 @@ id: AQ-100
 title: >-
   Implement click-to-focus camera dolly transitions and fish inspect cards with
   smooth panorama reset
-status: To Do
+status: Done
 assignee:
-  - '@Luna'
+  - '@codex'
 created_date: '2026-11-11 05:09'
+updated_date: '2026-11-12 02:18'
 labels:
   - camera
   - ui
@@ -42,9 +43,29 @@ Implement an interactive click-to-focus camera transition and inspection card wo
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Clicking a fish or choosing a service from the Services modal initiates a smooth camera dolly focusing on that fish
-- [ ] #2 The camera smoothly follows the selected fish while presenting a compact, non-intrusive status card with a direct launch link
-- [ ] #3 A Reset view button, pressing Escape, or clicking open water smoothly dollies the camera back to the full-tank panorama
-- [ ] #4 Under prefers-reduced-motion, transitions cut or fade instantly without camera dolly motion
-- [ ] #5 Keyboard navigation and touch interactions work reliably without camera jitter at 1440x900 and 402x874
+- [x] #1 Clicking a fish or choosing a service from the Services modal initiates a smooth camera dolly focusing on that fish
+- [x] #2 The camera smoothly follows the selected fish while presenting a compact, non-intrusive status card with a direct launch link
+- [x] #3 A Reset view button, pressing Escape, or clicking open water smoothly dollies the camera back to the full-tank panorama
+- [x] #4 Under prefers-reduced-motion, transitions cut or fade instantly without camera dolly motion
+- [x] #5 Keyboard navigation and touch interactions work reliably without camera jitter at 1440x900 and 402x874
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Add zoomStateForFishPosition and trackFocusedFishCameraState in src/rendering/scene/camera-zoom.ts with instant snap on reduced-motion/pause.
+2. Expose fish focus APIs on AquariumController and add fish inspect card + panorama reset in src/components/AquariumScene.tsx.
+3. Add unit tests in src/rendering/scene/camera-zoom.test.ts and src/components/AquariumScene.test.tsx.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Added zoomStateForFishPosition and trackFocusedFishCameraState in src/rendering/scene/camera-zoom.ts, wired focusServiceFish and getFocusedServiceId in src/rendering/scene/aquarium.ts, and added the compact glassmorphic .fish-inspect-card with direct launch link and panorama reset (button, Escape, open-water click) in src/components/AquariumScene.tsx and src/styles/aquarium.css.
+<!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Implemented click-to-focus camera dolly transitions, live fish tracking, compact glassmorphic fish inspect cards with direct launch links, smooth panorama reset via button/Escape/open-water click, and instant snap under prefers-reduced-motion.
+<!-- SECTION:FINAL_SUMMARY:END -->

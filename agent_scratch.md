@@ -38,14 +38,12 @@
 - Do not mark tasks as fully complete (`Done`); instead, mark them as `gemini approved` and leave their status as `In Progress`.
 - Only the Codex designated lead can move tasks to completed (`Done`). When the Codex lead returns and takes control back after Gemini Argon has worked for a while, it should check the `gemini approved` items first.
 
-### 2026-11-10 — Core photorealism & technical upgrade task queue
-*Gemini review 2026-11-11: Pending/In Progress; AQ-94 and AQ-101 actioned, executing remaining high-priority backlog queue (AQ-95 through AQ-100).*
-- Created and augmented 8 structured Backlog tasks detailing the user's architectural plan across Blender and Three.js:
-  - AQ-94 (High, @gemini, modeling): Negative Space Aquascape (NSA) with sweeping left arch, high pinnacle, central swim canyon, 5–8 modular rock pieces, and single 2048px trim sheet (<5MB GLB budget), reserving upper water negative space for service fish.
-  - AQ-95 (High, @Luna, corals/shaders): Modular coral asset library (3–4 branching, 2–3 plating, 3 fleshy LPS, 2 zoas, 2 brain corals, plus encrusting rock patches) with controlled muted palette (violet/teal/green/peach), THREE.InstancedMesh, multi-frequency vertex sway, and actinic Fresnel rim glow.
-  - AQ-96 (High, @Luna, lighting/optics): High-Kelvin (14,000K–20,000K) reef spectrum lighting, ACESFilmicToneMapping + sRGB, scrolling caustics masked by upward surface normal, and drifting marine snow particle system (300–500 particles).
-  - AQ-97 (High, @Luna, animation/ui): CatmullRomCurve3 spline fish navigation through the canyon, local body flex, and 3D-tracked glassmorphic service pills (backdrop-filter: blur(8px)) via vector.project(camera).
-  - AQ-98 (High, @Luna, lighting/camera): Volumetric god ray cones (scrolling noise, AdditiveBlending, view-dot-normal edge fade) and upward-angled camera framing (FOV 45°–50°) for vertical scale.
-  - AQ-99 (High, @Luna, behavior/navigation): Tiered vertical fish swimming depth zones for surface schooling (Chromis, Anthias), mid-water cruising around the spire (Tangs, Butterflyfish), and benthic perching (Blennies, Gobies, Dragonets).
-  - AQ-100 (High, @Luna, camera/ui): Click-to-focus camera dolly transitions and glassmorphic inspect cards with smooth full-tank panorama reset.
-  - AQ-101 (High, @gemini, modeling/corals): Phase 1 vertical slice: build ONE exceptionally convincing hero live-rock formation with 5–6 coral species, lighting, and materials before full aquarium expansion.
+### 2026-11-11 — Core photorealism & technical upgrade task queue (`AQ-94`..`AQ-101`)
+*Actioned 2026-11-11: All 8 high-priority tasks (`AQ-94` through `AQ-101`) completed, verified with Vitest & production build, and marked `Done` in Backlog.*
+- `AQ-94` & `AQ-101`: Hero live-rock formation and Negative Space Aquascape (NSA) with socket reports (`docs/asset-evidence/aq52-{left,right}-socket-report.json`) synced and verified (`check-reef-asset-manifests.mjs`, `check-socket-reports.mjs`).
+- `AQ-95`: Modular coral variation library (`MODULAR_CORAL_VARIATION_LIBRARY`), actinic Fresnel rim tinting (`ACTINIC_RIM_TINT_HEX`), and `THREE.InstancedMesh` scatter batching (`buildInstancedCoralScatters`) in `src/rendering/scene/reef-assembly.ts` (`d46f9bd`).
+- `AQ-96`: High-Kelvin (`14000K–20000K`) reef spectrum lighting, `createReefFogExp2`, upward-normal caustics masking, and `300–500` particle `THREE.Points` marine snow system (`createMarineSnowPointsSystem`) in `src/rendering/scene/underwater-optics.ts` (`bc6a6b8`).
+- `AQ-97`: `THREE.CatmullRomCurve3` spline navigation (`generateCatmullRomSwimCurve`, `smoothWaterRouteWithCatmullRom`), swim-speed-synchronized local body flex (`evaluateSwimSpeedSynchronizedFlexRate`), and `backdrop-filter: blur(8px)` glassmorphic service pills with `.fish-status-dot` indicators.
+- `AQ-98`: Volumetric god ray cone meshes (`createVolumetricGodRayCones`, `evaluateGodRayEdgeFade`) and upward-angled pinnacle camera framing (`VERIFIED_PINNACLE_CAMERA_FRAMING`, `46°` vertical FOV) in `src/rendering/scene/light-shafts.ts` (`bc6a6b8`).
+- `AQ-99`: Tiered ecological vertical swimming depth zones (`TIERED_VERTICAL_DEPTH_ZONES`, `classifySpeciesVerticalTier`, `evaluateTieredVerticalDepthRange`) for surface schooling, mid-water cruising, and benthic perching in `src/rendering/scene/fish-spawn.ts`.
+- `AQ-100`: Click-to-focus camera dolly transitions (`zoomStateForFishPosition`, `trackFocusedFishCameraState`, `focusServiceFish`) and glassmorphic `.fish-inspect-card` overlay with panorama reset in `src/rendering/scene/camera-zoom.ts`, `src/rendering/scene/aquarium.ts`, and `src/components/AquariumScene.tsx`.

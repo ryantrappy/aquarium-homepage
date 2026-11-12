@@ -62,6 +62,7 @@ import {
   isOverviewZoomState,
   panCameraZoomState,
   stepZoomDistance,
+  zoomStateForFishPosition,
   zoomStateForFocalArea,
   zoomToCursor,
   type CameraZoomState,
@@ -100,7 +101,7 @@ const modelUrls: Record<string, string> = {
   'copperband-butterflyfish': new URL('../assets/splat-fish/copperband-butterflyfish.glb', import.meta.url).href,
 }
 export type SceneStatus = 'loading' | 'ready' | 'failed'
-export type AquariumController = { update(services: ServiceConfig[], paused: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void; zoomIn(): boolean; zoomOut(): boolean; zoomToFocalArea(id: FocalAreaId): boolean; resetZoom(): boolean; isZoomed(): boolean; getCameraZoom(): CameraZoomState }
+export type AquariumController = { update(services: ServiceConfig[], paused: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void; zoomIn(): boolean; zoomOut(): boolean; zoomToFocalArea(id: FocalAreaId): boolean; resetZoom(): boolean; isZoomed(): boolean; getCameraZoom(): CameraZoomState; focusServiceFish?(id: string): boolean; getFocusedServiceId?(): string | undefined }
 type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; flex?: FishFlexBinding; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean; schoolmate: boolean; lod: FishLod; lodModel?: THREE.Object3D }
 
 function disposeTree(root: THREE.Object3D) {
@@ -163,6 +164,7 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   // stay accurate at every zoom state by construction (AQ-62 AC #4).
   let cameraZoomCurrent: CameraZoomState = { ...DEFAULT_CAMERA_ZOOM_STATE }
   let cameraZoomDesired: CameraZoomState = { ...DEFAULT_CAMERA_ZOOM_STATE }
+  let focusedServiceId: string | undefined
   function applyCameraZoom() {
     camera.position.set(cameraZoomCurrent.targetX, cameraZoomCurrent.targetY, cameraZoomCurrent.targetZ + cameraZoomCurrent.distance)
     camera.lookAt(cameraZoomCurrent.targetX, cameraZoomCurrent.targetY, cameraZoomCurrent.targetZ)
@@ -1181,6 +1183,14 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     // hidden, so zoom still responds with no animation loop. A single
     // render(0, true) while running leaves the current state alone — the
     // next tick damps it — so button/wheel zooms stay smooth.
+    if (focusedServiceId) {
+      const focusedItem = fish.find(item => item.service.id === focusedServiceId)
+      if (focusedItem) {
+        cameraZoomDesired = zoomStateForFishPosition(focusedItem.motion.position, cameraZoomDesired.distance)
+      } else {
+        focusedServiceId = undefined
+      }
+    }
     if (reducedMotion || habitatStopped) cameraZoomCurrent = { ...cameraZoomDesired }
     else if (steps > 0) cameraZoomCurrent = dampCameraZoomState(cameraZoomCurrent, cameraZoomDesired, steps * SIMULATION_STEP_SECONDS)
     applyCameraZoom()
@@ -1668,11 +1678,19 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     zoomIn() { return setCameraZoomDesired({ ...cameraZoomDesired, distance: stepZoomDistance(cameraZoomDesired.distance, 'in') }) },
     zoomOut() { return setCameraZoomDesired({ ...cameraZoomDesired, distance: stepZoomDistance(cameraZoomDesired.distance, 'out') }) },
     zoomToFocalArea(id) {
+      focusedServiceId = undefined
       const next = zoomStateForFocalArea(id)
       if (!next) return !isOverviewZoomState(cameraZoomDesired)
       return setCameraZoomDesired(next)
     },
-    resetZoom() { return setCameraZoomDesired({ ...DEFAULT_CAMERA_ZOOM_STATE }) },
+    focusServiceFish(id) {
+      const item = fish.find(candidate => candidate.service.id === id)
+      if (!item) return !isOverviewZoomState(cameraZoomDesired)
+      focusedServiceId = id
+      return setCameraZoomDesired(zoomStateForFishPosition(item.motion.position))
+    },
+    getFocusedServiceId() { return focusedServiceId },
+    resetZoom() { focusedServiceId = undefined; return setCameraZoomDesired({ ...DEFAULT_CAMERA_ZOOM_STATE }) },
     isZoomed() { return !isOverviewZoomState(cameraZoomDesired) },
     getCameraZoom() { return { ...cameraZoomCurrent } },
     serviceAt: nearest,

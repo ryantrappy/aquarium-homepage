@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { getSpeciesBehaviorProfile, type HabitatAnchor } from '../../lib/fish-behavior'
 import { advanceFishBehavior, createFishBehaviorInstance, dispatchBehaviorEvent, getMotionIntent, getNavigationRequest, reportNavigationOutcome, type FishBehaviorInstance } from '../../simulation/behavior-runtime'
 import { evaluateSchoolingSteering, isGroupSchoolingSpecies, type SchoolingPeer } from './schooling-navigation'
@@ -15,6 +16,94 @@ import {
   stepFishTurnKinematics,
   type FishTurnKinematics,
 } from './fish-turning'
+
+export type CatmullRomSwimCurveOptions = {
+  closed?: boolean
+  tension?: number
+  samplesPerSegment?: number
+}
+
+/**
+ * Generates a smooth, continuous 3D swimming spline using `THREE.CatmullRomCurve3`
+ * (`AQ-97` AC #1) from a sequence of 3D control waypoints.
+ */
+export function generateCatmullRomSwimCurve(
+  waypoints: readonly Vec3[],
+  options: CatmullRomSwimCurveOptions = {},
+): { curve: THREE.CatmullRomCurve3; sampledPath: Vec3[] } {
+  const validWaypoints = waypoints.filter(
+    pt => Number.isFinite(pt.x) && Number.isFinite(pt.y) && Number.isFinite(pt.z),
+  )
+  if (validWaypoints.length < 2) {
+    const fallback = validWaypoints[0] ?? { x: 0, y: 0, z: 0 }
+    const curve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(fallback.x, fallback.y, fallback.z),
+      new THREE.Vector3(fallback.x, fallback.y, fallback.z),
+    ])
+    return { curve, sampledPath: validWaypoints.map(pt => ({ ...pt })) }
+  }
+  const tension = Number.isFinite(options.tension) ? Math.min(1, Math.max(0, options.tension!)) : 0.45
+  const samplesPerSegment = Number.isSafeInteger(options.samplesPerSegment) && options.samplesPerSegment! >= 2
+    ? options.samplesPerSegment!
+    : 4
+  const points3 = validWaypoints.map(pt => new THREE.Vector3(pt.x, pt.y, pt.z))
+  const curve = new THREE.CatmullRomCurve3(points3, Boolean(options.closed), 'catmullrom', tension)
+  const totalSamples = Math.max(2, (validWaypoints.length - 1) * samplesPerSegment)
+  const sampledPath = curve.getPoints(totalSamples).map(vec => ({
+    x: vec.x,
+    y: vec.y,
+    z: vec.z,
+  }))
+  return { curve, sampledPath }
+}
+
+/**
+ * Smooths a multi-waypoint water route with `THREE.CatmullRomCurve3` while verifying
+ * that every sampled spline chord remains obstacle-safe inside `waterBounds` (`AQ-97` AC #1).
+ * Falls back to the original route if any spline chord would clip rock or glass bounds.
+ */
+export function smoothWaterRouteWithCatmullRom(
+  waypoints: readonly Vec3[],
+  waterBounds: AxisAlignedBox,
+  obstacles: readonly SolidObstacleVolume[],
+  fishClearanceRadius: number,
+  options: CatmullRomSwimCurveOptions = {},
+): Vec3[] {
+  if (waypoints.length < 3) return waypoints.map(pt => ({ ...pt }))
+  const { sampledPath } = generateCatmullRomSwimCurve(waypoints, options)
+  for (let i = 1; i < sampledPath.length; i++) {
+    if (
+      !isWaterSegmentSafe({
+        start: sampledPath[i - 1]!,
+        target: sampledPath[i]!,
+        waterBounds,
+        obstacles,
+        fishClearanceRadius,
+      })
+    ) {
+      return waypoints.map(pt => ({ ...pt }))
+    }
+  }
+  return sampledPath
+}
+
+/**
+ * Evaluates the swim-speed-synchronized local body flexion rate (`AQ-97` AC #2, #5).
+ * Returns 0 synchronously when paused or under `prefers-reduced-motion`.
+ */
+export function evaluateSwimSpeedSynchronizedFlexRate(
+  speedMps: number,
+  cruiseSpeedMps: number,
+  animationPlaybackRate = 1,
+  options: { paused?: boolean; reducedMotion?: boolean } = {},
+): number {
+  if (options.paused || options.reducedMotion) return 0
+  const safeSpeed = Number.isFinite(speedMps) ? Math.max(0, speedMps) : 0
+  const safeCruise = Number.isFinite(cruiseSpeedMps) && cruiseSpeedMps > 0 ? cruiseSpeedMps : 0.35
+  const safePlayback = Number.isFinite(animationPlaybackRate) ? Math.max(0, animationPlaybackRate) : 1
+  const normalizedSpeed = Math.min(2.5, safeSpeed / safeCruise)
+  return (0.55 + Math.min(1.7, normalizedSpeed * 1.15)) * safePlayback
+}
 
 export type MeshNavigationConfig = {
   /** World positions, bounds and collider queries share meter units in mesh mode. */

@@ -254,10 +254,93 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   color: #dce7e1;
   background: rgba(7, 29, 35, .46);
   box-shadow: none;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   font-size: 10px;
   line-height: 1.2;
   transition: color .16s ease, border-color .16s ease, background-color .16s ease, box-shadow .16s ease;
+}
+.fish-status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 6px rgba(74, 222, 128, .75);
+}
+/* Fish inspect card (AQ-100 AC #2/#3): compact glassmorphic overlay shown
+ * when a service fish is focused via click or Services selection. */
+.fish-inspect-card {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(440px, calc(100vw - 28px));
+  padding: 8px 12px;
+  border: 1px solid rgba(220, 247, 231, .32);
+  border-radius: 12px;
+  color: #f4fcf7;
+  background: rgba(6, 30, 38, .82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 10px 28px rgba(0, 16, 24, .36);
+}
+.fish-inspect-details {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.fish-inspect-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fish-inspect-species {
+  color: #9ec4bc;
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fish-inspect-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+.fish-inspect-launch {
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid rgba(199, 231, 208, .35);
+  border-radius: 7px;
+  color: #0b2a2a;
+  background: var(--seafoam);
+  font-size: 11px;
+  font-weight: 650;
+  text-decoration: none;
+}
+.fish-inspect-reset {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid rgba(220, 247, 231, .28);
+  border-radius: 7px;
+  color: #e6f5ee;
+  background: rgba(15, 52, 60, .65);
+  font-size: 11px;
+  cursor: pointer;
 }
 .aquarium-three.is-rendered .aquarium-fish-link:hover .fish-name,
 .aquarium-three.is-rendered .aquarium-fish-link:focus-visible .fish-name,

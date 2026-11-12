@@ -14,6 +14,7 @@ export function AquariumScene({ services, paused, focusFallbackRef, fpsCounterEn
   const current = useRef({ services, paused, focusFallbackRef }); current.current = { services, paused, focusFallbackRef }
   const [status, setStatus] = useState<SceneStatus>('loading')
   const [zoomed, setZoomed] = useState(false)
+  const [focusedServiceId, setFocusedServiceId] = useState<string | undefined>(undefined)
   // Debug FPS counter (AQ-83): the badge renders only after mount, so the
   // server HTML and the first client render agree (no badge) even when the
   // counter is enabled in localStorage. Rendering it on the first client
@@ -22,14 +23,19 @@ export function AquariumScene({ services, paused, focusFallbackRef, fpsCounterEn
   const [mounted, setMounted] = useState(false)
   useEffect(() => { setMounted(true) }, [])
   const acknowledgments = useRef(new Set<ReturnType<typeof setTimeout>>())
-  // Camera zoom reset (AQ-62 AC #3): Esc returns to the full-tank overview,
-  // unless a dialog is open — then Esc belongs to the dialog.
+  function resetPanoramaView() {
+    const isZoomed = controller.current?.resetZoom?.()
+    setZoomed(Boolean(isZoomed))
+    setFocusedServiceId(undefined)
+  }
+  // Camera zoom reset (AQ-62 AC #3 / AQ-100 AC #3): Esc returns to the
+  // full-tank overview and clears any focused fish inspect card, unless a
+  // dialog is open — then Esc belongs to the dialog.
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key !== 'Escape' || event.defaultPrevented) return
       if (document.querySelector('dialog[open]')) return
-      const isZoomed = controller.current?.resetZoom()
-      if (isZoomed !== undefined) setZoomed(isZoomed)
+      resetPanoramaView()
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
@@ -50,7 +56,12 @@ export function AquariumScene({ services, paused, focusFallbackRef, fpsCounterEn
     }).catch(error => { console.error('Aquarium renderer unavailable', error); if (!cancelled) setStatus('failed') })
     return () => { cancelled = true; controller.current?.dispose(); controller.current = undefined; acknowledgments.current.forEach(clearTimeout); acknowledgments.current.clear() }
   }, [])
-  useEffect(() => { controller.current?.update(services, paused) }, [services, paused])
+  useEffect(() => {
+    controller.current?.update(services, paused)
+    if (focusedServiceId && !services.some(service => service.id === focusedServiceId)) {
+      setFocusedServiceId(undefined)
+    }
+  }, [services, paused, focusedServiceId])
   useEffect(() => { if (status !== 'ready') overlayRef.current?.querySelectorAll<HTMLAnchorElement>('a').forEach(anchor => { anchor.tabIndex = 0; anchor.removeAttribute('aria-hidden'); delete anchor.dataset.occluded }) }, [status])
 
   function captionAtPoint(x: number, y: number) {
@@ -115,12 +126,25 @@ export function AquariumScene({ services, paused, focusFallbackRef, fpsCounterEn
     const anchor = Array.from(overlayRef.current?.querySelectorAll<HTMLAnchorElement>('a[data-service-id]') ?? []).find(candidate => candidate.dataset.serviceId === selected.id) ?? event.currentTarget
     if (selected.id !== service.id) anchor.focus({ preventScroll: true })
     controller.current?.activate(selected.id)
+    if (status === 'ready') {
+      const focused = controller.current?.focusServiceFish?.(selected.id)
+      setFocusedServiceId(selected.id)
+      if (focused !== undefined) setZoomed(focused)
+      else setZoomed(true)
+    }
     anchor.classList.add('is-acknowledged')
     const timer = setTimeout(() => { anchor.classList.remove('is-acknowledged'); acknowledgments.current.delete(timer) }, 1000)
     acknowledgments.current.add(timer)
   }
+  function onSceneClick(event: MouseEvent<HTMLElement>) {
+    if (status !== 'ready') return
+    if (event.target instanceof Element && event.target.closest('a, button, .fish-inspect-card, .aquarium-zoom-controls')) return
+    if (focusedServiceId || zoomed) resetPanoramaView()
+  }
+  const focusedService = focusedServiceId ? services.find(candidate => candidate.id === focusedServiceId) : undefined
+  const focusedSpecies = focusedService ? getFishById(focusedService.fishId) : undefined
   return (
-    <section className={`aquarium-scene aquarium-three ${status === 'ready' ? 'is-rendered' : 'is-fallback'}${paused ? ' is-paused' : ''}`} aria-label="Aquarium with clickable service fish">
+    <section className={`aquarium-scene aquarium-three ${status === 'ready' ? 'is-rendered' : 'is-fallback'}${paused ? ' is-paused' : ''}`} aria-label="Aquarium with clickable service fish" onClick={onSceneClick}>
       <canvas ref={canvasRef} className="aquarium-canvas" aria-hidden="true" />
       <div ref={overlayRef} className="aquarium-link-layer">
         {services.map(service => {
@@ -128,16 +152,28 @@ export function AquariumScene({ services, paused, focusFallbackRef, fpsCounterEn
           if (!species) return null
           return <a key={service.id} data-service-id={service.id} className="aquarium-fish-link" href={service.url} target="_blank" rel="noreferrer" aria-label={`Open ${service.name} in a new tab`} title={`${service.name} · ${species.commonName}`} onClick={event => activate(event, service)} onAuxClick={event => { if (event.button === 1) activate(event, service) }} onContextMenu={event => { nativeTarget(event, service) }}>
             <FishFigure fish={species} />
-            <span className="fish-name"><span>{service.name}</span>{service.isExample && <small>example</small>}</span>
+            <span className="fish-name"><i className="fish-status-dot" aria-hidden="true" /><span>{service.name}</span>{service.isExample && <small>example</small>}</span>
             <span className="fish-link-tooltip" aria-hidden="true">{service.name}</span>
           </a>
         })}
       </div>
       {mounted && fpsCounterEnabled && <div ref={fpsBadgeRef} className="fps-counter-badge" aria-hidden="true">—</div>}
+      {status === 'ready' && focusedService && focusedSpecies && (
+        <aside className="fish-inspect-card" aria-label={`Inspecting ${focusedService.name}`}>
+          <div className="fish-inspect-details">
+            <span className="fish-inspect-title"><i className="fish-status-dot" aria-hidden="true" /><span>{focusedService.name}</span></span>
+            <span className="fish-inspect-species">{focusedSpecies.commonName}</span>
+          </div>
+          <div className="fish-inspect-actions">
+            <a className="fish-inspect-launch" href={focusedService.url} target="_blank" rel="noreferrer">Open {focusedService.name}</a>
+            <button className="fish-inspect-reset" type="button" onClick={resetPanoramaView}>Reset view</button>
+          </div>
+        </aside>
+      )}
       {status === 'ready' && <div className="aquarium-zoom-controls" role="group" aria-label="Camera zoom">
         <button className="scene-control icon-control" type="button" onClick={() => { const isZoomed = controller.current?.zoomIn(); if (isZoomed !== undefined) setZoomed(isZoomed) }} aria-label="Zoom in" title="Zoom in"><span aria-hidden="true">+</span></button>
         <button className="scene-control icon-control" type="button" onClick={() => { const isZoomed = controller.current?.zoomOut(); if (isZoomed !== undefined) setZoomed(isZoomed) }} aria-label="Zoom out" title="Zoom out"><span aria-hidden="true">−</span></button>
-        <button className="scene-control" type="button" onClick={() => { const isZoomed = controller.current?.resetZoom(); if (isZoomed !== undefined) setZoomed(isZoomed) }} disabled={!zoomed} aria-label="Reset view to full tank overview" title="Reset view (Esc)">Reset view</button>
+        <button className="scene-control" type="button" onClick={resetPanoramaView} disabled={!zoomed && !focusedServiceId} aria-label="Reset view to full tank overview" title="Reset view (Esc)">Reset view</button>
       </div>}
       {status === 'failed' && <p className="aquarium-load-notice" role="status">Aquarium visuals unavailable. Your service links and Settings still work.</p>}
     </section>

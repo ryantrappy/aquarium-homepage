@@ -184,3 +184,48 @@ export function dampCameraZoomState(current: CameraZoomState, desired: CameraZoo
     Math.abs(next.distance - desired.distance) < 0.001
   return close ? { ...desired } : next
 }
+
+/** Default dolly distance when focusing on an individual service fish (AQ-100 AC #1). */
+export const DEFAULT_FISH_FOCUS_DISTANCE_M = 4.8
+
+/**
+ * Resolves a clamped camera zoom state focused on a specific fish's 3D position
+ * (AQ-100 AC #1/#2). Keeps the camera ahead of the fish volume (`z >= 3.15`) so
+ * focusing never clips into foreground fish or rock geometry.
+ */
+export function zoomStateForFishPosition(
+  fishPosition: Readonly<{ x: number; y: number; z: number }>,
+  distanceM = DEFAULT_FISH_FOCUS_DISTANCE_M,
+): CameraZoomState {
+  const x = Number.isFinite(fishPosition.x) ? fishPosition.x : DEFAULT_CAMERA_TARGET.x
+  const y = Number.isFinite(fishPosition.y) ? fishPosition.y : DEFAULT_CAMERA_TARGET.y
+  const z = Number.isFinite(fishPosition.z) ? fishPosition.z : DEFAULT_CAMERA_TARGET.z
+  const dist = Number.isFinite(distanceM) ? distanceM : DEFAULT_FISH_FOCUS_DISTANCE_M
+  return clampCameraZoomState({
+    targetX: x,
+    targetY: y,
+    targetZ: z,
+    distance: dist,
+  })
+}
+
+/**
+ * Tracks a focused fish's moving 3D position with smooth damped camera interpolation,
+ * or cuts/snaps immediately without dolly motion when `reducedMotion` or `paused` is active
+ * (AQ-100 AC #1, #2, #4).
+ */
+export function trackFocusedFishCameraState(
+  current: CameraZoomState,
+  fishPosition: Readonly<{ x: number; y: number; z: number }>,
+  dtSeconds: number,
+  options: { distanceM?: number; reducedMotion?: boolean; paused?: boolean } = {},
+): CameraZoomState {
+  const desired = zoomStateForFishPosition(
+    fishPosition,
+    options.distanceM ?? DEFAULT_FISH_FOCUS_DISTANCE_M,
+  )
+  if (options.reducedMotion || options.paused) {
+    return { ...desired }
+  }
+  return dampCameraZoomState(current, desired, dtSeconds)
+}
