@@ -4,9 +4,9 @@
 Category: Architecture / Rendering
 Status: Active
 Authority: Active Architectural Specification
-Backlog: AQ-5, AQ-38, AQ-12, AQ-34, AQ-13
+Backlog: AQ-5, AQ-38, AQ-12, AQ-34, AQ-13, AQ-70.2
 Owner: @root
-Updated: 2026-11-05
+Updated: 2026-11-12
 Upstream: docs/requirements.md, docs/design-principles.md
 Downstream: src/rendering/scene/aquarium.ts, src/components/AquariumScene.tsx, src/rendering/proof/*
 -->
@@ -180,3 +180,21 @@ desktop host) with its caveats.
 - **Tiered Vertical Swimming Depth Zones (`AQ-99`)**: `src/rendering/scene/fish-spawn.ts` defines `TIERED_VERTICAL_DEPTH_ZONES`, `classifySpeciesVerticalTier`, and `evaluateTieredVerticalDepthRange` grouping species into `surface` schoolers (`blue-green-chromis`, `lyretail-anthias`), `mid-water` cruisers (`blue-tang`, `yellow-tang`, `desjardins-sailfin-tang`, `copperband-butterflyfish`, `flame-angelfish`, `mccoskers-flasher-wrasse`, `six-line-wrasse`, `banggai-cardinalfish`, `ocellaris-clownfish`), and `benthic` perchers (`tailspot-blenny`, `yellow-watchman-goby`, `mandarin-dragonet`, `firefish`, `royal-gramma`).
 - **Click-to-Focus Camera Dolly & Fish Inspect Card (`AQ-100`)**: `src/rendering/scene/camera-zoom.ts` (`zoomStateForFishPosition`, `trackFocusedFishCameraState`), `src/rendering/scene/aquarium.ts` (`focusServiceFish`, `getFocusedServiceId`), and `src/components/AquariumScene.tsx` (`.fish-inspect-card`) smoothly dolly and track a selected service fish (snapping immediately under `prefers-reduced-motion` or pause) and reset to the full-tank panorama via the Reset view button, `Escape`, or open-water click.
 
+
+## Deterministic inspection captures (AQ-70.2)
+
+The development build accepts `?lookdev=1&seed=2026&time=1.25&labels=off`. Start it from the repository with an exact source revision:
+
+```sh
+VITE_GIT_COMMIT="$(git rev-parse HEAD)" npm run dev -- --host 127.0.0.1 --port 5214 --strictPort
+```
+
+The main-world `window.__AQUARIUM_LOOKDEV__` bridge exists only for a valid development opt-in. `ready()` waits for saved configuration, current navigation generation, all current asset loads and a frozen render. The complete roster is staged deterministically after those inputs settle. Normal aquarium reconciliation continues preserving existing fish state.
+
+The bridge provides `state()`, `renderFrozen()`, `setPreset(name)`, `setSubject(serviceId)`, and `setTime(seconds)`. Presets are `full-scene`, `fish-macro`, `coral-macro`, and `rock-sand-contact`. Select a configured service ID for the fish macro. Reef macros use the central island in portrait and the left island in landscape. Changing preset, subject, time, configuration or layout resets timing windows.
+
+Root captures through CUA CDP at 1440×900 or 402×874 CSS pixels, DPR1. After `ready()`, allow45 animation-frame callbacks for settled DOM/timing samples, call `renderFrozen()`, and capture via `Page.captureScreenshot` with `format: 'png'`, `fromSurface: true`, `captureBeyondViewport: false`, and no clip. Save the returned snapshot as the image's JSON sidecar; verify PNG signature, IHDR dimensions, source revision and asset readiness.
+
+Statistics distinguish RAF presentation intervals, complete CPU render calls, and explicit frozen-render CPU calls. They are not GPU timers. Renderer counts aggregate depth, shadow, main and shaft passes rather than counting unique geometry. Resource Timing reports encoded response bytes and transfer bytes separately; cached bodies, restricted timing and zero sizes must not be mistaken for complete network-download or GPU-memory measurements.
+
+The [committed before baseline](asset-evidence/aq70-2/baseline-before/review.json) records source0e958a0, four presets at both required viewports and two full-reload runs per view. All eight pairs are byte-identical with zero tolerance. Each of16 PNGs has a sidecar. This fixed High inspection mode disables adaptive quality, so its frame timings do not certify normal-runtime budgets. The baseline also does not accept final fish, coral, rock or composition art.

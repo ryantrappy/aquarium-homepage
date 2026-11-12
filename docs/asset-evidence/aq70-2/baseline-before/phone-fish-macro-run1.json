@@ -1,0 +1,66 @@
+{
+  "assets": {
+    "assetResourceCount": 32,
+    "encodedAssetBytes": 23501388,
+    "encodedBytesUnavailableCount": 0,
+    "encodedZeroByteCount": 0,
+    "transferBytes": 9600,
+    "transferBytesUnavailableCount": 0,
+    "transferZeroByteCount": 0
+  },
+  "commit": "0e958a0786906eff1469853a36db5894069a3b30",
+  "failedAssets": [],
+  "labelsVisible": false,
+  "pendingAssetCount": 0,
+  "preset": "fish-macro",
+  "ready": true,
+  "renderer": {
+    "memory": {
+      "geometries": 41,
+      "textures": 95
+    },
+    "render": {
+      "calls": 161,
+      "lines": 0,
+      "points": 64,
+      "triangles": 2368018
+    }
+  },
+  "seed": 2026,
+  "subjectId": "starter-ombi",
+  "timeSeconds": 1.25,
+  "timing": {
+    "cpuRenderCall": {
+      "p50Ms": 1.2000000178813934,
+      "p95Ms": 1.630000030994415,
+      "sampleCount": 48
+    },
+    "frozenPoseRenderCall": {
+      "p50Ms": 1,
+      "p95Ms": 1,
+      "sampleCount": 1
+    },
+    "rafInterval": {
+      "p50Ms": 49.900000000001455,
+      "p95Ms": 78.53999999999938,
+      "sampleCount": 45
+    },
+    "windowFrames": 120
+  },
+  "unresolvedFishIds": [],
+  "viewport": {
+    "devicePixelRatio": 1,
+    "height": 874,
+    "width": 402
+  },
+  "capture": {
+    "file": "phone-fish-macro-run1.png",
+    "format": "png",
+    "width": 402,
+    "height": 874,
+    "sha256": "a221cffe1ebbcf4e483b9c288cab752b163353da4a3198f3c1141b434c851e58",
+    "run": 1
+  },
+  "quality": "High fixed inspection mode; adaptive tier disabled; these are not normal-runtime budget acceptance stats",
+  "timingScope": "RAF presentation intervals and CPU render calls are distinct; no GPU timer"
+}

@@ -1,0 +1,65 @@
+{
+  "assets": {
+    "assetResourceCount": 32,
+    "encodedAssetBytes": 23501388,
+    "encodedBytesUnavailableCount": 0,
+    "encodedZeroByteCount": 0,
+    "transferBytes": 9600,
+    "transferBytesUnavailableCount": 0,
+    "transferZeroByteCount": 0
+  },
+  "commit": "0e958a0786906eff1469853a36db5894069a3b30",
+  "failedAssets": [],
+  "labelsVisible": false,
+  "pendingAssetCount": 0,
+  "preset": "coral-macro",
+  "ready": true,
+  "renderer": {
+    "memory": {
+      "geometries": 41,
+      "textures": 95
+    },
+    "render": {
+      "calls": 219,
+      "lines": 0,
+      "points": 80,
+      "triangles": 4017426
+    }
+  },
+  "seed": 2026,
+  "timeSeconds": 1.25,
+  "timing": {
+    "cpuRenderCall": {
+      "p50Ms": 3.2500000298023224,
+      "p95Ms": 7.02499998807907,
+      "sampleCount": 48
+    },
+    "frozenPoseRenderCall": {
+      "p50Ms": 1.699999988079071,
+      "p95Ms": 1.699999988079071,
+      "sampleCount": 1
+    },
+    "rafInterval": {
+      "p50Ms": 65.89999999999782,
+      "p95Ms": 128.5400000000001,
+      "sampleCount": 45
+    },
+    "windowFrames": 120
+  },
+  "unresolvedFishIds": [],
+  "viewport": {
+    "devicePixelRatio": 1,
+    "height": 900,
+    "width": 1440
+  },
+  "capture": {
+    "file": "laptop-coral-macro-run1.png",
+    "format": "png",
+    "width": 1440,
+    "height": 900,
+    "sha256": "1334551d72e4e64711657e7423b319a1561e1551c40fb1cd747a99a44bd8a144",
+    "run": 1
+  },
+  "quality": "High fixed inspection mode; adaptive tier disabled; these are not normal-runtime budget acceptance stats",
+  "timingScope": "RAF presentation intervals and CPU render calls are distinct; no GPU timer"
+}

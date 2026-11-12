@@ -1,0 +1,167 @@
+{
+  "task": "AQ-70.2",
+  "date": "2026-11-12",
+  "reviewer": "Root",
+  "sourceCommit": "0e958a0786906eff1469853a36db5894069a3b30",
+  "status": "Verified baseline before aquascape recomposition; not final aquarium art acceptance",
+  "pairs": [
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "preset": "full-scene",
+      "runs": [
+        "laptop-full-scene-run1.png",
+        "laptop-full-scene-run2.png"
+      ],
+      "sidecars": [
+        "laptop-full-scene-run1.json",
+        "laptop-full-scene-run2.json"
+      ],
+      "byteIdentical": true,
+      "sha256": "5febc0d4b4867f0e44176c31db385938ea761f4159c1bb5b2add4668f7b10c31",
+      "perceptualTolerance": 0
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "preset": "fish-macro",
+      "runs": [
+        "laptop-fish-macro-run1.png",
+        "laptop-fish-macro-run2.png"
+      ],
+      "sidecars": [
+        "laptop-fish-macro-run1.json",
+        "laptop-fish-macro-run2.json"
+      ],
+      "byteIdentical": true,
+      "sha256": "b2d491783edd878bf0c6f672e8efb3fd9cb4a281f4ede8dec2f9ed9c2760e024",
+      "perceptualTolerance": 0
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "preset": "coral-macro",
+      "runs": [
+        "laptop-coral-macro-run1.png",
+        "laptop-coral-macro-run2.png"
+      ],
+      "sidecars": [
+        "laptop-coral-macro-run1.json",
+        "laptop-coral-macro-run2.json"
+      ],
+      "byteIdentical": true,
+      "sha256": "1334551d72e4e64711657e7423b319a1561e1551c40fb1cd747a99a44bd8a144",
+      "perceptualTolerance": 0
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "preset": "rock-sand-contact",
+      "runs": [
+        "laptop-rock-sand-contact-run1.png",
+        "laptop-rock-sand-contact-run2.png"
+      ],
+      "sidecars": [
+        "laptop-rock-sand-contact-run1.json",
+        "laptop-rock-sand-contact-run2.json"
+      ],
+      "byteIdentical": true,
+      "sha256": "1312a985e942cdc7a7f1f9143fe97c5d6543d592535107b66263a42e53942b7f",
+      "perceptualTolerance": 0
+    },
+    {
+      "viewport": [
+        402,
+        874
+      ],
+      "preset": "full-scene",
+      "runs": [
+        "phone-full-scene-run1.png",
+        "phone-full-scene-run2.png"
+      ],
+      "sidecars": [
+        "phone-full-scene-run1.json",
+        "phone-full-scene-run2.json"
+      ],
+      "byteIdentical": true,
+      "sha256": "d908dde1813ec2a2c050ada406c6e21a7119d0a970d43dd37645c659ce5d9483",
+      "perceptualTolerance": 0
+    },
+    {
+      "viewport": [
+        402,
+        874
+      ],
+      "preset": "fish-macro",
+      "runs": [
+        "phone-fish-macro-run1.png",
+        "phone-fish-macro-run2.png"
+      ],
+      "sidecars": [
+        "phone-fish-macro-run1.json",
+        "phone-fish-macro-run2.json"
+      ],
+      "byteIdentical": true,
+      "sha256": "a221cffe1ebbcf4e483b9c288cab752b163353da4a3198f3c1141b434c851e58",
+      "perceptualTolerance": 0
+    },
+    {
+      "viewport": [
+        402,
+        874
+      ],
+      "preset": "coral-macro",
+      "runs": [
+        "phone-coral-macro-run1.png",
+        "phone-coral-macro-run2.png"
+      ],
+      "sidecars": [
+        "phone-coral-macro-run1.json",
+        "phone-coral-macro-run2.json"
+      ],
+      "byteIdentical": true,
+      "sha256": "be829fa7f3e6ff5f2adf0ec0c0e279feb093ffde3a978b481c1f9b1985b8d4b6",
+      "perceptualTolerance": 0
+    },
+    {
+      "viewport": [
+        402,
+        874
+      ],
+      "preset": "rock-sand-contact",
+      "runs": [
+        "phone-rock-sand-contact-run1.png",
+        "phone-rock-sand-contact-run2.png"
+      ],
+      "sidecars": [
+        "phone-rock-sand-contact-run1.json",
+        "phone-rock-sand-contact-run2.json"
+      ],
+      "byteIdentical": true,
+      "sha256": "873a2c96f7d7bdb5051842687827d5c1b0e49fa90aa3b756421d4f9139878e9b",
+      "perceptualTolerance": 0
+    }
+  ],
+  "verification": [
+    "16 native PNG signatures/IHDR dimensions independently checked",
+    "All8 repeat pairs are byte-identical across full reloads at same commit; zero tolerance",
+    "All16 sidecars have correct commit/viewport/preset/seed/time, aggregate renderer.info, finite RAF/CPU p50-p95, encoded/transfer asset bytes and no pending/failed/unresolved assets",
+    "All3 macros reviewed; portrait reef macros center on the single island",
+    "Production bundle bridge-string exclusion and normal-production checks recorded separately"
+  ],
+  "captureMethod": "CUA Chrome3, CDP Page.captureScreenshot format=png/fromSurface=true/captureBeyondViewport=false with no clip. Wait for bridge.ready including saved configuration/current navigation/assets, then45 RAF callbacks per preset, renderFrozen and export snapshot JSON.",
+  "limits": [
+    "High fixed inspection tier disables adaptive quality; slow RAF timings are not normal-runtime performance acceptance",
+    "Renderer render counts aggregate depth/shadow/main/shaft passes, not unique geometry",
+    "Encoded Resource Timing sizes include cached response bodies; transfer bytes report network transfer separately, zeros/unavailable are explicit",
+    "The previous async-roster run was rejected rather than accepted with a tolerance; only corrected final-camera runs are committed here"
+  ]
+}
