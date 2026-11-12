@@ -561,13 +561,13 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         vec3 col = mix(marineCyan, tirReefColor + marineCyan * 0.35, tirWeight * 0.88);
         col = mix(col, deepNavyRim, darkCrestRing * 0.82);
         col = mix(col, snellWindowCyan, smoothstep(0.18, 0.68, snellFocus) * 0.72);
-        col += causticLensWhite * clamp(hotspotCore, 0.0, 1.15) * 0.78;
+        col += causticLensWhite * clamp(hotspotCore, 0.0, 1.15) * 0.32;
 
         // Subtle rear-glass meniscus water-line seam where the surface meets the back wall
         float rearMeniscusLine = exp(-pow((vSurfaceLocalY + 2.65) / 0.24, 2.0));
         col = mix(col, vec3(0.003, 0.014, 0.042), rearMeniscusLine * 0.65);
 
-        float alpha = clamp(0.68 + 0.26 * clamp(snellFocus + darkCrestRing * 0.5 + tirWeight * 0.4, 0.0, 1.0), 0.0, 0.94);
+        float alpha = clamp(0.42 + 0.20 * clamp(snellFocus + darkCrestRing * 0.5 + tirWeight * 0.4, 0.0, 1.0), 0.0, 0.62);
         // Smoothly feather the rear meniscus edge right behind the upper Acropora tips
         alpha *= smoothstep(-3.15, -2.35, vSurfaceLocalY);
         alpha *= smoothstep(2.6, 0.1, vSurfaceLocalY);
@@ -578,7 +578,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   })
   const waterSurface = new THREE.Mesh(waterSurfaceGeometry, waterSurfaceMaterial)
   waterSurface.rotation.x = Math.PI / 2 - 0.065
-  waterSurface.position.set(0, 3.24, -1.2)
+  waterSurface.position.set(0, 3.75, -1.2)
   waterSurface.raycast = () => {}
   scene.add(waterSurface)
 
