@@ -10,7 +10,8 @@
     "population": "24 or 32 deterministic service rows cycle through the current 16 fish species; production spawn and schoolmate resolution add 5 visual schoolmates per Chromis service and 3 per Anthias service. The resulting runtime fish count, and any skipped spawn, are recorded per case.",
     "simulation": "Default behavior/extension setup, unpaused, reducedMotion=false, no focus-stopped fish. stepSwimmingSchool() advances simulation and routes at fixed 1/60 s.",
     "limits": "AABB obstacle safety is active. Mesh capsule navigation is deliberately inactive; no MESH_NAVIGATION_MOVEMENT_BUDGET is applied. The live renderer caps catch-up to 6 simulation steps per frame, but this benchmark measures one step per call.",
-    "rawSamples": "All 600 measured timings are embedded for each case."
+    "rawSamples": "All 600 measured timings are embedded for each case.",
+    "percentiles": "Nearest-rank quantiles: sorted[ceil(p * N) - 1], not interpolated median. Independently recomputed from all embedded samples by Root."
   },
   "environment": {
     "node": "v26.13.0",
