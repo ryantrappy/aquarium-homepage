@@ -93,12 +93,23 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
     expect(atZero.a.v).toBeCloseTo(-0.8 * DEFAULT_AQUARIUM_OPTICS_CONFIG.causticTextureScaleA)
     expect(atZero.b.u).toBeCloseTo(1.2 * DEFAULT_AQUARIUM_OPTICS_CONFIG.causticTextureScaleB)
     expect(atZero.b.v).toBeCloseTo(-0.8 * DEFAULT_AQUARIUM_OPTICS_CONFIG.causticTextureScaleB)
+    // Layer C (surface-water pass 2, Zucconi second scale): the mid
+    // scale of A/B, drifting slower than either.
+    const scaleC =
+      (DEFAULT_AQUARIUM_OPTICS_CONFIG.causticTextureScaleA +
+        DEFAULT_AQUARIUM_OPTICS_CONFIG.causticTextureScaleB) /
+      2
+    expect(atZero.c.u).toBeCloseTo(1.2 * scaleC)
+    expect(atZero.c.v).toBeCloseTo(-0.8 * scaleC)
+    expect(atZero.c).not.toEqual(atZero.a)
+    expect(atZero.c).not.toEqual(atZero.b)
 
     const active = evaluateCausticPatternUV(1.2, -0.8, 5)
     // Layers scroll in opposite directions and at different rates
     expect(active.a.u).toBeGreaterThan(atZero.a.u)
     expect(active.b.u).toBeLessThan(atZero.b.u)
     expect(active.a).not.toEqual(active.b)
+    expect(active.c.u).toBeGreaterThan(atZero.c.u)
 
     const paused = evaluateCausticPatternUV(1.2, -0.8, 5, { paused: true })
     expect(paused).toEqual(atZero)
@@ -340,7 +351,9 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
     expect(cfg.sunDirection).toEqual(SUN_DIRECTION)
     expect(cfg.sunDirection.y).toBeGreaterThan(0.8)
     expect(cfg.surfaceFocusGain).toBe(0.6)
-    expect(cfg.causticSandThreshold).toBe(0.3)
+    // Sand threshold restored to 9d0418a's 0.18 in the surface-water
+    // pass (PR #43's merge had overwritten it with 0.30).
+    expect(cfg.causticSandThreshold).toBe(0.18)
     expect(cfg.causticMaxAdd).toBe(0.35)
     expect(cfg.shaftRaymarchSteps).toBe(14)
     expect(cfg.shaftRaymarchAlpha).toBe(0.28)

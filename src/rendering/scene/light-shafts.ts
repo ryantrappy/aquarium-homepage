@@ -292,7 +292,12 @@ export class RaymarchedShaftPass {
             float beam = pow(shaftBeamPattern(surf, uTime), 2.4);
             float curtainStriation = 0.55 + 0.45 * shaftValueNoise(vec2(surf.x * 3.8 + uTime * 0.05, p.y * 0.35));
             float rippleGate = smoothstep(-0.15, 0.75, focus) * curtainStriation;
-            float depthFade = exp(-max(3.20 - p.y, 0.0) * 0.82) * smoothstep(-1.4, 3.15, p.y);
+            // Depth fade anchored to the one true surface height
+            // (surface-water pass 2): brightest at the surface, fading
+            // with depth below it. The old 3.20 / 3.15 constants were
+            // tuned against the tilted mesh's centre height and would
+            // leave the top 0.54 m of the new level surface dimmed.
+            float depthFade = exp(-max(uSurfaceY - p.y, 0.0) * 0.82) * smoothstep(-1.4, uSurfaceY, p.y);
             accum += beam * (0.20 + 0.80 * rippleGate) * depthFade * stepLen * 0.30;
           }
           float light = (1.0 - exp(-accum * uSoftClamp)) * axisFade * uAlpha * 0.58;
