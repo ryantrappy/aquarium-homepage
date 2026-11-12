@@ -1,13 +1,12 @@
 ---
 id: AQ-13
 title: Startle a fish when its service link is activated
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-03T04:15:00Z'
-updated_date: '2026-11-12 05:37'
-labels:
-  - waiting-for-answers
+updated_date: '2026-11-12 05:43'
+labels: []
 dependencies:
   - AQ-12
   - AQ-44
@@ -35,7 +34,7 @@ Extend the photorealistic fish animation system from AQ-12 with a realistic star
 - [ ] #3 The response retains photorealistic body, fin, and tail motion; it does not substitute a separate rigid sprite translation or generic bounce.
 - [x] #4 The fish label follows the fish and remains readable without flipping or becoming detached.
 - [x] #5 With reduced motion enabled, the link still opens and the fish gives a clear non-spatial acknowledgment instead of darting; other fish keep their normal behavior.
-- [ ] #6 Fish/service captions are always visible, rendered smaller/subtle by default, and brighter on hover/focus, verified in the running aquarium for mouse hover and keyboard focus; the 44px minimum link target is preserved. Caption choice is the recorded user choice implemented as AQ-70.14 helpers (see AGENT_TASKS.md); AQ-70.14 exists and is Done — an earlier note claiming no AQ-70.14 task file exists was wrong (corrected 2026-11-09, AQ-82 batch) — and this AC is not final until Root review is recorded.
+- [ ] #6 Fish/service captions are small and subtle by default and brighter on hover/focus when shown. Overlapping captions may hide to avoid collisions. Preserve the 44px minimum link target and keyboard/service-list access.
 <!-- AC:END -->
 
 ## Implementation Notes
@@ -69,5 +68,11 @@ author: @root
 created: 2026-11-12 05:37
 ---
 Root review 2026-11-11: HOLD for user clarification. Clarify whether captions must always remain visible, or may hide to avoid overlap. AQ-89 deliberately applies fish-label-deconflicted opacity zero even on focus/hover, conflicting with AC6. Realistic startle visual verification also remains open.
+---
+
+author: @root
+created: 2026-11-12 05:43
+---
+User clarification 2026-11-11 supersedes the corresponding earlier criterion: {6: 'Fish/service captions are small and subtle by default and brighter on hover/focus when shown. Overlapping captions may hide to avoid collisions. Preserve the 44px minimum link target and keyboard/service-list access.'}. Root follow-up: Caption hiding is accepted; realistic articulated startle/recovery visual verification in AC2/3 remains open.
 ---
 <!-- COMMENTS:END -->
