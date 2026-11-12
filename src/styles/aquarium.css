@@ -203,7 +203,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 /* The mounted 3D scene owns travel and projected link positions. */
 .aquarium-three .aquarium-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
 .aquarium-three.is-fallback .aquarium-canvas { visibility: hidden; }
-.aquarium-three.is-rendered { background: #155c73; }
+.aquarium-three.is-rendered { background: #04152d; }
 .aquarium-link-layer { position: absolute; inset: 0; pointer-events: none; }
 .aquarium-fish-link { position: absolute; display: block; min-width: 44px; min-height: 44px; pointer-events: auto; text-decoration: none; transform-origin: 0 0; border-radius: 45%; }
 .aquarium-fish-link .fish-name { position: absolute; top: calc(100% - var(--fish-label-lift, 10px) + var(--fish-label-dy, 0px)); left: 50%; transform: translateX(calc(-50% + var(--fish-label-dx, 0px))); max-width: 170px; min-width: 44px; min-height: 32px; justify-content: center; margin: 0; font-size: 11px; }

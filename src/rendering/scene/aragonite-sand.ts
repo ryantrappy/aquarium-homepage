@@ -540,16 +540,20 @@ float leftCaveShadow = exp(-pow((vSandWorldPos.x + 2.35) / 0.55, 2.0) - pow((vSa
 float rightArchShadow = exp(-pow((vSandWorldPos.x - 2.35) / 0.68, 2.0) - pow((vSandWorldPos.z + 1.05) / 0.52, 2.0)) * 0.32 * (1.0 - uSingleIslandMode);
 rockContactAo *= (1.0 - max(leftCaveShadow, rightArchShadow));
 
-// Gentle rear-water depth attenuation preserving warm cream foreground
-float rearFade = smoothstep(-5.4, 0.8, vSandWorldPos.z);
-vec3 rearWaterTint = vec3(0.56, 0.66, 0.72);
-diffuseColor.rgb = mix(diffuseColor.rgb * rearWaterTint, diffuseColor.rgb, 0.48 + 0.52 * rearFade);
+// Gentle rear-water depth attenuation preserving warm cream foreground on caustic ridges
+// while shading ambient sand into moody underwater reef-blue shadow (more_realistic_reef_guide.png)
+float rearFade = smoothstep(-5.4, 1.2, vSandWorldPos.z);
+vec3 rearWaterTint = vec3(0.16, 0.26, 0.44);
+diffuseColor.rgb = mix(diffuseColor.rgb * rearWaterTint, diffuseColor.rgb * vec3(0.46, 0.54, 0.68), 0.32 + 0.68 * rearFade);
+// Center arch and side-wall vignette shadow on the sandbed
+float centerArchPocket = exp(-pow(vSandWorldPos.x / 1.45, 2.0) - pow((vSandWorldPos.z + 1.25) / 1.15, 2.0)) * 0.42 * (1.0 - uSingleIslandMode);
+float sideSandVignette = smoothstep(2.2, 6.2, abs(vSandWorldPos.x)) * 0.35;
 // Visual-check fix: the dual-scale UV blend only swaps grain phase, so at
 // overview distance (mipmapped) both samples average to the same mean and
 // the field reads flat white. Modulate luminance by the same macro signal
 // so broad warm patches (±10%, zero mean change) survive at any distance.
 diffuseColor.rgb *= 0.90 + 0.20 * sandMacroBlend;
-diffuseColor.rgb *= rockContactAo;
+diffuseColor.rgb *= rockContactAo * (1.0 - centerArchPocket) * (1.0 - sideSandVignette);
 // AQ-70.6: the sand's own caustic ridge network was removed. The shared
 // cellular caustic chunk (caustics.ts) is applied to the sand material in
 // rebuildHabitat, so the sand, rock, coral, and fish all show the one
@@ -617,7 +621,7 @@ normal = perturbNormalArb(-vViewPosition, normal, dHdxy_fwd(), faceDirection);
     map: albedoTexture,
     roughness: 0.94,
     metalness: 0.0,
-    color: new THREE.Color('#dfd4be'),
+    color: new THREE.Color('#2c3f5e'),
   })
   const frontEdgeMesh = new THREE.Mesh(frontEdgeGeometry, frontEdgeMaterial)
   frontEdgeMesh.name = 'AragoniteFrontGlassSandEdge'

@@ -285,16 +285,18 @@ export class RaymarchedShaftPass {
             if (i >= uSteps) break;
             float t = (float(i) + jitter) * stepLen;
             vec3 p = uCameraPos + rayDir * t;
-            // Surface footpoint the light passed through (sun-slant).
+            // Surface footpoint the light passed through (gentle vertical sun-slant).
             float dist = (uSurfaceY - p.y) / max(uSunDir.y, 0.2);
-            vec2 surf = p.xz + uSunDir.xz * dist;
+            vec2 surf = p.xz + uSunDir.xz * dist * 0.25;
             float focus = surfaceWaveFocus(surf, uTime);
-            float beam = shaftBeamPattern(surf, uTime);
-            float depthFade = exp(-max(uSurfaceY - p.y, 0.0) * ${SHAFT_DEPTH_FADE_PER_M.toFixed(2)});
-            accum += beam * (1.0 + 0.5 * focus) * depthFade * stepLen;
+            float beam = pow(shaftBeamPattern(surf, uTime), 2.4);
+            float curtainStriation = 0.55 + 0.45 * shaftValueNoise(vec2(surf.x * 3.8 + uTime * 0.05, p.y * 0.35));
+            float rippleGate = smoothstep(-0.15, 0.75, focus) * curtainStriation;
+            float depthFade = exp(-max(3.20 - p.y, 0.0) * 0.82) * smoothstep(-1.4, 3.15, p.y);
+            accum += beam * (0.20 + 0.80 * rippleGate) * depthFade * stepLen * 0.30;
           }
-          float light = (1.0 - exp(-accum * uSoftClamp)) * axisFade * uAlpha;
-          gl_FragColor = vec4(vec3(0.55, 0.80, 0.95) * light, light);
+          float light = (1.0 - exp(-accum * uSoftClamp)) * axisFade * uAlpha * 0.58;
+          gl_FragColor = vec4(vec3(0.24, 0.60, 0.94) * light, light);
         }`,
     })
     const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), shaftMaterial)

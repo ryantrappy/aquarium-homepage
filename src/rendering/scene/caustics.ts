@@ -320,25 +320,23 @@ export function applyCaustics(
 // the upward-normal and depth masks, still restrained under the +0.35 cap.
 float causticDist = (uSurfaceY - vCausticWorldPos.y) / max(uSunDir.y, 0.2);
 vec2 causticSurf = vCausticWorldPos.xz + uSunDir.xz * causticDist;
-vec2 causticUvA = causticSurf * uCausticScaleA + vec2(uCausticTime * 0.022, -uCausticTime * 0.0132);
-vec2 causticUvB = causticSurf * uCausticScaleB + vec2(-uCausticTime * 0.0296, uCausticTime * 0.0185);
+vec2 causticWarp = surfaceWaveSlope(causticSurf, uCausticTime) * 1.45;
+vec2 causticUvA = (causticSurf + causticWarp) * uCausticScaleA + vec2(uCausticTime * 0.022, -uCausticTime * 0.0132);
+vec2 causticUvB = (causticSurf - causticWarp * 0.85) * uCausticScaleB + vec2(-uCausticTime * 0.0296, uCausticTime * 0.0185);
 float causticP = max(texture2D(uCausticMap, causticUvA).r, texture2D(uCausticMap, causticUvB).r);
 causticP = smoothstep(uCausticThreshold, 0.9, causticP);
 float causticMask = max(vCausticWorldNormal.y, 0.0) * (1.0 - 0.35 * clamp((2.8 - vCausticWorldPos.y) / 5.6, 0.0, 1.0));
 // Light redistribution (look-dev 2026-11-11): focusing means bright
 // ridges AND dimmer surroundings — the light in the web came from the
-// field around it. Dimming the direct diffuse by up to 30% where there
-// is no ridge is what makes the dapple read on bright surfaces (the
-// sand is near-white and ACES-clipped, so a purely additive +0.35 on a
-// 233/255 field has nowhere to go). The +0.35 peak cap is untouched.
-// (Look-dev 2026-11-11: 0.20 → 0.30 → 0.40 — the first two values left
-// the web subtle on the near-white sand at overview distance; 0.40
-// darkens the field enough for the web to read without the ridges
-// clipping, and the field keeps at least 60% of direct (74% on the
-// sand, where the depth mask is 0.65).)
+// field around it.
 reflectedLight.directDiffuse *= 1.0 - 0.40 * (1.0 - causticP) * causticMask;
+// Deep blue-water shadow tint between caustic ridges so non-caustic surfaces sit in moody reef water shadow
+vec3 underwaterShadowTint = mix(vec3(1.0), vec3(0.28, 0.44, 0.70), (1.0 - causticP) * clamp(causticMask * 1.25, 0.0, 1.0));
+reflectedLight.directDiffuse *= underwaterShadowTint;
+reflectedLight.indirectDiffuse *= mix(vec3(1.0), vec3(0.24, 0.38, 0.64), (1.0 - causticP) * 0.85);
 float causticBright = causticP * max(0.0, 1.0 + uFocusGain * surfaceWaveFocus(causticSurf, uCausticTime));
-reflectedLight.directDiffuse += diffuseColor.rgb * (causticBright * causticMask * uCausticMaxAdd);`,
+vec3 causticSunlightTint = vec3(1.18, 1.08, 0.90);
+reflectedLight.directDiffuse += diffuseColor.rgb * causticSunlightTint * (causticBright * causticMask * uCausticMaxAdd * 1.35);`,
     )
   }
   const cacheKeySuffix = skinned ? CAUSTIC_SKINNED_CACHE_KEY_SUFFIX : CAUSTIC_CACHE_KEY_SUFFIX

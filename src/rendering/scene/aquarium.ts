@@ -124,7 +124,7 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5))
   renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.toneMapping = THREE.ACESFilmicToneMapping
-  renderer.toneMappingExposure = 1.02
+  renderer.toneMappingExposure = 0.80
   renderer.shadowMap.enabled = true
   // AQ-70.4 AC #3: Variance Shadow Maps for soft reef-fixture penumbras.
   // A reef LED fixture is a wide multi-emitter source, not a single sun:
@@ -150,8 +150,8 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   const optics = DEFAULT_AQUARIUM_OPTICS_CONFIG
   const waterColumnColor = evaluateDepthTintedColor(optics.backgroundHex, 3.5)
   const scene = new THREE.Scene()
-  scene.background = new THREE.Color(waterColumnColor)
-  scene.fog = new THREE.Fog(waterColumnColor, optics.fogNear, optics.fogFar)
+  scene.background = new THREE.Color('#04152d')
+  scene.fog = new THREE.Fog('#04152d', optics.fogNear, optics.fogFar)
   const camera = new THREE.PerspectiveCamera(42, 1, .1, 60); camera.position.set(0, .15, 9); camera.lookAt(0, .15, 0)
 
   // Camera zoom into focal areas (AQ-62 AC #1/#2): the camera stays front-on
@@ -186,7 +186,7 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
 
   // 3-tier reef LED lighting rig (AQ-14.2 & AQ-39):
   // 1) Balanced sky-to-indigo-crevice HemisphereLight so overhangs & caves retain deep actinic shadow contrast
-  const hemiLight = new THREE.HemisphereLight('#88ccff', '#1b1636', 0.40)
+  const hemiLight = new THREE.HemisphereLight('#3b78b8', '#080614', 0.22)
   scene.add(hemiLight)
   // 2) Crisp 14,000K overhead reef daylight key light with soft shadow map.
   // AQ-70.6 AC #2: the key/fill split is derived from the fixture
@@ -195,7 +195,7 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   // once. At the default balance the resolved intensities are exactly the
   // long-standing 2.1 / 0.95.
   const fixture = evaluateFixtureIntensities(optics.fixtureWhiteBalance, optics.fixtureTotalIntensity)
-  const keyLight = new THREE.DirectionalLight('#f6faff', fixture.keyLightIntensity)
+  const keyLight = new THREE.DirectionalLight('#eef6ff', fixture.keyLightIntensity)
   keyLight.position.set(1.2, 6.8, 4.6)
   keyLight.castShadow = true
   keyLight.shadow.mapSize.set(1024, 1024)
@@ -215,10 +215,10 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   keyLight.shadow.normalBias = 0.015
   scene.add(keyLight)
   // 3) Royal-blue actinic fill light + soft top-back rim light
-  const fillLight = new THREE.DirectionalLight('#5a98ff', fixture.fillLightIntensity)
-  fillLight.position.set(-4.2, 2.8, 3.2)
+  const fillLight = new THREE.DirectionalLight('#2e6be6', fixture.fillLightIntensity)
+  fillLight.position.set(-3.6, 4.2, 2.8)
   scene.add(fillLight)
-  const rimLight = new THREE.DirectionalLight('#b4dcff', 0.45)
+  const rimLight = new THREE.DirectionalLight('#4a8ce0', 0.28)
   rimLight.position.set(0, 4.2, -3.5)
   scene.add(rimLight)
 
@@ -258,7 +258,7 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   // only the gradient + patina + sand seam; all beams come from the one
   // shared wave field (shaft plane / raymarched pass). There is no
   // uRearTime any more: the backdrop is static, as it should be.
-  const rearMaterial = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.96, metalness: 0.0 })
+  const rearMaterial = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.98, metalness: 0.0 })
   rearMaterial.envMapIntensity = ENVIRONMENT_MAP_INTENSITY.backdrop
   rearMaterial.onBeforeCompile = shader => {
     shader.vertexShader = `varying vec3 vRearWorldPos;\n` + shader.vertexShader
@@ -271,24 +271,26 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
       '#include <color_fragment>',
       `#include <color_fragment>
 float hNorm = clamp((vRearWorldPos.y + 2.8) / 5.6, 0.0, 1.0);
-// Deep actinic navy-indigo at base -> rich reef cobalt mid-water -> luminous aquamarine-violet under top LEDs
-// AQ-86: deepened base/mid so the graded background reads darker deep-blue with depth.
-vec3 cBottom = vec3(0.04, 0.08, 0.19);
-vec3 cMid = vec3(0.10, 0.23, 0.40);
-vec3 cTop = vec3(0.26, 0.48, 0.66);
-vec3 waterCol = mix(cBottom, cMid, smoothstep(0.0, 0.58, hNorm));
-waterCol = mix(waterCol, cTop, smoothstep(0.52, 1.0, hNorm));
+// Deep abyssal navy at base -> rich reef sapphire mid-water -> deep royal cobalt below top LEDs
+// Calibrated in linear space so directional lights do not wash the backdrop pale.
+vec3 cBottom = vec3(0.002, 0.008, 0.026);
+vec3 cMid = vec3(0.006, 0.024, 0.072);
+vec3 cTop = vec3(0.015, 0.056, 0.145);
+vec3 waterCol = mix(cBottom, cMid, smoothstep(0.0, 0.56, hNorm));
+waterCol = mix(waterCol, cTop, smoothstep(0.50, 1.0, hNorm));
 
-// Subtle rear-glass coralline & reef biofilm patina (like the real aquarium back glass in 12.23.52 PM)
+// Natural lateral falloff toward the tank side walls so the central reef & arch pop against deep navy corners
+float sideFalloff = smoothstep(1.5, 8.5, abs(vRearWorldPos.x));
+waterCol *= mix(1.0, 0.38, sideFalloff);
+
+// Subtle rear-glass coralline & reef biofilm patina
 float patinaNoise = 0.5 + 0.28 * sin(vRearWorldPos.x * 1.7 + cos(vRearWorldPos.y * 2.3)) + 0.22 * cos(vRearWorldPos.x * 4.1 - vRearWorldPos.y * 3.7);
-float patinaMask = smoothstep(0.42, 0.82, patinaNoise) * (1.0 - smoothstep(0.65, 0.96, hNorm)) * 0.28;
-vec3 cCorallineGlass = vec3(0.24, 0.16, 0.34);
+float patinaMask = smoothstep(0.42, 0.82, patinaNoise) * (1.0 - smoothstep(0.55, 0.90, hNorm)) * 0.18;
+vec3 cCorallineGlass = vec3(0.018, 0.009, 0.036);
 waterCol = mix(waterCol, cCorallineGlass, patinaMask);
 
-// AQ-86: soften the hard horizontal background/sand seam — the lowest band
-// of the backdrop eases toward the warm aragonite sand tone instead of
-// ending on a hard navy line. No blur, veil, or vignette is involved.
-waterCol = mix(vec3(0.30, 0.27, 0.22), waterCol, smoothstep(0.0, 0.14, hNorm));
+// Deep shadowed rear-sand horizon transition (no bright beige band)
+waterCol = mix(vec3(0.003, 0.009, 0.024), waterCol, smoothstep(0.0, 0.14, hNorm));
 
 diffuseColor.rgb = waterCol;
 `,
@@ -313,7 +315,7 @@ diffuseColor.rgb = waterCol;
       void main() {
         float vertical = 1.0 - vHazeUv.y;
         float edgeFade = smoothstep(0.0, 0.10, vHazeUv.x) * smoothstep(1.0, 0.90, vHazeUv.x);
-        vec3 hazeColor = mix(vec3(0.05, 0.16, 0.30), vec3(0.02, 0.07, 0.16), vertical);
+        vec3 hazeColor = mix(vec3(0.012, 0.048, 0.12), vec3(0.004, 0.016, 0.052), vertical);
         float alpha = uHazeAlpha * (0.45 + 0.55 * vertical) * edgeFade;
         gl_FragColor = vec4(hazeColor, alpha);
       }`,
@@ -364,7 +366,7 @@ diffuseColor.rgb = waterCol;
       ${SHAFT_BEAM_GLSL}
       void main() {
         float depthFromTop = clamp((2.8 - vShaftWorldPos.y) / 5.6, 0.0, 1.0);
-        float depthEnvelope = 1.0 - 0.85 * depthFromTop;
+        float depthEnvelope = pow(1.0 - 0.85 * depthFromTop, 1.55);
         float edgeFade = smoothstep(0.0, 0.06, vShaftUv.x) * smoothstep(1.0, 0.94, vShaftUv.x);
         float shaft = 0.0;
 ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
@@ -373,15 +375,15 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         float reachFade${center === LIGHT_SHAFT_BAND_CENTERS[0] ? 0 : center === LIGHT_SHAFT_BAND_CENTERS[1] ? 1 : 2} = clamp(1.0 - (depthFromTop - ${reach.toFixed(4)}) / ${LIGHT_SHAFT_REACH_FADE_M.toFixed(2)}, 0.0, 1.0);
         shaft += exp(-pow((vShaftWorldPos.x - (${center.toFixed(2)} + (2.8 - vShaftWorldPos.y) * ${LIGHT_SHAFT_SLANT_PER_M.toFixed(2)} + sway${center === LIGHT_SHAFT_BAND_CENTERS[0] ? 0 : center === LIGHT_SHAFT_BAND_CENTERS[1] ? 1 : 2})) / ${LIGHT_SHAFT_BAND_WIDTH_M.toFixed(2)}, 2.0)) * reachFade${center === LIGHT_SHAFT_BAND_CENTERS[0] ? 0 : center === LIGHT_SHAFT_BAND_CENTERS[1] ? 1 : 2};`
 }).join('\n')}
-        // Internal breakup: a slow value-noise layer in the same tilted
-        // coordinate space, so beams are not solid columns.
-        float breakup = 0.75 + 0.25 * shaftValueNoise(vec2(vShaftWorldPos.x * 0.8 + vShaftWorldPos.y * 0.3, uShaftTime * 0.05));
+        // Internal fine curtain rays: vertical ray striations beneath surface ripples
+        float fineCurtain = 0.55 + 0.45 * shaftValueNoise(vec2(vShaftWorldPos.x * 2.4 + uShaftTime * 0.04, vShaftWorldPos.y * 0.25));
+        float breakup = (0.65 + 0.35 * shaftValueNoise(vec2(vShaftWorldPos.x * 0.8 + vShaftWorldPos.y * 0.3, uShaftTime * 0.05))) * fineCurtain;
         // View-angle fade: beams read from the side, not when looking up
         // the beam axis (zoomed-in / looking up), where they would band.
         vec3 shaftViewDir = normalize(vShaftWorldPos - cameraPosition);
         float axisFade = 1.0 - smoothstep(0.75, 0.95, abs(dot(shaftViewDir, uSunDir)));
-        float alpha = min(shaft, 1.0) * depthEnvelope * edgeFade * breakup * axisFade * uShaftAlpha;
-        gl_FragColor = vec4(vec3(0.55, 0.80, 0.95) * alpha, alpha);
+        float alpha = min(shaft, 1.0) * depthEnvelope * edgeFade * breakup * axisFade * uShaftAlpha * 0.68;
+        gl_FragColor = vec4(vec3(0.24, 0.58, 0.92) * alpha, alpha);
       }`,
   })
   const shaftPlane = new THREE.Mesh(new THREE.PlaneGeometry(16, 10), shaftMaterial)
@@ -408,7 +410,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     uTime: { value: 0 },
     uSunDir: { value: new THREE.Vector3(SUN_DIRECTION.x, SUN_DIRECTION.y, SUN_DIRECTION.z) },
   }
-  const waterSurfaceGeometry = new THREE.PlaneGeometry(32, 12, 48, 20)
+  const waterSurfaceGeometry = new THREE.PlaneGeometry(32, 12, 64, 28)
   const waterSurfaceMaterial = new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
@@ -425,7 +427,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         // Local +z maps to world -y under rotation.x = PI/2, so the
         // heightfield displaces local -z to raise the world surface.
         vec3 displaced = position;
-        displaced.z -= surfaceWaveHeight(wp.xz, uTime);
+        displaced.z -= surfaceWaveHeight(wp.xz, uTime) * 1.15;
         vec4 displacedWp = modelMatrix * vec4(displaced, 1.0);
         vSurfaceWorldPos = displacedWp.xyz;
         gl_Position = projectionMatrix * viewMatrix * displacedWp;
@@ -436,62 +438,147 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       varying vec3 vSurfaceWorldPos;
       varying float vSurfaceLocalY;
       ${SURFACE_WAVE_GLSL}
+
+      float surfHash21(vec2 p) {
+        p = fract(p * vec2(123.34, 456.21));
+        p += dot(p, p + 45.32);
+        return fract(p.x * p.y);
+      }
+
+      float surfNoise(vec2 p) {
+        vec2 i = floor(p);
+        vec2 f = fract(p);
+        vec2 u = f * f * (3.0 - 2.0 * f);
+        return mix(
+          mix(surfHash21(i + vec2(0.0, 0.0)), surfHash21(i + vec2(1.0, 0.0)), u.x),
+          mix(surfHash21(i + vec2(0.0, 1.0)), surfHash21(i + vec2(1.0, 1.0)), u.x),
+          u.y
+        );
+      }
+
+      // Evaluates foreshortened oval ripple cells with bright Snell's-window cores and dark TIR rims
+      vec2 ovalRippleLens(vec2 uv, float t) {
+        vec2 i = floor(uv);
+        vec2 f = fract(uv);
+        float d1 = 8.0;
+        float d2 = 8.0;
+        for (int dy = -1; dy <= 1; dy++) {
+          for (int dx = -1; dx <= 1; dx++) {
+            vec2 g = vec2(float(dx), float(dy));
+            float h = surfHash21(i + g);
+            vec2 o = 0.5 + 0.38 * sin(t * 1.15 + 6.28318 * vec2(h, fract(h * 17.3)));
+            vec2 r = g + o - f;
+            // Foreshorten horizontally so each wave cell reads as a crisp horizontal oval lens
+            r.y *= 1.35;
+            float d = length(r);
+            if (d < d1) {
+              d2 = d1;
+              d1 = d;
+            } else if (d < d2) {
+              d2 = d;
+            }
+          }
+        }
+        return vec2(d1, d2 - d1);
+      }
+
       void main() {
         vec2 p = vSurfaceWorldPos.xz;
         vec3 n = surfaceWaveNormal(p, uTime);
         float focus = surfaceWaveFocus(p, uTime);
-        // Ray from camera to surface: its up-component drives the Snell
-        // window (bright looking straight up, ~48 deg critical cone).
-        vec3 rayDir = normalize(vSurfaceWorldPos - cameraPosition);
-        float upness = clamp(rayDir.y, 0.0, 1.0);
-        float snell = smoothstep(0.55, 0.85, upness);
-        // Facets tilted toward the sun go bright blue-white; facets
-        // tilted away go deep blue — the ripple-cell structure.
-        float sunFace = max(dot(n, uSunDir), 0.0);
-        // Tight sun glitter from the key-light direction.
+
+        // Anisotropic horizontal wave coordinates for foreshortened oval meniscus ripples
+        vec2 waveWarp = n.xz * 2.8 + vec2(
+          0.18 * sin(p.y * 3.6 + p.x * 1.4 + uTime * 1.3),
+          0.14 * cos(p.x * 2.9 - p.y * 4.2 - uTime * 1.1)
+        );
+        vec2 ovalCoord1 = vec2(p.x * 1.15, p.y * 3.10) + waveWarp * 0.65;
+        vec2 ovalCoord2 = vec2(p.x * 2.35 - 1.7, p.y * 5.80 + 0.9) - waveWarp * 0.85;
+        vec2 lens1 = ovalRippleLens(ovalCoord1, uTime * 0.65);
+        vec2 lens2 = ovalRippleLens(ovalCoord2, uTime * 0.92 + 3.7);
+
+        // Oval caustic bright centers and dark navy TIR border rings
+        float ovalCore1 = 1.0 - smoothstep(0.06, 0.34, lens1.x);
+        float ovalCore2 = 1.0 - smoothstep(0.05, 0.28, lens2.x);
+        float ovalRing1 = exp(-pow((lens1.x - 0.36) / 0.095, 2.0));
+        float ovalRing2 = exp(-pow((lens2.x - 0.32) / 0.085, 2.0));
+
+        // High-frequency horizontal liquid striations between the oval lenses
+        float ribbonWave = 0.5 + 0.28 * sin(p.x * 4.2 + p.y * 16.5 + n.x * 9.0 + uTime * 1.45)
+                               + 0.22 * cos(p.x * 7.8 - p.y * 24.0 + n.z * 11.0 - uTime * 1.75);
+        float darkCrestRing = clamp(ovalRing1 * 0.75 + ovalRing2 * 0.55 + smoothstep(0.68, 0.92, 1.0 - ribbonWave) * 0.45, 0.0, 1.0);
+
         vec3 viewToCamera = normalize(cameraPosition - vSurfaceWorldPos);
+        float grazing = 1.0 - clamp(abs(viewToCamera.y), 0.0, 1.0);
+        // Fresnel Total Internal Reflection (TIR) weight: strong mirror reflection outside Snell's window
+        float tirWeight = smoothstep(0.42, 0.92, grazing) * (0.65 + 0.35 * sin(p.y * 9.5 + n.z * 6.0));
+
+        // Reflected reef coordinate warped by the undulating underside water normal
+        vec2 refXz = p + n.xz * 3.6 + vec2(sin(p.y * 6.2 + uTime * 1.2) * 0.45, cos(p.x * 3.4 - uTime * 0.9) * 0.30);
+        float rippleBreakup = surfNoise(vec2(refXz.x * 2.2, refXz.y * 6.8 + uTime * 0.35));
+
+        // Spatially mapped Total Internal Reflection (TIR) of the reef below (matching 9.36.15 PM reference):
+        // 1. Royal violet & magenta reflection over the left Peak & right Acropora / coralline rock
+        float violetLeft = exp(-pow((refXz.x + 3.2) / 2.1, 2.0));
+        float violetMidRight = exp(-pow((refXz.x - 1.9) / 1.9, 2.0));
+        float violetFarRight = exp(-pow((refXz.x - 4.1) / 1.6, 2.0));
+        float violetMask = clamp(violetLeft * 0.95 + violetMidRight * 0.78 + violetFarRight * 0.65, 0.0, 1.0)
+          * smoothstep(0.28, 0.76, rippleBreakup);
+
+        // 2. Glowing chartreuse / lime-gold reflection over the Euphyllia torch & hammer colonies
+        float greenLeft = exp(-pow((refXz.x + 1.55) / 1.05, 2.0));
+        float greenRight = exp(-pow((refXz.x - 0.95) / 1.15, 2.0));
+        float greenMask = clamp(greenLeft * 0.92 + greenRight * 0.95, 0.0, 1.0)
+          * smoothstep(0.32, 0.80, surfNoise(vec2(refXz.x * 2.8 + 4.1, refXz.y * 7.5 - uTime * 0.4)));
+
+        // 3. Warm coral-orange / amber reflection over the Montipora plate & Acanthastrea apron
+        float orangeLeft = exp(-pow((refXz.x + 2.25) / 0.95, 2.0));
+        float orangeCenter = exp(-pow((refXz.x + 0.15) / 1.10, 2.0));
+        float orangeMask = clamp(orangeLeft * 0.85 + orangeCenter * 0.72, 0.0, 1.0)
+          * smoothstep(0.36, 0.82, surfNoise(vec2(refXz.x * 3.1 - 2.3, refXz.y * 8.2 + uTime * 0.3)));
+
+        vec3 tirViolet = mix(vec3(0.26, 0.07, 0.44), vec3(0.52, 0.16, 0.46), ribbonWave);
+        vec3 tirGreen = mix(vec3(0.24, 0.48, 0.10), vec3(0.62, 0.66, 0.14), ribbonWave);
+        vec3 tirOrange = mix(vec3(0.48, 0.18, 0.06), vec3(0.68, 0.34, 0.12), ribbonWave);
+
+        vec3 tirReefColor = vec3(0.0);
+        tirReefColor = mix(tirReefColor, tirViolet, violetMask * 0.82);
+        tirReefColor = mix(tirReefColor, tirGreen, greenMask * 0.85);
+        tirReefColor = mix(tirReefColor, tirOrange, orangeMask * 0.72);
+
+        // Deep marine sapphire-cyan base water color + dark navy TIR wave rings
+        vec3 deepNavyRim = vec3(0.002, 0.009, 0.030);
+        vec3 marineCyan = vec3(0.018, 0.115, 0.285);
+        vec3 snellWindowCyan = vec3(0.18, 0.56, 0.88);
+        vec3 causticLensWhite = vec3(0.78, 0.95, 1.00);
+
         vec3 halfVec = normalize(uSunDir + viewToCamera);
-        float glitter = pow(max(dot(n, halfVec), 0.0), 90.0);
-        // Fresnel grazing: looking along the surface toward the rear
-        // junction it goes more reflective/bright — the top of the frame
-        // is the most grazing, which matches the reference's brightest
-        // band at the very top.
-        float grazing = pow(1.0 - upness, 2.0);
-        vec3 deep = vec3(0.02, 0.10, 0.20);
-        vec3 bright = vec3(0.55, 0.80, 1.00);
-        // Look-dev (2026-11-11): the flat Snell term was washing the whole
-        // top band pale — the reference surface is bright CELLS on deep
-        // blue, not a uniform ceiling. Weight the facet term (sunFace)
-        // over the flat Snell term, and keep the alpha restrained so the
-        // deep-blue backdrop still reads through the band.
-        vec3 col = deep
-          + bright * (0.50 * sunFace + 0.28 * snell)
-          + bright * 0.35 * grazing
-          + bright * 0.25 * max(focus, 0.0)
-          + vec3(0.90, 0.97, 1.00) * glitter * 1.2;
-        float cellBright = clamp(0.50 * sunFace + 0.28 * snell + 0.35 * grazing, 0.0, 1.0);
-        float alpha = clamp(0.22 + 0.40 * cellBright, 0.0, 0.85);
-        // Rear-junction fade (visual-check fix, kept): the surface plane
-        // runs to the rear glass (local y -6, world z -7.2, behind the
-        // backdrop at z -5.5), so its visible edge is the hard
-        // surface/backdrop junction at y 2.66. Fade the alpha to zero over
-        // the last metre before that junction — a plain alpha fade, no
-        // fog, veil, vignette, or blur (AQ-39 §1.1, AQ-14.6 AC #3,
-        // AQ-14.2 AC #4).
-        alpha *= smoothstep(-4.3, -3.3, vSurfaceLocalY);
-        // Near-edge fade (look-dev 2026-11-11): the surface plane's near
-        // edge (local y +6, world z 4.8, closest to the camera) projects
-        // as a hard horizontal line ~28% down the overview frame. Fade
-        // the alpha out over the last 1.5 m before it, same plain fade.
-        alpha *= smoothstep(6.0, 4.5, vSurfaceLocalY);
+        float specGlitter = pow(max(dot(n, halfVec), 0.0), 95.0);
+        float snellFocus = clamp(ovalCore1 * 0.72 + ovalCore2 * 0.54 + max(focus, 0.0) * 0.42, 0.0, 1.0);
+        float hotspotCore = pow(snellFocus, 1.85) + specGlitter * 0.85;
+
+        // Combine marine water base, colorful TIR reef reflections, dark navy wave rings, and bright oval Snell lenses
+        vec3 col = mix(marineCyan, tirReefColor + marineCyan * 0.35, tirWeight * 0.88);
+        col = mix(col, deepNavyRim, darkCrestRing * 0.82);
+        col = mix(col, snellWindowCyan, smoothstep(0.18, 0.68, snellFocus) * 0.72);
+        col += causticLensWhite * clamp(hotspotCore, 0.0, 1.15) * 0.78;
+
+        // Subtle rear-glass meniscus water-line seam where the surface meets the back wall
+        float rearMeniscusLine = exp(-pow((vSurfaceLocalY + 2.65) / 0.24, 2.0));
+        col = mix(col, vec3(0.003, 0.014, 0.042), rearMeniscusLine * 0.65);
+
+        float alpha = clamp(0.68 + 0.26 * clamp(snellFocus + darkCrestRing * 0.5 + tirWeight * 0.4, 0.0, 1.0), 0.0, 0.94);
+        // Smoothly feather the rear meniscus edge right behind the upper Acropora tips
+        alpha *= smoothstep(-3.15, -2.35, vSurfaceLocalY);
+        alpha *= smoothstep(2.6, 0.1, vSurfaceLocalY);
         gl_FragColor = vec4(col, alpha);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`,
   })
   const waterSurface = new THREE.Mesh(waterSurfaceGeometry, waterSurfaceMaterial)
-  waterSurface.rotation.x = Math.PI / 2
-  waterSurface.position.set(0, WATER_SURFACE_Y, -1.2)
+  waterSurface.rotation.x = Math.PI / 2 - 0.065
+  waterSurface.position.set(0, 3.24, -1.2)
   waterSurface.raycast = () => {}
   scene.add(waterSurface)
 

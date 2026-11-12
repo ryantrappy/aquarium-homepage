@@ -235,14 +235,14 @@ export const DEPTH_HAZE_END_Z = -4.6
 /** World-space x centres of the three volumetric light-shaft bands at the surface (AQ-86). */
 export const LIGHT_SHAFT_BAND_CENTERS: readonly number[] = Object.freeze([-2.2, 0.2, 2.4])
 /** Gaussian half-width of one shaft band, in metres. */
-export const LIGHT_SHAFT_BAND_WIDTH_M = 0.55
+export const LIGHT_SHAFT_BAND_WIDTH_M = 0.42
 /** How far a shaft band slants sideways per metre of depth (slanting away from the surface). */
-export const LIGHT_SHAFT_SLANT_PER_M = 0.35
+export const LIGHT_SHAFT_SLANT_PER_M = 0.08
 /** Slow lateral sway amplitude of a shaft band, in metres. Now the
  * scale applied to the shared wave-field height sampled at the band
  * root (surface-waves.ts): the bands drift with the surface instead of
  * on an independent 0.05 Hz sine. */
-export const LIGHT_SHAFT_SWAY_AMPLITUDE_M = 4.5
+export const LIGHT_SHAFT_SWAY_AMPLITUDE_M = 2.5
 /** Depth (as a fraction of the 5.6 m water column) over which a shaft
  * band fades out past its per-band reach. */
 export const LIGHT_SHAFT_REACH_FADE_M = 0.35
