@@ -8,6 +8,8 @@ export type FishClipPlayer = Readonly<{
   skinBoneCount: number
   /** Advances the sole full-weight clip, leaving a normalized clean pose for the caller's overlay. */
   advance(dtSeconds: number): void
+  /** Repositions the clip deterministically without retaining a procedural overlay. */
+  seek(timeSeconds: number): void
   /** Stops the action and releases mixer bindings for this root and clip. */
   dispose(): void
 }>
@@ -73,6 +75,21 @@ export function createFishClipPlayer(
         captureCleanPose(bones, cleanPose)
       } catch (error) {
         // Keep the last known clean pose if the mixer emits an invalid quaternion.
+        restoreCleanPose(bones, cleanPose)
+        throw error
+      }
+    },
+
+    seek(timeSeconds: number): void {
+      if (disposed) throw new Error('Cannot seek a disposed fish clip player.')
+      if (!Number.isFinite(timeSeconds) || timeSeconds < 0) {
+        throw new RangeError('Fish clip seek time must be finite and nonnegative.')
+      }
+      restoreCleanPose(bones, cleanPose)
+      try {
+        mixer.setTime(timeSeconds)
+        captureCleanPose(bones, cleanPose)
+      } catch (error) {
         restoreCleanPose(bones, cleanPose)
         throw error
       }

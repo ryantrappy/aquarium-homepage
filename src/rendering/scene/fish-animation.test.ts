@@ -109,6 +109,18 @@ describe('fish animation clean-pose mixer owner', () => {
     player.dispose()
   })
 
+  it('seeks to a deterministic clip time from a clean pose after an overlay', () => {
+    const { root, bones } = makeRig()
+    const tailEnd = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0.7)
+    const player = createFishClipPlayer(root, makeSwimClip())
+    player.advance(0.2)
+    overlay(bones.tail, 0.35)
+    player.seek(0.6)
+    expectQuaternionNear(bones.tail.quaternion, poseAt(new THREE.Quaternion(), tailEnd, 0.6))
+    expect(() => player.seek(-1)).toThrow(/finite and nonnegative/i)
+    player.dispose()
+  })
+
   it('keeps separate mixer clocks and poses for independent fish instances sharing one immutable clip', () => {
     const clip = makeSwimClip()
     const { root: firstRoot, bones: firstBones } = makeRig()

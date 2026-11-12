@@ -10,19 +10,22 @@ import { createAquarium, type AquariumController, type SceneStatus } from './aqu
 import type { FishExtensionConfig, FishExtensionSnapshot } from '../../simulation/fish-extensions'
 
 const state = vi.hoisted(() => ({
-  renderer: undefined as undefined | { scene?: import('three').Scene; loop: ((time: number) => void) | null },
+  renderer: undefined as undefined | { scene?: import('three').Scene; loop: ((time: number) => void) | null; pixelRatio: number; info: { autoReset: boolean; render: { calls: number; triangles: number; points: number; lines: number }; memory: { geometries: number; textures: number }; reset(): void } },
   created: [] as SwimmingFish[], players: [] as FishClipPlayer[], sources: [] as import('three').Group[],
   textures: [] as { texture: import('three').Texture; load?: () => void; error?: (error: unknown) => void }[],
+  deferFishLoads: false, failFishLoads: false, pendingFishLoadReleases: [] as Array<() => void>, resizeCallback: undefined as undefined | (() => void),
+  deferMeshNavigation: false, pendingMeshNavigationReleases: [] as Array<() => void>, meshNavigationResult: undefined as unknown,
   blockedSpawn: false, throwCreateForId: '', beforeCreateFailure: undefined as (() => void) | undefined,
 }))
 vi.mock('three', async importOriginal => {
   const real = await importOriginal<typeof import('three')>()
   class Renderer {
-    shadowMap = { enabled: false, type: 0 }; scene?: THREE.Scene; loop: ((time: number) => void) | null = null
+    shadowMap = { enabled: false, type: 0 }; scene?: THREE.Scene; loop: ((time: number) => void) | null = null; pixelRatio = 1
+    info = { autoReset: true, render: { calls: 0, triangles: 0, points: 0, lines: 0 }, memory: { geometries: 0, textures: 0 }, reset() { this.render = { calls: 0, triangles: 0, points: 0, lines: 0 } } }
     constructor() { state.renderer = this }
-    setPixelRatio() {} setSize() {} dispose() {} forceContextLoss() {}
+    setPixelRatio(value: number) { this.pixelRatio = value } getPixelRatio() { return this.pixelRatio } setSize() {} dispose() {} forceContextLoss() {}
     setAnimationLoop(loop: ((time: number) => void) | null) { this.loop = loop }
-    render(scene: THREE.Scene, camera: THREE.Camera) { this.scene = scene; camera.updateMatrixWorld(true) }
+    render(scene: THREE.Scene, camera: THREE.Camera) { this.scene = scene; camera.updateMatrixWorld(true); if (this.info.autoReset) this.info.reset(); this.info.render.calls++; this.info.render.triangles += 12; this.info.memory.geometries = scene.children.length; this.info.memory.textures = 3 }
   }
   return { ...real, WebGLRenderer: Renderer }
 })
@@ -32,6 +35,8 @@ vi.mock('three/addons/loaders/GLTFLoader.js', async () => {
     async loadAsync(url: string) {
       const root = new T.Group()
       if (url.includes('left-rock') || url.includes('right-rock') || url === 'coral') return { scene: root, animations: [] }
+      if (state.failFishLoads && url.includes('.glb')) throw new Error('Fixture fish asset failure')
+      if (state.deferFishLoads && url.includes('.glb')) await new Promise<void>(resolve => state.pendingFishLoadReleases.push(resolve))
       const bone = new T.Bone(); bone.name = 'spine_0'; root.add(bone)
       const geometry = new T.BufferGeometry()
       geometry.setAttribute('position', new T.Float32BufferAttribute([-.2, 0, 0, .2, 0, 0, 0, .2, 0], 3))
@@ -51,6 +56,17 @@ vi.mock('./reef-assembly', () => ({
   DEFAULT_LEFT_ISLAND_MOUNTS: [], DEFAULT_RIGHT_ISLAND_MOUNTS: [],
   assembleCoralsOnRockSockets: () => ({ update() {} }), instantiateModularReefHabitat: () => ({ obstacles: [], anchors: [] }),
 }))
+vi.mock('./reef-mesh-navigation', async importOriginal => {
+  const real = await importOriginal<typeof import('./reef-mesh-navigation')>()
+  return {
+    ...real,
+    createReefMeshNavigation: (...args: Parameters<typeof real.createReefMeshNavigation>) => state.deferMeshNavigation
+      ? new Promise<Awaited<ReturnType<typeof real.createReefMeshNavigation>>>(resolve => {
+          state.pendingMeshNavigationReleases.push(() => resolve(state.meshNavigationResult as Awaited<ReturnType<typeof real.createReefMeshNavigation>>))
+        })
+      : real.createReefMeshNavigation(...args),
+  }
+})
 vi.mock('./motion', async importOriginal => {
   const real = await importOriginal<typeof import('./motion')>()
   return { ...real, createSwimmingFish: (...args: Parameters<typeof real.createSwimmingFish>) => {
@@ -115,19 +131,147 @@ function spriteAlphaAt(texture: THREE.DataTexture, fx: number, fy: number): numb
 
 beforeEach(() => {
   state.created = []; state.players = []; state.sources = []; state.textures = []; state.blockedSpawn = false; state.throwCreateForId = ''; state.beforeCreateFailure = undefined
+  state.deferFishLoads = false; state.failFishLoads = false; state.pendingFishLoadReleases = []; state.resizeCallback = undefined
+  state.deferMeshNavigation = false; state.pendingMeshNavigationReleases = []; state.meshNavigationResult = undefined
   vi.stubGlobal('devicePixelRatio', 1)
-  vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} })
+  vi.stubGlobal('ResizeObserver', class { constructor(callback: () => void) { state.resizeCallback = callback } observe() {} disconnect() {} })
   vi.spyOn(document, 'hidden', 'get').mockReturnValue(false)
   vi.spyOn(THREE.TextureLoader.prototype, 'load').mockImplementation((_url, _loaded, _progress, error) => {
     const texture = new THREE.Texture(document.createElement('img')); vi.spyOn(texture, 'dispose'); state.textures.push({ texture, load: () => _loaded?.(texture), error }); return texture
   })
   vi.spyOn(console, 'warn').mockImplementation(() => {}); vi.spyOn(console, 'error').mockImplementation(() => {})
-  host = document.createElement('div'); Object.defineProperties(host, { clientWidth: { value: 1440 }, clientHeight: { value: 900 } })
+  host = document.createElement('div'); Object.defineProperties(host, { clientWidth: { configurable: true, value: 1440 }, clientHeight: { configurable: true, value: 900 } })
   host.innerHTML = '<canvas></canvas><div></div>'; overlay = host.querySelector('div')!; document.body.append(host); status = vi.fn()
 })
-afterEach(() => { controller?.dispose(); host.remove(); vi.restoreAllMocks(); vi.unstubAllGlobals() })
+afterEach(() => { controller?.dispose(); delete window.__AQUARIUM_LOOKDEV__; window.history.replaceState({}, '', '/'); host.remove(); vi.restoreAllMocks(); vi.unstubAllGlobals() })
 
 describe('actual aquarium controller inhabitant lifecycle without WebGL', () => {
+  it('freezes a DEV look-dev scene at the configured seed/time and resets stats after preset, subject, and time changes', async () => {
+    window.history.replaceState({}, '', '/?lookdev=1&seed=43&time=7.25&preset=fish-macro&subject=capture&labels=off')
+    await start([service('capture')])
+    const bridge = window.__AQUARIUM_LOOKDEV__!
+    const ready = await bridge.ready()
+    expect(ready.ready).toBe(true)
+    expect(ready.seed).toBe(43)
+    expect(ready.timeSeconds).toBe(7.25)
+    expect(ready.preset).toBe('fish-macro')
+    expect(ready.viewport).toMatchObject({ width: 1440, height: 900, devicePixelRatio: 1 })
+    expect(ready.renderer.render.calls).toBeGreaterThan(0)
+    expect(overlay.querySelector('.fish-name')?.getAttribute('style')).toContain('visibility: hidden')
+
+    const fish = state.created[0]!
+    const startPosition = { ...fish.position }
+    const startBone = meshFor('capture').skeleton.bones[0]!.quaternion.clone()
+    expect(fish.yaw).toBeCloseTo(Math.PI / 2)
+    advance()
+    expect(fish.position).toEqual(startPosition)
+    expect(fish.yaw).toBeCloseTo(Math.PI / 2)
+
+    expect(bridge.setTime(0.6)).toBe(true)
+    expect(bridge.state().ready).toBe(true)
+    expect(bridge.state().timing.rafInterval).toBeNull()
+    expect(meshFor('capture').skeleton.bones[0]!.quaternion.angleTo(startBone)).toBeGreaterThan(0.01)
+    const fishMacro = controller.getCameraZoom()
+    expect(bridge.setPreset('coral-macro').preset).toBe('coral-macro')
+    expect(controller.getCameraZoom().targetX).not.toBe(fishMacro.targetX)
+    expect(bridge.state().timing.rafInterval).toBeNull()
+    expect(bridge.setSubject('missing')).toBe(false)
+    expect(bridge.setSubject(undefined)).toBe(true)
+    expect(bridge.state().timing.rafInterval).toBeNull()
+    expect(bridge.setPreset('rock-sand-contact').preset).toBe('rock-sand-contact')
+    expect(bridge.setTime(Number.NaN)).toBe(false)
+    Object.defineProperty(host, 'clientWidth', { configurable: true, value: 402 })
+    Object.defineProperty(host, 'clientHeight', { configurable: true, value: 874 })
+    state.resizeCallback?.()
+    expect(bridge.state().viewport).toMatchObject({ width: 402, height: 874, devicePixelRatio: 1 })
+    await bridge.ready()
+    expect(bridge.state().ready).toBe(true)
+    expect(bridge.state().timing.rafInterval).toBeNull()
+    const frozen = bridge.renderFrozen()
+    expect(frozen.timing.frozenPoseRenderCall?.sampleCount).toBe(1)
+
+    const canvas = host.querySelector('canvas')!
+    canvas.dispatchEvent(new Event('webglcontextlost', { cancelable: true }))
+    expect(bridge.state().ready).toBe(false)
+    expect(state.renderer!.loop).toBeNull()
+    const restoredReady = bridge.ready()
+    canvas.dispatchEvent(new Event('webglcontextrestored'))
+    expect((await restoredReady).ready).toBe(true)
+  })
+
+  it('does not resolve look-dev readiness until queued fish assets finish and are integrated', async () => {
+    state.deferFishLoads = true
+    window.history.replaceState({}, '', '/?lookdev=1&seed=11')
+    anchors([service('pending')])
+    controller = createAquarium(host.querySelector('canvas')!, overlay, [service('pending')], false, status)
+    const bridge = window.__AQUARIUM_LOOKDEV__!
+    const readyPromise = bridge.ready()
+    await vi.waitFor(() => expect(state.pendingFishLoadReleases.length).toBeGreaterThan(0))
+    expect(bridge.state().ready).toBe(false)
+    expect(bridge.state().pendingAssetCount).toBeGreaterThan(0)
+    for (const release of state.pendingFishLoadReleases.splice(0)) release()
+    await vi.waitFor(() => expect(status).toHaveBeenLastCalledWith('ready'))
+    expect((await readyPromise).ready).toBe(true)
+    expect(bridge.state().pendingAssetCount).toBe(0)
+    expect(bridge.state().unresolvedFishIds).toEqual([])
+  })
+
+  it('waits for current mesh navigation before resolving readiness and freezes the post-relocation pose', async () => {
+    state.deferMeshNavigation = true
+    window.history.replaceState({}, '', '/?lookdev=1&seed=17')
+    await start([service('nav-pending')])
+    const bridge = window.__AQUARIUM_LOOKDEV__!
+    const initial = { ...state.created[0]!.position }
+    let readyResolved = false
+    const readyPromise = bridge.ready().then(snapshot => { readyResolved = true; return snapshot })
+    await vi.waitFor(() => expect(state.pendingMeshNavigationReleases).toHaveLength(1))
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(readyResolved).toBe(false)
+    expect(bridge.state().ready).toBe(false)
+
+    const blockedInitialPoint = (point: { x: number; y: number; z: number }) =>
+      point.x === initial.x && point.y === initial.y && point.z === initial.z
+    state.meshNavigationResult = {
+      status: 'ready',
+      meshNavigation: {
+        units: 'meter', spacingM: 0.5,
+        budget: { maxLatticeNodes: 4096, maxExpandedNodes: 4096, maxCollisionQueries: 50000, maxNodeVisits: 250000, maxTriangleTests: 2000000 },
+        movementBudget: { maxNodeVisits: 4096, maxTriangleTests: 8192 },
+        queryCapsule: (start: { x: number; y: number; z: number }) => ({
+          status: blockedInitialPoint(start) ? 'blocked' : 'clear',
+          work: { nodeVisits: 0, triangleTests: 0 },
+        }),
+      },
+      diagnostics: { islands: [], buildMs: 0 },
+    } satisfies import('./reef-mesh-navigation').ReefMeshNavigationResult
+    state.pendingMeshNavigationReleases.shift()?.()
+    const snapshot = await readyPromise
+    expect(snapshot.ready).toBe(true)
+    const settledPose = { ...state.created[0]!.position }
+    expect(settledPose).not.toEqual(initial)
+    expect(bridge.state().ready).toBe(true)
+    advance()
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(state.created[0]!.position).toEqual(settledPose)
+  })
+
+  it('blocks on a failed current thumbnail texture and clears that failure when its inhabitant retires', async () => {
+    state.failFishLoads = true
+    window.history.replaceState({}, '', '/?lookdev=1')
+    await start([service('texture-failure')])
+    const bridge = window.__AQUARIUM_LOOKDEV__!
+    await vi.waitFor(() => expect(state.textures.length).toBeGreaterThan(0))
+    const texture = state.textures[0]!
+    expect(bridge.state().ready).toBe(false)
+    const waiting = bridge.ready()
+    texture.error?.(new Error('Fixture texture failure'))
+    await expect(waiting).rejects.toThrow(/thumbnail texture failed/i)
+    expect(bridge.state().failedAssets.some(key => key.startsWith('thumbnail:'))).toBe(true)
+    update([])
+    await vi.waitFor(() => expect(bridge.state().ready).toBe(true))
+    expect(bridge.state().failedAssets.some(key => key.startsWith('thumbnail:'))).toBe(false)
+  })
+
   it('preserves live roots, motion, routes and clip phase through name/URL edits and reorder', async () => {
     await start()
     const initialPosition = { ...state.created[0].position }, initialQuaternion = meshFor('first').skeleton.bones[0].quaternion.toArray()

@@ -68,6 +68,16 @@ import {
   type CameraZoomState,
   type FocalAreaId,
 } from './camera-zoom'
+import {
+  LOOKDEV_PRESETS,
+  lookDevCameraState,
+  resolveLookDevConfig,
+  summarizeLookDevAssetBytes,
+  summarizeLookDevTiming,
+  type LookDevBridge,
+  type LookDevCaptureSnapshot,
+  type LookDevPreset,
+} from './lookdev'
 
 const modelUrls: Record<string, string> = {
   'ocellaris-clownfish': new URL('../assets/fish/download_testing_copies/clownfish-copy.glb', import.meta.url).href,
@@ -102,6 +112,7 @@ const modelUrls: Record<string, string> = {
 }
 export type SceneStatus = 'loading' | 'ready' | 'failed'
 export type AquariumController = { update(services: ServiceConfig[], paused: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void; zoomIn(): boolean; zoomOut(): boolean; zoomToFocalArea(id: FocalAreaId): boolean; resetZoom(): boolean; isZoomed(): boolean; getCameraZoom(): CameraZoomState; focusServiceFish?(id: string): boolean; getFocusedServiceId?(): string | undefined }
+declare global { interface Window { __AQUARIUM_LOOKDEV__?: LookDevBridge } }
 type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; flex?: FishFlexBinding; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean; schoolmate: boolean; lod: FishLod; lodModel?: THREE.Object3D }
 
 function disposeTree(root: THREE.Object3D) {
@@ -120,8 +131,9 @@ function disposeTree(root: THREE.Object3D) {
 }
 
 export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, initialServices: ServiceConfig[], initialPaused: boolean, status: (status: SceneStatus) => void, focusFallback: () => HTMLElement | null = () => null, fishExtensions: FishExtensionConfig = EMPTY_FISH_EXTENSIONS, onFrameRate?: (sample: FrameRateSample | null) => void): AquariumController {
+  const lookDevConfig = import.meta.env.DEV ? resolveLookDevConfig(window.location.search, true) : undefined
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' })
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5))
+  renderer.setPixelRatio(lookDevConfig ? 1 : Math.min(devicePixelRatio, 1.5))
   renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.toneMapping = THREE.ACESFilmicToneMapping
   renderer.toneMappingExposure = 0.80
@@ -672,7 +684,170 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   const loadedAssets = new Set<GLTF>()
   let habitat: WaterHabitat = { bounds: { min: { x: -4, y: -2.25, z: -4.6 }, max: { x: 4, y: 2.8, z: 2.8 } }, obstacles: [], anchors: [] }
   let width = 1, height = 1, labelClock = 0, spawnUnavailable = false
+  let lookDevPreset: LookDevPreset = lookDevConfig?.preset ?? 'full-scene'
+  let lookDevTimeSeconds = lookDevConfig?.timeSeconds ?? 0
+  let lookDevSubjectId = lookDevConfig?.subjectId
+  let lookDevTextureRequestId = 0
+  let lookDevReady = false, lookDevContextLost = false, lookDevFailure: string | undefined
+  const lookDevCurrentAssets = new Set<string>(), lookDevPendingAssets = new Set<string>(), lookDevFailedAssets = new Set<string>()
+  const lookDevRafSamples: number[] = [], lookDevCpuRenderSamples: number[] = [], lookDevFrozenRenderSamples: number[] = []
+  let lookDevLastRafTime: number | undefined
+  let lookDevCaptureRequested = false
+  const lookDevReadyWaiters = new Set<{ resolve: (value: LookDevCaptureSnapshot) => void; reject: (reason: Error) => void }>()
+  const lookDevWindowFrames = 120
+  const lookDevResetTiming = () => {
+    lookDevRafSamples.length = 0
+    lookDevCpuRenderSamples.length = 0
+    lookDevFrozenRenderSamples.length = 0
+    lookDevLastRafTime = undefined
+  }
+  const recordLookDevSample = (target: number[], value: number) => {
+    if (!Number.isFinite(value) || value < 0) return
+    target.push(value)
+    if (target.length > lookDevWindowFrames) target.shift()
+  }
+  function lookDevSnapshot(): LookDevCaptureSnapshot {
+    const performanceEntries = performance.getEntriesByType('resource') as PerformanceResourceTiming[]
+    const rendererInfo = renderer.info
+    const buildEnv = import.meta.env as ImportMetaEnv & { VITE_GIT_COMMIT?: string }
+    const unresolvedFishIds = [...new Set([...fish, ...schoolmates]
+      .filter(item => item.fallback && modelBases.has(item.service.fishId))
+      .map(item => item.service.fishId))].sort()
+    const failedTextures = [...lookDevFailedAssets].filter(key => key.startsWith('thumbnail:'))
+    const currentFailure = lookDevFailure
+      ?? (spawnUnavailable ? 'Fish spawn is unavailable for this viewport and service layout.' : undefined)
+      ?? (failedTextures.length ? `Current fish thumbnail texture failed: ${failedTextures.join(', ')}` : undefined)
+      ?? (unresolvedFishIds.length ? `Loaded fish models still have thumbnail-only inhabitants: ${unresolvedFishIds.join(', ')}.` : undefined)
+    return {
+      ready: lookDevReady && !lookDevContextLost && !document.hidden && !currentFailure && loaded
+        && meshNavigationSettledGeneration === meshNavigationGeneration
+        && lookDevPendingAssets.size === 0 && lazyQueue.length === 0
+        && failedTextures.length === 0 && unresolvedFishIds.length === 0,
+      ...(currentFailure === undefined ? {} : { failure: currentFailure }),
+      pendingAssetCount: lookDevPendingAssets.size + lazyQueue.length,
+      failedAssets: [...lookDevFailedAssets].sort(),
+      unresolvedFishIds,
+      commit: buildEnv.VITE_GIT_COMMIT ?? null,
+      viewport: { width, height, devicePixelRatio: renderer.getPixelRatio() },
+      preset: lookDevPreset,
+      seed: lookDevConfig?.seed ?? 0,
+      timeSeconds: lookDevTimeSeconds,
+      ...(lookDevSubjectId === undefined ? {} : { subjectId: lookDevSubjectId }),
+      labelsVisible: lookDevConfig?.labelsVisible ?? true,
+      renderer: {
+        render: { calls: rendererInfo.render.calls, triangles: rendererInfo.render.triangles, points: rendererInfo.render.points, lines: rendererInfo.render.lines },
+        memory: { geometries: rendererInfo.memory.geometries, textures: rendererInfo.memory.textures },
+      },
+      timing: {
+        rafInterval: summarizeLookDevTiming(lookDevRafSamples) ?? null,
+        cpuRenderCall: summarizeLookDevTiming(lookDevCpuRenderSamples) ?? null,
+        frozenPoseRenderCall: summarizeLookDevTiming(lookDevFrozenRenderSamples) ?? null,
+        windowFrames: lookDevWindowFrames,
+      },
+      assets: summarizeLookDevAssetBytes(performanceEntries.map(entry => ({
+        name: entry.name,
+        encodedBodySize: entry.encodedBodySize,
+        transferSize: entry.transferSize,
+      }))),
+    }
+  }
+  function waitForLookDevReady(): Promise<LookDevCaptureSnapshot> {
+    const snapshot = lookDevSnapshot()
+    if (snapshot.ready) return Promise.resolve(snapshot)
+    if (snapshot.failure) return Promise.reject(new Error(snapshot.failure))
+    return new Promise((resolve, reject) => lookDevReadyWaiters.add({ resolve, reject }))
+  }
+  function rejectLookDevWaiters(error: Error) {
+    lookDevReadyWaiters.forEach(waiter => waiter.reject(error))
+    lookDevReadyWaiters.clear()
+  }
+  function failLookDevCapture(reason: string) {
+    if (!lookDevConfig || lookDevFailure) return
+    lookDevFailure = reason
+    rejectLookDevWaiters(new Error(reason))
+  }
+  function lookDevCameraTarget() {
+    const target = lookDevSubjectId ? fish.find(item => item.service.id === lookDevSubjectId) : undefined
+    const position = target?.motion.position
+    return clampCameraZoomState(lookDevCameraState(lookDevPreset, position))
+  }
+  function applyLookDevCamera() {
+    if (!lookDevConfig) return
+    focusedServiceId = undefined
+    cameraZoomDesired = lookDevCameraTarget()
+    cameraZoomCurrent = { ...cameraZoomDesired }
+    applyCameraZoom()
+  }
+  function applyLookDevPresentation() {
+    if (!lookDevConfig) return
+    for (const item of [...fish, ...schoolmates]) {
+      item.motion.yaw = Math.PI / 2
+      item.motion.pitch = 0
+      item.motion.bank = 0
+      item.motion.speed = 0
+      item.root.position.set(item.motion.position.x, item.motion.position.y, item.motion.position.z)
+      if (item.fallback) item.root.scale.x = 1
+      else item.root.rotation.set(0, Math.PI / 2, 0, 'YXZ')
+      item.root.updateMatrix()
+      item.root.updateMatrixWorld()
+      if (item.anchor) {
+        const label = item.anchor.querySelector('.fish-name') as HTMLElement | null
+        if (label) label.style.visibility = lookDevConfig.labelsVisible ? '' : 'hidden'
+      }
+    }
+  }
+  function settleLookDevReadiness() {
+    if (!lookDevConfig || lookDevReady || lookDevContextLost || lookDevFailure || disposed) return
+    if (document.hidden) return
+    if (spawnUnavailable) {
+      rejectLookDevWaiters(new Error('Fish spawn is unavailable for this viewport and service layout.'))
+      return
+    }
+    if (meshNavigationSettledGeneration !== meshNavigationGeneration) return
+    if (!loaded || lookDevPendingAssets.size > 0 || lazyQueue.length > 0 || lazyActiveLoads > 0) return
+    const failedTextures = [...lookDevFailedAssets].filter(key => key.startsWith('thumbnail:'))
+    if (failedTextures.length > 0) {
+      rejectLookDevWaiters(new Error(`Current fish thumbnail texture failed: ${failedTextures.join(', ')}`))
+      return
+    }
+    if (lookDevSubjectId && !fish.some(item => item.service.id === lookDevSubjectId)) {
+      rejectLookDevWaiters(new Error(`Look-dev subject "${lookDevSubjectId}" is not a configured service id.`))
+      return
+    }
+    const unresolved = lookDevSnapshot().unresolvedFishIds
+    if (unresolved.length > 0) {
+      rejectLookDevWaiters(new Error(`Loaded fish models still have thumbnail-only inhabitants: ${unresolved.join(', ')}.`))
+      return
+    }
+    lookDevResetTiming()
+    applyLookDevPresentation()
+    applyLookDevCamera()
+    lookDevReady = true
+    try { render(0, true) }
+    catch (error) {
+      lookDevReady = false
+      failLookDevCapture(`Frozen render failed: ${String(error)}`)
+      return
+    }
+    const snapshot = lookDevSnapshot()
+    lookDevReadyWaiters.forEach(waiter => waiter.resolve(snapshot))
+    lookDevReadyWaiters.clear()
+  }
+  function beginLookDevAsset(key: string) {
+    if (!lookDevConfig) return
+    lookDevCurrentAssets.add(key)
+    lookDevPendingAssets.add(key)
+    lookDevReady = false
+    lookDevResetTiming()
+  }
+  function finishLookDevAsset(key: string, failedAsset = false) {
+    if (!lookDevConfig || !lookDevCurrentAssets.has(key)) return
+    lookDevPendingAssets.delete(key)
+    if (failedAsset) lookDevFailedAssets.add(key)
+    settleLookDevReadiness()
+  }
   let meshNavigationGeneration = 0
+  let meshNavigationSettledGeneration = 0
   const clock = createFrameClock()
   // AQ-76 runtime quality: global simulation-step counter for the LOD1
   // half-rate clip cadence, and the adaptive tier controller + active tier.
@@ -770,11 +945,19 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     // generation is still current. Until it lands, fish keep AABB routing.
     meshNavigationGeneration++
     const generation = meshNavigationGeneration
+    if (lookDevConfig) {
+      lookDevReady = false
+      lookDevResetTiming()
+    }
     habitat.meshNavigation = undefined
     particleBuffersDirty = true
     reefs.forEach(reef => { scene.remove(reef) }); reefs.length = 0; hitMeshes.length = 0; reefMeshes.length = 0; fishMeshes.length = 0
     reefControllers = []; habitat.obstacles = []; habitat.anchors = []
-    if (!rockIslandLeftBase || !rockIslandRightBase || coralTemplates.size === 0) return
+    if (!rockIslandLeftBase || !rockIslandRightBase || coralTemplates.size === 0) {
+      meshNavigationSettledGeneration = generation
+      settleLookDevReadiness()
+      return
+    }
     const reducedMotion = Boolean(reducedMotionQuery?.matches)
     const placements = width < 600
       ? [
@@ -917,11 +1100,27 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       } else {
         console.warn('Mesh navigation unavailable; staying on AABB routing', result.reason, result.diagnostics)
       }
+      meshNavigationSettledGeneration = generation
+      settleLookDevReadiness()
     }).catch(error => {
-      if (!disposed && generation === meshNavigationGeneration) console.warn('Mesh navigation build failed; staying on AABB routing', error)
+      if (disposed || generation !== meshNavigationGeneration) return
+      console.warn('Mesh navigation build failed; staying on AABB routing', error)
+      meshNavigationSettledGeneration = generation
+      settleLookDevReadiness()
     })
   }
+  function retireLookDevTextures(serviceId: string) {
+    if (lookDevConfig) {
+      const prefix = `thumbnail:${serviceId}:`
+      for (const key of [...lookDevCurrentAssets]) if (key.startsWith(prefix)) {
+        lookDevCurrentAssets.delete(key)
+        lookDevPendingAssets.delete(key)
+        lookDevFailedAssets.delete(key)
+      }
+    }
+  }
   function disposeInhabitant(item: Inhabitant) {
+    retireLookDevTextures(item.service.id)
     try { item.motion.extensions.dispose() } catch (error) { console.error('Fish extension cleanup failed', error) }
     item.flex?.dispose(); item.flex = undefined
     scene.remove(item.root); item.clipPlayer?.dispose()
@@ -946,10 +1145,16 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     // The player restores the clean clip pose before every turning overlay.
     if (base.animations.length === 1) {
       try {
-        item.clipPlayer = createFishClipPlayer(model, base.animations[0], (seedForId(item.service.id) % 1500) / 1000)
+        const clip = base.animations[0]!
+        const initialClipTime = lookDevConfig
+          ? (clip.duration > 0 ? lookDevTimeSeconds % clip.duration : 0)
+          : (seedForId(item.service.id) % 1500) / 1000
+        item.clipPlayer = createFishClipPlayer(model, clip, initialClipTime)
         item.turningRig = bindFishTurningRig(model, item.service.fishId)
         try {
-          item.flex = bindFishFlexToModel(model, item.service.fishId, seedForId(item.service.id))
+          const flexSeed = lookDevConfig ? `${lookDevConfig.seed}:${item.service.id}` : item.service.id
+          item.flex = bindFishFlexToModel(model, item.service.fishId, seedForId(flexSeed))
+          if (lookDevConfig) item.flex?.seek(lookDevTimeSeconds)
         } catch (error) {
           console.warn('Fish body flex unavailable; retaining bone-only animation', item.service.fishId, error)
         }
@@ -979,11 +1184,14 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   function buildSprite(item: Inhabitant) {
     const species = getFishById(item.service.fishId)!
     const spriteScale = fishSpriteScale(item.service.fishId)
+    const textureKey = `thumbnail:${item.service.id}:${++lookDevTextureRequestId}`
+    beginLookDevAsset(textureKey)
     // No-fit fallback retains old resources, but callbacks for a removed or
     // replaced service must not rewrite its React-owned current native link.
     const acceptsArtworkCallback = () => !disposed && !failed && ownedSprites.has(sprite)
       && (item.schoolmate || services.some(next => next.id === item.service.id && next.fishId === item.service.fishId))
     const texture = new THREE.TextureLoader().load(species.thumbnail, loadedTexture => {
+      finishLookDevAsset(textureKey)
       if (!acceptsArtworkCallback()) return
       const image = loadedTexture.image as HTMLImageElement
       const imageWidth = image.naturalWidth, imageHeight = image.naturalHeight
@@ -994,6 +1202,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       catch (error) { console.warn('Fish artwork alpha unavailable', error) }
       if (!document.hidden) render(0, true)
     }, undefined, error => {
+      finishLookDevAsset(textureKey, true)
       if (!acceptsArtworkCallback()) return
       item.artworkUnavailable = true
       handleArtworkTextureFailure(sprite, texture, hitMeshes, spriteMasks, item.anchor)
@@ -1018,6 +1227,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     const sprite = item.artwork
     try {
       if (sprite) {
+        retireLookDevTextures(item.service.id)
         item.root.remove(sprite)
         ownedSprites.delete(sprite); spriteMasks.delete(sprite); disposeTree(sprite)
         item.artwork = undefined
@@ -1125,7 +1335,11 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     const anchors = new Map(Array.from(overlay.querySelectorAll<HTMLAnchorElement>('a[data-service-id]')).map(anchor => [anchor.dataset.serviceId!, anchor]))
     const current = new Map(fish.map(item => [item.service.id, item]))
     const nextServices = services.filter(service => getFishById(service.fishId))
-    const horizontalOrder = [...nextServices].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : a.fishId < b.fishId ? -1 : a.fishId > b.fishId ? 1 : 0)
+    const spawnOrderKey = (id: string) => lookDevConfig ? `${lookDevConfig.seed}:${id}` : id
+    const horizontalOrder = [...nextServices].sort((a, b) => {
+      const aKey = spawnOrderKey(a.id), bKey = spawnOrderKey(b.id)
+      return aKey < bKey ? -1 : aKey > bKey ? 1 : a.fishId < b.fishId ? -1 : a.fishId > b.fishId ? 1 : 0
+    })
     const horizontalSlots = new Map(horizontalOrder.map((service, index) => [service.id, { index, count: horizontalOrder.length }]))
     const spawns = new Map<string, FishSpawn>()
     const occupied: Array<{ position: SwimmingFish['position']; clearance: number; bodyRadiusM?: number }> = nextServices.flatMap(next => {
@@ -1152,7 +1366,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       if (previous?.service.fishId === service.fishId) continue
       const species = getFishById(service.fishId)!
       const clearance = fishClearanceRadius(service.fishId)
-      const preference = fishSpawnPreference(service.id, service.fishId, habitat.bounds, clearance, horizontalSlots.get(service.id))
+      const preference = fishSpawnPreference(spawnOrderKey(service.id), service.fishId, habitat.bounds, clearance, horizontalSlots.get(service.id))
       const position = preference && findSafeFishSpawn(preference.position, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(service.fishId))
       if (!position || !preference) {
         // Keep existing instances intact during the truthful full-native fallback.
@@ -1265,6 +1479,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   function render(steps: number, forceLabels = false) {
     const habitatStopped = paused || document.hidden
     const reducedMotion = Boolean(reducedMotionQuery?.matches)
+    if (lookDevConfig) applyLookDevPresentation()
     // Camera zoom (AQ-62 AC #1/#5): damp toward the desired state while the
     // scene is running; snap instantly on reduced motion or while paused /
     // hidden, so zoom still responds with no animation loop. A single
@@ -1284,10 +1499,13 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     if (!habitatStopped && !reducedMotion && steps > 0) {
       coralElapsedSec = (coralElapsedSec + steps * SIMULATION_STEP_SECONDS) % 3600
     }
-    const effectiveEnvTime = habitatStopped || reducedMotion ? 0 : coralElapsedSec
+    const sceneTime = lookDevConfig ? lookDevTimeSeconds : coralElapsedSec
+    const environmentStopped = lookDevConfig ? false : habitatStopped
+    const environmentReducedMotion = lookDevConfig ? false : reducedMotion
+    const effectiveEnvTime = lookDevConfig ? sceneTime : habitatStopped || reducedMotion ? 0 : sceneTime
     // AQ-73: the aragonite bed owns its sand time; its caustic network
     // freezes at its last phase on pause / reduced-motion / hidden.
-    sandBed.update(coralElapsedSec, habitatStopped, reducedMotion)
+    sandBed.update(sceneTime, environmentStopped, environmentReducedMotion)
     // AQ-86: the shaft sway freezes at its t=0 phase with everything else.
     shaftUniforms.uShaftTime.value = effectiveEnvTime
     // AQ-96: the water surface time freezes at 0 with everything else.
@@ -1300,10 +1518,10 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     shaftPlane.visible = shaftMode !== 'raymarch'
     shaftUniforms.uShaftAlpha.value =
       shaftMode === 'reduced' ? optics.lightShaftMaxAlpha * 0.5 : optics.lightShaftMaxAlpha
-    causticLightController.update(coralElapsedSec, habitatStopped, reducedMotion)
+    causticLightController.update(sceneTime, environmentStopped, environmentReducedMotion)
     // The caustic texture time freezes at 0 on pause / reduced-motion,
     // exactly like the scalar shimmer above.
-    caustics.update(coralElapsedSec, habitatStopped, reducedMotion)
+    caustics.update(sceneTime, environmentStopped, environmentReducedMotion)
 
     // Update depth-graded water-column motes (AQ-43 AC #2 as amended):
     // foreground motes stay in the fish volume, background motes behind it.
@@ -1314,9 +1532,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     const uploadParticles = motesMoving || particleBuffersDirty
     if (uploadParticles) {
       for (let i = 0; i < foregroundParticleCount; i++) {
-        const pt = evaluateSuspendedParticlePosition(i, habitat.bounds, coralElapsedSec, {
-          paused: habitatStopped,
-          reducedMotion,
+        const pt = evaluateSuspendedParticlePosition(i, habitat.bounds, sceneTime, {
+          paused: environmentStopped,
+          reducedMotion: environmentReducedMotion,
           zBand: { min: -1.5, max: 2.8 },
         })
         foregroundParticlePositions[i * 3] = pt.x
@@ -1325,9 +1543,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       }
       foregroundParticlePositionAttr.needsUpdate = true
       for (let i = 0; i < backgroundParticleCount; i++) {
-        const pt = evaluateSuspendedParticlePosition(foregroundParticleCount + i, habitat.bounds, coralElapsedSec, {
-          paused: habitatStopped,
-          reducedMotion,
+        const pt = evaluateSuspendedParticlePosition(foregroundParticleCount + i, habitat.bounds, sceneTime, {
+          paused: environmentStopped,
+          reducedMotion: environmentReducedMotion,
           zBand: { min: -4.6, max: -1.5 },
         })
         backgroundParticlePositions[i * 3] = pt.x
@@ -1342,9 +1560,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       for (let i = 0; i < DEFAULT_AQUARIUM_OPTICS_CONFIG.maxBubbles; i++) {
         const streamIndex = i < bubblesPerStream ? 0 : 1
         const emitter = bubbleEmitters[streamIndex] ?? bubbleEmitters[0] ?? { x: 0, y: DEFAULT_AQUARIUM_OPTICS_CONFIG.bubbleEmitterBaseY, z: 0 }
-        const bubble = evaluateBubblePosition(i, emitter, habitat.bounds, coralElapsedSec, {
-          paused: habitatStopped,
-          reducedMotion,
+        const bubble = evaluateBubblePosition(i, emitter, habitat.bounds, sceneTime, {
+          paused: environmentStopped,
+          reducedMotion: environmentReducedMotion,
         })
         bubblePositions[i * 3] = bubble.x
         bubblePositions[i * 3 + 1] = bubble.y
@@ -1355,7 +1573,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     }
 
     for (const controller of reefControllers) {
-      controller.update(coralElapsedSec, habitatStopped, reducedMotion)
+      controller.update(sceneTime, environmentStopped, environmentReducedMotion)
     }
     for (let step = 0; step < steps; step++) {
       // School steering needs one pre-move peer snapshot per frame (AQ-41),
@@ -1429,6 +1647,10 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     // Construction is lazy and failure is a fallback, never a scene
     // failure: if the pass cannot be built or a render throws, it is
     // disposed and the upgraded shaft plane takes over.
+    const renderStartedAt = lookDevConfig ? performance.now() : 0
+    const previousInfoAutoReset = renderer.info.autoReset
+    if (lookDevConfig) { renderer.info.reset(); renderer.info.autoReset = false }
+    try {
     if (shaftMode === 'raymarch' && !shaftPassFailed) {
       if (!shaftPass) {
         try {
@@ -1444,7 +1666,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         }
       }
       if (shaftPass) {
-        shaftPass.update(coralElapsedSec, camera, habitatStopped, reducedMotion)
+        shaftPass.update(sceneTime, camera, environmentStopped, environmentReducedMotion)
         try {
           shaftPass.renderDepth(scene, camera)
         } catch (error) {
@@ -1467,6 +1689,14 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         shaftPass = null
         shaftPlane.visible = true
       }
+    }
+    } finally {
+      if (lookDevConfig) renderer.info.autoReset = previousInfoAutoReset
+    }
+    if (lookDevConfig) {
+      const elapsedMs = Math.max(0, performance.now() - renderStartedAt)
+      recordLookDevSample(lookDevCpuRenderSamples, elapsedMs)
+      if (lookDevCaptureRequested) recordLookDevSample(lookDevFrozenRenderSamples, elapsedMs)
     }
   }
   // Distance LOD (AQ-76 AC #1), evaluated at the ~0.24 s label cadence
@@ -1503,6 +1733,13 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   const frameRateSampler = new FrameRateSampler()
   let lastFrameRatePushMs = 0
   function tick(now: number) {
+    if (lookDevConfig) {
+      if (lookDevLastRafTime !== undefined && now >= lookDevLastRafTime) recordLookDevSample(lookDevRafSamples, now - lookDevLastRafTime)
+      lookDevLastRafTime = now
+      lastTickTimestamp = now
+      if (!document.hidden && loaded && !lookDevContextLost) render(0, true)
+      return
+    }
     const steps = consumeFrameSteps(clock, now)
     if (lastTickTimestamp !== undefined && now > lastTickTimestamp) {
       const intervalMs = now - lastTickTimestamp
@@ -1522,6 +1759,10 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   function syncLoop() {
     if (disposed || failed) return
     suspendFrameClock(clock)
+    if (lookDevConfig) {
+      renderer.setAnimationLoop(document.hidden || lookDevContextLost ? null : tick)
+      return
+    }
     if (!canRunFishSceneLoop(paused, document.hidden, spawnUnavailable)) {
       renderer.setAnimationLoop(null)
       // Sampling stops with the loop; report the suspension so the HUD
@@ -1536,6 +1777,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     if (disposed || failed) return
     const nextWidth = Math.max(1, canvas.parentElement!.clientWidth), nextHeight = Math.max(1, canvas.parentElement!.clientHeight)
     const sizeChanged = width !== nextWidth || height !== nextHeight
+    if (lookDevConfig && sizeChanged) { lookDevReady = false; lookDevResetTiming() }
     if (sizeChanged) particleBuffersDirty = true
     width = nextWidth; height = nextHeight
     camera.aspect = width / height; camera.updateProjectionMatrix(); renderer.setSize(width, height, false)
@@ -1561,10 +1803,15 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       if (rebuildSucceeded !== undefined) status(fishSceneStatus(!rebuildSucceeded))
     }
     if (recoveringFromUnavailableSpawn && rebuildSucceeded === true) syncLoop()
+    if (lookDevConfig) applyLookDevCamera()
     if (!spawnUnavailable) render(0, true)
+    if (lookDevConfig) settleLookDevReadiness()
   }
   const observer = new ResizeObserver(resize); observer.observe(canvas.parentElement!); resize()
-  document.addEventListener('visibilitychange', syncLoop, { signal: abort.signal })
+  document.addEventListener('visibilitychange', () => {
+    syncLoop()
+    if (!document.hidden) settleLookDevReadiness()
+  }, { signal: abort.signal })
   // Camera zoom input (AQ-62 AC #1/#2): wheel zooms toward the cursor,
   // drag pans while zoomed, pinch zooms on touch. The canvas itself has
   // pointer-events: none, so listeners live on the section (the canvas
@@ -1654,18 +1901,87 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     event.preventDefault()
     event.stopPropagation()
   }, { capture: true, signal: abort.signal })
-  canvas.addEventListener('webglcontextlost', event => { event.preventDefault(); failed = true; renderer.setAnimationLoop(null); status('failed') }, { signal: abort.signal })
+  canvas.addEventListener('webglcontextlost', event => {
+    event.preventDefault()
+    if (lookDevConfig) {
+      lookDevContextLost = true
+      lookDevReady = false
+      lookDevResetTiming()
+      syncLoop()
+      return
+    }
+    failed = true; renderer.setAnimationLoop(null); status('failed')
+  }, { signal: abort.signal })
+  canvas.addEventListener('webglcontextrestored', () => {
+    if (!lookDevConfig || disposed) return
+    lookDevContextLost = false
+    lookDevReady = false
+    lookDevResetTiming()
+    applyLookDevCamera()
+    syncLoop()
+    settleLookDevReadiness()
+  }, { signal: abort.signal })
+  let lookDevBridge: LookDevBridge | undefined
+  if (import.meta.env.DEV && lookDevConfig) {
+    lookDevBridge = Object.freeze({
+      ready: waitForLookDevReady,
+      state: lookDevSnapshot,
+      renderFrozen() {
+        if (!lookDevSnapshot().ready) throw new Error('Look-dev capture is not ready; wait for bridge.ready() first.')
+        lookDevCaptureRequested = true
+        try { render(0, true) }
+        finally { lookDevCaptureRequested = false }
+        return lookDevSnapshot()
+      },
+      setPreset(preset: LookDevPreset) {
+        if (!(LOOKDEV_PRESETS as readonly string[]).includes(preset)) return lookDevSnapshot()
+        lookDevPreset = preset
+        lookDevReady = false
+        lookDevResetTiming()
+        applyLookDevCamera()
+        settleLookDevReadiness()
+        return lookDevSnapshot()
+      },
+      setSubject(subjectId?: string) {
+        if (subjectId !== undefined && !fish.some(item => item.service.id === subjectId)) return false
+        if (lookDevSubjectId === subjectId) return true
+        lookDevSubjectId = subjectId
+        lookDevReady = false
+        lookDevResetTiming()
+        applyLookDevCamera()
+        settleLookDevReadiness()
+        return true
+      },
+      setTime(timeSeconds: number) {
+        if (!Number.isFinite(timeSeconds) || timeSeconds < 0 || timeSeconds > 3600) return false
+        lookDevTimeSeconds = timeSeconds
+        for (const item of [...fish, ...schoolmates]) {
+          item.clipPlayer?.seek(timeSeconds)
+          item.flex?.seek(timeSeconds)
+        }
+        lookDevReady = false
+        lookDevResetTiming()
+        settleLookDevReadiness()
+        return true
+      },
+    })
+    window.__AQUARIUM_LOOKDEV__ = lookDevBridge
+  }
   // Per-asset fish load with failure isolation (AQ-76 AC #2): a single GLB
   // failure logs a warning and leaves that species on its thumbnail sprite
   // instead of failing the whole scene, as the old single Promise.all did.
   // A load that finishes after disposal disposes its GLB instead of adding it.
   async function loadFishModel(id: string) {
+    const lookDevKey = `fish:${id}`
+    beginLookDevAsset(lookDevKey)
     try {
       const model = await loader.loadAsync(modelUrls[id])
-      if (disposed || failed) { disposeTree(model.scene); return undefined }
+      if (disposed || failed) { disposeTree(model.scene); finishLookDevAsset(lookDevKey); return undefined }
       loadedAssets.add(model)
+      finishLookDevAsset(lookDevKey)
       return model
     } catch (error) {
+      finishLookDevAsset(lookDevKey, true)
       console.warn('Fish model failed to load; keeping thumbnail fallback', id, error)
       return undefined
     }
@@ -1697,7 +2013,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       // same pure projection as a service fish's.
       const item = [...fish, ...schoolmates].find(next => next.service.fishId === id)
       if (item && !item.fallback) { lazyQueue.shift(); continue }
-      if (item && !projectFishLinkBounds(item.root.position, camera, width, height, fishRenderLength(id), projected)) break
+      if (item && !lookDevConfig && !projectFishLinkBounds(item.root.position, camera, width, height, fishRenderLength(id), projected)) break
       lazyQueue.shift()
       lazyActiveLoads++
       void loadFishModel(id).then(model => {
@@ -1709,16 +2025,25 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
           if (target) swapFallbackToGlb(target)
           if (!document.hidden) render(0, true)
         }
+        settleLookDevReadiness()
         scheduleLazyPump()
       })
     }
   }
   async function initialize() {
     const load = async (url: string) => {
-      const model = await loader.loadAsync(url)
-      if (disposed || failed) disposeTree(model.scene)
-      else loadedAssets.add(model)
-      return model
+      const lookDevKey = `scene:${url}`
+      beginLookDevAsset(lookDevKey)
+      try {
+        const model = await loader.loadAsync(url)
+        if (disposed || failed) disposeTree(model.scene)
+        else loadedAssets.add(model)
+        finishLookDevAsset(lookDevKey)
+        return model
+      } catch (error) {
+        finishLookDevAsset(lookDevKey, true)
+        throw error
+      }
     }
     const coralIds = Object.keys(MODULAR_CORAL_ASSET_URLS)
     // Lazy loading (AQ-76 AC #2): Phase 0 blocks first paint on the rocks,
@@ -1743,19 +2068,36 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     status(fishSceneStatus(!initialSpawnSucceeded))
     syncLoop()
     enqueueLazyFishLoads(configuredFishIds)
+    settleLookDevReadiness()
   }
-  void initialize().catch(error => { console.error('Aquarium assets could not load', error); failed = true; loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); if (!disposed) { renderer.setAnimationLoop(null); status('failed') } })
+  void initialize().catch(error => {
+    console.error('Aquarium assets could not load', error)
+    failed = true
+    failLookDevCapture(`Aquarium asset initialization failed: ${String(error)}`)
+    loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear()
+    if (!disposed) { renderer.setAnimationLoop(null); status('failed') }
+  })
   syncLoop()
   return {
     update(next, stopped) {
       const changed = JSON.stringify(next) !== JSON.stringify(services); services = next; paused = stopped
       if (changed) {
+        if (lookDevConfig) {
+          lookDevReady = false
+          lookDevResetTiming()
+          if (lookDevSubjectId && !next.some(service => service.id === lookDevSubjectId)) lookDevSubjectId = undefined
+          const activeSpecies = new Set(next.map(service => service.fishId))
+          for (const key of [...lookDevCurrentAssets]) if (key.startsWith('fish:') && !activeSpecies.has(key.slice('fish:'.length))) {
+            lookDevCurrentAssets.delete(key); lookDevPendingAssets.delete(key); lookDevFailedAssets.delete(key)
+          }
+        }
         const rebuilt = reconcileFish()
         if (rebuilt !== undefined) status(fishSceneStatus(!rebuilt))
         // A newly configured species starts on its thumbnail sprite and its
         // GLB joins the background queue; removing a service never evicts a
         // loaded GLB in v1 (16 species max, ~20 MB total).
         enqueueLazyFishLoads(next.map(service => service.fishId))
+        if (lookDevConfig) { applyLookDevCamera(); settleLookDevReadiness() }
       }
       syncLoop()
     },
@@ -1784,6 +2126,8 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     canActivate(id, x, y) { const item = fish.find(item => item.service.id === id); return Boolean(item && (x === undefined || y === undefined ? updateVisibility(item) : nearest(x, y) === id)) },
     dispose() {
       if (disposed) return; disposed = true; abort.abort(); observer.disconnect(); renderer.setAnimationLoop(null); lazyQueue = []
+      rejectLookDevWaiters(new Error('Aquarium was disposed before look-dev capture readiness.'))
+      if (import.meta.env.DEV && lookDevBridge && window.__AQUARIUM_LOOKDEV__ === lookDevBridge) delete window.__AQUARIUM_LOOKDEV__
       removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sandBed.dispose(); rear.geometry.dispose(); rear.material.dispose(); hazePlane.geometry.dispose(); hazeMaterial.dispose(); shaftPlane.geometry.dispose(); shaftMaterial.dispose(); waterSurfaceGeometry.dispose(); waterSurfaceMaterial.dispose(); shaftPass?.dispose(); shaftPass = null; foregroundParticleGeometry.dispose(); foregroundParticleMaterial.dispose(); backgroundParticleGeometry.dispose(); backgroundParticleMaterial.dispose(); bubbleGeometry.dispose(); bubbleMaterial.dispose(); caustics.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
     },
   }

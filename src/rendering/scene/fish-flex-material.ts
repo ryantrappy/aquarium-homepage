@@ -51,6 +51,8 @@ export type FishFlexBinding = Readonly<{
    * `reducedMotion` neutralises the amplitude to zero.
    */
   update(values: FishFlexValues, dtSeconds: number, reducedMotion: boolean): void
+  /** Sets a deterministic absolute scene time while preserving the base phase. */
+  seek(timeSeconds: number): void
   /** Disposes the cloned materials and restores the originals. */
   dispose(): void
 }>
@@ -247,6 +249,14 @@ export function bindFishFlexToModel(
         ? 0
         : 0.0038 * respEffort * amplitudeScale * bodyLength
       uniforms.uFlexEnabled.value = reducedMotion ? 0 : 1
+    },
+    seek(timeSeconds: number): void {
+      if (disposed) return
+      if (!Number.isFinite(timeSeconds) || timeSeconds < 0) throw new RangeError('Fish flex seek time must be finite and nonnegative.')
+      flexTimeSeconds = timeSeconds
+      accumulatedWavePhaseRad = (TWO_PI * uniforms.uFlexFrequencyHz.value * timeSeconds) % TWO_PI
+      uniforms.uFlexTime.value = timeSeconds
+      uniforms.uFlexPhase.value = phaseRad
     },
     dispose(): void {
       if (disposed) return
