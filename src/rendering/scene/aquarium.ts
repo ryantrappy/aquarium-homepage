@@ -771,7 +771,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   function lookDevCameraTarget() {
     const target = lookDevSubjectId ? fish.find(item => item.service.id === lookDevSubjectId) : undefined
     const position = target?.motion.position
-    return clampCameraZoomState(lookDevCameraState(lookDevPreset, position))
+    return clampCameraZoomState(lookDevCameraState(lookDevPreset, position, width < 600))
   }
   function applyLookDevCamera() {
     if (!lookDevConfig) return

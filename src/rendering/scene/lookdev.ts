@@ -26,14 +26,15 @@ export type LookDevCameraState = Readonly<{
 export function lookDevCameraState(
   preset: LookDevPreset,
   subjectPosition?: Readonly<{ x: number; y: number; z: number }>,
+  narrow = false,
 ): LookDevCameraState {
   switch (preset) {
     case 'fish-macro':
       return { targetX: subjectPosition?.x ?? 0, targetY: subjectPosition?.y ?? 0.4, targetZ: subjectPosition?.z ?? 0, distance: 5.2 }
     case 'coral-macro':
-      return { targetX: -2.0, targetY: -0.55, targetZ: -1.4, distance: 5.6 }
+      return { targetX: narrow ? -0.15 : -2.0, targetY: -0.55, targetZ: -1.4, distance: 5.6 }
     case 'rock-sand-contact':
-      return { targetX: -1.2, targetY: -1.65, targetZ: -1.2, distance: 5.8 }
+      return { targetX: narrow ? -0.15 : -1.2, targetY: narrow ? -2.0 : -1.65, targetZ: -1.2, distance: 5.8 }
     case 'full-scene':
       return { targetX: 0, targetY: 0.15, targetZ: 0, distance: 9 }
   }

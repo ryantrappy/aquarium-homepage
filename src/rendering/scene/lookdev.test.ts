@@ -40,6 +40,15 @@ describe('look-dev capture helpers', () => {
     expect(lookDevCameraState('fish-macro')).toEqual({ targetX: 0, targetY: 0.4, targetZ: 0, distance: 5.2 })
   })
 
+  it('keeps portrait reef macros on the single central island instead of the empty left water', () => {
+    const coral = lookDevCameraState('coral-macro', undefined, true)
+    const contact = lookDevCameraState('rock-sand-contact', undefined, true)
+    expect(Math.abs(coral.targetX)).toBeLessThan(0.5)
+    expect(Math.abs(contact.targetX)).toBeLessThan(0.5)
+    expect(contact.targetY).toBeLessThan(coral.targetY - 1)
+    expect(lookDevCameraState('fish-macro', { x: 0.2, y: 0.7, z: 0.4 }, true).targetX).toBe(0.2)
+  })
+
   it.each([
     '?lookdev=1&seed=-1',
     '?lookdev=1&seed=',
