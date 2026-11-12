@@ -619,37 +619,37 @@ float fissure = smoothstep(0.04, 0.22, abs(rockNoise3D(wPos * 26.0) - 0.5));
 float overhangShade = smoothstep(-0.45, 0.58, rNorm.y);
 float rockCavityAo = clamp(vugPit * (0.48 + 0.52 * fissure) * (0.28 + 0.72 * overhangShade), 0.05, 1.0);
 
-// Photoreal Fiji/Marco carbonate live rock + vibrant crustose coralline plaques
-// matching reef-full-model.blend (Photoreal_Fiji_Live_Rock_Mat) and more_realistic_reef_guide.png
-vec3 cPoreDeep = vec3(0.016, 0.012, 0.034);
-vec3 cCarbShaded = vec3(0.072, 0.056, 0.118);
-vec3 cCarbSunlit = vec3(0.225, 0.185, 0.255);
-vec3 cOliveFilm = vec3(0.052, 0.058, 0.082);
+// Neutral porous carbonate with restrained rose coralline patches.
+// Keep the substrate distinct from the brighter coral tissue above it.
+vec3 cPoreDeep = vec3(0.012, 0.010, 0.007);
+vec3 cCarbShaded = vec3(0.055, 0.048, 0.036);
+vec3 cCarbSunlit = vec3(0.16, 0.135, 0.095);
+vec3 cOliveFilm = vec3(0.045, 0.046, 0.032);
 
 // Crustose coralline algae (Porolithon & Lithothamnion) — rich violet, plum, and magenta plaques
-vec3 cCorDeep = vec3(0.145, 0.042, 0.165);
-vec3 cCorMagenta = vec3(0.345, 0.095, 0.295);
-vec3 cCorLavender = vec3(0.525, 0.195, 0.445);
-vec3 cCorMargin = vec3(0.685, 0.365, 0.565);
+vec3 cCorDeep = vec3(0.10, 0.035, 0.055);
+vec3 cCorMagenta = vec3(0.21, 0.07, 0.115);
+vec3 cCorLavender = vec3(0.30, 0.13, 0.19);
+vec3 cCorMargin = vec3(0.40, 0.21, 0.24);
 
 vec3 carbColor = mix(cPoreDeep, cCarbShaded, smoothstep(0.10, 0.48, rockCavityAo));
 carbColor = mix(carbColor, cCarbSunlit, smoothstep(0.38, 0.78, rockCavityAo * (0.52 + 0.48 * cragRidge)));
 float ridgeHighlight = smoothstep(0.54, 0.84, cragRidge * 0.60 + medCrag * 0.40) * smoothstep(0.44, 0.82, rockCavityAo) * smoothstep(0.0, 0.75, rNorm.y);
-carbColor = mix(carbColor, vec3(0.36, 0.29, 0.38), ridgeHighlight * 0.52);
+carbColor = mix(carbColor, vec3(0.28, 0.24, 0.17), ridgeHighlight * 0.52);
 
 // Deep underside & lower-apron shadow patina
 float oliveMask = (1.0 - smoothstep(0.04, 0.22, vRockWorldPos.y)) * smoothstep(0.25, 0.75, medCrag) * 0.45;
 carbColor = mix(carbColor, cOliveFilm, oliveMask);
 
 float upwardExp = smoothstep(-0.08, 0.62, rNorm.y);
-float corPatchField = rockNoise3D(wPos * 24.0 + vec3(4.2)) * 0.52 + medCrag * 0.48 + 0.24 * upwardExp;
-float corMask = smoothstep(0.36, 0.62, corPatchField) * (0.38 + 0.62 * upwardExp) * smoothstep(0.16, 0.58, rockCavityAo);
+float corPatchField = rockNoise3D(wPos * 24.0 + vec3(4.2)) * 0.52 + medCrag * 0.48 + 0.12 * upwardExp;
+float corMask = smoothstep(0.48, 0.74, corPatchField) * (0.38 + 0.62 * upwardExp) * smoothstep(0.16, 0.58, rockCavityAo);
 
 vec3 corColor = mix(cCorDeep, cCorMagenta, smoothstep(0.26, 0.64, medCrag));
 corColor = mix(corColor, cCorLavender, smoothstep(0.54, 0.84, cragRidge) * 0.68);
 // Calcified rose-violet margin ring on coralline plaque edges
 float plaqueRim = exp(-pow((corPatchField - 0.54) / 0.032, 2.0)) * upwardExp;
-corColor = mix(corColor, cCorMargin, plaqueRim * 0.52);
+corColor = mix(corColor, cCorMargin, plaqueRim * 0.28);
 
 // Direct encrusting coral & Ricordea mushroom rock patches on sunlit mid-slope shelves (AQ-95 AC #2 & AQ-101 AC #2)
 float encCell = rockNoise3D(wPos * 22.0 + vec3(-3.1, 5.4, 1.8));
@@ -660,7 +660,7 @@ float encGoldMask = smoothstep(0.67, 0.80, 1.0 - encCell) * shelfZone;
 vec3 cEncTeal = mix(vec3(0.06, 0.24, 0.22), vec3(0.14, 0.48, 0.40), polypBead);
 vec3 cEncGold = mix(vec3(0.28, 0.11, 0.06), vec3(0.54, 0.26, 0.10), polypBead);
 
-vec3 finalRockColor = mix(carbColor, corColor, corMask * 0.90);
+vec3 finalRockColor = mix(carbColor, corColor, corMask * 0.72);
 finalRockColor = mix(finalRockColor, cEncTeal, encTealMask * 0.65);
 finalRockColor = mix(finalRockColor, cEncGold, encGoldMask * 0.65);
 finalRockColor *= (0.78 + 0.28 * (0.6 * finePores + 0.4 * microGrain));

@@ -1,0 +1,46 @@
+{
+  "task": "AQ-59",
+  "date": "2026-11-12",
+  "reviewer": "Root",
+  "scope": "Renderer material refinement only; exact-export model acceptance remains open.",
+  "changes": [
+    "Neutralized blue-biased carbonate substrate colors",
+    "Reduced coralline patch coverage and bright plaque rims",
+    "Preserved pore/cavity/roughness math, coral tissue palettes, geometry, sockets, Blender sources, GLBs and manifests"
+  ],
+  "captures": [
+    {
+      "path": "laptop.png",
+      "size": [
+        1440,
+        900
+      ],
+      "dpr": 1,
+      "sha256": "74b89e40ed157a7bcd50df6518eb5c46cdfe37dc2b2740021b46cb9232e6f537"
+    },
+    {
+      "path": "phone.png",
+      "size": [
+        402,
+        874
+      ],
+      "dpr": 1,
+      "sha256": "5e7ba09007d370891ea892eb1d5ede62113b92eb7d0b96c5738ea24a1bb701c1"
+    }
+  ],
+  "verification": [
+    "Native WebGL at1440x900 and402x874 CSS pixels, DPR1",
+    "No captured shader warnings/errors",
+    "24 coral-material/reef-assembly tests pass",
+    "Current full suite687 tests in63 files passes"
+  ],
+  "observations": [
+    "Dark neutral porous rock separates the brightly colored coral colonies",
+    "Idle-host HUD observed54FPS laptop and60FPS phone; these are indicative screenshots, not formal frame-time regression benchmarks"
+  ],
+  "open": [
+    "Hash-matched neutral front/oblique/exact-export renders",
+    "Current measured cave/mount/grounding review",
+    "Geometry silhouette and final art acceptance against reference"
+  ]
+}

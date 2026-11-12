@@ -1,11 +1,11 @@
 ---
 id: AQ-59
 title: Refine supplied rock silhouette and materials before scene promotion
-status: To Do
+status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-05 03:13'
-updated_date: '2026-11-12 05:50'
+updated_date: '2026-11-12 14:08'
 labels:
   - modeling
 dependencies: []
@@ -17,6 +17,8 @@ references:
   - /tmp/aq-asset-review-20261104/left-exact-oblique.png
   - docs/asset-evidence/aq57/left-exact-front.png
   - docs/asset-evidence/aq57/left-exact-oblique.png
+documentation:
+  - docs/asset-evidence/aq59/runtime-20261112/review.json
 priority: '2'
 type: bug
 ordinal: 110000
@@ -41,6 +43,8 @@ Root inspected exact packaged left front/oblique snapshots (SHA 2f90be064f3f5b15
 2026-11-05 Root-requested independent read-only review lane (@collision-validation): pin exact newly packaged left/right GLBs, current generator, manifests and packaged/docs inspection/socket evidence under /tmp/aq59-root-review-20261105, detect source changes and verify task-declared hashes. Run existing manifest/socket freshness checkers independently; inspect exact geometry/provenance/canonical bounds, cave and fixed .02/.04/.06m mesh capsules from pinned bytes. Produce neutral-light textured front/oblique/sand-contact views plus neutral material comparison using copied existing Blender review scripts only in /tmp; no visual/model/generator/packager/renderer/inspection-record writes and no AQ58 historical fixture changes. Check live Blender/render jobs before launching or treating waits as terminal. Record outputs/limitations in this task; Root alone reviews art and Done. Modeling ownership remains @gemini.
 
 Root-approved functional AQ59 texture-pipeline iteration. Before editing, snapshot the current generator and exact left/right GLB hashes to /tmp. Keep all model/GLB export output under /tmp/aq59-uv-fix-20261105; do not run package_modular_corals or write candidate GLBs/manifest/inspection records in the repo. In build_live_rock_islands.py only, replace top-only UV sampling and compressed top/bottom skirt UVs with non-overlapping surface charts at measured texel density; rasterize the existing color/ORM/height fields from actual triangle barycentric positions and normals. Bake tangent-space normal detail from each chart's physical surface frame, or omit only unsupported detail in a clearly labeled comparison variant. Keep geometry, sockets, palette, field parameters, and dimensions unchanged. Quantify original/new UV overlap, degeneracy, anisotropy, texels/m and source-to-export triangle-position equality; create temporary exact-PBR and neutral front/oblique/sand-contact renders. Verify existing cave/mount geometry and exact rendered hashes. Report outputs and limits for Root approval; do not update ACs/DoD or mark Done.
+
+Root renderer-only refinement 2026-11-12: keep Gemini geometry, Blender sources, GLBs, socket data and manifests unchanged; replace blue-biased carbonate shader colors with neutral warm dark aragonite and reduce broad coralline coverage/rims. Verify actual compiled WebGL at the two viewports and retain porous geometry detail. This is an assembled-material improvement, not acceptance of exact-export model criteria.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -66,6 +70,8 @@ Twelve exact1000x750 Cycles24sample renders exist at renders/{left,right}-{front
 Reviewer observation requiring Root visual decision: both current textured front/oblique images still show conspicuous vertical stretched/wavy gray-purple streaks and broad flat truncated platform/summit silhouettes; clay oblique confirms smooth steep-sided truncated masses. Useful real arch/ground contact retained, but technical passes do not establish natural porous carbonate/coralline art or satisfy AC1/AC3. Root must inspect the exact images; no visual acceptance/Done or AC changes made. No repository source/model/generator/packager/coral/renderer/inspection edits. Historical AQ58 fixture remains unchanged at77fd00de0c9cceacd0d1219b101b12793619e53eef5b16a8430acfee23991612.
 
 2026-11-05 Root gate refresh: runtime live-rock/coral shading and measured AO improvements are functional code reviews, not acceptance of rock silhouette/material art. Preserve supplied geometry, real arch and measured mounts. AQ59 stays open for a Gemini-authored model iteration addressing the previously reviewed flat summit/mesa and natural-surface criteria, with exact exported front/oblique evidence and current provenance/socket/clearance checks. Current scene screenshots in AQ63/66 are interaction illustrations, not final scene or candidate art approvals.
+
+Root2026-11-12 renderer-only handoff: neutralized blue-biased carbonate shades and reduced broad magenta coralline coverage/rims, preserving geometry, sockets, Blender sources, GLBs and manifests. Both exact DPR1 browser views render without shader warnings/errors.24 coral/assembly tests and current687-test full suite pass. Native HUD observed54FPS laptop/60FPS phone when host idle, not a formal regression benchmark. Captures and explicit remaining exact-export art/geometry gates:docs/asset-evidence/aq59/runtime-20261112/review.json. AQ59 remains In Progress; no exact-export/model acceptance criterion is checked by this renderer change.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
