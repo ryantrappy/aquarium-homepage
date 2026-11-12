@@ -55,3 +55,5 @@
 
 ### 2026-11-11 — Backlog completion resumed by Root
 *All seven standing/checkpoint entries above reviewed 2026-11-11: standing asset, viewport, review and no-deployment policies current; historical worktree/PR4 routing superseded by current review branch. Active art and runtime backlog pending. Latest user request supersedes the prior review-only restriction and authorizes implementation with Luna agents and Root review. Root exclusively reserves Blender; no agent currently has Blender ownership.*
+
+*Root resume re-review 2026-11-12: all entries above inspected; standing policies current, historical workspace/count facts superseded. Current branch review/PR45; AQ84 andAQ85 now Done after reviewed tests/commits. Visual refinement and deterministic-capture work pending; CI/FPS explicitly excluded at user direction. Blender remains unmodified and exclusively reserved for Root.*
