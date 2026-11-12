@@ -1,0 +1,124 @@
+{
+  "taskIds": [
+    "AQ-14.2",
+    "AQ-70.6"
+  ],
+  "reviewer": "Root",
+  "reviewDate": "2026-11-12",
+  "authority": "Evidentiary functional handoff, not final aquarium art acceptance",
+  "captures": [
+    {
+      "path": "laptop-before.png",
+      "pngWidth": 1440,
+      "pngHeight": 900,
+      "sha256": "437f9a8d6ebc2dd80c3db066878866fa5106808e582e343bcd2c5fd1b1fca872",
+      "cssViewport": [
+        1440,
+        900
+      ],
+      "devicePixelRatio": 1
+    },
+    {
+      "path": "laptop-after.png",
+      "pngWidth": 1440,
+      "pngHeight": 900,
+      "sha256": "55b89cd68ac51599830f1029bd0e3b6cbf5457f8741c483355eaa8b74cd3ee86",
+      "cssViewport": [
+        1440,
+        900
+      ],
+      "devicePixelRatio": 1
+    },
+    {
+      "path": "phone-after.png",
+      "pngWidth": 402,
+      "pngHeight": 874,
+      "sha256": "3ab07c1cf3852859272c1677c6c18fc3703c2067f26dd45afb233d61057f4478",
+      "cssViewport": [
+        402,
+        874
+      ],
+      "devicePixelRatio": 1
+    }
+  ],
+  "changes": [
+    "Surface moved upward and highlights/opacity reduced",
+    "Caustics preserve indirect lighting, reduce direct-light dimming and clamp focus boost"
+  ],
+  "verification": [
+    "Native WebGL render at both required CSS sizes and DPR1",
+    "No captured shader warnings or errors",
+    "36 optics/caustic/surface tests pass",
+    "Typecheck, 14 script syntax checks and production build pass",
+    "Full current suite:687 tests pass across63 files"
+  ],
+  "observations": [
+    "Sand now reads as pale grainy substrate instead of an indigo polygon grid",
+    "Surface band is shallower and softer",
+    "Reef remains too low and sparse against goal image; no composition acceptance",
+    "Live HUD observed around15FPS laptop/25FPS phone, not a timed performance benchmark",
+    "Later idle-host review HUD showed54FPS laptop and60FPS phone; initial15/25 samples occurred during concurrent work and were not stable benchmarks."
+  ],
+  "open": [
+    "Timed frame-budget comparisons (HUD observations are not benchmarks)",
+    "Fluorescence and fixture look-dev rubric",
+    "Final asset and composition acceptance"
+  ],
+  "beforeAfterLimit": "Fish positions, startup load state and label placement vary; these are native visual observations, not deterministic pixel comparisons.",
+  "pauseFollowUp": {
+    "viewport": [
+      1440,
+      900
+    ],
+    "dpr": 1,
+    "settledFrames": [
+      "paused-stable-a.png",
+      "paused-stable-b.png"
+    ],
+    "sha256": "9509dffe4497e2a6a654ea8af8a811cf59763d4abd28567411019b1bd967ea4c",
+    "byteIdentical": true,
+    "conclusion": "The first/late mismatch was not reproduced after allowing the paused render to settle. Two separated native full-frame PNG captures are byte-identical."
+  },
+  "phonePauseFollowUp": {
+    "viewport": [
+      402,
+      874
+    ],
+    "dpr": 1,
+    "captures": [
+      "phone-stable-a.png",
+      "phone-stable-b.png"
+    ],
+    "sha256": "d1c0283e1f3ab7da13bc95813ae21e0dd67fca190bba346c9e41002b9aca7166",
+    "byteIdentical": true
+  },
+  "reducedMotionFollowUp": {
+    "viewport": [
+      402,
+      874
+    ],
+    "dpr": 1,
+    "mediaQueryVerified": true,
+    "captures": [
+      "reduced-phone-a.png",
+      "reduced-phone-b.png"
+    ],
+    "surfaceRegionPx": [
+      0,
+      75,
+      402,
+      140
+    ],
+    "regionSha256": "3511ea28fd388e6c146c727e99a7110cb4a2681fb910525f874bee850952e514",
+    "regionIdentical": true,
+    "limit": "This pixel comparison covers the visible surface band only. Fish continue restrained movement under reduced motion; it does not claim whole-frame freeze."
+  },
+  "nativeControls": [
+    "Pause and Resume both viewports",
+    "Phone Services dialog opens, shows all8 configured entries and closes"
+  ],
+  "acceptance": {
+    "AQ-14.2": "Root accepts bounded ambient-motion responsiveness after refinement; final aquarium realism remains AQ70 scope.",
+    "AQ-70.6": "Open for fixture/fluorescence/full frame budget proof."
+  }
+}

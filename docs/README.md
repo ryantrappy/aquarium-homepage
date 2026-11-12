@@ -6,7 +6,7 @@ Status: Canonical / Active
 Authority: Binding Single Source of Documentation Truth
 Backlog: AQ-61, AQ-63, AQ-65, AQ-66, AQ-64, AQ-53, AQ-60, AQ-42
 Owner: @documentation
-Updated: 2026-11-06
+Updated: 2026-11-12
 Upstream: AGENTS.md, AGENT_TASKS.md, docs/requirements.md, docs/framework/DOCUMENTATION_FRAMEWORK.md
 Downstream: All repository documentation and active agent workflows
 -->
@@ -37,6 +37,7 @@ Find the authoritative documents for your task area:
 | **2D Thumbnails & Cutouts** | [`fish-assets.md`](fish-assets.md) | [`fish-art-provenance.json`](fish-art-provenance.json) | `public/fish-art-provenance.json`  [AQ-66 thumbnail proof](asset-evidence/aq66/review.json) |
 | **Homelab Services & Links** | [`service-mapping-review.md`](service-mapping-review.md) | [`requirements.md`](requirements.md) | Backlog `AQ-8` / `AQ-56` |
 | **Read-Only Telemetry (Hardware)**| [`network-traffic-source.md`](network-traffic-source.md) | Server endpoints (`src/routes/api/telemetry/`) | `src/server/disk-capacity-math.test.ts` |
+| **Ambient Motion & Lighting** | [`rendering.md`](rendering.md) | [`requirements.md`](requirements.md) | [AQ-14.2/AQ-70.6 Root visual review](asset-evidence/aq14-2/root-visual-review.json) |
 | **Accessibility & Controls** | [`accessibility-audit.md`](accessibility-audit.md) | [`design-principles.md`](design-principles.md) | Backlog `AQ-6` / `AQ-50`  [AQ-63 interaction proof](asset-evidence/aq63/review.json), [AQ-70.14 caption/access proof](asset-evidence/aq70-14/review.json) |
 | **Deployment & Production** | [`deployment.md`](deployment.md) | [`deployment-2.md`](archive/deployment-2.md) *(Historical)* | Docker / Node 24 on `trappserv.er` |
 | **Documentation Standards** | [`framework/DOCUMENTATION_FRAMEWORK.md`](framework/DOCUMENTATION_FRAMEWORK.md)| [`framework/TEMPLATE.md`](framework/TEMPLATE.md) | Backlog `AQ-61` |
@@ -81,6 +82,7 @@ Directory of project documentation and verification evidence:
 ### Tier 4: Audits & Verification Evidence (Evidentiary)
 | Document | Status | Authority | Backlog | Scope / Purpose |
 |---|---|---|---|---|
+| [Ambient lighting Root review](asset-evidence/aq14-2/root-visual-review.json) | **Active** | Evidentiary | `AQ-14.2`, `AQ-70.6` | Native DPR1 captures at both required CSS sizes after surface/caustic refinement; art, freeze and performance limits explicitly remain open. |
 | [Nine fish candidate provenance](asset-evidence/aq12/splat-candidate-provenance.json) | **Active** | Evidentiary | `AQ-12`, `AQ-70.10` | Exact candidate/donor hashes, retained payload proof, owner confirmation and derivative credit; no asset promotion. |
 | [AQ-70.12 sand functional review](asset-evidence/aq70-12/functional-review.json) | **Active** | Evidentiary | `AQ-70.12` | Real WebGL shader/phase comparisons; final sand art, physical grain and budgets remain open. |
 | [AQ-70.14 caption/access review](asset-evidence/aq70-14/review.json) | **Complete** | Evidentiary | `AQ-70.14` | Both-viewport compact captions, native intercepted-label routing, keyboard/touch/modal access and exact PNGs. |
