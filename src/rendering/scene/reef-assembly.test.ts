@@ -5,6 +5,8 @@ import {
   AQUARIUM_WATER_BOUNDS,
   DEFAULT_LEFT_ISLAND_MOUNTS,
   DEFAULT_RIGHT_ISLAND_MOUNTS,
+  MODULAR_CORAL_VARIATION_LIBRARY,
+  ACTINIC_RIM_TINT_HEX,
   assembleCoralsOnRockSockets,
   inferSocketArchetype,
   instantiateModularReefHabitat,
@@ -509,5 +511,39 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
         },
       ]),
     ).toThrow(/archetype.*does not match/)
+  })
+
+  it('defines the modular coral variation library (4 branching, 3 plating, 3 fleshy LPS, 2 colonial polyps, 2 brain, 2 encrusting) with controlled hues and THREE.InstancedMesh scatter (AQ-95)', () => {
+    const byFamily = (family: string) => MODULAR_CORAL_VARIATION_LIBRARY.filter(v => v.family === family)
+    expect(byFamily('branching')).toHaveLength(4)
+    expect(byFamily('plating')).toHaveLength(3)
+    expect(byFamily('fleshy-lps')).toHaveLength(3)
+    expect(byFamily('colonial-polyp')).toHaveLength(2)
+    expect(byFamily('brain')).toHaveLength(2)
+    expect(byFamily('encrusting')).toHaveLength(2)
+
+    const validHues = new Set(['violet', 'teal', 'green', 'peach'])
+    const validRims = new Set(Object.keys(ACTINIC_RIM_TINT_HEX))
+    for (const variation of MODULAR_CORAL_VARIATION_LIBRARY) {
+      expect(validHues.has(variation.dominantHue)).toBe(true)
+      expect(validRims.has(variation.actinicRimTint)).toBe(true)
+      expect(variation.morphology.length).toBeGreaterThan(15)
+    }
+    const fluorescent = MODULAR_CORAL_VARIATION_LIBRARY.filter(v => v.isFluorescentSpecimen)
+    expect(fluorescent.length).toBeGreaterThanOrEqual(3)
+    expect(fluorescent.length).toBeLessThan(MODULAR_CORAL_VARIATION_LIBRARY.length)
+
+    const templates = buildMockCoralTemplates()
+    const leftRock = buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json')
+    const assembly = assembleCoralsOnRockSockets(leftRock, templates, DEFAULT_LEFT_ISLAND_MOUNTS)
+    expect(assembly.instancedMeshes.length).toBeGreaterThan(0)
+    const totalInstances = assembly.instancedMeshes.reduce((sum, mesh) => sum + mesh.count, 0)
+    expect(totalInstances).toBe(DEFAULT_LEFT_ISLAND_MOUNTS.length)
+    for (const instanced of assembly.instancedMeshes) {
+      expect(instanced).toBeInstanceOf(THREE.InstancedMesh)
+      const m0 = new THREE.Matrix4()
+      instanced.getMatrixAt(0, m0)
+      expect(m0.elements.every(Number.isFinite)).toBe(true)
+    }
   })
 })

@@ -31,6 +31,96 @@ export type OccupiedFishSpawn = { position: Vec3; clearance: number; bodyRadiusM
 export const SPAWN_BODY_RADIUS_GAP_M = 0.06
 export type FishSpawnPreference = { position: Vec3; yaw: number }
 
+export type VerticalDepthZoneTier = 'surface' | 'mid-water' | 'benthic'
+
+export type TieredVerticalDepthZoneSpec = Readonly<{
+  tier: VerticalDepthZoneTier
+  label: string
+  normalizedDepthBand: readonly [number, number]
+  speciesIds: readonly string[]
+}>
+
+/**
+ * Ecological vertical swimming depth zones (AQ-99 AC #1–#3):
+ * 1. Surface swimmers: schooling Chromis & Anthias in upper open water and light shafts.
+ * 2. Mid-water cruisers: Tangs, Butterflyfish, Angelfish, Wrasses, Cardinalfish, Clownfish around the spire and swim-through channels.
+ * 3. Benthic / perching dwellers: Blennies, Watchman Gobies, Dragonets, Firefish, Royal Gramma on lower rock ledges, crevices, and substrate sand zones.
+ */
+export const TIERED_VERTICAL_DEPTH_ZONES: Readonly<Record<VerticalDepthZoneTier, TieredVerticalDepthZoneSpec>> = Object.freeze({
+  surface: Object.freeze({
+    tier: 'surface',
+    label: 'Upper water column and illuminated light shafts',
+    normalizedDepthBand: Object.freeze([0.12, 0.66] as const),
+    speciesIds: Object.freeze(['blue-green-chromis', 'lyretail-anthias']),
+  }),
+  'mid-water': Object.freeze({
+    tier: 'mid-water',
+    label: 'Mid-water reef spire and swim-through channels',
+    normalizedDepthBand: Object.freeze([0.18, 0.84] as const),
+    speciesIds: Object.freeze([
+      'blue-tang',
+      'yellow-tang',
+      'desjardins-sailfin-tang',
+      'copperband-butterflyfish',
+      'flame-angelfish',
+      'mccoskers-flasher-wrasse',
+      'six-line-wrasse',
+      'banggai-cardinalfish',
+      'ocellaris-clownfish',
+    ]),
+  }),
+  benthic: Object.freeze({
+    tier: 'benthic',
+    label: 'Lower rock ledges, caves, and substrate sand zones',
+    normalizedDepthBand: Object.freeze([0.48, 0.98] as const),
+    speciesIds: Object.freeze([
+      'tailspot-blenny',
+      'yellow-watchman-goby',
+      'mandarin-dragonet',
+      'firefish',
+      'royal-gramma',
+    ]),
+  }),
+})
+
+export function classifySpeciesVerticalTier(speciesId: string): VerticalDepthZoneTier | undefined {
+  for (const spec of Object.values(TIERED_VERTICAL_DEPTH_ZONES)) {
+    if (spec.speciesIds.includes(speciesId)) return spec.tier
+  }
+  return undefined
+}
+
+export function evaluateTieredVerticalDepthRange(
+  speciesId: string,
+  waterBounds: AxisAlignedBox,
+  clearance = 0,
+): {
+  tier: VerticalDepthZoneTier
+  normalizedDepthRange: readonly [number, number]
+  worldYRange: readonly [number, number]
+} | undefined {
+  const profile = getSpeciesBehaviorProfile(speciesId)
+  const tier = classifySpeciesVerticalTier(speciesId)
+  if (!profile || !tier) return undefined
+  const zoneSpec = TIERED_VERTICAL_DEPTH_ZONES[tier]
+  const minDepth = Math.max(profile.depthRange[0], zoneSpec.normalizedDepthBand[0])
+  const maxDepth = Math.min(profile.depthRange[1], zoneSpec.normalizedDepthBand[1])
+  const normalizedDepthRange: readonly [number, number] = minDepth < maxDepth
+    ? [minDepth, maxDepth]
+    : [profile.depthRange[0], profile.depthRange[1]]
+  const height = waterBounds.max.y - waterBounds.min.y
+  const safeMinY = waterBounds.min.y + Math.max(0, clearance)
+  const safeMaxY = waterBounds.max.y - Math.max(0, clearance)
+  const clampY = (y: number) => Math.min(safeMaxY, Math.max(safeMinY, y))
+  const lowY = clampY(waterBounds.max.y - normalizedDepthRange[1] * height)
+  const highY = clampY(waterBounds.max.y - normalizedDepthRange[0] * height)
+  return {
+    tier,
+    normalizedDepthRange,
+    worldYRange: [Math.min(lowY, highY), Math.max(lowY, highY)],
+  }
+}
+
 export function fishSceneStatus(spawnUnavailable: boolean): 'ready' | 'failed' {
   return spawnUnavailable ? 'failed' : 'ready'
 }

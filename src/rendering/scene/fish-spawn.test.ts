@@ -7,7 +7,7 @@ import { EMPTY_FISH_EXTENSIONS } from '../../simulation/fish-extensions'
 import { fishClearanceRadius, fishRenderLength } from './fish-scale'
 import { projectFishLinkBounds } from './fish-link-projection'
 import { createSwimmingFish, stepSwimmingFish } from './motion'
-import { canRunFishSceneLoop, findSafeFishHeading, findSafeFishSpawn, fishSceneStatus, fishSpawnPreference, isSafeFishPosition, FISH_SPAWN_DEPTH_PLANES, FISH_SPAWN_DEPTH_PLANE_JITTER, type OccupiedFishSpawn } from './fish-spawn'
+import { canRunFishSceneLoop, classifySpeciesVerticalTier, evaluateTieredVerticalDepthRange, findSafeFishHeading, findSafeFishSpawn, fishSceneStatus, fishSpawnPreference, isSafeFishPosition, FISH_SPAWN_DEPTH_PLANES, FISH_SPAWN_DEPTH_PLANE_JITTER, TIERED_VERTICAL_DEPTH_ZONES, type OccupiedFishSpawn } from './fish-spawn'
 import { instantiateModularReefHabitat } from './reef-assembly'
 
 function waterBounds(width: number, height: number): AxisAlignedBox {
@@ -307,4 +307,33 @@ describe('safe aquarium fish spawning', () => {
     const zs = placements.map(item => item.position.z)
     expect(Math.max(...zs) - Math.min(...zs)).toBeGreaterThan(1.5)
   })
+
+  it('configures tiered vertical swimming depth zones for surface schoolers, mid-water cruisers, and benthic perchers (AQ-99 AC #1–#5)', () => {
+    const bounds = waterBounds(1440, 900)
+    expect(TIERED_VERTICAL_DEPTH_ZONES.surface.speciesIds).toEqual(['blue-green-chromis', 'lyretail-anthias'])
+    expect(TIERED_VERTICAL_DEPTH_ZONES['mid-water'].speciesIds).toEqual(expect.arrayContaining([
+      'blue-tang',
+      'yellow-tang',
+      'copperband-butterflyfish',
+      'flame-angelfish',
+    ]))
+    expect(TIERED_VERTICAL_DEPTH_ZONES.benthic.speciesIds).toEqual(expect.arrayContaining([
+      'tailspot-blenny',
+      'yellow-watchman-goby',
+      'mandarin-dragonet',
+    ]))
+
+    const chromisZone = evaluateTieredVerticalDepthRange('blue-green-chromis', bounds, fishClearanceRadius('blue-green-chromis'))!
+    const tangZone = evaluateTieredVerticalDepthRange('blue-tang', bounds, fishClearanceRadius('blue-tang'))!
+    const gobyZone = evaluateTieredVerticalDepthRange('yellow-watchman-goby', bounds, fishClearanceRadius('yellow-watchman-goby'))!
+
+    expect(classifySpeciesVerticalTier('blue-green-chromis')).toBe('surface')
+    expect(classifySpeciesVerticalTier('blue-tang')).toBe('mid-water')
+    expect(classifySpeciesVerticalTier('yellow-watchman-goby')).toBe('benthic')
+
+    // Surface schoolers sit higher in the water column than benthic perchers
+    expect(chromisZone.worldYRange[1]).toBeGreaterThan(gobyZone.worldYRange[1])
+    expect(tangZone.worldYRange[1]).toBeGreaterThan(gobyZone.worldYRange[0])
+  })
 })
+

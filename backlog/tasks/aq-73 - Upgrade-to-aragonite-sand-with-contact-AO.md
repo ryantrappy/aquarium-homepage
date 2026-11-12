@@ -32,14 +32,14 @@ Current main-scene sand in src/rendering/scene/aquarium.ts (~L113-165) is a 256x
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Sand shows grain-scale normal / roughness variation and sparkle at close range, not a flat procedural texture
-- [ ] #2 Contact AO is present where live rock meets the substrate, with grounded bases
-- [ ] #3 The external AQ-70.12 sand work is Root-reviewed and either integrated or explicitly rejected with reasons
-- [ ] #4 Sand is verified at 1440x900 and 402x874 with no performance regression
+- [x] #1 Sand shows grain-scale normal / roughness variation and sparkle at close range, not a flat procedural texture
+- [x] #2 Contact AO is present where live rock meets the substrate, with grounded bases
+- [x] #3 The external AQ-70.12 sand work is Root-reviewed and either integrated or explicitly rejected with reasons
+- [x] #4 Sand is verified at 1440x900 and 402x874 with no performance regression
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Root agent reviews the completed work before the task is marked Done.
-- [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
+- [x] #1 Root agent reviews the completed work before the task is marked Done.
+- [x] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->

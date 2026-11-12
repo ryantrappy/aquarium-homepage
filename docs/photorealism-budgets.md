@@ -129,6 +129,13 @@ drift apart silently. No runtime change was needed for this task — the
 mechanism was delivered by PR #22 (AQ-76); this task documents it and
 guards its thresholds.
 
+Surface-driven lighting (AQ-96 / AQ-98, 2026-11-11) adds no asset bytes
+and no GPU texture memory — the wave field, surface shader, shaft plane,
+and raymarched shafts are all procedural — and its frame cost is governed
+by the tier mechanism above: the raymarched shaft pass runs on High only,
+the upgraded shaft plane on Balanced, and a half-alpha plane on Low. No
+cap in this document changes for that work.
+
 ## 4. Texture delivery: compressed textures required for new assets
 
 **Rule.** Every photoreal asset created or rebuilt after this budget must

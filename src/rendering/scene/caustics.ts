@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { DEFAULT_AQUARIUM_OPTICS_CONFIG } from './underwater-optics'
+import { SURFACE_WAVE_GLSL } from './surface-waves'
 
 /**
  * Real, animated caustics (AQ-14.2 AC #2, AQ-39, AQ-70.6): a single
@@ -24,8 +25,12 @@ import { DEFAULT_AQUARIUM_OPTICS_CONFIG } from './underwater-optics'
  * world-position hook in `applyCaustics`). Backdrop, water surface, and
  * glass are excluded. No Snell's-law ray convergence is implemented; this
  * is a surface-space approximation whose physical coherence comes from
- * reusing the ripple frequencies (0.22 / 0.37 Hz), the upward-normal mask,
- * and the depth envelope from `evaluateCausticIntensity`.
+ * the sun-slant projection (UVs sampled at the surface footpoint the
+ * light passed through) and the shared wave-field focus term
+ * (`surface-waves.ts`: bright where the surface converges light, dim
+ * where it diverges) — the scroll still reuses the 0.22 / 0.37 Hz
+ * envelope rates, which are deliberately not equated to the wave
+ * field's dispersion frequencies (see `evaluateCausticPatternUV`).
  */
 
 /** Default caustic texture resolution (pixels per side). 256, not 512:
@@ -133,6 +138,12 @@ export function generateCausticsTexture(size: number = CAUSTIC_TEXTURE_SIZE): TH
 export type CausticUniforms = {
   uCausticMap: { value: THREE.Texture }
   uCausticTime: { value: number }
+  /** Unit sun direction (toward the key light) for the slant projection. */
+  uSunDir: { value: THREE.Vector3 }
+  /** Water-surface height for the slant projection. */
+  uSurfaceY: { value: number }
+  /** Gain of the shared wave-field focus term on the caustic pattern. */
+  uFocusGain: { value: number }
 }
 
 export type Caustics = {
@@ -150,9 +161,13 @@ export type Caustics = {
  */
 export function createCaustics(size: number = CAUSTIC_TEXTURE_SIZE): Caustics {
   const texture = generateCausticsTexture(size)
+  const cfg = DEFAULT_AQUARIUM_OPTICS_CONFIG
   const uniforms: CausticUniforms = {
     uCausticMap: { value: texture },
     uCausticTime: { value: 0 },
+    uSunDir: { value: new THREE.Vector3(cfg.sunDirection.x, cfg.sunDirection.y, cfg.sunDirection.z) },
+    uSurfaceY: { value: cfg.surfaceY },
+    uFocusGain: { value: cfg.surfaceFocusGain },
   }
   return {
     texture,
@@ -262,13 +277,38 @@ export function applyCaustics(
       )
     }
     shader.fragmentShader =
-      'uniform sampler2D uCausticMap;\nuniform float uCausticTime;\nuniform float uCausticScaleA;\nuniform float uCausticScaleB;\nuniform float uCausticMaxAdd;\nuniform float uCausticThreshold;\nvarying vec3 vCausticWorldPos;\nvarying vec3 vCausticWorldNormal;\n' +
+      'uniform sampler2D uCausticMap;\nuniform float uCausticTime;\nuniform vec3 uSunDir;\nuniform float uSurfaceY;\nuniform float uFocusGain;\nuniform float uCausticScaleA;\nuniform float uCausticScaleB;\nuniform float uCausticMaxAdd;\nuniform float uCausticThreshold;\nvarying vec3 vCausticWorldPos;\nvarying vec3 vCausticWorldNormal;\n' +
+      SURFACE_WAVE_GLSL +
       shader.fragmentShader
     // UV scroll mirrors evaluateCausticPatternUV exactly (0.22 Hz layer A,
     // 0.37 Hz layer B, opposite drift directions). Keep the two in sync.
+    // Sun-slant projection (AQ-70.6 / AQ-96): the UVs are sampled at the
+    // surface point the light passed through, so the dapple on tall rock
+    // and high coral shifts along the light direction and lines up with
+    // the shafts above it. Focus modulation: the shared wave-field focus
+    // at that surface point multiplies the pattern by
+    // (1 + uFocusGain * focus) — bright where the surface converges light,
+    // dim where it diverges — so the sand dapple breathes with the surface
+    // instead of scrolling on an independent clock.
+    // Injection point (AQ-14.2 fix, 2026-11-11): AFTER `#include
+    // <aomap_fragment>`, NOT at `#include <opaque_fragment>`. In three
+    // r187's meshphysical fragment shader, `outgoingLight` is already
+    // formed from `reflectedLight` (`vec3 outgoingLight = totalDiffuse +
+    // totalSpecular + ...`) BEFORE `opaque_fragment` runs, so writing
+    // `reflectedLight.directDiffuse` at the opaque_fragment point is
+    // dead code — it never reaches the pixels. That is why three visual
+    // checks found "no dapple discernible" even though the pattern was
+    // sampled correctly: the caustic chunk ran, then its result was
+    // discarded. `aomap_fragment` sits between `lights_fragment_end`
+    // (where directDiffuse is accumulated) and the outgoingLight sum,
+    // so the dim and the add below actually land. Verified with an
+    // isolated probe (plane + key light): rendering `causticP` directly
+    // shows a strong cellular web, and with this injection point the
+    // same web reaches the lit output.
     shader.fragmentShader = shader.fragmentShader.replace(
-      '#include <opaque_fragment>',
-      `// Animated caustic texture (AQ-14.2 AC #2): two world-space layers
+      '#include <aomap_fragment>',
+      `#include <aomap_fragment>
+// Animated caustic texture (AQ-14.2 AC #2): two world-space layers
 // scrolling in opposite directions, masked to upward faces and faded
 // with depth, capped at uCausticMaxAdd additive on direct diffuse light.
 // The layers combine by MAX, not product: the cellular texture is a
@@ -278,13 +318,25 @@ export function applyCaustics(
 // visual-check finding. Max keeps the cellular network shape (union of
 // ridges): ~32% of the surface shows pattern, mean additive +0.07 before
 // the upward-normal and depth masks, still restrained under the +0.35 cap.
-vec2 causticUvA = vCausticWorldPos.xz * uCausticScaleA + vec2(uCausticTime * 0.022, -uCausticTime * 0.0132);
-vec2 causticUvB = vCausticWorldPos.xz * uCausticScaleB + vec2(-uCausticTime * 0.0296, uCausticTime * 0.0185);
+float causticDist = (uSurfaceY - vCausticWorldPos.y) / max(uSunDir.y, 0.2);
+vec2 causticSurf = vCausticWorldPos.xz + uSunDir.xz * causticDist;
+vec2 causticWarp = surfaceWaveSlope(causticSurf, uCausticTime) * 1.45;
+vec2 causticUvA = (causticSurf + causticWarp) * uCausticScaleA + vec2(uCausticTime * 0.022, -uCausticTime * 0.0132);
+vec2 causticUvB = (causticSurf - causticWarp * 0.85) * uCausticScaleB + vec2(-uCausticTime * 0.0296, uCausticTime * 0.0185);
 float causticP = max(texture2D(uCausticMap, causticUvA).r, texture2D(uCausticMap, causticUvB).r);
 causticP = smoothstep(uCausticThreshold, 0.9, causticP);
 float causticMask = max(vCausticWorldNormal.y, 0.0) * (1.0 - 0.35 * clamp((2.8 - vCausticWorldPos.y) / 5.6, 0.0, 1.0));
-reflectedLight.directDiffuse += diffuseColor.rgb * (causticP * causticMask * uCausticMaxAdd);
-#include <opaque_fragment>`,
+// Light redistribution (look-dev 2026-11-11): focusing means bright
+// ridges AND dimmer surroundings — the light in the web came from the
+// field around it.
+reflectedLight.directDiffuse *= 1.0 - 0.40 * (1.0 - causticP) * causticMask;
+// Deep blue-water shadow tint between caustic ridges so non-caustic surfaces sit in moody reef water shadow
+vec3 underwaterShadowTint = mix(vec3(1.0), vec3(0.28, 0.44, 0.70), (1.0 - causticP) * clamp(causticMask * 1.25, 0.0, 1.0));
+reflectedLight.directDiffuse *= underwaterShadowTint;
+reflectedLight.indirectDiffuse *= mix(vec3(1.0), vec3(0.24, 0.38, 0.64), (1.0 - causticP) * 0.85);
+float causticBright = causticP * max(0.0, 1.0 + uFocusGain * surfaceWaveFocus(causticSurf, uCausticTime));
+vec3 causticSunlightTint = vec3(1.18, 1.08, 0.90);
+reflectedLight.directDiffuse += diffuseColor.rgb * causticSunlightTint * (causticBright * causticMask * uCausticMaxAdd * 1.35);`,
     )
   }
   const cacheKeySuffix = skinned ? CAUSTIC_SKINNED_CACHE_KEY_SUFFIX : CAUSTIC_CACHE_KEY_SUFFIX

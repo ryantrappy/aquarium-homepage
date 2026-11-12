@@ -373,8 +373,8 @@
       "kind": "rock",
       "archetype": "rock-foundation",
       "species": "Aragonite Live-Rock Left Arched Bommie Foundation with Coral Mount Sockets",
-      "sha256": "ac2ed1793d16e84f264ac19017935f7daa4f158ebac116cddde57a53653c34d5",
-      "bytes": 2125240,
+      "sha256": "2f81f8fc212886aa3eea9a0d316ca0a1f4badccac20044583f8ad4f0bdd9c2ef",
+      "bytes": 1482184,
       "triangles": 24572,
       "dimensionsM": [
         1.011278,
@@ -397,13 +397,13 @@
         {
           "id": "live_rock_island_left",
           "role": "rock",
-          "vertexCount": 12604,
+          "vertexCount": 12924,
           "maskSchema": null
         }
       ],
       "socketCount": 12,
       "generator": "src/rendering/modeling/build_live_rock_islands.py",
-      "generatorSha256": "3508cc39e15bb594a19d8774dbaff1f10dc675aa124e510d363d1c28c15009cc",
+      "generatorSha256": "611af814643238ae4ffa1a7b2604180d3ab9b9afae59b58e55843e4bb585690b",
       "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_live_rock_islands.py -- /tmp/coral-models left",
       "contractValidated": true,
       "status": "candidate-awaiting-root-review"
@@ -416,8 +416,8 @@
       "kind": "rock",
       "archetype": "rock-foundation",
       "species": "Aragonite Live-Rock Right Terraced Shelf Foundation with Coral Mount Sockets",
-      "sha256": "ab7b756344c6a0a879d254b6ca06a20c63c4246b0a19b76394cc532c61abfbee",
-      "bytes": 2104916,
+      "sha256": "7d8cc1ce22d850d199f28652437c6d95d64ab4cc80606cc451c4c58c702558c1",
+      "bytes": 939092,
       "triangles": 24572,
       "dimensionsM": [
         0.966449,
@@ -440,13 +440,13 @@
         {
           "id": "live_rock_island_right",
           "role": "rock",
-          "vertexCount": 12604,
+          "vertexCount": 12924,
           "maskSchema": null
         }
       ],
       "socketCount": 11,
       "generator": "src/rendering/modeling/build_live_rock_islands.py",
-      "generatorSha256": "3508cc39e15bb594a19d8774dbaff1f10dc675aa124e510d363d1c28c15009cc",
+      "generatorSha256": "611af814643238ae4ffa1a7b2604180d3ab9b9afae59b58e55843e4bb585690b",
       "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_live_rock_islands.py -- /tmp/coral-models right",
       "contractValidated": true,
       "status": "candidate-awaiting-root-review"

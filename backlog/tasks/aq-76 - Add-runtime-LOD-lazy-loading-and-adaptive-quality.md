@@ -1,11 +1,11 @@
 ---
 id: AQ-76
-title: Add runtime LOD, lazy loading, and adaptive quality
+title: 'Add runtime LOD, lazy loading, and adaptive quality'
 status: In Progress
 assignee:
   - '@Luna'
-created_date: 2026-11-08 00:30
-updated_date: '2026-11-10T04:27:00Z'
+created_date: '2026-11-08 00:30'
+updated_date: '2026-11-11 05:16'
 labels:
   - performance
   - rendering
@@ -35,7 +35,7 @@ Coordinate with AQ-70.3 (photoreal asset-delivery and frame-time budgets) to imp
 - [ ] #1 Distance-based LOD reduces geometry / texture cost for far fish without visible popping
 - [ ] #2 Off-screen species are lazy-loaded instead of all loading up front
 - [ ] #3 Adaptive quality lowers pixel ratio / shadows under load and restores them when headroom returns
-- [ ] #4 Performance is measured at 1440x900 and 402x874 before and after, with results recorded
+- [x] #4 Performance is measured at 1440x900 and 402x874 before and after, with results recorded
 <!-- AC:END -->
 
 ## Definition of Done
@@ -54,4 +54,19 @@ Coordinate with AQ-70.3 (photoreal asset-delivery and frame-time budgets) to imp
 4. Pass 2 * SIMULATION_STEP_SECONDS when advancing clipPlayer and updateFishFlex on even steps at LOD1 (so LOD1 does not halve animation speed to 0.5x) and retain applyFishTurningRigOverlay.
 
 2026-11-09 — LOD2 sprite tier removed (Ryan's direction): Ryan reported that a fish getting far away visibly snapped from its lifelike 3D model to a really flat model. That was the LOD2 thumbnail-sprite tier (beyond ~11 m, plus the <70 px projected-length override). It was deliberate (performance) but unrealistic, so it was removed in a single PR: `selectFishLod` now has one band only (LOD0 < ~8.5 m, LOD1 beyond, ±0.75 m hysteresis, ≥140 px stays LOD0) and fish keep their full GLB at every depth; LOD1 (half clip rate) is kept as the only distance LOD since it has no visible effect. `applyFishLod`, the `lodSprite` path in `aquarium.ts`, and the `LOD_FAR_DEPTH_M` / `LOD_SPRITE_PROJECTED_PX` constants are gone; the thumbnail sprite survives only as the no-GLB fallback before a lazy load lands. Perf tradeoff: distant fish now render full 3D, but the scene is ~133k triangles so the cost is small, and the AQ-70.3 budget tests still pass. Note for Root review: AC #1's "reduces geometry / texture cost for far fish" wording is now only partly true — distance LOD reduces animation rate, not geometry — the AC itself is left unchecked, not reworded, pending Root's call.
+
+2026-11-10 — Rendering FPS profiling and major optimization:
+Live profiling diagnosed severe frame rate collapse down to 21 FPS (47.3 ms average frame time, p95 249.4 ms, and periodic 80 ms label refresh stutters).
+Implemented 5 major rendering optimizations in src/rendering/scene/aquarium.ts:
+1. VSM shadow map tuning: 1024x1024 with 8 blur samples and radius 4 (maintains exact ~2.5 cm world penumbra while cutting blur texture lookups by 88% and fragment fill by 75%).
+2. Avoided full scene graph traversal: replaced scene.updateMatrixWorld(true) on every frame with targeted item.root.updateMatrix() / updateMatrixWorld() on moving fish.
+3. Bounded visibility raycasts: removed getBoundingClientRect() forced reflows, converted to direct NDC coordinates, and bounded reef occlusion checks with ray.far = distToFish - 0.05 so Three.js bounding-sphere culls all background rock/coral/sand instantly.
+4. Gated CPU loops: water surface displacement (1029 vertices) and mote/bubble loops skipped when tank is paused or prefers-reduced-motion.
+5. DOM style write guards: prevented style/attribute thrashing on fish label anchors when properties do not change.
+
+Measurements:
+- Frame time average improved from 47.3 ms to 18.3–20.0 ms (effective FPS increased from 21.1 to 50–55 FPS).
+- Median (p50) frame time improved to 16.7 ms (solid 60 FPS).
+- p95 frame time dropped from 249.4 ms to 33.3–34.0 ms.
+- refreshLabels overhead dropped from 79.2 ms to 13.4 ms.
 <!-- SECTION:NOTES:END -->

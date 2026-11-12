@@ -21,6 +21,25 @@ custom only, see `docs/asset-contract.md`); a reference marked CC BY-SA is
 usable for looking, not for shipping, and any file marked "verify on file
 page" must have its license confirmed there before any use beyond looking.
 
+## 0. Project Goal Visual
+
+![Project goal visual: reef composition, coral plan, Blender modeling, and Three.js implementation guide](more-realistic-reef-guide.png)
+
+**[`docs/more-realistic-reef-guide.png`](more-realistic-reef-guide.png) is the primary goal visual for the project.** Every visual, layout, modeling, and rendering pass should aim toward the clarity, lighting, and reef composition shown in this guide:
+
+- **Layout & Composition**: Three-part aquascape silhouette — **Left Peak** (Height + Focus) → **Center Arch** (Depth + Flow) → **Right Island** (Balance) over a sunlit, caustic-lit sand bed.
+- **Coral Plan (Examples)**: *Acropora* (SPS, Branching), *Montipora* (SPS, Plate), *Euphyllia* (LPS, Hammer/Torch), *Acanthastrea* (LPS, Acan), *Zoanthids* (Soft, Colonial), *Ricordea* (Soft, Mushroom), *Goniopora* (LPS, Flowering), and *Tridacna* (Clam, Focal).
+- **Modeling Guidance (Blender)**:
+  - Start with realistic live rock (scanned asset or sculpted, porous, irregular shapes).
+  - Build a small library of coral modules (branching, plate, encrusting, polyp) and instance them.
+  - Use vertex displacement + normal maps for coral texture and polyp detail.
+  - Keep assets modular (rocks, coral clumps, sand) so you can rearrange and iterate.
+- **3JS / Web Implementation Tips**:
+  - *Water & lighting*: caustics, volumetric light rays, subtle surface ripples (e.g., water material + caustic texture).
+  - *Fish animation*: glTF models with skeletal animation; use fish-like motion and random swimming behavior (seek/avoid).
+  - *Performance*: use LODs, instancing, compressed textures (KTX2), and limit high-poly corals to focal areas.
+  - *Realism extras*: floating particles, micro-bubbles, subtle coral polyp motion (shader-driven), and glass reflections.
+
 ## 1. How to use this set
 
 - Judge a capture side by side with the closest reference, not from memory.

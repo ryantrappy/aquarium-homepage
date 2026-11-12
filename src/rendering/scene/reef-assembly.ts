@@ -33,8 +33,8 @@ export type AssembledCoralBinding = {
 }
 
 export const LIVE_ROCK_ISLAND_URLS: Readonly<Record<'left' | 'right', string>> = Object.freeze({
-  left: new URL('../assets/corals/live-rock-island-left.glb', import.meta.url).href,
-  right: new URL('../assets/corals/live-rock-island-right.glb', import.meta.url).href,
+  left: new URL('../assets/corals/reef-full-model-left.glb?v=reef-full-1', import.meta.url).href,
+  right: new URL('../assets/corals/reef-full-model-right.glb?v=reef-full-1', import.meta.url).href,
 })
 
 export const MODULAR_CORAL_ASSET_URLS: Readonly<Record<string, string>> = Object.freeze({
@@ -194,49 +194,96 @@ function ensureCoralShaderBounds(
   geometry.boundingSphere!.radius += state.maxMargin
 }
 
-// Cohesive, velvety actinic-daylight reef palettes for branching SPS, plating Montipora, and GSP carpets:
-const PALETTE_MAUVE_GORGONIAN_PLUME: CoralPaletteOverride = {
-  baseColor: '#c48ca8',
-  tipColor: '#f2d8e6',
-  creviceColor: '#5c3b52',
-  regradeStrength: 0.92,
-  roughness: 0.82,
+// Cohesive, velvety actinic-daylight reef palettes matching more_realistic_reef_guide.png (AQ-95 & AQ-101):
+const PALETTE_ROYAL_VIOLET_ACROPORA: CoralPaletteOverride = {
+  baseColor: '#5c46c8',
+  tipColor: '#b89cff',
+  creviceColor: '#221652',
+  regradeStrength: 0.94,
+  roughness: 0.78,
   subsurfaceStrength: 0.38,
-  fluorescenceStrength: 0.14,
+  fluorescenceStrength: 0.24,
 }
-const PALETTE_CREAM_BLUSH_LEATHER: CoralPaletteOverride = {
-  baseColor: '#cbb0be',
-  tipColor: '#f7ebf0',
-  creviceColor: '#5e4858',
+const PALETTE_CORAL_ROSE_ACROPORA: CoralPaletteOverride = {
+  baseColor: '#d85c84',
+  tipColor: '#ffc8dc',
+  creviceColor: '#521a30',
   regradeStrength: 0.93,
-  roughness: 0.84,
-  subsurfaceStrength: 0.42,
-  fluorescenceStrength: 0.14,
-}
-const PALETTE_DUSTY_LAVENDER_SPS: CoralPaletteOverride = {
-  baseColor: '#9876b8',
-  tipColor: '#e4d4f5',
-  creviceColor: '#432d5e',
-  regradeStrength: 0.92,
-  roughness: 0.80,
-  subsurfaceStrength: 0.34,
-  fluorescenceStrength: 0.15,
-}
-const PALETTE_POWDER_BLUE_TOADSTOOL: CoralPaletteOverride = {
-  baseColor: '#5a98c8',
-  tipColor: '#c2e8fc',
-  creviceColor: '#284568',
-  regradeStrength: 0.92,
   roughness: 0.80,
   subsurfaceStrength: 0.40,
-  fluorescenceStrength: 0.18,
+  fluorescenceStrength: 0.20,
 }
-const PALETTE_ROYAL_PLUM_MONTIPORA: CoralPaletteOverride = {
-  baseColor: '#784888',
-  tipColor: '#cfa8dc',
-  creviceColor: '#361c42',
+const PALETTE_NEON_GREEN_STAGHORN_SPS: CoralPaletteOverride = {
+  baseColor: '#34cc58',
+  tipColor: '#88f792',
+  creviceColor: '#164d24',
   regradeStrength: 0.92,
+  roughness: 0.78,
+  subsurfaceStrength: 0.40,
+  fluorescenceStrength: 0.26,
+}
+const PALETTE_TERRACOTTA_MONTIPORA_PLATE: CoralPaletteOverride = {
+  baseColor: '#b85042',
+  tipColor: '#f7d4c8',
+  creviceColor: '#481a14',
+  regradeStrength: 0.94,
   roughness: 0.82,
+  subsurfaceStrength: 0.36,
+  fluorescenceStrength: 0.16,
+}
+const PALETTE_EUPHYLLIA_GREEN_GOLD_TORCH: CoralPaletteOverride = {
+  baseColor: '#2ec84e',
+  tipColor: '#eef862',
+  creviceColor: '#123e1c',
+  regradeStrength: 0.94,
+  roughness: 0.42,
+  subsurfaceStrength: 0.52,
+  fluorescenceStrength: 0.28,
+}
+const PALETTE_EUPHYLLIA_TEAL_HAMMER: CoralPaletteOverride = {
+  baseColor: '#28a86e',
+  tipColor: '#8ef598',
+  creviceColor: '#103c28',
+  regradeStrength: 0.93,
+  roughness: 0.46,
+  subsurfaceStrength: 0.48,
+  fluorescenceStrength: 0.24,
+}
+const PALETTE_FIERY_ACANTHASTREA_LPS: CoralPaletteOverride = {
+  baseColor: '#e64422',
+  tipColor: '#ff9668',
+  creviceColor: '#1a4c54',
+  regradeStrength: 0.95,
+  roughness: 0.68,
+  subsurfaceStrength: 0.44,
+  fluorescenceStrength: 0.26,
+}
+const PALETTE_ZOANTHID_ORANGE_GREEN: CoralPaletteOverride = {
+  baseColor: '#e85820',
+  tipColor: '#6cf558',
+  creviceColor: '#3a1c12',
+  regradeStrength: 0.94,
+  roughness: 0.72,
+  subsurfaceStrength: 0.42,
+  fluorescenceStrength: 0.26,
+}
+const PALETTE_TRIDACNA_COBALT_MANTLE: CoralPaletteOverride = {
+  baseColor: '#2248c8',
+  tipColor: '#58dff8',
+  creviceColor: '#0e1c52',
+  regradeStrength: 0.95,
+  roughness: 0.64,
+  subsurfaceStrength: 0.46,
+  fluorescenceStrength: 0.24,
+}
+const PALETTE_GONIOPORA_MAGENTA_FLOWER: CoralPaletteOverride = {
+  baseColor: '#a83cb2',
+  tipColor: '#f294ec',
+  creviceColor: '#3c1244',
+  regradeStrength: 0.93,
+  roughness: 0.52,
+  subsurfaceStrength: 0.48,
+  fluorescenceStrength: 0.22,
 }
 const PALETTE_GSP_GREEN_CARPET: CoralPaletteOverride = {
   baseColor: '#48b838',
@@ -247,30 +294,11 @@ const PALETTE_GSP_GREEN_CARPET: CoralPaletteOverride = {
   subsurfaceStrength: 0.42,
   fluorescenceStrength: 0.24,
 }
-const PALETTE_DEEP_VIOLET_POLYP_MAT: CoralPaletteOverride = {
-  baseColor: '#5c4678',
-  tipColor: '#a892c8',
-  creviceColor: '#281d38',
-  regradeStrength: 0.94,
-  roughness: 0.84,
-}
-
-// Realistic, lifelike Sea Anemone color morphs (creamy-ivory fluted tentacle roots,
-// translucent hydrostat shafts, glowing rounded acrosphere tips, and terracotta/crimson verrucose pedal columns):
 const PALETTE_ANEMONE_COLUMN_TERRACOTTA: CoralPaletteOverride = {
   baseColor: '#d8481c',
   tipColor: '#f7ead8',
   creviceColor: '#5c1210',
   regradeStrength: 0.22,
-  roughness: 0.52,
-  subsurfaceStrength: 0.44,
-  fluorescenceStrength: 0.14,
-}
-const PALETTE_ANEMONE_COLUMN_CRIMSON: CoralPaletteOverride = {
-  baseColor: '#a81c2e',
-  tipColor: '#f2e0c8',
-  creviceColor: '#480a14',
-  regradeStrength: 0.28,
   roughness: 0.52,
   subsurfaceStrength: 0.44,
   fluorescenceStrength: 0.14,
@@ -284,48 +312,6 @@ const PALETTE_ANEMONE_COLUMN_SIENNA: CoralPaletteOverride = {
   subsurfaceStrength: 0.44,
   fluorescenceStrength: 0.14,
 }
-
-// 1. Rose-Magenta / Lavender Magnificent Anemone (matches user reference photos 1 & 2)
-const PALETTE_ROSE_MAUVE_ANEMONE: CoralPaletteOverride = {
-  baseColor: '#e85298',
-  tipColor: '#ff3888',
-  creviceColor: '#f5e8d0',
-  regradeStrength: 0.22,
-  roughness: 0.30,
-  subsurfaceStrength: 0.56,
-  fluorescenceStrength: 0.24,
-}
-// 2. Sunburst / Rainbow Host Anemone (emerald-jade base -> fiery tangerine shaft -> neon rose-coral tip)
-const PALETTE_TERRACOTTA_SUNBURST_BTA: CoralPaletteOverride = {
-  baseColor: '#f25c28',
-  tipColor: '#ff2e58',
-  creviceColor: '#a8e898',
-  regradeStrength: 0.78,
-  roughness: 0.30,
-  subsurfaceStrength: 0.56,
-  fluorescenceStrength: 0.26,
-}
-// 3. Electric Mint-Green / Chartreuse-Tip Ritteri Anemone (creamy-jade base -> seafoam-emerald shaft -> chartreuse tip)
-const PALETTE_MINT_GREEN_ANEMONE: CoralPaletteOverride = {
-  baseColor: '#38c86e',
-  tipColor: '#c8ff4d',
-  creviceColor: '#e6f2d4',
-  regradeStrength: 0.78,
-  roughness: 0.30,
-  subsurfaceStrength: 0.56,
-  fluorescenceStrength: 0.24,
-}
-// 4. Royal Purple / Lavender-Tip Sebae Anemone (champagne-ivory base -> amethyst-lavender shaft -> glowing violet tip)
-const PALETTE_PURPLE_LAVENDER_ANEMONE: CoralPaletteOverride = {
-  baseColor: '#9462dc',
-  tipColor: '#df52ff',
-  creviceColor: '#f4e8d6',
-  regradeStrength: 0.76,
-  roughness: 0.30,
-  subsurfaceStrength: 0.56,
-  fluorescenceStrength: 0.24,
-}
-// 5. Golden-Peach / Rose-Gold Long-Tentacle Anemone (vanilla-ivory base -> warm apricot-peach shaft -> rose-gold tip)
 const PALETTE_GOLDEN_PEACH_ANEMONE: CoralPaletteOverride = {
   baseColor: '#f07c4e',
   tipColor: '#ff98c4',
@@ -335,294 +321,292 @@ const PALETTE_GOLDEN_PEACH_ANEMONE: CoralPaletteOverride = {
   subsurfaceStrength: 0.56,
   fluorescenceStrength: 0.22,
 }
-// 6. Aquamarine / Violet-Tip Reef Anemone (creamy-aqua base -> translucent turquoise shaft -> glowing violet-pink tip)
-const PALETTE_SEAFOAM_CYAN_CORAL: CoralPaletteOverride = {
-  baseColor: '#32b8c4',
-  tipColor: '#f068d8',
-  creviceColor: '#e4f5ee',
-  regradeStrength: 0.76,
+const PALETTE_ROSE_MAUVE_ANEMONE: CoralPaletteOverride = {
+  baseColor: '#e85298',
+  tipColor: '#ff3888',
+  creviceColor: '#f5e8d0',
+  regradeStrength: 0.22,
   roughness: 0.30,
   subsurfaceStrength: 0.56,
   fluorescenceStrength: 0.24,
 }
 
 /**
- * Large, lush, mature reef coral mounts (`scale: 1.35..1.85`) featuring the new Blender
- * Host Sea Anemone (`coral-anemone-bta`) across the tentaculate & anemone sockets in realistic,
- * lifelike biological color morphs (Rose-Magenta, Mint-Chartreuse, Golden-Peach, Sunburst-Rainbow,
- * Royal-Lavender, and Aquamarine-Violet).
+ * 6-Species Reef Ecosystem Zonation matching more_realistic_reef_guide.png (AQ-95 & AQ-101):
+ * - Left Peak (Height + Focus): Royal-violet & coral-rose branching Acropora at the apex,
+ *   broad terracotta-rose Montipora plate jutting from the mid-upper plateau shelf,
+ *   huge flowing green/gold Euphyllia torch & hammer on the lower-left flank,
+ *   and fiery orange-red Acanthastrea + emerald brain coral along the lower apron.
+ * - Center Arch & Right Island (Depth + Flow + Balance): Open coral-encrusted arch bridge
+ *   topped with orange/green colonial Zoanthids, balanced coral-pink & violet Acropora on the right crest,
+ *   peach-pink Goniopora/anemone in the lower-front, and deep cobalt-blue Tridacna mantle on the right apron.
  */
 export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
-  // Giant sweeping upper-crest branching & gorgonian plumes (Mauve-Pink, Dusty Lavender, Cream-Blush)
+  // 1. Left Peak Apex: Royal Violet-Blue & Coral-Rose Branching Acropora (from reef-full-model.blend)
   {
     socketName: 'socket_sps_crest_01',
     coralAssetId: 'coral-acropora-staghorn',
     archetype: 'branching-sps',
-    yawRad: 0.35,
-    scale: 1.75,
-    tiltXRad: 0.16,
-    tiltZRad: 0.24,
-    offsetM: [-0.03, 0.01, 0.0],
-    paletteOverride: PALETTE_DUSTY_LAVENDER_SPS,
+    yawRad: 0.20,
+    scale: 1.18,
+    tiltXRad: 0.04,
+    tiltZRad: 0.06,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: PALETTE_ROYAL_VIOLET_ACROPORA,
   },
   {
     socketName: 'socket_sps_crest_02',
     coralAssetId: 'coral-acropora-table',
     archetype: 'branching-sps',
-    yawRad: -0.25,
-    scale: 1.70,
-    tiltXRad: 0.20,
-    tiltZRad: -0.10,
-    offsetM: [0.01, 0.02, 0.02],
-    paletteOverride: PALETTE_MAUVE_GORGONIAN_PLUME,
+    yawRad: -0.20,
+    scale: 1.15,
+    tiltXRad: 0.05,
+    tiltZRad: -0.04,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: PALETTE_ROYAL_VIOLET_ACROPORA,
   },
   {
     socketName: 'socket_sps_crest_03',
     coralAssetId: 'coral-acropora-staghorn',
     archetype: 'branching-sps',
-    yawRad: 1.4,
-    scale: 1.85,
-    tiltXRad: 0.18,
-    tiltZRad: -0.26,
-    offsetM: [0.04, 0.02, 0.01],
-    paletteOverride: PALETTE_MAUVE_GORGONIAN_PLUME,
+    yawRad: 1.20,
+    scale: 1.08,
+    tiltXRad: 0.04,
+    tiltZRad: -0.08,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: PALETTE_NEON_GREEN_STAGHORN_SPS,
   },
-  // Broad scrolling Montipora whorl ledges jutting out from the mid-reef shelves
+  // 2. Mid-Upper Cantilevered Plateau Shelf: Broad Terracotta-Rose Montipora Plate
   {
     socketName: 'socket_plate_ledge_01',
     coralAssetId: 'coral-montipora-plate',
     archetype: 'plating-sps',
-    yawRad: 0.2,
-    scale: 1.50,
-    tiltXRad: 0.14,
-    tiltZRad: 0.20,
-    offsetM: [-0.03, 0.01, 0.02],
-    paletteOverride: PALETTE_ROYAL_PLUM_MONTIPORA,
+    yawRad: 0.10,
+    scale: 1.18,
+    tiltXRad: 0.04,
+    tiltZRad: 0.05,
+    offsetM: [-0.03, -0.008, 0.01],
+    paletteOverride: PALETTE_TERRACOTTA_MONTIPORA_PLATE,
   },
   {
     socketName: 'socket_plate_ledge_02',
     coralAssetId: 'coral-montipora-plate',
     archetype: 'plating-sps',
-    yawRad: -0.45,
-    scale: 1.48,
-    tiltXRad: 0.14,
-    tiltZRad: -0.18,
-    offsetM: [0.03, 0.01, 0.02],
-    paletteOverride: PALETTE_CREAM_BLUSH_LEATHER,
+    yawRad: -0.40,
+    scale: 0.98,
+    tiltXRad: 0.05,
+    tiltZRad: -0.06,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: PALETTE_ZOANTHID_ORANGE_GREEN,
   },
-  // Mid-slope Sea Anemones in realistic Mint-Chartreuse, Golden-Peach, and Rose-Magenta morphs
+  // 3. Lower-Left & Mid Ledges: Lush Neon-Green/Gold Euphyllia Torch & Hammer + Fiery Acanthastrea
   {
     socketName: 'socket_lps_mid_01',
-    coralAssetId: 'coral-anemone-bta',
+    coralAssetId: 'coral-euphyllia-torch',
     archetype: 'tentaculate-lps',
-    yawRad: 0.15,
-    scale: 1.42,
-    tiltXRad: 0.24,
-    tiltZRad: 0.18,
-    offsetM: [-0.03, 0.01, 0.03],
-    paletteOverride: PALETTE_MINT_GREEN_ANEMONE,
-    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_SIENNA,
+    yawRad: 0.20,
+    scale: 1.28,
+    tiltXRad: 0.16,
+    tiltZRad: 0.08,
+    offsetM: [-0.03, -0.008, 0.03],
+    paletteOverride: PALETTE_EUPHYLLIA_GREEN_GOLD_TORCH,
   },
   {
     socketName: 'socket_lps_mid_02',
-    coralAssetId: 'coral-anemone-bta',
+    coralAssetId: 'coral-euphyllia-hammer',
     archetype: 'tentaculate-lps',
-    yawRad: -0.4,
-    scale: 1.40,
-    tiltXRad: 0.22,
-    tiltZRad: -0.16,
-    offsetM: [0.03, 0.01, 0.03],
-    paletteOverride: PALETTE_GOLDEN_PEACH_ANEMONE,
-    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_CRIMSON,
+    yawRad: -0.30,
+    scale: 1.06,
+    tiltXRad: 0.15,
+    tiltZRad: -0.05,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: PALETTE_FIERY_ACANTHASTREA_LPS,
   },
   {
     socketName: 'socket_lps_mid_03',
-    coralAssetId: 'coral-anemone-bta',
+    coralAssetId: 'coral-euphyllia-hammer',
     archetype: 'tentaculate-lps',
-    yawRad: 0.85,
-    scale: 1.45,
-    tiltXRad: 0.22,
-    tiltZRad: 0.08,
-    offsetM: [0.0, 0.02, 0.03],
-    paletteOverride: PALETTE_PURPLE_LAVENDER_ANEMONE,
-    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_TERRACOTTA,
+    yawRad: 0.60,
+    scale: 1.06,
+    tiltXRad: 0.12,
+    tiltZRad: 0.04,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: PALETTE_EUPHYLLIA_TEAL_HAMMER,
   },
   {
     socketName: 'socket_anemone_crevice_01',
     coralAssetId: 'coral-anemone-bta',
     archetype: 'host-anemone',
-    yawRad: 0.1,
-    scale: 1.45,
-    tiltXRad: 0.24,
-    tiltZRad: -0.10,
-    offsetM: [-0.06, -0.02, 0.04],
+    yawRad: 0.10,
+    scale: 0.98,
+    tiltXRad: 0.15,
+    tiltZRad: -0.04,
+    offsetM: [0.0, -0.008, 0.0],
     paletteOverride: PALETTE_ROSE_MAUVE_ANEMONE,
     columnPaletteOverride: PALETTE_ANEMONE_COLUMN_TERRACOTTA,
   },
-  // Lush fuzzy Green Star-Polyp (GSP) carpets along the lower rock apron
+  // 4. Foreground Apron: Emerald Brain Coral, Fiery Orange-Red Acanthastrea & Colonial Zoanthids
   {
     socketName: 'socket_brain_apron_01',
     coralAssetId: 'coral-brain-diploria',
     archetype: 'mounded-lps',
-    yawRad: 0.3,
-    scale: 1.45,
-    tiltXRad: 0.12,
-    tiltZRad: 0.10,
-    offsetM: [-0.04, 0.0, 0.03],
-    paletteOverride: PALETTE_GSP_GREEN_CARPET,
+    yawRad: 0.30,
+    scale: 1.08,
+    tiltXRad: 0.10,
+    tiltZRad: 0.04,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: PALETTE_EUPHYLLIA_TEAL_HAMMER,
   },
   {
     socketName: 'socket_brain_apron_02',
     coralAssetId: 'coral-brain-diploria',
     archetype: 'mounded-lps',
-    yawRad: -0.55,
-    scale: 1.50,
-    tiltXRad: 0.14,
-    tiltZRad: -0.10,
-    offsetM: [0.03, 0.0, 0.04],
-    paletteOverride: PALETTE_GSP_GREEN_CARPET,
+    yawRad: -0.40,
+    scale: 1.10,
+    tiltXRad: 0.10,
+    tiltZRad: -0.04,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: PALETTE_FIERY_ACANTHASTREA_LPS,
   },
   {
     socketName: 'socket_soft_mat_01',
     coralAssetId: 'coral-zoanthid-mat',
     archetype: 'zoanthid-mat',
-    yawRad: 0.25,
-    scale: 1.42,
-    tiltXRad: 0.16,
-    tiltZRad: 0.08,
-    offsetM: [-0.02, 0.01, 0.04],
-    paletteOverride: PALETTE_ROSE_MAUVE_ANEMONE,
+    yawRad: 0.20,
+    scale: 1.05,
+    tiltXRad: 0.10,
+    tiltZRad: 0.04,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: PALETTE_ZOANTHID_ORANGE_GREEN,
   },
 ] as const
 
 export const DEFAULT_RIGHT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
-  // Giant upper-right branching Mauve-Pink, Powder-Blue, and Dusty-Lavender colonies
+  // 1. Center-Right Arch & Balanced Right Island Crest: Violet-Magenta & Coral-Pink Acropora (from reef-full-model.blend)
   {
     socketName: 'socket_sps_crest_04',
-    coralAssetId: 'coral-acropora-staghorn',
+    coralAssetId: 'coral-acropora-table',
     archetype: 'branching-sps',
-    yawRad: 0.18,
-    scale: 1.82,
-    tiltXRad: 0.16,
-    tiltZRad: 0.10,
-    offsetM: [0.0, 0.02, 0.01],
-    paletteOverride: PALETTE_POWDER_BLUE_TOADSTOOL,
+    yawRad: 0.20,
+    scale: 1.12,
+    tiltXRad: 0.04,
+    tiltZRad: 0.04,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: PALETTE_CORAL_ROSE_ACROPORA,
   },
   {
     socketName: 'socket_sps_crest_05',
     coralAssetId: 'coral-acropora-staghorn',
     archetype: 'branching-sps',
-    yawRad: -0.6,
-    scale: 1.75,
-    tiltXRad: 0.16,
-    tiltZRad: -0.22,
-    offsetM: [0.04, 0.02, 0.01],
-    paletteOverride: PALETTE_MAUVE_GORGONIAN_PLUME,
+    yawRad: -0.50,
+    scale: 1.15,
+    tiltXRad: 0.04,
+    tiltZRad: -0.06,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: PALETTE_CORAL_ROSE_ACROPORA,
   },
   {
     socketName: 'socket_sps_crest_06',
-    coralAssetId: 'coral-acropora-table',
+    coralAssetId: 'coral-acropora-staghorn',
     archetype: 'branching-sps',
-    yawRad: 1.1,
-    scale: 1.62,
-    tiltXRad: 0.20,
-    tiltZRad: 0.18,
-    offsetM: [-0.04, 0.01, 0.02],
-    paletteOverride: PALETTE_MAUVE_GORGONIAN_PLUME,
+    yawRad: 0.80,
+    scale: 1.02,
+    tiltXRad: 0.04,
+    tiltZRad: 0.06,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: PALETTE_GONIOPORA_MAGENTA_FLOWER,
   },
-  // Scrolling Montipora & leather folds on the left and right flanks
+  // 2. Arch Span & Flank Ledges: Colonial Zoanthid Arch Bridge & Magenta Goniopora
   {
     socketName: 'socket_plate_ledge_03',
     coralAssetId: 'coral-montipora-plate',
     archetype: 'plating-sps',
-    yawRad: 0.4,
-    scale: 1.52,
-    tiltXRad: 0.16,
-    tiltZRad: 0.20,
-    offsetM: [-0.03, 0.01, 0.02],
-    paletteOverride: PALETTE_POWDER_BLUE_TOADSTOOL,
+    yawRad: 0.40,
+    scale: 0.92,
+    tiltXRad: 0.04,
+    tiltZRad: 0.06,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: PALETTE_ZOANTHID_ORANGE_GREEN,
   },
   {
     socketName: 'socket_plate_ledge_04',
     coralAssetId: 'coral-montipora-plate',
     archetype: 'plating-sps',
-    yawRad: -0.3,
-    scale: 1.48,
-    tiltXRad: 0.15,
-    tiltZRad: -0.20,
-    offsetM: [0.04, 0.01, 0.02],
-    paletteOverride: PALETTE_ROYAL_PLUM_MONTIPORA,
+    yawRad: -0.30,
+    scale: 1.04,
+    tiltXRad: 0.04,
+    tiltZRad: -0.06,
+    offsetM: [0.04, -0.008, 0.0],
+    paletteOverride: PALETTE_GONIOPORA_MAGENTA_FLOWER,
   },
-  // Mid-right Sea Anemones in Aquamarine-Violet, Sunburst-Rainbow, and Royal-Lavender morphs
+  // 3. Mid-Right Ledges: Chartreuse Euphyllia Hammer & Peach-Pink Flowing Goniopora/Anemone
   {
     socketName: 'socket_lps_mid_04',
-    coralAssetId: 'coral-anemone-bta',
+    coralAssetId: 'coral-euphyllia-hammer',
     archetype: 'tentaculate-lps',
-    yawRad: 0.22,
-    scale: 1.44,
-    tiltXRad: 0.24,
-    tiltZRad: 0.20,
-    offsetM: [-0.04, 0.01, 0.04],
-    paletteOverride: PALETTE_SEAFOAM_CYAN_CORAL,
-    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_CRIMSON,
+    yawRad: 0.20,
+    scale: 1.08,
+    tiltXRad: 0.12,
+    tiltZRad: 0.06,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: PALETTE_GSP_GREEN_CARPET,
   },
   {
     socketName: 'socket_lps_mid_05',
     coralAssetId: 'coral-anemone-bta',
     archetype: 'tentaculate-lps',
-    yawRad: -0.5,
-    scale: 1.46,
-    tiltXRad: 0.24,
-    tiltZRad: -0.18,
-    offsetM: [0.04, 0.01, 0.03],
-    paletteOverride: PALETTE_TERRACOTTA_SUNBURST_BTA,
-    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_TERRACOTTA,
+    yawRad: -0.40,
+    scale: 1.12,
+    tiltXRad: 0.18,
+    tiltZRad: -0.06,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: PALETTE_GOLDEN_PEACH_ANEMONE,
+    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_SIENNA,
   },
   {
     socketName: 'socket_lps_mid_06',
-    coralAssetId: 'coral-anemone-bta',
+    coralAssetId: 'coral-zoanthid-mat',
     archetype: 'tentaculate-lps',
-    yawRad: 0.75,
-    scale: 1.42,
-    tiltXRad: 0.22,
-    tiltZRad: 0.10,
-    offsetM: [0.0, 0.02, 0.04],
-    paletteOverride: PALETTE_PURPLE_LAVENDER_ANEMONE,
-    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_SIENNA,
+    yawRad: 0.50,
+    scale: 0.96,
+    tiltXRad: 0.10,
+    tiltZRad: 0.04,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: PALETTE_ZOANTHID_ORANGE_GREEN,
   },
-  // Lower right apron: lush Green Star-Polyp (GSP) carpet & deep violet-blue polyp mounds
+  // 4. Right Foreground Apron: Orange-Green Zoanthids & Deep Ultramarine-Blue Tridacna Mantle
   {
     socketName: 'socket_brain_apron_03',
     coralAssetId: 'coral-brain-diploria',
     archetype: 'mounded-lps',
-    yawRad: -0.2,
-    scale: 1.46,
-    tiltXRad: 0.14,
-    tiltZRad: 0.12,
-    offsetM: [-0.04, 0.0, 0.04],
-    paletteOverride: PALETTE_GSP_GREEN_CARPET,
+    yawRad: -0.20,
+    scale: 1.02,
+    tiltXRad: 0.10,
+    tiltZRad: 0.04,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: PALETTE_ZOANTHID_ORANGE_GREEN,
   },
   {
     socketName: 'socket_brain_apron_04',
     coralAssetId: 'coral-brain-diploria',
     archetype: 'mounded-lps',
-    yawRad: 0.65,
-    scale: 1.44,
-    tiltXRad: 0.14,
-    tiltZRad: -0.12,
-    offsetM: [0.04, 0.0, 0.04],
-    paletteOverride: PALETTE_POWDER_BLUE_TOADSTOOL,
+    yawRad: 0.50,
+    scale: 1.12,
+    tiltXRad: 0.10,
+    tiltZRad: -0.04,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: PALETTE_TRIDACNA_COBALT_MANTLE,
   },
   {
     socketName: 'socket_soft_mat_02',
     coralAssetId: 'coral-zoanthid-mat',
     archetype: 'zoanthid-mat',
-    yawRad: -0.15,
-    scale: 1.42,
-    tiltXRad: 0.16,
-    tiltZRad: 0.08,
-    offsetM: [0.0, 0.01, 0.04],
-    paletteOverride: PALETTE_DEEP_VIOLET_POLYP_MAT,
+    yawRad: -0.10,
+    scale: 1.04,
+    tiltXRad: 0.10,
+    tiltZRad: 0.04,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: PALETTE_ZOANTHID_ORANGE_GREEN,
   },
 ] as const
 
@@ -636,50 +620,7 @@ const EXTRA_COMPANION_CLUSTERS_LEFT: ReadonlyArray<{
   scale: number
   paletteOverride: CoralPaletteOverride
   columnPaletteOverride?: CoralPaletteOverride
-}> = [
-  {
-    parentSocket: 'socket_sps_crest_01',
-    coralAssetId: 'coral-acropora-staghorn',
-    localOffsetM: [-0.09, -0.02, -0.02],
-    yawRad: -0.8,
-    tiltXRad: 0.12,
-    tiltZRad: 0.32,
-    scale: 0.90,
-    paletteOverride: PALETTE_CREAM_BLUSH_LEATHER,
-  },
-  {
-    parentSocket: 'socket_plate_ledge_01',
-    coralAssetId: 'coral-anemone-bta',
-    localOffsetM: [-0.04, -0.02, 0.06],
-    yawRad: 0.5,
-    tiltXRad: 0.26,
-    tiltZRad: 0.22,
-    scale: 0.94,
-    paletteOverride: PALETTE_PURPLE_LAVENDER_ANEMONE,
-    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_TERRACOTTA,
-  },
-  {
-    parentSocket: 'socket_soft_mat_01',
-    coralAssetId: 'coral-anemone-bta',
-    localOffsetM: [0.04, 0.01, 0.03],
-    yawRad: 0.4,
-    tiltXRad: 0.22,
-    tiltZRad: 0.14,
-    scale: 0.95,
-    paletteOverride: PALETTE_TERRACOTTA_SUNBURST_BTA,
-    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_CRIMSON,
-  },
-  {
-    parentSocket: 'socket_plate_ledge_02',
-    coralAssetId: 'coral-acropora-table',
-    localOffsetM: [0.05, 0.02, 0.04],
-    yawRad: -0.7,
-    tiltXRad: 0.22,
-    tiltZRad: -0.28,
-    scale: 0.88,
-    paletteOverride: PALETTE_DUSTY_LAVENDER_SPS,
-  },
-]
+}> = []
 
 const EXTRA_COMPANION_CLUSTERS_RIGHT: ReadonlyArray<{
   parentSocket: string
@@ -691,49 +632,7 @@ const EXTRA_COMPANION_CLUSTERS_RIGHT: ReadonlyArray<{
   scale: number
   paletteOverride: CoralPaletteOverride
   columnPaletteOverride?: CoralPaletteOverride
-}> = [
-  {
-    parentSocket: 'socket_sps_crest_04',
-    coralAssetId: 'coral-acropora-table',
-    localOffsetM: [-0.07, -0.01, 0.02],
-    yawRad: 0.9,
-    tiltXRad: 0.18,
-    tiltZRad: 0.16,
-    scale: 0.92,
-    paletteOverride: PALETTE_MAUVE_GORGONIAN_PLUME,
-  },
-  {
-    parentSocket: 'socket_plate_ledge_04',
-    coralAssetId: 'coral-acropora-staghorn',
-    localOffsetM: [0.05, -0.02, 0.05],
-    yawRad: -0.4,
-    tiltXRad: 0.22,
-    tiltZRad: -0.28,
-    scale: 0.92,
-    paletteOverride: PALETTE_MAUVE_GORGONIAN_PLUME,
-  },
-  {
-    parentSocket: 'socket_lps_mid_05',
-    coralAssetId: 'coral-acropora-table',
-    localOffsetM: [0.02, -0.02, 0.06],
-    yawRad: 0.3,
-    tiltXRad: 0.26,
-    tiltZRad: -0.15,
-    scale: 0.90,
-    paletteOverride: PALETTE_CREAM_BLUSH_LEATHER,
-  },
-  {
-    parentSocket: 'socket_brain_apron_03',
-    coralAssetId: 'coral-anemone-bta',
-    localOffsetM: [-0.05, 0.02, 0.04],
-    yawRad: 0.2,
-    tiltXRad: 0.22,
-    tiltZRad: 0.16,
-    scale: 0.94,
-    paletteOverride: PALETTE_ROSE_MAUVE_ANEMONE,
-    columnPaletteOverride: PALETTE_ANEMONE_COLUMN_TERRACOTTA,
-  },
-]
+}> = []
 
 const LEFT_ISLAND_LOCAL_OBSTACLES_M: ReadonlyArray<{ id: string; min: [number, number, number]; max: [number, number, number] }> = [
   { id: 'rock-part-01', min: [-0.495452, -0.012, -0.271264], max: [-0.09066, 0.03775, 0.265537] },
@@ -927,36 +826,6 @@ function sculptOrganicRockContour(rockRoot: THREE.Object3D) {
 
     node.castShadow = true
     node.receiveShadow = true
-    const geom = node.geometry.clone()
-    const pos = geom.getAttribute('position')
-    if (pos && pos.count > 0) {
-      for (let i = 0; i < pos.count; i++) {
-        let x = pos.getX(i)
-        const y = pos.getY(i)
-        let z = pos.getZ(i)
-
-        // Tuck lower outer skirt inward so there is no vertical ribbon cliff around the bottom
-        const rHoriz = Math.hypot(x / 0.48, z / 0.26)
-        if (rHoriz > 0.76 && y < 0.09) {
-          const tuck = Math.min(1, (rHoriz - 0.76) / 0.26) * (1 - Math.max(0, y) / 0.09)
-          x *= 1 - 0.18 * tuck
-          z *= 1 - 0.18 * tuck
-        }
-
-        // Subtle organic horizontal rock-strata undulation on vertical flanks (leaving top socket pads untouched)
-        if (y > 0.02 && y < 0.34) {
-          const waveX = Math.sin(y * 28.0 + z * 14.0) * 0.012
-          const waveZ = Math.cos(y * 24.0 - x * 15.0) * 0.010
-          x += waveX
-          z += waveZ
-        }
-
-        pos.setXYZ(i, x, y, z)
-      }
-      pos.needsUpdate = true
-      geom.computeVertexNormals()
-      node.geometry = geom
-    }
   })
 }
 
@@ -1015,10 +884,346 @@ function bindCoralInstanceMaterials(
   })
 }
 
+export type CoralVariationFamily =
+  | 'branching'
+  | 'plating'
+  | 'fleshy-lps'
+  | 'colonial-polyp'
+  | 'brain'
+  | 'encrusting'
+
+export type CoralDominantHue = 'violet' | 'teal' | 'green' | 'peach'
+export type CoralActinicRimTint = 'cyan' | 'magenta' | 'neon-green'
+
+export type CoralVariationSpec = Readonly<{
+  id: string
+  family: CoralVariationFamily
+  coralAssetId: string | 'rock-shader-direct'
+  morphology: string
+  dominantHue: CoralDominantHue
+  isFluorescentSpecimen: boolean
+  actinicRimTint: CoralActinicRimTint
+  actinicRimHex: string
+  palette: CoralPaletteOverride
+}>
+
+export const ACTINIC_RIM_TINT_HEX: Readonly<Record<CoralActinicRimTint, string>> = Object.freeze({
+  cyan: '#38f4ff',
+  magenta: '#ff48d8',
+  'neon-green': '#58ff6e',
+})
+
+/**
+ * Modular Coral Asset Library (AQ-95 AC #1, #2, #3):
+ * - 4 branching coral variations (irregular tapering crooked growth with axial/radial corallites)
+ * - 3 plating coral variations (broad thin uneven overlapping shelves attaching to plateau ledges)
+ * - 3 fleshy LPS variations (rounded inflated tissue, fine tentacles, visible skeletal bases)
+ * - 2 colonial polyp variations (dense low button clusters and corallimorph discs)
+ * - 2 brain coral variations (meandering valley ridges with muted tones)
+ * - 2 direct encrusting rock patches (mapped directly onto live-rock shader surfaces)
+ */
+export const MODULAR_CORAL_VARIATION_LIBRARY: readonly CoralVariationSpec[] = Object.freeze([
+  // 1. Branching Corals (4 variations)
+  {
+    id: 'acropora-staghorn-violet',
+    family: 'branching',
+    coralAssetId: 'coral-acropora-staghorn',
+    morphology: 'Irregular tapering crooked staghorn branches with axial and radial corallites',
+    dominantHue: 'violet',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'magenta',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.magenta,
+    palette: PALETTE_ROYAL_VIOLET_ACROPORA,
+  },
+  {
+    id: 'acropora-staghorn-teal',
+    family: 'branching',
+    coralAssetId: 'coral-acropora-staghorn',
+    morphology: 'Asymmetric crooked arborescent branches with pronounced radial corallite cups',
+    dominantHue: 'teal',
+    isFluorescentSpecimen: true,
+    actinicRimTint: 'cyan',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.cyan,
+    palette: PALETTE_EUPHYLLIA_TEAL_HAMMER,
+  },
+  {
+    id: 'acropora-table-violet',
+    family: 'branching',
+    coralAssetId: 'coral-acropora-table',
+    morphology: 'Corymbose anastomosing crooked branchlets with upturned axial corallite tips',
+    dominantHue: 'violet',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'magenta',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.magenta,
+    palette: PALETTE_CORAL_ROSE_ACROPORA,
+  },
+  {
+    id: 'stylophora-crooked-green',
+    family: 'branching',
+    coralAssetId: 'coral-acropora-staghorn',
+    morphology: 'Blunt dichotomous crooked branching fingers with dense corallite texture',
+    dominantHue: 'green',
+    isFluorescentSpecimen: true,
+    actinicRimTint: 'neon-green',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX['neon-green'],
+    palette: PALETTE_NEON_GREEN_STAGHORN_SPS,
+  },
+  // 2. Plating Corals (3 variations)
+  {
+    id: 'montipora-shelf-peach',
+    family: 'plating',
+    coralAssetId: 'coral-montipora-plate',
+    morphology: 'Broad thin uneven overlapping shelf whorl with calcified growth edge',
+    dominantHue: 'peach',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'magenta',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.magenta,
+    palette: PALETTE_TERRACOTTA_MONTIPORA_PLATE,
+  },
+  {
+    id: 'montipora-whorl-violet',
+    family: 'plating',
+    coralAssetId: 'coral-montipora-plate',
+    morphology: 'Tiered scrolling thin lamina plates projecting from plateau ledges',
+    dominantHue: 'violet',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'magenta',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.magenta,
+    palette: PALETTE_GONIOPORA_MAGENTA_FLOWER,
+  },
+  {
+    id: 'montipora-ledge-teal',
+    family: 'plating',
+    coralAssetId: 'coral-montipora-plate',
+    morphology: 'Foliosed overlapping thin carbonate shelves with ruffled rim',
+    dominantHue: 'teal',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'cyan',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.cyan,
+    palette: PALETTE_TRIDACNA_COBALT_MANTLE,
+  },
+  // 3. Fleshy LPS Corals (3 variations)
+  {
+    id: 'euphyllia-torch-green',
+    family: 'fleshy-lps',
+    coralAssetId: 'coral-euphyllia-torch',
+    morphology: 'Elongated inflated hydrostat tentacles with acrosphere tips over phaceloid skeletal base',
+    dominantHue: 'green',
+    isFluorescentSpecimen: true,
+    actinicRimTint: 'neon-green',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX['neon-green'],
+    palette: PALETTE_EUPHYLLIA_GREEN_GOLD_TORCH,
+  },
+  {
+    id: 'euphyllia-hammer-teal',
+    family: 'fleshy-lps',
+    coralAssetId: 'coral-euphyllia-hammer',
+    morphology: 'Fleshy anchor-shaped tentacle tips over recessed calcified corallite skeleton',
+    dominantHue: 'teal',
+    isFluorescentSpecimen: true,
+    actinicRimTint: 'cyan',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.cyan,
+    palette: PALETTE_EUPHYLLIA_TEAL_HAMMER,
+  },
+  {
+    id: 'euphyllia-hammer-peach',
+    family: 'fleshy-lps',
+    coralAssetId: 'coral-euphyllia-hammer',
+    morphology: 'Inflated fleshy polyp crown with warm peach-orange tips and visible skeletal stalk',
+    dominantHue: 'peach',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'magenta',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.magenta,
+    palette: PALETTE_FIERY_ACANTHASTREA_LPS,
+  },
+  // 4. Colonial Polyps (2 variations)
+  {
+    id: 'zoanthid-cluster-teal-peach',
+    family: 'colonial-polyp',
+    coralAssetId: 'coral-zoanthid-mat',
+    morphology: 'Dense low colonial button polyp mat with oral disc fringe',
+    dominantHue: 'peach',
+    isFluorescentSpecimen: true,
+    actinicRimTint: 'neon-green',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX['neon-green'],
+    palette: PALETTE_ZOANTHID_ORANGE_GREEN,
+  },
+  {
+    id: 'actinodiscus-mushroom-violet',
+    family: 'colonial-polyp',
+    coralAssetId: 'coral-zoanthid-mat',
+    morphology: 'Low corallimorph disc cluster hugging shaded rock contours',
+    dominantHue: 'violet',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'magenta',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.magenta,
+    palette: PALETTE_GONIOPORA_MAGENTA_FLOWER,
+  },
+  // 5. Brain Corals (2 variations)
+  {
+    id: 'diploria-meandroid-teal',
+    family: 'brain',
+    coralAssetId: 'coral-brain-diploria',
+    morphology: 'Hemispherical meandroid brain coral with labyrinthine valley ridges',
+    dominantHue: 'teal',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'cyan',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.cyan,
+    palette: PALETTE_EUPHYLLIA_TEAL_HAMMER,
+  },
+  {
+    id: 'favia-mounded-peach',
+    family: 'brain',
+    coralAssetId: 'coral-brain-diploria',
+    morphology: 'Mounded plocoid/meandroid brain colony with muted peach-terracotta ridges and teal valleys',
+    dominantHue: 'peach',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'cyan',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.cyan,
+    palette: PALETTE_FIERY_ACANTHASTREA_LPS,
+  },
+  // 6. Direct Encrusting Rock Patches (2 variations mapped directly onto the live-rock shader)
+  {
+    id: 'encrusting-montipora-teal',
+    family: 'encrusting',
+    coralAssetId: 'rock-shader-direct',
+    morphology: 'Direct encrusting teal-emerald polyp patch shaded onto sunlit mid-elevation rock shelves',
+    dominantHue: 'teal',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'cyan',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.cyan,
+    palette: PALETTE_EUPHYLLIA_TEAL_HAMMER,
+  },
+  {
+    id: 'encrusting-ricordea-peach',
+    family: 'encrusting',
+    coralAssetId: 'rock-shader-direct',
+    morphology: 'Direct encrusting peach-gold corallimorph patch mapped onto live-rock crevices',
+    dominantHue: 'peach',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'magenta',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.magenta,
+    palette: PALETTE_FIERY_ACANTHASTREA_LPS,
+  },
+])
+
+/**
+ * Builds `THREE.InstancedMesh` batches (AQ-95 AC #4) to scatter colonial polyp
+ * and companion coral variations across the rock foundation with randomized
+ * scale and orientation in a single draw call per template primitive.
+ */
+function buildInstancedCoralScatters(
+  rockRoot: THREE.Object3D,
+  coralTemplates: ReadonlyMap<string, THREE.Object3D>,
+  mounts: readonly ModularCoralMountEntry[],
+  socketNodes: ReadonlyMap<string, THREE.Object3D>,
+  options: { paused?: boolean; reducedMotion?: boolean; actinicLevel?: number } | undefined,
+  materialControllers: Array<ReturnType<typeof applyCoralRawMaskMaterial>>,
+  geometryBindings: CoralMaterialBoundBinding[],
+): THREE.InstancedMesh[] {
+  const instancedMeshes: THREE.InstancedMesh[] = []
+  if (mounts.length === 0) return instancedMeshes
+
+  const scatterGroups = new Map<
+    string,
+    Array<{
+      position: THREE.Vector3
+      yawRad: number
+      tiltXRad: number
+      tiltZRad: number
+      scale: number
+      palette: CoralPaletteOverride
+      rimTint: CoralActinicRimTint
+    }>
+  >()
+
+  const dummy = new THREE.Object3D()
+  mounts.forEach((mount, idx) => {
+    const socketNode = socketNodes.get(mount.socketName)
+    if (!socketNode) return
+    const seed = (idx + 1) * 2654435761
+    const hash01 = (salt: number) => (((seed ^ (salt * 1597334677)) >>> 0) % 1000) / 1000
+    const scatterAssetId = coralTemplates.has('coral-zoanthid-mat')
+      ? 'coral-zoanthid-mat'
+      : mount.coralAssetId
+    if (!coralTemplates.has(scatterAssetId)) return
+
+    const angle = hash01(1) * Math.PI * 2
+    const radius = 0.018 + hash01(2) * 0.012
+    const pos = socketNode.position.clone().add(
+      new THREE.Vector3(Math.cos(angle) * radius, -0.008 + hash01(3) * 0.004, Math.sin(angle) * radius),
+    )
+    const rimTint: CoralActinicRimTint =
+      idx % 3 === 0 ? 'cyan' : idx % 3 === 1 ? 'magenta' : 'neon-green'
+    const list = scatterGroups.get(scatterAssetId) ?? []
+    list.push({
+      position: pos,
+      yawRad: mount.yawRad + (hash01(4) - 0.5) * 2.4,
+      tiltXRad: (hash01(5) - 0.5) * 0.16,
+      tiltZRad: (hash01(6) - 0.5) * 0.16,
+      scale: mount.scale * (0.14 + hash01(7) * 0.06),
+      palette: mount.paletteOverride ?? PALETTE_ZOANTHID_ORANGE_GREEN,
+      rimTint,
+    })
+    scatterGroups.set(scatterAssetId, list)
+  })
+
+  for (const [assetId, placements] of scatterGroups.entries()) {
+    const template = coralTemplates.get(assetId)
+    if (!template || placements.length === 0) continue
+    template.traverse(child => {
+      if (!(child instanceof THREE.Mesh)) return
+      const reefPrimitive = child.userData?.reefPrimitive ?? child.parent?.userData?.reefPrimitive
+      const role: CoralPrimitiveRole =
+        reefPrimitive?.role === 'coral-soft' ||
+        child.name.includes('crown') ||
+        child.name.includes('anemone') ||
+        child.name.includes('zoanthid') ||
+        child.name.includes('brain')
+          ? 'coral-soft'
+          : 'coral-rigid'
+      const firstPlacement = placements[0]!
+      const baseMat = Array.isArray(child.material) ? child.material[0] : child.material
+      const stdMat =
+        baseMat instanceof THREE.MeshStandardMaterial ? baseMat.clone() : new THREE.MeshStandardMaterial()
+      const binding = applyCoralRawMaskMaterial(stdMat, {
+        role,
+        paletteOverride: firstPlacement.palette,
+        fluorescenceTint: ACTINIC_RIM_TINT_HEX[firstPlacement.rimTint],
+        paused: options?.paused,
+        reducedMotion: options?.reducedMotion,
+        actinicLevel: options?.actinicLevel,
+      })
+      ensureCoralShaderBounds(child.geometry, role, binding.uniforms.uFlowAmplitudeM.value)
+      geometryBindings.push({ geometry: child.geometry, role, binding })
+      materialControllers.push(binding)
+
+      const instanced = new THREE.InstancedMesh(child.geometry, binding.material, placements.length)
+      instanced.name = `instanced_${assetId}_${child.name}`
+      instanced.castShadow = true
+      instanced.receiveShadow = true
+      instanced.customDepthMaterial = binding.depthMaterial
+      placements.forEach((p, i) => {
+        dummy.position.copy(p.position)
+        dummy.rotation.set(p.tiltXRad, p.yawRad, p.tiltZRad, 'YXZ')
+        dummy.scale.setScalar(p.scale)
+        dummy.updateMatrix()
+        instanced.setMatrixAt(i, dummy.matrix)
+      })
+      instanced.instanceMatrix.needsUpdate = true
+      rockRoot.add(instanced)
+      instancedMeshes.push(instanced)
+    })
+  }
+
+  return instancedMeshes
+}
+
 /**
  * Mounts modular coral templates onto named `socket_*` nodes of a live-rock island scene graph,
  * applies the 3D coralline/aragonite shader (`applyLiveRockMaterial`) to the rock foundation,
- * and binds `applyCoralRawMaskMaterial` with large, lush mature-reef colony proportions.
+ * binds `applyCoralRawMaskMaterial` with large, lush mature-reef colony proportions, and
+ * populates `THREE.InstancedMesh` coral scatter batches for minimal draw calls (AQ-95).
  */
 export function assembleCoralsOnRockSockets(
   rockRoot: THREE.Object3D,
@@ -1027,6 +1232,7 @@ export function assembleCoralsOnRockSockets(
   options?: { paused?: boolean; reducedMotion?: boolean; actinicLevel?: number },
 ): {
   mountedCorals: AssembledCoralBinding[]
+  instancedMeshes: THREE.InstancedMesh[]
   update(timeSeconds: number, paused?: boolean, reducedMotion?: boolean): void
 } {
   let hasRockGeometry = false
@@ -1058,6 +1264,7 @@ export function assembleCoralsOnRockSockets(
 
   const mountedCorals: AssembledCoralBinding[] = []
   const geometryBindings: CoralMaterialBoundBinding[] = []
+  const instancedControllers: Array<ReturnType<typeof applyCoralRawMaskMaterial>> = []
   const isLeftIsland = socketNodes.has('socket_sps_crest_01')
   const companionSpecs = hasRockGeometry
     ? isLeftIsland
@@ -1140,13 +1347,27 @@ export function assembleCoralsOnRockSockets(
     })
   }
 
+  const instancedMeshes = buildInstancedCoralScatters(
+    rockRoot,
+    coralTemplates,
+    mounts,
+    socketNodes,
+    options,
+    instancedControllers,
+    geometryBindings,
+  )
+
   return {
     mountedCorals,
+    instancedMeshes,
     update(timeSeconds: number, paused = false, reducedMotion = false) {
       for (const mounted of mountedCorals) {
         for (const controller of mounted.materialControllers) {
           controller.update(timeSeconds, paused, reducedMotion)
         }
+      }
+      for (const controller of instancedControllers) {
+        controller.update(timeSeconds, paused, reducedMotion)
       }
       // Controllers expose their uniforms. If a caller raises the amplitude,
       // extend the shared local sphere before this frame's camera/shadow cull.

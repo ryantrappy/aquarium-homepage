@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { BoxGeometry } from 'three'
-import { MAX_PITCH_RAD_LEGACY, MAX_PITCH_RAD_METRIC, MAX_PITCH_RATE_RAD_PER_SEC_METRIC, anchorApproachClearanceM, createSwimmingFish, distance, disturbSchool, startleFish, stepSwimmingFish, stepSwimmingSchool, type WaterHabitat } from './motion'
+import { MAX_PITCH_RAD_LEGACY, MAX_PITCH_RAD_METRIC, MAX_PITCH_RATE_RAD_PER_SEC_METRIC, anchorApproachClearanceM, createSwimmingFish, distance, disturbSchool, evaluateSwimSpeedSynchronizedFlexRate, generateCatmullRomSwimCurve, smoothWaterRouteWithCatmullRom, startleFish, stepSwimmingFish, stepSwimmingSchool, type WaterHabitat } from './motion'
 import { instantiateModularReefHabitat } from './reef-assembly'
 import { fishClearanceRadius } from './fish-scale'
 import { findSafeFishSpawn } from './fish-spawn'
@@ -831,5 +831,23 @@ describe('socket-derived anchor interactions (AQ-82)', () => {
       expect(isWaterSegmentSafe({ start: previous, target: fish.position, waterBounds: reefBounds, obstacles: habitat.obstacles, fishClearanceRadius: anchorApproachClearanceM(fish) })).toBe(true)
     }
     expect(maxDistance).toBeGreaterThan(1)
+  })
+
+  it('generates smooth THREE.CatmullRomCurve3 spline trajectories and synchronizes local swim-axis body flex rate (AQ-97 AC #1, #2, #5)', () => {
+    const waypoints = [
+      { x: -2.5, y: 1.2, z: 1.5 },
+      { x: 0, y: 0.9, z: 0.4 },
+      { x: 2.5, y: 1.1, z: 1.4 },
+    ]
+    const { curve, sampledPath } = generateCatmullRomSwimCurve(waypoints, { samplesPerSegment: 4 })
+    expect(curve.curveType).toBe('catmullrom')
+    expect(sampledPath.length).toBeGreaterThan(waypoints.length)
+    const smoothed = smoothWaterRouteWithCatmullRom(waypoints, habitat.bounds, [], 0.4)
+    expect(smoothed.length).toBe(sampledPath.length)
+
+    // Flex rate scales with swim speed and freezes to 0 on pause / reduced motion
+    expect(evaluateSwimSpeedSynchronizedFlexRate(0.6, 0.3, 1)).toBeGreaterThan(evaluateSwimSpeedSynchronizedFlexRate(0.1, 0.3, 1))
+    expect(evaluateSwimSpeedSynchronizedFlexRate(0.6, 0.3, 1, { paused: true })).toBe(0)
+    expect(evaluateSwimSpeedSynchronizedFlexRate(0.6, 0.3, 1, { reducedMotion: true })).toBe(0)
   })
 })

@@ -23,6 +23,8 @@ Downstream: All 3D scene, shader, and UI implementations
 
 Make the homepage feel like a photorealistic, living reef aquarium. Realistic fish should fill almost the entire main view and act as the clickable links to configured homelab services. The aquarium and fish experience is the project's main success criterion.
 
+Use [`docs/more-realistic-reef-guide.png`](more-realistic-reef-guide.png) (and its breakdown in [`docs/photorealism-reference.md`](photorealism-reference.md#0-project-goal-visual)) as the project's target **goal visual** for aquascape composition (Left Peak, Center Arch, Right Island), coral variety, modular Blender assets, and Three.js water/lighting realism.
+
 ## Build the tank as a crisp habitat
 
 - Use a straight-on view through the front glass into the water portion of a reef display tank, with true perspective and deep focus.

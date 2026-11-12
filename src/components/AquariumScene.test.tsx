@@ -8,7 +8,7 @@ import type { Window as HappyWindow } from 'happy-dom'
 import { applyFishLinkVisibility } from '../rendering/scene/fish-link-focus'
 
 const mock = vi.hoisted(() => ({
-  update: vi.fn(), activate: vi.fn(), serviceAt: vi.fn<(x: number, y: number) => string | undefined>(), canActivate: vi.fn(() => true), dispose: vi.fn(),
+  update: vi.fn(), activate: vi.fn(), serviceAt: vi.fn<(x: number, y: number) => string | undefined>(), canActivate: vi.fn(() => true), dispose: vi.fn(), focusServiceFish: vi.fn(() => true), resetZoom: vi.fn(() => false),
 }))
 const focusHandoff = vi.hoisted(() => ({ get: undefined as (() => HTMLElement | null) | undefined, status: undefined as ((value: string) => void) | undefined }))
 const frameRateHandoff = vi.hoisted(() => ({ onFrameRate: undefined as ((sample: { fps: number; frameTimeMs: number } | null) => void) | undefined }))
@@ -334,5 +334,24 @@ describe('debug FPS counter badge (AQ-83 AC #2/#3/#4)', () => {
     expect(event.defaultPrevented).toBe(false)
     expect(mock.activate).toHaveBeenCalledExactlyOnceWith('clown')
     expect(badge()!.textContent).toBe('60 FPS · 16.7 ms')
+  })
+})
+
+describe('glassmorphic status dot and click-to-focus inspect card (AQ-97 AC #3/#4 & AQ-100 AC #1/#2/#3)', () => {
+  it('renders a status indicator dot inside each fish pill and opens/resets the fish inspect card', async () => {
+    expect(anchor('clown').querySelector('.fish-name .fish-status-dot')).not.toBeNull()
+    mock.serviceAt.mockReturnValue('clown')
+    await act(async () => { pointerClick(anchor('clown')) })
+    expect(mock.focusServiceFish).toHaveBeenCalledWith('clown')
+    const card = container.querySelector<HTMLElement>('.fish-inspect-card')
+    expect(card).not.toBeNull()
+    expect(card!.textContent).toContain('Home')
+    const launch = card!.querySelector<HTMLAnchorElement>('.fish-inspect-launch')!
+    expect(launch.href).toBe(services[0].url + '/')
+
+    const resetBtn = card!.querySelector<HTMLButtonElement>('.fish-inspect-reset')!
+    await act(async () => { resetBtn.click() })
+    expect(mock.resetZoom).toHaveBeenCalled()
+    expect(container.querySelector('.fish-inspect-card')).toBeNull()
   })
 })
