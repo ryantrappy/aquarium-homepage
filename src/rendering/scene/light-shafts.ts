@@ -393,3 +393,133 @@ export class RaymarchedShaftPass {
     })
   }
 }
+
+/**
+ * View-dot-normal soft edge fade for volumetric god ray cones (AQ-98 AC #2):
+ * `clamp(dot(viewDirection, normal), 0.0, 1.0)` raised to a soft falloff exponent
+ * so light rays vanish smoothly at grazing angles or as the camera orbits,
+ * eliminating hard polygon boundaries.
+ */
+export function evaluateGodRayEdgeFade(
+  viewDirection: Readonly<{ x: number; y: number; z: number }>,
+  normal: Readonly<{ x: number; y: number; z: number }>,
+): number {
+  const vLen = Math.hypot(viewDirection.x, viewDirection.y, viewDirection.z)
+  const nLen = Math.hypot(normal.x, normal.y, normal.z)
+  if (vLen <= 1e-9 || nLen <= 1e-9) return 0
+  const dot =
+    (viewDirection.x / vLen) * (normal.x / nLen) +
+    (viewDirection.y / vLen) * (normal.y / nLen) +
+    (viewDirection.z / vLen) * (normal.z / nLen)
+  const clamped = Math.min(1, Math.max(0, dot))
+  return Math.pow(clamped, 1.5)
+}
+
+/**
+ * Upward-angled / vertical-scale camera framing (AQ-98 AC #3):
+ * Positions the camera slightly lower in the water column with a gentle upward
+ * tilt and a 45°–50° vertical FOV band so the left NSA pinnacle reads with
+ * towering vertical scale while keeping the camera well in front of the
+ * foreground fish volume (`z <= 2.8`).
+ */
+export const VERIFIED_PINNACLE_CAMERA_FRAMING = Object.freeze({
+  fovDeg: 46,
+  minFovDeg: 45,
+  maxFovDeg: 50,
+  position: Object.freeze({ x: 0, y: 0.08, z: 9.0 }),
+  lookAt: Object.freeze({ x: 0, y: 0.24, z: 0.0 }),
+  upwardTiltRad: Math.atan2(0.24 - 0.08, 9.0),
+  foregroundFishMaxZ: 2.8,
+})
+
+/**
+ * Constructs 4–5 volumetric god-ray cone/cylinder meshes descending from the
+ * top water surface with scrolling noise, `THREE.AdditiveBlending`,
+ * `depthWrite: false`, and view-dot-normal edge fade (AQ-98 AC #1, #2, #4).
+ */
+export function createVolumetricGodRayCones(requestedCount = 5): {
+  group: THREE.Group
+  cones: THREE.Mesh[]
+  uniforms: { uTime: { value: number }; uAlpha: { value: number } }
+  update(timeSeconds: number, options?: { paused?: boolean; reducedMotion?: boolean; hidden?: boolean }): void
+  dispose(): void
+} {
+  const count = Math.min(5, Math.max(4, Math.round(Number.isFinite(requestedCount) ? requestedCount : 5)))
+  const cfg = DEFAULT_AQUARIUM_OPTICS_CONFIG
+  const uniforms = {
+    uTime: { value: 0 },
+    uAlpha: { value: cfg.lightShaftMaxAlpha },
+  }
+  const group = new THREE.Group()
+  group.name = 'Volumetric_God_Ray_Cones'
+  const cones: THREE.Mesh[] = []
+
+  const xPositions = [-2.4, -1.1, 0.15, 1.35, 2.55].slice(0, count)
+  for (let i = 0; i < count; i++) {
+    const topRadius = 0.28 + (i % 2) * 0.08
+    const bottomRadius = 0.72 + (i % 3) * 0.14
+    const height = 4.6 + (i === 2 ? 0.6 : 0.0)
+    const geometry = new THREE.CylinderGeometry(topRadius, bottomRadius, height, 24, 1, true)
+    const material = new THREE.ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      uniforms,
+      vertexShader: `
+        varying vec3 vWorldPos;
+        varying vec3 vWorldNormal;
+        varying vec2 vConeUv;
+        void main() {
+          vConeUv = uv;
+          vec4 wp = modelMatrix * vec4(position, 1.0);
+          vWorldPos = wp.xyz;
+          vWorldNormal = normalize(mat3(modelMatrix) * normal);
+          gl_Position = projectionMatrix * viewMatrix * wp;
+        }
+      `,
+      fragmentShader: `
+        uniform float uTime;
+        uniform float uAlpha;
+        varying vec3 vWorldPos;
+        varying vec3 vWorldNormal;
+        varying vec2 vConeUv;
+        ${SHAFT_BEAM_GLSL}
+        void main() {
+          vec3 viewDirection = normalize(cameraPosition - vWorldPos);
+          vec3 faceNormal = gl_FrontFacing ? normalize(vWorldNormal) : -normalize(vWorldNormal);
+          float edgeFade = pow(clamp(dot(viewDirection, faceNormal), 0.0, 1.0), 1.5);
+          float verticalFade = smoothstep(0.0, 0.85, vConeUv.y) * (1.0 - smoothstep(0.88, 1.0, vConeUv.y));
+          float noise = 0.65 + 0.35 * shaftValueNoise(vec2(vConeUv.x * 4.0 + uTime * 0.04, vConeUv.y * 2.5 - uTime * 0.06));
+          float alpha = edgeFade * verticalFade * noise * uAlpha;
+          gl_FragColor = vec4(vec3(0.55, 0.82, 0.96) * alpha, alpha);
+        }
+      `,
+    })
+    const mesh = new THREE.Mesh(geometry, material)
+    mesh.name = `God_Ray_Cone_${i + 1}`
+    mesh.position.set(xPositions[i]!, cfg.surfaceY - height * 0.48, -1.6 - (i % 2) * 0.35)
+    mesh.rotation.z = -0.18 + (i - 2) * 0.03
+    mesh.rotation.x = 0.08
+    mesh.raycast = () => {}
+    group.add(mesh)
+    cones.push(mesh)
+  }
+
+  return {
+    group,
+    cones,
+    uniforms,
+    update(timeSeconds: number, options?: { paused?: boolean; reducedMotion?: boolean; hidden?: boolean }) {
+      const frozen = Boolean(options?.paused || options?.reducedMotion || options?.hidden || !Number.isFinite(timeSeconds))
+      uniforms.uTime.value = frozen ? 0 : timeSeconds % 3600
+    },
+    dispose() {
+      for (const cone of cones) {
+        cone.geometry.dispose()
+        ;(cone.material as THREE.Material).dispose()
+      }
+    },
+  }
+}
+

@@ -780,3 +780,82 @@ export function createRestrainedCausticLightController(
     },
   }
 }
+
+/** High-Kelvin reef spectrum specification (AQ-96 AC #1: 14,000K–20,000K). */
+export const REEF_SPECTRUM_KELVIN_RANGE = Object.freeze({
+  minK: 14000,
+  maxK: 20000,
+  defaultK: 16000,
+})
+
+/** Deep aquatic exponential fog helper (AQ-96: #0a2239 to #0d3b66). */
+export function createReefFogExp2(hex = '#0b2e4f', density = 0.028): THREE.FogExp2 {
+  return new THREE.FogExp2(hex, Math.max(0.001, Math.min(0.15, density)))
+}
+
+/**
+ * Single `THREE.Points` marine-snow particle system (AQ-96 AC #4 & #5: 300–500 particles)
+ * that slowly drifts through the water column and freezes synchronously on pause or reduced motion.
+ */
+export function createMarineSnowPointsSystem(
+  requestedCount = 360,
+  bounds: Readonly<{ min: { x: number; y: number; z: number }; max: { x: number; y: number; z: number } }> = {
+    min: { x: -4, y: -2.25, z: -4.6 },
+    max: { x: 4, y: 2.8, z: 2.8 },
+  },
+): {
+  points: THREE.Points
+  count: number
+  positions: Float32Array
+  update(timeSeconds: number, options?: { paused?: boolean; reducedMotion?: boolean; hidden?: boolean }): void
+  dispose(): void
+} {
+  const count = Math.min(500, Math.max(300, Math.round(Number.isFinite(requestedCount) ? requestedCount : 360)))
+  const positions = new Float32Array(count * 3)
+  const geometry = new THREE.BufferGeometry()
+  const posAttr = new THREE.BufferAttribute(positions, 3)
+  geometry.setAttribute('position', posAttr)
+  const sprite = createParticleSprite('mote')
+  const material = new THREE.PointsMaterial({
+    color: '#d8f0ff',
+    size: 0.022,
+    transparent: true,
+    opacity: 0.24,
+    depthWrite: false,
+    map: sprite,
+    alphaTest: 0.01,
+  })
+  const points = new THREE.Points(geometry, material)
+  points.name = 'Marine_Snow_Points'
+  points.raycast = () => {}
+
+  const writePositions = (timeSeconds: number, frozen: boolean) => {
+    for (let i = 0; i < count; i++) {
+      const pt = evaluateSuspendedParticlePosition(i, bounds, timeSeconds, {
+        paused: frozen,
+        reducedMotion: frozen,
+      })
+      positions[i * 3] = pt.x
+      positions[i * 3 + 1] = pt.y
+      positions[i * 3 + 2] = pt.z
+    }
+    posAttr.needsUpdate = true
+  }
+  writePositions(0, true)
+
+  return {
+    points,
+    count,
+    positions,
+    update(timeSeconds: number, options?: { paused?: boolean; reducedMotion?: boolean; hidden?: boolean }) {
+      const frozen = Boolean(options?.paused || options?.reducedMotion || options?.hidden || !Number.isFinite(timeSeconds))
+      writePositions(frozen ? 0 : timeSeconds, frozen)
+    },
+    dispose() {
+      geometry.dispose()
+      material.dispose()
+      sprite.dispose()
+    },
+  }
+}
+

@@ -5,8 +5,11 @@ import {
   LIGHT_SHAFT_BAND_CENTERS,
   LIGHT_SHAFT_SLANT_PER_M,
   LIGHT_SHAFT_SWAY_AMPLITUDE_M,
+  REEF_SPECTRUM_KELVIN_RANGE,
   SUN_DIRECTION,
   WATER_SURFACE_Y,
+  createMarineSnowPointsSystem,
+  createReefFogExp2,
   createRestrainedCausticLightController,
   createParticleSprite,
   PARTICLE_SPRITE_SIZE_PX,
@@ -415,6 +418,32 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
     expect(spriteAlphaAt(sprite, 0.99, 0.99)).toBe(0)
     // The ring differs from the disc at the centre: a bubble is hollow, a mote is solid.
     expect(spriteAlphaAt(createParticleSprite('mote'), 0, 0)).toBe(255)
+  })
+
+  it('builds a 300-500 particle THREE.Points marine snow system, 14,000K-20,000K spectrum range, and FogExp2 that freeze on pause and reduced motion (AQ-96)', () => {
+    expect(REEF_SPECTRUM_KELVIN_RANGE.minK).toBe(14000)
+    expect(REEF_SPECTRUM_KELVIN_RANGE.maxK).toBe(20000)
+
+    const fog = createReefFogExp2('#0b2e4f', 0.028)
+    expect(fog).toBeInstanceOf(THREE.FogExp2)
+    expect(fog.density).toBeCloseTo(0.028, 6)
+
+    const snow = createMarineSnowPointsSystem(380)
+    expect(snow.points).toBeInstanceOf(THREE.Points)
+    expect(snow.count).toBeGreaterThanOrEqual(300)
+    expect(snow.count).toBeLessThanOrEqual(500)
+
+    const frozenBaseline = Array.from(snow.positions.slice(0, 18))
+    snow.update(4.5, { paused: false, reducedMotion: false })
+    const movingSnapshot = Array.from(snow.positions.slice(0, 18))
+    expect(movingSnapshot).not.toEqual(frozenBaseline)
+
+    snow.update(9.2, { paused: true })
+    expect(Array.from(snow.positions.slice(0, 18))).toEqual(frozenBaseline)
+
+    snow.update(14.7, { reducedMotion: true })
+    expect(Array.from(snow.positions.slice(0, 18))).toEqual(frozenBaseline)
+    snow.dispose()
   })
 })
 
