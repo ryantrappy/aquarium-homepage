@@ -6,21 +6,20 @@ title: >-
 status: In Progress
 assignee:
   - '@Luna'
-created_date: 2026-11-03 04:37
-updated_date: '2026-11-08T21:37:00Z'
+created_date: '2026-11-03 04:37'
+updated_date: '2026-11-12 05:37'
 labels:
   - reef-fish
   - animation
-  - ready-for-review
-  - gemini approved
+  - waiting-for-answers
 dependencies:
   - AQ-12
 references:
-  - https://aquarium.org/animals/blue-tang/
+  - 'https://aquarium.org/animals/blue-tang/'
   - >-
     https://australian.museum/learn/animals/fishes/blue-tang-paracanthurus-hepatus/
-  - https://www.marinespecies.org/aphia.php?id=219676&p=taxdetails
-  - https://www.youtube.com/watch?v=azxKu-FJhyQ&t=38s
+  - 'https://www.marinespecies.org/aphia.php?id=219676&p=taxdetails'
+  - 'https://www.youtube.com/watch?v=azxKu-FJhyQ&t=38s'
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
@@ -62,10 +61,13 @@ Roster ID: `blue-tang`. Implement this fish as an independently reviewable speci
 <!-- COMMENTS:BEGIN -->
 author: @Luna
 created: 2026-11-04T02:31:00Z
-
+---
+Added candidate video references and the research index. The video clip species and timestamps are still unverified; do not count these references as satisfying the video-review acceptance criterion.
 ---
 
-Added candidate video references and the research index. The video clip species and timestamps are still unverified; do not count these references as satisfying the video-review acceptance criterion.
-
+author: @root
+created: 2026-11-12 05:37
+---
+Root review 2026-11-11: HOLD for user clarification. Clarify whether comparison against verified real-species video remains required by AC3. Task notes explicitly leave species identity and timestamps unverified; current evidence does not close that gate.
 ---
 <!-- COMMENTS:END -->
