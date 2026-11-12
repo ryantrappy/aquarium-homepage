@@ -601,13 +601,41 @@ describe('school stepping and group disturbance (AQ-41/AQ-44)', () => {
     expect(distance(closeA.position, closeB.position)).toBeGreaterThanOrEqual(physicalMinSep - 0.01)
   })
 
+  it('lets a non-schooling fish swim through the physical gap between stopped schoolmates (AQ-85 AC #2)', () => {
+    const left = createSwimmingFish('aq85-gap-left', 'blue-green-chromis', { x: -0.25, y: 0.8, z: 1.0 }, .5)
+    const right = createSwimmingFish('aq85-gap-right', 'blue-green-chromis', { x: 0.25, y: 0.8, z: 1.0 }, .5)
+    const tang = createSwimmingFish('aq85-gap-tang', 'yellow-tang', { x: 0, y: 0.8, z: 1.5 }, .5, undefined, { initialYaw: Math.PI })
+    tang.route = [{ ...tang.position }, { x: 0, y: 0.8, z: 0.5 }]
+    tang.waypoint = 1
+    tang.speed = 0.3
+
+    const minPhysicalSeparation = fishBodyRadiusM(tang.speciesId) + fishBodyRadiusM(left.speciesId) + 0.06
+    let closestLeft = Infinity
+    let closestRight = Infinity
+    let crossedAtX: number | undefined
+    for (let frame = 0; frame < 60; frame++) {
+      const previousZ = tang.position.z
+      stepSwimmingSchool([left, tang, right], habitat, 1 / 30, [true, false, true])
+      if (previousZ >= 1 && tang.position.z < 1) crossedAtX = tang.position.x
+      closestLeft = Math.min(closestLeft, distance(tang.position, left.position))
+      closestRight = Math.min(closestRight, distance(tang.position, right.position))
+    }
+
+    expect(tang.position.z).toBeLessThan(0.9)
+    expect(crossedAtX).toBeDefined()
+    expect(Math.abs(crossedAtX!)).toBeLessThan(0.25)
+    expect(closestLeft).toBeGreaterThanOrEqual(minPhysicalSeparation - 0.01)
+    expect(closestRight).toBeGreaterThanOrEqual(minPhysicalSeparation - 0.01)
+  })
+
   it('keeps a chromis pair within schooling range over time (AC #1)', () => {
     const [a, b] = chromisPair()
     for (let frame = 0; frame < 300; frame++) stepSwimmingSchool([a, b], habitat, 1 / 30)
     expect(distance(a.position, b.position)).toBeLessThan(2.2)
-    // AQ-85: schoolmates may group down to ~their 0.2 physical minSep, so
-    // the floor guards against collapse/interpenetration, not close grouping.
-    expect(distance(a.position, b.position)).toBeGreaterThan(0.15)
+    // AQ-85: schoolmates can group closely, but the simulation must hold at
+    // least the species-specific body radii plus their 0.06m buffer.
+    const physicalMinSep = fishBodyRadiusM(a.speciesId) + fishBodyRadiusM(b.speciesId) + 0.06
+    expect(distance(a.position, b.position)).toBeGreaterThanOrEqual(physicalMinSep - 0.01)
   })
 
   it('holds a stopped fish still while it still counts as a peer (AQ-44 AC #4)', () => {
