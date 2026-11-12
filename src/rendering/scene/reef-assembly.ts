@@ -996,10 +996,349 @@ function bindCoralInstanceMaterials(
   })
 }
 
+export type CoralVariationFamily =
+  | 'branching'
+  | 'plating'
+  | 'fleshy-lps'
+  | 'colonial-polyp'
+  | 'brain'
+  | 'encrusting'
+
+export type CoralDominantHue = 'violet' | 'teal' | 'green' | 'peach'
+export type CoralActinicRimTint = 'cyan' | 'magenta' | 'neon-green'
+
+export type CoralVariationSpec = Readonly<{
+  id: string
+  family: CoralVariationFamily
+  coralAssetId: string | 'rock-shader-direct'
+  morphology: string
+  dominantHue: CoralDominantHue
+  isFluorescentSpecimen: boolean
+  actinicRimTint: CoralActinicRimTint
+  actinicRimHex: string
+  palette: CoralPaletteOverride
+}>
+
+export const ACTINIC_RIM_TINT_HEX: Readonly<Record<CoralActinicRimTint, string>> = Object.freeze({
+  cyan: '#38f4ff',
+  magenta: '#ff48d8',
+  'neon-green': '#58ff6e',
+})
+
+/**
+ * Modular Coral Asset Library (AQ-95 AC #1, #2, #3):
+ * - 4 branching coral variations (irregular tapering crooked growth with axial/radial corallites)
+ * - 3 plating coral variations (broad thin uneven overlapping shelves attaching to plateau ledges)
+ * - 3 fleshy LPS variations (rounded inflated tissue, fine tentacles, visible skeletal bases)
+ * - 2 colonial polyp variations (dense low button clusters and corallimorph discs)
+ * - 2 brain coral variations (meandering valley ridges with muted tones)
+ * - 2 direct encrusting rock patches (mapped directly onto live-rock shader surfaces)
+ */
+export const MODULAR_CORAL_VARIATION_LIBRARY: readonly CoralVariationSpec[] = Object.freeze([
+  // 1. Branching Corals (4 variations)
+  {
+    id: 'acropora-staghorn-violet',
+    family: 'branching',
+    coralAssetId: 'coral-acropora-staghorn',
+    morphology: 'Irregular tapering crooked staghorn branches with axial and radial corallites',
+    dominantHue: 'violet',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'magenta',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.magenta,
+    palette: PALETTE_ROYAL_VIOLET_ACROPORA,
+  },
+  {
+    id: 'acropora-staghorn-teal',
+    family: 'branching',
+    coralAssetId: 'coral-acropora-staghorn',
+    morphology: 'Asymmetric crooked arborescent branches with pronounced radial corallite cups',
+    dominantHue: 'teal',
+    isFluorescentSpecimen: true,
+    actinicRimTint: 'cyan',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.cyan,
+    palette: PALETTE_EUPHYLLIA_TEAL_HAMMER,
+  },
+  {
+    id: 'acropora-table-violet',
+    family: 'branching',
+    coralAssetId: 'coral-acropora-table',
+    morphology: 'Corymbose anastomosing crooked branchlets with upturned axial corallite tips',
+    dominantHue: 'violet',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'magenta',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.magenta,
+    palette: PALETTE_CORAL_ROSE_ACROPORA,
+  },
+  {
+    id: 'stylophora-crooked-green',
+    family: 'branching',
+    coralAssetId: 'coral-acropora-staghorn',
+    morphology: 'Blunt dichotomous crooked branching fingers with dense corallite texture',
+    dominantHue: 'green',
+    isFluorescentSpecimen: true,
+    actinicRimTint: 'neon-green',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX['neon-green'],
+    palette: PALETTE_NEON_GREEN_STAGHORN_SPS,
+  },
+  // 2. Plating Corals (3 variations)
+  {
+    id: 'montipora-shelf-peach',
+    family: 'plating',
+    coralAssetId: 'coral-montipora-plate',
+    morphology: 'Broad thin uneven overlapping shelf whorl with calcified growth edge',
+    dominantHue: 'peach',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'magenta',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.magenta,
+    palette: PALETTE_TERRACOTTA_MONTIPORA_PLATE,
+  },
+  {
+    id: 'montipora-whorl-violet',
+    family: 'plating',
+    coralAssetId: 'coral-montipora-plate',
+    morphology: 'Tiered scrolling thin lamina plates projecting from plateau ledges',
+    dominantHue: 'violet',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'magenta',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.magenta,
+    palette: PALETTE_GONIOPORA_MAGENTA_FLOWER,
+  },
+  {
+    id: 'montipora-ledge-teal',
+    family: 'plating',
+    coralAssetId: 'coral-montipora-plate',
+    morphology: 'Foliosed overlapping thin carbonate shelves with ruffled rim',
+    dominantHue: 'teal',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'cyan',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.cyan,
+    palette: PALETTE_TRIDACNA_COBALT_MANTLE,
+  },
+  // 3. Fleshy LPS Corals (3 variations)
+  {
+    id: 'euphyllia-torch-green',
+    family: 'fleshy-lps',
+    coralAssetId: 'coral-euphyllia-torch',
+    morphology: 'Elongated inflated hydrostat tentacles with acrosphere tips over phaceloid skeletal base',
+    dominantHue: 'green',
+    isFluorescentSpecimen: true,
+    actinicRimTint: 'neon-green',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX['neon-green'],
+    palette: PALETTE_EUPHYLLIA_GREEN_GOLD_TORCH,
+  },
+  {
+    id: 'euphyllia-hammer-teal',
+    family: 'fleshy-lps',
+    coralAssetId: 'coral-euphyllia-hammer',
+    morphology: 'Fleshy anchor-shaped tentacle tips over recessed calcified corallite skeleton',
+    dominantHue: 'teal',
+    isFluorescentSpecimen: true,
+    actinicRimTint: 'cyan',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.cyan,
+    palette: PALETTE_EUPHYLLIA_TEAL_HAMMER,
+  },
+  {
+    id: 'euphyllia-hammer-peach',
+    family: 'fleshy-lps',
+    coralAssetId: 'coral-euphyllia-hammer',
+    morphology: 'Inflated fleshy polyp crown with warm peach-orange tips and visible skeletal stalk',
+    dominantHue: 'peach',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'magenta',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.magenta,
+    palette: PALETTE_FIERY_ACANTHASTREA_LPS,
+  },
+  // 4. Colonial Polyps (2 variations)
+  {
+    id: 'zoanthid-cluster-teal-peach',
+    family: 'colonial-polyp',
+    coralAssetId: 'coral-zoanthid-mat',
+    morphology: 'Dense low colonial button polyp mat with oral disc fringe',
+    dominantHue: 'peach',
+    isFluorescentSpecimen: true,
+    actinicRimTint: 'neon-green',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX['neon-green'],
+    palette: PALETTE_ZOANTHID_ORANGE_GREEN,
+  },
+  {
+    id: 'actinodiscus-mushroom-violet',
+    family: 'colonial-polyp',
+    coralAssetId: 'coral-zoanthid-mat',
+    morphology: 'Low corallimorph disc cluster hugging shaded rock contours',
+    dominantHue: 'violet',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'magenta',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.magenta,
+    palette: PALETTE_GONIOPORA_MAGENTA_FLOWER,
+  },
+  // 5. Brain Corals (2 variations)
+  {
+    id: 'diploria-meandroid-teal',
+    family: 'brain',
+    coralAssetId: 'coral-brain-diploria',
+    morphology: 'Hemispherical meandroid brain coral with labyrinthine valley ridges',
+    dominantHue: 'teal',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'cyan',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.cyan,
+    palette: PALETTE_EUPHYLLIA_TEAL_HAMMER,
+  },
+  {
+    id: 'favia-mounded-peach',
+    family: 'brain',
+    coralAssetId: 'coral-brain-diploria',
+    morphology: 'Mounded plocoid/meandroid brain colony with muted peach-terracotta ridges and teal valleys',
+    dominantHue: 'peach',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'cyan',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.cyan,
+    palette: PALETTE_FIERY_ACANTHASTREA_LPS,
+  },
+  // 6. Direct Encrusting Rock Patches (2 variations mapped directly onto the live-rock shader)
+  {
+    id: 'encrusting-montipora-teal',
+    family: 'encrusting',
+    coralAssetId: 'rock-shader-direct',
+    morphology: 'Direct encrusting teal-emerald polyp patch shaded onto sunlit mid-elevation rock shelves',
+    dominantHue: 'teal',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'cyan',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.cyan,
+    palette: PALETTE_EUPHYLLIA_TEAL_HAMMER,
+  },
+  {
+    id: 'encrusting-ricordea-peach',
+    family: 'encrusting',
+    coralAssetId: 'rock-shader-direct',
+    morphology: 'Direct encrusting peach-gold corallimorph patch mapped onto live-rock crevices',
+    dominantHue: 'peach',
+    isFluorescentSpecimen: false,
+    actinicRimTint: 'magenta',
+    actinicRimHex: ACTINIC_RIM_TINT_HEX.magenta,
+    palette: PALETTE_FIERY_ACANTHASTREA_LPS,
+  },
+])
+
+/**
+ * Builds `THREE.InstancedMesh` batches (AQ-95 AC #4) to scatter colonial polyp
+ * and companion coral variations across the rock foundation with randomized
+ * scale and orientation in a single draw call per template primitive.
+ */
+function buildInstancedCoralScatters(
+  rockRoot: THREE.Object3D,
+  coralTemplates: ReadonlyMap<string, THREE.Object3D>,
+  mounts: readonly ModularCoralMountEntry[],
+  socketNodes: ReadonlyMap<string, THREE.Object3D>,
+  options: { paused?: boolean; reducedMotion?: boolean; actinicLevel?: number } | undefined,
+  materialControllers: Array<ReturnType<typeof applyCoralRawMaskMaterial>>,
+  geometryBindings: CoralMaterialBoundBinding[],
+): THREE.InstancedMesh[] {
+  const instancedMeshes: THREE.InstancedMesh[] = []
+  if (mounts.length === 0) return instancedMeshes
+
+  const scatterGroups = new Map<
+    string,
+    Array<{
+      position: THREE.Vector3
+      yawRad: number
+      tiltXRad: number
+      tiltZRad: number
+      scale: number
+      palette: CoralPaletteOverride
+      rimTint: CoralActinicRimTint
+    }>
+  >()
+
+  const dummy = new THREE.Object3D()
+  mounts.forEach((mount, idx) => {
+    const socketNode = socketNodes.get(mount.socketName)
+    if (!socketNode) return
+    const seed = (idx + 1) * 2654435761
+    const hash01 = (salt: number) => (((seed ^ (salt * 1597334677)) >>> 0) % 1000) / 1000
+    const scatterAssetId =
+      mount.archetype === 'branching-sps'
+        ? 'coral-acropora-staghorn'
+        : mount.archetype === 'plating-sps'
+          ? 'coral-montipora-plate'
+          : 'coral-zoanthid-mat'
+    if (!coralTemplates.has(scatterAssetId)) return
+
+    const angle = hash01(1) * Math.PI * 2
+    const radius = 0.032 + hash01(2) * 0.024
+    const pos = socketNode.position.clone().add(
+      new THREE.Vector3(Math.cos(angle) * radius, -0.004 + hash01(3) * 0.008, Math.sin(angle) * radius),
+    )
+    const rimTint: CoralActinicRimTint =
+      idx % 3 === 0 ? 'cyan' : idx % 3 === 1 ? 'magenta' : 'neon-green'
+    const list = scatterGroups.get(scatterAssetId) ?? []
+    list.push({
+      position: pos,
+      yawRad: mount.yawRad + (hash01(4) - 0.5) * 2.4,
+      tiltXRad: (hash01(5) - 0.5) * 0.28,
+      tiltZRad: (hash01(6) - 0.5) * 0.28,
+      scale: mount.scale * (0.42 + hash01(7) * 0.22),
+      palette: mount.paletteOverride ?? PALETTE_ZOANTHID_ORANGE_GREEN,
+      rimTint,
+    })
+    scatterGroups.set(scatterAssetId, list)
+  })
+
+  for (const [assetId, placements] of scatterGroups.entries()) {
+    const template = coralTemplates.get(assetId)
+    if (!template || placements.length === 0) continue
+    template.traverse(child => {
+      if (!(child instanceof THREE.Mesh)) return
+      const reefPrimitive = child.userData?.reefPrimitive ?? child.parent?.userData?.reefPrimitive
+      const role: CoralPrimitiveRole =
+        reefPrimitive?.role === 'coral-soft' ||
+        child.name.includes('crown') ||
+        child.name.includes('anemone') ||
+        child.name.includes('zoanthid') ||
+        child.name.includes('brain')
+          ? 'coral-soft'
+          : 'coral-rigid'
+      const firstPlacement = placements[0]!
+      const baseMat = Array.isArray(child.material) ? child.material[0] : child.material
+      const stdMat =
+        baseMat instanceof THREE.MeshStandardMaterial ? baseMat.clone() : new THREE.MeshStandardMaterial()
+      const binding = applyCoralRawMaskMaterial(stdMat, {
+        role,
+        paletteOverride: firstPlacement.palette,
+        fluorescenceTint: ACTINIC_RIM_TINT_HEX[firstPlacement.rimTint],
+        paused: options?.paused,
+        reducedMotion: options?.reducedMotion,
+        actinicLevel: options?.actinicLevel,
+      })
+      ensureCoralShaderBounds(child.geometry, role, binding.uniforms.uFlowAmplitudeM.value)
+      geometryBindings.push({ geometry: child.geometry, role, binding })
+      materialControllers.push(binding)
+
+      const instanced = new THREE.InstancedMesh(child.geometry, binding.material, placements.length)
+      instanced.name = `instanced_${assetId}_${child.name}`
+      instanced.castShadow = true
+      instanced.receiveShadow = true
+      instanced.customDepthMaterial = binding.depthMaterial
+      placements.forEach((p, i) => {
+        dummy.position.copy(p.position)
+        dummy.rotation.set(p.tiltXRad, p.yawRad, p.tiltZRad, 'YXZ')
+        dummy.scale.setScalar(p.scale)
+        dummy.updateMatrix()
+        instanced.setMatrixAt(i, dummy.matrix)
+      })
+      instanced.instanceMatrix.needsUpdate = true
+      rockRoot.add(instanced)
+      instancedMeshes.push(instanced)
+    })
+  }
+
+  return instancedMeshes
+}
+
 /**
  * Mounts modular coral templates onto named `socket_*` nodes of a live-rock island scene graph,
  * applies the 3D coralline/aragonite shader (`applyLiveRockMaterial`) to the rock foundation,
- * and binds `applyCoralRawMaskMaterial` with large, lush mature-reef colony proportions.
+ * binds `applyCoralRawMaskMaterial` with large, lush mature-reef colony proportions, and
+ * populates `THREE.InstancedMesh` coral scatter batches for minimal draw calls (AQ-95).
  */
 export function assembleCoralsOnRockSockets(
   rockRoot: THREE.Object3D,
@@ -1008,6 +1347,7 @@ export function assembleCoralsOnRockSockets(
   options?: { paused?: boolean; reducedMotion?: boolean; actinicLevel?: number },
 ): {
   mountedCorals: AssembledCoralBinding[]
+  instancedMeshes: THREE.InstancedMesh[]
   update(timeSeconds: number, paused?: boolean, reducedMotion?: boolean): void
 } {
   let hasRockGeometry = false
@@ -1039,6 +1379,7 @@ export function assembleCoralsOnRockSockets(
 
   const mountedCorals: AssembledCoralBinding[] = []
   const geometryBindings: CoralMaterialBoundBinding[] = []
+  const instancedControllers: Array<ReturnType<typeof applyCoralRawMaskMaterial>> = []
   const isLeftIsland = socketNodes.has('socket_sps_crest_01')
   const companionSpecs = hasRockGeometry
     ? isLeftIsland
@@ -1121,13 +1462,27 @@ export function assembleCoralsOnRockSockets(
     })
   }
 
+  const instancedMeshes = buildInstancedCoralScatters(
+    rockRoot,
+    coralTemplates,
+    mounts,
+    socketNodes,
+    options,
+    instancedControllers,
+    geometryBindings,
+  )
+
   return {
     mountedCorals,
+    instancedMeshes,
     update(timeSeconds: number, paused = false, reducedMotion = false) {
       for (const mounted of mountedCorals) {
         for (const controller of mounted.materialControllers) {
           controller.update(timeSeconds, paused, reducedMotion)
         }
+      }
+      for (const controller of instancedControllers) {
+        controller.update(timeSeconds, paused, reducedMotion)
       }
       // Controllers expose their uniforms. If a caller raises the amplitude,
       // extend the shared local sphere before this frame's camera/shadow cull.
