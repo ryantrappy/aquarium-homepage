@@ -6,10 +6,9 @@ assignee:
   - '@render-integration'
   - '@gemini'
 created_date: '2026-11-04T19:20:00Z'
-updated_date: '2026-11-10T05:01:00Z'
+updated_date: '2026-11-12 05:37'
 labels:
-  - ready-for-review
-  - gemini approved
+  - waiting-for-answers
 dependencies:
   - AQ-35
   - AQ-44
@@ -124,5 +123,11 @@ author: root
 created: 2026-11-05 14:12
 ---
 Root independent reset review found a concrete overlay accumulation defect: Three PropertyMixer.apply skips assigning unchanged cached track values, so mixer.update alone does not guarantee a fresh bone pose before multiplicative overlays. A constant quaternion-track repro accumulates0.1,0.2,0.3rad despite0.1rad per application. Root will add an explicit clean pose restore before mixer update, normalize/capture clean skin-joint quaternions before applying overlay, and regression-test real mixer constant/changing tracks and pause/resume. Existing track coverage/caps do not prove reset safety.
+---
+
+author: @root
+created: 2026-11-12 05:37
+---
+Root review 2026-11-11: HOLD for user clarification. Clarify whether exact final habitat-anchor arrival remains required. Actual motion-module reproduction completes the route 0.345794m from its target; passedWaypoint accepts distances up to 0.35m. Ordinary waypoint passing may be intended, but this does not prove exact anchor arrival.
 ---
 <!-- COMMENTS:END -->
