@@ -3,15 +3,14 @@ id: AQ-21
 title: >-
   Animate Regal blue tang (Paracanthurus hepatus) with species-specific reef
   behavior
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-03 04:37'
-updated_date: '2026-11-12 05:37'
+updated_date: '2026-11-12 05:43'
 labels:
   - reef-fish
   - animation
-  - waiting-for-answers
 dependencies:
   - AQ-12
 references:
@@ -39,9 +38,8 @@ Roster ID: `blue-tang`. Implement this fish as an independently reviewable speci
 <!-- AC:BEGIN -->
 - [x] #1 The rendered fish visibly matches the Regal blue tang (Paracanthurus hepatus) visual baseline (adult vivid blue body, curved black palette marking, and yellow tail), checked against the species references linked on this task.
 - [x] #2 Its species-specific behavior is visible: sustain an agile pectoral-fin-driven cruise with quick turns and occasional retreat toward nearby branching coral; avoid tail-dominant body sway.
-- [ ] #3 Real-species video review confirms visible body and fin articulation appropriate to this fish, plausible turns, and any natural hovering or pauses; rigid sprite sliding without articulated fish motion does not count.
-- [x] #4 Roster ID `blue-tang` is available as a fish choice for new and existing services and maps to the correct fish, readable label, and service link; the fish occupies its described habitat position and stays within the aquarium.
-- [x] #5 Shared pause, stopping when the page is hidden, and reduced-motion behavior work for this fish without breaking its service link.
+- [x] #3 Roster ID `blue-tang` is available as a fish choice for new and existing services and maps to the correct fish, readable label, and service link; the fish occupies its described habitat position and stays within the aquarium.
+- [x] #4 Shared pause, stopping when the page is hidden, and reduced-motion behavior work for this fish without breaking its service link.
 <!-- AC:END -->
 
 ## Definition of Done
@@ -69,5 +67,11 @@ author: @root
 created: 2026-11-12 05:37
 ---
 Root review 2026-11-11: HOLD for user clarification. Clarify whether comparison against verified real-species video remains required by AC3. Task notes explicitly leave species identity and timestamps unverified; current evidence does not close that gate.
+---
+
+author: @root
+created: 2026-11-12 05:43
+---
+User clarification 2026-11-11 supersedes the corresponding earlier criterion: {3: None}. Root follow-up: Real-species video comparison is removed at user direction. Remaining checked criteria retain prior implementation evidence; final Root visual review still needs completion.
 ---
 <!-- COMMENTS:END -->
