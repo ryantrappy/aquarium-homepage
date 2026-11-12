@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-05 03:13'
-updated_date: '2026-11-12 14:08'
+updated_date: '2026-11-12 14:46'
 labels:
   - modeling
 dependencies: []
@@ -45,6 +45,8 @@ Root inspected exact packaged left front/oblique snapshots (SHA 2f90be064f3f5b15
 Root-approved functional AQ59 texture-pipeline iteration. Before editing, snapshot the current generator and exact left/right GLB hashes to /tmp. Keep all model/GLB export output under /tmp/aq59-uv-fix-20261105; do not run package_modular_corals or write candidate GLBs/manifest/inspection records in the repo. In build_live_rock_islands.py only, replace top-only UV sampling and compressed top/bottom skirt UVs with non-overlapping surface charts at measured texel density; rasterize the existing color/ORM/height fields from actual triangle barycentric positions and normals. Bake tangent-space normal detail from each chart's physical surface frame, or omit only unsupported detail in a clearly labeled comparison variant. Keep geometry, sockets, palette, field parameters, and dimensions unchanged. Quantify original/new UV overlap, degeneracy, anisotropy, texels/m and source-to-export triangle-position equality; create temporary exact-PBR and neutral front/oblique/sand-contact renders. Verify existing cave/mount geometry and exact rendered hashes. Report outputs and limits for Root approval; do not update ACs/DoD or mark Done.
 
 Root renderer-only refinement 2026-11-12: keep Gemini geometry, Blender sources, GLBs, socket data and manifests unchanged; replace blue-biased carbonate shader colors with neutral warm dark aragonite and reduce broad coralline coverage/rims. Verify actual compiled WebGL at the two viewports and retain porous geometry detail. This is an assembled-material improvement, not acceptance of exact-export model criteria.
+
+Root GPU-cost refinement2026-11-12: native callback/draw diagnostics suggest graphics/presentation cost, while the rock normal shader redundantly reevaluates the same four-octave3D field at four offsets per fragment. Reuse its existing height signal and derive the surface gradient with screen-space derivatives in the view-space tangent frame. Preserve substrate/pore/color fields and geometry; verify actual WebGL compile, macro detail and both native frame-time cases before accepting.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -72,6 +74,8 @@ Reviewer observation requiring Root visual decision: both current textured front
 2026-11-05 Root gate refresh: runtime live-rock/coral shading and measured AO improvements are functional code reviews, not acceptance of rock silhouette/material art. Preserve supplied geometry, real arch and measured mounts. AQ59 stays open for a Gemini-authored model iteration addressing the previously reviewed flat summit/mesa and natural-surface criteria, with exact exported front/oblique evidence and current provenance/socket/clearance checks. Current scene screenshots in AQ63/66 are interaction illustrations, not final scene or candidate art approvals.
 
 Root2026-11-12 renderer-only handoff: neutralized blue-biased carbonate shades and reduced broad magenta coralline coverage/rims, preserving geometry, sockets, Blender sources, GLBs and manifests. Both exact DPR1 browser views render without shader warnings/errors.24 coral/assembly tests and current687-test full suite pass. Native HUD observed54FPS laptop/60FPS phone when host idle, not a formal regression benchmark. Captures and explicit remaining exact-export art/geometry gates:docs/asset-evidence/aq59/runtime-20261112/review.json. AQ59 remains In Progress; no exact-export/model acceptance criterion is checked by this renderer change.
+
+Root2026-11-12 removed redundant normal-field evaluations: reuses medCrag/finePores already computed for color and applies an unparametrized view-space surface gradient using dFdx/dFdy, preserving3D pore/color fields and model geometry.24 coral/assembly tests pass. Native full/macro WebGL renders compile with no captured shader warnings/errors and retain visible rock detail. Speedup is not yet measured; do not infer frame-budget acceptance from fewer shader operations. Current preview is a working-tree review, not a committed AQ70.2 baseline.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

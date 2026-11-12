@@ -680,13 +680,17 @@ roughnessFactor = mix(0.90, 0.65, corMask * 0.85);
     shader.fragmentShader = shader.fragmentShader.replace(
       '#include <normal_fragment_maps>',
       `#include <normal_fragment_maps>
-float eps = 0.005;
-float h0 = rockRidged3D(wPos * 44.0) * 0.65 + rockNoise3D(rPos * 115.0) * 0.35;
-float hx = rockRidged3D((wPos + vec3(eps, 0.0, 0.0)) * 44.0) * 0.65 + rockNoise3D((rPos + vec3(eps, 0.0, 0.0)) * 115.0) * 0.35;
-float hy = rockRidged3D((wPos + vec3(0.0, eps, 0.0)) * 44.0) * 0.65 + rockNoise3D((rPos + vec3(0.0, eps, 0.0)) * 115.0) * 0.35;
-float hz = rockRidged3D((wPos + vec3(0.0, 0.0, eps)) * 44.0) * 0.65 + rockNoise3D((rPos + vec3(0.0, 0.0, eps)) * 115.0) * 0.35;
-vec3 rockBumpGrad = vec3(hx - h0, hy - h0, hz - h0) / eps;
-normal = normalize(normal - rockBumpGrad * 0.015);
+// Reuse the exact height field already sampled for color. A view-space
+// surface gradient avoids sixteen redundant noise-octave evaluations.
+// Unparametrized bump mapping, as in Three.js perturbNormalArb/Mikkelsen.
+float rockHeight = medCrag * 0.65 + finePores * 0.35;
+vec3 rockSigmaX = dFdx(-vViewPosition);
+vec3 rockSigmaY = dFdy(-vViewPosition);
+vec3 rockR1 = cross(rockSigmaY, normal);
+vec3 rockR2 = cross(normal, rockSigmaX);
+float rockDet = dot(rockSigmaX, rockR1) * faceDirection;
+vec3 rockSurfaceGradient = sign(rockDet) * (dFdx(rockHeight) * rockR1 + dFdy(rockHeight) * rockR2);
+if (abs(rockDet) > 1e-10) normal = normalize(abs(rockDet) * normal - rockSurfaceGradient * 0.05);
 `,
     )
   }
