@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
   ADAPTIVE_COOLDOWN_MS,
+  ADAPTIVE_MIN_WINDOW_FRAMES,
   ADAPTIVE_STEP_DOWN_EMA_MS,
   ADAPTIVE_STEP_DOWN_P95_MS,
+  ADAPTIVE_WINDOW_DURATION_MS,
   ADAPTIVE_WINDOW_FRAMES,
   AdaptiveQualityController,
   consumeLodAnimationDelta,
@@ -169,6 +171,56 @@ describe('AdaptiveQualityController (AQ-76 AC #3)', () => {
     expect(feedWindow(controller, 25, 10000)).toBe('balanced')
     expect(feedWindow(controller, 25, 20000)).toBe('balanced')
     expect(feedWindow(controller, 25, 30000)).toBe('low')
+  })
+
+  it('steps down at 15 FPS after two elapsed 2-second windows', () => {
+    const controller = new AdaptiveQualityController()
+    const intervalMs = 1000 / 15
+    const feedElapsedWindow = (startAtMs: number) => {
+      let tier = controller.currentTier
+      // 31 samples span exactly 2 seconds at 15 FPS. Thirty samples alone
+      // span only 1.93 seconds and are intentionally insufficient.
+      for (let frame = 0; frame <= ADAPTIVE_MIN_WINDOW_FRAMES; frame++) {
+        const nowMs = startAtMs + frame * intervalMs
+        controller.recordFrameInterval(intervalMs, nowMs)
+        tier = controller.evaluate(nowMs)
+      }
+      return tier
+    }
+
+    expect(feedElapsedWindow(0)).toBe('high')
+    expect(feedElapsedWindow(ADAPTIVE_WINDOW_DURATION_MS + intervalMs)).toBe('balanced')
+    expect(ADAPTIVE_WINDOW_DURATION_MS).toBe(2000)
+  })
+
+  it('restarts the elapsed window and slow-window count after excluded samples', () => {
+    const controller = new AdaptiveQualityController()
+    const intervalMs = 1000 / 15
+
+    // A partial old window must not contribute samples or elapsed time.
+    for (let frame = 0; frame < ADAPTIVE_MIN_WINDOW_FRAMES; frame++) {
+      const nowMs = frame * intervalMs
+      controller.recordFrameInterval(25, nowMs)
+      controller.evaluate(nowMs)
+    }
+    controller.recordFrameInterval(25, 5000, true)
+    expect(controller.evaluate(5000)).toBe('high')
+
+    // The first fresh window starts at 10s and evaluates at 12s. The next
+    // window must then span another full 2s, rather than using the old start.
+    for (let frame = 0; frame <= ADAPTIVE_MIN_WINDOW_FRAMES; frame++) {
+      const nowMs = 10000 + frame * intervalMs
+      controller.recordFrameInterval(25, nowMs)
+      expect(controller.evaluate(nowMs)).toBe('high')
+    }
+    for (let frame = 1; frame <= ADAPTIVE_MIN_WINDOW_FRAMES; frame++) {
+      const nowMs = 10000 + ADAPTIVE_WINDOW_DURATION_MS + frame * intervalMs
+      controller.recordFrameInterval(25, nowMs)
+      expect(controller.evaluate(nowMs)).toBe('high')
+    }
+    const secondWindowEnd = 10000 + ADAPTIVE_WINDOW_DURATION_MS + (ADAPTIVE_MIN_WINDOW_FRAMES + 1) * intervalMs
+    controller.recordFrameInterval(25, secondWindowEnd)
+    expect(controller.evaluate(secondWindowEnd)).toBe('balanced')
   })
 
   it('steps down on a slow p95 even when the EMA looks fine', () => {

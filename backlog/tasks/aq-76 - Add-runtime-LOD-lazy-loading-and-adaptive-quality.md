@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-08 00:30'
-updated_date: '2026-11-12 14:45'
+updated_date: '2026-11-12 14:48'
 labels:
   - performance
   - rendering
@@ -84,4 +84,8 @@ Measurements:
 Root2026-11-12 functional correction: replaced the global LOD skip counter with per-fish accrued active animation time, so LOD1 samples at half cadence without halving clip/flex speed; turning overlays apply to every sampled pose. Lazy integration now upgrades every matching service fish and schoolmate. Queue selection checks actual viewport intersection and skips past off-screen entries without discarding them or starving later visible species. New actual-controller regression reproduced4 players for9 inhabitants before the all-instance fix; now all9 receive models. Actual-controller tests also prove distant animation consumes0.1s across6steps and an off-screen queued species does not block a later visible species.49 lifecycle/runtime-quality tests pass; typecheck and14 script checks pass. Formal before/after native performance review and the geometry-vs-animation-only LOD criterion remain open.
 
 Root native production comparison recorded underdocs/asset-evidence/aq76/native-20261112/review.json. Same8-service local config, exactDPR1 two-viewports,120warmup/180measured rAF samples. Before cf5703e: laptopp50/p95=49.8/67.0ms,phone33.3/51.7ms; after01f1403: laptop66.1/150.9ms,phone33.3/65.5ms. These fail16.7/22ms budgets, and the short warmup may not settle original adaptive windows at lowFPS. Do not claim performance acceptance or isolate causation from one animated run. All schoolmates remain3D; next work reduces redundant rock shader math and shortens low-FPS adaptive response. Raw samples, PNGs and limited CPU diagnostic are retained.
+
+2026-11-12 adaptive-quality correction: retained the 120-sample window and added a 2,000 ms elapsed-time alternative requiring at least 30 valid samples. Window timing begins at the first valid record and resets after evaluation or excluded samples; p95/EMA thresholds, 2/3 sustained-window counts and 5,000 ms cooldown are unchanged. Added 15 FPS two-window step-down and excluded-window restart regressions. Verification: npm test -- src/rendering/scene/runtime-quality.test.ts — 24 tests passed; git diff --check passed.
+
+Root review2026-11-12 accepted elapsed-time adaptive windows: evaluate after120 valid samples or at least30 samples spanning2s, retaining p95/EMA thresholds,2/3 slow/fast windows and5s cooldown. At15FPS the tested first fallback now occurs around4.1s instead of waiting for240 frames (~16s). Exclusion resets elapsed window and slow/fast counters.24 focused policy tests pass. Native settled budget acceptance still requires repeat measurement after this source change.
 <!-- SECTION:NOTES:END -->

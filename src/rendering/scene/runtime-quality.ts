@@ -43,8 +43,12 @@ export const LOD_MIN_PROJECTED_PX = 140
 export const LAZY_PHASE0_MAX_SPECIES = 3
 /** Background GLB loads in flight at once. */
 export const LAZY_MAX_CONCURRENT_LOADS = 2
-/** Frames per adaptive-quality evaluation window (~2 s at 60 fps). */
+/** Maximum samples per adaptive-quality window; preserves the 120-frame path. */
 export const ADAPTIVE_WINDOW_FRAMES = 120
+/** Elapsed-time alternative for adaptive-quality evaluation windows. */
+export const ADAPTIVE_WINDOW_DURATION_MS = 2000
+/** Minimum valid samples before the elapsed-time window may be evaluated. */
+export const ADAPTIVE_MIN_WINDOW_FRAMES = 30
 /** Step down after sustained windows with EMA above this (ms). */
 export const ADAPTIVE_STEP_DOWN_EMA_MS = 19
 /** Step down after sustained windows with p95 above this (ms). */
@@ -198,6 +202,7 @@ export class AdaptiveQualityController {
   private tier: QualityTier = 'high'
   private emaMs: number | undefined
   private samples: number[] = []
+  private windowStartedAtMs: number | undefined
   private slowWindows = 0
   private fastWindows = 0
   private lastChangeAtMs = -Infinity
@@ -217,27 +222,34 @@ export class AdaptiveQualityController {
     if (excluded) {
       this.samples = []
       this.emaMs = undefined
+      this.windowStartedAtMs = undefined
       this.slowWindows = 0
       this.fastWindows = 0
       return
     }
     if (!(intervalMs > 0) || !Number.isFinite(intervalMs) || !Number.isFinite(nowMs)) return
+    if (this.windowStartedAtMs === undefined) this.windowStartedAtMs = nowMs
     this.emaMs = this.emaMs === undefined ? intervalMs : this.emaMs * 0.9 + intervalMs * 0.1
     this.samples.push(intervalMs)
     if (this.samples.length > ADAPTIVE_WINDOW_FRAMES) this.samples.shift()
   }
 
-  /** Evaluate the current window (once it holds a full window of frames)
-   * and return the tier that should be active at `nowMs`. No tier change
+  /** Evaluate the current window once it holds 120 samples, or at least 30
+   * samples spanning 2 seconds, and return the tier active at `nowMs`. No tier change
    * is made before a full window, during cooldown, or on a single slow
    * window — stepping down needs 2 consecutive slow windows, stepping up
    * needs 3 consecutive fast windows. */
   evaluate(nowMs: number): QualityTier {
-    if (this.samples.length < ADAPTIVE_WINDOW_FRAMES || this.emaMs === undefined) return this.tier
+    const fullSampleWindow = this.samples.length >= ADAPTIVE_WINDOW_FRAMES
+    const elapsedWindow = this.samples.length >= ADAPTIVE_MIN_WINDOW_FRAMES
+      && this.windowStartedAtMs !== undefined
+      && nowMs - this.windowStartedAtMs >= ADAPTIVE_WINDOW_DURATION_MS
+    if ((!fullSampleWindow && !elapsedWindow) || this.emaMs === undefined) return this.tier
     const sorted = [...this.samples].sort((a, b) => a - b)
     const p95 = sorted[Math.min(sorted.length - 1, Math.floor(0.95 * sorted.length))]
     const ema = this.emaMs
     this.samples = []
+    this.windowStartedAtMs = undefined
     const cooledDown = nowMs - this.lastChangeAtMs >= ADAPTIVE_COOLDOWN_MS
     if (ema > ADAPTIVE_STEP_DOWN_EMA_MS || p95 > ADAPTIVE_STEP_DOWN_P95_MS) {
       this.slowWindows++
