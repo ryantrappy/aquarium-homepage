@@ -153,6 +153,43 @@ beforeEach(() => {
 afterEach(() => { controller?.dispose(); delete window.__AQUARIUM_LOOKDEV__; window.history.replaceState({}, '', '/'); host.remove(); vi.restoreAllMocks(); vi.unstubAllGlobals() })
 
 describe('actual aquarium controller inhabitant lifecycle without WebGL', () => {
+  it('holds capture readiness until the application finishes loading saved configuration', async () => {
+    window.history.replaceState({}, '', '/?lookdev=1')
+    const services = [service('config-pending')]
+    anchors(services)
+    controller = createAquarium(host.querySelector('canvas')!, overlay, services, false, status, undefined, undefined, undefined, false)
+    await vi.waitFor(() => expect(status).toHaveBeenLastCalledWith('ready'))
+    const bridge = window.__AQUARIUM_LOOKDEV__!
+    let resolved = false
+    const ready = bridge.ready().then(snapshot => { resolved = true; return snapshot })
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(resolved).toBe(false)
+    expect(bridge.state().ready).toBe(false)
+    controller.update(services, false, true)
+    expect((await ready).ready).toBe(true)
+  })
+
+  it('stages the same final look-dev roster whether saved services arrive early or late', async () => {
+    window.history.replaceState({}, '', '/?lookdev=1&seed=61')
+    const final = [service('early-a'), service('early-b', 'yellow-tang'), service('late-c', 'royal-gramma')]
+    const poses = () => final.map(service => ({
+      id: service.id,
+      position: { ...state.created.slice().reverse().find(fish => fish.id === service.id)!.position },
+    }))
+    await start(final.slice(0, 2))
+    await window.__AQUARIUM_LOOKDEV__!.ready()
+    update(final)
+    await window.__AQUARIUM_LOOKDEV__!.ready()
+    const lateArrival = poses()
+
+    controller.dispose()
+    state.created = []
+    status.mockClear()
+    await start(final)
+    await window.__AQUARIUM_LOOKDEV__!.ready()
+    expect(poses()).toEqual(lateArrival)
+  })
+
   it('loads a later visible species while an off-screen species stays queued', async () => {
     const idleCallbacks: IdleRequestCallback[] = []
     vi.stubGlobal('requestIdleCallback', (callback: IdleRequestCallback) => {
@@ -227,7 +264,7 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     expect(overlay.querySelector('a')?.dataset.occluded).toBe('false')
     expect(overlay.querySelector('.fish-name')?.getAttribute('style')).toContain('visibility: hidden')
 
-    const fish = state.created[0]!
+    const fish = state.created.slice().reverse().find(fish => fish.id === 'capture')!
     const startPosition = { ...fish.position }
     const startBone = meshFor('capture').skeleton.bones[0]!.quaternion.clone()
     expect(fish.yaw).toBeCloseTo(Math.PI / 2)
@@ -315,12 +352,13 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     state.pendingMeshNavigationReleases.shift()?.()
     const snapshot = await readyPromise
     expect(snapshot.ready).toBe(true)
-    const settledPose = { ...state.created[0]!.position }
+    const settledFish = state.created.slice().reverse().find(fish => fish.id === 'nav-pending')!
+    const settledPose = { ...settledFish.position }
     expect(settledPose).not.toEqual(initial)
     expect(bridge.state().ready).toBe(true)
     advance()
     await new Promise(resolve => setTimeout(resolve, 0))
-    expect(state.created[0]!.position).toEqual(settledPose)
+    expect(settledFish.position).toEqual(settledPose)
   })
 
   it('blocks on a failed current thumbnail texture and clears that failure when its inhabitant retires', async () => {

@@ -11,7 +11,7 @@ import { useServices } from '../lib/useServices'
 export const Route = createFileRoute('/')({ component: ReefHome })
 
 function ReefHome() {
-  const { services, loadError, retryLoad, addService, updateService, deleteService, importServices, resetServices } = useServices()
+  const { services, isLoaded, loadError, retryLoad, addService, updateService, deleteService, importServices, resetServices } = useServices()
   const [managerOpen, setManagerOpen] = useState(false)
   const [servicesOpen, setServicesOpen] = useState(false)
   const [paused, setPaused] = useState(false)
@@ -80,7 +80,7 @@ function ReefHome() {
 
   return (
     <main className="page-shell">
-      <AquariumScene services={services} paused={motionStopped} focusFallbackRef={servicesTrigger} fpsCounterEnabled={fpsCounterEnabled} />
+      <AquariumScene services={services} paused={motionStopped} configurationReady={isLoaded} focusFallbackRef={servicesTrigger} fpsCounterEnabled={fpsCounterEnabled} />
       <div className="aquarium-controls" role="group" aria-label="Aquarium controls">
         <button ref={servicesTrigger} className="scene-control services-control" type="button" onClick={openServices} aria-haspopup="dialog" aria-expanded={servicesOpen} title="Open service shortcuts"><ServicesIcon /><span>Services</span></button>
         <button className="scene-control icon-control" type="button" onClick={() => setPaused(!paused)} aria-pressed={motionStopped} disabled={reducedBySystem} aria-label={reducedBySystem ? 'Reduced motion enabled by system' : paused ? 'Resume fish movement' : 'Pause fish movement'} title={reducedBySystem ? 'Reduced motion' : paused ? 'Resume motion' : 'Pause motion'}><PauseIcon paused={paused && !reducedBySystem} /></button>

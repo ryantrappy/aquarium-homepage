@@ -111,7 +111,7 @@ const modelUrls: Record<string, string> = {
   'copperband-butterflyfish': new URL('../assets/splat-fish/copperband-butterflyfish.glb', import.meta.url).href,
 }
 export type SceneStatus = 'loading' | 'ready' | 'failed'
-export type AquariumController = { update(services: ServiceConfig[], paused: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void; zoomIn(): boolean; zoomOut(): boolean; zoomToFocalArea(id: FocalAreaId): boolean; resetZoom(): boolean; isZoomed(): boolean; getCameraZoom(): CameraZoomState; focusServiceFish?(id: string): boolean; getFocusedServiceId?(): string | undefined }
+export type AquariumController = { update(services: ServiceConfig[], paused: boolean, configurationReady?: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void; zoomIn(): boolean; zoomOut(): boolean; zoomToFocalArea(id: FocalAreaId): boolean; resetZoom(): boolean; isZoomed(): boolean; getCameraZoom(): CameraZoomState; focusServiceFish?(id: string): boolean; getFocusedServiceId?(): string | undefined }
 declare global { interface Window { __AQUARIUM_LOOKDEV__?: LookDevBridge } }
 type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; flex?: FishFlexBinding; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean; schoolmate: boolean; lod: FishLod; lodModel?: THREE.Object3D }
 
@@ -130,7 +130,7 @@ function disposeTree(root: THREE.Object3D) {
   textures.forEach(value => { value.dispose(); if (typeof ImageBitmap !== 'undefined' && value.source.data instanceof ImageBitmap) value.source.data.close() })
 }
 
-export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, initialServices: ServiceConfig[], initialPaused: boolean, status: (status: SceneStatus) => void, focusFallback: () => HTMLElement | null = () => null, fishExtensions: FishExtensionConfig = EMPTY_FISH_EXTENSIONS, onFrameRate?: (sample: FrameRateSample | null) => void): AquariumController {
+export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, initialServices: ServiceConfig[], initialPaused: boolean, status: (status: SceneStatus) => void, focusFallback: () => HTMLElement | null = () => null, fishExtensions: FishExtensionConfig = EMPTY_FISH_EXTENSIONS, onFrameRate?: (sample: FrameRateSample | null) => void, initialConfigurationReady = true): AquariumController {
   const lookDevConfig = import.meta.env.DEV ? resolveLookDevConfig(window.location.search, true) : undefined
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' })
   renderer.setPixelRatio(lookDevConfig ? 1 : Math.min(devicePixelRatio, 1.5))
@@ -689,6 +689,8 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   let lookDevSubjectId = lookDevConfig?.subjectId
   let lookDevTextureRequestId = 0
   let lookDevReady = false, lookDevContextLost = false, lookDevFailure: string | undefined
+  let lookDevNeedsStaging = true
+  let lookDevConfigurationReady = initialConfigurationReady
   const lookDevCurrentAssets = new Set<string>(), lookDevPendingAssets = new Set<string>(), lookDevFailedAssets = new Set<string>()
   const lookDevRafSamples: number[] = [], lookDevCpuRenderSamples: number[] = [], lookDevFrozenRenderSamples: number[] = []
   let lookDevLastRafTime: number | undefined
@@ -719,7 +721,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       ?? (failedTextures.length ? `Current fish thumbnail texture failed: ${failedTextures.join(', ')}` : undefined)
       ?? (unresolvedFishIds.length ? `Loaded fish models still have thumbnail-only inhabitants: ${unresolvedFishIds.join(', ')}.` : undefined)
     return {
-      ready: lookDevReady && !lookDevContextLost && !document.hidden && !currentFailure && loaded
+      ready: lookDevReady && lookDevConfigurationReady && !lookDevContextLost && !document.hidden && !currentFailure && loaded
         && meshNavigationSettledGeneration === meshNavigationGeneration
         && lookDevPendingAssets.size === 0 && lazyQueue.length === 0
         && failedTextures.length === 0 && unresolvedFishIds.length === 0,
@@ -794,6 +796,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   }
   function settleLookDevReadiness() {
     if (!lookDevConfig || lookDevReady || lookDevContextLost || lookDevFailure || disposed) return
+    if (!lookDevConfigurationReady) return
     if (document.hidden) return
     if (spawnUnavailable) {
       rejectLookDevWaiters(new Error('Fish spawn is unavailable for this viewport and service layout.'))
@@ -809,6 +812,17 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     if (lookDevSubjectId && !fish.some(item => item.service.id === lookDevSubjectId)) {
       rejectLookDevWaiters(new Error(`Look-dev subject "${lookDevSubjectId}" is not a configured service id.`))
       return
+    }
+    // Saved configuration can arrive before or after the starter models.
+    // Restage the complete roster against the settled habitat once, rather
+    // than capturing whichever retained starter positions won that race.
+    if (lookDevNeedsStaging) {
+      lookDevNeedsStaging = false
+      if (rebuildFish() !== true) {
+        rejectLookDevWaiters(new Error('Complete look-dev roster cannot be staged safely.'))
+        return
+      }
+      if (lookDevPendingAssets.size > 0 || lazyQueue.length > 0 || lazyActiveLoads > 0) return
     }
     const unresolved = lookDevSnapshot().unresolvedFishIds
     if (unresolved.length > 0) {
@@ -935,6 +949,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     )
   }
   function rebuildHabitat() {
+    if (lookDevConfig) lookDevNeedsStaging = true
     // Invalidate any previous mesh routing before the reefs are replaced; a
     // fresh collider build is kicked off below and applied only if this
     // generation is still current. Until it lands, fish keep AABB routing.
@@ -1781,7 +1796,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     if (disposed || failed) return
     const nextWidth = Math.max(1, canvas.parentElement!.clientWidth), nextHeight = Math.max(1, canvas.parentElement!.clientHeight)
     const sizeChanged = width !== nextWidth || height !== nextHeight
-    if (lookDevConfig && sizeChanged) { lookDevReady = false; lookDevResetTiming() }
+    if (lookDevConfig && sizeChanged) { lookDevReady = false; lookDevNeedsStaging = true; lookDevResetTiming() }
     if (sizeChanged) particleBuffersDirty = true
     width = nextWidth; height = nextHeight
     camera.aspect = width / height; camera.updateProjectionMatrix(); renderer.setSize(width, height, false)
@@ -2093,11 +2108,18 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   })
   syncLoop()
   return {
-    update(next, stopped) {
+    update(next, stopped, configurationReady = true) {
+      if (lookDevConfig && configurationReady !== lookDevConfigurationReady) {
+        lookDevConfigurationReady = configurationReady
+        lookDevReady = false
+        lookDevNeedsStaging = true
+        lookDevResetTiming()
+      }
       const changed = JSON.stringify(next) !== JSON.stringify(services); services = next; paused = stopped
       if (changed) {
         if (lookDevConfig) {
           lookDevReady = false
+          lookDevNeedsStaging = true
           lookDevResetTiming()
           if (lookDevSubjectId && !next.some(service => service.id === lookDevSubjectId)) lookDevSubjectId = undefined
           const activeSpecies = new Set(next.map(service => service.fishId))
@@ -2114,6 +2136,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         if (lookDevConfig) { applyLookDevCamera(); settleLookDevReadiness() }
       }
       syncLoop()
+      if (lookDevConfig) settleLookDevReadiness()
     },
     activate(id) { const item = fish.find(item => item.service.id === id); if (!item || paused || document.hidden) return; item.releasedFocus = true; startleFish(item.motion, habitat) },
     // Camera zoom (AQ-62 AC #1/#3): each returns whether the camera is
