@@ -1,15 +1,13 @@
 ---
 id: AQ-43
 title: Evaluate restrained suspended particles and microbubbles
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
-created_date: 2026-11-03 12:34
-updated_date: '2026-11-08T21:36:00Z'
+created_date: '2026-11-03 12:34'
+updated_date: '2026-11-12 05:37'
 labels:
   - good-for-parallel-work
-  - ready-for-review
-  - gemini approved
 dependencies:
   - AQ-34
   - AQ-14.2
@@ -98,10 +96,13 @@ Per `docs/open-source-asset-and-motion-research.md` §6.4 and our front-on tank 
 <!-- COMMENTS:BEGIN -->
 author: @Luna
 created: 2026-11-04T02:32:00Z
-
+---
+Research doc treats particle counts, pixel sizes, opacity, and gyre motion as artistic parameters; prior numeric marine-snow/copepod density claims were unmeasured. No natural particle-density claim is made.
 ---
 
-Research doc treats particle counts, pixel sizes, opacity, and gyre motion as artistic parameters; prior numeric marine-snow/copepod density claims were unmeasured. No natural particle-density claim is made.
-
+author: @root
+created: 2026-11-12 05:37
+---
+Root review 2026-11-11: Returned to To Do. AC3 remains unverified: current two-viewport fish visibility and particle/bubble performance evidence is incomplete. Focused tests pass, including sprite/lifecycle behavior, but no accepted live motion/performance comparison closes the visual gate.
 ---
 <!-- COMMENTS:END -->
