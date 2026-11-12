@@ -1,0 +1,39 @@
+{
+  "task": "AQ-70.13",
+  "date": "2026-11-12",
+  "sourceCommit": "091cacae111b22b7c2477dbbca57aa42e7546028",
+  "status": "Partial composition refinement; not task completion or final art acceptance",
+  "captures": [
+    {
+      "image": "laptop.png",
+      "snapshot": "laptop.json",
+      "viewport": [
+        1440,
+        900
+      ],
+      "sha256": "9dc36cdd1670c0599bb091658f167eef255f5bff08af304c9b9f9397d0560d4b"
+    },
+    {
+      "image": "phone.png",
+      "snapshot": "phone.json",
+      "viewport": [
+        402,
+        874
+      ],
+      "sha256": "afac225610cccf78419219a76477f42fcc2e14696381584b9f0e67da6d43b16b"
+    }
+  ],
+  "review": [
+    "Reef is taller and visibly asymmetric, with lower right island and open channel/foreground",
+    "Rejected initial scale6.3/5.2 edge cropping; final desktop6.0/5.0 and portrait4.6 preserve supplied uniform geometry",
+    "Visible reef, runtime obstacle/anchor generation, sand contact ellipses and bubble origins share placement source",
+    "All eight phone native service links visible; targets retain minimum44px size"
+  ],
+  "remaining": [
+    "Metric-scale correspondence and camera documentation",
+    "Reference-level height, depth layering, central arch and colony variation",
+    "Root and user final reference acceptance"
+  ],
+  "verification": "Six focused suites pass70 tests; native images have exact PNG dimensions/DPR1 and no pending/failed/unresolved assets",
+  "limits": "Fixed High inspection stats are not normal runtime performance evidence. No GLB or Blender changes."
+}
