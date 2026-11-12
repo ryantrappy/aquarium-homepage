@@ -329,14 +329,12 @@ float causticMask = max(vCausticWorldNormal.y, 0.0) * (1.0 - 0.35 * clamp((2.8 -
 // Light redistribution (look-dev 2026-11-11): focusing means bright
 // ridges AND dimmer surroundings — the light in the web came from the
 // field around it.
-reflectedLight.directDiffuse *= 1.0 - 0.40 * (1.0 - causticP) * causticMask;
-// Deep blue-water shadow tint between caustic ridges so non-caustic surfaces sit in moody reef water shadow
-vec3 underwaterShadowTint = mix(vec3(1.0), vec3(0.28, 0.44, 0.70), (1.0 - causticP) * clamp(causticMask * 1.25, 0.0, 1.0));
-reflectedLight.directDiffuse *= underwaterShadowTint;
-reflectedLight.indirectDiffuse *= mix(vec3(1.0), vec3(0.24, 0.38, 0.64), (1.0 - causticP) * 0.85);
-float causticBright = causticP * max(0.0, 1.0 + uFocusGain * surfaceWaveFocus(causticSurf, uCausticTime));
+// Only redistribute the direct fixture light. Recoloring ambient light
+// here painted the whole sand bed blue between bright polygon outlines.
+reflectedLight.directDiffuse *= 1.0 - 0.12 * (1.0 - causticP) * causticMask;
+float causticBright = causticP * clamp(1.0 + uFocusGain * surfaceWaveFocus(causticSurf, uCausticTime), 0.0, 1.0);
 vec3 causticSunlightTint = vec3(1.18, 1.08, 0.90);
-reflectedLight.directDiffuse += diffuseColor.rgb * causticSunlightTint * (causticBright * causticMask * uCausticMaxAdd * 1.35);`,
+reflectedLight.directDiffuse += diffuseColor.rgb * causticSunlightTint * (causticBright * causticMask * uCausticMaxAdd);`,
     )
   }
   const cacheKeySuffix = skinned ? CAUSTIC_SKINNED_CACHE_KEY_SUFFIX : CAUSTIC_CACHE_KEY_SUFFIX

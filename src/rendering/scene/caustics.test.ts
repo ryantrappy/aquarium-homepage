@@ -176,11 +176,12 @@ describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
     // modulates the pattern by the shared wave-field focus there.
     expect(shader.fragmentShader).toContain('causticSurf')
     expect(shader.fragmentShader).toContain('surfaceWaveFocus(causticSurf, uCausticTime)')
-    expect(shader.fragmentShader).toContain('1.0 + uFocusGain * surfaceWaveFocus')
+    expect(shader.fragmentShader).toContain('clamp(1.0 + uFocusGain * surfaceWaveFocus')
     // Light redistribution: the field between ridges is dimmed (the
     // light in the web came from around it), so the dapple reads on
     // bright surfaces instead of clipping away.
-    expect(shader.fragmentShader).toContain('reflectedLight.directDiffuse *= 1.0 - 0.40 * (1.0 - causticP) * causticMask')
+    expect(shader.fragmentShader).toContain('reflectedLight.directDiffuse *= 1.0 - 0.12 * (1.0 - causticP) * causticMask')
+    expect(shader.fragmentShader).not.toContain('reflectedLight.indirectDiffuse *=')
     expect(shader.fragmentShader).toContain('surfaceWaveHeight')
     expect(shader.uniforms.uCausticMaxAdd.value).toBeCloseTo(0.35)
     expect(shader.uniforms.uCausticThreshold.value).toBeCloseTo(0.35)
