@@ -5,6 +5,7 @@ import {
   createAragoniteSandPbrTextures,
   evaluateAragoniteSandElevation,
   evaluateRockBaseContactFactor,
+  getRockFootprintsForViewport,
 } from './aragonite-sand'
 
 function expandShaderIncludes(source: string, depth = 0): string {
@@ -141,12 +142,15 @@ describe('photoreal aragonite sand bed (AQ-70.12)', () => {
 
     // Contact factor darkens tightly at rock footprints and stays 1.0 in open foreground sand
     expect(evaluateRockBaseContactFactor(0, 1.5, false)).toBe(1.0)
-    expect(evaluateRockBaseContactFactor(-2.35, -1.35, false)).toBeCloseTo(0.45, 2)
-    expect(evaluateRockBaseContactFactor(2.65, -1.20, false)).toBeCloseTo(0.48, 2)
-    expect(evaluateRockBaseContactFactor(-0.15, -1.35, true)).toBeCloseTo(0.45, 2)
+    const desktopFootprints = getRockFootprintsForViewport(false)
+    const phoneFootprints = getRockFootprintsForViewport(true)
+    expect(evaluateRockBaseContactFactor(desktopFootprints[0].x, desktopFootprints[0].z, false)).toBeCloseTo(0.45, 2)
+    expect(evaluateRockBaseContactFactor(desktopFootprints[1].x, desktopFootprints[1].z, false)).toBeCloseTo(0.48, 2)
+    expect(evaluateRockBaseContactFactor(phoneFootprints[0].x, phoneFootprints[0].z, true)).toBeCloseTo(0.45, 2)
     // The wider fade (0.55..1.55) extends the grounding ring beyond the rock edge: at r 1.45 the
     // factor is still darkened, where the old 1.30 fade had already returned to 1.0.
-    expect(evaluateRockBaseContactFactor(-2.35 + 1.45 * 1.85 * 0.92, -1.35, false)).toBeLessThan(1.0)
+    const leftDesktop = desktopFootprints[0]
+    expect(evaluateRockBaseContactFactor(leftDesktop.x + 1.45 * leftDesktop.radiusX * 0.92, leftDesktop.z, false)).toBeLessThan(1.0)
 
     bed.dispose()
   })
@@ -172,8 +176,9 @@ describe('photoreal aragonite sand bed (AQ-70.12)', () => {
     expect(rearOpen).toBeGreaterThan(frontOpen + 0.15)
 
     // Talus berm near left rock perimeter is higher than adjacent open sand at the same Z depth
-    const atRockPerimeter = evaluateAragoniteSandElevation(-2.35 + 1.35, -1.35, false)
-    const atCenterChannel = evaluateAragoniteSandElevation(0.15, -1.35, false)
+    const [leftFootprint, rightFootprint] = getRockFootprintsForViewport(false)
+    const atRockPerimeter = evaluateAragoniteSandElevation(leftFootprint.x + 0.75 * leftFootprint.radiusX, leftFootprint.z, false)
+    const atCenterChannel = evaluateAragoniteSandElevation((leftFootprint.x + rightFootprint.x) / 2, -1.35, false)
     expect(atRockPerimeter).toBeGreaterThan(atCenterChannel)
 
     // Every vertex on the sand bed stays strictly below habitat.bounds.min.y = -2.25

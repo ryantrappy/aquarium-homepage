@@ -35,6 +35,7 @@ import {
 import { SURFACE_WAVE_GLSL } from './surface-waves'
 import { RaymarchedShaftPass, SHAFT_BEAM_GLSL } from './light-shafts'
 import { createAragoniteSandBed, getRockFootprintsForViewport } from './aragonite-sand'
+import { reefPlacementsForViewport } from './reef-layout'
 import { estimateCaptionRect, labelLiftPx, resolveLabelDeconflicts } from './fish-label-layout'
 import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
 import { createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
@@ -969,35 +970,11 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       return
     }
     const reducedMotion = Boolean(reducedMotionQuery?.matches)
-    const placements = width < 600
-      ? [
-          {
-            islandKind: 'left' as const,
-            rockScene: rockIslandLeftBase.scene,
-            mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
-            position: { x: -0.15, y: -2.70, z: -1.35 },
-            uniformScale: 3.4,
-            yaw: 0.06,
-          },
-        ]
-      : [
-          {
-            islandKind: 'left' as const,
-            rockScene: rockIslandLeftBase.scene,
-            mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
-            position: { x: -2.35, y: -2.70, z: -1.35 },
-            uniformScale: 4.5,
-            yaw: 0.08,
-          },
-          {
-            islandKind: 'right' as const,
-            rockScene: rockIslandRightBase.scene,
-            mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
-            position: { x: 2.65, y: -2.70, z: -1.20 },
-            uniformScale: 4.3,
-            yaw: -0.10,
-          },
-        ]
+    const placements = reefPlacementsForViewport(width < 600).map(placement => ({
+      ...placement,
+      rockScene: placement.islandKind === 'left' ? rockIslandLeftBase!.scene : rockIslandRightBase!.scene,
+      mounts: placement.islandKind === 'left' ? DEFAULT_LEFT_ISLAND_MOUNTS : DEFAULT_RIGHT_ISLAND_MOUNTS,
+    }))
     // Bubble emitters (AQ-43 as amended): one at the base of each live-rock
     // island, derived from the placements above — never hardcoded. The left
     // stream is the anemone stream: the host-anemone mount lives on the

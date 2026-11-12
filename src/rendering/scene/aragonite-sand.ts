@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { reefContactFootprints } from './reef-layout'
 
 export type RockFootprint = Readonly<{
   x: number
@@ -27,20 +28,11 @@ export type AragoniteSandBed = Readonly<{
   dispose(): void
 }>
 
-const DESKTOP_ROCK_FOOTPRINTS: readonly RockFootprint[] = Object.freeze([
-  { x: -2.35, z: -1.35, radiusX: 1.85, radiusZ: 1.15 },
-  { x: 2.65, z: -1.20, radiusX: 1.75, radiusZ: 1.10 },
-])
-
-const MOBILE_ROCK_FOOTPRINTS: readonly RockFootprint[] = Object.freeze([
-  { x: -0.15, z: -1.35, radiusX: 1.45, radiusZ: 0.95 },
-])
-
 const LEFT_CONTACT_AO_STRENGTH = 0.55
 const RIGHT_CONTACT_AO_STRENGTH = 0.52
 
 export function getRockFootprintsForViewport(narrow: boolean): readonly RockFootprint[] {
-  return narrow ? MOBILE_ROCK_FOOTPRINTS : DESKTOP_ROCK_FOOTPRINTS
+  return reefContactFootprints(narrow)
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -454,8 +446,8 @@ export function createAragoniteSandBed(config: AragoniteSandConfig = {}): Aragon
   applySandGeometryElevation(sandGeometry, narrow)
 
   const sandUniforms = {
-    uLeftFootprint: { value: new THREE.Vector4(-2.35, -1.35, 1.85, 1.15) },
-    uRightFootprint: { value: new THREE.Vector4(2.65, -1.20, 1.75, 1.10) },
+    uLeftFootprint: { value: new THREE.Vector4() },
+    uRightFootprint: { value: new THREE.Vector4() },
     uSingleIslandMode: { value: narrow ? 1 : 0 },
   }
 
