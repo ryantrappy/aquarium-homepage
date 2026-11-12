@@ -16,6 +16,7 @@ const state = vi.hoisted(() => ({
   deferFishLoads: false, failFishLoads: false, pendingFishLoadReleases: [] as Array<() => void>, resizeCallback: undefined as undefined | (() => void),
   deferMeshNavigation: false, pendingMeshNavigationReleases: [] as Array<() => void>, meshNavigationResult: undefined as unknown,
   blockedSpawn: false, throwCreateForId: '', beforeCreateFailure: undefined as (() => void) | undefined,
+  forceLabelExposure: false,
 }))
 vi.mock('three', async importOriginal => {
   const real = await importOriginal<typeof import('three')>()
@@ -91,6 +92,11 @@ vi.mock('./fish-spawn', async importOriginal => {
     findSafeFishSpawn: (...args: Parameters<typeof real.findSafeFishSpawn>) => state.blockedSpawn ? undefined : real.findSafeFishSpawn(...args),
   }
 })
+vi.mock('./fish-link-focus', async importOriginal => {
+  const real = await importOriginal<typeof import('./fish-link-focus')>()
+  return { ...real, applyFishLinkVisibility: (...args: Parameters<typeof real.applyFishLinkVisibility>) =>
+    real.applyFishLinkVisibility(args[0], state.forceLabelExposure || args[1], args[2]) }
+})
 vi.mock('../../lib/fish', async importOriginal => {
   const real = await importOriginal<typeof import('../../lib/fish')>()
   return { ...real, getFishById: (id: string) => id === 'artwork-fixture' ? { ...real.REEF_FISH[0], id } : real.getFishById(id) }
@@ -133,6 +139,7 @@ beforeEach(() => {
   state.created = []; state.players = []; state.sources = []; state.textures = []; state.blockedSpawn = false; state.throwCreateForId = ''; state.beforeCreateFailure = undefined
   state.deferFishLoads = false; state.failFishLoads = false; state.pendingFishLoadReleases = []; state.resizeCallback = undefined
   state.deferMeshNavigation = false; state.pendingMeshNavigationReleases = []; state.meshNavigationResult = undefined
+  state.forceLabelExposure = false
   vi.stubGlobal('devicePixelRatio', 1)
   vi.stubGlobal('ResizeObserver', class { constructor(callback: () => void) { state.resizeCallback = callback } observe() {} disconnect() {} })
   vi.spyOn(document, 'hidden', 'get').mockReturnValue(false)
@@ -212,6 +219,12 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     expect(ready.preset).toBe('fish-macro')
     expect(ready.viewport).toMatchObject({ width: 1440, height: 900, devicePixelRatio: 1 })
     expect(ready.renderer.render.calls).toBeGreaterThan(0)
+    expect(overlay.querySelector('.fish-name')?.getAttribute('style')).toContain('visibility: hidden')
+    // Exercise the normal exposure writer for a visible fish, rather than
+    // relying on the mock triangle's raycast visibility in this fixture.
+    state.forceLabelExposure = true
+    bridge.renderFrozen()
+    expect(overlay.querySelector('a')?.dataset.occluded).toBe('false')
     expect(overlay.querySelector('.fish-name')?.getAttribute('style')).toContain('visibility: hidden')
 
     const fish = state.created[0]!

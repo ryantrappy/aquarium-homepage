@@ -790,10 +790,6 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       else item.root.rotation.set(0, Math.PI / 2, 0, 'YXZ')
       item.root.updateMatrix()
       item.root.updateMatrixWorld()
-      if (item.anchor) {
-        const label = item.anchor.querySelector('.fish-name') as HTMLElement | null
-        if (label) label.style.visibility = lookDevConfig.labelsVisible ? '' : 'hidden'
-      }
     }
   }
   function settleLookDevReadiness() {
@@ -1641,6 +1637,14 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       pumpLazyLoads()
     }
     positionLabels(refreshLabels)
+    // Apply capture-only suppression after normal occlusion/focus exposure,
+    // which writes the same visibility property during label placement.
+    if (lookDevConfig && !lookDevConfig.labelsVisible) {
+      for (const item of fish) {
+        const label = item.anchor?.querySelector('.fish-name') as HTMLElement | null
+        if (label) label.style.visibility = 'hidden'
+      }
+    }
     if (labelClock > .24) labelClock = 0
     // Raymarched shafts (AQ-98, High tier only): the depth-only pre-pass
     // runs before the main render, the additive half-res quad after it.
