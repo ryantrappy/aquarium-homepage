@@ -1,17 +1,15 @@
 ---
 id: AQ-71
 title: Add a PMREM IBL environment map
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
-created_date: 2026-11-08 00:30
-updated_date: '2026-11-08T21:36:00Z'
+created_date: '2026-11-08 00:30'
+updated_date: '2026-11-12 05:37'
 labels:
   - photorealism
   - rendering
   - optics
-  - ready-for-review
-  - gemini approved
 dependencies:
   - AQ-39
   - AQ-14.2
@@ -52,3 +50,13 @@ The main scene currently lacks a scene.environment PMREM texture, causing MeshSt
 <!-- SECTION:NOTES:BEGIN -->
 2026-11-08 audit: PR #9 merged procedural PMREM environment map generation (src/rendering/scene/environment-map.ts, 6 passing tests in environment-map.test.ts) and wired scene.environment and per-role envMapIntensity into src/rendering/scene/aquarium.ts. Moved to In Progress (ready-for-review / gemini approved) awaiting Root 2-viewport exposure/performance sign-off (ACs #3-#4).
 <!-- SECTION:NOTES:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @root
+created: 2026-11-12 05:37
+---
+Root review 2026-11-11: Returned to To Do. AC3/4 remain unverified: current two-viewport exposure acceptance and controlled no-regression performance comparison are missing. Six focused optics/environment/lifecycle suites pass 70 tests, but those do not establish visual quality or frame-rate parity.
+---
+<!-- COMMENTS:END -->

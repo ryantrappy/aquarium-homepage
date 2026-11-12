@@ -1,10 +1,11 @@
 ---
 id: AQ-83
 title: Add a Settings toggle to display a debug FPS and frame-time counter
-status: To Do
+status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-08T20:07:00Z'
+updated_date: '2026-11-12 05:55'
 labels:
   - ui
   - performance
@@ -44,3 +45,9 @@ As photorealistic fish, coral shaders, caustics, and post-processing passes are 
 - [ ] #1 Root agent reviews the completed work before the task is marked Done.
 - [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Inspect the existing Settings persistence and aquarium HUD lifecycle; keep the sampling module independent of aquarium.ts scene behavior. 2. Add a default-off persisted performance setting and accessible Settings toggle. 3. Add a small external-store/DOM FPS display module that samples frame intervals while active, reports paused/hidden states, and cleans up timers/listeners. 4. Add focused unit/component tests for measurement cadence, pause/visibility suspension, persistence, toggle accessibility, and link non-interference. 5. Run the focused suites and typecheck, then hand off for Root browser review.
+<!-- SECTION:PLAN:END -->

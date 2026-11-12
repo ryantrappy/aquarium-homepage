@@ -1,15 +1,13 @@
 ---
 id: AQ-49
 title: Implement biomechanical fish turning and curvilinear spine bending
-status: In Progress
+status: To Do
 assignee:
   - '@render-integration'
   - '@gemini'
 created_date: '2026-11-04T19:20:00Z'
-updated_date: '2026-11-10T05:01:00Z'
-labels:
-  - ready-for-review
-  - gemini approved
+updated_date: '2026-11-12 05:43'
+labels: []
 dependencies:
   - AQ-35
   - AQ-44
@@ -39,7 +37,7 @@ Implement the biomechanical turning and curvilinear spine-bending plan documente
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [x] #1 Forward translation in `src/rendering/scene/motion.ts` is locked to the fish's actual heading axis (`yaw`/`pitch`) rather than sliding sideways along `(dx, dy, dz)` during direction changes, while preserving obstacle-safe routing (`isWaterSegmentSafe`), tank-bound margins, and exact habitat-anchor arrival.
+- [x] #1 Forward translation in src/rendering/scene/motion.ts follows actual heading axis rather than sliding sideways during turns, while preserving obstacle-safe routing and tank margins. Habitat-anchor arrival within the accepted 0.35m area is sufficient; exact point arrival is not required.
 - [x] #2 Waypoint transitions use lookahead corner filleting for smooth arcs, and large direction changes (`|delta| >= 65°` or startle turns) execute a two-stage maneuver (`brake-pivot` deceleration + rapid yaw rotation followed by an `exit-stroke` propulsive tail pulse and acceleration).
 - [x] #3 `src/rendering/scene/aquarium.ts` applies a post-mixer procedural turn overlay on rigged 3D fish bones: archetype-appropriate curvilinear spine bending (`spine_mid`/`tail_base`/`tail_tip` ramp for `subcarangiform_schooler`; peduncle/tail-only bend for `labriform_rigid_disc` so tang sails never shear) with a delayed traveling tail wave, plus asymmetric inside-pectoral braking flare and outside-pectoral rowing boost.
 - [x] #4 Fallback 2D sprite planes replace the single-frame `scale.x` binary flip with a smoothed foreshortening turn transition, and all turn states freeze deterministically when `paused`, hidden, or under `prefers-reduced-motion`.
@@ -124,5 +122,17 @@ author: root
 created: 2026-11-05 14:12
 ---
 Root independent reset review found a concrete overlay accumulation defect: Three PropertyMixer.apply skips assigning unchanged cached track values, so mixer.update alone does not guarantee a fresh bone pose before multiplicative overlays. A constant quaternion-track repro accumulates0.1,0.2,0.3rad despite0.1rad per application. Root will add an explicit clean pose restore before mixer update, normalize/capture clean skin-joint quaternions before applying overlay, and regression-test real mixer constant/changing tracks and pause/resume. Existing track coverage/caps do not prove reset safety.
+---
+
+author: @root
+created: 2026-11-12 05:37
+---
+Root review 2026-11-11: HOLD for user clarification. Clarify whether exact final habitat-anchor arrival remains required. Actual motion-module reproduction completes the route 0.345794m from its target; passedWaypoint accepts distances up to 0.35m. Ordinary waypoint passing may be intended, but this does not prove exact anchor arrival.
+---
+
+author: @root
+created: 2026-11-12 05:43
+---
+User clarification 2026-11-11 supersedes the corresponding earlier criterion: {1: 'Forward translation in src/rendering/scene/motion.ts follows actual heading axis rather than sliding sideways during turns, while preserving obstacle-safe routing and tank margins. Habitat-anchor arrival within the accepted 0.35m area is sufficient; exact point arrival is not required.'}. Root follow-up: The 0.345794m arrival reproduced in prior review now satisfies the clarified tolerance. Final numerical-plus-visual Root review and exact two-viewport responsiveness evidence remain incomplete.
 ---
 <!-- COMMENTS:END -->

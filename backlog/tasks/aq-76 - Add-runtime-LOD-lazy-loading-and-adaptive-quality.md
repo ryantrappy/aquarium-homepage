@@ -1,11 +1,11 @@
 ---
 id: AQ-76
 title: 'Add runtime LOD, lazy loading, and adaptive quality'
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-08 00:30'
-updated_date: '2026-11-11 05:16'
+updated_date: '2026-11-12 05:50'
 labels:
   - performance
   - rendering
@@ -21,7 +21,7 @@ documentation:
   - docs/rendering.md
 priority: '4'
 type: feature
-ordinal: 76
+ordinal: 134000
 ---
 
 ## Description

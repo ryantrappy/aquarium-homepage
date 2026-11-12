@@ -1,11 +1,11 @@
 ---
 id: AQ-34
 title: Build a true 3D reef scene with depth-aware fish and habitat interactions
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-03T04:46:00Z'
-updated_date: '2026-11-08T04:47:00Z'
+updated_date: '2026-11-12 05:50'
 labels: []
 dependencies:
   - AQ-5
@@ -18,7 +18,7 @@ documentation:
   - docs/habitat-navigation-core-contract.md
 priority: '7'
 type: feature
-ordinal: 7
+ordinal: 113000
 ---
 
 ## Description

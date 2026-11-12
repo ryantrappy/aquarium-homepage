@@ -1,16 +1,14 @@
 ---
 id: AQ-60
 title: Scale fish models to true relative adult sizes
-status: In Progress
+status: To Do
 assignee:
   - '@Antigravity'
-created_date: 2026-11-05 05:14
-updated_date: '2026-11-08T21:36:00Z'
+created_date: '2026-11-05 05:14'
+updated_date: '2026-11-12 05:43'
 labels:
   - easy
   - rendering
-  - ready-for-review
-  - gemini approved
 dependencies: []
 priority: '3'
 ordinal: 3
@@ -24,7 +22,7 @@ Use docs/fish-scale-reference.md (clownfish ~3in vs royal gramma ~2.5-3in vs yel
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [x] #1 Verify each size in docs/fish-scale-reference.md against its FishBase page and correct the table
+- [x] #1 Use sourced maximum adult lengths and explicit render targets in docs/fish-scale-reference.md; sourced typical adult lengths are not required.
 - [x] #2 One global tank-units-per-inch constant drives every fish's nose-to-tail length, measured from the GLB along the swim axis
 - [x] #3 Test asserts rendered length ratios match the reference within 10% (e.g. yellow tang ≈ 2x clownfish)
 - [ ] #4 Visual check at 1440x900 and 402x874 confirms sensible proportions without breaking collision envelopes, hit targets or accessibility focus
@@ -112,5 +110,17 @@ author: @thumbnail_loading
 created: 2026-11-05 23:12
 ---
 Proposed documentation follow-up before any edits: no FishBase maximum correction is needed. Add per-row FishBase source links so the maxima are auditable, retain the explicit yellow-watchman goby SL label, and source the “typical adult” column separately: FishBase species summaries provide maxima, not the table’s typical aquarium-kept adult values. The typical-size claims currently have no row-level husbandry citations in docs/fish-scale-reference.md.
+---
+
+author: @root
+created: 2026-11-12 05:37
+---
+Root review 2026-11-11: HOLD for user clarification. Clarify whether sourced typical adult lengths are still required, or whether sourced maxima plus explicit artistic render targets suffice. docs/fish-scale-reference.md still marks typical estimates unverified; AC1 cannot currently be accepted.
+---
+
+author: @root
+created: 2026-11-12 05:43
+---
+User clarification 2026-11-11 supersedes the corresponding earlier criterion: {1: 'Use sourced maximum adult lengths and explicit render targets in docs/fish-scale-reference.md; sourced typical adult lengths are not required.'}. Root follow-up: AC4 still needs exact two-viewport proportions, collision, hit-target and focus verification.
 ---
 <!-- COMMENTS:END -->

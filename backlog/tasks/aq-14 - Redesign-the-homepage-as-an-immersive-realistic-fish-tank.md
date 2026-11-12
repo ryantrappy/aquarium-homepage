@@ -1,11 +1,11 @@
 ---
 id: AQ-14
 title: Redesign the homepage as an immersive realistic fish tank
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-03T04:25:00Z'
-updated_date: '2026-11-08T04:47:00Z'
+updated_date: '2026-11-12 05:50'
 labels: []
 dependencies: []
 references:
@@ -16,7 +16,7 @@ documentation:
   - docs/gemini-research-links.md
 priority: '14'
 type: feature
-ordinal: 14
+ordinal: 116000
 ---
 
 ## Description

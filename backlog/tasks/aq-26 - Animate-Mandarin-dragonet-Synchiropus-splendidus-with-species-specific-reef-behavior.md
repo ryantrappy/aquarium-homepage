@@ -3,28 +3,28 @@ id: AQ-26
 title: >-
   Animate Mandarin dragonet (Synchiropus splendidus) with species-specific reef
   behavior
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
-created_date: 2026-11-03 04:37
-updated_date: '2026-11-08T21:37:00Z'
+created_date: '2026-11-03 04:37'
+updated_date: '2026-11-12 05:50'
 labels:
   - reef-fish
   - animation
 dependencies:
   - AQ-12
 references:
-  - https://aquarium.org/animals/mandarin-goby/
+  - 'https://aquarium.org/animals/mandarin-goby/'
   - >-
     https://ornamentalfish.org/what-we-do/advice-information/care-sheets/caresheets-marine-fish/how-to-look-after-dragonets-mandarin-fish/
-  - https://www.youtube.com/watch?v=cmNfqfEgsWo&t=0s
+  - 'https://www.youtube.com/watch?v=cmNfqfEgsWo&t=0s'
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
   - docs/open-source-asset-and-motion-research.md
 priority: '29'
 type: enhancement
-ordinal: 29
+ordinal: 128000
 ---
 
 ## Description

@@ -1,25 +1,25 @@
 ---
 id: AQ-20
 title: Animate Royal gramma (Gramma loreto) with species-specific reef behavior
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
-created_date: 2026-11-03 04:37
-updated_date: '2026-11-08T21:37:00Z'
+created_date: '2026-11-03 04:37'
+updated_date: '2026-11-12 05:50'
 labels: []
 dependencies:
   - AQ-12
 references:
-  - https://www.saltcorner.com/AquariumLibrary/browsespecies.php?CritterID=195
-  - https://www.youtube.com/watch?v=ILqLqAAEGLc&t=60s
-  - https://www.youtube.com/watch?v=FJOreYB0Knk&t=0s
+  - 'https://www.saltcorner.com/AquariumLibrary/browsespecies.php?CritterID=195'
+  - 'https://www.youtube.com/watch?v=ILqLqAAEGLc&t=60s'
+  - 'https://www.youtube.com/watch?v=FJOreYB0Knk&t=0s'
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
   - docs/open-source-asset-and-motion-research.md
 priority: '21'
 type: enhancement
-ordinal: 21
+ordinal: 121000
 ---
 
 ## Description

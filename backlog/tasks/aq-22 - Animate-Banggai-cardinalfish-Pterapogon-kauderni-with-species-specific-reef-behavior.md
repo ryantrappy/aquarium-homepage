@@ -3,27 +3,27 @@ id: AQ-22
 title: >-
   Animate Banggai cardinalfish (Pterapogon kauderni) with species-specific reef
   behavior
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
-created_date: 2026-11-03 04:37
-updated_date: '2026-11-08T21:37:00Z'
+created_date: '2026-11-03 04:37'
+updated_date: '2026-11-12 05:50'
 labels:
   - reef-fish
   - animation
 dependencies:
   - AQ-12
 references:
-  - https://aquarium.org/animals/banggai-cardinalfish/
-  - https://www.youtube.com/watch?v=3qOfVLtuEWY&t=0s
-  - https://www.youtube.com/watch?v=_Uxl7noP_3A&t=0s
+  - 'https://aquarium.org/animals/banggai-cardinalfish/'
+  - 'https://www.youtube.com/watch?v=3qOfVLtuEWY&t=0s'
+  - 'https://www.youtube.com/watch?v=_Uxl7noP_3A&t=0s'
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
   - docs/open-source-asset-and-motion-research.md
 priority: '27'
 type: enhancement
-ordinal: 27
+ordinal: 126000
 ---
 
 ## Description

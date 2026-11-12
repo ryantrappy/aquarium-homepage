@@ -1,18 +1,16 @@
 ---
 id: AQ-12
-title: Animate reef fish with photorealistic, species-aware swimming
-status: In Progress
+title: 'Animate reef fish with photorealistic, species-aware swimming'
+status: To Do
 assignee:
   - '@render-integration'
 created_date: '2026-11-03T04:15:00Z'
-updated_date: '2026-11-08T21:36:00Z'
-labels:
-  - ready-for-review
-  - gemini approved
+updated_date: '2026-11-12 05:37'
+labels: []
 dependencies:
   - AQ-5
 references:
-  - https://www.fisheries.noaa.gov/species/banggai-cardinalfish/resources
+  - 'https://www.fisheries.noaa.gov/species/banggai-cardinalfish/resources'
   - >-
     https://www.montereybayaquarium.org/animals-the-ocean/animals-a-to-z/clownfish
   - AQ-34
@@ -91,5 +89,11 @@ author: @behavior-profiles
 created: 2026-11-05 14:15
 ---
 Read-only visual findings: canonical yellow tang is more diamond-shaped with taller/rayed dorsal and anal sails than the rounder old active candidate; blue tang's palette marking and yellow tail are clear; gramma is compact purple-to-yellow; Banggai's black bars, high banners, forked tail and spotted rays read clearly; clown's bands and fins are clear. At frame 1→25 (0→1s), posterior spine changes are visible but generally modest; full-loop samples show largest single-spine deltas from frame 1 of .260rad clown, .193rad yellow tang, .209rad blue tang, .249rad gramma, .137rad Banggai, while pectoral deltas peak earlier (.421/.573/.543/.421/.497rad respectively). Old active clown/tang show larger max bone rotation deltas than canonical at the selected interval (.429 vs .260rad; .264 vs .184rad). These are isolated clip pose comparisons only, not propulsion/photorealism/reef-lighting or anatomical acceptance. Assets remain candidates. No scene/assets were edited and no AQ12/AQ60 criteria were checked.
+---
+
+author: @root
+created: 2026-11-12 05:37
+---
+Root review 2026-11-11: Returned to To Do. AC3 visual integration remains unverified. Live narrow-view inspection shows clustered/overlapping fish; current evidence does not establish believable scale, lighting, depth and occlusion. Motion/link suites pass 107 tests without proving final appearance.
 ---
 <!-- COMMENTS:END -->

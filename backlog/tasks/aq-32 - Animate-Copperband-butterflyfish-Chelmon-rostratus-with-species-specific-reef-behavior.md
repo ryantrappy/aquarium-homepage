@@ -3,11 +3,11 @@ id: AQ-32
 title: >-
   Animate Copperband butterflyfish (Chelmon rostratus) with species-specific
   reef behavior
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
-created_date: 2026-11-03 04:37
-updated_date: '2026-11-08T21:37:00Z'
+created_date: '2026-11-03 04:37'
+updated_date: '2026-11-12 05:50'
 labels:
   - reef-fish
   - animation
@@ -16,15 +16,15 @@ dependencies:
 references:
   - >-
     https://zoo.ch/en/conservation/animal-and-plant-encyclopedia/copperband-butterflyfish
-  - https://dwazoo.com/animal/copperband-butterflyfish/
-  - https://www.youtube.com/watch?v=W32sNeT1qbk&t=35s
+  - 'https://dwazoo.com/animal/copperband-butterflyfish/'
+  - 'https://www.youtube.com/watch?v=W32sNeT1qbk&t=35s'
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
   - docs/open-source-asset-and-motion-research.md
 priority: '24'
 type: enhancement
-ordinal: 24
+ordinal: 123000
 ---
 
 ## Description

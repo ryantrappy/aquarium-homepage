@@ -1,11 +1,11 @@
 ---
 id: AQ-44
 title: Implement a lightweight per-fish behavior state runtime
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-03T12:38:00Z'
-updated_date: '2026-11-08T04:47:00Z'
+updated_date: '2026-11-12 05:50'
 labels: []
 dependencies:
   - AQ-12
@@ -23,7 +23,7 @@ documentation:
   - docs/behavior-runtime-contract.md
 priority: '9'
 type: enhancement
-ordinal: 9
+ordinal: 114000
 ---
 
 ## Description

@@ -3,28 +3,28 @@ id: AQ-18
 title: >-
   Animate Ocellaris clownfish (Amphiprion ocellaris) with species-specific reef
   behavior
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
-created_date: 2026-11-03 04:37
-updated_date: '2026-11-08T21:37:00Z'
+created_date: '2026-11-03 04:37'
+updated_date: '2026-11-12 05:50'
 labels:
   - reef-fish
   - animation
 dependencies:
   - AQ-12
 references:
-  - https://www.fishbase.se/summary/Amphiprion-ocellaris
+  - 'https://www.fishbase.se/summary/Amphiprion-ocellaris'
   - >-
     https://www.montereybayaquarium.org/animals-the-ocean/animals-a-to-z/clownfish
-  - https://pmc.ncbi.nlm.nih.gov/articles/PMC6850181/
+  - 'https://pmc.ncbi.nlm.nih.gov/articles/PMC6850181/'
   - >-
     https://www.aquariumofpacific.org/onlinelearningcenter/species/clown_anemonefish
   - AQ-45
-  - https://www.youtube.com/watch?v=MUMX7u7v2uY&t=11s
-  - https://www.youtube.com/watch?v=mw-2yWO6WLY&t=7s
-  - https://www.youtube.com/watch?v=n_L9ev92miU&t=0s
-  - https://www.youtube.com/watch?v=dQUe6zCkI0w&t=10s
+  - 'https://www.youtube.com/watch?v=MUMX7u7v2uY&t=11s'
+  - 'https://www.youtube.com/watch?v=mw-2yWO6WLY&t=7s'
+  - 'https://www.youtube.com/watch?v=n_L9ev92miU&t=0s'
+  - 'https://www.youtube.com/watch?v=dQUe6zCkI0w&t=10s'
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
@@ -32,7 +32,7 @@ documentation:
   - docs/open-source-asset-and-motion-research.md
 priority: '16'
 type: enhancement
-ordinal: 16
+ordinal: 117000
 ---
 
 ## Description

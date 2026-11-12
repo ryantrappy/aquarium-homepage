@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { BoxGeometry } from 'three'
 import { MAX_PITCH_RAD_LEGACY, MAX_PITCH_RAD_METRIC, MAX_PITCH_RATE_RAD_PER_SEC_METRIC, anchorApproachClearanceM, createSwimmingFish, distance, disturbSchool, evaluateSwimSpeedSynchronizedFlexRate, generateCatmullRomSwimCurve, smoothWaterRouteWithCatmullRom, startleFish, stepSwimmingFish, stepSwimmingSchool, type WaterHabitat } from './motion'
 import { instantiateModularReefHabitat } from './reef-assembly'
-import { fishClearanceRadius } from './fish-scale'
+import { fishBodyRadiusM, fishClearanceRadius } from './fish-scale'
 import { findSafeFishSpawn } from './fish-spawn'
 import { EXAMPLE_SERVICES } from '../../lib/services'
 import { findWaterRoute, isWaterSegmentSafe, resolveHabitatRoute } from '../../simulation/habitat-navigation'
@@ -594,6 +594,11 @@ describe('school stepping and group disturbance (AQ-41/AQ-44)', () => {
       expect(isWaterSegmentSafe({ start: previousB, target: closeB.position, waterBounds: habitat.bounds, obstacles: habitat.obstacles, fishClearanceRadius: .5 })).toBe(true)
     }
     expect(distance(closeA.position, closeB.position)).toBeGreaterThan(initial)
+    // The simulation should recover to approximately the pair's physical
+    // body envelope (0.204m for chromis), not merely move an infinitesimal
+    // amount away from overlap. Habitat safety above still uses 0.5m.
+    const physicalMinSep = fishBodyRadiusM(closeA.speciesId) + fishBodyRadiusM(closeB.speciesId) + 0.06
+    expect(distance(closeA.position, closeB.position)).toBeGreaterThanOrEqual(physicalMinSep - 0.01)
   })
 
   it('keeps a chromis pair within schooling range over time (AC #1)', () => {

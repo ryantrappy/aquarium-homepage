@@ -1,11 +1,11 @@
 ---
 id: AQ-16
 title: Show remaining disk space in an aquarium top-off reservoir
-status: In Progress
+status: To Do
 assignee:
   - '@root'
 created_date: '2026-11-03T04:25:00Z'
-updated_date: '2026-11-08T04:47:00Z'
+updated_date: '2026-11-12 05:50'
 labels: []
 dependencies: []
 references:
@@ -14,7 +14,7 @@ documentation:
   - docs/requirements.md
 priority: '38'
 type: feature
-ordinal: 38
+ordinal: 133000
 ---
 
 ## Description

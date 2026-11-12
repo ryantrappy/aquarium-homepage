@@ -1,11 +1,11 @@
 ---
 id: AQ-58
 title: Replace unsafe rock collision declarations with measured conservative geometry
-status: In Progress
+status: To Do
 assignee:
   - '@collision-validation'
-created_date: 2026-11-05 03:13
-updated_date: '2026-11-08T04:47:00Z'
+created_date: '2026-11-05 03:13'
+updated_date: '2026-11-12 05:50'
 labels:
   - modeling
   - validation
@@ -22,7 +22,7 @@ documentation:
   - docs/asset-evidence/aq58/fish-player-review.json
 priority: '1'
 type: bug
-ordinal: 1
+ordinal: 109000
 ---
 
 ## Description

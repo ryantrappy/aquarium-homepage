@@ -1,30 +1,30 @@
 ---
 id: AQ-19
 title: Animate Yellow tang (Zebrasoma flavescens) with species-specific reef behavior
-status: In Progress
+status: To Do
 assignee:
   - '@render-integration'
-created_date: 2026-11-03 04:37
-updated_date: '2026-11-08T21:37:00Z'
+created_date: '2026-11-03 04:37'
+updated_date: '2026-11-12 05:50'
 labels:
   - reef-fish
   - animation
 dependencies:
   - AQ-12
 references:
-  - https://aquarium.org/animals/yellow-tang/
-  - https://pmc.ncbi.nlm.nih.gov/articles/PMC12602642/
-  - https://www.youtube.com/watch?v=CIMmr-PKn_M&t=30s
-  - https://www.youtube.com/watch?v=c2vSKErCqTM&t=0s
-  - https://www.youtube.com/watch?v=siSZkVow48Q&t=20s
-  - https://www.youtube.com/watch?v=fIiOV0jpDlE&t=13s
+  - 'https://aquarium.org/animals/yellow-tang/'
+  - 'https://pmc.ncbi.nlm.nih.gov/articles/PMC12602642/'
+  - 'https://www.youtube.com/watch?v=CIMmr-PKn_M&t=30s'
+  - 'https://www.youtube.com/watch?v=c2vSKErCqTM&t=0s'
+  - 'https://www.youtube.com/watch?v=siSZkVow48Q&t=20s'
+  - 'https://www.youtube.com/watch?v=fIiOV0jpDlE&t=13s'
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
   - docs/open-source-asset-and-motion-research.md
 priority: '17'
 type: enhancement
-ordinal: 17
+ordinal: 118000
 ---
 
 ## Description

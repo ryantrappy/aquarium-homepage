@@ -3,11 +3,11 @@ id: AQ-84
 title: >-
   Fix outer schooling fish lateral drag by integrating steering into heading and
   turning kinematics
-status: To Do
+status: In Progress
 assignee:
-  - '@Luna'
+  - '@root'
 created_date: '2026-11-08 20:43'
-updated_date: '2026-11-08 20:43'
+updated_date: '2026-11-12 05:55'
 labels: []
 dependencies:
   - AQ-41
@@ -32,6 +32,12 @@ When fish swim in a school, fish on the outer edges receive strong cohesion and 
 - [ ] #3 Personal-space separation and collision safety with habitat obstacles and tank boundaries remain strictly enforced.
 - [ ] #4 Vitest unit and simulation tests verify that schooling steering updates fish heading and turning state without decoupled sideways drift.
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Audit the existing heading-steering implementation against current AQ-84 criteria and actual controller tests. 2. Fix any demonstrated drift, turn-limit, or safety regression without changing models. 3. Run focused schooling/motion tests and review browser motion; record exact evidence and remaining art limitations.
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 

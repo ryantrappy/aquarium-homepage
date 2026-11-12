@@ -1,17 +1,15 @@
 ---
 id: AQ-74
-title: Add eye, gill, and mouth articulation to fish
-status: In Progress
+title: 'Add eye, gill, and mouth articulation to fish'
+status: To Do
 assignee:
   - '@Luna'
-created_date: 2026-11-08 00:30
-updated_date: '2026-11-09T03:32:00Z'
+created_date: '2026-11-08 00:30'
+updated_date: '2026-11-12 05:43'
 labels:
   - modeling
   - photorealism
   - animation
-  - ready-for-review
-  - gemini approved
 dependencies:
   - AQ-12
   - AQ-70
@@ -39,7 +37,7 @@ Add anatomical head detail and subtle respiratory/buccal articulation to fish mo
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [x] #1 Promoted fish have convex cornea eyes with shine and pupil, verified in renders
+- [x] #1 The blue tang alone has convex cornea eyes with shine and pupil, verified in renders; remaining species articulation is tracked in AQ-91.
 - [x] #2 Operculum (gill cover) relief is present and gill movement is subtly tied to the swim cycle
 - [x] #3 Mouth movement is present and does not look like a separate animated sprite
 - [ ] #4 Eye, gill, and mouth work is verified at 1440x900 and 402x874 without breaking click targets
@@ -70,3 +68,19 @@ Implemented AQ-74 for the Regal Blue Tang (blue-tang) across both the procedural
 - 3D Mouth Lips, Buccal Cleft & Swim-Synchronized Jaw Ventilation (AC #3): Sculpted 3D upper premaxillary and lower mandibular lip ridges (+0.0055m) and recessed buccal mouth cleft (-0.0065m), plus subtle lower-jaw mouth ventilation (evaluateMouthArticulationBL / uFlexMouthAmplitude) leading opercular flare by 90 degrees (pi/2) at the active swim frequency and zeroing out under prefers-reduced-motion.
 - Saved src/rendering/assets/splat-fish/blend/blue-tang.blend (packed textures), exported src/rendering/assets/splat-fish/overrides/blue-tang.glb, synced src/rendering/assets/splat-fish/blue-tang.glb + learned-shape-guide.json + manifest.json, and rendered close-up verification previews (.output/blue-tang-aq74-head-closeup.png and .output/blue-tang-aq74-3q.png).
 <!-- SECTION:NOTES:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @root
+created: 2026-11-12 05:37
+---
+Root review 2026-11-11: HOLD for user clarification. Clarify whether this task covers blue tang only, with the remaining species in AQ-91, or all promoted fish as AC1 currently states. Referenced close-up PNG evidence is absent; saved Blender and override files exist.
+---
+
+author: @root
+created: 2026-11-12 05:43
+---
+User clarification 2026-11-11 supersedes the corresponding earlier criterion: {1: 'The blue tang alone has convex cornea eyes with shine and pupil, verified in renders; remaining species articulation is tracked in AQ-91.'}. Root follow-up: AC4 still needs two-viewport articulation/click-target verification; referenced close-up evidence was absent in the prior review.
+---
+<!-- COMMENTS:END -->
