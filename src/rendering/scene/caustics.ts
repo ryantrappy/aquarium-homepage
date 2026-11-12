@@ -281,15 +281,37 @@ export function applyCaustics(
       SURFACE_WAVE_GLSL +
       shader.fragmentShader
     // UV scroll mirrors evaluateCausticPatternUV exactly (0.22 Hz layer A,
-    // 0.37 Hz layer B, opposite drift directions). Keep the two in sync.
+    // 0.37 Hz layer B, opposite drift directions; layer C is the Zucconi
+    // second scale at the mid scale, drift 0.017 / 0.011). Keep the three
+    // in sync.
     // Sun-slant projection (AQ-70.6 / AQ-96): the UVs are sampled at the
     // surface point the light passed through, so the dapple on tall rock
     // and high coral shifts along the light direction and lines up with
-    // the shafts above it. Focus modulation: the shared wave-field focus
-    // at that surface point multiplies the pattern by
-    // (1 + uFocusGain * focus) — bright where the surface converges light,
-    // dim where it diverges — so the sand dapple breathes with the surface
-    // instead of scrolling on an independent clock.
+    // the shafts above it.
+    // Focus (surface-water pass 2, Wallace/Renou differential-area
+    // method): the A/B experiment is settled — the focus term is now the
+    // screen-space derivative convergence of the sun ray refracted
+    // through the wave normal (oldArea/newArea via dFdx/dFdy), not the
+    // analytic-Laplacian proxy. The derivative measure is the principled
+    // version of what the Laplacian approximated, and it is computed from
+    // the same shared field, so caustics and surface still cannot
+    // disagree. The Laplacian proxy survives in surface-waves.ts for the
+    // surface shader's own brightness/focus use and in the TS
+    // evaluateCausticPatternUV return for tests.
+    // Zucconi blend (surface-water pass 2, §6.4 #3b): the base web is
+    // still max(A, B) — the cellular texture is a mostly-dark field, so
+    // a product would kill it — but it is then min()-blended against a
+    // second sampling at a different scale/scroll (layer C), and the RGB
+    // channels are split with slightly different C UVs for chromatic
+    // dispersion at the ridge edges. The recipe as written says min(),
+    // and min() was tried first: with this texture it thins the web to
+    // near invisibility (the first after-capture's sand went flat),
+    // because min() of two mostly-dark fields is bright only where both
+    // have a ridge (~5% of the sand). So the shipped blend keeps
+    // Zucconi's two-scale idea and its RGB channel split but combines
+    // by max, which is what keeps the network visible — the same reason
+    // max beat product in the original fix. One coherent model: max
+    // across three scales, per channel.
     // Injection point (AQ-14.2 fix, 2026-11-11): AFTER `#include
     // <aomap_fragment>`, NOT at `#include <opaque_fragment>`. In three
     // r187's meshphysical fragment shader, `outgoingLight` is already
@@ -323,9 +345,40 @@ vec2 causticSurf = vCausticWorldPos.xz + uSunDir.xz * causticDist;
 vec2 causticWarp = surfaceWaveSlope(causticSurf, uCausticTime) * 1.45;
 vec2 causticUvA = (causticSurf + causticWarp) * uCausticScaleA + vec2(uCausticTime * 0.022, -uCausticTime * 0.0132);
 vec2 causticUvB = (causticSurf - causticWarp * 0.85) * uCausticScaleB + vec2(-uCausticTime * 0.0296, uCausticTime * 0.0185);
-float causticP = max(texture2D(uCausticMap, causticUvA).r, texture2D(uCausticMap, causticUvB).r);
-causticP = smoothstep(uCausticThreshold, 0.9, causticP);
-float causticMask = max(vCausticWorldNormal.y, 0.0) * (1.0 - 0.35 * clamp((2.8 - vCausticWorldPos.y) / 5.6, 0.0, 1.0));
+float causticBase = max(texture2D(uCausticMap, causticUvA).r, texture2D(uCausticMap, causticUvB).r);
+vec2 causticUvC = (causticSurf - causticWarp * 0.6) * ((uCausticScaleA + uCausticScaleB) * 0.5) + vec2(uCausticTime * 0.017, uCausticTime * 0.011);
+vec3 causticRgb = vec3(
+  max(causticBase, texture2D(uCausticMap, causticUvC + vec2(0.008, 0.0)).r),
+  max(causticBase, texture2D(uCausticMap, causticUvC + vec2(-0.006, 0.005)).r),
+  max(causticBase, texture2D(uCausticMap, causticUvC + vec2(0.0, -0.009)).r));
+vec3 causticRgbS = vec3(
+  smoothstep(uCausticThreshold, 0.9, causticRgb.r),
+  smoothstep(uCausticThreshold, 0.9, causticRgb.g),
+  smoothstep(uCausticThreshold, 0.9, causticRgb.b));
+float causticP = (causticRgbS.r + causticRgbS.g + causticRgbS.b) / 3.0;
+// Sigmoid fade where caustics meet the glass (research §5 #5): the
+// pattern must not end in a hard line at the back glass (z -> -4.6)
+// or at the top of the back wall (y -> surfaceY).
+float causticGlassFade = smoothstep(-4.6, -3.9, vCausticWorldPos.z) * (1.0 - 0.55 * smoothstep(2.0, uSurfaceY, vCausticWorldPos.y));
+float causticMask = max(vCausticWorldNormal.y, 0.0) * (1.0 - 0.35 * clamp((2.8 - vCausticWorldPos.y) / 5.6, 0.0, 1.0)) * causticGlassFade;
+// Derivative-based focus (Wallace/Renou): refract the sun ray through
+// the wave normal at the footpoint and through the flat normal, project
+// both to the fragment's depth, and take the screen-space area ratio.
+// Converging rays shrink the new area, so the ratio rises above 1 where
+// the web should be bright. Clamped to [0, 2]: at grazing angles and on
+// vertical faces the derivatives blow up, and this must stay a gentle
+// multiplier, not a blowout. The +1e-6 terms keep the ratio finite on
+// flat water.
+vec3 causticSurfN = surfaceWaveNormal(causticSurf, uCausticTime);
+vec3 causticSunRay = refract(-uSunDir, causticSurfN, 0.75);
+vec3 causticFlatRay = refract(-uSunDir, vec3(0.0, 1.0, 0.0), 0.75);
+float causticRayDist = max(uSurfaceY - vCausticWorldPos.y, 0.0) / max(causticSunRay.y, 0.2);
+float causticFlatDist = max(uSurfaceY - vCausticWorldPos.y, 0.0) / max(causticFlatRay.y, 0.2);
+vec2 causticHit = causticSurf + causticSunRay.xz * causticRayDist;
+vec2 causticHitFlat = causticSurf + causticFlatRay.xz * causticFlatDist;
+float causticOldArea = length(dFdx(causticHitFlat)) * length(dFdy(causticHitFlat)) + 1e-6;
+float causticNewArea = length(dFdx(causticHit)) * length(dFdy(causticHit)) + 1e-6;
+float causticFocusD = clamp(causticOldArea / causticNewArea, 0.0, 2.0);
 // Light redistribution (look-dev 2026-11-11): focusing means bright
 // ridges AND dimmer surroundings — the light in the web came from the
 // field around it.
@@ -334,9 +387,9 @@ reflectedLight.directDiffuse *= 1.0 - 0.40 * (1.0 - causticP) * causticMask;
 vec3 underwaterShadowTint = mix(vec3(1.0), vec3(0.28, 0.44, 0.70), (1.0 - causticP) * clamp(causticMask * 1.25, 0.0, 1.0));
 reflectedLight.directDiffuse *= underwaterShadowTint;
 reflectedLight.indirectDiffuse *= mix(vec3(1.0), vec3(0.24, 0.38, 0.64), (1.0 - causticP) * 0.85);
-float causticBright = causticP * max(0.0, 1.0 + uFocusGain * surfaceWaveFocus(causticSurf, uCausticTime));
+vec3 causticBrightRgb = causticRgbS * causticFocusD;
 vec3 causticSunlightTint = vec3(1.18, 1.08, 0.90);
-reflectedLight.directDiffuse += diffuseColor.rgb * causticSunlightTint * (causticBright * causticMask * uCausticMaxAdd * 1.35);`,
+reflectedLight.directDiffuse += diffuseColor.rgb * causticSunlightTint * (causticBrightRgb * causticMask * uCausticMaxAdd * 1.35);`,
     )
   }
   const cacheKeySuffix = skinned ? CAUSTIC_SKINNED_CACHE_KEY_SUFFIX : CAUSTIC_CACHE_KEY_SUFFIX

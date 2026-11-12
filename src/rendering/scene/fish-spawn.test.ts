@@ -8,7 +8,8 @@ import { fishClearanceRadius, fishRenderLength } from './fish-scale'
 import { projectFishLinkBounds } from './fish-link-projection'
 import { createSwimmingFish, stepSwimmingFish } from './motion'
 import { canRunFishSceneLoop, classifySpeciesVerticalTier, evaluateTieredVerticalDepthRange, findSafeFishHeading, findSafeFishSpawn, fishSceneStatus, fishSpawnPreference, isSafeFishPosition, FISH_SPAWN_DEPTH_PLANES, FISH_SPAWN_DEPTH_PLANE_JITTER, TIERED_VERTICAL_DEPTH_ZONES, type OccupiedFishSpawn } from './fish-spawn'
-import { instantiateModularReefHabitat } from './reef-assembly'
+import { AQUARIUM_WATER_BOUNDS, instantiateModularReefHabitat } from './reef-assembly'
+import { WATER_SURFACE_Y } from './underwater-optics'
 
 function waterBounds(width: number, height: number): AxisAlignedBox {
   const halfWidth = Math.min(5, (9 - 2.8) * Math.tan(21 * Math.PI / 180) * (width / height) * .96)
@@ -334,6 +335,19 @@ describe('safe aquarium fish spawning', () => {
     // Surface schoolers sit higher in the water column than benthic perchers
     expect(chromisZone.worldYRange[1]).toBeGreaterThan(gobyZone.worldYRange[1])
     expect(tangZone.worldYRange[1]).toBeGreaterThan(gobyZone.worldYRange[0])
+  })
+
+  it('surface schoolers stay below the one true water surface with production bounds (surface-water pass 2)', () => {
+    // One true surface height: the level mesh sits at WATER_SURFACE_Y
+    // (2.66) and the production fish volume tops out at y 2.5, so no
+    // surface schooler — the highest-swimming tier — can sit above the
+    // water, while still cruising the upper column.
+    const chromisZone = evaluateTieredVerticalDepthRange('blue-green-chromis', AQUARIUM_WATER_BOUNDS, fishClearanceRadius('blue-green-chromis'))!
+    expect(AQUARIUM_WATER_BOUNDS.max.y).toBeLessThan(WATER_SURFACE_Y)
+    expect(chromisZone.worldYRange[1]).toBeLessThan(WATER_SURFACE_Y)
+    expect(chromisZone.worldYRange[1]).toBeGreaterThan(0)
+    const anthiasZone = evaluateTieredVerticalDepthRange('lyretail-anthias', AQUARIUM_WATER_BOUNDS, fishClearanceRadius('lyretail-anthias'))!
+    expect(anthiasZone.worldYRange[1]).toBeLessThan(WATER_SURFACE_Y)
   })
 })
 

@@ -66,7 +66,27 @@ export const SURFACE_WAVES: readonly SurfaceWave[] = Object.freeze([
   { dirX: -0.8, dirZ: 0.6, wavelengthM: 0.65, amplitudeM: 0.004, phaseRad: 1.3 },
 ])
 
-/** Total wave amplitude (sum of the four amplitudes), metres. */
+/**
+ * High-frequency ripple octave (surface-water pass 2, AQ-96 / AQ-70.6):
+ * two short, low-amplitude sines used for NORMALS AND GLITTER ONLY.
+ * They are deliberately NOT part of the height field, the displacement,
+ * the focus term, or the shaft/caustic coupling: at λ 0.28 / 0.19 m they
+ * are far below the mesh vertex spacing (0.50 × 0.43 m), so displacing
+ * with them would alias, and feeding them into the shafts/caustics
+ * would make the beams and the dapple shimmer noisily. Their only job
+ * is to break the glitter into finer sparkle so the surface stops
+ * reading as four clean sine waves at AQ-62 zoom distances. Slopes stay
+ * small (a·k ≈ 0.03) so the surface never looks choppy.
+ */
+export const SURFACE_RIPPLE_OCTAVE: readonly SurfaceWave[] = Object.freeze([
+  { dirX: 0.8, dirZ: -0.6, wavelengthM: 0.28, amplitudeM: 0.0015, phaseRad: 0.9 },
+  { dirX: -0.28, dirZ: 0.96, wavelengthM: 0.19, amplitudeM: 0.001, phaseRad: 2.7 },
+])
+
+const DERIVED_RIPPLE_WAVES: readonly DerivedWave[] = SURFACE_RIPPLE_OCTAVE.map(wave => {
+  const k = TWO_PI / wave.wavelengthM
+  return { ...wave, k, omega: Math.sqrt(GRAVITY_M_PER_S2 * k) }
+})
 export const SURFACE_WAVE_TOTAL_AMPLITUDE_M = SURFACE_WAVES.reduce(
   (sum, wave) => sum + wave.amplitudeM,
   0,
@@ -193,6 +213,49 @@ export function evaluateSurfaceWaveField(
   }
 }
 
+/**
+ * Ripple-octave slope (∂h/∂x, ∂h/∂z) at world (x, z) and time `t`.
+ * Normals/glitter only — never height, displacement, focus, shafts, or
+ * caustics (see SURFACE_RIPPLE_OCTAVE).
+ */
+export function evaluateSurfaceRippleSlope(
+  x: number,
+  z: number,
+  timeSeconds: number,
+  options?: { paused?: boolean; reducedMotion?: boolean },
+): { x: number; z: number } {
+  if (!Number.isFinite(x) || !Number.isFinite(z)) return { x: 0, z: 0 }
+  const t = effectiveTime(timeSeconds, options?.paused, options?.reducedMotion)
+  let dhdx = 0
+  let dhdz = 0
+  for (const wave of DERIVED_RIPPLE_WAVES) {
+    const c = wave.amplitudeM * wave.k * Math.cos(wavePhase(wave, x, z, t))
+    dhdx += c * wave.dirX
+    dhdz += c * wave.dirZ
+  }
+  return { x: dhdx, z: dhdz }
+}
+
+/**
+ * Surface normal with the ripple octave folded in: the 4-sine slope plus
+ * the ripple slope, normalised. The plain `evaluateSurfaceNormal` stays
+ * the canonical field normal for shafts/caustics; this one is for the
+ * surface shader's glitter/Fresnel only.
+ */
+export function evaluateSurfaceRippleNormal(
+  x: number,
+  z: number,
+  timeSeconds: number,
+  options?: { paused?: boolean; reducedMotion?: boolean },
+): { x: number; y: number; z: number } {
+  const slope = evaluateSurfaceSlope(x, z, timeSeconds, options)
+  const ripple = evaluateSurfaceRippleSlope(x, z, timeSeconds, options)
+  const sx = slope.x + ripple.x
+  const sz = slope.z + ripple.z
+  const len = Math.hypot(sx, 1, sz)
+  return { x: -sx / len, y: 1 / len, z: -sz / len }
+}
+
 function fmt(n: number): string {
   return n.toFixed(6)
 }
@@ -217,10 +280,17 @@ export const SURFACE_WAVE_GLSL: string = (() => {
     wave =>
       `  f += ${fmt(wave.amplitudeM * wave.k * wave.k)} * sin(dot(p, vec2(${fmt(wave.dirX)}, ${fmt(wave.dirZ)})) * ${fmt(wave.k)} - ${fmt(wave.omega)} * t + ${fmt(wave.phaseRad)});`,
   ).join('\n')
+  const rippleSlopeTerms = DERIVED_RIPPLE_WAVES.map(
+    wave =>
+      `  s += ${fmt(wave.amplitudeM * wave.k)} * cos(dot(p, vec2(${fmt(wave.dirX)}, ${fmt(wave.dirZ)})) * ${fmt(wave.k)} - ${fmt(wave.omega)} * t + ${fmt(wave.phaseRad)}) * vec2(${fmt(wave.dirX)}, ${fmt(wave.dirZ)});`,
+  ).join('\n')
   return `// Shared surface wave field (surface-waves.ts): 4 summed sines,
 // dispersion-derived frequencies, analytic normals, negative-Laplacian
 // focus proxy. Generated from SURFACE_WAVES — keep the TS and GLSL in
 // sync by editing the wave table, never this string by hand.
+// surfaceRippleSlope / surfaceRippleNormal carry the high-frequency
+// ripple octave: normals/glitter only, never height, focus, shafts, or
+// caustics.
 float surfaceWaveHeight(vec2 p, float t) {
   float h = 0.0;
 ${heightTerms}
@@ -239,6 +309,15 @@ float surfaceWaveFocus(vec2 p, float t) {
   float f = 0.0;
 ${focusTerms}
   return f / ${fmt(SURFACE_FOCUS_NORMALISER)};
+}
+vec2 surfaceRippleSlope(vec2 p, float t) {
+  vec2 s = vec2(0.0);
+${rippleSlopeTerms}
+  return s;
+}
+vec3 surfaceRippleNormal(vec2 p, float t) {
+  vec2 s = surfaceWaveSlope(p, t) + surfaceRippleSlope(p, t);
+  return normalize(vec3(-s.x, 1.0, -s.y));
 }
 `
 })()

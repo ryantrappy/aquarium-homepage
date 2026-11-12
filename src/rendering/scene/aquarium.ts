@@ -243,12 +243,16 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   // shows the same caustic system as the rock, coral, and fish.
   const sandBed = createAragoniteSandBed({ narrow: false })
   const sand = sandBed.sandMesh
-  // Surface-driven lighting (AQ-96 / AQ-70.6): the sand threshold is
-  // re-tuned from the 0.22 visual-check workaround back toward the 0.35
-  // default (now `causticSandThreshold: 0.30` in the optics config) now
-  // that the wave-field focus term does the work of making the dapple
-  // strong — same +0.35 cap, same texture, no brighter peak.
-  applyCaustics(sand.material as THREE.MeshStandardMaterial, caustics, { threshold: optics.causticSandThreshold })
+  // Surface-driven lighting (AQ-96 / AQ-70.6): the sand dapple is
+  // 9d0418a's stronger values (threshold 0.18, maxAdd 0.52, scales
+  // 0.42/0.68), restored deliberately in the surface-water pass — the
+  // PR #43 merge silently overwrote them with the weaker config
+  // defaults (0.30 / 0.35 / 0.35 / 0.55), and the goal image has a
+  // strong sand caustic web. The +0.52 peak stays under the scene's
+  // restraint: the depth envelope and upward-normal mask still apply.
+  // The threshold lives in the optics config (causticSandThreshold);
+  // the peak and scales are sand-only, passed here.
+  applyCaustics(sand.material as THREE.MeshStandardMaterial, caustics, { threshold: optics.causticSandThreshold, maxAdd: 0.52, scaleA: 0.42, scaleB: 0.68 })
   scene.add(sandBed.group)
 
   // Layered Reef-Tank Backdrop (AQ-14.6 & AQ-39): eliminates the flat paint-bucket wall & sharp horizon line
@@ -397,15 +401,29 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
 
   // Visible Rippling Top Water Surface / Meniscus (AQ-14.2 AC #1 & AQ-14.6 AC #2,
   // rebuilt AQ-96): a custom ShaderMaterial driven by the shared surface
-  // wave field — GPU vertex displacement (the old per-frame CPU loop over
-  // 1,029 vertices is deleted) + per-pixel analytic normals + glitter +
-  // Snell's-window brightening + Fresnel grazing brightening. The surface
-  // is a light-emitting boundary seen from below, not a PBR object, so a
-  // MeshStandardMaterial (whose flat normal could never glitter) buys
-  // nothing here; `envMapIntensity.waterSurface` is no longer consumed
-  // by the surface (the key stays in environment-map.ts for API compat).
-  // uTime freezes at 0 on pause / reduced-motion / hidden, exactly like
-  // uCausticTime and uShaftTime.
+  // Surface-water pass 2 (AQ-96 / AQ-14.2 / AQ-70.6 / AQ-98 / AQ-86):
+  // physical Snell window + ray-based glitter + procedural sky, driven
+  // by the shared wave field. The f50a5d6 oval-Voronoi lenses and painted
+  // TIR reef colours are deleted: they were look-dev decoupled from the
+  // wave field (fixed Gaussians at fixed x) and sat on a dark-navy base,
+  // while the goal image's surface is the brightest element in the frame.
+  // The mesh is LEVEL at the one true surface height (WATER_SURFACE_Y =
+  // optics surfaceY = 2.66): the old tilt (rotation.x = PI/2 - 0.065,
+  // position y 3.24) put the visible mesh 0.19–0.97 m above the water
+  // volume the shafts, caustics, bubbles, and habitat all assume, so
+  // shafts rooted below a surface the viewer never saw. A level plane
+  // also makes vSurfaceLocalY a clean world-Z map (localY = worldZ + 1.2),
+  // which the edge feathers and meniscus seam below rely on.
+  // Optics, per the jeantimex research (§5 #1–#3): refracted-ray sun
+  // glitter sharpened by the focus term; a procedural sky gradient
+  // inside the Snell window (no cubemap asset); physical Fresnel
+  // (F0 0.02) with explicit TIR via the zero-length-refract trick —
+  // past the ~48.6° critical angle the pixel is fully the mirror term
+  // (a dimmed tank interior, not black, not painted reef colours). The
+  // high-frequency ripple octave feeds the glitter/Fresnel normal only,
+  // never displacement, shafts, or caustics. uTime freezes at 0 on
+  // pause / reduced-motion / hidden, exactly like uCausticTime and
+  // uShaftTime.
   const surfaceUniforms = {
     uTime: { value: 0 },
     uSunDir: { value: new THREE.Vector3(SUN_DIRECTION.x, SUN_DIRECTION.y, SUN_DIRECTION.z) },
@@ -456,129 +474,117 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         );
       }
 
-      // Evaluates foreshortened oval ripple cells with bright Snell's-window cores and dark TIR rims
-      vec2 ovalRippleLens(vec2 uv, float t) {
-        vec2 i = floor(uv);
-        vec2 f = fract(uv);
-        float d1 = 8.0;
-        float d2 = 8.0;
-        for (int dy = -1; dy <= 1; dy++) {
-          for (int dx = -1; dx <= 1; dx++) {
-            vec2 g = vec2(float(dx), float(dy));
-            float h = surfHash21(i + g);
-            vec2 o = 0.5 + 0.38 * sin(t * 1.15 + 6.28318 * vec2(h, fract(h * 17.3)));
-            vec2 r = g + o - f;
-            // Foreshorten horizontally so each wave cell reads as a crisp horizontal oval lens
-            r.y *= 1.35;
-            float d = length(r);
-            if (d < d1) {
-              d2 = d1;
-              d1 = d;
-            } else if (d < d2) {
-              d2 = d;
-            }
-          }
-        }
-        return vec2(d1, d2 - d1);
-      }
-
       void main() {
         vec2 p = vSurfaceWorldPos.xz;
-        vec3 n = surfaceWaveNormal(p, uTime);
+        // nFine is the canonical 4-sine normal plus the ripple octave:
+        // the 4-sine part is the one shafts and caustics agree on, the
+        // ripple part feeds glitter/Fresnel only.
+        vec3 nFine = surfaceRippleNormal(p, uTime);
         float focus = surfaceWaveFocus(p, uTime);
 
-        // Anisotropic horizontal wave coordinates for foreshortened oval meniscus ripples
-        vec2 waveWarp = n.xz * 2.8 + vec2(
-          0.18 * sin(p.y * 3.6 + p.x * 1.4 + uTime * 1.3),
-          0.14 * cos(p.x * 2.9 - p.y * 4.2 - uTime * 1.1)
-        );
-        vec2 ovalCoord1 = vec2(p.x * 1.15, p.y * 3.10) + waveWarp * 0.65;
-        vec2 ovalCoord2 = vec2(p.x * 2.35 - 1.7, p.y * 5.80 + 0.9) - waveWarp * 0.85;
-        vec2 lens1 = ovalRippleLens(ovalCoord1, uTime * 0.65);
-        vec2 lens2 = ovalRippleLens(ovalCoord2, uTime * 0.92 + 3.7);
-
-        // Oval caustic bright centers and dark navy TIR border rings
-        float ovalCore1 = 1.0 - smoothstep(0.06, 0.34, lens1.x);
-        float ovalCore2 = 1.0 - smoothstep(0.05, 0.28, lens2.x);
-        float ovalRing1 = exp(-pow((lens1.x - 0.36) / 0.095, 2.0));
-        float ovalRing2 = exp(-pow((lens2.x - 0.32) / 0.085, 2.0));
-
-        // High-frequency horizontal liquid striations between the oval lenses
-        float ribbonWave = 0.5 + 0.28 * sin(p.x * 4.2 + p.y * 16.5 + n.x * 9.0 + uTime * 1.45)
-                               + 0.22 * cos(p.x * 7.8 - p.y * 24.0 + n.z * 11.0 - uTime * 1.75);
-        float darkCrestRing = clamp(ovalRing1 * 0.75 + ovalRing2 * 0.55 + smoothstep(0.68, 0.92, 1.0 - ribbonWave) * 0.45, 0.0, 1.0);
-
         vec3 viewToCamera = normalize(cameraPosition - vSurfaceWorldPos);
-        float grazing = 1.0 - clamp(abs(viewToCamera.y), 0.0, 1.0);
-        // Fresnel Total Internal Reflection (TIR) weight: strong mirror reflection outside Snell's window
-        float tirWeight = smoothstep(0.42, 0.92, grazing) * (0.65 + 0.35 * sin(p.y * 9.5 + n.z * 6.0));
+        // Incident ray: camera -> surface point, travelling upward
+        // through the water. Its angle to the (fine) normal decides
+        // the Snell window.
+        vec3 incident = -viewToCamera;
+        float cosThetaI = clamp(dot(incident, nFine), 0.0, 1.0);
+        // Critical angle water -> air: sin = 1/1.333 = 0.75, cos = 0.6614.
+        // The ±0.03 softening is anti-aliasing for a 1 px edge only; the
+        // window boundary itself is the physical critical angle, not a
+        // brightness gradient.
+        float inWindow = smoothstep(0.63, 0.69, cosThetaI);
+        // Physical Fresnel, F0 = 0.02 (air-water), Schlick power 5.
+        float fresnel = 0.02 + 0.98 * pow(1.0 - cosThetaI, 5.0);
+        // Refracted ray into the air, eta = n_water / n_air = 1.333.
+        // GLSL refract() returns the zero vector past the critical angle,
+        // so sunAlignment below is 0 there and no sky light leaks into
+        // the mirror term: the TIR switch is the refract() itself.
+        vec3 refr = refract(incident, -nFine, 1.333);
 
-        // Reflected reef coordinate warped by the undulating underside water normal
-        vec2 refXz = p + n.xz * 3.6 + vec2(sin(p.y * 6.2 + uTime * 1.2) * 0.45, cos(p.x * 3.4 - uTime * 0.9) * 0.30);
-        float rippleBreakup = surfNoise(vec2(refXz.x * 2.2, refXz.y * 6.8 + uTime * 0.35));
+        // Procedural sky inside the Snell window, sampled along the
+        // refracted ray: pale horizon -> deeper blue zenith. No cubemap
+        // asset; the sun disc lives in the glitter term below.
+        vec3 skyHorizon = vec3(0.85, 0.93, 1.00);
+        vec3 skyZenith = vec3(0.42, 0.66, 0.95);
+        vec3 sky = mix(skyHorizon, skyZenith, clamp(refr.y, 0.0, 1.0));
 
-        // Spatially mapped Total Internal Reflection (TIR) of the reef below (matching 9.36.15 PM reference):
-        // 1. Royal violet & magenta reflection over the left Peak & right Acropora / coralline rock
-        float violetLeft = exp(-pow((refXz.x + 3.2) / 2.1, 2.0));
-        float violetMidRight = exp(-pow((refXz.x - 1.9) / 1.9, 2.0));
-        float violetFarRight = exp(-pow((refXz.x - 4.1) / 1.6, 2.0));
-        float violetMask = clamp(violetLeft * 0.95 + violetMidRight * 0.78 + violetFarRight * 0.65, 0.0, 1.0)
-          * smoothstep(0.28, 0.76, rippleBreakup);
-
-        // 2. Glowing chartreuse / lime-gold reflection over the Euphyllia torch & hammer colonies
-        float greenLeft = exp(-pow((refXz.x + 1.55) / 1.05, 2.0));
-        float greenRight = exp(-pow((refXz.x - 0.95) / 1.15, 2.0));
-        float greenMask = clamp(greenLeft * 0.92 + greenRight * 0.95, 0.0, 1.0)
-          * smoothstep(0.32, 0.80, surfNoise(vec2(refXz.x * 2.8 + 4.1, refXz.y * 7.5 - uTime * 0.4)));
-
-        // 3. Warm coral-orange / amber reflection over the Montipora plate & Acanthastrea apron
-        float orangeLeft = exp(-pow((refXz.x + 2.25) / 0.95, 2.0));
-        float orangeCenter = exp(-pow((refXz.x + 0.15) / 1.10, 2.0));
-        float orangeMask = clamp(orangeLeft * 0.85 + orangeCenter * 0.72, 0.0, 1.0)
-          * smoothstep(0.36, 0.82, surfNoise(vec2(refXz.x * 3.1 - 2.3, refXz.y * 8.2 + uTime * 0.3)));
-
-        vec3 tirViolet = mix(vec3(0.26, 0.07, 0.44), vec3(0.52, 0.16, 0.46), ribbonWave);
-        vec3 tirGreen = mix(vec3(0.24, 0.48, 0.10), vec3(0.62, 0.66, 0.14), ribbonWave);
-        vec3 tirOrange = mix(vec3(0.48, 0.18, 0.06), vec3(0.68, 0.34, 0.12), ribbonWave);
-
-        vec3 tirReefColor = vec3(0.0);
-        tirReefColor = mix(tirReefColor, tirViolet, violetMask * 0.82);
-        tirReefColor = mix(tirReefColor, tirGreen, greenMask * 0.85);
-        tirReefColor = mix(tirReefColor, tirOrange, orangeMask * 0.72);
-
-        // Deep marine sapphire-cyan base water color + dark navy TIR wave rings
-        vec3 deepNavyRim = vec3(0.002, 0.009, 0.030);
-        vec3 marineCyan = vec3(0.018, 0.115, 0.285);
-        vec3 snellWindowCyan = vec3(0.18, 0.56, 0.88);
-        vec3 causticLensWhite = vec3(0.78, 0.95, 1.00);
-
+        // Ray-based sun glitter (research §5 #1): the transmitted sun,
+        // driven by the refracted ray (not just the normal) and sharpened
+        // where the wave field focuses light. The tight sun disc in the
+        // sky and the broader glitter are the same term at two powers.
+        float sunAlignment = max(dot(refr, uSunDir), 0.0);
+        float focusSharpen = 0.45 + 0.85 * clamp(focus * 0.5 + 0.5, 0.0, 1.0);
+        float rayGlitter = pow(sunAlignment, 350.0) * focusSharpen;
+        float sunDisc = pow(sunAlignment, 800.0);
+        sky += vec3(1.20, 1.05, 0.85) * sunDisc * 2.0;
+        // Broad base glitter from the fine normal so the surface never
+        // goes flat between sparkles.
         vec3 halfVec = normalize(uSunDir + viewToCamera);
-        float specGlitter = pow(max(dot(n, halfVec), 0.0), 95.0);
-        float snellFocus = clamp(ovalCore1 * 0.72 + ovalCore2 * 0.54 + max(focus, 0.0) * 0.42, 0.0, 1.0);
-        float hotspotCore = pow(snellFocus, 1.85) + specGlitter * 0.85;
+        float baseGlitter = pow(max(dot(nFine, halfVec), 0.0), 95.0);
 
-        // Combine marine water base, colorful TIR reef reflections, dark navy wave rings, and bright oval Snell lenses
-        vec3 col = mix(marineCyan, tirReefColor + marineCyan * 0.35, tirWeight * 0.88);
-        col = mix(col, deepNavyRim, darkCrestRing * 0.82);
-        col = mix(col, snellWindowCyan, smoothstep(0.18, 0.68, snellFocus) * 0.72);
-        col += causticLensWhite * clamp(hotspotCore, 0.0, 1.15) * 0.78;
+        // Mirror term outside the window: the tank interior reflected.
+        // From this camera (9 m away, near-horizontal sight lines) the
+        // whole visible strip is past the critical angle, so the surface
+        // IS a mirror here — and what it mirrors is the brightly lit
+        // tank, not a dark void: the pale sand bed and the lit reef.
+        // The first version of this shader used a dark-navy mirror and
+        // the after-capture read as a dark ceiling, the opposite of the
+        // goal image. So the mirror base is the bright interior average
+        // (pale cyan, sand-dominated), dimmed by the Fresnel weight at
+        // the mix, and broken up by fine ripple noise — not painted reef
+        // colours (the f50a5d6 Gaussians could not track aquascape
+        // moves) and not black. The Snell-window code above still
+        // matters: on AQ-62 zoom (camera closer, steeper sight lines)
+        // the window comes into frame and the sky/glitter take over.
+        float mirrorNoise = surfNoise(vec2(p.x * 2.2, p.y * 6.8 + uTime * 0.35));
+        float mirrorRipple = surfNoise(vec2(p.x * 5.1 + 3.7, p.y * 11.3 - uTime * 0.5));
+        vec3 mirrorCol = vec3(0.38, 0.58, 0.72) * (0.72 + 0.55 * mirrorNoise)
+          + vec3(0.10, 0.16, 0.22) * (mirrorRipple - 0.5);
+        // Underside scatter: the surface underside is lit by the
+        // overhead fixture and by light scattered in the water column,
+        // so facets tilted toward the sun scatter more. This is the
+        // glow that makes the band read bright even where it is all
+        // mirror — a real tank surface seen from below at grazing
+        // angles is not a black mirror, it glows.
+        float undersideScatter = 0.30 + 0.70 * clamp(dot(nFine, uSunDir), 0.0, 1.0);
 
-        // Subtle rear-glass meniscus water-line seam where the surface meets the back wall
-        float rearMeniscusLine = exp(-pow((vSurfaceLocalY + 2.65) / 0.24, 2.0));
+        // Mix sky vs mirror by Fresnel, forced fully to mirror past the
+        // critical angle; the surface brightness also breathes gently
+        // with the shared wave-field focus, so the surface and the
+        // shafts/caustics it drives can never disagree about the light.
+        float reflectWeight = clamp(max(fresnel, 1.0 - inWindow), 0.0, 1.0);
+        vec3 col = mix(sky, mirrorCol, reflectWeight);
+        col *= 0.92 + 0.16 * clamp(focus * 0.5 + 0.5, 0.0, 1.0);
+        col += vec3(0.45, 0.68, 0.85) * undersideScatter * 0.35;
+        col += vec3(0.90, 1.00, 1.05) * clamp(rayGlitter, 0.0, 1.5) * 1.1;
+        col += vec3(0.75, 0.90, 1.00) * baseGlitter * 0.5;
+        // Past the critical angle refract() returns the zero vector, so
+        // sunAlignment is 0 there and no sky light leaks into the mirror
+        // term — the TIR guard is the refract() itself, via reflectWeight.
+
+        // Subtle rear-glass meniscus water-line seam where the surface
+        // meets the back wall (localY -3.15 is world z -4.35, just in
+        // front of the wall at z -4.6, inside the rear alpha ramp).
+        float rearMeniscusLine = exp(-pow((vSurfaceLocalY + 3.15) / 0.24, 2.0));
         col = mix(col, vec3(0.003, 0.014, 0.042), rearMeniscusLine * 0.65);
 
-        float alpha = clamp(0.68 + 0.26 * clamp(snellFocus + darkCrestRing * 0.5 + tirWeight * 0.4, 0.0, 1.0), 0.0, 0.94);
-        // Smoothly feather the rear meniscus edge right behind the upper Acropora tips
-        alpha *= smoothstep(-3.15, -2.35, vSurfaceLocalY);
-        alpha *= smoothstep(2.6, 0.1, vSurfaceLocalY);
+        // Mostly opaque where bright — the dark backdrop behind must not
+        // bleed through and dim the band; the rear ramp fades in just in
+        // front of the back wall and the front ramp fades out toward the
+        // top edge of the frame (localY 3.7 is world z 2.5, where the
+        // level surface leaves the 42-degree FOV), so the bright band
+        // reaches the top of the frame instead of ending mid-air.
+        float alpha = clamp(0.88 + 0.07 * inWindow, 0.0, 0.96);
+        alpha *= smoothstep(-3.35, -2.85, vSurfaceLocalY);
+        alpha *= 1.0 - smoothstep(2.9, 3.7, vSurfaceLocalY);
         gl_FragColor = vec4(col, alpha);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`,
   })
   const waterSurface = new THREE.Mesh(waterSurfaceGeometry, waterSurfaceMaterial)
-  waterSurface.rotation.x = Math.PI / 2 - 0.065
-  waterSurface.position.set(0, 3.24, -1.2)
+  waterSurface.rotation.x = Math.PI / 2
+  waterSurface.position.set(0, WATER_SURFACE_Y, -1.2)
   waterSurface.raycast = () => {}
   scene.add(waterSurface)
 
@@ -670,7 +676,10 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   // list by reconcileSchoolmates() below.
   let schoolmates: Inhabitant[] = []
   const loadedAssets = new Set<GLTF>()
-  let habitat: WaterHabitat = { bounds: { min: { x: -4, y: -2.25, z: -4.6 }, max: { x: 4, y: 2.8, z: 2.8 } }, obstacles: [], anchors: [] }
+  // One true surface height (surface-water pass 2): fish volume tops out
+  // at y 2.5, 0.16 m below the level water surface at WATER_SURFACE_Y
+  // 2.66. The z 2.8 is the tank front, not a height.
+  let habitat: WaterHabitat = { bounds: { min: { x: -4, y: -2.25, z: -4.6 }, max: { x: 4, y: 2.5, z: 2.8 } }, obstacles: [], anchors: [] }
   let width = 1, height = 1, labelClock = 0, spawnUnavailable = false
   let meshNavigationGeneration = 0
   const clock = createFrameClock()
@@ -1549,7 +1558,12 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     // not the live camera — zooming in must not shrink the fish roaming
     // volume or trigger a habitat rebuild.
     const halfWidth = Math.min(5.0, (DEFAULT_CAMERA_DISTANCE_M - 2.8) * Math.tan(THREE.MathUtils.degToRad(21)) * camera.aspect * .96)
-    habitat.bounds = { min: { x: -halfWidth, y: -2.25, z: -4.6 }, max: { x: halfWidth, y: 2.8, z: 2.8 } }
+    // One true surface height (surface-water pass 2): the fish volume
+    // tops out at y 2.5, 0.16 m below the level water surface at
+    // WATER_SURFACE_Y 2.66, so no fish centre can sit above the water.
+    // Must match AQUARIUM_WATER_BOUNDS in reef-assembly.ts and the
+    // initial bounds above; the z 2.8 is the tank front, not a height.
+    habitat.bounds = { min: { x: -halfWidth, y: -2.25, z: -4.6 }, max: { x: halfWidth, y: 2.5, z: 2.8 } }
     const newNarrow = width < 600
     const recoveringFromUnavailableSpawn = spawnUnavailable
     let rebuildSucceeded: boolean | undefined

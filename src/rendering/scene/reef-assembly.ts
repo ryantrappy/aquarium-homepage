@@ -751,10 +751,12 @@ export const SAND_BURROW_WORLD_Y_M = -2.13
 /** Sand-burrow anchor offset in front of the rock front face (local m). */
 export const SAND_BURROW_FRONT_Z_LOCAL_M = 0.45
 
-/** Production swimming volume; must match the habitat bounds in aquarium.ts. */
+/** Production swimming volume; must match the habitat bounds in aquarium.ts.
+ * Top is y 2.5, not 2.8: the one true water surface is WATER_SURFACE_Y 2.66
+ * (surface-water pass 2), so the fish volume stops 0.16 m below it. */
 export const AQUARIUM_WATER_BOUNDS: AxisAlignedBox = {
   min: { x: -4, y: -2.25, z: -4.6 },
-  max: { x: 4, y: 2.8, z: 2.8 },
+  max: { x: 4, y: 2.5, z: 2.8 },
 }
 
 type SocketAnchorSpec = Readonly<{

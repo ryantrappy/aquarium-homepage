@@ -140,7 +140,14 @@ describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
     expect(shader.fragmentShader).toContain('max(texture2D(uCausticMap, causticUvA).r, texture2D(uCausticMap, causticUvB).r)')
     // The ridge threshold is a per-material uniform (default 0.35), so
     // the sand can widen its dapple without raising the +0.35 peak.
-    expect(shader.fragmentShader).toContain('smoothstep(uCausticThreshold, 0.9, causticP)')
+    // Surface-water pass 2: the smoothstep runs per RGB channel (the
+    // Zucconi split fringes the ridges) and the scalar pattern is the
+    // channel average.
+    expect(shader.fragmentShader).toContain('smoothstep(uCausticThreshold, 0.9, causticRgb.r)')
+    expect(shader.fragmentShader).toContain('smoothstep(uCausticThreshold, 0.9, causticRgb.g)')
+    expect(shader.fragmentShader).toContain('smoothstep(uCausticThreshold, 0.9, causticRgb.b)')
+    expect(shader.fragmentShader).toContain('float causticP = (causticRgbS.r + causticRgbS.g + causticRgbS.b) / 3.0;')
+    expect(shader.fragmentShader).not.toContain('smoothstep(uCausticThreshold, 0.9, causticP)')
     expect(shader.fragmentShader).not.toContain('texture2D(uCausticMap, causticUvA).r * texture2D(uCausticMap, causticUvB).r')
     expect(shader.fragmentShader).toContain('causticUvA')
     expect(shader.fragmentShader).toContain('causticUvB')
@@ -173,10 +180,26 @@ describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
       caustics.uniforms.uSunDir.value.z,
     )).toBeCloseTo(1, 9)
     // The shader samples UVs at the slanted surface footpoint and
-    // modulates the pattern by the shared wave-field focus there.
+    // modulates the pattern by the shared wave field there.
+    // Surface-water pass 2: the focus term is the Wallace/Renou
+    // differential-area convergence of the sun ray refracted through
+    // the wave normal (dFdx/dFdy area ratio), not the analytic-Laplacian
+    // proxy — the A/B verdict. The Laplacian proxy survives in
+    // surface-waves.ts and in the TS evaluateCausticPatternUV return.
     expect(shader.fragmentShader).toContain('causticSurf')
-    expect(shader.fragmentShader).toContain('surfaceWaveFocus(causticSurf, uCausticTime)')
-    expect(shader.fragmentShader).toContain('1.0 + uFocusGain * surfaceWaveFocus')
+    expect(shader.fragmentShader).toContain('refract(-uSunDir, causticSurfN, 0.75)')
+    expect(shader.fragmentShader).toContain('dFdx(causticHitFlat)')
+    expect(shader.fragmentShader).toContain('dFdy(causticHit)')
+    expect(shader.fragmentShader).toContain('float causticFocusD = clamp(causticOldArea / causticNewArea, 0.0, 2.0);')
+    expect(shader.fragmentShader).not.toContain('1.0 + uFocusGain * surfaceWaveFocus')
+    // Zucconi second scale + RGB split, and the sigmoid glass-junction fade.
+    // (min() was tried and rejected: see the chunk comment — with this
+    // mostly-dark texture min() thins the web to near-invisibility.)
+    expect(shader.fragmentShader).toContain('causticUvC')
+    expect(shader.fragmentShader).toContain('max(causticBase, texture2D(uCausticMap, causticUvC')
+    expect(shader.fragmentShader).not.toContain('min(causticBase, texture2D(uCausticMap, causticUvC')
+    expect(shader.fragmentShader).toContain('causticGlassFade')
+    expect(shader.fragmentShader).toContain('smoothstep(-4.6, -3.9, vCausticWorldPos.z)')
     // Light redistribution: the field between ridges is dimmed (the
     // light in the web came from around it), so the dapple reads on
     // bright surfaces instead of clipping away.
@@ -208,7 +231,7 @@ describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
     expect(shader.uniforms.uCausticThreshold.value).toBeCloseTo(0.22)
     // The peak add is unchanged: the threshold only widens the network.
     expect(shader.uniforms.uCausticMaxAdd.value).toBeCloseTo(0.35)
-    expect(shader.fragmentShader).toContain('smoothstep(uCausticThreshold, 0.9, causticP)')
+    expect(shader.fragmentShader).toContain('smoothstep(uCausticThreshold, 0.9, causticRgb.r)')
     caustics.dispose()
   })
 

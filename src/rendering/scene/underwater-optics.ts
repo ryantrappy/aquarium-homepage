@@ -180,7 +180,10 @@ export const DEFAULT_AQUARIUM_OPTICS_CONFIG: AquariumOpticsConfig = Object.freez
   surfaceY: 2.66,
   sunDirection: SUN_DIRECTION,
   surfaceFocusGain: 0.6,
-  causticSandThreshold: 0.3,
+  // Sand caustic threshold restored to 9d0418a's 0.18 in the
+  // surface-water pass (PR #43's merge had overwritten it with 0.30);
+  // the sand call site passes its own maxAdd/scales alongside this.
+  causticSandThreshold: 0.18,
   shaftRaymarchSteps: 14,
   shaftRaymarchAlpha: 0.28,
   shaftRenderScale: 0.5,
@@ -462,6 +465,8 @@ export function evaluateCausticPatternUV(
 ): {
   a: { u: number; v: number }
   b: { u: number; v: number }
+  /** Zucconi second scale (mid scale of A/B) for the min() blend. */
+  c: { u: number; v: number }
   /** Surface point the light passed through (the slanted footpoint). */
   surfacePoint: { x: number; z: number }
   /** Shared wave-field focus at the surface point, in [-1, 1]. */
@@ -483,6 +488,11 @@ export function evaluateCausticPatternUV(
     }
   }
   const focus = evaluateSurfaceFocus(surfacePoint.x, surfacePoint.z, effectiveTime)
+  // Layer C (surface-water pass 2, Zucconi second scale): the mid scale
+  // of A/B, drifting at 0.17 / 0.11 Hz-equivalent so the GLSL min()
+  // blend has a TS mirror. Like A/B it carries no warp term here — the
+  // warp is a shader-side slope offset, not part of the UV contract.
+  const scaleC = (cfg.causticTextureScaleA + cfg.causticTextureScaleB) / 2
   return {
     a: {
       u: surfacePoint.x * cfg.causticTextureScaleA + effectiveTime * cfg.causticPrimaryHz * 0.1,
@@ -491,6 +501,10 @@ export function evaluateCausticPatternUV(
     b: {
       u: surfacePoint.x * cfg.causticTextureScaleB - effectiveTime * cfg.causticSecondaryHz * 0.08,
       v: surfacePoint.z * cfg.causticTextureScaleB + effectiveTime * cfg.causticSecondaryHz * 0.05,
+    },
+    c: {
+      u: surfacePoint.x * scaleC + effectiveTime * 0.017,
+      v: surfacePoint.z * scaleC + effectiveTime * 0.011,
     },
     surfacePoint,
     focus,
