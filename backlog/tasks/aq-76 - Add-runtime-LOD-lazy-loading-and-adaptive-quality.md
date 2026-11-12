@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-08 00:30'
-updated_date: '2026-11-12 14:27'
+updated_date: '2026-11-12 14:45'
 labels:
   - performance
   - rendering
@@ -19,6 +19,7 @@ references:
   - AQ-70.3
 documentation:
   - docs/rendering.md
+  - docs/asset-evidence/aq76/native-20261112/review.json
 priority: '4'
 type: feature
 ordinal: 134000
@@ -48,6 +49,8 @@ Coordinate with AQ-70.3 (photoreal asset-delivery and frame-time budgets) to imp
 
 <!-- SECTION:PLAN:BEGIN -->
 1. Add a pure runtime-quality helper that accrues fixed simulation deltas for clip and flex updates across LOD cadence, emitting the full elapsed simulation delta only when due. 2. Make pause/resume and LOD transitions deterministic by resetting or re-basing the cadence accumulator at those boundaries so paused time is never applied and changing tiers does not create a burst or lose elapsed active time. 3. Add focused unit tests for LOD0/LOD1 total animation time, odd/even skipped-step sequences, pause/resume, and LOD changes; leave aquarium.ts integration to Root after the capture agent finishes.
+
+Add a 2,000 ms adaptive-quality window alternative requiring at least 30 valid frame samples, while preserving the 120-sample path, thresholds, slow/fast window counts and cooldown. Start the elapsed window at the first valid sample and reset it on evaluation or excluded samples. Add low-FPS and exclusion-reset regressions.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -79,4 +82,6 @@ Measurements:
 2026-11-12 runtime animation dt helper: added per-fish delta state and consumeLodAnimationDelta() in src/rendering/scene/runtime-quality.ts. It returns accumulated active fixed-step seconds at each LOD cadence, preserves active time across deterministic LOD changes and pause boundaries, and ignores invalid deltas. Added five focused cases for alternating LOD1 timing, LOD0 timing, pause/resume, tier changes and invalid deltas. Verification: npm test -- src/rendering/scene/runtime-quality.test.ts — 22 tests passed. aquarium.ts integration remains for Root after the capture agent handoff.
 
 Root2026-11-12 functional correction: replaced the global LOD skip counter with per-fish accrued active animation time, so LOD1 samples at half cadence without halving clip/flex speed; turning overlays apply to every sampled pose. Lazy integration now upgrades every matching service fish and schoolmate. Queue selection checks actual viewport intersection and skips past off-screen entries without discarding them or starving later visible species. New actual-controller regression reproduced4 players for9 inhabitants before the all-instance fix; now all9 receive models. Actual-controller tests also prove distant animation consumes0.1s across6steps and an off-screen queued species does not block a later visible species.49 lifecycle/runtime-quality tests pass; typecheck and14 script checks pass. Formal before/after native performance review and the geometry-vs-animation-only LOD criterion remain open.
+
+Root native production comparison recorded underdocs/asset-evidence/aq76/native-20261112/review.json. Same8-service local config, exactDPR1 two-viewports,120warmup/180measured rAF samples. Before cf5703e: laptopp50/p95=49.8/67.0ms,phone33.3/51.7ms; after01f1403: laptop66.1/150.9ms,phone33.3/65.5ms. These fail16.7/22ms budgets, and the short warmup may not settle original adaptive windows at lowFPS. Do not claim performance acceptance or isolate causation from one animated run. All schoolmates remain3D; next work reduces redundant rock shader math and shortens low-FPS adaptive response. Raw samples, PNGs and limited CPU diagnostic are retained.
 <!-- SECTION:NOTES:END -->
