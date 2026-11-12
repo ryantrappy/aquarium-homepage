@@ -675,6 +675,9 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   const rawTarget = fish.route[fish.waypoint]
   if (!rawTarget) {
     fish.speed *= Math.exp(-dt * 4)
+    // Level out after a traveling turn; stationary school pivots do not
+    // sustain the bank inherited from the preceding route.
+    fish.bank *= Math.exp(-dt * 4)
     // AQ-84: with no route to follow the fish still turns in place toward
     // the school, and the turn kinematics record that turn.
     fish.turnKinematics = stepFishTurnKinematics(fish.turnKinematics, schoolTurn, dt, fish.speed, fish.startleSeconds, schoolDelta)

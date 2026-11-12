@@ -715,6 +715,18 @@ describe('schooling steering through heading kinematics (AQ-84)', () => {
     expect(outer.turnKinematics.smoothedYawRate).toBeGreaterThan(0)
   })
 
+  it('levels a no-route pivot instead of retaining bank from its previous swim turn', () => {
+    const { outer, peer } = outerFishNoRoute()
+    outer.bank = -0.12
+    const previousAbsBank = Math.abs(outer.bank)
+
+    stepSwimmingSchool([outer, peer], habitat, 1 / 60, [false, true])
+
+    // With no route and no forward speed, yaw may pivot in place, but the
+    // body should not remain visibly rolled from a previous traveling turn.
+    expect(Math.abs(outer.bank)).toBeLessThan(previousAbsBank)
+  })
+
   it('respects the species turn limit on every substep and never overshoots the school heading (AC #2)', () => {
     const { outer, peer } = outerFishNoRoute()
     const turnRateRad = outer.behavior.variation.turnDegreesPerSecond * Math.PI / 180
@@ -751,6 +763,63 @@ describe('schooling steering through heading kinematics (AQ-84)', () => {
     expect(forward).toBeGreaterThan(0.05)
     expect(lateral).toBeLessThan(0.05)
     expect(lateral).toBeLessThan(forward * 0.5)
+  })
+
+  it('bounds routed school turns by existing turn boosts and banks with the turn while staying habitat-safe (AC #2/#3)', () => {
+    for (const direction of [-1, 1] as const) {
+      const outer = createSwimmingFish(`aq84-routed-${direction}`, 'blue-green-chromis', { x: -0.6 * direction, y: 0.8, z: 1.4 }, .5)
+      const peer = createSwimmingFish(`aq84-routed-peer-${direction}`, 'blue-green-chromis', { x: 0.9 * direction, y: 0.8, z: 1.4 }, .5)
+      outer.yaw = 0
+      peer.yaw = 0
+      outer.route = [
+        { ...outer.position },
+        { x: outer.position.x + direction * 0.3, y: outer.position.y, z: outer.position.z },
+      ]
+      outer.waypoint = 1
+      outer.speed = 0.4
+
+      const previous = { ...outer.position }
+      const previousYaw = outer.yaw
+      const dt = 1 / 60
+      stepSwimmingSchool([outer, peer], habitat, dt, [false, true])
+
+      const yawDelta = angleDiff(outer.yaw, previousYaw)
+      const baseTurnRate = outer.behavior.variation.turnDegreesPerSecond * Math.PI / 180
+      // The route is a sharp turn within the existing 0.35m proximity zone;
+      // its established boost is 1.65 × 2.2. Schooling yaw is budgeted from
+      // the same base rate before the route uses the remaining boosted rate.
+      expect(Math.abs(yawDelta) / dt).toBeLessThanOrEqual(baseTurnRate * 1.65 * 2.2 + 1e-6)
+      expect(Math.sign(yawDelta)).toBe(direction)
+      expect(Math.sign(outer.turnKinematics.yawRateRadPerSec)).toBe(direction)
+      // Positive yaw banks negative; mirrored negative yaw banks positive.
+      expect(Math.sign(outer.bank)).toBe(-direction)
+      expect(isWaterSegmentSafe({ start: previous, target: outer.position, waterBounds: habitat.bounds, obstacles: habitat.obstacles, fishClearanceRadius: outer.clearance })).toBe(true)
+    }
+  })
+
+  it('keeps all motion state frozen for stopped fish during a paused school step', () => {
+    const { outer, peer } = outerFishNoRoute()
+    const before = [outer, peer].map(fish => ({
+      position: { ...fish.position },
+      yaw: fish.yaw,
+      pitch: fish.pitch,
+      bank: fish.bank,
+      speed: fish.speed,
+      turnKinematics: { ...fish.turnKinematics },
+      behavior: fish.behavior,
+    }))
+
+    stepSwimmingSchool([outer, peer], habitat, 1 / 30, true)
+
+    expect([outer, peer].map(fish => ({
+      position: fish.position,
+      yaw: fish.yaw,
+      pitch: fish.pitch,
+      bank: fish.bank,
+      speed: fish.speed,
+      turnKinematics: fish.turnKinematics,
+      behavior: fish.behavior,
+    }))).toEqual(before)
   })
 
   it('freezes schooling heading under reduced motion while route motion continues (AC #3)', () => {
