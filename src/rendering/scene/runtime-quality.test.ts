@@ -5,6 +5,8 @@ import {
   ADAPTIVE_STEP_DOWN_P95_MS,
   ADAPTIVE_WINDOW_FRAMES,
   AdaptiveQualityController,
+  consumeLodAnimationDelta,
+  createLodAnimationDeltaState,
   LAZY_PHASE0_MAX_SPECIES,
   LOD_DEPTH_HYSTERESIS_M,
   LOD_MIN_PROJECTED_PX,
@@ -79,6 +81,56 @@ describe('lodAnimationFrameSkip (AQ-76 AC #1)', () => {
   it('halves the clip rate at LOD1 and never stops it outright', () => {
     expect(lodAnimationFrameSkip(0)).toBe(1)
     expect(lodAnimationFrameSkip(1)).toBe(2)
+  })
+})
+
+describe('LOD animation delta accrual (AQ-76)', () => {
+  const step = 1 / 60
+
+  it('preserves total animation time while LOD1 updates on alternating steps', () => {
+    const state = createLodAnimationDeltaState(1)
+    const emitted: number[] = []
+    for (let frame = 0; frame < 60; frame++) {
+      emitted.push(consumeLodAnimationDelta(state, step, 1))
+    }
+
+    expect(emitted[0]).toBe(0)
+    expect(emitted[1]).toBeCloseTo(2 * step)
+    expect(emitted[2]).toBe(0)
+    expect(emitted[3]).toBeCloseTo(2 * step)
+    expect(emitted.filter((delta) => delta > 0)).toHaveLength(30)
+    expect(emitted.reduce((total, delta) => total + delta, 0)).toBeCloseTo(1)
+  })
+
+  it('emits every LOD0 fixed step and does not accrue paused time', () => {
+    const state = createLodAnimationDeltaState(0)
+    expect(consumeLodAnimationDelta(state, step, 0)).toBeCloseTo(step)
+    expect(consumeLodAnimationDelta(state, 10, 0, true)).toBe(0)
+    expect(consumeLodAnimationDelta(state, step, 0)).toBeCloseTo(step)
+  })
+
+  it('retains partial active time across pause and resumes on a fresh LOD cadence', () => {
+    const state = createLodAnimationDeltaState(1)
+    expect(consumeLodAnimationDelta(state, step, 1)).toBe(0)
+    expect(consumeLodAnimationDelta(state, 5, 1, true)).toBe(0)
+    expect(consumeLodAnimationDelta(state, step, 1)).toBe(0)
+    expect(consumeLodAnimationDelta(state, step, 1)).toBeCloseTo(3 * step)
+  })
+
+  it('keeps accrued time when LOD changes and restarts the new cadence', () => {
+    const state = createLodAnimationDeltaState(1)
+    expect(consumeLodAnimationDelta(state, step, 1)).toBe(0)
+    // Moving to LOD0 consumes its current step plus the pending LOD1 step.
+    expect(consumeLodAnimationDelta(state, step, 0)).toBeCloseTo(2 * step)
+    expect(consumeLodAnimationDelta(state, step, 1)).toBe(0)
+    expect(consumeLodAnimationDelta(state, step, 1)).toBeCloseTo(2 * step)
+  })
+
+  it('ignores invalid deltas without corrupting the cadence', () => {
+    const state = createLodAnimationDeltaState(1)
+    expect(consumeLodAnimationDelta(state, Number.NaN, 1)).toBe(0)
+    expect(consumeLodAnimationDelta(state, step, 1)).toBe(0)
+    expect(consumeLodAnimationDelta(state, step, 1)).toBeCloseTo(2 * step)
   })
 })
 

@@ -120,6 +120,54 @@ export function lodAnimationFrameSkip(lod: FishLod): number {
   return lod === 0 ? 1 : 2
 }
 
+/** Per-fish accumulator for animation updates sampled at the LOD cadence.
+ * Call `consumeLodAnimationDelta` once for every active simulation step,
+ * including steps where the renderer would otherwise skip clip/flex work.
+ * LOD1 emits the sum of both fixed steps on every second call, preserving
+ * animation time while halving update frequency. */
+export interface LodAnimationDeltaState {
+  pendingSeconds: number
+  stepsSinceUpdate: number
+  lod: FishLod
+}
+
+export function createLodAnimationDeltaState(initialLod: FishLod = 0): LodAnimationDeltaState {
+  return { pendingSeconds: 0, stepsSinceUpdate: 0, lod: initialLod }
+}
+
+/** Accrue one fixed simulation delta and return elapsed animation seconds
+ * only when the current LOD cadence is due. `paused` steps do not accrue
+ * time; any partial active interval is retained and resumes deterministically.
+ * A LOD change restarts the cadence count but keeps accrued active time, so
+ * no time is lost and no paused-time catch-up is introduced. */
+export function consumeLodAnimationDelta(
+  state: LodAnimationDeltaState,
+  simulationDeltaSeconds: number,
+  lod: FishLod,
+  paused = false,
+): number {
+  if (lod !== state.lod) {
+    state.lod = lod
+    state.stepsSinceUpdate = 0
+  }
+
+  if (paused) {
+    state.stepsSinceUpdate = 0
+    return 0
+  }
+
+  if (!(simulationDeltaSeconds > 0) || !Number.isFinite(simulationDeltaSeconds)) return 0
+
+  state.pendingSeconds += simulationDeltaSeconds
+  state.stepsSinceUpdate += 1
+  if (state.stepsSinceUpdate < lodAnimationFrameSkip(lod)) return 0
+
+  const elapsedSeconds = state.pendingSeconds
+  state.pendingSeconds = 0
+  state.stepsSinceUpdate = 0
+  return elapsedSeconds
+}
+
 /** Configured species whose GLBs block first paint, in service order.
  * Everything else loads in the background after `ready`. */
 export function phase0SpeciesIds(configuredFishIds: readonly string[]): string[] {

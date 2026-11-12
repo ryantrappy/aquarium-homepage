@@ -146,6 +146,61 @@ beforeEach(() => {
 afterEach(() => { controller?.dispose(); delete window.__AQUARIUM_LOOKDEV__; window.history.replaceState({}, '', '/'); host.remove(); vi.restoreAllMocks(); vi.unstubAllGlobals() })
 
 describe('actual aquarium controller inhabitant lifecycle without WebGL', () => {
+  it('loads a later visible species while an off-screen species stays queued', async () => {
+    const idleCallbacks: IdleRequestCallback[] = []
+    vi.stubGlobal('requestIdleCallback', (callback: IdleRequestCallback) => {
+      idleCallbacks.push(callback)
+      return idleCallbacks.length
+    })
+    const services = [
+      service('clown'), service('tang', 'yellow-tang'), service('gramma', 'royal-gramma'),
+      service('offscreen', 'mandarin-dragonet'), service('visible', 'lyretail-anthias'),
+    ]
+    await start(services)
+    const offscreen = state.created.find(fish => fish.id === 'offscreen')!
+    offscreen.position = { ...offscreen.position, x: 100 }
+    controller.update(services, true)
+    for (const callback of idleCallbacks.splice(0)) callback({ didTimeout: false, timeRemaining: () => 10 })
+    await vi.waitFor(() => expect(state.sources).toHaveLength(4))
+    await vi.waitFor(() => expect(state.players).toHaveLength(state.created.length - 1))
+    let offscreenHasModel = false
+    rootFor('offscreen').traverse(node => { if (node instanceof THREE.SkinnedMesh) offscreenHasModel = true })
+    expect(offscreenHasModel).toBe(false)
+  })
+
+  it('samples a distant fish less often without halving its animation clock', async () => {
+    const services = [service('far')]
+    await start(services)
+    const fish = state.created[0]!
+    fish.position = { ...fish.position, z: -3.5 }
+    controller.update(services, true) // Publish the far pose and evaluate LOD while stopped.
+    controller.update(services, false)
+    const player = state.players[0]!, originalAdvance = player.advance
+    const sampledSeconds: number[] = []
+    vi.spyOn(player, 'advance').mockImplementation(delta => {
+      const rate = (.55 + Math.min(1.7, fish.speed * 2.2)) * fish.animationPlaybackRate
+      sampledSeconds.push(delta / rate)
+      originalAdvance(delta)
+    })
+    state.renderer!.loop?.(0)
+    state.renderer!.loop?.(100)
+    expect(sampledSeconds).toHaveLength(3)
+    for (const delta of sampledSeconds) expect(delta).toBeCloseTo(2 / 60)
+    expect(sampledSeconds.reduce((sum, delta) => sum + delta, 0)).toBeCloseTo(0.1)
+  })
+
+  it('upgrades every schoolmate when its shared lazy-loaded species arrives', async () => {
+    window.history.replaceState({}, '', '/?lookdev=1&seed=23')
+    await start([
+      service('clown'), service('tang', 'yellow-tang'),
+      service('gramma', 'royal-gramma'), service('school', 'blue-green-chromis'),
+    ])
+    await vi.waitFor(() => expect(state.sources).toHaveLength(4))
+    expect(state.created.length).toBeGreaterThan(4)
+    await vi.waitFor(() => expect(state.players).toHaveLength(state.created.length))
+    expect((await window.__AQUARIUM_LOOKDEV__!.ready()).unresolvedFishIds).toEqual([])
+  })
+
   it('freezes a DEV look-dev scene at the configured seed/time and resets stats after preset, subject, and time changes', async () => {
     window.history.replaceState({}, '', '/?lookdev=1&seed=43&time=7.25&preset=fish-macro&subject=capture&labels=off')
     await start([service('capture')])

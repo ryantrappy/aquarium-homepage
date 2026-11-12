@@ -52,7 +52,7 @@ import { bindFishFlexToModel, updateFishFlex, type FishFlexBinding } from './fis
 import { reconcileFishInhabitants, refreshFishLink } from './fish-inhabitants'
 import { SCHOOL_TOTAL_COUNT, resolveSchoolPopulation, schoolmateSpawnOffset } from './school-population'
 import { applyCaustics, createCaustics } from './caustics'
-import { AdaptiveQualityController, LAZY_MAX_CONCURRENT_LOADS, QUALITY_TIERS, lodAnimationFrameSkip, orderLazyLoadQueue, phase0SpeciesIds, projectedFishLengthPx, selectFishLod, shaftModeForTier, type FishLod, type QualityTier } from './runtime-quality'
+import { AdaptiveQualityController, LAZY_MAX_CONCURRENT_LOADS, QUALITY_TIERS, consumeLodAnimationDelta, createLodAnimationDeltaState, orderLazyLoadQueue, phase0SpeciesIds, projectedFishLengthPx, selectFishLod, shaftModeForTier, type FishLod, type QualityTier } from './runtime-quality'
 import { FRAME_RATE_PUSH_INTERVAL_MS, FrameRateSampler, type FrameRateSample } from './frame-rate'
 import {
   DEFAULT_CAMERA_DISTANCE_M,
@@ -849,9 +849,8 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   let meshNavigationGeneration = 0
   let meshNavigationSettledGeneration = 0
   const clock = createFrameClock()
-  // AQ-76 runtime quality: global simulation-step counter for the LOD1
-  // half-rate clip cadence, and the adaptive tier controller + active tier.
-  let animationStepIndex = 0
+  // Keep animation time per inhabitant across artwork swaps and LOD changes.
+  const animationDeltas = new WeakMap<SwimmingFish, ReturnType<typeof createLodAnimationDeltaState>>()
   let qualityTier: QualityTier = 'high'
   // Raymarched shaft pass (AQ-98): lazily constructed on the High tier
   // only, disposed on failure (the shaft plane is the fallback). The
@@ -1588,17 +1587,19 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       stepSwimmingSchool(swimmers.map(item => item.motion), habitat, SIMULATION_STEP_SECONDS, stoppedFlags, { reducedMotion })
       swimmers.forEach((item, index) => {
         const stopped = stoppedFlags[index]
+        let animationState = animationDeltas.get(item.motion)
+        if (!animationState) {
+          animationState = createLodAnimationDeltaState(item.lod)
+          animationDeltas.set(item.motion, animationState)
+        }
+        const animationDt = consumeLodAnimationDelta(animationState, SIMULATION_STEP_SECONDS, item.lod, stopped)
         if (!stopped) {
-        // Animation LOD (AQ-76 AC #1): fish keep swimming at every tier, but
-        // far fish advance their swim clip at half rate (LOD1), and the
-        // turning-rig overlay runs only at LOD0. `animationStepIndex` is
-        // the global step counter, so the half rate is a real every-other-
-        // step cadence rather than a per-frame coin flip. There is no
-        // sprite tier any more, so the clip never stops outright.
-        const animateThisStep = !stopped && animationStepIndex % lodAnimationFrameSkip(item.lod) === 0
+        // Distant fish sample less often, but consume all active elapsed
+        // time so their fins and body flex keep the same swimming speed.
+        const animateThisStep = animationDt > 0
         if (animateThisStep) {
           try {
-            item.clipPlayer?.advance(SIMULATION_STEP_SECONDS * (.55 + Math.min(1.7, item.motion.speed * 2.2)) * item.motion.animationPlaybackRate)
+            item.clipPlayer?.advance(animationDt * (.55 + Math.min(1.7, item.motion.speed * 2.2)) * item.motion.animationPlaybackRate)
           } catch (error) {
             // The player has restored its complete last clean pose. Retire this
             // unsupported animation once; other fish and native links keep working.
@@ -1619,13 +1620,12 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
               state: item.motion.behavior.state,
               maneuverStage: item.motion.turnKinematics.maneuverStage,
               startleSeconds: item.motion.startleSeconds,
-            }, SIMULATION_STEP_SECONDS, reducedMotion)
+            }, animationDt, reducedMotion)
           }
         }
-        if (!stopped && item.lod === 0 && item.turningRig) applyFishTurningRigOverlay(item.turningRig, item.motion.turnKinematics, stopped)
+        if (animateThisStep && item.turningRig) applyFishTurningRigOverlay(item.turningRig, item.motion.turnKinematics, stopped)
         }
       })
-    animationStepIndex++
     }
     for (const item of [...fish, ...schoolmates]) {
       const pose = item.motion; item.root.position.set(pose.position.x, pose.position.y, pose.position.z)
@@ -2007,22 +2007,32 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   function pumpLazyLoads() {
     if (disposed || failed || lazyQueue.length === 0) return
     while (lazyActiveLoads < LAZY_MAX_CONCURRENT_LOADS && lazyQueue.length > 0) {
-      const id = lazyQueue[0]
-      // Service fish and visual-only schoolmates share the queue; a
-      // schoolmate has no service link, so its off-screen check is the
-      // same pure projection as a service fish's.
-      const item = [...fish, ...schoolmates].find(next => next.service.fishId === id)
-      if (item && !item.fallback) { lazyQueue.shift(); continue }
-      if (item && !lookDevConfig && !projectFishLinkBounds(item.root.position, camera, width, height, fishRenderLength(id), projected)) break
-      lazyQueue.shift()
+      const inhabitants = [...fish, ...schoolmates]
+      // Keep off-screen species queued, while allowing later visible
+      // species to load. Any member of a species can make it visible.
+      const queueIndex = lazyQueue.findIndex(id => {
+        const matches = inhabitants.filter(item => item.service.fishId === id)
+        return modelBases.has(id) || matches.length === 0 || Boolean(lookDevConfig)
+          || matches.some(item => {
+            const bounds = projectFishLinkBounds(item.root.position, camera, width, height, fishRenderLength(id), projected)
+            return bounds && bounds.x < width && bounds.y < height
+              && bounds.x + bounds.width > 0 && bounds.y + bounds.height > 0
+          })
+      })
+      if (queueIndex < 0) break
+      const [id] = lazyQueue.splice(queueIndex, 1)
+      const targets = inhabitants.filter(item => item.service.fishId === id && item.fallback)
+      if (modelBases.has(id)) { targets.forEach(swapFallbackToGlb); continue }
+      if (targets.length === 0) continue
       lazyActiveLoads++
       void loadFishModel(id).then(model => {
         lazyActiveLoads--
         if (disposed || failed) { if (model) disposeTree(model.scene); return }
         if (model) {
           modelBases.set(id, model)
-          const target = [...fish, ...schoolmates].find(next => next.service.fishId === id && next.fallback)
-          if (target) swapFallbackToGlb(target)
+          for (const target of [...fish, ...schoolmates]) {
+            if (target.service.fishId === id && target.fallback) swapFallbackToGlb(target)
+          }
           if (!document.hidden) render(0, true)
         }
         settleLookDevReadiness()
