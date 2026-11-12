@@ -3,11 +3,11 @@ id: AQ-85
 title: >-
   Scale fish-to-fish personal space separation to physical body radius to
   prevent whole-school collision envelopes
-status: To Do
+status: In Progress
 assignee:
-  - '@Luna'
+  - '@Codex'
 created_date: '2026-11-08 21:33'
-updated_date: '2026-11-08 21:33'
+updated_date: '2026-11-12 05:55'
 labels: []
 dependencies:
   - AQ-41
@@ -34,6 +34,15 @@ In evaluateSchoolingSteering, personal-space separation uses minSep = self.clear
 - [ ] #4 Vitest unit and simulation tests verify individual fish separation distances and multi-neighbor repulsion caps.
 <!-- AC:END -->
 
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Keep the fish-to-fish radius independent from the legacy habitat-clearance radius, using the species-proportional fishBodyRadiusM adapter in schoolingPeer and preserving clearance for reef/tank segment safety.
+2. Audit the existing AQ-85 steering logic and tests for measurable guarantees: close-range thresholds, passage between schoolmates, bounded total multi-peer separation, and no interpenetration in simulation.
+3. Add or tighten only AQ-85 invariants in schooling-navigation.ts/tests and fish-scale.ts/tests; coordinate any change in the shared motion.ts with Root's AQ-84 review.
+4. Run focused Vitest suites for schooling navigation, fish scale, and motion; record exact results and verified criteria for Root review. Keep AQ-41 open because its viewport benchmark acceptance remains unverified.
+<!-- SECTION:PLAN:END -->
+
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
@@ -56,4 +65,6 @@ Investigation & Technical Fix Architecture:
      Normalize or clamp the total separation vector across multiple neighbors so an approaching fish does not experience an artificially magnified repulsion force when swimming near a tight cluster.
    - Allow Independent Fish Passage:
      Other fish can swim close to school members and even weave between them without triggering early deflections across the whole school envelope.
+
+Prerequisite reality: AQ-41 supplies the implemented schooling/navigation foundation used by this bounded fix, but AQ-41 remains To Do with acceptance still open (notably current rendered benchmarks at both target viewports). Proceeding on the existing implementation does not satisfy or close AQ-41.
 <!-- SECTION:NOTES:END -->

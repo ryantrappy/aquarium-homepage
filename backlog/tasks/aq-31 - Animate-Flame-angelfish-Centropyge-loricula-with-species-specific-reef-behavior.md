@@ -3,27 +3,27 @@ id: AQ-31
 title: >-
   Animate Flame angelfish (Centropyge loricula) with species-specific reef
   behavior
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
-created_date: 2026-11-03 04:37
-updated_date: '2026-11-08T21:37:00Z'
+created_date: '2026-11-03 04:37'
+updated_date: '2026-11-12 05:50'
 labels:
   - reef-fish
   - animation
 dependencies:
   - AQ-12
 references:
-  - https://nas.er.usgs.gov/queries/FactSheet.aspx?SpeciesID=2591
-  - https://www.youtube.com/watch?v=dtXJ9GocYq4&t=15s
-  - https://www.youtube.com/watch?v=TFjoIJrNIe4&t=40s
+  - 'https://nas.er.usgs.gov/queries/FactSheet.aspx?SpeciesID=2591'
+  - 'https://www.youtube.com/watch?v=dtXJ9GocYq4&t=15s'
+  - 'https://www.youtube.com/watch?v=TFjoIJrNIe4&t=40s'
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
   - docs/open-source-asset-and-motion-research.md
 priority: '23'
 type: enhancement
-ordinal: 23
+ordinal: 122000
 ---
 
 ## Description

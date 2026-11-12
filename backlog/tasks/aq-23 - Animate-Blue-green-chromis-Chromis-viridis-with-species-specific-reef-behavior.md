@@ -3,21 +3,21 @@ id: AQ-23
 title: >-
   Animate Blue-green chromis (Chromis viridis) with species-specific reef
   behavior
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
-created_date: 2026-11-03 04:37
-updated_date: '2026-11-08T21:37:00Z'
+created_date: '2026-11-03 04:37'
+updated_date: '2026-11-12 05:50'
 labels:
   - reef-fish
   - animation
 dependencies:
   - AQ-12
 references:
-  - https://aquarium.org/animals/blue-green-chromis/
+  - 'https://aquarium.org/animals/blue-green-chromis/'
   - AQ-41
-  - https://www.youtube.com/watch?v=5PkiUZdKrSY&t=5s
-  - https://www.youtube.com/watch?v=Ig9cTBsg2CI&t=0s
+  - 'https://www.youtube.com/watch?v=5PkiUZdKrSY&t=5s'
+  - 'https://www.youtube.com/watch?v=Ig9cTBsg2CI&t=0s'
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
@@ -25,7 +25,7 @@ documentation:
   - docs/open-source-asset-and-motion-research.md
 priority: '19'
 type: enhancement
-ordinal: 19
+ordinal: 119000
 ---
 
 ## Description

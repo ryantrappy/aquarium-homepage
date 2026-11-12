@@ -3,11 +3,11 @@ id: AQ-25
 title: >-
   Animate Yellow watchman goby (Cryptocentrus cinctus) with species-specific
   reef behavior
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
-created_date: 2026-11-03 04:37
-updated_date: '2026-11-08T21:37:00Z'
+created_date: '2026-11-03 04:37'
+updated_date: '2026-11-12 05:50'
 labels:
   - reef-fish
   - animation
@@ -19,8 +19,8 @@ references:
   - >-
     https://lifg.australian.museum/Group.html?groupId=BDBaE9qK&hierarchyId=CEJQQmVx
   - AQ-45
-  - https://www.youtube.com/watch?v=Sbdm-LApMdg&t=0s
-  - https://www.youtube.com/watch?v=vHaQdhewngI&t=0s
+  - 'https://www.youtube.com/watch?v=Sbdm-LApMdg&t=0s'
+  - 'https://www.youtube.com/watch?v=vHaQdhewngI&t=0s'
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
@@ -28,7 +28,7 @@ documentation:
   - docs/open-source-asset-and-motion-research.md
 priority: '31'
 type: enhancement
-ordinal: 31
+ordinal: 130000
 ---
 
 ## Description

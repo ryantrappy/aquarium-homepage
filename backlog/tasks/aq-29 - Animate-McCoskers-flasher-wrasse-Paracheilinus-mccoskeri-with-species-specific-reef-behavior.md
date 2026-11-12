@@ -3,27 +3,27 @@ id: AQ-29
 title: >-
   Animate McCosker's flasher wrasse (Paracheilinus mccoskeri) with
   species-specific reef behavior
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
-created_date: 2026-11-03 04:37
-updated_date: '2026-11-08T21:37:00Z'
+created_date: '2026-11-03 04:37'
+updated_date: '2026-11-12 05:50'
 labels:
   - reef-fish
   - animation
 dependencies:
   - AQ-12
 references:
-  - https://www.mrc.gov.mv/assets/Uploads/fishes-of-the-maldives.pdf
-  - https://www.youtube.com/watch?v=b3lKey6ZfiA&t=0s
-  - https://www.youtube.com/watch?v=TXiFcyosy5A&t=15s
+  - 'https://www.mrc.gov.mv/assets/Uploads/fishes-of-the-maldives.pdf'
+  - 'https://www.youtube.com/watch?v=b3lKey6ZfiA&t=0s'
+  - 'https://www.youtube.com/watch?v=TXiFcyosy5A&t=15s'
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
   - docs/open-source-asset-and-motion-research.md
 priority: '26'
 type: enhancement
-ordinal: 26
+ordinal: 125000
 ---
 
 ## Description

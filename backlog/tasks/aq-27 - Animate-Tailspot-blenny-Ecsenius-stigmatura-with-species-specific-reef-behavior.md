@@ -3,11 +3,11 @@ id: AQ-27
 title: >-
   Animate Tailspot blenny (Ecsenius stigmatura) with species-specific reef
   behavior
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
-created_date: 2026-11-03 04:37
-updated_date: '2026-11-08T21:37:00Z'
+created_date: '2026-11-03 04:37'
+updated_date: '2026-11-12 05:50'
 labels:
   - reef-fish
   - animation
@@ -17,8 +17,8 @@ references:
   - >-
     https://baliwildlife.com/encyclopedia/marine-life/ray-finned-fishes/blennies/tailspot-blenny-ecsenius-stigmatura/
   - AQ-45
-  - https://www.youtube.com/watch?v=2hL5ojGRuQc&t=30s
-  - https://www.youtube.com/watch?v=K0_8PBYciJ0&t=0s
+  - 'https://www.youtube.com/watch?v=2hL5ojGRuQc&t=30s'
+  - 'https://www.youtube.com/watch?v=K0_8PBYciJ0&t=0s'
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
@@ -26,7 +26,7 @@ documentation:
   - docs/open-source-asset-and-motion-research.md
 priority: '30'
 type: enhancement
-ordinal: 30
+ordinal: 129000
 ---
 
 ## Description

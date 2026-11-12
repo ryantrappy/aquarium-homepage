@@ -1,11 +1,11 @@
 ---
 id: AQ-45
 title: Implement species-compatible interactions with reef habitat anchors
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-03T12:38:00Z'
-updated_date: '2026-11-09T19:42:56Z'
+updated_date: '2026-11-12 05:50'
 labels: []
 dependencies:
   - AQ-34
@@ -15,13 +15,13 @@ references:
   - docs/fish-behavior-design.md
   - docs/reef-fish-roster.md
   - docs/aq45-interaction-architecture.md
-  - https://pmc.ncbi.nlm.nih.gov/articles/PMC6850181/
+  - 'https://pmc.ncbi.nlm.nih.gov/articles/PMC6850181/'
   - >-
     https://www.aquariumofpacific.org/onlinelearningcenter/species/clown_anemonefish
-  - https://www.fao.org/fishery/docs/CDrom/bobp/cd1/Bobp/Publns/MAG/021.pdf
+  - 'https://www.fao.org/fishery/docs/CDrom/bobp/cd1/Bobp/Publns/MAG/021.pdf'
   - >-
     https://australian.museum/learn/animals/fishes/yellow-shrimpgoby-cryptocentrus-cinctus/
-  - https://nrm-fishbaselinux01.nrm.se/Ecology/Ecsenius_stigmatura
+  - 'https://nrm-fishbaselinux01.nrm.se/Ecology/Ecsenius_stigmatura'
   - AQ-18
   - AQ-19
   - AQ-24
@@ -35,7 +35,7 @@ documentation:
   - docs/aq45-interaction-architecture.md
 priority: '11'
 type: enhancement
-ordinal: 11
+ordinal: 115000
 ---
 
 ## Description

@@ -3,26 +3,26 @@ id: AQ-30
 title: >-
   Animate Lyretail anthias (Pseudanthias squamipinnis) with species-specific
   reef behavior
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
-created_date: 2026-11-03 04:37
-updated_date: '2026-11-08T21:37:00Z'
+created_date: '2026-11-03 04:37'
+updated_date: '2026-11-12 05:50'
 labels:
   - reef-fish
   - animation
 dependencies:
   - AQ-12
 references:
-  - https://aquarium.org/animals/lyretail-anthias/
-  - https://www.youtube.com/watch?v=ER43oQdsEfE&t=115s
+  - 'https://aquarium.org/animals/lyretail-anthias/'
+  - 'https://www.youtube.com/watch?v=ER43oQdsEfE&t=115s'
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
   - docs/open-source-asset-and-motion-research.md
 priority: '20'
 type: enhancement
-ordinal: 20
+ordinal: 120000
 ---
 
 ## Description

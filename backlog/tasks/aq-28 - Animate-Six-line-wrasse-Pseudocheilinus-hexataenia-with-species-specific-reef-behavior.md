@@ -3,27 +3,27 @@ id: AQ-28
 title: >-
   Animate Six-line wrasse (Pseudocheilinus hexataenia) with species-specific
   reef behavior
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
-created_date: 2026-11-03 04:37
-updated_date: '2026-11-08T21:37:00Z'
+created_date: '2026-11-03 04:37'
+updated_date: '2026-11-12 05:50'
 labels:
   - reef-fish
   - animation
 dependencies:
   - AQ-12
 references:
-  - https://reeflife.org/species/pseudocheilinus-hexataenia/
-  - https://www.fishbase.se/summary/Pseudocheilinus-hexataenia
-  - https://www.youtube.com/watch?v=zYXrXtxKRfo&t=25s
+  - 'https://reeflife.org/species/pseudocheilinus-hexataenia/'
+  - 'https://www.fishbase.se/summary/Pseudocheilinus-hexataenia'
+  - 'https://www.youtube.com/watch?v=zYXrXtxKRfo&t=25s'
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
   - docs/open-source-asset-and-motion-research.md
 priority: '25'
 type: enhancement
-ordinal: 25
+ordinal: 124000
 ---
 
 ## Description

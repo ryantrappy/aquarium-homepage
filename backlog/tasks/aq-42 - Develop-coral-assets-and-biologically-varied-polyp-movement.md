@@ -1,13 +1,13 @@
 ---
 id: AQ-42
 title: Develop coral assets and biologically varied polyp movement
-status: In Progress
+status: To Do
 assignee:
   - '@gemini'
   - '@root'
   - '@Luna'
-created_date: 2026-11-03 12:34
-updated_date: '2026-11-08T04:47:00Z'
+created_date: '2026-11-03 12:34'
+updated_date: '2026-11-12 05:50'
 labels: []
 dependencies:
   - AQ-14.3
@@ -18,13 +18,13 @@ references:
   - docs/reef_aquarium_all_code.md
   - docs/open-source-asset-and-motion-research.md
   - docs/modular-coral-and-live-rock-spec.md
-  - https://pmc.ncbi.nlm.nih.gov/articles/PMC7329047/
+  - 'https://pmc.ncbi.nlm.nih.gov/articles/PMC7329047/'
 documentation:
   - docs/open-source-asset-and-motion-research.md
   - docs/modular-coral-and-live-rock-spec.md
 priority: '5'
 type: enhancement
-ordinal: 5
+ordinal: 112000
 ---
 
 ## Description

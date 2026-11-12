@@ -1,20 +1,20 @@
 ---
 id: AQ-24
 title: Animate Firefish (Nemateleotris magnifica) with species-specific reef behavior
-status: In Progress
+status: To Do
 assignee:
   - '@Luna'
-created_date: 2026-11-03 04:37
-updated_date: '2026-11-08T21:37:00Z'
+created_date: '2026-11-03 04:37'
+updated_date: '2026-11-12 05:50'
 labels:
   - reef-fish
   - animation
 dependencies:
   - AQ-12
 references:
-  - https://www.fao.org/fishery/docs/CDrom/bobp/cd1/Bobp/Publns/MAG/021.pdf
+  - 'https://www.fao.org/fishery/docs/CDrom/bobp/cd1/Bobp/Publns/MAG/021.pdf'
   - AQ-45
-  - https://www.youtube.com/watch?v=HKvHrVIDGjY&t=11s
+  - 'https://www.youtube.com/watch?v=HKvHrVIDGjY&t=11s'
 documentation:
   - docs/reef-fish-roster.md
   - docs/requirements.md
@@ -22,7 +22,7 @@ documentation:
   - docs/open-source-asset-and-motion-research.md
 priority: '28'
 type: enhancement
-ordinal: 28
+ordinal: 127000
 ---
 
 ## Description
