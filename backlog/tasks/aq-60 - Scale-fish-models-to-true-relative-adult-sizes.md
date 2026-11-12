@@ -4,13 +4,12 @@ title: Scale fish models to true relative adult sizes
 status: In Progress
 assignee:
   - '@Antigravity'
-created_date: 2026-11-05 05:14
-updated_date: '2026-11-08T21:36:00Z'
+created_date: '2026-11-05 05:14'
+updated_date: '2026-11-12 05:37'
 labels:
   - easy
   - rendering
-  - ready-for-review
-  - gemini approved
+  - waiting-for-answers
 dependencies: []
 priority: '3'
 ordinal: 3
@@ -112,5 +111,11 @@ author: @thumbnail_loading
 created: 2026-11-05 23:12
 ---
 Proposed documentation follow-up before any edits: no FishBase maximum correction is needed. Add per-row FishBase source links so the maxima are auditable, retain the explicit yellow-watchman goby SL label, and source the “typical adult” column separately: FishBase species summaries provide maxima, not the table’s typical aquarium-kept adult values. The typical-size claims currently have no row-level husbandry citations in docs/fish-scale-reference.md.
+---
+
+author: @root
+created: 2026-11-12 05:37
+---
+Root review 2026-11-11: HOLD for user clarification. Clarify whether sourced typical adult lengths are still required, or whether sourced maxima plus explicit artistic render targets suffice. docs/fish-scale-reference.md still marks typical estimates unverified; AC1 cannot currently be accepted.
 ---
 <!-- COMMENTS:END -->
