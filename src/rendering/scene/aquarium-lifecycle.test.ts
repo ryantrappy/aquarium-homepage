@@ -190,6 +190,16 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     expect(bridge.state().ready).toBe(false)
     controller.update(services, false, true)
     expect((await ready).ready).toBe(true)
+    const samples = bridge.state().inhabitants
+    expect(samples.filter(sample => !sample.schoolmate).map(sample => sample.id).sort()).toEqual(services.map(service => service.id).sort())
+    for (const sample of samples) {
+      const live = state.created.slice().reverse().find(fish => fish.id === sample.id)!
+      expect(sample.position).toEqual(live.position)
+      expect(sample.position).not.toBe(live.position)
+      expect(sample.heightRange).not.toBeNull()
+      expect(sample.position.y).toBeGreaterThanOrEqual(sample.heightRange![0])
+      expect(sample.position.y).toBeLessThanOrEqual(sample.heightRange![1])
+    }
   })
 
   it('stages the same final look-dev roster whether saved services arrive early or late', async () => {
@@ -211,6 +221,30 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     await start(final)
     await window.__AQUARIUM_LOOKDEV__!.ready()
     expect(poses()).toEqual(lateArrival)
+  })
+
+  it.each([[1440, 900], [402, 874]])('keeps final roster spawns in their ecological bands across the %ix%i water column', async (width, height) => {
+    Object.defineProperty(host, 'clientWidth', { configurable: true, value: width })
+    Object.defineProperty(host, 'clientHeight', { configurable: true, value: height })
+    window.history.replaceState({}, '', '/?lookdev=1&seed=2026')
+    await start([
+      service('a-gramma', 'royal-gramma'), service('b-yellow', 'yellow-tang'),
+      service('c-blue', 'blue-tang'), service('d-clown'),
+      service('e-cardinal', 'banggai-cardinalfish'), service('f-wrasse', 'mccoskers-flasher-wrasse'),
+      service('g-butterfly', 'copperband-butterflyfish'), service('h-anthias', 'lyretail-anthias'),
+    ])
+    const snapshot = await window.__AQUARIUM_LOOKDEV__!.ready()
+    const leaders = snapshot.inhabitants.filter(fish => !fish.schoolmate)
+    expect(leaders).toHaveLength(8)
+    for (const fish of snapshot.inhabitants) {
+      expect(fish.heightRange).not.toBeNull()
+      expect(fish.position.y).toBeGreaterThanOrEqual(fish.heightRange![0] - 1e-9)
+      expect(fish.position.y).toBeLessThanOrEqual(fish.heightRange![1] + 1e-9)
+    }
+    const heights = leaders.map(fish => fish.position.y)
+    expect(Math.max(...heights) - Math.min(...heights)).toBeGreaterThan(2.5)
+    expect(leaders.find(fish => fish.speciesId === 'royal-gramma')!.position.y).toBeLessThan(-0.75)
+    expect(new Set(leaders.map(fish => fish.position.z.toFixed(1))).size).toBeGreaterThanOrEqual(2)
   })
 
   it('loads a later visible species while an off-screen species stays queued', async () => {

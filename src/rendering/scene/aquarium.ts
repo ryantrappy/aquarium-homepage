@@ -43,7 +43,7 @@ import { createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type Sw
 import { createReefMeshNavigation, MESH_NAVIGATION_COLLISION_RADIUS_M, type ReefMeshIslandInput } from './reef-mesh-navigation'
 import { applyFishTurningRigOverlay, bindFishTurningRig, evaluateSpriteTurnScaleX, type FishTurningRig } from './fish-turning'
 import { SPRITE_PLANE_WIDTH, fishBodyRadiusM, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale } from './fish-scale'
-import { canRunFishSceneLoop, findSafeFishHeading, findSafeFishSpawn, fishSceneStatus, fishSpawnPreference, isSafeFishPosition } from './fish-spawn'
+import { canRunFishSceneLoop, evaluateTieredVerticalDepthRange, findSafeFishHeading, findSafeFishSpawn, fishSceneStatus, fishSpawnPreference, fishSpawnSlotsForServices, isSafeFishPosition } from './fish-spawn'
 import { EMPTY_FISH_EXTENSIONS, type FishExtensionConfig } from '../../simulation/fish-extensions'
 import { consumeFrameSteps, createFrameClock, SIMULATION_STEP_SECONDS, suspendFrameClock } from './clock'
 import { handleArtworkTextureFailure, nearestVisibleIntersection, readArtworkAlpha, type SpriteMasks } from './alpha-picking'
@@ -746,6 +746,13 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       timeSeconds: lookDevTimeSeconds,
       ...(lookDevSubjectId === undefined ? {} : { subjectId: lookDevSubjectId }),
       labelsVisible: lookDevConfig?.labelsVisible ?? true,
+      inhabitants: [...fish, ...schoolmates].map(item => ({
+        id: item.service.id,
+        speciesId: item.service.fishId,
+        schoolmate: Boolean(item.schoolmate),
+        position: { ...item.motion.position },
+        heightRange: evaluateTieredVerticalDepthRange(item.service.fishId, habitat.bounds, item.motion.clearance)?.worldYRange ?? null,
+      })),
       renderer: {
         render: { calls: rendererInfo.render.calls, triangles: rendererInfo.render.triangles, points: rendererInfo.render.points, lines: rendererInfo.render.lines },
         memory: { geometries: rendererInfo.memory.geometries, textures: rendererInfo.memory.textures },
@@ -1083,6 +1090,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
             occupiedForRelocation,
             meshCheck,
             fishBodyRadiusM(item.service.fishId),
+            evaluateTieredVerticalDepthRange(item.service.fishId, habitat.bounds, item.motion.clearance)?.worldYRange,
           )
           if (relocated) {
             item.motion.position = relocated
@@ -1311,7 +1319,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       const clearance = fishClearanceRadius(mate.speciesId)
       const offset = schoolmateSpawnOffset(mate.id, mate.speciesId, tankWidth, mate.index, SCHOOL_TOTAL_COUNT[mate.speciesId] - 1)
       const preferred = { x: lead.x + offset.x, y: lead.y + offset.y, z: lead.z + offset.z }
-      const position = findSafeFishSpawn(preferred, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(mate.speciesId))
+      const position = findSafeFishSpawn(preferred, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(mate.speciesId), evaluateTieredVerticalDepthRange(mate.speciesId, habitat.bounds, clearance)?.worldYRange)
       if (!position) continue
       const yaw = findSafeFishHeading(position, Math.atan2(offset.x, offset.z), habitat.bounds, habitat.obstacles, clearance)
       if (yaw === undefined) continue
@@ -1332,11 +1340,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     const current = new Map(fish.map(item => [item.service.id, item]))
     const nextServices = services.filter(service => getFishById(service.fishId))
     const spawnOrderKey = (id: string) => lookDevConfig ? `${lookDevConfig.seed}:${id}` : id
-    const horizontalOrder = [...nextServices].sort((a, b) => {
-      const aKey = spawnOrderKey(a.id), bKey = spawnOrderKey(b.id)
-      return aKey < bKey ? -1 : aKey > bKey ? 1 : a.fishId < b.fishId ? -1 : a.fishId > b.fishId ? 1 : 0
-    })
-    const horizontalSlots = new Map(horizontalOrder.map((service, index) => [service.id, { index, count: horizontalOrder.length }]))
+    const horizontalSlots = fishSpawnSlotsForServices(nextServices)
     const spawns = new Map<string, FishSpawn>()
     const occupied: Array<{ position: SwimmingFish['position']; clearance: number; bodyRadiusM?: number }> = nextServices.flatMap(next => {
       const retained = current.get(next.id)
@@ -1363,7 +1367,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       const species = getFishById(service.fishId)!
       const clearance = fishClearanceRadius(service.fishId)
       const preference = fishSpawnPreference(spawnOrderKey(service.id), service.fishId, habitat.bounds, clearance, horizontalSlots.get(service.id))
-      const position = preference && findSafeFishSpawn(preference.position, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(service.fishId))
+      const position = preference && findSafeFishSpawn(preference.position, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(service.fishId), evaluateTieredVerticalDepthRange(service.fishId, habitat.bounds, clearance)?.worldYRange)
       if (!position || !preference) {
         // Keep existing instances intact during the truthful full-native fallback.
         // A later fitting configuration can reuse their exact poses and clocks.

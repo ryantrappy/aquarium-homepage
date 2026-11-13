@@ -8,6 +8,7 @@ import { findWaterRoute, isWaterSegmentSafe, resolveHabitatRoute, type AxisAlign
 import { findMeshRoute, type CapsuleClearanceQuery, type MeshNavigationBudget, type MeshNavigationWorkBudget, type MeshNavigationWorkReport } from '../../simulation/mesh-navigation'
 import { simulationSubsteps } from './clock'
 import { fishBodyRadiusM, ANCHOR_APPROACH_MARGIN_M } from './fish-scale'
+import { evaluateTieredVerticalDepthRange } from './fish-spawn'
 import {
   SHARP_TURN_THRESHOLD_RAD,
   computeCurvilinearStepVector,
@@ -405,9 +406,10 @@ function planMesh(fish: SwimmingFish, habitat: WaterHabitat) {
 
   const profile = getSpeciesBehaviorProfile(fish.speciesId)!
   const { min, max } = habitat.bounds, r = radiusM
+  const depthRange = evaluateTieredVerticalDepthRange(fish.speciesId, habitat.bounds, r)?.normalizedDepthRange ?? profile.depthRange
   for (let attempt = 0; attempt < 12; attempt++) {
     if (!budgetAvailable(planBudget)) break
-    const depth = profile.depthRange[0] + random(fish) * (profile.depthRange[1] - profile.depthRange[0])
+    const depth = depthRange[0] + random(fish) * (depthRange[1] - depthRange[0])
     const evasiveYaw = fish.yaw + (attempt % 2 ? -1 : 1) * (.7 + random(fish) * .4)
     const target = fish.startleSeconds > 0
       ? { x: clamp(fish.position.x + Math.sin(evasiveYaw) * 1.4, min.x + r, max.x - r), y: clamp(fish.position.y + .15, min.y + r, max.y - r), z: clamp(fish.position.z + Math.cos(evasiveYaw) * 1.4, min.z + r, max.z - r) }
@@ -446,8 +448,9 @@ function plan(fish: SwimmingFish, habitat: WaterHabitat) {
   }
   const profile = getSpeciesBehaviorProfile(fish.speciesId)!
   const { min, max } = habitat.bounds, r = fish.clearance + .08
+  const depthRange = evaluateTieredVerticalDepthRange(fish.speciesId, habitat.bounds, r)?.normalizedDepthRange ?? profile.depthRange
   for (let attempt = 0; attempt < 12; attempt++) {
-    const depth = profile.depthRange[0] + random(fish) * (profile.depthRange[1] - profile.depthRange[0])
+    const depth = depthRange[0] + random(fish) * (depthRange[1] - depthRange[0])
     const evasiveYaw = fish.yaw + (attempt % 2 ? -1 : 1) * (.7 + random(fish) * .4)
     const target = fish.startleSeconds > 0
       ? { x: clamp(fish.position.x + Math.sin(evasiveYaw) * 1.4, min.x + r, max.x - r), y: clamp(fish.position.y + .15, min.y + r, max.y - r), z: clamp(fish.position.z + Math.cos(evasiveYaw) * 1.4, min.z + r, max.z - r) }

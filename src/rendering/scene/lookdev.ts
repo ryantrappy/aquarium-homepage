@@ -81,6 +81,14 @@ export type LookDevCaptureSnapshot = Readonly<{
   timeSeconds: number
   subjectId?: string
   labelsVisible: boolean
+  /** Copied world positions for distribution review; never live motion objects. */
+  inhabitants: readonly Readonly<{
+    id: string
+    speciesId: string
+    schoolmate: boolean
+    position: Readonly<{ x: number; y: number; z: number }>
+    heightRange: readonly [number, number] | null
+  }>[]
   renderer: LookDevRendererStats
   timing: Readonly<{
     rafInterval: LookDevPercentiles | null

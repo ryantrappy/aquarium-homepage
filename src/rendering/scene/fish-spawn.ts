@@ -30,6 +30,24 @@ export type OccupiedFishSpawn = { position: Vec3; clearance: number; bodyRadiusM
 /** Gap added to the two body radii for fish-vs-fish spawn separation (AQ-85: minSep = self + peer + 0.06). */
 export const SPAWN_BODY_RADIUS_GAP_M = 0.06
 export type FishSpawnPreference = { position: Vec3; yaw: number }
+export type FishSpawnSlot = Readonly<{ index: number; count: number; heightIndex?: number }>
+
+/** Horizontal identity lanes and independent ecological height strata.
+ * A lower-reef fish must not get the top of its band just because its ID
+ * sorts first. Input order never changes either assignment.
+ */
+export function fishSpawnSlotsForServices(services: readonly { id: string; fishId: string }[]): Map<string, FishSpawnSlot> {
+  const byIdentity = (a: { id: string; fishId: string }, b: { id: string; fishId: string }) =>
+    a.id < b.id ? -1 : a.id > b.id ? 1 : a.fishId < b.fishId ? -1 : a.fishId > b.fishId ? 1 : 0
+  const horizontalOrder = [...services].sort(byIdentity)
+  const meanDepth = (speciesId: string) => {
+    const band = getSpeciesBehaviorProfile(speciesId)?.depthRange
+    return band ? (band[0] + band[1]) / 2 : 0.5
+  }
+  const verticalOrder = [...horizontalOrder].sort((a, b) => meanDepth(a.fishId) - meanDepth(b.fishId) || byIdentity(a, b))
+  const verticalIndices = new Map(verticalOrder.map((service, index) => [service.id, index]))
+  return new Map(horizontalOrder.map((service, index) => [service.id, { index, count: services.length, heightIndex: verticalIndices.get(service.id)! }]))
+}
 
 export type VerticalDepthZoneTier = 'surface' | 'mid-water' | 'benthic'
 
@@ -178,14 +196,18 @@ function seededUnit(seed: number, salt: number): number {
  * supplies only its declared normalized depth preference; this does not invent
  * an anchor or claim a real habitat position.
  */
-export function fishSpawnPreference(instanceId: string, speciesId: string, waterBounds: AxisAlignedBox, clearance: number, horizontalSlot?: { index: number; count: number }): FishSpawnPreference | undefined {
+export function fishSpawnPreference(instanceId: string, speciesId: string, waterBounds: AxisAlignedBox, clearance: number, horizontalSlot?: FishSpawnSlot): FishSpawnPreference | undefined {
   const values = [waterBounds.min.x, waterBounds.min.y, waterBounds.min.z, waterBounds.max.x, waterBounds.max.y, waterBounds.max.z, clearance]
   if (!instanceId.trim() || !values.every(Number.isFinite) || clearance < 0) return undefined
   if (horizontalSlot && (!Number.isSafeInteger(horizontalSlot.index) || !Number.isSafeInteger(horizontalSlot.count)
     || horizontalSlot.count < 1 || horizontalSlot.index < 0 || horizontalSlot.index >= horizontalSlot.count)) return undefined
+  if (horizontalSlot?.heightIndex !== undefined && (!Number.isSafeInteger(horizontalSlot.heightIndex)
+    || horizontalSlot.heightIndex < 0 || horizontalSlot.heightIndex >= horizontalSlot.count)) return undefined
   if (!(waterBounds.min.x < waterBounds.max.x && waterBounds.min.y < waterBounds.max.y && waterBounds.min.z < waterBounds.max.z)) return undefined
   const profile = getSpeciesBehaviorProfile(speciesId)
   if (!profile) return undefined
+  const ecologicalRange = evaluateTieredVerticalDepthRange(speciesId, waterBounds, clearance)
+  if (!ecologicalRange) return undefined
 
   const safeMin = { x: waterBounds.min.x + clearance, y: waterBounds.min.y + clearance, z: waterBounds.min.z + clearance }
   const safeMax = { x: waterBounds.max.x - clearance, y: waterBounds.max.y - clearance, z: waterBounds.max.z - clearance }
@@ -193,16 +215,15 @@ export function fishSpawnPreference(instanceId: string, speciesId: string, water
 
   const seed = spawnSeed(instanceId, speciesId)
   // AQ-87: a plain seeded draw inside each species' depthRange clusters the
-  // whole school in the middle of the column (the five starters' draws
-  // spanned only ~0.27 of the depth). Stratify the draw by horizontal slot
-  // — the same cohort index already stratifies X — so each fish takes a
-  // different fifth of its own declared band and the ensemble spans the
-  // full column. The draw never leaves the species' depthRange.
+  // whole school in the middle of the column. Use the cohort's independent
+  // ecological height rank when supplied; horizontal identity order is
+  // retained only for legacy callers. Never leave the declared band.
   const depthUnit = seededUnit(seed, 0x9e3779b9)
   const depthFraction = horizontalSlot
-    ? (horizontalSlot.index + depthUnit) / horizontalSlot.count
+    ? ((horizontalSlot.heightIndex ?? horizontalSlot.index) + depthUnit) / horizontalSlot.count
     : depthUnit
-  const depth = profile.depthRange[0] + depthFraction * (profile.depthRange[1] - profile.depthRange[0])
+  const depth = ecologicalRange.normalizedDepthRange[0]
+    + depthFraction * (ecologicalRange.normalizedDepthRange[1] - ecologicalRange.normalizedDepthRange[0])
   const height = waterBounds.max.y - waterBounds.min.y
   const preferredY = waterBounds.max.y - depth * height
   const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
@@ -228,10 +249,7 @@ export function fishSpawnPreference(instanceId: string, speciesId: string, water
     : Math.min(FISH_SPAWN_DEPTH_PLANES.length - 1, Math.floor(zNoise * FISH_SPAWN_DEPTH_PLANES.length))
   const zFraction = FISH_SPAWN_DEPTH_PLANES[planeIndex]! + (zNoise * 2 - 1) * FISH_SPAWN_DEPTH_PLANE_JITTER
   const preferredZ = safeMin.z + (safeMax.z - safeMin.z) * zFraction
-  const safeYForProfile = clamp(preferredY, safeMin.y, safeMax.y)
-  const profileLowY = clamp(waterBounds.max.y - profile.depthRange[1] * height, safeMin.y, safeMax.y)
-  const profileHighY = clamp(waterBounds.max.y - profile.depthRange[0] * height, safeMin.y, safeMax.y)
-  const y = clamp(safeYForProfile, Math.min(profileLowY, profileHighY), Math.max(profileLowY, profileHighY))
+  const y = clamp(preferredY, ecologicalRange.worldYRange[0], ecologicalRange.worldYRange[1])
 
   return {
     position: {
@@ -265,16 +283,25 @@ export function findSafeFishSpawn(
    * instead of the legacy `clearance + other.clearance` sum.
    */
   spawningBodyRadiusM?: number,
+  /** Additional world-Y restriction (inclusive), intersected with the clearance-safe water interval. */
+  safeHeightRange?: readonly [number, number],
 ): Vec3 | undefined {
   const coordinates = [preferred.x, preferred.y, preferred.z,
     waterBounds.min.x, waterBounds.min.y, waterBounds.min.z,
     waterBounds.max.x, waterBounds.max.y, waterBounds.max.z]
   if (!coordinates.every(Number.isFinite) || !Number.isFinite(clearance) || clearance < 0) return undefined
+  if (safeHeightRange !== undefined && (!Array.isArray(safeHeightRange) || safeHeightRange.length !== 2
+    || !Number.isFinite(safeHeightRange[0]) || !Number.isFinite(safeHeightRange[1])
+    || safeHeightRange[0] > safeHeightRange[1])) return undefined
   const validOccupied = occupied.filter(item => [item.position.x, item.position.y, item.position.z, item.clearance].every(Number.isFinite) && item.clearance >= 0)
   if (!(waterBounds.min.x < waterBounds.max.x && waterBounds.min.y < waterBounds.max.y && waterBounds.min.z < waterBounds.max.z)) return undefined
 
   const safeMin = { x: waterBounds.min.x + clearance, y: waterBounds.min.y + clearance, z: waterBounds.min.z + clearance }
   const safeMax = { x: waterBounds.max.x - clearance, y: waterBounds.max.y - clearance, z: waterBounds.max.z - clearance }
+  if (safeHeightRange) {
+    safeMin.y = Math.max(safeMin.y, safeHeightRange[0])
+    safeMax.y = Math.min(safeMax.y, safeHeightRange[1])
+  }
   if (safeMin.x > safeMax.x || safeMin.y > safeMax.y || safeMin.z > safeMax.z) return undefined
 
   const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
@@ -326,6 +353,13 @@ export function findSafeFishSpawn(
       }, 0)
       const crowdingDifference = crowding(a) - crowding(b)
       if (crowdingDifference) return crowdingDifference
+    }
+    // Preserve intended swimming height when searching around a reef.
+    // Prefer moving forward/back at that height over escaping above the
+    // canopy merely because that is the shorter Euclidean displacement.
+    if (safeHeightRange) {
+      const heightDifference = Math.abs(a.y - clamped.y) - Math.abs(b.y - clamped.y)
+      if (heightDifference) return heightDifference
     }
     return targetDistance(a) - targetDistance(b) || a.x - b.x || a.y - b.y || a.z - b.z
   })
