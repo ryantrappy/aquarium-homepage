@@ -80,3 +80,9 @@
 - AQ71 explicit shared PMREM fixes renderer override;69cad24 rear fill0.65 accepted bothsizes under AC3, AC4 open.758tests/66files,45focused/typecheck14scripts/build pass. Native evidence docs/asset-evidence/aq71/sand-ibl-20261113/. No Root Blender edits or deployment.
 - Proofdetached69cad24/dev5215 pins69cad24; verifyownershipbeforestopping. Reviewtabclosed/metricsreset; oldstale1298077987 remains. User3000/5210 preserved, original5214/5212 stale.
 - AQ94 central arch next major visual iteration, plan recorded only. Root owns new model/isolated reef pipeline; no competing Blender agent. Preserve existing supplied models; all new used models must save/pack/export/sync/commit.
+
+### 2026-11-13 — Central arch persisted and integrated
+*Root reviewed2026-11-13 all entries: vertical-fill request actioned; standing policies current; older process checkpoints superseded. Full art/model/clearance goal pending.*
+- AQ94Root6e57f2d original centralarch saved packednative/exported/synced/used/committed. Dedicated reef override path preserves fish workflow; native textures allpacked. Existing Gemini/user reef untouched; background Blenderonly, liveuserfileuntouched. Full5–8library/2048atlas/finalrockart stillopen.
+- Exact6e57f2d782tests/68files, typecheck15scripts/buildpass; native2sizes ready/nofailures/11inhabitants/8phonetargets>=44/zeroconsolewarnings. docs/asset-evidence/aq94/central-arch-20261113/. Technical0.04sceneopening probe only, no animatedbody certification.
+- Proofdetached6e57f2d/dev5215PID86121; verifyownershipbeforestopping. Native reviewtabsclosed/metricsreset, oldstale1298077987 remains. Preserve user3000/5210; original5214/5212stale. No deployment. Nextvisualworkarchcolonization/materialcohesion and broader referenceart; do notmarkfullAQ94Done.

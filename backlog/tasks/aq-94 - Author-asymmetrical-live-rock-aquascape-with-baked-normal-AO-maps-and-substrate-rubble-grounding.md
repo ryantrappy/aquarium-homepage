@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-11 04:55'
-updated_date: '2026-11-13 15:03'
+updated_date: '2026-11-13 15:08'
 labels:
   - modeling
   - blender
@@ -64,4 +64,8 @@ Root2026-11-12 reopened from Done after independent native/export review. Saved 
 Luna read-only pipeline audit confirms current sync main always writes fish docs, learns every override GLB and executes fish builder. Reef path must branch before all those operations and reject mixed fish flags. Existing contract.ts supports kindrock with identityY-upmeter/provenance; socket-inspector.ts can pin source bytes and measure declared socket intent. Existing coral packager is a fixed ten-asset batch, not a callable module installer; existing manifest checker hardcodes counts. Preserve those sources and use separate custom module registry/manifest. No new model/pipeline changes have been made by Root yet.
 
 Root authored additive reef-center-arch in separate background Blender5.2.3 (live user scene untouched), saved uncompressed packed source splat-fish/blend/reef-center-arch.blend and exported raw overrides/reef-center-arch.glb. Separate --reef reef-center-arch --learn-guide installer stamps/validates rock metadata, measured buffers and hashes with dedicated custom-rocks registry; never rebuilds/learns fish. Source has9282vertices/18560triangles, three packed custom images1024carbonate/512normal/512roughness; not a high-poly bake/2048atlas or full5–8modulelibrary. Actual scene uses desktop central bridge with own fallback/exactcollider, hit/depth/shadow/caustics/env handling; phone preserves enlarged single-island composition. Existing supplied foundations untouched. Root first native trial confirms visible opening and additional central height; final exact-source captures/verification follow. Luna actualasset navigation at0.04scene probe clears center and blocks cap/leg; no calibrated fullfish-body envelope claim. Keep full task InProgress.
+
+Root final native review accepts additive central-height iteration at6e57f2d. Evidence docs/asset-evidence/aq94/central-arch-20261113/: bothsizes ready/no failedassets,11inhabitants,8phone targets>=44px insideviewport, zero consolewarnings/errors. Packednative read-only audit confirms9282vertexmesh plus3packedimages. Runtime left/right/arch exports total2963992bytes so retained AC4 remains valid. Exactsource782tests/68files/typecheck15scripts pass; final productionbuild running. Actualmesh0.04sceneprobe passes center and blocks cap/leg, not animated-body certification. Model is saved/exported/synced/used/committed6e57f2d. Full AC1/2/5 art/library/grounding remain open; no Done. Root reserves Blender, no live scene edits/deployment.
+
+Final exact6e57f2d production build completed successfully. Root verified native PNG signatures/dimensions and snapshot source/ready assertions. No final-task completion or runtime-budget claim.
 <!-- SECTION:NOTES:END -->

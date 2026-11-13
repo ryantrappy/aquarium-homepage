@@ -1,0 +1,12 @@
+{
+  "source": "6e57f2d",
+  "method": "Separate read-only Blender 5.2.3 background process opens saved source; no save/export during audit",
+  "native": "src/rendering/assets/splat-fish/blend/reef-center-arch.blend",
+  "objects": [{"name": "Reef_Center_Arch", "type": "MESH", "vertices": 9282}],
+  "images": [
+    {"name": "reef-center-arch-carbonate", "width": 1024, "height": 1024, "packed": true},
+    {"name": "reef-center-arch-normal", "width": 512, "height": 512, "packed": true},
+    {"name": "reef-center-arch-orm", "width": 512, "height": 512, "packed": true}
+  ],
+  "limitations": ["Original procedural surface textures, not high-poly bake", "No modular 5–8 piece library or shared 2048px atlas acceptance", "Not a fish-body clearance certificate"]
+}

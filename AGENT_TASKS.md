@@ -13,6 +13,17 @@ Downstream: Current implementation and review work
 
 Root verified this checkpoint against the current checkout. The goal remains active and incomplete: finish the backlog and make the living aquarium resemble the supplied reference. Passing functional tests does not accept final art.
 
+## Latest Root checkpoint — 2026-11-13 central arch used and persisted
+
+This section supersedes older process/source/count details. Full goal remains active and incomplete.
+
+- Root6e57f2d adds original central limestone arch behind existing desktop islands, preserving Gemini/user foundations/corals; phone retains enlarged single-island layout. Taller upper colonies were already committed5514b60. Native exact-source two-size evidence docs/asset-evidence/aq94/central-arch-20261113/ shows visible central opening/additional middle height, ready/no failed assets,11inhabitants,8phone targets>=44px inside viewport, no consolewarnings/errors. Root accepts this additive visual iteration, not final reference art or fullAQ94.
+- New model saved in mandated splat-fish/blend/reef-center-arch.blend with3packed images, raw exported to overrides/reef-center-arch.glb, synced via --reef reef-center-arch --learn-guide, actually loaded/used in aquarium and committed. Separate read-only native audit confirms9282vertices;18560triangles in1,422,812byte packagedGLB. Current left/right/arch runtime exports2,963,992bytes. Original procedural1024carbonate/512normal/512roughness are not2048atlas/highpoly bake/5–8modulelibrary; AQ94AC1/2/5 remain open. Root used separate background Blender processes, never changed live user document.
+- Isolated reef sync dispatch precedes fish docs/guide/build side effects; reserved reef- IDs rejected by direct fish guide extractor/skipped in default learner. Dedicated custom-rock registry pins native/generator/raw/package hashes; actual-buffer contract/socket inspection and temporary-fixture idempotence/freshness tests pass. New arch retains authored maps/geometry, owns cloned materials only, participates in shadows/caustics/PMREM/hit/depth, actualfallback and separate exactcollider; no invented coral sockets. Technical0.04scene capsule clears arch opening and blocks cap/leg; no animatedfish envelope acceptance.
+- Exact isolated6e57f2d:782tests/68files, typecheck15scripts, productionbuild pass. New20pipeline/3actualasset tests plus39controller tests verified by Luna/Root. No controlled performance acceptance; userCI/FPSdisplay lanes excluded. AQ71AC3 exposure accepted69cad24; AC4 remains open.
+- Proofworktree /tmp/aquarium-aq87-proof-8b2d7cc detached6e57f2d, only infrastructure Viteconfigdirty. Owneddev5215PID86121 pins6e57f2d; verify PID/cwd before stopping. Original5214/5212 stale; preserve user3000/5210. Final reviewtabclosed/metricsreset; oldowned1298077987 remains stale/uncloseable. No deployment/configwrites. All Luna agents idle/completed; Root reserves Blender.
+- Next work: central arch colonization/material cohesion and broader rock/coral reference art underAQ94/59, full modular library/metric/animatedbody clearance and visible host nesting remain. Avoid repeating audits or accepting art from unit tests. Latest user vertical-fill request actioned with enlarged colonies and additive arch; full goal incomplete.
+
 ## Latest Root checkpoint — 2026-11-13 effective PMREM and next arch
 
 This section supersedes older process/source/count details. Full goal remains active and incomplete.
