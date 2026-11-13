@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-08 00:30'
-updated_date: '2026-11-13 14:34'
+updated_date: '2026-11-13 14:41'
 labels:
   - photorealism
   - rendering
@@ -54,6 +54,8 @@ The main scene currently lacks a scene.environment PMREM texture, causing MeshSt
 4. Run the focused environment-map and aquarium-lifecycle suites plus typecheck; hand off for Root visual review without marking AQ-71 Done.
 
 Native A/B at df6227e revealed identical foreground pixels despite changed material property. Root confirmed installed Three r187 WebGLRenderer overwrites envMapIntensity with scene.environmentIntensity when material.envMap is null. Bind the single shared PMREM texture explicitly to each PBR role (fish/reef/sand/backdrop) so declared strengths take effect, preserving no-IBL fallback. Borrowed target ownership must stay with scene; generic asset disposal receives the borrowed texture and skips it while disposing other asset textures. Verify real controller shared bindings/removal/teardown and then repeat native exposure review. No new maps or per-frame PMREM work.
+
+Once explicit strengths took effect, backdrop0 made the rear water too dark relative to the goal reference. Root exposure trial rebalances only the backdrop role to0.65, retaining fish0.55/reef0.35/sand0.2, ACES0.80 and the same LED rig. Validate native two-size exposure with fixed-pose foreground measurements and no clipping; final art and cost remain separate.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes

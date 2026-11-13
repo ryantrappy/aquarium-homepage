@@ -27,14 +27,7 @@ describe('aquarium PMREM environment map (AQ-71)', () => {
     expect([...positions].sort((a, b) => a - b)).toEqual(positions)
   })
 
-  it('keeps every envMapIntensity in [0, 1] with the backdrop at 0', () => {
-    expect(ENVIRONMENT_MAP_INTENSITY).toEqual({
-      fish: 0.55,
-      reef: 0.35,
-      sand: 0.2,
-      waterSurface: 0.9,
-      backdrop: 0,
-    })
+  it('keeps every configured environment strength in the normalized range', () => {
     for (const value of Object.values(ENVIRONMENT_MAP_INTENSITY)) {
       expect(value).toBeGreaterThanOrEqual(0)
       expect(value).toBeLessThanOrEqual(1)

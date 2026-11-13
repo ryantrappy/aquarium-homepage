@@ -43,7 +43,8 @@ export const ENVIRONMENT_MAP_INTENSITY = {
   reef: 0.35,
   sand: 0.2,
   waterSurface: 0.9,
-  backdrop: 0,
+  // Preserve the graded blue rear water after explicit binding makes this role effective.
+  backdrop: 0.65,
 } as const
 
 function gradientColorAt(t: number, out: THREE.Color): THREE.Color {
