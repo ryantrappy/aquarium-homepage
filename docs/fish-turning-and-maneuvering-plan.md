@@ -4,9 +4,9 @@
 Category: Architecture / Motion Plan
 Status: Active
 Authority: Active Implementation Plan
-Backlog: AQ-49, AQ-12
+Backlog: AQ-49, AQ-12, AQ-12.1
 Owner: @behavior_profiles
-Updated: 2026-11-05
+Updated: 2026-11-12
 Upstream: docs/behavior-runtime-contract.md, docs/fish-behavior-design.md
 Downstream: src/rendering/scene/motion.ts, src/rendering/scene/aquarium.ts, src/simulation/*
 -->
@@ -21,6 +21,20 @@ Downstream: src/rendering/scene/motion.ts, src/rendering/scene/aquarium.ts, src/
 
 _Date: 2026-11-04_  
 _Scope: Root-cause analysis of current fish turning artifacts in `src/rendering/scene/motion.ts` and `src/rendering/scene/aquarium.ts`, peer-reviewed biomechanical turning models for reef fishes, and a concrete implementation plan (`AQ-49`)._
+
+## Current operating behavior (AQ-12.1)
+
+AQ-12.1 supersedes the original numeric tuning proposed below. These cutoffs are project tuning choices, not measured biological constants. The current implementation uses:
+
+- Terminal arrival braking only at the final waypoint; intermediate corners retain forward momentum.
+- Speed/archetype-scaled smooth lookahead in both navigation modes, used only after the movement safety query clears it.
+- A115° reversal threshold, a higher routine-turn speed floor, and yaw limited by forward speed/minimum turn radius plus a bounded hover/startle allowance.
+- Exponential coasting during safe chord recovery, forward-biased cruise targets, smoothed root banking/playback/flex and a bounded0.18rad local `spine_0` roll overlay.
+- Complete pause/hidden/reduced-motion pose holds in the aquarium controller; clip reset precedes each procedural overlay.
+
+Root reviewed the current implementation in `dd2af7a`. The732-test suite and production build pass. `node scripts/verify-fish-clip-player.mjs --runtime` verifies the16 exact assets currently mapped by `aquarium.ts`, including source hashes,120-frame reset/overlay checks and unchanged pause poses/tracks. The default verifier mode retains historical study/candidate inputs; it does not represent the current runtime map. The [runtime clip report](asset-evidence/aq12-1/current-runtime-clip-check.json) proves skeletal/reset compatibility only, not anatomy, material quality, continuous clearance or license acceptance. AQ-49's final art review and AQ-58's geometry/envelope work remain separate.
+
+The diagnosis and phased proposal below are retained as historical context; their65° threshold, fixed lookahead and earlier speed multipliers are not the current operating values.
 
 ## 1. Root-Cause Diagnosis: Why Current Fish Turns Look Artificial
 
