@@ -163,7 +163,13 @@ export function evaluateCoralTissueColor(input: CoralTissueGradeInput): { r: num
   const brightness = 0.86 + 0.22 * input.texLuma + 0.16 * (input.polypHighlight - 0.4)
   grad = { r: grad.r * brightness, g: grad.g * brightness, b: grad.b * brightness }
   const luma = 0.299 * grad.r + 0.587 * grad.g + 0.114 * grad.b
-  grad = mix3({ r: luma, g: luma, b: luma }, grad, CORAL_TISSUE_SATURATION_BOOST)
+  // GLSL mix extrapolates when t > 1; the clamped helper above is only for
+  // palette-mask blends, so mirror the saturation step explicitly here.
+  grad = {
+    r: luma + (grad.r - luma) * CORAL_TISSUE_SATURATION_BOOST,
+    g: luma + (grad.g - luma) * CORAL_TISSUE_SATURATION_BOOST,
+    b: luma + (grad.b - luma) * CORAL_TISSUE_SATURATION_BOOST,
+  }
   return {
     r: Math.min(grad.r, CORAL_TISSUE_HIGHLIGHT_CEILING),
     g: Math.min(grad.g, CORAL_TISSUE_HIGHLIGHT_CEILING),

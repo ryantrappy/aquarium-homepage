@@ -349,4 +349,28 @@ describe('coral-raw-masks-v1 material and shader adapter (AQ-53 / AQ-42)', () =>
     expect(graded.g).toBeLessThanOrEqual(CORAL_TISSUE_HIGHLIGHT_CEILING)
     expect(graded.b).toBeLessThanOrEqual(CORAL_TISSUE_HIGHLIGHT_CEILING)
   })
+
+  it('matches GLSL saturation extrapolation above 1 and applies only its upper highlight ceiling', () => {
+    const vivid = { r: 0.98, g: 0.2, b: 0.1 }
+    const graded = evaluateCoralTissueColor({
+      baseColor: vivid,
+      tipColor: vivid,
+      creviceColor: vivid,
+      heightTerm: 0.6,
+      tipTerm: 0.5,
+      texLuma: 0.5,
+      polypHighlight: 0.5,
+    })
+
+    // With identical palette endpoints, the brightness factor is 0.986,
+    // giving [0.96628, 0.1972, 0.0986]. Its weighted luma is 0.41591452.
+    // GLSL mix(luma, channel, 1.18) extrapolates to [1.065..., 0.1578313864,
+    // 0.0414833864], then min(..., 0.92) caps only the red highlight.
+    expect(graded.r).toBeCloseTo(0.92, 10)
+    expect(graded.g).toBeCloseTo(0.1578313864, 10)
+    expect(graded.b).toBeCloseTo(0.0414833864, 10)
+    for (const channel of Object.values(graded)) {
+      expect(channel).toBeLessThanOrEqual(CORAL_TISSUE_HIGHLIGHT_CEILING)
+    }
+  })
 })
