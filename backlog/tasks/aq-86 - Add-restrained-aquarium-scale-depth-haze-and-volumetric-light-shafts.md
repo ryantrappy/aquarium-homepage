@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-08'
-updated_date: '2026-11-13 00:13'
+updated_date: '2026-11-13 00:15'
 labels:
   - optics
   - photorealism
@@ -20,6 +20,7 @@ references:
   - AQ-39
   - AQ-14.6
   - AQ-70.6
+  - docs/asset-evidence/aq86/compositing-20261112/review.json
 documentation:
   - docs/rendering.md
 priority: '2'
@@ -58,4 +59,6 @@ Root renderer correction: verify the existing shaft offscreen/additive blend pat
 
 <!-- SECTION:NOTES:BEGIN -->
 Root renderer correction2026-11-12: Three WebGLState confirms normal offscreen blending and straight-alpha additive compositing were multiplying already-weighted shaft radiance by alpha again. Store shaft radiance with NoBlending, composite premultiplied ONE/ONE, and use the same premultiplied convention for the fallback plane. Raymarch now starts behind front glass z2.8 and stops at depth/rear glass z-5.5, skipping samples above the actual surface or below substrate rather than lighting the air before the tank. Restored shared surfaceY3.75 for rendered surface/shaft/caustic projection (visible surface had drifted from the old2.66 projection constant). Added pass-level material/state regressions covering depth and both shaft-draw exceptions.66 focused tests and typecheck14script checks pass. Native final-pose art/seam/budget gates remain open; no Done claim.
+
+Root native review of35581ed at both exactDPR1 sizes saved under docs/asset-evidence/aq86/compositing-20261112/. All current assets ready, no captured shader warnings/errors. Soft overhead light now survives blending, foreground objects stay sharp; hard rear-sand seam remains visibly unresolved, and full reference-level shaft shape/freeze/budget acceptance is not claimed. Keep task open.
 <!-- SECTION:NOTES:END -->

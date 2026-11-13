@@ -1,0 +1,43 @@
+{
+  "task": "AQ-86",
+  "date": "2026-11-12",
+  "sourceCommit": "35581ed6eca03b528f4565396e301c84783c173e",
+  "status": "Partial renderer correction; task remains open",
+  "captures": [
+    {
+      "image": "laptop.png",
+      "snapshot": "laptop.json",
+      "viewport": [
+        1440,
+        900
+      ],
+      "sha256": "bfcda7b50bfedccd32f098adb1e3c3a96781dcd11628da6263aa9b2ea72587fc"
+    },
+    {
+      "image": "phone.png",
+      "snapshot": "phone.json",
+      "viewport": [
+        402,
+        874
+      ],
+      "sha256": "d50b7734406b65d2b634841acfe6af635719af9549348205037943e8a02be221"
+    }
+  ],
+  "verification": [
+    "Native exact two-size PNGs atDPR1, seed2026/time1.25; ready with no pending/failed/unresolved assets",
+    "No captured browser shader warnings/errors",
+    "66 focused shaft/caustic/optics/controller tests pass; typecheck and14script checks pass",
+    "Offscreen radiance stored without alpha blending; premultiplied additive composite uses ONE/ONE per installed Three WebGLState",
+    "Depth and both shaft-draw exception tests restore render target, override/visibility and autoClear"
+  ],
+  "visualReview": [
+    "Soft overhead light now survives compositing; fish and coral remain sharp",
+    "No scene-color intermediate buffer, global color grade or dark overlay added",
+    "Native full-frame captures still show a hard sand/rear seam; reference-level shaft shape and final art remain open"
+  ],
+  "limits": [
+    "Fixed High inspection timings do not establish normal-runtime budgets or a controlled no-regression comparison",
+    "Haze/shaft motion freeze and final visual acceptance still require full task review",
+    "No model/Blender changes"
+  ]
+}
