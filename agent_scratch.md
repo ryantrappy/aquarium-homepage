@@ -26,3 +26,9 @@
 - User asked to fill vertical space.5514b60 uniformly enlarges existing upper colonies, highest left crest near180px laptop/306px phone. No new coral geometry or Blender edits. Both native captures/evidence: docs/asset-evidence/aq70-13/taller-20261112/.
 - Enclosure functional handoffe5fd2e1 includes clear panes/seams/lips and bounded/staggered true side reflections. Bottom-lip framing and controlled cost/final glass art still open underAQ102. All722tests/65files, typecheck14scripts and productionbuild pass.
 - Dev5214 and production5212 now servee5fd2e1; completed-phase browser tabs closed. Original user3000/5210 untouched. All child agents idle/completed.
+
+### 2026-11-12 — Distribution and continuous-turn review
+*Root reviewed all entries2026-11-12: standing policies current; older process/count checkpoints superseded by this entry and AGENT_TASKS.md; remaining art pending.*
+- AQ12.1 Root reviewed/Done8b2d7cc after externaldd2af7a continuous-turn implementation;16actual runtime rig reset/overlay/pause checks pass. AQ87 band-preserving staging95f9b1c now has two-size native evidence at exact8b2d7cc; AC2/4/5 accepted, AC1/3 open for profile/state targets and animated-body clearance.
+- Isolated /tmp/aquarium-aq87-proof-8b2d7cc passes732tests/65files, typecheck14scripts and productionbuild. Proof-only Vite allow-list; shared package links, local caches. Native tab closed/metrics reset. Dev5215 PID85779 owned proof server; verify before stopping. Original5214metadatae5fd2e1 stale; original5212 build/process may differ. Preserve user3000/5210.
+- Concurrent user3f2bf70 substrate work preserved. Full reef goal incomplete. AQ59runtime export/manifest/socket mismatch needs review; no Root model edits. Luna agents reported usage limit, Root continues useful work.
