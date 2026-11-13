@@ -15,6 +15,8 @@ const state = vi.hoisted(() => ({
   textures: [] as { texture: import('three').Texture; load?: () => void; error?: (error: unknown) => void }[],
   deferFishLoads: false, failFishLoads: false, pendingFishLoadReleases: [] as Array<() => void>, resizeCallback: undefined as undefined | (() => void),
   deferMeshNavigation: false, pendingMeshNavigationReleases: [] as Array<() => void>, meshNavigationResult: undefined as unknown,
+  rockFallbackUnavailable: false,
+  rockFallbackObstacles: undefined as undefined | import('../../simulation/habitat-navigation').SolidObstacleVolume[],
   blockedSpawn: false, throwCreateForId: '', beforeCreateFailure: undefined as (() => void) | undefined,
   forceLabelExposure: false,
 }))
@@ -84,6 +86,12 @@ vi.mock('./reef-mesh-navigation', async importOriginal => {
   const real = await importOriginal<typeof import('./reef-mesh-navigation')>()
   return {
     ...real,
+    createRockFallbackObstacles: (_reef: Parameters<typeof real.createRockFallbackObstacles>[0], islandId: string) => state.rockFallbackUnavailable
+      ? { status: 'unavailable' as const, reason: 'fixture-rock-geometry-unavailable' }
+      : {
+          status: 'ready' as const,
+          obstacles: (state.rockFallbackObstacles ?? []).map(obstacle => ({ ...obstacle, id: `${obstacle.id}-${islandId}` })),
+        },
     createReefMeshNavigation: (...args: Parameters<typeof real.createReefMeshNavigation>) => state.deferMeshNavigation
       ? new Promise<Awaited<ReturnType<typeof real.createReefMeshNavigation>>>(resolve => {
           state.pendingMeshNavigationReleases.push(() => resolve(state.meshNavigationResult as Awaited<ReturnType<typeof real.createReefMeshNavigation>>))
@@ -164,6 +172,8 @@ beforeEach(() => {
   state.created = []; state.players = []; state.sources = []; state.textures = []; state.blockedSpawn = false; state.throwCreateForId = ''; state.beforeCreateFailure = undefined
   state.deferFishLoads = false; state.failFishLoads = false; state.pendingFishLoadReleases = []; state.resizeCallback = undefined
   state.deferMeshNavigation = false; state.pendingMeshNavigationReleases = []; state.meshNavigationResult = undefined
+  state.rockFallbackUnavailable = false
+  state.rockFallbackObstacles = undefined
   state.forceLabelExposure = false
   vi.stubGlobal('devicePixelRatio', 1)
   vi.stubGlobal('ResizeObserver', class { constructor(callback: () => void) { state.resizeCallback = callback } observe() {} disconnect() {} })
@@ -202,6 +212,54 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
       expect(sample.position.y).toBeGreaterThanOrEqual(sample.heightRange![0])
       expect(sample.position.y).toBeLessThanOrEqual(sample.heightRange![1])
     }
+  })
+
+  it('fails closed when rock fallback geometry is unavailable and keeps service links available', async () => {
+    window.history.replaceState({}, '', '/?lookdev=1&seed=103')
+    state.rockFallbackUnavailable = true
+    const services = [service('visible-service')]
+    anchors(services)
+    controller = createAquarium(host.querySelector('canvas')!, overlay, services, false, status)
+
+    await vi.waitFor(() => expect(status).toHaveBeenLastCalledWith('failed'))
+    expect(state.renderer!.loop).toBeNull()
+    expect(state.created).toHaveLength(0)
+    expect(overlay.querySelectorAll('a')).toHaveLength(1)
+    expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(services[0]!.url + '/')
+    expect(window.__AQUARIUM_LOOKDEV__!.state()).toMatchObject({ ready: false, failure: expect.stringContaining('fixture-rock-geometry-unavailable') })
+    await expect(window.__AQUARIUM_LOOKDEV__!.ready()).rejects.toThrow(/fixture-rock-geometry-unavailable/)
+
+    const updated = [service('updated-service', 'yellow-tang')]
+    anchors(updated)
+    controller.update(updated, false)
+    Object.defineProperty(host, 'clientWidth', { configurable: true, value: 402 })
+    state.resizeCallback?.()
+
+    expect(status).toHaveBeenLastCalledWith('failed')
+    expect(state.renderer!.loop).toBeNull()
+    expect(state.created).toHaveLength(0)
+    expect(overlay.querySelectorAll('a')).toHaveLength(1)
+    expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(updated[0]!.url + '/')
+    expect(window.__AQUARIUM_LOOKDEV__!.state()).toMatchObject({ ready: false, failure: expect.stringContaining('fixture-rock-geometry-unavailable') })
+  })
+
+  it('passes ready fallback rock bounds into real fish spawn safety checks', async () => {
+    state.rockFallbackObstacles = [{
+      id: 'whole-water-column',
+      bounds: {
+        min: { x: -100, y: -100, z: -100 },
+        max: { x: 100, y: 100, z: 100 },
+      },
+    }]
+    const services = [service('blocked-by-rock')]
+    anchors(services)
+    controller = createAquarium(host.querySelector('canvas')!, overlay, services, false, status)
+
+    await vi.waitFor(() => expect(status).toHaveBeenLastCalledWith('failed'))
+    expect(state.renderer!.loop).toBeNull()
+    expect(state.created).toHaveLength(0)
+    expect(overlay.querySelectorAll('a')).toHaveLength(1)
+    expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(services[0]!.url + '/')
   })
 
   it('stages the same final look-dev roster whether saved services arrive early or late', async () => {

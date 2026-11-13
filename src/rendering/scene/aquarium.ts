@@ -41,7 +41,7 @@ import { createWaterSurface } from './water-surface'
 import { estimateCaptionRect, labelLiftPx, resolveLabelDeconflicts } from './fish-label-layout'
 import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
 import { createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
-import { createReefMeshNavigation, MESH_NAVIGATION_COLLISION_RADIUS_M, type ReefMeshIslandInput } from './reef-mesh-navigation'
+import { createReefMeshNavigation, createRockFallbackObstacles, MESH_NAVIGATION_COLLISION_RADIUS_M, type ReefMeshIslandInput } from './reef-mesh-navigation'
 import { applyFishTurningRigOverlay, bindFishTurningRig, evaluateSpriteTurnScaleX, type FishTurningRig } from './fish-turning'
 import { SPRITE_PLANE_WIDTH, fishBodyRadiusM, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale } from './fish-scale'
 import { canRunFishSceneLoop, evaluateTieredVerticalDepthRange, findSafeFishHeading, findSafeFishSpawn, fishSceneStatus, fishSpawnPreference, fishSpawnSlotsForServices, isSafeFishPosition } from './fish-spawn'
@@ -870,8 +870,20 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       reefs.push(reef)
       applyEnvironmentMapIntensity(reef, ENVIRONMENT_MAP_INTENSITY.reef)
 
+      const fallback = createRockFallbackObstacles(reef, `reef-${i}`)
+      if (fallback.status !== 'ready') {
+        // Never keep swimming with incomplete solid geometry, including on
+        // resize. Native service links remain available in the failed view.
+        failed = true
+        renderer.setAnimationLoop(null)
+        failLookDevCapture(`Reef collision geometry unavailable: ${fallback.reason}`)
+        status('failed')
+        return
+      }
       const result = instantiateModularReefHabitat(islandKind, uniformScale, position, `reef-${i}`, yaw, mounts, habitat.bounds)
-      habitat.obstacles.push(...result.obstacles)
+      // Keep the calcified coral bases; historical hand-authored rock bands
+      // are replaced by bounds of the same current meshes used for rendering.
+      habitat.obstacles.push(...fallback.obstacles, ...result.obstacles.filter(obstacle => obstacle.id.startsWith(`reef-${i}-coral-base-`)))
       habitat.anchors.push(...result.anchors)
       reef.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) })
       meshIslands.push({ reef, islandId: `reef-${i}`, mountedCorals: assembled.mountedCorals })
@@ -1155,7 +1167,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     schoolmates = [...nextMates]
   }
   function reconcileFish(): boolean | undefined {
-    if (!loaded || disposed) return undefined
+    if (!loaded || disposed || failed) return undefined
     const anchors = new Map(Array.from(overlay.querySelectorAll<HTMLAnchorElement>('a[data-service-id]')).map(anchor => [anchor.dataset.serviceId!, anchor]))
     const current = new Map(fish.map(item => [item.service.id, item]))
     const nextServices = services.filter(service => getFishById(service.fishId))
@@ -1297,6 +1309,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     }
   }
   function render(steps: number, forceLabels = false) {
+    if (disposed || failed) return
     const habitatStopped = paused || document.hidden
     const reducedMotion = Boolean(reducedMotionQuery?.matches)
     if (lookDevConfig) applyLookDevPresentation()
@@ -1960,7 +1973,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       syncLoop()
       if (lookDevConfig) settleLookDevReadiness()
     },
-    activate(id) { const item = fish.find(item => item.service.id === id); if (!item || paused || document.hidden) return; item.releasedFocus = true; startleFish(item.motion, habitat) },
+    activate(id) { const item = fish.find(item => item.service.id === id); if (!item || failed || paused || document.hidden) return; item.releasedFocus = true; startleFish(item.motion, habitat) },
     // Camera zoom (AQ-62 AC #1/#3): each returns whether the camera is
     // zoomed after the action, so the UI can enable the Reset control.
     zoomIn() { return setCameraZoomDesired({ ...cameraZoomDesired, distance: stepZoomDistance(cameraZoomDesired.distance, 'in') }) },
