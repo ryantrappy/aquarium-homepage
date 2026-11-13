@@ -1,0 +1,74 @@
+[
+  {
+    "height": 70.8671875,
+    "insideViewport": true,
+    "label": "Open Komodo in a new tab",
+    "visible": true,
+    "width": 104.49220275878906,
+    "x": 166.33445739746094,
+    "y": 348.9919738769531
+  },
+  {
+    "height": 61.67967224121094,
+    "insideViewport": true,
+    "label": "Open WatchMyBirds in a new tab",
+    "visible": true,
+    "width": 80.7734375,
+    "x": 238.28237915039065,
+    "y": 211.6065216064453
+  },
+  {
+    "height": 61.234375,
+    "insideViewport": true,
+    "label": "Open Paperless in a new tab",
+    "visible": true,
+    "width": 80.1953125,
+    "x": 84.01133728027344,
+    "y": 648.082275390625
+  },
+  {
+    "height": 64.015625,
+    "insideViewport": true,
+    "label": "Open Home Assistant in a new tab",
+    "visible": true,
+    "width": 84.1328125,
+    "x": 169.7275390625,
+    "y": 146.04086303710938
+  },
+  {
+    "height": 99.65625,
+    "insideViewport": true,
+    "label": "Open Ombi in a new tab",
+    "visible": true,
+    "width": 146.93748474121094,
+    "x": 144.75318908691406,
+    "y": 298.7723083496094
+  },
+  {
+    "height": 110.7890625,
+    "insideViewport": true,
+    "label": "Open radarr in a new tab",
+    "visible": true,
+    "width": 163.3515625,
+    "x": 110.16968536376952,
+    "y": 551.6502685546875
+  },
+  {
+    "height": 63.539031982421875,
+    "insideViewport": true,
+    "label": "Open Sonarr in a new tab",
+    "visible": true,
+    "width": 83.203125,
+    "x": 103.1188507080078,
+    "y": 488.1124572753906
+  },
+  {
+    "height": 57.6015625,
+    "insideViewport": true,
+    "label": "Open Basketball in a new tab",
+    "visible": true,
+    "width": 75.4375,
+    "x": 132.6731414794922,
+    "y": 393.0125122070313
+  }
+]

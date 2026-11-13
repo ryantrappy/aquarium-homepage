@@ -41,3 +41,12 @@
 *Root reviewed every retained entry2026-11-13: standing policies current; older process checkpoints superseded by latest AGENT_TASKS.md; full art/model/clearance pending.*
 - 949ccb7 original antler savedpacked/exported/synced/used/committed with3PBRmaps; Root artgate beforepromotion. f4d4f24raises3rightcrestscales17–28%; nativebothsizesready/11inhabitants/8phonetargets>=44/noerrors.817tests/70files/typecheck16scripts/buildpass. Evidence docs/asset-evidence/aq70-11/antler-20261113/. AQ70.11/70.13remainopenforfullrubric/variants/physicalscale/clearance/budgets.
 - Proofdetachedf4d4f24/dev5215pinsexactsource; verifyownershipbeforestop. Reviewtabclosed/metricsreset, oldstale1298077987remains. Preserveuser3000/5210/liveBlender. Nextmajorvisualwork remainingcoralarchetypes/variants; CI/FPSexcluded. No deployment.
+
+### 2026-11-13 — Corymbose coral resume
+*Root reviewed all retained entries2026-11-13: standing policies current; prior completed milestones actioned; older process details superseded; overall art/model/clearance pending.*
+- Prior goalturn progress:949ccb7/f4d4f24/573715b saved antler used/committed/pushed plus taller secondary crest/817tests/nativeproof. Cleanreview checkout before newplan. Next AQ70.11 original bushy branching colony; Root reserves Blender, separatebackgroundprocess/liveuserfilepreserved. No competing modelagent.
+
+### 2026-11-13 — Bushy right colony verified
+*Root reviewed every retained entry2026-11-13: standing policies current; prior milestones actioned; older source/process checkpoints superseded by latest AGENT_TASKS.md; full art/scale/clearance pending.*
+- c52b969 originalcorymbose savedpacked/exported/synced/used/committed at rightcrest05;112tips/25725runtime triangles,3PBRmaps. Safeatlasfill+EXTEND removedblackgutters; Rootgate beforepromotion. Exact821tests/70files/typecheck16scripts/build andnative2sizesready/11inhabitants/8phonetargets>=44/noerrors. Evidence docs/asset-evidence/aq70-11/corymbose-20261113/. Phone usesleftisland; no newrightmacrobothsizes/artfulltaskacceptance.
+- Proofdetachedc52b969/dev5215pinsit, onlyinfraViteconfigdirty. Finaltabclosed/metricsreset; oldstale1298077987remains. iCloudreadblock recovered with exacthashcopies; no globalsettingschanges. Preserveuser3000/5210/liveBlender; backgroundRootonly/allnewmodelscommitted. Next remainingLPS/softcoralfidelity; CI/FPSexcluded; no deployment.
