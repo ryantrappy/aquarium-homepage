@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-11 04:55'
-updated_date: '2026-11-13 15:34'
+updated_date: '2026-11-13 15:39'
 labels:
   - modeling
   - blender
@@ -72,4 +72,6 @@ Root final native review accepts additive central-height iteration at6e57f2d. Ev
 Final exact6e57f2d production build completed successfully. Root verified native PNG signatures/dimensions and snapshot source/ready assertions. No final-task completion or runtime-budget claim.
 
 Root implementation handoff: four saved native socket empties now support two small front-facing zoanthid mats, a Montipora plate and a green Acropora table colony reusing existing supplied templates. Smaller footprint25mm with scaled zoa0.16 preservesarchcontour; no legacy scatter/companion extras. Exact exported inspector accepts4/4,384radial samples, zero unsupported footprint samples or cylinder blockers. Added explicit preserveAuthoredRock/includeScatter options (defaultsunchanged), shared-clock controllers, shader-expanded coral fallback boxes and actual mesh-nav envelope inputs. Newcoral materials/depthmaterials released onrebuild/teardown; sourcegeometry/maps remain borrowed. Surface uses isotropic seeded noise; UVassignment followsvertexidentity afterwinding fixes. Read-only saved-native audit shows9282vertices,4empties,3packedimages, positivevolume0.03133588389145,0boundary/nonmanifoldedges/zeroareafaces. No exhaustive selfintersection/wholecolony or fishbodyfit certification. Initial broadpads rejected visually and replaced by smaller frontslopes.107focusedtests/5files passed, final27actualasset/pipeline tests andtypecheck15scripts pass after finalmodelupdate. Root final exactsource native captures/fulltests/build follow; no Done.
+
+Root exactd454c27 verification complete:791tests/68files, typecheck15scripts and productionbuild pass. Native1440x900/402x874DPR1 ready/no failedassets/11inhabitants;8phone targets>=44px contained;zeroconsolewarnings/errors. Evidence docs/asset-evidence/aq94/arch-growth-20261113/. Finalgreenbranchingcolony movedforward fromrightreefshadow, smallzoa mats frontfacing, broadsupportpads rejected/removed. Root accepts bounded colonization/texture iteration; maincoralshape/texture and broader finalreefart stillopen. Current threefoundationpackages2,874,820bytes retain delivery-sizeAC4, not performanceacceptance. Native/exactexport/currentpackage hashes committed withd454c27, no liveBlenderdocumentedit/deployment. Task94remainsInProgressforfullNSA/library/atlas/grounding requirements.
 <!-- SECTION:NOTES:END -->
