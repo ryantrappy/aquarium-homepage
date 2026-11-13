@@ -4,57 +4,46 @@
 Category: Governance / Checkpoint
 Status: Active
 Authority: Binding Checkpoint; Backlog controls acceptance
-Backlog: AQ-58, AQ-60, AQ-42, AQ-70, AQ-70.2, AQ-70.12, AQ-70.14, AQ-70.15
+Backlog: AQ-44, AQ-49, AQ-54, AQ-59, AQ-70.2, AQ-70.13, AQ-74, AQ-86
 Owner: @root
-Updated: 2026-11-06
+Updated: 2026-11-12
 Upstream: AGENTS.md, agent_scratch.md, docs/requirements.md
 Downstream: Current implementation and review work
 -->
 
-> [!NOTE]
-> Root verified this checkpoint. The goal is active and incomplete. Backlog controls acceptance; functional proofs do not accept final aquarium art.
+Root verified this checkpoint against the current checkout. The goal remains active and incomplete: finish the backlog and make the living aquarium resemble the supplied reference. Passing functional tests does not accept final art.
 
-## Workspaces and delivery
+## Current workspace and delivery
 
-The user's original checkout at `/Users/ryantrapp/Desktop/Code/aquarium-homepage` was last observed on main at 0cd0fa3. Leave its source, configuration, assets and processes untouched. PR2 and Docker PR3 were merged externally. Root performs no merge or deployment; the user deploys to trappserv.er.
+Work in `/Users/ryantrapp/Desktop/Code/aquarium-homepage`, branch `review`. Historical isolated-worktree/PR4 instructions are superseded. Preserve concurrent user changes and candidate assets; stage specific task files only. PR45 was externally merged into main (`34b7279`); prepare a fresh review PR for the next milestone. User handles deployment to `trappserv.er`; never deploy.
 
-The user preserved concurrent candidate work in 0010cd7 on milestone/continued-realism. Root review continues in `/tmp/aquarium-continued-realism-root`, branch codex/continued-realism-root-review. Preserve its candidate models, generator, raw source and sand integration. Do not blanket-stage, reset or clean.
+User explicitly excludes CI follow-up and FPS-display work because both are done. Do not reopen those lanes from stale task statuses. Root may mark verified tasks Done. Use Luna/high for bounded routine implementation; Root owns review, demanding integration and visual decisions. Only one agent may use Blender; Root currently reserves it.
 
-Clean delivery is `/tmp/aquarium-reviewed-delivery`, branch codex/aquarium-reviewed-milestones, based on main 0cd0fa3. Shared rolling draft PR: https://github.com/ryantrappy/aquarium-homepage/pull/4. Push every task-completion commit and update its running contents/evidence. Selectively port reviewed sources without importing candidate Git history. Do not stage local node_modules symlinks.
+## Reviewed progress in this goal run
 
-## Reviewed milestones
+- AQ84/AQ85 Done: heading-based school steering, bank recovery and physical spacing/pass-through regressions (`e4c29e3`, `514c549`).
+- AQ75 Done: approved five-service defaults survive fresh missing-file configuration (`fdd1971`). Do not overwrite the ignored local eight-service saved configuration.
+- AQ14.2 Done: ambient motion, reduced/pause holds and native exact-size evidence; surface-band/caustic refinement (`50d324c`, `6350beb`). Final art is separate.
+- AQ70.2 Done: guarded DEV capture bridge, configuration/navigation/asset readiness and complete deterministic roster staging. Four presets at both target viewports yield eight byte-identical pairs (16 PNGs/sidecars), source `0e958a0`; evidence `docs/asset-evidence/aq70-2/`. Acceptance commit `0717dd5`. Production query is inert; native controls retained. See `docs/rendering.md` for capture usage.
+- AQ44 Done (`4bdb54e`): current production integration supersedes old staged-only notes. Individual activation, explicit group disturbance and compatible generation-scoped safe navigation reviewed; 101 focused behavior/navigation/motion/component tests pass.
 
-Ten tasks closed during this goal run: AQ-37 (4c5a09d), AQ-53 (3635208), AQ-63 (663f84c), AQ-64 (e77346c), AQ-65 (5879062), AQ-66 (be0fc4c), AQ-67 (a38c4f7), AQ-68 (b994682), AQ-69 (eea80d1/b078c5b), and AQ-70.14 (7680fe1). Earlier milestones were merged externally via PR2. PR4 also preserves the expanded AQ-70 queue in 77e7fff and the sand functional handoff in db84de7.
+## Active implementation and review
 
-AQ-70.14 keeps persistent captions at 10px with 24px minimum height, subtler resting glass and brighter hover/focus states. Parent targets remain at least 44px. Root found and fixed an actual moving-phone defect: Ombi's transparent anchor intercepted Komodo's visible caption. Native paint-order caption ownership now resolves pointer, auxiliary and context actions before body picking. Native phone verification opens Komodo correctly; the next Ombi Enter resets its borrowed URL and opens Ombi. Both viewports retain five named native links, touch/keyboard access and all five Services entries. The 37 focused tests, typecheck and production build pass; seven new cases fail against the old component. Evidence: docs/asset-evidence/aq70-14/review.json.
+- AQ70.13: shared `reef-layout.ts` transforms feed rendered assembly, runtime obstacle/anchor generation, sand contact ellipses and bubbles. Desktop left/right scales6.0/5.0, portrait4.6; native proof `docs/asset-evidence/aq70-13/layout-20261112/`, source `091caca`. Larger first trial was rejected for edge cropping. Supplied GLBs/Blender unchanged. Metric scale, central arch, depth/colony variation and final reference acceptance remain open. Main runtime rebuilds navigation from current placements; do not falsely claim static reef-habitat.json was regenerated.
+- AQ86: corrected repeated alpha attenuation (`35581ed`): offscreen radiance NoBlending, premultiplied additive composite/fallback, tank-only ray segment and exception-safe render state. Shared surfaceY3.75 now matches visible surface, shaft and caustic projection.66 focused tests/typecheck pass. Native evidence `docs/asset-evidence/aq86/compositing-20261112/`; rear sand seam, final shaft/haze art, freeze and controlled budget gates remain open.
+- AQ49: Luna `ready_audit` owns bounded reduced-motion controller fix. Root found stoppedFlags omitted the preference although AC4 requires frozen turns. Plan: hold complete inhabitant simulation/clip/overlay while reduced, preserve pose/active animation time and resume without catch-up; actual controller dynamic media tests required. Do not mark Done without Root numerical and native visual review.
+- AQ74: apparent newer Blender-only export gap resolved read-only (`8bfde04`).68ffe2c only removed unused images; compared mesh topology/UVs/weights, rig rest transforms, actions, material links and retained image pixels are identical. Evidence `docs/asset-evidence/aq74/blend-freshness-review.json`. Native head/articulation/click review remains. No model edits/export/sync performed.
+- AQ59: renderer material made neutral carbonate with restrained coralline; reused existing height samples for derivative normals (`5475d14`, `935357d`). Geometry unchanged; exact-export silhouette/cave/support/final art open. No measured speedup claimed.
+- AQ76: accumulated LOD animation time, full-school lazy upgrades and visible-queue progress fixed; low-frame adaptive windows now evaluate by elapsed time. Existing evidence fails runtime budgets and has attribution limits. Recovery EMA threshold13ms may be unreachable on60Hz; unresolved, not acceptance. CI/FPS lanes remain excluded.
+- AQ41: current CPU-only Node raw samples under `docs/asset-evidence/aq41/`; no browser/GPU budget or population-cap acceptance.
+- AQ73/AQ70.12 checked criteria have stale/contradictory historical evidence; current sand integrated, but no controlled no-regression proof or final physical-grain/reference acceptance. Do not equate checked boxes with complete proof.
 
-The requested natural initial spread is actioned in d6767c2. Stable horizontal lanes, outer forward depths and varied safe headings give native center spans of 39.68% on phone and 65.34% on laptop. All five fish start visible and move after resume; pause and survivor state remain stable. The first clustered iteration is superseded. AQ-60 stays open for all fifteen scale/source/envelope criteria. Female anthias correction 387be1a uses 2.5in below the female 7cm maximum; typical adult-size claims remain unsupported.
+## Verification and local processes
 
-AQ-42 bounds handoff b1bb742 expands original shared geometry spheres for exact shader skirt/soft displacement without accumulation. Dynamic amplitude and Float32 overflow are handled. CPU dy now matches the existing flex-squared GLSL; eight GLBs and actual GLSL are unchanged. Fourteen focused tests and the then-current 408-test suite, typecheck and build pass. Art, assembled scene and performance criteria remain open. Evidence: docs/asset-evidence/aq42/.
+Verify only1440×900 and402×874 CSS pixels, DPR1. Use CUA Chrome3 for browser interactions. Native true PNG: CDP Page.captureScreenshot format png, fromSurface true, captureBeyondViewport false, NO clip; verify IHDR. Main-world bridge needs CDP Runtime.evaluate (DOM-isolated evaluate cannot see it). Reset overrides/close owned tabs; immediately send completion_summary after each CUA phase. All completed-phase tabs were closed.
 
-AQ-53 verifies eight exact coral raw-mask/source-height contracts, the single exponent surface/depth shader and actual GPU motion/pause/reduced/rigid behavior. AQ-64 verifies retained roots, motion, phase and resources through native Settings edits/add/remove/reorder. Their evidence remains under docs/asset-evidence/aq53/ and aq64/.
+Owned local servers: dev5214 currently pins source35581ed in VITE_GIT_COMMIT; restart with the new source revision before claiming exact evidence after source changes. Production5212 still serves the earlier0e958a0 build. Verify PID/cwd/command before stopping; do not disturb user3000/5210. Builds overwrite .output, so restart owned production after rebuilding. Before-worktree5213 was stopped; preserve its files. No deployment/sign-in/service-config writes occurred.
 
-AQ-58 player handoff e6d1ecc validates finite atomic quaternion poses, preserves them on retirement and isolates failures per fish. scripts/verify-fish-clip-player.mjs defaults to eight tracked candidates; --include-unreviewed-splats explicitly adds nine local candidates. This does not accept materials, art or animated clearance. Main still uses legacy scene units and conservative habitat boxes. Six clip-only overlay contracts under /tmp/aq58-overlay-candidates-20261105 await Root scope review; no metadata is installed. Fixed cave probes do not certify animated assembled clearance.
+Current focused verifications: capture49 tests; layout/sand/assembly/navigation/focus70; shaft/caustic/optics/controller66; behavior/navigation/motion/component101; typecheck including14script checks. Last full suite705 preceded the portrait capture and later layout/shaft changes; run the full suite/build for the next reviewed milestone rather than claiming these focused checks cover everything.
 
-## Active lanes
-
-Root owns final review/Done, browser evidence, scoped commits, shared PR and this handoff. At this checkpoint Backlog has 98 tasks: 45 Done and 53 open (36 To Do, 17 In Progress). Do not shrink scope to the tasks present on an older branch.
-
-- AQ-70.2: thumbnail_loading implements the deterministic DEV-only mode; link_interaction independently reviews. The first integration remains rejected pending unconditional freezing while recovering, readiness based on current pending/failed textures, and timing resets after preset/layout/subject changes. Require actual-controller regressions and native repeatable captures/stats/baselines. Eighteen passing pure-helper tests and production string exclusion do not complete this task. Clean delivery uses two models and three sprites; the candidate review scene maps all fifteen species.
-- AQ-70.12: reviewed functional handoff db84de7 publishes the experimental module and standalone study, without main aquarium integration. Root actual WebGL2 comparisons pass at both viewports, with thirteen programs and no shader/GL errors. Active/resume pixel hashes change; pause/reduced/fixed-time hashes match. Six focused tests pass. All four criteria remain open: procedural maps are not scanned/photo-derived; grain scale, tiling, assembled art/contact and measured budgets remain unverified. Three MiB of base map data becomes about four MiB with mips. The 24,940 rendered triangles include shadow draws. Evidence: docs/asset-evidence/aq70-12/functional-review.json.
-- AQ-70.15: the user confirmed blue_tang.ply and its derivatives are theirs to share. Source redistribution is cleared. The exact file is 17,826,208 bytes, SHA756c58ebd7fb60ae5822cba635ecd8fee803bc984bd5996d13e29be35f30221e, with 262144 vertices and seventeen Float32 properties. Appearance is degree-zero/DC-only; no capture/camera/unit metadata was supplied. Available-input AC1 is checked; bake, comparison, deformation and decision criteria remain open. Ry(-90deg) maps +X to +Z; the older +90 note is explicitly corrected. SH DC conversion is not validated albedo or a known lighting/color pipeline. navigation_recovery assesses an existing-mesh experiment; no competing geometry.
-- Nine splat-fish candidates and their generator remain a separate provenance/art lane. Preserve all of them. The user additionally confirmed all nine referenced splat models are theirs to share. Ownership permission is resolved; precise source records and output-specific donor attribution remain to be recorded. The generator reads a CC-BY4 donor with baseline credit; do not invent allegations about copied pixels.
-- AQ-59 remains Gemini's rock art lane. Runtime shader changes do not accept flat summit/mesa silhouettes. Existing geometry/cavity data remains useful.
-
-The clean-delivery suite currently passes 451 tests in 46 files: 433 cover committed sources plus eighteen uncommitted, reviewed pure look-dev helper tests. Typecheck, ten tracked script syntax checks and production build pass. No timeout or assertion was weakened.
-
-## Restart and verification
-
-Read AGENTS.md, the Backlog overview once per conversation, agent_scratch.md, this handoff, and the docs catalog/framework/requirements. Read the matching detailed lifecycle guide before task mutations. Use Backlog CLI only for its records. Preserve Gemini work and verify only 402x874 and 1440x900 CSS pixels at DPR1.
-
-Use CUA for all browser interaction. Reuse selected Chrome browser3; after a context summary call cua.rewriteDocumentation. Exact PNG capture uses Page.captureScreenshot with format png, fromSurface true, captureBeyondViewport false and NO clip. Explicit clipped/full captures previously returned blank images. Verify signatures and IHDR dimensions; generic screenshots may be JPEG. Restore overrides, close only owned tabs and immediately send completion_summary after each completed CUA phase.
-
-Root production 5199 serves `/tmp/aquarium-root-milestone-20261105` with the caption fix and localhost-only config `/tmp/aq7014-root-config/production-config.json`. Root 5200 serves the standalone sand proof from `/tmp/aq7012-root-proof-dist`; its temporary config is `/tmp/aq7012-root-proof.config.mjs`. Verify PID/cwd/command before stopping. Root 5198 and earlier 5194–5197 were stopped after ownership checks. Do not disturb user3000 or historical5189/5191; check 5193 ownership before use. No completed-phase browser tabs remain. No deployment, host mount, remote configuration or sign-in occurred.
-
-### 2026-11-11 — Root review checkpoint
-Root reviewed the 15 ready-for-review tasks in the current main checkout following the user request. Backlog comments contain individual evidence and clarification questions. AQ-77 is accepted with renderer migration deferred. Seven tasks return to To Do for missing evidence; seven remain In Progress with waiting-for-answers. Earlier workspace, queue counts and delivery-branch instructions above are historical observations and were not used to overwrite current work. Review commits contain task records only; no deployment or renderer changes occurred.
+Live Blender holds a dirty `src/rendering/assets/corals/blend/reef-full-model.blend`; leave it untouched without preserving its work. Root only inspected it. Saved blue-tang comparisons used separate background processes sequentially. No Root model edits have been made. Every future Blender edit must obey save/packed texture/export/sync/Git rules in AGENTS.md.
