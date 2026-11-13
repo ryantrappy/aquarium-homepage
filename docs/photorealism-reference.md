@@ -11,15 +11,18 @@ Upstream: docs/requirements.md, backlog/tasks/aq-70.1 - Research-a-photoreal-ree
 Downstream: docs/photorealism-rubric.md, docs/baked-lighting-spike.md
 -->
 
-Reference photographs for judging whether the rendered aquarium reads as a
-real front-on home reef tank — not open ocean, not a blurry backdrop — under
-typical 14,000–20,000 K LED fixtures with white + royal-blue/actinic
-channels. Every entry below has a URL verified 2026-11-09 and a license
-status read from its file page or the cited source. **Reference only:**
-nothing here is bundled. Bundling follows the $0 rule (CC0 / CC-BY 4.0 /
-custom only, see `docs/asset-contract.md`); a reference marked CC BY-SA is
-usable for looking, not for shipping, and any file marked "verify on file
-page" must have its license confirmed there before any use beyond looking.
+Reference photographs and source links for judging whether the rendered
+aquarium reads as a real front-on home reef tank — not open ocean, not a
+blurry backdrop — under typical 14,000–20,000 K LED fixtures with white +
+royal-blue/actinic channels. This document mixes exact image file pages with
+galleries, categories, credit pages, asset sources, and a model sample; those
+link types are distinguished below and are not all photographs. Some
+individual license statuses remain explicitly unresolved (“verify on file
+page”). **Reference only:** nothing here is bundled. Bundling follows the
+$0 rule (CC0 / CC BY 4.0 / custom only, see `docs/asset-contract.md`); a
+reference marked CC BY-SA is usable for looking, not for shipping. The six
+new §7 file-page records have source/author/date/license metadata checked,
+but their image pixels have not been independently inspected.
 
 ## 0. Project Goal Visual
 
@@ -55,6 +58,13 @@ page" must have its license confirmed there before any use beyond looking.
 - When a reference is a gallery or category page, pick one file from it,
   record that file's exact URL and license in the task or review where you
   rely on it, and do not cite the gallery as if it were the image.
+- **Reference inventory count (2026-11-12):** the numbered list contains 33
+  entries, of which 22 are exact image file pages and 11 are gallery,
+  category, species, credit, asset-source, license, or model-information
+  pages. The latter 11 are not reference images. The six additional exact
+  file-page records in §7 have their page descriptions, author/date fields,
+  and license statements checked; their image pixels were not independently
+  inspected, so their visual suitability remains to be reviewed.
 
 ## 2. Fish — the 16-species roster
 
@@ -160,3 +170,21 @@ the rejection.
 | NOAA / US-government imagery | Public domain (US federal work) | As stated (e.g. NOAA photo credit) | Per-image URL; verify the specific image | Reef / fish photographs | **Candidate, unverified** — verify the specific image is a federal work, not a credited third-party photo |
 | Sketchfab (filtered) | Per listing: CC0 / CC-BY 4.0 only | Per listing | Per listing | Fish / coral models | **Accepted only per listing** — reject NC, ND, Editorial, and any paid listing on sight |
 | CGTrader, Fab, FreePBR, HDRMaps | Per listing / paid / restrictive | — | — | — | **Rejected** — paid (FreePBR commercial, Fab/CGTrader paid listings), NC/ND/Editorial, or no-redistribution terms (HDRMaps) |
+
+## 7. Additional exact file-page references (checked 2026-11-12)
+
+These six direct Commons file pages fill specific subject lookup gaps. The
+page metadata and license statements were read; the photographs themselves
+were not visually reviewed in this pass. Descriptions below report the
+file-page subject text and do not claim that the image has been judged
+against the visual rubric. “Reference only” means the file is not eligible
+for bundling under this project's CC0 / CC BY 4.0 / custom-made policy.
+
+| # | Subject and exact file page | File-page author and date | Exact license shown | Use here |
+|---|---|---|---|---|
+| 28 | Leaf-plate *Montipora capricornis* at OdySea aquarium — https://commons.wikimedia.org/wiki/File:Leaf_plate_montipora.gk.jpg | Grendelkhan; own work; taken 2006-08-19 | CC BY-SA 3.0, 2.5, 2.0, or 1.0; also GFDL 1.2 or later | Reference only; share-alike/GFDL licenses are outside the project's bundle whitelist. |
+| 29 | Torch coral (*Euphyllia glabrescens*) at Scarborough SEA LIFE Sanctuary — https://commons.wikimedia.org/wiki/File:Vi_-_Euphyllia_glabrescens_-_2.jpg | Emőke Dénes; 2018-08-26; page says kindly granted by author | CC BY-SA 4.0; page also lists CC BY-SA 2.5 | Reference only; share-alike is outside the project's bundle whitelist. |
+| 30 | Yellow/grooved brain coral (*Diploria labyrinthiformis*) near Bonaire — https://commons.wikimedia.org/wiki/File:Brain_coral.jpg | Jan Derk (Janderk); photographed 2005; the page notes the original English Wikipedia upload on 2005-04-09 | Public domain, released by the author | Reference only under the project's narrower whitelist; public domain is not listed as an approved bundled license. |
+| 31 | Bubble-tip anemone (*Entacmaea quadricolor*) — https://commons.wikimedia.org/wiki/File:Entacmaea_quadricolor_276794107.jpg | Susan Prior; source iNaturalist photo 276794107; photo dated 2023-05-01; license review and Commons upload 2023-12-01 | CC BY 4.0, confirmed from the original iNaturalist posting | Bundle-eligible with attribution: “Susan Prior, CC BY 4.0, via iNaturalist/Wikimedia Commons”; record source, license, and any modifications. |
+| 32 | Aquarium zoanthids — https://commons.wikimedia.org/wiki/File:Zoanthid.jpg | Neil Skene; own work; the file-page date is `12/10/08` (not expanded because its date format is ambiguous); Commons upload history is 2008-10-11 | Public domain, released by the author | Reference only under the project's narrower whitelist; public domain is not listed as an approved bundled license. |
+| 33 | Four pieces of live rock on coarse sand in an Aquarium of the Pacific touch-pool exhibit — https://commons.wikimedia.org/wiki/File:Live_rock_Aquarium_of_the_Pacific.jpg | Coughdrop12; own work; 2020-10-16 | CC BY-SA 4.0 | Reference only; share-alike is outside the project's bundle whitelist. The pictured pool is not a reef-tank composition reference. |
