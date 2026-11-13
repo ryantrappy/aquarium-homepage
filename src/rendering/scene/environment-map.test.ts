@@ -103,10 +103,15 @@ describe('aquarium PMREM environment map (AQ-71)', () => {
     expect(sandBounce!.position.y).toBeLessThan(0)
   })
 
-  it('sets envMapIntensity on standard materials only, including nested meshes', () => {
+  it('binds the shared borrowed PMREM and sets its intensity on standard materials only', () => {
     const standard = new THREE.MeshStandardMaterial({ color: '#ffffff' })
     const physical = new THREE.MeshPhysicalMaterial({ color: '#ffffff' })
     const basic = new THREE.MeshBasicMaterial({ color: '#ffffff' })
+    const basicEnvironmentBefore = (basic as unknown as { envMap?: THREE.Texture | null }).envMap
+    const sharedEnvironment = new THREE.Texture()
+    const dispose = vi.spyOn(sharedEnvironment, 'dispose')
+    const standardVersion = standard.version
+    const physicalVersion = physical.version
     const group = new THREE.Group()
     const inner = new THREE.Group()
     inner.add(new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), standard))
@@ -114,12 +119,35 @@ describe('aquarium PMREM environment map (AQ-71)', () => {
     inner.add(new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), basic))
     group.add(inner)
 
-    applyEnvironmentMapIntensity(group, 0.55)
+    applyEnvironmentMapIntensity(group, 0.55, sharedEnvironment)
 
     expect(standard.envMapIntensity).toBe(0.55)
     expect(physical.envMapIntensity).toBe(0.55)
+    expect(standard.envMap).toBe(sharedEnvironment)
+    expect(physical.envMap).toBe(sharedEnvironment)
+    expect(standard.version).toBe(standardVersion + 1)
+    expect(physical.version).toBe(physicalVersion + 1)
+    const boundVersions = [standard.version, physical.version]
+    applyEnvironmentMapIntensity(group, 0.6, sharedEnvironment)
+    expect([standard.version, physical.version]).toEqual(boundVersions)
     const basicIntensity = (basic as unknown as { envMapIntensity?: number }).envMapIntensity
     expect(basicIntensity).not.toBe(0.55)
+    expect((basic as unknown as { envMap?: THREE.Texture | null }).envMap).toBe(basicEnvironmentBefore)
+    expect(dispose).not.toHaveBeenCalled()
+  })
+
+  it('preserves a material-owned environment map when no shared texture is supplied', () => {
+    const ownedEnvironment = new THREE.Texture()
+    const standard = new THREE.MeshStandardMaterial({ color: '#ffffff' })
+    standard.envMap = ownedEnvironment
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), standard)
+    const version = standard.version
+
+    applyEnvironmentMapIntensity(mesh, 0.2)
+
+    expect(standard.envMap).toBe(ownedEnvironment)
+    expect(standard.envMapIntensity).toBe(0.2)
+    expect(standard.version).toBe(version)
   })
 
   it('exposes a create function that returns a texture and a dispose function', () => {

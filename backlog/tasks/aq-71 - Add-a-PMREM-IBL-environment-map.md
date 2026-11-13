@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-08 00:30'
-updated_date: '2026-11-13 14:17'
+updated_date: '2026-11-13 14:34'
 labels:
   - photorealism
   - rendering
@@ -52,6 +52,8 @@ The main scene currently lacks a scene.environment PMREM texture, causing MeshSt
 2. Clarify environment-map module comments against the current authoritative renderer/optics settings; mark waterSurface intensity as compatibility-only for the custom shader material.
 3. Add an actual aquarium-controller lifecycle regression that inspects the created sand group's MeshStandardMaterials for the declared intensity, and retain focused environment-map tests.
 4. Run the focused environment-map and aquarium-lifecycle suites plus typecheck; hand off for Root visual review without marking AQ-71 Done.
+
+Native A/B at df6227e revealed identical foreground pixels despite changed material property. Root confirmed installed Three r187 WebGLRenderer overwrites envMapIntensity with scene.environmentIntensity when material.envMap is null. Bind the single shared PMREM texture explicitly to each PBR role (fish/reef/sand/backdrop) so declared strengths take effect, preserving no-IBL fallback. Borrowed target ownership must stay with scene; generic asset disposal receives the borrowed texture and skips it while disposing other asset textures. Verify real controller shared bindings/removal/teardown and then repeat native exposure review. No new maps or per-frame PMREM work.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -64,6 +66,8 @@ Luna/Root2026-11-13 read-only audit: procedural PMREM initialization/scene.envir
 2026-11-13 bounded sand-intensity fix: applied ENVIRONMENT_MAP_INTENSITY.sand to the complete AragoniteSandGroup before rendering; corrected stale environment-map comments and marked waterSurface value compatibility-only for the custom shader. Added actual aquarium-controller lifecycle coverage asserting all five sand-group MeshStandardMaterials use the declared value. Focused environment-map + lifecycle suites pass 43 tests; typecheck and 14 script checks pass. Root visual review pending; no viewport/FPS acceptance claimed.
 
 Root reviewed Luna sand-intensity integration: actual sand group now receives declared0.2 rather than default1.0, including floor/frontedge/scatter. Actualcontroller regression covers five PBRmaterials.43focused environment/controller tests and typecheck14scripts pass. Root also removes stale comments claiming visible backdrop and lighting-proxy gradients are identical, and obsolete fishasset counts; no numeric lights/exposure/shader colors changed. This is a verified code handoff; native A/B exposure review follows before acceptance. Water customShaderMaterial retains compatibility-only entry. No FPSdisplay work, model/asset edits or performance claim.
+
+Root native diagnostic atdf6227e: laptop/phone foreground ROI statistics were exactly unchanged from6be5dcc baseline despite sand.envMapIntensity changing1.0->0.2. Installed Three r187 WebGLRenderer.js2747 explicitly substitutes scene.environmentIntensity while material.envMap isnull; WebGLMaterials refresh uses material.envMapIntensity only for an explicitmap. Root/Luna now explicitly bind the one shared PMREMtexture to all PBRroles and markchanged bindings forrefresh; numeric intensities remain unchanged. Generic asset disposal skips only that borrowed texture by identity; scene/render-target owner releasesonce. Real controller regression supplies actualshared map to sand/twofish/backdrop and asserts removal/teardowndoesnotdisposeitthroughmodels.45focusedtests/typecheck14scripts pass; final native review follows. No newenvironmentasset or perframePMREM work.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

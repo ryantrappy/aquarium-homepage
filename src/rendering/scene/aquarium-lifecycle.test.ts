@@ -19,6 +19,8 @@ const state = vi.hoisted(() => ({
   rockFallbackUnavailable: false,
   rockFallbackObstacles: undefined as undefined | import('../../simulation/habitat-navigation').SolidObstacleVolume[],
   mountedCoralBindings: [] as Array<{ socketName: string; coralAssetId: string; root: import('three').Group; materialControllers: never[] }>,
+  fakeEnvironmentMap: undefined as undefined | { texture: import('three').Texture; dispose: () => void },
+  standardFishMaterials: false,
   blockedSpawn: false, throwCreateForId: '', beforeCreateFailure: undefined as (() => void) | undefined,
   forceLabelExposure: false,
 }))
@@ -59,7 +61,10 @@ vi.mock('three/addons/loaders/GLTFLoader.js', async () => {
       geometry.setAttribute('position', new T.Float32BufferAttribute([-.2, 0, 0, .2, 0, 0, 0, .2, 0], 3))
       geometry.setAttribute('skinIndex', new T.Uint16BufferAttribute(new Array(12).fill(0), 4))
       geometry.setAttribute('skinWeight', new T.Float32BufferAttribute([1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0], 4)); geometry.setIndex([0, 1, 2])
-      const mesh = new T.SkinnedMesh(geometry, new T.MeshBasicMaterial({ side: T.DoubleSide })); root.add(mesh)
+      const material = state.standardFishMaterials
+        ? new T.MeshStandardMaterial({ side: T.DoubleSide, roughness: 0.5 })
+        : new T.MeshBasicMaterial({ side: T.DoubleSide })
+      const mesh = new T.SkinnedMesh(geometry, material); root.add(mesh)
       const bones = turningRig ? [...spine, pectoralLeft, pectoralRight] : spine
       root.updateMatrixWorld(true); mesh.bind(new T.Skeleton(bones))
       const end = new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 0, 1), .7)
@@ -104,6 +109,14 @@ vi.mock('./reef-mesh-navigation', async importOriginal => {
           state.pendingMeshNavigationReleases.push(() => resolve(state.meshNavigationResult as Awaited<ReturnType<typeof real.createReefMeshNavigation>>))
         })
       : real.createReefMeshNavigation(...args),
+  }
+})
+vi.mock('./environment-map', async importOriginal => {
+  const real = await importOriginal<typeof import('./environment-map')>()
+  return {
+    ...real,
+    createAquariumEnvironmentMap: (...args: Parameters<typeof real.createAquariumEnvironmentMap>) =>
+      state.fakeEnvironmentMap ?? real.createAquariumEnvironmentMap(...args),
   }
 })
 vi.mock('./motion', async importOriginal => {
@@ -182,6 +195,8 @@ beforeEach(() => {
   state.rockFallbackUnavailable = false
   state.rockFallbackObstacles = undefined
   state.mountedCoralBindings = []
+  state.fakeEnvironmentMap = undefined
+  state.standardFishMaterials = false
   state.forceLabelExposure = false
   vi.stubGlobal('devicePixelRatio', 1)
   vi.stubGlobal('ResizeObserver', class { constructor(callback: () => void) { state.resizeCallback = callback } observe() {} disconnect() {} })
@@ -210,6 +225,57 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     })
     expect(standardMaterials).toHaveLength(5)
     expect(standardMaterials.every(material => material.envMapIntensity === ENVIRONMENT_MAP_INTENSITY.sand)).toBe(true)
+  })
+
+  it('wires one shared environment texture to PBR scene roles and disposes it only through its owner', async () => {
+    const sharedTexture = new THREE.Texture()
+    const sharedTextureDispose = vi.spyOn(sharedTexture, 'dispose')
+    const environmentOwnerDispose = vi.fn(() => sharedTexture.dispose())
+    state.fakeEnvironmentMap = { texture: sharedTexture, dispose: environmentOwnerDispose }
+    state.standardFishMaterials = true
+    const services = [service('ibl-clown'), service('ibl-tang', 'yellow-tang')]
+    await start(services)
+
+    const scene = state.renderer!.scene!
+    expect(scene.environment).toBe(sharedTexture)
+
+    const sandGroup = scene.getObjectByName('AragoniteSandGroup')!
+    const sandMaterials: THREE.MeshStandardMaterial[] = []
+    sandGroup.traverse(object => {
+      if (!(object instanceof THREE.Mesh)) return
+      for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
+        if (material instanceof THREE.MeshStandardMaterial) sandMaterials.push(material)
+      }
+    })
+    expect(sandMaterials).toHaveLength(5)
+    expect(sandMaterials.every(material => material.envMap === sharedTexture)).toBe(true)
+    expect(sandMaterials.every(material => material.envMapIntensity === ENVIRONMENT_MAP_INTENSITY.sand)).toBe(true)
+
+    const fishMaterials = services.flatMap(service => {
+      const materials: THREE.MeshStandardMaterial[] = []
+      rootFor(service.id).traverse(object => {
+        if (!(object instanceof THREE.Mesh)) return
+        for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
+          if (material instanceof THREE.MeshStandardMaterial) materials.push(material)
+        }
+      })
+      return materials
+    })
+    expect(fishMaterials).toHaveLength(2)
+    expect(fishMaterials.every(material => material.envMap === sharedTexture)).toBe(true)
+    expect(fishMaterials.every(material => material.envMapIntensity === ENVIRONMENT_MAP_INTENSITY.fish)).toBe(true)
+
+    const backdrop = scene.children.find(object => object instanceof THREE.Mesh && object.position.z === -5.5) as THREE.Mesh
+    const backdropMaterial = backdrop.material as THREE.MeshStandardMaterial
+    expect(backdropMaterial.envMap).toBe(sharedTexture)
+    expect(backdropMaterial.envMapIntensity).toBe(ENVIRONMENT_MAP_INTENSITY.backdrop)
+
+    update([services[1]!])
+    expect(sharedTextureDispose).not.toHaveBeenCalled()
+
+    controller.dispose()
+    expect(environmentOwnerDispose).toHaveBeenCalledOnce()
+    expect(sharedTextureDispose).toHaveBeenCalledOnce()
   })
 
   it('holds capture readiness until the application finishes loading saved configuration', async () => {

@@ -193,14 +193,27 @@ export function createAquariumEnvironmentMap(renderer: THREE.WebGLRenderer): Aqu
 /**
  * Sets an explicit `envMapIntensity` on every MeshStandardMaterial (which
  * includes MeshPhysicalMaterial) under `root`. MeshBasicMaterial sprites and
- * PointsMaterials are untouched — they do not take part in IBL.
+ * PointsMaterials are untouched — they do not take part in IBL. When a shared
+ * PMREM texture is supplied, it is borrowed and assigned directly to each PBR
+ * material. Three.js r187 otherwise uses `scene.environmentIntensity` for a
+ * material whose `envMap` is null, overriding its per-material intensity.
+ * The caller retains ownership and is responsible for disposing the texture.
  */
-export function applyEnvironmentMapIntensity(root: THREE.Object3D, intensity: number): void {
+export function applyEnvironmentMapIntensity(
+  root: THREE.Object3D,
+  intensity: number,
+  sharedEnvironment?: THREE.Texture,
+): void {
   root.traverse(object => {
     if (!(object instanceof THREE.Mesh)) return
     const materials = Array.isArray(object.material) ? object.material : [object.material]
     for (const material of materials) {
-      if (material instanceof THREE.MeshStandardMaterial) material.envMapIntensity = intensity
+      if (!(material instanceof THREE.MeshStandardMaterial)) continue
+      if (sharedEnvironment && material.envMap !== sharedEnvironment) {
+        material.envMap = sharedEnvironment
+        material.needsUpdate = true
+      }
+      material.envMapIntensity = intensity
     }
   })
 }

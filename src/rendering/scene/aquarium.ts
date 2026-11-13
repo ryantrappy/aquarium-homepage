@@ -119,14 +119,16 @@ export type AquariumController = { update(services: ServiceConfig[], paused: boo
 declare global { interface Window { __AQUARIUM_LOOKDEV__?: LookDevBridge } }
 type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; flex?: FishFlexBinding; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean; schoolmate: boolean; lod: FishLod; lodModel?: THREE.Object3D }
 
-function disposeTree(root: THREE.Object3D) {
+function disposeTree(root: THREE.Object3D, borrowedEnvironment?: THREE.Texture) {
   const geometries = new Set<THREE.BufferGeometry>(), materials = new Set<THREE.Material>(), textures = new Set<THREE.Texture>()
   root.traverse(object => {
     if (!(object instanceof THREE.Mesh)) return
     geometries.add(object.geometry)
     for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
       materials.add(material)
-      for (const value of Object.values(material)) if (value instanceof THREE.Texture) textures.add(value)
+      // Role materials borrow the scene's PMREM target; the scene owner releases
+      // it once. Source albedo/normal/etc. textures remain asset-owned here.
+      for (const value of Object.values(material)) if (value instanceof THREE.Texture && value !== borrowedEnvironment) textures.add(value)
     }
     if (object instanceof THREE.SkinnedMesh) object.skeleton.dispose()
   })
@@ -258,7 +260,7 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   // the shared cellular caustic chunk is applied here instead, so the sand
   // shows the same caustic system as the rock, coral, and fish.
   const sandBed = createAragoniteSandBed({ narrow: false })
-  applyEnvironmentMapIntensity(sandBed.group, ENVIRONMENT_MAP_INTENSITY.sand)
+  applyEnvironmentMapIntensity(sandBed.group, ENVIRONMENT_MAP_INTENSITY.sand, environmentMap?.texture)
   const sand = sandBed.sandMesh
   // Surface-driven lighting (AQ-96 / AQ-70.6): the sand threshold is
   // re-tuned from the 0.22 visual-check workaround back toward the 0.35
@@ -277,6 +279,7 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   // uRearTime any more: the backdrop is static, as it should be.
   const rearMaterial = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.98, metalness: 0.0 })
   rearMaterial.envMapIntensity = ENVIRONMENT_MAP_INTENSITY.backdrop
+  rearMaterial.envMap = environmentMap?.texture ?? null
   rearMaterial.onBeforeCompile = shader => {
     shader.vertexShader = `varying vec3 vRearWorldPos;\n` + shader.vertexShader
     shader.vertexShader = shader.vertexShader.replace(
@@ -876,7 +879,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       reef.rotation.y = yaw
       scene.add(reef)
       reefs.push(reef)
-      applyEnvironmentMapIntensity(reef, ENVIRONMENT_MAP_INTENSITY.reef)
+      applyEnvironmentMapIntensity(reef, ENVIRONMENT_MAP_INTENSITY.reef, environmentMap?.texture)
 
       const fallback = createRockFallbackObstacles(reef, `reef-${i}`)
       if (fallback.status !== 'ready') {
@@ -976,7 +979,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     item.root.traverse(object => { if (object instanceof THREE.SkinnedMesh) skeletons.add(object.skeleton) })
     skeletons.forEach(skeleton => skeleton.dispose())
     if (item.artwork) {
-      ownedSprites.delete(item.artwork); spriteMasks.delete(item.artwork); disposeTree(item.artwork)
+      ownedSprites.delete(item.artwork); spriteMasks.delete(item.artwork); disposeTree(item.artwork, environmentMap?.texture)
     }
     item.anchor?.removeAttribute('data-artwork-error')
   }
@@ -985,7 +988,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   // sprite-to-GLB swap below, so the two paths can never drift apart.
   function bindGlbToInhabitant(item: Inhabitant, base: GLTF) {
     const model = clone(base.scene); model.scale.setScalar(fishModelScale(item.service.fishId))
-    applyEnvironmentMapIntensity(model, ENVIRONMENT_MAP_INTENSITY.fish)
+    applyEnvironmentMapIntensity(model, ENVIRONMENT_MAP_INTENSITY.fish, environmentMap?.texture)
     // Only service fish get a serviceId on their meshes (AQ-41 AC #4 / AQ-13):
     // schoolmates must never be pickable, so their meshes stay anonymous.
     if (!item.schoolmate) model.traverse(object => { if (object instanceof THREE.Mesh) object.userData.serviceId = item.service.id })
@@ -1077,7 +1080,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       if (sprite) {
         retireLookDevTextures(item.service.id)
         item.root.remove(sprite)
-        ownedSprites.delete(sprite); spriteMasks.delete(sprite); disposeTree(sprite)
+        ownedSprites.delete(sprite); spriteMasks.delete(sprite); disposeTree(sprite, environmentMap?.texture)
         item.artwork = undefined
       }
       bindGlbToInhabitant(item, base)
@@ -1842,7 +1845,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     beginLookDevAsset(lookDevKey)
     try {
       const model = await loader.loadAsync(modelUrls[id])
-      if (disposed || failed) { disposeTree(model.scene); finishLookDevAsset(lookDevKey); return undefined }
+      if (disposed || failed) { disposeTree(model.scene, environmentMap?.texture); finishLookDevAsset(lookDevKey); return undefined }
       loadedAssets.add(model)
       finishLookDevAsset(lookDevKey)
       return model
@@ -1893,7 +1896,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       lazyActiveLoads++
       void loadFishModel(id).then(model => {
         lazyActiveLoads--
-        if (disposed || failed) { if (model) disposeTree(model.scene); return }
+        if (disposed || failed) { if (model) disposeTree(model.scene, environmentMap?.texture); return }
         if (model) {
           modelBases.set(id, model)
           for (const target of [...fish, ...schoolmates]) {
@@ -1912,7 +1915,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       beginLookDevAsset(lookDevKey)
       try {
         const model = await loader.loadAsync(url)
-        if (disposed || failed) disposeTree(model.scene)
+        if (disposed || failed) disposeTree(model.scene, environmentMap?.texture)
         else loadedAssets.add(model)
         finishLookDevAsset(lookDevKey)
         return model
@@ -1950,7 +1953,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     console.error('Aquarium assets could not load', error)
     failed = true
     failLookDevCapture(`Aquarium asset initialization failed: ${String(error)}`)
-    loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear()
+    loadedAssets.forEach(model => disposeTree(model.scene, environmentMap?.texture)); loadedAssets.clear()
     if (!disposed) { renderer.setAnimationLoop(null); status('failed') }
   })
   syncLoop()
@@ -2013,7 +2016,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       rejectLookDevWaiters(new Error('Aquarium was disposed before look-dev capture readiness.'))
       glassEnclosure.dispose()
       if (import.meta.env.DEV && lookDevBridge && window.__AQUARIUM_LOOKDEV__ === lookDevBridge) delete window.__AQUARIUM_LOOKDEV__
-      removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sandBed.dispose(); rear.geometry.dispose(); rear.material.dispose(); hazePlane.geometry.dispose(); hazeMaterial.dispose(); shaftPlane.geometry.dispose(); shaftMaterial.dispose(); waterSurfaceController.dispose(); shaftPass?.dispose(); shaftPass = null; foregroundParticleGeometry.dispose(); foregroundParticleMaterial.dispose(); backgroundParticleGeometry.dispose(); backgroundParticleMaterial.dispose(); bubbleGeometry.dispose(); bubbleMaterial.dispose(); caustics.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
+      removeFish(); loadedAssets.forEach(model => disposeTree(model.scene, environmentMap?.texture)); loadedAssets.clear(); sandBed.dispose(); rear.geometry.dispose(); rear.material.dispose(); hazePlane.geometry.dispose(); hazeMaterial.dispose(); shaftPlane.geometry.dispose(); shaftMaterial.dispose(); waterSurfaceController.dispose(); shaftPass?.dispose(); shaftPass = null; foregroundParticleGeometry.dispose(); foregroundParticleMaterial.dispose(); backgroundParticleGeometry.dispose(); backgroundParticleMaterial.dispose(); bubbleGeometry.dispose(); bubbleMaterial.dispose(); caustics.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
     },
   }
 }
