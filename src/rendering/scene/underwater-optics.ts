@@ -61,7 +61,7 @@ export type AquariumOpticsConfig = Readonly<{
   /** Bubble spawn height, just above the sand bed (y = -2.8). */
   bubbleEmitterBaseY: number
   /** Bubbles recycle to their emitter above this height, below the water
-   * surface plane (y = 3.75). */
+   * surface plane (y = 4.4). */
   bubbleRecycleTopY: number
   /** Maximum alpha of the restrained rear depth-haze plane (AQ-86): haze
    * starts behind the fish volume (z < -1.5) and never veils foreground
@@ -135,7 +135,7 @@ export const SUN_DIRECTION: Readonly<{ x: number; y: number; z: number }> = Obje
   })(),
 )
 /** Height of the water surface plane (AQ-14.2). */
-export const WATER_SURFACE_Y = 3.75
+export const WATER_SURFACE_Y = 4.4
 
 export const DEFAULT_AQUARIUM_OPTICS_CONFIG: AquariumOpticsConfig = Object.freeze({
   backgroundHex: '#183654',
@@ -616,7 +616,7 @@ export function bubbleEmitterForRockFootprint(footprint: Readonly<{
  * amended 2026-11-08): rises from its emitter at a deterministic,
  * size-hashed speed (larger bubbles rise faster), wobbles sinusoidally in
  * X/Z, and recycles to the emitter once it passes `bubbleRecycleTopY`
- * (below the water surface plane at y = 3.75). Freezes at the static
+ * (below the water surface plane at y = 4.4). Freezes at the static
  * emitter position when `paused` or `reducedMotion` is active; X/Z never
  * leave the water column bounds and Y never leaves [emitter.y,
  * recycleTopY]. Per-bubble size growth with height is

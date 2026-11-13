@@ -165,7 +165,7 @@ describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
     expect(shader.uniforms.uSunDir).toBe(caustics.uniforms.uSunDir)
     expect(shader.uniforms.uSurfaceY).toBe(caustics.uniforms.uSurfaceY)
     expect(shader.uniforms.uFocusGain).toBe(caustics.uniforms.uFocusGain)
-    expect(caustics.uniforms.uSurfaceY.value).toBeCloseTo(3.75)
+    expect(caustics.uniforms.uSurfaceY.value).toBeCloseTo(4.4)
     expect(caustics.uniforms.uFocusGain.value).toBeCloseTo(0.6)
     expect(Math.hypot(
       caustics.uniforms.uSunDir.value.x,

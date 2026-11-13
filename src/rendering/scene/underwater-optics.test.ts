@@ -165,7 +165,7 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
     expect(a).toEqual(evaluateBubblePosition(2, emitter, bounds, 4.2))
 
     // Rises monotonically between recycles and never passes the recycle
-    // height (below the water surface plane at y = 3.75).
+    // height (below the water surface plane at y = 4.4).
     let previousY = -Infinity
     let sawRecycle = false
     for (let t = 0; t <= 30; t += 0.25) {
@@ -335,7 +335,7 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
   it('carries the surface-driven lighting config: sun direction, surface height, focus gain, raymarch tiers', () => {
     const cfg = DEFAULT_AQUARIUM_OPTICS_CONFIG
     expect(cfg.surfaceY).toBe(WATER_SURFACE_Y)
-    expect(cfg.surfaceY).toBe(3.75)
+    expect(cfg.surfaceY).toBe(4.4)
     expect(Math.hypot(cfg.sunDirection.x, cfg.sunDirection.y, cfg.sunDirection.z)).toBeCloseTo(1, 9)
     expect(cfg.sunDirection).toEqual(SUN_DIRECTION)
     expect(cfg.sunDirection.y).toBeGreaterThan(0.8)
