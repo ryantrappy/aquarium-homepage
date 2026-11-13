@@ -1,0 +1,26 @@
+{
+  "reviewer": "Root",
+  "recordedAt": "2026-11-13T20:51:22.482914+00:00",
+  "decision": "Accept bounded branching morphology and warm rose PBR palette for right crest05; full-task archetypes/variants/rubric/scale/clearance/budgets remain open",
+  "packageSha256": "b1808ce01bcb7013e29e0e46a399130da13c12a83bbdaccd08c439e25d62b6c3",
+  "nativeSha256": "da92952ed746c453de1cc77fd01803c0b88e611ed80bd16cdf2cbe4f686021a9",
+  "generatorSha256": "dc4f110f23b099ee81b5e94721c1e80850884f43f2465cfd98d5c9ce9af889ee",
+  "reviewSource": "Dirty isolated trial based on f4d4f24; snapshot commit identifies base only",
+  "runtimeSourceSha256": "59da6008cf1926eef783f994390650a8eb67de767d061c0cbbe264e9621f0cde",
+  "reviewed": [
+    "Matched neutral clay comparison: supplied cone cluster on left/new corymbose on right",
+    "New neutral textured render with padding/background correction",
+    "Native laptop full-scene with new right crest",
+    "Native phone full-scene compatibility; phone uses left island and does not display this new right colony"
+  ],
+  "rejected": [
+    "Initial sparse long forks",
+    "Black atlas gutters/subpixel bake misses",
+    "Dark gray-green runtime palette"
+  ],
+  "limits": [
+    "No dedicated right-colony runtime macro at both sizes; existing capture macro selects left island",
+    "Neutral chosen0.218m height is comparison framing, not taxonomy/specimen or scene-scale calibration",
+    "No calibrated animated-fish or branch-permeability certificate"
+  ]
+}

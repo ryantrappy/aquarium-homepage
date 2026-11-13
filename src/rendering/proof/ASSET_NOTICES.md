@@ -150,3 +150,16 @@ paths. The custom-colonies registry pins source/package hashes. Its morphology
 and comparison scale are chosen art, without exact species/physical calibration
 or whole-fish clearance claims. Root approved this bounded pilot before promotion;
 full eight-archetype/two-variant photorealism acceptance remains open.
+
+## Custom bushy Acropora-like colony — AQ-70.11
+
+`src/rendering/assets/corals/custom-colonies/reef-acropora-corymbose.glb` uses
+original project geometry and original procedural/baked PBR maps ($0). Its
+self-contained authoring generator derives the existing original antler baking
+workflow while building a different, wider branching graph. No external imagery
+or model was imported. Packed native, raw override, PNG bakes, generator and
+source-hashed separate registry are committed together; the main right crest05
+uses the model. All canonical/supplied models and antler source remain preserved.
+Root reviewed the matched neutral render and isolated laptop scene before
+promotion. The chosen comparison height and morphology do not certify taxonomy,
+physical scale, all-archetype realism, runtime budgets or animated clearance.

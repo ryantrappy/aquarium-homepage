@@ -5,6 +5,7 @@ import {
   AQUARIUM_WATER_BOUNDS,
   DEFAULT_LEFT_ISLAND_MOUNTS,
   DEFAULT_RIGHT_ISLAND_MOUNTS,
+  MODULAR_CORAL_ASSET_URLS,
   MODULAR_CORAL_VARIATION_LIBRARY,
   ACTINIC_RIM_TINT_HEX,
   assembleCoralsOnRockSockets,
@@ -75,6 +76,7 @@ function buildMockCoralTemplates(): Map<string, THREE.Object3D> {
     ['coral-acropora-table', [['acropora_table_colony', 'coral-rigid']]],
     ['coral-acropora-staghorn', [['acropora_staghorn_colony', 'coral-rigid']]],
     ['reef-acropora-antler', [['reef_acropora_antler', 'coral-rigid']]],
+    ['reef-acropora-corymbose', [['reef_acropora_corymbose', 'coral-rigid']]],
     ['coral-montipora-plate', [['montipora_plate_colony', 'coral-rigid']]],
     ['coral-brain-diploria', [['diploria_brain_colony', 'coral-soft']]],
     ['coral-zoanthid-mat', [['zoanthid_button_cluster', 'coral-soft']]],
@@ -232,6 +234,31 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     expect(primaryBinding.uniforms.uPaletteBase.value.getHexString()).toBe('8b71a8')
     expect(scatterMaterial.customProgramCacheKey()).not.toContain(':baked-pbr')
     expect(scatterUniforms.uPaletteBase.value.getHexString()).toBe('5c46c8')
+  })
+
+  it('mounts the registered corymbose colony at right crest 05 with baked PBR while preserving the legacy scatter palette', () => {
+    const id = 'reef-acropora-corymbose'
+    const registeredUrl = MODULAR_CORAL_ASSET_URLS[id]
+    expect(registeredUrl).toBeDefined()
+    expect(new URL(registeredUrl!).pathname).toContain('/custom-colonies/reef-acropora-corymbose.glb')
+
+    const mount = DEFAULT_RIGHT_ISLAND_MOUNTS.find(entry => entry.socketName === 'socket_sps_crest_05')
+    expect(mount).toMatchObject({ coralAssetId: id, archetype: 'branching-sps' })
+    expect(mount?.paletteOverride?.surfaceMode).toBe('baked-pbr')
+
+    const templates = buildMockCoralTemplates()
+    const rockRoot = buildRockFixtureFromSocketReport('live-rock-island-right-socket-report.json')
+    const assembly = assembleCoralsOnRockSockets(rockRoot, templates, DEFAULT_RIGHT_ISLAND_MOUNTS)
+    const primary = assembly.mountedCorals.find(mounted => mounted.socketName === 'socket_sps_crest_05')!
+    const primaryBinding = primary.materialControllers[0]!
+    const scatter = assembly.instancedMeshes.find(mesh => mesh.name.startsWith('instanced_coral-zoanthid-mat_'))!
+    const scatterMaterial = scatter.material as THREE.MeshStandardMaterial
+    const scatterUniforms = scatterMaterial.userData.coralRawMasks.uniforms
+
+    expect(primary.coralAssetId).toBe(id)
+    expect(primaryBinding.material.customProgramCacheKey()).toContain(':baked-pbr')
+    expect(scatterMaterial.customProgramCacheKey()).not.toContain(':baked-pbr')
+    expect(scatterUniforms.uPaletteBase.value.getHexString()).toBe('d85c84')
   })
 
   it('forwards the fixture actinic level to every mounted coral material, defaulting to 1 (AQ-70.6 AC #3)', () => {

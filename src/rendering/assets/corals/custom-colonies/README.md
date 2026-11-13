@@ -52,3 +52,29 @@ the existing raw-mask contract.
 This is one reviewed morphology/PBR step. All-archetype realism, two variants per
 archetype, whole-colony support and animated fish clearance, physical scene scale
 and controlled runtime budgets remain separate open requirements.
+
+## Bushy branching colony
+
+`reef-acropora-corymbose` is a second original branching morphology used at the
+right island's crest05. It has112growth tips,109runtime cups and2170high-source
+cups. Its435218-triangle hidden source bakes to a25725-triangle runtime mesh and
+three packed512px PBR maps. The installed package is2,284,116bytes. Native,
+raw export, generator and registry use the same reserved paths/contract as above:
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_acropora_corymbose.py
+node scripts/sync-blender-override.mjs --coral reef-acropora-corymbose --learn-guide
+```
+
+The generator uses narrow UV padding, explicit EXTEND bake margins and safe
+initial tissue/normal/roughness/AO texels with `use_clear=False`; subpixel UV
+faces therefore do not sample black gutters. A read-only final audit finds zero
+zero-area UV triangles and zero black nearest-texel triangle-centroid albedo
+samples, without claiming exhaustive GPU filtering coverage. The neutral tissue
+is muted green/tan; the mounted palette explicitly grades it toward warm rose.
+This palette does not add blanket emission. Legacy scatter remains separately
+graded. A single-island phone view uses the left colony, so final phone captures
+prove compatibility, not visual review of the new right colony there. Dedicated
+runtime macros for this colony at both sizes and full rubric acceptance remain
+open. Root's bounded pre-promotion art gate is recorded in
+`docs/asset-evidence/aq70-11/corymbose-20261113/trial/approval.json`.

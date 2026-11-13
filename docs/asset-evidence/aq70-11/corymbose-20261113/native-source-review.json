@@ -1,0 +1,60 @@
+{
+  "meshes": [
+    {
+      "name": "Corymbose_High_Source",
+      "vertices": 227350,
+      "triangles": 435218,
+      "valid": true,
+      "hidden": true
+    },
+    {
+      "name": "Reef_Acropora_Corymbose",
+      "vertices": 13220,
+      "triangles": 25725,
+      "valid": true,
+      "hidden": false
+    }
+  ],
+  "packedImages": [
+    {
+      "name": "reef-acropora-corymbose-normal",
+      "size": [
+        512,
+        512
+      ],
+      "packed": true
+    },
+    {
+      "name": "reef-acropora-corymbose-roughness",
+      "size": [
+        512,
+        512
+      ],
+      "packed": true
+    },
+    {
+      "name": "reef-acropora-corymbose-tissue",
+      "size": [
+        512,
+        512
+      ],
+      "packed": true
+    }
+  ],
+  "selected": [
+    "Reef_Acropora_Corymbose"
+  ],
+  "nativeSha256": "da92952ed746c453de1cc77fd01803c0b88e611ed80bd16cdf2cbe4f686021a9",
+  "packageSha256": "b1808ce01bcb7013e29e0e46a399130da13c12a83bbdaccd08c439e25d62b6c3",
+  "generatorSha256": "dc4f110f23b099ee81b5e94721c1e80850884f43f2465cfd98d5c9ce9af889ee",
+  "uvCentroidDiagnostic": {
+    "triangles": 25725,
+    "zeroUV": 0,
+    "blackCentroidCount": 0,
+    "examples": []
+  },
+  "limits": [
+    "Read-only saved native check; mesh.validate alone is not a manifold/self-intersection certificate",
+    "Nearest-texel UV triangle-centroid samples do not certify every GPU filtering case"
+  ]
+}

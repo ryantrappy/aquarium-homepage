@@ -103,6 +103,7 @@ export const LIVE_ROCK_ISLAND_URLS: Readonly<Record<'left' | 'right', string>> =
 })
 
 export const MODULAR_CORAL_ASSET_URLS: Readonly<Record<string, string>> = Object.freeze({
+  'reef-acropora-corymbose': new URL('../assets/corals/custom-colonies/reef-acropora-corymbose.glb', import.meta.url).href,
   'reef-acropora-antler': new URL('../assets/corals/custom-colonies/reef-acropora-antler.glb', import.meta.url).href,
   'coral-acropora-staghorn': new URL('../assets/corals/coral-acropora-staghorn.glb', import.meta.url).href,
   'coral-acropora-table': new URL('../assets/corals/coral-acropora-table.glb', import.meta.url).href,
@@ -567,14 +568,19 @@ export const DEFAULT_RIGHT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
   },
   {
     socketName: 'socket_sps_crest_05',
-    coralAssetId: 'coral-acropora-staghorn',
+    coralAssetId: 'reef-acropora-corymbose',
     archetype: 'branching-sps',
     yawRad: -0.50,
     scale: 2.15,
     tiltXRad: 0.04,
     tiltZRad: -0.06,
     offsetM: [0.0, -0.008, 0.0],
-    paletteOverride: PALETTE_CORAL_ROSE_ACROPORA,
+    paletteOverride: {
+      surfaceMode: 'baked-pbr',
+      baseColor: '#c7a0a9', tipColor: '#e8d8cc', creviceColor: '#4c3942',
+      regradeStrength: 0.72, roughness: 1, fluorescenceStrength: 0.05,
+    },
+    scatterPaletteOverride: PALETTE_CORAL_ROSE_ACROPORA,
   },
   {
     socketName: 'socket_sps_crest_06',

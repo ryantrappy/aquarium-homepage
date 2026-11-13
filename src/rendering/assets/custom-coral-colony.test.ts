@@ -6,15 +6,30 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { validateAssetContract } from './contract'
 import { evaluateCoralVertexDisplacement } from '../scene/coral-material'
-import { DEFAULT_LEFT_ISLAND_MOUNTS, MODULAR_CORAL_ASSET_URLS } from '../scene/reef-assembly'
+import {
+  DEFAULT_LEFT_ISLAND_MOUNTS,
+  DEFAULT_RIGHT_ISLAND_MOUNTS,
+  MODULAR_CORAL_ASSET_URLS,
+} from '../scene/reef-assembly'
 // The installer is plain .mjs without a declaration file.
 // @ts-expect-error Test the actual source-bound custom colony packager.
 import { syncCoralOverride } from '../../../scripts/sync-coral-override.mjs'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
-const id = 'reef-acropora-antler'
 const registryDir = 'src/rendering/assets/corals/custom-colonies'
 const registryPath = `${registryDir}/manifest.json`
+const coralCases = [
+  {
+    id: 'reef-acropora-antler',
+    mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
+    socketName: 'socket_sps_crest_01',
+  },
+  {
+    id: 'reef-acropora-corymbose',
+    mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+    socketName: 'socket_sps_crest_05',
+  },
+] as const
 
 type GlbDocument = {
   scene?: number
@@ -38,10 +53,21 @@ function sha256(bytes: Buffer) {
   return createHash('sha256').update(bytes).digest('hex')
 }
 
-function registeredRuntimePath() {
+function registeredRuntimePath(id: string) {
   const url = MODULAR_CORAL_ASSET_URLS[id]
   expect(url).toBeDefined()
   return fileURLToPath(new URL(url!))
+}
+
+function sourceBoundPrimaryMount<T extends { coralAssetId: string; socketName: string }>(
+  id: string,
+  socketName: string,
+  mounts: readonly T[],
+): T {
+  const mount = mounts.find(candidate => candidate.socketName === socketName && candidate.coralAssetId === id)
+  expect(mount, `${id} should be mounted at ${socketName}`).toBeDefined()
+  if (!mount) throw new Error(`${id} is not mounted at ${socketName}`)
+  return mount
 }
 
 function readGlb(filePath: string) {
@@ -95,17 +121,18 @@ function channelSummary(values: readonly number[], channel: number) {
   }
 }
 
-describe('custom rigid coral colony package', () => {
+describe.each(coralCases)('$id custom rigid coral colony package', ({ id, mounts, socketName }) => {
   it('keeps source identities, mask contract, geometry and embedded PBR package in sync', () => {
     const registry = JSON.parse(fs.readFileSync(path.join(repoRoot, registryPath), 'utf8'))
     expect(registry.schema).toBe('custom-coral-colonies-v1')
     const entry = registry.assets.find((asset: { id: string }) => asset.id === id)
     expect(entry).toBeDefined()
     if (!entry) return
-    const primaryMount = DEFAULT_LEFT_ISLAND_MOUNTS[0]!
+    const primaryMount = sourceBoundPrimaryMount(id, socketName, mounts)
     expect(primaryMount).toMatchObject({ coralAssetId: id, archetype: 'branching-sps' })
+    expect(primaryMount?.socketName).toBe(socketName)
     expect(primaryMount.paletteOverride?.surfaceMode).toBe('baked-pbr')
-    const runtimePath = registeredRuntimePath()
+    const runtimePath = registeredRuntimePath(id)
     expect(path.relative(repoRoot, runtimePath)).toBe(entry.path)
 
     const checkedHashes = [
@@ -216,7 +243,7 @@ describe('custom rigid coral colony package', () => {
   })
 
   it('keeps sampled actual COLOR_0 vertices rigid across changing simulation times', () => {
-    const { document, binary } = readGlb(registeredRuntimePath())
+    const { document, binary } = readGlb(registeredRuntimePath(id))
     const primitive = document.meshes[0]!.primitives[0]!
     const positions = readPositions(document, binary, primitive.attributes.POSITION!)
     const masks = readNormalizedColor0(document, binary, primitive.attributes.COLOR_0!)
