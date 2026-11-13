@@ -1,11 +1,11 @@
 ---
 id: AQ-71
 title: Add a PMREM IBL environment map
-status: To Do
+status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-08 00:30'
-updated_date: '2026-11-13 06:28'
+updated_date: '2026-11-13 14:17'
 labels:
   - photorealism
   - rendering
@@ -45,12 +45,25 @@ The main scene currently lacks a scene.environment PMREM texture, causing MeshSt
 - [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
 
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Apply the existing declared sand environment-map intensity (0.2) to the full aragonite sand group immediately after group creation, preserving all numeric lighting, exposure, and shader values.
+2. Clarify environment-map module comments against the current authoritative renderer/optics settings; mark waterSurface intensity as compatibility-only for the custom shader material.
+3. Add an actual aquarium-controller lifecycle regression that inspects the created sand group's MeshStandardMaterials for the declared intensity, and retain focused environment-map tests.
+4. Run the focused environment-map and aquarium-lifecycle suites plus typecheck; hand off for Root visual review without marking AQ-71 Done.
+<!-- SECTION:PLAN:END -->
+
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 2026-11-08 audit: PR #9 merged procedural PMREM environment map generation (src/rendering/scene/environment-map.ts, 6 passing tests in environment-map.test.ts) and wired scene.environment and per-role envMapIntensity into src/rendering/scene/aquarium.ts. Moved to In Progress (ready-for-review / gemini approved) awaiting Root 2-viewport exposure/performance sign-off (ACs #3-#4).
 
 Luna/Root2026-11-13 read-only audit: procedural PMREM initialization/scene.environment and teardown are wired; fish/reef receiveexplicit intensities. Sand declaration0.2 is currentlynotapplied to sandBed.group (materials retain default1.0); evaluate a scoped integration fix against current warm foreground before acceptance. Water surface is customShaderMaterial, so its oldenvironmentintensity entry is compatibility-only and shouldnot be applied asPBR. Topmodulecomments reference stale exposure/hemi/backdrop values. Successful WebGL_PMREM and view-angle specular evidence still need explicitreview; no asset/license change. CI/FPSdisplay tasks remain excluded; no newframe-ratebenchmarkrun in this audit.
+
+2026-11-13 bounded sand-intensity fix: applied ENVIRONMENT_MAP_INTENSITY.sand to the complete AragoniteSandGroup before rendering; corrected stale environment-map comments and marked waterSurface value compatibility-only for the custom shader. Added actual aquarium-controller lifecycle coverage asserting all five sand-group MeshStandardMaterials use the declared value. Focused environment-map + lifecycle suites pass 43 tests; typecheck and 14 script checks pass. Root visual review pending; no viewport/FPS acceptance claimed.
+
+Root reviewed Luna sand-intensity integration: actual sand group now receives declared0.2 rather than default1.0, including floor/frontedge/scatter. Actualcontroller regression covers five PBRmaterials.43focused environment/controller tests and typecheck14scripts pass. Root also removes stale comments claiming visible backdrop and lighting-proxy gradients are identical, and obsolete fishasset counts; no numeric lights/exposure/shader colors changed. This is a verified code handoff; native A/B exposure review follows before acceptance. Water customShaderMaterial retains compatibility-only entry. No FPSdisplay work, model/asset edits or performance claim.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

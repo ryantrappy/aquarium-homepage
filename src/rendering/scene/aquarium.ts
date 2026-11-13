@@ -258,6 +258,7 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   // the shared cellular caustic chunk is applied here instead, so the sand
   // shows the same caustic system as the rock, coral, and fish.
   const sandBed = createAragoniteSandBed({ narrow: false })
+  applyEnvironmentMapIntensity(sandBed.group, ENVIRONMENT_MAP_INTENSITY.sand)
   const sand = sandBed.sandMesh
   // Surface-driven lighting (AQ-96 / AQ-70.6): the sand threshold is
   // re-tuned from the 0.22 visual-check workaround back toward the 0.35

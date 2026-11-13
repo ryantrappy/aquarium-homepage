@@ -7,6 +7,7 @@ import type { SwimmingFish } from './motion'
 import type { FishClipPlayer } from './fish-animation'
 import { refreshFishLink } from './fish-inhabitants'
 import { createAquarium, type AquariumController, type SceneStatus } from './aquarium'
+import { ENVIRONMENT_MAP_INTENSITY } from './environment-map'
 import type { FishExtensionConfig, FishExtensionSnapshot } from '../../simulation/fish-extensions'
 
 const state = vi.hoisted(() => ({
@@ -195,6 +196,22 @@ beforeEach(() => {
 afterEach(() => { controller?.dispose(); delete window.__AQUARIUM_LOOKDEV__; window.history.replaceState({}, '', '/'); host.remove(); vi.restoreAllMocks(); vi.unstubAllGlobals() })
 
 describe('actual aquarium controller inhabitant lifecycle without WebGL', () => {
+  it('applies the declared environment intensity to every material in the actual sand group', async () => {
+    await start([service('sand-ibl-check')])
+    const sandGroup = state.renderer!.scene!.getObjectByName('AragoniteSandGroup')
+    expect(sandGroup).toBeDefined()
+    const standardMaterials: THREE.MeshStandardMaterial[] = []
+    sandGroup!.traverse(object => {
+      if (!(object instanceof THREE.Mesh)) return
+      const materials = Array.isArray(object.material) ? object.material : [object.material]
+      for (const material of materials) {
+        if (material instanceof THREE.MeshStandardMaterial) standardMaterials.push(material)
+      }
+    })
+    expect(standardMaterials).toHaveLength(5)
+    expect(standardMaterials.every(material => material.envMapIntensity === ENVIRONMENT_MAP_INTENSITY.sand)).toBe(true)
+  })
+
   it('holds capture readiness until the application finishes loading saved configuration', async () => {
     window.history.replaceState({}, '', '/?lookdev=1')
     const services = [service('config-pending')]
