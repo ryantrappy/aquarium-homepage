@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-13 05:41'
-updated_date: '2026-11-13 06:04'
+updated_date: '2026-11-13 06:09'
 labels:
   - rendering
   - optics
@@ -29,12 +29,12 @@ The water-surface plane in aquarium.ts reads as stretched static due to cellular
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The water plane remains horizontal at the configured surfaceY and its geometry and shader bounds match the current glass front/rear/half-width in narrow and desktop layouts, including responsive layout changes.
+- [x] #1 The water plane remains horizontal at the configured surfaceY and its geometry and shader bounds match the current glass front/rear/half-width in narrow and desktop layouts, including responsive layout changes.
 - [ ] #2 The cellular-dot and high-frequency stripe surface pattern is replaced by continuous canonical wave/capillary facets, a softened Snell-window/TIR transition, restrained rear grazing-angle coral reflection, and overhead-fixture transmission.
 - [ ] #3 Surface alpha blends into the rear background, fades at sides, and shows a thin meniscus inside the front-glass boundary without extending beyond the enclosure.
-- [ ] #4 Shared animation time still freezes for pause/reduced-motion/hidden states, and non-interactive raycast and resource disposal behavior are preserved.
-- [ ] #5 Requirements and active rendering documentation describe the revised interface; AQ-39’s conflicting older interface proposal is explicitly superseded for this focused surface work.
-- [ ] #6 Focused tests cover both enclosure layouts, shader structure, time/uniform behavior, and disposal; typecheck/build pass, with visual checks at 402×874 and 1440×900 when a usable browser is available.
+- [x] #4 Shared animation time still freezes for pause/reduced-motion/hidden states, and non-interactive raycast and resource disposal behavior are preserved.
+- [x] #5 Requirements and active rendering documentation describe the revised interface; AQ-39’s conflicting older interface proposal is explicitly superseded for this focused surface work.
+- [x] #6 Focused tests cover both enclosure layouts, shader structure, time/uniform behavior, and disposal; typecheck/build pass, with visual checks at 402×874 and 1440×900 when a usable browser is available.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -51,6 +51,16 @@ The water-surface plane in aquarium.ts reads as stretched static due to cellular
 
 <!-- SECTION:NOTES:BEGIN -->
 Root reviewed Junie implementation and Luna read-only integration audit. Luna added actual-controller water-clock regression observing live mesh uniform across active/pause/reduced/hidden/resume;33lifecycle tests pass. Initial isolated snapshot full740tests/66files and typecheck14scripts pass. After subsequent shader-only tuning,55focused surface/wave/enclosure/lifecycle tests pass; final typecheck/build and native two-size source-pinned captures follow. No asset/Blender files changed by Root, and no final meniscus visibility/AC/Done claim yet. Preserve separate AQ58fallback helper work and dirty native reef source.
+
+2026-11-13 Junie implementation handoff:
+- Extracted the water interface into createWaterSurface; aquarium.ts now supplies shared time, updates bounds with glassEnclosureLayout, retains the non-interactive mesh, and disposes its resources. The shader uses the canonical wave field, lower distance-filtered capillary/macro slopes, softened Snell-window/TIR, bounded fixture transmission, restrained rear/mid coral bounce, backdrop fade, and a thin front-edge meniscus.
+- AC #1 evidence: water-surface.test.ts verifies exact desktop/narrow plane dimensions, level placement, shader bounds, and geometry replacement on setLayout; aquarium.ts updates the surface alongside glassEnclosure on layout changes.
+- AC #4 evidence: aquarium-lifecycle.test.ts actual-controller test exercises active, pause, reduced-motion, and hidden behavior; water-surface.test.ts covers raycast exclusion, time updates, and idempotent disposal.
+- AC #5 evidence: docs/requirements.md and docs/rendering.md describe the revised interface; AQ-39 received a CLI comment that supersedes only its surface-interface proposal while preserving broader optics work.
+- AC #6 evidence: npm test -- src/rendering/scene/water-surface.test.ts src/rendering/scene/surface-waves.test.ts src/rendering/scene/glass-enclosure.test.ts src/rendering/scene/aquarium-lifecycle.test.ts (55 passed); npm run typecheck passed (14 scripts checked); npm run build passed. Headless Chrome captures were inspected at exact 402x874 and 1440x900 pixel sizes.
+- Root review remains requested before completion. AC #2 and #3 are intentionally unchecked: the overview captures do not clearly expose the front meniscus, and the final visual surface/reflection balance still needs Root judgment. Chrome emitted macOS CVDisplayLink/GPU mailbox warnings and Vite logged a generic root-route notFound warning; screenshots rendered the aquarium, and no shader compilation error was visible in the captured output. Changes remain uncommitted per AGENT_TASKS.md; unrelated Blender, reef-navigation, AQ-58, and AQ-82 work was preserved.
+
+Root exact-sourcea5e64a2 native1440x900/402x874DPR1 evidence under docs/asset-evidence/aq103/interface-20261113/: all assets ready, zero captured consolewarnings/errors, visible bounded smooth facets replacing static/dots/stripes, all service links retained.55focused tests/4files, finaltypecheck14scripts and productionbuild pass. Actualcontroller clock proves active/paused/reduced/hidden/resume behavior; disposedgeometry/material and noninteractive raycast tests pass. Root acceptsAC1/4/5/6. AC2retains fixture-transmission/finalcontrast art check; AC3frontmeniscus lies outside overview frustum and still needs targeted framing review. Do not markDone from a hidden meniscus or shader-marker tests. No Root Blender/asset edits; exactsource proof excludes ongoingAQ58fallback changes.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
