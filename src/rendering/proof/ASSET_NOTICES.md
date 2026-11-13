@@ -4,9 +4,9 @@
 Category: Evidence / Asset Attribution
 Status: Active
 Authority: Evidentiary
-Backlog: AQ-12, AQ-40, AQ-70.10, AQ-70.12
+Backlog: AQ-12, AQ-40, AQ-70.10, AQ-70.12, AQ-94
 Owner: @root
-Updated: 2026-11-06
+Updated: 2026-11-13
 Upstream: docs/requirements.md, src/rendering/proof/asset-manifest.json
 Downstream: Rendering study assets and candidate attribution
 -->
@@ -126,3 +126,14 @@ verifies source integration and temporal invariants only. No scanned/photo-deriv
 map, 1–2mm physical calibration, tiling quality, final sand art or budget criterion
 has been accepted. Earlier reference/calibration descriptions are not evidence of
 those gates. The clean delivery keeps the module separate from the main aquarium.
+
+## Custom central limestone arch — AQ-94
+
+`src/rendering/assets/corals/custom-rocks/reef-center-arch.glb` is original project
+geometry and custom procedural carbonate/normal/roughness textures ($0, no
+imported imagery). Packed Blender source and raw override are committed under
+`splat-fish/blend/reef-center-arch.blend` and `splat-fish/overrides/reef-center-arch.glb`.
+The separate custom-rock registry pins native, generator, raw export and installed
+package hashes. This additive background module is used in the laptop reef;
+phone retains the taller single island. It does not replace the supplied Gemini
+foundations or claim completion of the modular library/final reef art.

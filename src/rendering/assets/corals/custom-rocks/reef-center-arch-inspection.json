@@ -1,0 +1,80 @@
+{
+  "extras": {
+    "reefAsset": {
+      "schema": "reef-asset-v1",
+      "id": "reef-center-arch",
+      "kind": "rock",
+      "units": "meter",
+      "upAxis": "+Y",
+      "origin": "local",
+      "dimensionsM": [
+        1.0772002339363098,
+        0.5718747545033693,
+        0.21577372401952744
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "2861f56024bb6bc21a68857cede7ad1c52c706b4865a0e0b0c9824a92c8b8305",
+        "recipe": "Blender background --python src/rendering/modeling/build_reef_center_arch.py; node scripts/sync-blender-override.mjs --reef reef-center-arch --learn-guide",
+        "attribution": "Original custom procedural limestone arch and embedded textures; no imported visual assets."
+      }
+    }
+  },
+  "rootTransform": {
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "boundsM": {
+    "min": [
+      -0.5483332276344299,
+      -0.005690949037671089,
+      -0.10729692131280899
+    ],
+    "max": [
+      0.5288670063018799,
+      0.5661838054656982,
+      0.10847680270671844
+    ]
+  },
+  "primitives": [
+    {
+      "id": "reef_center_arch",
+      "role": "rock",
+      "vertexCount": 9555,
+      "boundsM": {
+        "min": [
+          -0.5483332276344299,
+          -0.005690949037671089,
+          -0.10729692131280899
+        ],
+        "max": [
+          0.5288670063018799,
+          0.5661838054656982,
+          0.10847680270671844
+        ]
+      },
+      "material": {
+        "vertexColors": false,
+        "vertexAlpha": false,
+        "aoSource": "none"
+      }
+    }
+  ],
+  "sockets": [],
+  "collisionParts": []
+}

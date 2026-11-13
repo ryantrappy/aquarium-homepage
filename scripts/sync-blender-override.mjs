@@ -16,6 +16,9 @@
  *
  *   - After exporting a sculpted .glb from Blender to overrides/<species-id>.glb:
  *     node scripts/sync-blender-override.mjs --learn-guide
+ *
+ *   - After exporting a custom reef rock override:
+ *     node scripts/sync-blender-override.mjs --reef reef-center-arch --learn-guide
  */
 
 import { execFileSync } from 'node:child_process'
@@ -115,6 +118,9 @@ export function parseGlbGeometry(glbBuffer) {
  * Extracts a normalized 3D anatomical shape guide from a manually sculpted .glb in overrides/.
  */
 export function extractShapeGuideFromOverride(speciesId, overrideGlbPath) {
+  if (typeof speciesId === 'string' && speciesId.startsWith('reef-')) {
+    throw new Error(`Cannot extract a fish shape guide from reef override "${speciesId}".`)
+  }
   const glbBuf = fs.readFileSync(overrideGlbPath)
   const { positions, joints, weights } = parseGlbGeometry(glbBuf)
   const vertCount = positions.length / 3
@@ -225,12 +231,15 @@ export function extractShapeGuideFromOverride(speciesId, overrideGlbPath) {
   }
 }
 
+export function fishOverrideFiles(files) {
+  return files
+    .filter(file => file.endsWith('.glb') && !path.basename(file).startsWith('reef-'))
+    .sort()
+}
+
 export function updateLearnedGuidesFile() {
   fs.mkdirSync(OVERRIDES_DIR, { recursive: true })
-  const overrideFiles = fs
-    .readdirSync(OVERRIDES_DIR)
-    .filter((f) => f.endsWith('.glb'))
-    .sort()
+  const overrideFiles = fishOverrideFiles(fs.readdirSync(OVERRIDES_DIR))
 
   const guidesBySpecies = {}
   const guidesByArchetype = {}
@@ -391,9 +400,16 @@ function sampleLearnedGuideMultiplier(specId, s, v) {
   return true
 }
 
-function main() {
-  ensureDocumentationAndRules()
+async function main() {
   const args = process.argv.slice(2)
+  // Rocks are not fish: dispatch before documentation, guide learning or builds.
+  if (args.includes('--reef')) {
+    const { syncReefOverride, parseReefSyncArgs } = await import('./sync-reef-override.mjs')
+    const id = parseReefSyncArgs(args)
+    syncReefOverride(REPO_ROOT, id)
+    return
+  }
+  ensureDocumentationAndRules()
 
   const freezeIdx = args.indexOf('--freeze')
   if (freezeIdx !== -1 && args[freezeIdx + 1]) {
@@ -424,5 +440,5 @@ function main() {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  main()
+  await main()
 }

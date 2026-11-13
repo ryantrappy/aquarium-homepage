@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-11 04:55'
-updated_date: '2026-11-13 05:36'
+updated_date: '2026-11-13 15:03'
 labels:
   - modeling
   - blender
@@ -50,8 +50,18 @@ Architect the live rock aquascape from scratch using Negative Space Aquascaping 
 - [ ] #5 Substrate dunes, shell fragments, and rubble eliminate hard intersecting seams at the sand bed base
 <!-- AC:END -->
 
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Root next major visual iteration under the active user goal: preserve supplied left/right foundations and coral work, add a custom central arch module rather than another enlarged mound. Root alone will own Blender; leave live reef-full-model scene untouched and use a separate saved source. Before authoring, add an explicitly isolated --reef <id> dispatch to sync-blender-override.mjs before fish docs/learning/build side effects. Mandated blend/override paths remain under splat-fish; install validated custom rock derivatives with a separate module manifest so ten-coral/fish catalogs are untouched. Never feed rock geometry into fish anatomical guides or run fish rebuilds from reef mode. Package source/blend/export hashes, contract/provenance/inspection, and verify module is actually selected in scene before model commit. Integrate arch as a separate navigation collider/input (verify union behavior; do not introduce overlapping components into a single parity classifier), aspect-specific placements and existing hit/depth/shadow rules. Save/pack/export/sync/commit the new used model; review native two-size composition and measured opening with honest fish-radius scope. This is the first additive visual module, not completion of the full5–8piece library/2048atlas/current foundation art requirements; retain all existing ACs and final reference goal.
+<!-- SECTION:PLAN:END -->
+
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 Root2026-11-12 reopened from Done after independent native/export review. Saved reef-full-model.blend contains exactly two merged foundation meshes (Live_Rock_Island_Left/Right), coral previews and sand/scatter, with no5-8 reusable rock-piece meshes or2048px image. Generator NSA_MODULAR_ROCK_LIBRARY is seven scalar field descriptions merged into island heightfields, not a reusable sculpted piece library. Actual runtime reef-full-model-left/right.glb have no embedded maps and are absent from canonical manifest/socket reports. Existing upper-water space and under5MB/draw-count criteria retained; central arch/library/grounding final acceptance withdrawn pending exact-source evidence. Native review is read-only and does not alter the live dirty Blender scene. Detailed evidence follows underAQ59.
+
+Luna read-only pipeline audit confirms current sync main always writes fish docs, learns every override GLB and executes fish builder. Reef path must branch before all those operations and reject mixed fish flags. Existing contract.ts supports kindrock with identityY-upmeter/provenance; socket-inspector.ts can pin source bytes and measure declared socket intent. Existing coral packager is a fixed ten-asset batch, not a callable module installer; existing manifest checker hardcodes counts. Preserve those sources and use separate custom module registry/manifest. No new model/pipeline changes have been made by Root yet.
+
+Root authored additive reef-center-arch in separate background Blender5.2.3 (live user scene untouched), saved uncompressed packed source splat-fish/blend/reef-center-arch.blend and exported raw overrides/reef-center-arch.glb. Separate --reef reef-center-arch --learn-guide installer stamps/validates rock metadata, measured buffers and hashes with dedicated custom-rocks registry; never rebuilds/learns fish. Source has9282vertices/18560triangles, three packed custom images1024carbonate/512normal/512roughness; not a high-poly bake/2048atlas or full5–8modulelibrary. Actual scene uses desktop central bridge with own fallback/exactcollider, hit/depth/shadow/caustics/env handling; phone preserves enlarged single-island composition. Existing supplied foundations untouched. Root first native trial confirms visible opening and additional central height; final exact-source captures/verification follow. Luna actualasset navigation at0.04scene probe clears center and blocks cap/leg; no calibrated fullfish-body envelope claim. Keep full task InProgress.
 <!-- SECTION:NOTES:END -->

@@ -16,6 +16,7 @@ const state = vi.hoisted(() => ({
   textures: [] as { texture: import('three').Texture; load?: () => void; error?: (error: unknown) => void }[],
   deferFishLoads: false, failFishLoads: false, pendingFishLoadReleases: [] as Array<() => void>, resizeCallback: undefined as undefined | (() => void),
   deferMeshNavigation: false, pendingMeshNavigationReleases: [] as Array<() => void>, meshNavigationResult: undefined as unknown,
+  reefFallbackIslandIds: [] as string[], reefNavigationIslandIds: [] as string[][],
   rockFallbackUnavailable: false,
   rockFallbackObstacles: undefined as undefined | import('../../simulation/habitat-navigation').SolidObstacleVolume[],
   mountedCoralBindings: [] as Array<{ socketName: string; coralAssetId: string; root: import('three').Group; materialControllers: never[] }>,
@@ -41,6 +42,19 @@ vi.mock('three/addons/loaders/GLTFLoader.js', async () => {
   return { GLTFLoader: class {
     async loadAsync(url: string) {
       const root = new T.Group()
+      if (url.includes('reef-center-arch.glb')) {
+        const addRock = (name: string, size: [number, number, number], position: [number, number, number]) => {
+          const mesh = new T.Mesh(new T.BoxGeometry(...size), new T.MeshStandardMaterial())
+          mesh.name = name
+          mesh.position.set(...position)
+          mesh.userData.reefPrimitive = { role: 'rock' }
+          root.add(mesh)
+        }
+        addRock('arch-leg-left', [0.35, 1.8, 0.5], [-0.8, -0.1, 0])
+        addRock('arch-leg-right', [0.35, 1.8, 0.5], [0.8, -0.1, 0])
+        addRock('arch-cap', [1.95, 0.35, 0.5], [0, 0.925, 0])
+        return { scene: root, animations: [] }
+      }
       if (url.includes('left-rock') || url.includes('right-rock') || url === 'coral') return { scene: root, animations: [] }
       if (state.failFishLoads && url.includes('.glb')) throw new Error('Fixture fish asset failure')
       if (state.deferFishLoads && url.includes('.glb')) await new Promise<void>(resolve => state.pendingFishLoadReleases.push(resolve))
@@ -98,17 +112,23 @@ vi.mock('./reef-mesh-navigation', async importOriginal => {
   const real = await importOriginal<typeof import('./reef-mesh-navigation')>()
   return {
     ...real,
-    createRockFallbackObstacles: (_reef: Parameters<typeof real.createRockFallbackObstacles>[0], islandId: string) => state.rockFallbackUnavailable
-      ? { status: 'unavailable' as const, reason: 'fixture-rock-geometry-unavailable' }
-      : {
-          status: 'ready' as const,
-          obstacles: (state.rockFallbackObstacles ?? []).map(obstacle => ({ ...obstacle, id: `${obstacle.id}-${islandId}` })),
-        },
-    createReefMeshNavigation: (...args: Parameters<typeof real.createReefMeshNavigation>) => state.deferMeshNavigation
-      ? new Promise<Awaited<ReturnType<typeof real.createReefMeshNavigation>>>(resolve => {
-          state.pendingMeshNavigationReleases.push(() => resolve(state.meshNavigationResult as Awaited<ReturnType<typeof real.createReefMeshNavigation>>))
-        })
-      : real.createReefMeshNavigation(...args),
+    createRockFallbackObstacles: (reef: Parameters<typeof real.createRockFallbackObstacles>[0], islandId: string) => {
+      state.reefFallbackIslandIds.push(islandId)
+      if (state.rockFallbackUnavailable) return { status: 'unavailable' as const, reason: 'fixture-rock-geometry-unavailable' }
+      if (state.rockFallbackObstacles !== undefined) {
+        return { status: 'ready' as const, obstacles: state.rockFallbackObstacles.map(obstacle => ({ ...obstacle, id: `${obstacle.id}-${islandId}` })) }
+      }
+      if (islandId === 'reef-center-arch') return real.createRockFallbackObstacles(reef, islandId)
+      return { status: 'ready' as const, obstacles: [] }
+    },
+    createReefMeshNavigation: (...args: Parameters<typeof real.createReefMeshNavigation>) => {
+      state.reefNavigationIslandIds.push(args[0].map(island => island.islandId))
+      return state.deferMeshNavigation
+        ? new Promise<Awaited<ReturnType<typeof real.createReefMeshNavigation>>>(resolve => {
+            state.pendingMeshNavigationReleases.push(() => resolve(state.meshNavigationResult as Awaited<ReturnType<typeof real.createReefMeshNavigation>>))
+          })
+        : real.createReefMeshNavigation(...args)
+    },
   }
 })
 vi.mock('./environment-map', async importOriginal => {
@@ -192,6 +212,7 @@ beforeEach(() => {
   state.created = []; state.players = []; state.sources = []; state.textures = []; state.blockedSpawn = false; state.throwCreateForId = ''; state.beforeCreateFailure = undefined
   state.deferFishLoads = false; state.failFishLoads = false; state.pendingFishLoadReleases = []; state.resizeCallback = undefined
   state.deferMeshNavigation = false; state.pendingMeshNavigationReleases = []; state.meshNavigationResult = undefined
+  state.reefFallbackIslandIds = []; state.reefNavigationIslandIds = []
   state.rockFallbackUnavailable = false
   state.rockFallbackObstacles = undefined
   state.mountedCoralBindings = []
@@ -276,6 +297,20 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     controller.dispose()
     expect(environmentOwnerDispose).toHaveBeenCalledOnce()
     expect(sharedTextureDispose).toHaveBeenCalledOnce()
+  })
+
+  it('registers the center arch in desktop collision setup and omits it from the narrow scene', async () => {
+    await start([service('center-arch-link')])
+    expect(state.renderer!.scene!.getObjectByName('reef-center-arch')).toBeDefined()
+    expect(state.reefFallbackIslandIds).toContain('reef-center-arch')
+    expect(state.reefNavigationIslandIds.at(-1)).toContain('reef-center-arch')
+
+    Object.defineProperty(host, 'clientWidth', { configurable: true, value: 402 })
+    state.resizeCallback?.()
+
+    expect(state.renderer!.scene!.getObjectByName('reef-center-arch')).toBeUndefined()
+    expect(state.reefFallbackIslandIds.slice(state.reefFallbackIslandIds.indexOf('reef-center-arch') + 1)).not.toContain('reef-center-arch')
+    expect(state.reefNavigationIslandIds.at(-1)).not.toContain('reef-center-arch')
   })
 
   it('holds capture readiness until the application finishes loading saved configuration', async () => {

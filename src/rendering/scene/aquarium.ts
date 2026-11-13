@@ -37,6 +37,7 @@ import { SURFACE_WAVE_GLSL } from './surface-waves'
 import { RaymarchedShaftPass, SHAFT_BEAM_GLSL } from './light-shafts'
 import { createAragoniteSandBed, getRockFootprintsForViewport } from './aragonite-sand'
 import { reefPlacementsForViewport } from './reef-layout'
+import { CENTER_ARCH_URL, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
 import { createGlassEnclosure, glassEnclosureLayout } from './glass-enclosure'
 import { createWaterSurface } from './water-surface'
 import { estimateCaptionRect, labelLiftPx, resolveLabelDeconflicts } from './fish-label-layout'
@@ -501,6 +502,8 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
 
   const abort = new AbortController(), loader = new GLTFLoader(), modelBases = new Map<string, GLTF>(), coralTemplates = new Map<string, THREE.Object3D>(), reefs: THREE.Object3D[] = []
   let rockIslandLeftBase: GLTF | undefined, rockIslandRightBase: GLTF | undefined
+  let centerArchBase: GLTF | undefined
+  let centerArchPlacement: THREE.Object3D | undefined
   let reefControllers: Array<ReturnType<typeof assembleCoralsOnRockSockets>> = []
   let coralElapsedSec = 0
   const reducedMotionQuery = typeof window !== 'undefined' && typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-reduced-motion: reduce)') : null
@@ -809,6 +812,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     }
     habitat.meshNavigation = undefined
     particleBuffersDirty = true
+    if (centerArchPlacement) { disposeCenterArchMaterials(centerArchPlacement); centerArchPlacement = undefined }
     reefs.forEach(reef => { scene.remove(reef) }); reefs.length = 0; hitMeshes.length = 0; reefMeshes.length = 0; fishMeshes.length = 0
     reefControllers = []; habitat.obstacles = []; habitat.anchors = []
     if (!rockIslandLeftBase || !rockIslandRightBase || coralTemplates.size === 0) {
@@ -902,6 +906,27 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       habitat.anchors.push(...result.anchors)
       reef.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) })
       meshIslands.push({ reef, islandId: `reef-${i}`, mountedCorals: assembled.mountedCorals })
+    }
+    if (width >= 600 && centerArchBase) {
+      const arch = createCenterArch(centerArchBase.scene)
+      centerArchPlacement = arch
+      arch.traverse(node => {
+        if (!(node instanceof THREE.Mesh)) return
+        for (const material of Array.isArray(node.material) ? node.material : [node.material]) {
+          if (material instanceof THREE.MeshStandardMaterial) applyCaustics(material, caustics, { scaleA: 0.25, scaleB: 0.4 })
+        }
+        hitMeshes.push(node)
+      })
+      scene.add(arch)
+      reefs.push(arch)
+      applyEnvironmentMapIntensity(arch, ENVIRONMENT_MAP_INTENSITY.reef, environmentMap?.texture)
+      const fallback = createRockFallbackObstacles(arch, 'reef-center-arch')
+      if (fallback.status !== 'ready') {
+        failReefSetup(`Arch collision geometry unavailable: ${fallback.reason}`)
+        return
+      }
+      habitat.obstacles.push(...fallback.obstacles)
+      meshIslands.push({ reef: arch, islandId: 'reef-center-arch', mountedCorals: [] })
     }
     hitMeshes.push(sand)
     // Mesh routing builds after first paint (~1 s per island on the main
@@ -1931,15 +1956,17 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     // no configured service never load at all.
     const configuredFishIds = [...new Set(services.map(service => service.fishId))]
     const phase0Ids = phase0SpeciesIds(configuredFishIds)
-    const [rockLeft, rockRight, ...restModels] = await Promise.all([
+    const [rockLeft, rockRight, rockArch, ...restModels] = await Promise.all([
       load(LIVE_ROCK_ISLAND_URLS.left),
       load(LIVE_ROCK_ISLAND_URLS.right),
+      load(CENTER_ARCH_URL),
       ...coralIds.map(id => load(MODULAR_CORAL_ASSET_URLS[id])),
       ...phase0Ids.map(id => loadFishModel(id)),
     ])
     if (disposed || failed) return
     rockIslandLeftBase = rockLeft
     rockIslandRightBase = rockRight
+    centerArchBase = rockArch
     coralIds.forEach((id, i) => coralTemplates.set(id, restModels[i]!.scene))
     phase0Ids.forEach((id, i) => { const model = restModels[coralIds.length + i]; if (model) modelBases.set(id, model) })
     loaded = true; narrow = width < 600; rebuildHabitat()
@@ -2015,6 +2042,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       if (disposed) return; disposed = true; abort.abort(); observer.disconnect(); renderer.setAnimationLoop(null); lazyQueue = []
       rejectLookDevWaiters(new Error('Aquarium was disposed before look-dev capture readiness.'))
       glassEnclosure.dispose()
+      if (centerArchPlacement) { disposeCenterArchMaterials(centerArchPlacement); centerArchPlacement = undefined }
       if (import.meta.env.DEV && lookDevBridge && window.__AQUARIUM_LOOKDEV__ === lookDevBridge) delete window.__AQUARIUM_LOOKDEV__
       removeFish(); loadedAssets.forEach(model => disposeTree(model.scene, environmentMap?.texture)); loadedAssets.clear(); sandBed.dispose(); rear.geometry.dispose(); rear.material.dispose(); hazePlane.geometry.dispose(); hazeMaterial.dispose(); shaftPlane.geometry.dispose(); shaftMaterial.dispose(); waterSurfaceController.dispose(); shaftPass?.dispose(); shaftPass = null; foregroundParticleGeometry.dispose(); foregroundParticleMaterial.dispose(); backgroundParticleGeometry.dispose(); backgroundParticleMaterial.dispose(); bubbleGeometry.dispose(); bubbleMaterial.dispose(); caustics.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
     },

@@ -1,0 +1,26 @@
+{
+  "schema": "custom-reef-modules-v1",
+  "assets": [
+    {
+      "id": "reef-center-arch",
+      "kind": "rock",
+      "path": "src/rendering/assets/corals/custom-rocks/reef-center-arch.glb",
+      "inspection": "src/rendering/assets/corals/custom-rocks/reef-center-arch-inspection.json",
+      "socketReport": "src/rendering/assets/corals/custom-rocks/reef-center-arch-socket-report.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-center-arch.blend",
+      "nativeSha256": "ecdf6e40e766de7a4250d37a7fbac6f398cf401cb24ca5863889fae9478ad7f1",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-center-arch.glb",
+      "overrideSha256": "2861f56024bb6bc21a68857cede7ad1c52c706b4865a0e0b0c9824a92c8b8305",
+      "generatorPath": "src/rendering/modeling/build_reef_center_arch.py",
+      "generatorSha256": "f1bb5e7f5da947e68a4902574fc24101daa29a1b0f00af59ab840a078c892e5b",
+      "sha256": "b3a97b2d95bb1dd013c2ed6a5ece72735deed78c0695f9926edfe364f1343db9",
+      "bytes": 1422812,
+      "triangles": 18560,
+      "dimensionsM": [
+        1.0772002339363098,
+        0.5718747545033693,
+        0.21577372401952744
+      ]
+    }
+  ]
+}
