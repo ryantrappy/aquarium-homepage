@@ -1,0 +1,2255 @@
+{
+  "file": "/Users/ryantrapp/Desktop/Code/aquarium-homepage/src/rendering/assets/corals/blend/reef-full-model.blend",
+  "sha256": "ed6da05ad28ccec47a718a7609e1e2ae1dd8f2f35c16470bb48f2022dcdf5bb3",
+  "objects": [
+    {
+      "name": "Anemone_Column_Disc",
+      "type": "MESH",
+      "mesh": "Anemone_Column_Disc",
+      "vertices": 852,
+      "polygons": 1536,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.22749048471450806,
+        0.20368626713752747,
+        0.11571677029132843
+      ],
+      "materials": [
+        "Anemone_Disc_Mat"
+      ]
+    },
+    {
+      "name": "Anemone_Tentacle_Crown",
+      "type": "MESH",
+      "mesh": "Anemone_Tentacle_Crown",
+      "vertices": 23040,
+      "polygons": 37440,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.2869184911251068,
+        0.27433353662490845,
+        0.15786539018154144
+      ],
+      "materials": [
+        "Anemone_Tentacle_Mat"
+      ]
+    },
+    {
+      "name": "Aragonite_Sand_Bed",
+      "type": "MESH",
+      "mesh": "Aragonite_Sand_Bed",
+      "vertices": 10240,
+      "polygons": 10033,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        3.5999999046325684,
+        2.799999952316284,
+        0.11808153241872787
+      ],
+      "materials": [
+        "Aragonite_Sand_Caustic_Mat"
+      ]
+    },
+    {
+      "name": "Camera",
+      "type": "CAMERA",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "Coral_Acropora_Staghorn",
+      "type": "MESH",
+      "mesh": "Acropora_Staghorn_Colony",
+      "vertices": 18693,
+      "polygons": 23648,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.17456898093223572,
+        0.19417797029018402,
+        0.22105474770069122
+      ],
+      "materials": [
+        "Acropora_Staghorn_Mat"
+      ]
+    },
+    {
+      "name": "Coral_Acropora_Table",
+      "type": "MESH",
+      "mesh": "Acropora_Table_Colony",
+      "vertices": 26665,
+      "polygons": 34176,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.22295516729354858,
+        0.15577071905136108,
+        0.17289870977401733
+      ],
+      "materials": [
+        "Acropora_Table_Mat"
+      ]
+    },
+    {
+      "name": "Coral_Anemone_BTA",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "Coral_Brain_Diploria",
+      "type": "MESH",
+      "mesh": "Diploria_Brain_Colony.001",
+      "vertices": 6609,
+      "polygons": 12544,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.2557119131088257,
+        0.23433560132980347,
+        0.08215101063251495
+      ],
+      "materials": [
+        "Diploria_Brain_Mat.001"
+      ]
+    },
+    {
+      "name": "Coral_Euphyllia_Hammer",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "Coral_Euphyllia_Torch",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "Coral_Montipora_Plate",
+      "type": "MESH",
+      "mesh": "Montipora_Plate_Colony",
+      "vertices": 2830,
+      "polygons": 4560,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.23036588728427887,
+        0.24070587754249573,
+        0.09705692529678345
+      ],
+      "materials": [
+        "Montipora_Plate_Mat"
+      ]
+    },
+    {
+      "name": "Coral_Zoanthid_Mat",
+      "type": "MESH",
+      "mesh": "Zoanthid_Button_Cluster",
+      "vertices": 10543,
+      "polygons": 18600,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.2444535791873932,
+        0.17365926504135132,
+        0.04237522557377815
+      ],
+      "materials": [
+        "Zoanthid_Cluster_Mat"
+      ]
+    },
+    {
+      "name": "Euphyllia_Hammer_Polyp_Crown",
+      "type": "MESH",
+      "mesh": "Euphyllia_Hammer_Polyp_Crown",
+      "vertices": 15232,
+      "polygons": 21760,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.2026997059583664,
+        0.17817527055740356,
+        0.06761039793491364
+      ],
+      "materials": [
+        "Euphyllia_Hammer_Polyp_Mat"
+      ]
+    },
+    {
+      "name": "Euphyllia_Hammer_Skeleton",
+      "type": "MESH",
+      "mesh": "Euphyllia_Hammer_Skeleton",
+      "vertices": 1538,
+      "polygons": 2352,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.1714615523815155,
+        0.15105798840522766,
+        0.11041807383298874
+      ],
+      "materials": [
+        "Euphyllia_Hammer_Skeleton_Mat"
+      ]
+    },
+    {
+      "name": "Euphyllia_Polyp_Crown",
+      "type": "MESH",
+      "mesh": "Euphyllia_Polyp_Crown",
+      "vertices": 16160,
+      "polygons": 23040,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.2668861150741577,
+        0.2407800257205963,
+        0.08856743574142456
+      ],
+      "materials": [
+        "Euphyllia_Polyp_Mat"
+      ]
+    },
+    {
+      "name": "Euphyllia_Skeleton",
+      "type": "MESH",
+      "mesh": "Euphyllia_Skeleton",
+      "vertices": 2037,
+      "polygons": 3192,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.16882938146591187,
+        0.17114147543907166,
+        0.1269247829914093
+      ],
+      "materials": [
+        "Euphyllia_Skeleton_Mat"
+      ]
+    },
+    {
+      "name": "Fill",
+      "type": "LIGHT",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "Key",
+      "type": "LIGHT",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "Live_Rock_Island_Left",
+      "type": "MESH",
+      "mesh": "Live_Rock_Island_Left.002",
+      "vertices": 12288,
+      "polygons": 24572,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0800000429153442,
+        1.0800000429153442,
+        1.149999976158142
+      ],
+      "dimensions": [
+        1.0944435596466064,
+        0.5942907929420471,
+        0.4949207007884979
+      ],
+      "materials": [
+        "Photoreal_Fiji_Live_Rock_Mat"
+      ]
+    },
+    {
+      "name": "Live_Rock_Island_Right",
+      "type": "MESH",
+      "mesh": "Live_Rock_Island_Right.002",
+      "vertices": 12288,
+      "polygons": 24572,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        0.9399999976158142,
+        0.9200000166893005,
+        0.8799999952316284
+      ],
+      "dimensions": [
+        0.9245591163635254,
+        0.4971466362476349,
+        0.27145954966545105
+      ],
+      "materials": [
+        "Photoreal_Fiji_Live_Rock_Mat"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_anemone_crevice_01_Anemone_Column_Disc",
+      "type": "MESH",
+      "mesh": "Anemone_Column_Disc.001",
+      "vertices": 852,
+      "polygons": 1536,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        0.8999999761581421,
+        0.8999999761581421,
+        0.8999999761581421
+      ],
+      "dimensions": [
+        0.22112075984477997,
+        0.19827869534492493,
+        0.1031855046749115
+      ],
+      "materials": [
+        "Textured_Pal_Goni_Peach_nemone_Column_Disc"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_anemone_crevice_01_Anemone_Tentacle_Crown",
+      "type": "MESH",
+      "mesh": "Anemone_Tentacle_Crown.001",
+      "vertices": 23040,
+      "polygons": 37440,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        0.8999999761581421,
+        0.8999999761581421,
+        0.8999999761581421
+      ],
+      "dimensions": [
+        0.27888479828834534,
+        0.2670503854751587,
+        0.16782109439373016
+      ],
+      "materials": [
+        "Textured_Pal_Goni_Peach_one_Tentacle_Crown"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_brain_apron_01_Coral_Brain_Diploria",
+      "type": "MESH",
+      "mesh": "Diploria_Brain_Colony.002",
+      "vertices": 6609,
+      "polygons": 12544,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0440000295639038,
+        1.0440000295639038,
+        1.0440000295639038
+      ],
+      "dimensions": [
+        0.2883203625679016,
+        0.26439425349235535,
+        0.1751386523246765
+      ],
+      "materials": [
+        "Textured_Pal_Hammer_Teal_ral_Brain_Diploria"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_brain_apron_02_Coral_Brain_Diploria",
+      "type": "MESH",
+      "mesh": "Diploria_Brain_Colony.003",
+      "vertices": 6609,
+      "polygons": 12544,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0499999523162842,
+        1.0499999523162842,
+        1.0499999523162842
+      ],
+      "dimensions": [
+        0.2899772822856903,
+        0.265913724899292,
+        0.17614521086215973
+      ],
+      "materials": [
+        "Textured_Pal_Acan_Orange_ral_Brain_Diploria"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_brain_apron_03_Coral_Brain_Diploria",
+      "type": "MESH",
+      "mesh": "Diploria_Brain_Colony.004",
+      "vertices": 6609,
+      "polygons": 12544,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        0.972000002861023,
+        0.972000002861023,
+        0.972000002861023
+      ],
+      "dimensions": [
+        0.2334446758031845,
+        0.20964334905147552,
+        0.1249089166522026
+      ],
+      "materials": [
+        "Textured_Pal_Zoa_Orange_Green_ral_Brain_Diploria"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_brain_apron_04_Coral_Brain_Diploria",
+      "type": "MESH",
+      "mesh": "Diploria_Brain_Colony.005",
+      "vertices": 6609,
+      "polygons": 12544,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0499999523162842,
+        1.0499999523162842,
+        1.0499999523162842
+      ],
+      "dimensions": [
+        0.2511635422706604,
+        0.22740186750888824,
+        0.13493862748146057
+      ],
+      "materials": [
+        "Textured_Pal_Tridacna_Blue_ral_Brain_Diploria"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_lps_mid_01_Euphyllia_Polyp_Crown",
+      "type": "MESH",
+      "mesh": "Euphyllia_Polyp_Crown.001",
+      "vertices": 16160,
+      "polygons": 23040,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0499999523162842,
+        1.0499999523162842,
+        1.0499999523162842
+      ],
+      "dimensions": [
+        0.3026488423347473,
+        0.2718440592288971,
+        0.14101192355155945
+      ],
+      "materials": [
+        "Textured_Pal_Torch_Green_Gold_hyllia_Polyp_Crown"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_lps_mid_02_Euphyllia_Hammer_Polyp_Crown",
+      "type": "MESH",
+      "mesh": "Euphyllia_Hammer_Polyp_Crown.002",
+      "vertices": 15232,
+      "polygons": 21760,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        0.9936000108718872,
+        0.9936000108718872,
+        0.9936000108718872
+      ],
+      "dimensions": [
+        0.21751464903354645,
+        0.1914832592010498,
+        0.08918225765228271
+      ],
+      "materials": [
+        "Textured_Pal_Acan_Orange_Hammer_Polyp_Crown"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_lps_mid_03_Euphyllia_Hammer_Polyp_Crown",
+      "type": "MESH",
+      "mesh": "Euphyllia_Hammer_Polyp_Crown.001",
+      "vertices": 15232,
+      "polygons": 21760,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        0.9936000108718872,
+        0.9936000108718872,
+        0.9936000108718872
+      ],
+      "dimensions": [
+        0.21751463413238525,
+        0.19138103723526,
+        0.08922447264194489
+      ],
+      "materials": [
+        "Textured_Pal_Hammer_Teal_Hammer_Polyp_Crown"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_lps_mid_04_Euphyllia_Hammer_Polyp_Crown",
+      "type": "MESH",
+      "mesh": "Euphyllia_Hammer_Polyp_Crown.003",
+      "vertices": 15232,
+      "polygons": 21760,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        0.9936000108718872,
+        0.9936000108718872,
+        0.9936000108718872
+      ],
+      "dimensions": [
+        0.18916092813014984,
+        0.16291213035583496,
+        0.06838037073612213
+      ],
+      "materials": [
+        "Textured_Pal_Green_Acro_Hammer_Polyp_Crown"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_lps_mid_05_Anemone_Column_Disc",
+      "type": "MESH",
+      "mesh": "Anemone_Column_Disc.002",
+      "vertices": 852,
+      "polygons": 1536,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0224000215530396,
+        1.0224000215530396,
+        1.0224000215530396
+      ],
+      "dimensions": [
+        0.2179320603609085,
+        0.19194543361663818,
+        0.08996046334505081
+      ],
+      "materials": [
+        "Textured_Pal_Goni_Peach_nemone_Column_Disc"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_lps_mid_05_Anemone_Tentacle_Crown",
+      "type": "MESH",
+      "mesh": "Anemone_Tentacle_Crown.002",
+      "vertices": 23040,
+      "polygons": 37440,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0224000215530396,
+        1.0224000215530396,
+        1.0224000215530396
+      ],
+      "dimensions": [
+        0.2748630940914154,
+        0.2585204839706421,
+        0.14631184935569763
+      ],
+      "materials": [
+        "Textured_Pal_Goni_Peach_one_Tentacle_Crown"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_lps_mid_06_Coral_Zoanthid_Mat",
+      "type": "MESH",
+      "mesh": "Zoanthid_Button_Cluster.002",
+      "vertices": 10543,
+      "polygons": 18600,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        0.8999999761581421,
+        0.8999999761581421,
+        0.8999999761581421
+      ],
+      "dimensions": [
+        0.15388207137584686,
+        0.12251519411802292,
+        0.0528644397854805
+      ],
+      "materials": [
+        "Textured_Pal_Zoa_Orange_Green_Coral_Zoanthid_Mat"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_plate_ledge_01_Coral_Montipora_Plate",
+      "type": "MESH",
+      "mesh": "Montipora_Plate_Colony.001",
+      "vertices": 2830,
+      "polygons": 4560,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0499999523162842,
+        1.0499999523162842,
+        1.0499999523162842
+      ],
+      "dimensions": [
+        0.26123493909835815,
+        0.27296048402786255,
+        0.13023220002651215
+      ],
+      "materials": [
+        "Textured_Pal_Terracotta_Plate_al_Montipora_Plate"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_plate_ledge_02_Coral_Montipora_Plate",
+      "type": "MESH",
+      "mesh": "Montipora_Plate_Colony.002",
+      "vertices": 2830,
+      "polygons": 4560,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        0.8999999761581421,
+        0.8999999761581421,
+        0.8999999761581421
+      ],
+      "dimensions": [
+        0.22391565144062042,
+        0.23396612703800201,
+        0.11162761598825455
+      ],
+      "materials": [
+        "Textured_Pal_Zoa_Orange_Green_al_Montipora_Plate"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_plate_ledge_03_Coral_Montipora_Plate",
+      "type": "MESH",
+      "mesh": "Montipora_Plate_Colony.003",
+      "vertices": 2830,
+      "polygons": 4560,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        0.8495999574661255,
+        0.8495999574661255,
+        0.8495999574661255
+      ],
+      "dimensions": [
+        0.18338747322559357,
+        0.1887693554162979,
+        0.0806359052658081
+      ],
+      "materials": [
+        "Textured_Pal_Zoa_Orange_Green_al_Montipora_Plate"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_plate_ledge_04_Coral_Montipora_Plate",
+      "type": "MESH",
+      "mesh": "Montipora_Plate_Colony.004",
+      "vertices": 2830,
+      "polygons": 4560,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        0.972000002861023,
+        0.972000002861023,
+        0.972000002861023
+      ],
+      "dimensions": [
+        0.2100934088230133,
+        0.21566154062747955,
+        0.0922529473900795
+      ],
+      "materials": [
+        "Textured_Pal_Goni_Magenta_al_Montipora_Plate"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_soft_mat_01_Coral_Zoanthid_Mat",
+      "type": "MESH",
+      "mesh": "Zoanthid_Button_Cluster.001",
+      "vertices": 10543,
+      "polygons": 18600,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0080000162124634,
+        1.0080000162124634,
+        1.0080000162124634
+      ],
+      "dimensions": [
+        0.1989818960428238,
+        0.16045553982257843,
+        0.07728874683380127
+      ],
+      "materials": [
+        "Textured_Pal_Zoa_Orange_Green_Coral_Zoanthid_Mat"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_soft_mat_02_Coral_Zoanthid_Mat",
+      "type": "MESH",
+      "mesh": "Zoanthid_Button_Cluster.003",
+      "vertices": 10543,
+      "polygons": 18600,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        0.9936000108718872,
+        0.9936000108718872,
+        0.9936000108718872
+      ],
+      "dimensions": [
+        0.17067797482013702,
+        0.13461406528949738,
+        0.05835926905274391
+      ],
+      "materials": [
+        "Textured_Pal_Zoa_Orange_Green_Coral_Zoanthid_Mat"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_sps_crest_01_Coral_Acropora_Staghorn",
+      "type": "MESH",
+      "mesh": "Acropora_Staghorn_Colony.001",
+      "vertices": 18693,
+      "polygons": 23648,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0499999523162842,
+        1.0499999523162842,
+        1.0499999523162842
+      ],
+      "dimensions": [
+        0.1979612112045288,
+        0.22019781172275543,
+        0.26692354679107666
+      ],
+      "materials": [
+        "Textured_Pal_Violet_Acro__Acropora_Staghorn"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_sps_crest_02_Coral_Acropora_Table",
+      "type": "MESH",
+      "mesh": "Acropora_Table_Colony.001",
+      "vertices": 26665,
+      "polygons": 34176,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0499999523162842,
+        1.0499999523162842,
+        1.0499999523162842
+      ],
+      "dimensions": [
+        0.2528311610221863,
+        0.17416167259216309,
+        0.20877514779567719
+      ],
+      "materials": [
+        "Textured_Pal_Violet_Acro_ral_Acropora_Table"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_sps_crest_03_Coral_Acropora_Staghorn",
+      "type": "MESH",
+      "mesh": "Acropora_Staghorn_Colony.002",
+      "vertices": 18693,
+      "polygons": 23648,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0080000162124634,
+        1.0080000162124634,
+        1.0080000162124634
+      ],
+      "dimensions": [
+        0.19004279375076294,
+        0.2113899290561676,
+        0.2562466263771057
+      ],
+      "materials": [
+        "Textured_Pal_Green_Acro__Acropora_Staghorn"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_sps_crest_04_Coral_Acropora_Table",
+      "type": "MESH",
+      "mesh": "Acropora_Table_Colony.002",
+      "vertices": 26665,
+      "polygons": 34176,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0440000295639038,
+        1.0440000295639038,
+        1.0440000295639038
+      ],
+      "dimensions": [
+        0.21861742436885834,
+        0.14764006435871124,
+        0.15884548425674438
+      ],
+      "materials": [
+        "Textured_Pal_Rose_Acro_ral_Acropora_Table"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_sps_crest_05_Coral_Acropora_Staghorn",
+      "type": "MESH",
+      "mesh": "Acropora_Staghorn_Colony.004",
+      "vertices": 18693,
+      "polygons": 23648,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0499999523162842,
+        1.0499999523162842,
+        1.0499999523162842
+      ],
+      "dimensions": [
+        0.17146390676498413,
+        0.18852099776268005,
+        0.20425456762313843
+      ],
+      "materials": [
+        "Textured_Pal_Rose_Acro__Acropora_Staghorn"
+      ]
+    },
+    {
+      "name": "Preview_Coral_socket_sps_crest_06_Coral_Acropora_Staghorn",
+      "type": "MESH",
+      "mesh": "Acropora_Staghorn_Colony.003",
+      "vertices": 18693,
+      "polygons": 23648,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        0.9504000544548035,
+        0.9504000544548035,
+        0.9504000544548035
+      ],
+      "dimensions": [
+        0.15425711870193481,
+        0.17169226706027985,
+        0.1848795861005783
+      ],
+      "materials": [
+        "Textured_Pal_Goni_Magenta__Acropora_Staghorn"
+      ]
+    },
+    {
+      "name": "Rim",
+      "type": "LIGHT",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "Sand_Rubble_Scatter",
+      "type": "MESH",
+      "mesh": "Sand_Rubble_Scatter",
+      "vertices": 432,
+      "polygons": 720,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        2.0996601581573486,
+        0.62523353099823,
+        0.029792465269565582
+      ],
+      "materials": [
+        "Sand_Rubble_Mat"
+      ]
+    },
+    {
+      "name": "socket_anemone_crevice_01",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_brain_apron_01",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_brain_apron_02",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_brain_apron_03",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_brain_apron_04",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_lps_mid_01",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_lps_mid_02",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_lps_mid_03",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_lps_mid_04",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_lps_mid_05",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_lps_mid_06",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_plate_ledge_01",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_plate_ledge_02",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_plate_ledge_03",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_plate_ledge_04",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_soft_mat_01",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_soft_mat_02",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_sps_crest_01",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_sps_crest_02",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_sps_crest_03",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_sps_crest_04",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_sps_crest_05",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_sps_crest_06",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    }
+  ],
+  "images": [
+    {
+      "name": "acropora_base",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 3
+    },
+    {
+      "name": "acropora_emissive",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "acropora_norm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "acropora_orm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "anemone_disc_base",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 2
+    },
+    {
+      "name": "anemone_disc_norm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "anemone_disc_orm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "anemone_tentacle_base",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 2
+    },
+    {
+      "name": "anemone_tentacle_emissive",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "anemone_tentacle_norm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "anemone_tentacle_orm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "brain_coral_base.001",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 5
+    },
+    {
+      "name": "brain_coral_emissive.001",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "brain_coral_norm.001",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "brain_coral_orm.001",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "euphyllia_polyp_base",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 2
+    },
+    {
+      "name": "euphyllia_polyp_emissive",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "euphyllia_polyp_norm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "euphyllia_polyp_orm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "euphyllia_skeleton_base",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "euphyllia_skeleton_norm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "euphyllia_skeleton_orm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "hammer_polyp_base",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 4
+    },
+    {
+      "name": "hammer_polyp_emissive",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "hammer_polyp_norm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "hammer_polyp_orm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "hammer_skeleton_base",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "hammer_skeleton_norm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "hammer_skeleton_orm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "live_rock_left_base.004",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_base.007",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_norm.004",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_norm.007",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_orm.004",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_orm.007",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_base.005",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_base.006",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_norm.005",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_norm.006",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_orm.005",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_orm.006",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "montipora_base",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 4
+    },
+    {
+      "name": "montipora_emissive",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "montipora_norm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "montipora_orm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "Render Result",
+      "size": [
+        0,
+        0
+      ],
+      "source": "VIEWER",
+      "packed": false,
+      "users": 1
+    },
+    {
+      "name": "staghorn_base",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 5
+    },
+    {
+      "name": "staghorn_emissive",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "staghorn_norm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "staghorn_orm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "Viewer Node",
+      "size": [
+        256,
+        256
+      ],
+      "source": "VIEWER",
+      "packed": false,
+      "users": 1
+    },
+    {
+      "name": "zoanthid_base",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 2
+    },
+    {
+      "name": "zoanthid_emissive",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "zoanthid_norm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "zoanthid_orm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    }
+  ],
+  "collections": [
+    {
+      "name": "Collection",
+      "objects": [
+        "Camera",
+        "Key",
+        "Fill",
+        "Rim",
+        "Live_Rock_Island_Left",
+        "socket_sps_crest_01",
+        "socket_sps_crest_02",
+        "socket_sps_crest_03",
+        "socket_plate_ledge_01",
+        "socket_lps_mid_01",
+        "socket_lps_mid_03",
+        "socket_anemone_crevice_01",
+        "socket_lps_mid_02",
+        "socket_plate_ledge_02",
+        "socket_brain_apron_01",
+        "socket_soft_mat_01",
+        "socket_brain_apron_02",
+        "Live_Rock_Island_Right",
+        "socket_sps_crest_06",
+        "socket_sps_crest_04",
+        "socket_sps_crest_05",
+        "socket_plate_ledge_03",
+        "socket_lps_mid_04",
+        "socket_lps_mid_06",
+        "socket_lps_mid_05",
+        "socket_plate_ledge_04",
+        "socket_brain_apron_03",
+        "socket_soft_mat_02",
+        "socket_brain_apron_04",
+        "Coral_Acropora_Staghorn",
+        "Coral_Acropora_Table",
+        "Coral_Montipora_Plate",
+        "Coral_Euphyllia_Torch",
+        "Euphyllia_Polyp_Crown",
+        "Euphyllia_Skeleton",
+        "Coral_Euphyllia_Hammer",
+        "Euphyllia_Hammer_Polyp_Crown",
+        "Euphyllia_Hammer_Skeleton",
+        "Coral_Anemone_BTA",
+        "Anemone_Column_Disc",
+        "Anemone_Tentacle_Crown",
+        "Coral_Brain_Diploria",
+        "Coral_Zoanthid_Mat",
+        "Preview_Coral_socket_sps_crest_01_Coral_Acropora_Staghorn",
+        "Preview_Coral_socket_sps_crest_02_Coral_Acropora_Table",
+        "Preview_Coral_socket_sps_crest_03_Coral_Acropora_Staghorn",
+        "Preview_Coral_socket_plate_ledge_01_Coral_Montipora_Plate",
+        "Preview_Coral_socket_plate_ledge_02_Coral_Montipora_Plate",
+        "Preview_Coral_socket_lps_mid_01_Euphyllia_Polyp_Crown",
+        "Preview_Coral_socket_lps_mid_03_Euphyllia_Hammer_Polyp_Crown",
+        "Preview_Coral_socket_anemone_crevice_01_Anemone_Column_Disc",
+        "Preview_Coral_socket_anemone_crevice_01_Anemone_Tentacle_Crown",
+        "Preview_Coral_socket_lps_mid_02_Euphyllia_Hammer_Polyp_Crown",
+        "Preview_Coral_socket_brain_apron_01_Coral_Brain_Diploria",
+        "Preview_Coral_socket_brain_apron_02_Coral_Brain_Diploria",
+        "Preview_Coral_socket_soft_mat_01_Coral_Zoanthid_Mat",
+        "Preview_Coral_socket_sps_crest_06_Coral_Acropora_Staghorn",
+        "Preview_Coral_socket_sps_crest_04_Coral_Acropora_Table",
+        "Preview_Coral_socket_sps_crest_05_Coral_Acropora_Staghorn",
+        "Preview_Coral_socket_plate_ledge_03_Coral_Montipora_Plate",
+        "Preview_Coral_socket_plate_ledge_04_Coral_Montipora_Plate",
+        "Preview_Coral_socket_lps_mid_04_Euphyllia_Hammer_Polyp_Crown",
+        "Preview_Coral_socket_lps_mid_06_Coral_Zoanthid_Mat",
+        "Preview_Coral_socket_lps_mid_05_Anemone_Column_Disc",
+        "Preview_Coral_socket_lps_mid_05_Anemone_Tentacle_Crown",
+        "Preview_Coral_socket_brain_apron_03_Coral_Brain_Diploria",
+        "Preview_Coral_socket_soft_mat_02_Coral_Zoanthid_Mat",
+        "Preview_Coral_socket_brain_apron_04_Coral_Brain_Diploria",
+        "Aragonite_Sand_Bed",
+        "Sand_Rubble_Scatter"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1281 @@
+{
+  "file": "/Users/ryantrapp/Desktop/Code/aquarium-homepage/src/rendering/assets/corals/blend/live-rock-island-right.blend",
+  "sha256": "5ba3d0d89fef211cbf25b1c6e65f3f3473fb4bcdf302866507aa3c089a9e23b5",
+  "objects": [
+    {
+      "name": "Aragonite_Sand_Bed",
+      "type": "MESH",
+      "mesh": "Grid",
+      "vertices": 2145,
+      "polygons": 2048,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        5.0,
+        4.0,
+        1.0
+      ],
+      "dimensions": [
+        5.0,
+        4.0,
+        0.02999993786215782
+      ],
+      "materials": [
+        "Aragonite_Sand_Mat"
+      ]
+    },
+    {
+      "name": "Camera",
+      "type": "CAMERA",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "Fill",
+      "type": "LIGHT",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "Key",
+      "type": "LIGHT",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "Live_Rock_Island_Left",
+      "type": "MESH",
+      "mesh": "Live_Rock_Island_Left.002",
+      "vertices": 12288,
+      "polygons": 24572,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        1.0112781524658203,
+        0.536800742149353,
+        0.39800000190734863
+      ],
+      "materials": [
+        "Live_Rock_Left_Mat.015"
+      ]
+    },
+    {
+      "name": "Live_Rock_Island_Right",
+      "type": "MESH",
+      "mesh": "Live_Rock_Island_Right.002",
+      "vertices": 12288,
+      "polygons": 24572,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.9664487838745117,
+        0.5115442276000977,
+        0.3479999899864197
+      ],
+      "materials": [
+        "Live_Rock_Right_Mat.014"
+      ]
+    },
+    {
+      "name": "Rim",
+      "type": "LIGHT",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_anemone_crevice_01",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_brain_apron_01",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_brain_apron_02",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_brain_apron_03",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_brain_apron_04",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_lps_mid_01",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_lps_mid_02",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_lps_mid_03",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_lps_mid_04",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_lps_mid_05",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_lps_mid_06",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_plate_ledge_01",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_plate_ledge_02",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_plate_ledge_03",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_plate_ledge_04",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_soft_mat_01",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_soft_mat_02",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_sps_crest_01",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_sps_crest_02",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_sps_crest_03",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_sps_crest_04",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_sps_crest_05",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    },
+    {
+      "name": "socket_sps_crest_06",
+      "type": "EMPTY",
+      "mesh": null,
+      "vertices": null,
+      "polygons": null,
+      "collections": [
+        "Collection"
+      ],
+      "hiddenRender": false,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": []
+    }
+  ],
+  "images": [
+    {
+      "name": "brain_coral_base",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "brain_coral_emissive",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "brain_coral_norm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "brain_coral_orm",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_base",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_base.001",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_base.002",
+      "size": [
+        256,
+        256
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_base.003",
+      "size": [
+        256,
+        256
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_base.004",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "live_rock_left_base.005",
+      "size": [
+        128,
+        128
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_base.006",
+      "size": [
+        128,
+        128
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_base.007",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "live_rock_left_base.008",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "live_rock_left_norm",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_norm.001",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_norm.002",
+      "size": [
+        256,
+        256
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_norm.003",
+      "size": [
+        256,
+        256
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_norm.004",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "live_rock_left_norm.005",
+      "size": [
+        128,
+        128
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_norm.006",
+      "size": [
+        128,
+        128
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_norm.007",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "live_rock_left_norm.008",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "live_rock_left_orm",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_orm.001",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_orm.002",
+      "size": [
+        256,
+        256
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_orm.003",
+      "size": [
+        256,
+        256
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_orm.004",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "live_rock_left_orm.005",
+      "size": [
+        128,
+        128
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_orm.006",
+      "size": [
+        128,
+        128
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_left_orm.007",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "live_rock_left_orm.008",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "live_rock_right_base",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_base.001",
+      "size": [
+        256,
+        256
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_base.002",
+      "size": [
+        256,
+        256
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_base.003",
+      "size": [
+        128,
+        128
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_base.004",
+      "size": [
+        128,
+        128
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_base.005",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "live_rock_right_base.006",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "live_rock_right_base.007",
+      "size": [
+        256,
+        256
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "live_rock_right_norm",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_norm.001",
+      "size": [
+        256,
+        256
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_norm.002",
+      "size": [
+        256,
+        256
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_norm.003",
+      "size": [
+        128,
+        128
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_norm.004",
+      "size": [
+        128,
+        128
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_norm.005",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "live_rock_right_norm.006",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "live_rock_right_norm.007",
+      "size": [
+        256,
+        256
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "live_rock_right_orm",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_orm.001",
+      "size": [
+        256,
+        256
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_orm.002",
+      "size": [
+        256,
+        256
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_orm.003",
+      "size": [
+        128,
+        128
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_orm.004",
+      "size": [
+        128,
+        128
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 0
+    },
+    {
+      "name": "live_rock_right_orm.005",
+      "size": [
+        1024,
+        1024
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "live_rock_right_orm.006",
+      "size": [
+        512,
+        512
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "live_rock_right_orm.007",
+      "size": [
+        256,
+        256
+      ],
+      "source": "FILE",
+      "packed": true,
+      "users": 1
+    },
+    {
+      "name": "Render Result",
+      "size": [
+        0,
+        0
+      ],
+      "source": "VIEWER",
+      "packed": false,
+      "users": 1
+    },
+    {
+      "name": "Viewer Node",
+      "size": [
+        256,
+        256
+      ],
+      "source": "VIEWER",
+      "packed": false,
+      "users": 1
+    }
+  ],
+  "collections": [
+    {
+      "name": "Collection",
+      "objects": [
+        "Camera",
+        "Key",
+        "Fill",
+        "Rim",
+        "Aragonite_Sand_Bed",
+        "Live_Rock_Island_Left",
+        "socket_sps_crest_01",
+        "socket_sps_crest_02",
+        "socket_sps_crest_03",
+        "socket_plate_ledge_01",
+        "socket_lps_mid_01",
+        "socket_lps_mid_03",
+        "socket_anemone_crevice_01",
+        "socket_lps_mid_02",
+        "socket_plate_ledge_02",
+        "socket_brain_apron_01",
+        "socket_soft_mat_01",
+        "socket_brain_apron_02",
+        "Live_Rock_Island_Right",
+        "socket_sps_crest_06",
+        "socket_sps_crest_04",
+        "socket_sps_crest_05",
+        "socket_plate_ledge_03",
+        "socket_lps_mid_04",
+        "socket_lps_mid_06",
+        "socket_lps_mid_05",
+        "socket_plate_ledge_04",
+        "socket_brain_apron_03",
+        "socket_soft_mat_02",
+        "socket_brain_apron_04"
+      ]
+    }
+  ]
+}

@@ -3,11 +3,11 @@ id: AQ-94
 title: >-
   Author Negative Space Aquascape (NSA) with 5–8 modular rock pieces, pinnacle
   canyon, and 2048px trim sheet
-status: Done
+status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-11 04:55'
-updated_date: '2026-11-11 05:16'
+updated_date: '2026-11-13 05:36'
 labels:
   - modeling
   - blender
@@ -43,9 +43,15 @@ Architect the live rock aquascape from scratch using Negative Space Aquascaping 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [x] #1 Aquascape forms an asymmetrical Negative Space Aquascape (NSA) with a left arch rising to a high pinnacle, lower right island, and central swim canyon
-- [x] #2 Reef is assembled from a reusable library of 5–8 modular sculpted rock pieces sharing a single 2048x2048 PBR texture atlas (Normal, Roughness, AO)
+- [ ] #1 Aquascape forms an asymmetrical Negative Space Aquascape (NSA) with a left arch rising to a high pinnacle, lower right island, and central swim canyon
+- [ ] #2 Reef is assembled from a reusable library of 5–8 modular sculpted rock pieces sharing a single 2048x2048 PBR texture atlas (Normal, Roughness, AO)
 - [x] #3 Upper half of the water column preserves open negative space for unobstructed fish swimming and label visibility
 - [x] #4 Total exported .glb asset size for assembled foundations remains under 5 MB with minimal draw calls
-- [x] #5 Substrate dunes, shell fragments, and rubble eliminate hard intersecting seams at the sand bed base
+- [ ] #5 Substrate dunes, shell fragments, and rubble eliminate hard intersecting seams at the sand bed base
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Root2026-11-12 reopened from Done after independent native/export review. Saved reef-full-model.blend contains exactly two merged foundation meshes (Live_Rock_Island_Left/Right), coral previews and sand/scatter, with no5-8 reusable rock-piece meshes or2048px image. Generator NSA_MODULAR_ROCK_LIBRARY is seven scalar field descriptions merged into island heightfields, not a reusable sculpted piece library. Actual runtime reef-full-model-left/right.glb have no embedded maps and are absent from canonical manifest/socket reports. Existing upper-water space and under5MB/draw-count criteria retained; central arch/library/grounding final acceptance withdrawn pending exact-source evidence. Native review is read-only and does not alter the live dirty Blender scene. Detailed evidence follows underAQ59.
+<!-- SECTION:NOTES:END -->
