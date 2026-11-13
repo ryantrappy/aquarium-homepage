@@ -137,10 +137,16 @@ describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
     // Layers combine by max, not product (visual-check fix): a product of
     // two mostly-dark cellular layers is ~0.027 mean and invisible through
     // the old smoothstep; max keeps the ridge network visible.
-    expect(shader.fragmentShader).toContain('max(texture2D(uCausticMap, causticUvA).r, texture2D(uCausticMap, causticUvB).r)')
+    expect(shader.fragmentShader).toContain('float cR = max(texture2D(uCausticMap, causticUvA + dispOffset).r')
+    expect(shader.fragmentShader).toContain('float cG = max(texture2D(uCausticMap, causticUvA).r')
+    expect(shader.fragmentShader).toContain('float cB = max(texture2D(uCausticMap, causticUvA - dispOffset).r')
     // The ridge threshold is a per-material uniform (default 0.35), so
     // the sand can widen its dapple without raising the +0.35 peak.
-    expect(shader.fragmentShader).toContain('smoothstep(uCausticThreshold, 0.9, causticP)')
+    expect(shader.fragmentShader).toContain('smoothstep(vec3(uCausticThreshold), vec3(0.88), vec3(cR, cG, cB))')
+    expect(shader.fragmentShader).toContain('pow(causticRGB, vec3(1.55))')
+    expect(shader.fragmentShader).toContain('pow(smoothstep(uCausticThreshold, 0.88, cG), 1.6)')
+    expect(shader.fragmentShader).toContain('causticRGB.g = causticP')
+    expect(shader.fragmentShader).toContain('vec3 causticLedTint = vec3(0.95, 1.06, 1.18)')
     expect(shader.fragmentShader).not.toContain('texture2D(uCausticMap, causticUvA).r * texture2D(uCausticMap, causticUvB).r')
     expect(shader.fragmentShader).toContain('causticUvA')
     expect(shader.fragmentShader).toContain('causticUvB')
@@ -180,7 +186,7 @@ describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
     // Light redistribution: the field between ridges is dimmed (the
     // light in the web came from around it), so the dapple reads on
     // bright surfaces instead of clipping away.
-    expect(shader.fragmentShader).toContain('reflectedLight.directDiffuse *= 1.0 - 0.12 * (1.0 - causticP) * causticMask')
+    expect(shader.fragmentShader).toContain('reflectedLight.directDiffuse *= 1.0 - 0.14 * (1.0 - cG) * causticMask')
     expect(shader.fragmentShader).not.toContain('reflectedLight.indirectDiffuse *=')
     expect(shader.fragmentShader).toContain('surfaceWaveHeight')
     expect(shader.uniforms.uCausticMaxAdd.value).toBeCloseTo(0.35)
@@ -209,7 +215,7 @@ describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
     expect(shader.uniforms.uCausticThreshold.value).toBeCloseTo(0.22)
     // The peak add is unchanged: the threshold only widens the network.
     expect(shader.uniforms.uCausticMaxAdd.value).toBeCloseTo(0.35)
-    expect(shader.fragmentShader).toContain('smoothstep(uCausticThreshold, 0.9, causticP)')
+    expect(shader.fragmentShader).toContain('smoothstep(vec3(uCausticThreshold), vec3(0.88), vec3(cR, cG, cB))')
     caustics.dispose()
   })
 

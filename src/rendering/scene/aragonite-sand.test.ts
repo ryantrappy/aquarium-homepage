@@ -17,19 +17,23 @@ function expandShaderIncludes(source: string, depth = 0): string {
   })
 }
 
-function compileSandShader(bed: ReturnType<typeof createAragoniteSandBed>) {
+function compileMaterialShader(material: THREE.MeshStandardMaterial) {
   const shader = {
     uniforms: {} as Record<string, { value: unknown }>,
     vertexShader: THREE.ShaderLib.standard.vertexShader,
     fragmentShader: THREE.ShaderLib.standard.fragmentShader,
   }
 
-  bed.sandMesh.material.onBeforeCompile(
+  material.onBeforeCompile(
     shader as unknown as THREE.WebGLProgramParametersWithUniforms,
     {} as THREE.WebGLRenderer,
   )
 
   return shader
+}
+
+function compileSandShader(bed: ReturnType<typeof createAragoniteSandBed>) {
+  return compileMaterialShader(bed.sandMesh.material)
 }
 
 describe('photoreal aragonite sand bed (AQ-70.12)', () => {
@@ -103,6 +107,29 @@ describe('photoreal aragonite sand bed (AQ-70.12)', () => {
     expect(expandedFragment).toContain('texture2D(roughnessMap, uvPrimary)')
     expect(expandedFragment).toContain('texture2D(roughnessMap, uvSecondary)')
     expect(expandedFragment).toContain('normalize(mix(sandNormalPrimary, sandNormalSecondary, sandMacroBlend))')
+    expect(shader.fragmentShader).toContain('float troughMask = (1.0 - smoothstep(0.24, 0.56, rippleWave)) * 0.12')
+    expect(shader.fragmentShader).toContain('smoothstep(-5.2, -0.4, vSandWorldPos.z)')
+    expect(shader.fragmentShader).toContain('vec3 frontSandTint = vec3(0.96, 0.95, 0.92)')
+    expect(shader.fragmentShader).toContain('float dRippleDx = 0.34 * cos(phase1) * 2.45')
+    expect(shader.fragmentShader).toContain('float dRippleDz = 0.34 * cos(phase1)')
+    expect(shader.fragmentShader).toContain('normal = normalize(normal + vec3(-dRippleDx * rippleStrength')
+    expect(shader.fragmentShader).toContain('floor(vSandWorldPos.xz * 220.0 + viewDir.xz * 6.0)')
+    expect(shader.fragmentShader).toContain('step(0.975, sparkleSignal)')
+    expect(shader.fragmentShader).toContain('roughnessFactor = mix(roughnessFactor, 0.08, sparkleGlint)')
+
+    bed.dispose()
+  })
+
+  it('uses a warm, stratified front-glass cross-section', () => {
+    const bed = createAragoniteSandBed({ textureSize: 64, narrow: false })
+    const shader = compileMaterialShader(bed.frontEdgeMesh.material)
+
+    expect(shader.fragmentShader).toContain('vUv.y')
+    expect(shader.fragmentShader).toContain('smoothstep(0.80, 0.84, vUv.y)')
+    expect(shader.fragmentShader).toContain('vec3 oxygenatedCrustColor = vec3(0.5647, 0.4910, 0.3712)')
+    expect(shader.fragmentShader).toContain('vec3 compactedBedColor = vec3(0.1529, 0.1301, 0.0976)')
+    expect(shader.fragmentShader).toContain('vec3 deepBedColor = vec3(0.0194, 0.0222, 0.0369)')
+    expect(shader.fragmentShader).toContain('strataNoise')
 
     bed.dispose()
   })
@@ -194,10 +221,28 @@ describe('photoreal aragonite sand bed (AQ-70.12)', () => {
   it('scatters instanced rubble, shells, and coralline chips plus a front-glass sand edge with raycasting disabled (AC #3)', () => {
     const bed = createAragoniteSandBed({ textureSize: 64, narrow: false })
 
-    expect(bed.rubbleInstances.count).toBe(48)
-    expect(bed.shellInstances.count).toBe(36)
-    expect(bed.corallineInstances.count).toBe(28)
+    expect(bed.rubbleInstances.count).toBe(96)
+    expect(bed.shellInstances.count).toBe(64)
+    expect(bed.corallineInstances.count).toBe(48)
     expect(bed.frontEdgeMesh.geometry.getAttribute('position').count).toBeGreaterThan(100)
+
+    const instanceXScales = (mesh: THREE.InstancedMesh) => {
+      const matrix = new THREE.Matrix4()
+      const position = new THREE.Vector3()
+      const rotation = new THREE.Quaternion()
+      const scale = new THREE.Vector3()
+      return Array.from({ length: mesh.count }, (_, index) => {
+        mesh.getMatrixAt(index, matrix)
+        matrix.decompose(position, rotation, scale)
+        return scale.x
+      })
+    }
+    for (const mesh of [bed.rubbleInstances, bed.shellInstances, bed.corallineInstances]) {
+      const scales = instanceXScales(mesh)
+      expect(scales.filter(scale => scale <= 0.003).length).toBeGreaterThan(scales.length * 0.8)
+      expect(Math.max(...scales)).toBeLessThanOrEqual(0.01)
+    }
+    expect(instanceXScales(bed.rubbleInstances).some(scale => scale > 0.005)).toBe(true)
 
     // Raycast against the group only hits sandMesh if tested directly; scatter & front edge never intercept fish clicks
     const raycaster = new THREE.Raycaster(

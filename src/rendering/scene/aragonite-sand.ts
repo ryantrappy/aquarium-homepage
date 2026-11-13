@@ -367,6 +367,11 @@ function populateScatterInstances(
     return seed / 4294967296
   }
 
+  const sampleFragmentScale = (nearRock: boolean) => {
+    const size = Math.pow(rand(), 2.2)
+    return nearRock && rand() > 0.94 ? 0.004 + size * 0.004 : 0.001 + size * 0.001
+  }
+
   const sampleScatterPoint = (index: number, total: number) => {
     const fp = footprints[index % footprints.length]
     const nearRock = index < total * 0.72
@@ -384,17 +389,17 @@ function populateScatterInstances(
     }
     wx = clamp(wx, -4.6, 4.6)
     wz = clamp(wz, -4.4, 2.55)
-    const wy = baseSandY + evaluateAragoniteSandElevation(wx, wz, narrow) + 0.008
-    return { wx, wy, wz }
+    const wy = baseSandY + evaluateAragoniteSandElevation(wx, wz, narrow) - 0.004
+    return { wx, wy, wz, nearRock }
   }
 
   for (let i = 0; i < rubbleMesh.count; i++) {
-    const { wx, wy, wz } = sampleScatterPoint(i, rubbleMesh.count)
+    const { wx, wy, wz, nearRock } = sampleScatterPoint(i, rubbleMesh.count)
     dummy.position.set(wx, wy, wz)
     dummy.rotation.set(rand() * 0.5 - 0.25, rand() * Math.PI * 2, rand() * 0.5 - 0.25)
-    const sx = 0.022 + rand() * 0.032
-    const sy = 0.012 + rand() * 0.016
-    const sz = 0.018 + rand() * 0.028
+    const sx = sampleFragmentScale(nearRock)
+    const sy = sx * 0.55
+    const sz = sx * 0.9
     dummy.scale.set(sx, sy, sz)
     dummy.updateMatrix()
     rubbleMesh.setMatrixAt(i, dummy.matrix)
@@ -406,10 +411,10 @@ function populateScatterInstances(
   if (rubbleMesh.instanceColor) rubbleMesh.instanceColor.needsUpdate = true
 
   for (let i = 0; i < shellMesh.count; i++) {
-    const { wx, wy, wz } = sampleScatterPoint(i + 17, shellMesh.count)
+    const { wx, wy, wz, nearRock } = sampleScatterPoint(i + 17, shellMesh.count)
     dummy.position.set(wx, wy + 0.003, wz)
     dummy.rotation.set(-Math.PI * 0.35 + (rand() - 0.5) * 0.4, rand() * Math.PI * 2, (rand() - 0.5) * 0.4)
-    const s = 0.016 + rand() * 0.020
+    const s = sampleFragmentScale(nearRock)
     dummy.scale.set(s * 1.25, s * 0.45, s)
     dummy.updateMatrix()
     shellMesh.setMatrixAt(i, dummy.matrix)
@@ -421,10 +426,10 @@ function populateScatterInstances(
   if (shellMesh.instanceColor) shellMesh.instanceColor.needsUpdate = true
 
   for (let i = 0; i < corallineMesh.count; i++) {
-    const { wx, wy, wz } = sampleScatterPoint(i + 31, corallineMesh.count)
+    const { wx, wy, wz, nearRock } = sampleScatterPoint(i + 31, corallineMesh.count)
     dummy.position.set(wx, wy, wz)
     dummy.rotation.set((rand() - 0.5) * 0.5, rand() * Math.PI * 2, (rand() - 0.5) * 0.5)
-    const s = 0.018 + rand() * 0.024
+    const s = sampleFragmentScale(nearRock)
     dummy.scale.set(s * 1.2, s * 0.55, s * 0.95)
     dummy.updateMatrix()
     corallineMesh.setMatrixAt(i, dummy.matrix)
@@ -518,7 +523,7 @@ float rockContactAo = min(aoLeft, aoRight);
 
 // Flow-sculpted sand ripple crests & troughs + under-arch shadow pockets (AQ-70.12, AQ-73, AQ-94)
 float rippleWave = 0.5 + 0.34 * sin(vSandWorldPos.x * 2.45 + vSandWorldPos.z * 1.15 + 0.45 * sin(vSandWorldPos.z * 1.5)) + 0.16 * cos(vSandWorldPos.z * 3.2 - vSandWorldPos.x * 1.3);
-float troughMask = (1.0 - smoothstep(0.24, 0.56, rippleWave)) * 0.36;
+float troughMask = (1.0 - smoothstep(0.24, 0.56, rippleWave)) * 0.12;
 float crestHighlight = smoothstep(0.58, 0.88, rippleWave) * 0.08;
 
 // Subtle warm detritus & dampened aragonite near rock bases and ripple troughs (never blue-grey or indigo)
@@ -534,9 +539,10 @@ rockContactAo *= (1.0 - max(leftCaveShadow, rightArchShadow));
 
 // Gentle rear-water depth attenuation preserving warm cream foreground on caustic ridges
 // while shading ambient sand into moody underwater reef-blue shadow (more_realistic_reef_guide.png)
-float rearFade = smoothstep(-5.4, 1.2, vSandWorldPos.z);
-vec3 rearWaterTint = vec3(0.16, 0.26, 0.44);
-diffuseColor.rgb = mix(diffuseColor.rgb * rearWaterTint, diffuseColor.rgb * vec3(0.46, 0.54, 0.68), 0.32 + 0.68 * rearFade);
+float rearFade = smoothstep(-5.2, -0.4, vSandWorldPos.z);
+vec3 rearWaterTint = vec3(0.18, 0.30, 0.50);
+vec3 frontSandTint = vec3(0.96, 0.95, 0.92);
+diffuseColor.rgb *= mix(rearWaterTint, frontSandTint, rearFade);
 // Center arch and side-wall vignette shadow on the sandbed
 float centerArchPocket = exp(-pow(vSandWorldPos.x / 1.45, 2.0) - pow((vSandWorldPos.z + 1.25) / 1.15, 2.0)) * 0.42 * (1.0 - uSingleIslandMode);
 float sideSandVignette = smoothstep(2.2, 6.2, abs(vSandWorldPos.x)) * 0.35;
@@ -560,9 +566,11 @@ vec4 roughnessPrimary = texture2D(roughnessMap, uvPrimary);
 vec4 roughnessSecondary = texture2D(roughnessMap, uvSecondary);
 roughnessFactor *= mix(roughnessPrimary.g, roughnessSecondary.g, sandMacroBlend);
 // Calcite & shell grain micro-sparkle at close range (AQ-73 AC #1)
-float sparkleSignal = fract(sin(dot(floor(vSandWorldPos.xz * 180.0), vec2(127.1, 311.7))) * 43758.5453);
-float sparkleGlint = step(0.965, sparkleSignal) * smoothstep(0.52, 0.85, rippleWave);
-roughnessFactor = mix(roughnessFactor, 0.32, sparkleGlint * 0.65);
+vec3 viewDir = normalize(cameraPosition - vSandWorldPos);
+vec2 sparkleCell = floor(vSandWorldPos.xz * 220.0 + viewDir.xz * 6.0);
+float sparkleSignal = fract(sin(dot(sparkleCell, vec2(127.1, 311.7))) * 43758.5453);
+float sparkleGlint = step(0.975, sparkleSignal) * smoothstep(0.45, 0.85, rippleWave);
+roughnessFactor = mix(roughnessFactor, 0.08, sparkleGlint);
 #endif`,
     )
     shader.fragmentShader = shader.fragmentShader.replace(
@@ -587,6 +595,14 @@ sandTbnSecondary[1] *= faceDirection;
 vec3 sandNormalPrimary = normalize(sandTbnPrimary * mapNPrimary);
 vec3 sandNormalSecondary = normalize(sandTbnSecondary * mapNSecondary);
 normal = normalize(mix(sandNormalPrimary, sandNormalSecondary, sandMacroBlend));
+
+// Flow-sculpted micro-ripples tilt the sand into the key and fill lights.
+float phase1 = vSandWorldPos.x * 2.45 + vSandWorldPos.z * 1.15 + 0.45 * sin(vSandWorldPos.z * 1.5);
+float phase2 = vSandWorldPos.z * 3.2 - vSandWorldPos.x * 1.3;
+float dRippleDx = 0.34 * cos(phase1) * 2.45 + 0.16 * sin(phase2) * 1.3;
+float dRippleDz = 0.34 * cos(phase1) * (1.15 + 0.45 * 1.5 * cos(vSandWorldPos.z * 1.5)) - 0.16 * sin(phase2) * 3.2;
+float rippleStrength = 0.085 * smoothstep(-5.0, -1.0, vSandWorldPos.z);
+normal = normalize(normal + vec3(-dRippleDx * rippleStrength, 0.0, -dRippleDz * rippleStrength));
 #elif defined( USE_NORMALMAP_OBJECTSPACE )
 normal = texture2D(normalMap, uvPrimary).xyz * 2.0 - 1.0;
 #ifdef FLIP_SIDED
@@ -613,8 +629,25 @@ normal = perturbNormalArb(-vViewPosition, normal, dHdxy_fwd(), faceDirection);
     map: albedoTexture,
     roughness: 0.94,
     metalness: 0.0,
-    color: new THREE.Color('#2c3f5e'),
   })
+  const deepBedColor = new THREE.Color('#262936')
+  const compactedBedColor = new THREE.Color('#6d6558')
+  const oxygenatedCrustColor = new THREE.Color('#c6baa4')
+  frontEdgeMaterial.onBeforeCompile = shader => {
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <color_fragment>',
+      `#include <color_fragment>
+vec3 deepBedColor = vec3(${deepBedColor.r.toFixed(4)}, ${deepBedColor.g.toFixed(4)}, ${deepBedColor.b.toFixed(4)});
+vec3 compactedBedColor = vec3(${compactedBedColor.r.toFixed(4)}, ${compactedBedColor.g.toFixed(4)}, ${compactedBedColor.b.toFixed(4)});
+vec3 oxygenatedCrustColor = vec3(${oxygenatedCrustColor.r.toFixed(4)}, ${oxygenatedCrustColor.g.toFixed(4)}, ${oxygenatedCrustColor.b.toFixed(4)});
+float middleLayerMask = smoothstep(0.25, 0.29, vUv.y) * (1.0 - smoothstep(0.78, 0.82, vUv.y));
+float strataNoise = sin(vUv.y * 115.0 + sin(vUv.x * 8.0) * 1.5) * 0.014;
+vec3 edgeColor = mix(deepBedColor, compactedBedColor, smoothstep(0.23, 0.27, vUv.y));
+edgeColor = mix(edgeColor, oxygenatedCrustColor, smoothstep(0.80, 0.84, vUv.y));
+edgeColor += strataNoise * middleLayerMask * vec3(0.70, 0.65, 0.55);
+diffuseColor.rgb = edgeColor;`,
+    )
+  }
   const frontEdgeMesh = new THREE.Mesh(frontEdgeGeometry, frontEdgeMaterial)
   frontEdgeMesh.name = 'AragoniteFrontGlassSandEdge'
   frontEdgeMesh.receiveShadow = true
@@ -625,7 +658,7 @@ normal = perturbNormalArb(-vViewPosition, normal, dHdxy_fwd(), faceDirection);
     roughness: 0.90,
     metalness: 0.0,
   })
-  const rubbleInstances = new THREE.InstancedMesh(rubbleGeometry, rubbleMaterial, 48)
+  const rubbleInstances = new THREE.InstancedMesh(rubbleGeometry, rubbleMaterial, 96)
   rubbleInstances.name = 'AragoniteRubbleInstances'
   rubbleInstances.castShadow = true
   rubbleInstances.receiveShadow = true
@@ -637,7 +670,7 @@ normal = perturbNormalArb(-vViewPosition, normal, dHdxy_fwd(), faceDirection);
     metalness: 0.02,
     side: THREE.DoubleSide,
   })
-  const shellInstances = new THREE.InstancedMesh(shellGeometry, shellMaterial, 36)
+  const shellInstances = new THREE.InstancedMesh(shellGeometry, shellMaterial, 64)
   shellInstances.name = 'AragoniteShellInstances'
   shellInstances.receiveShadow = true
   shellInstances.raycast = () => {}
@@ -647,7 +680,7 @@ normal = perturbNormalArb(-vViewPosition, normal, dHdxy_fwd(), faceDirection);
     roughness: 0.76,
     metalness: 0.0,
   })
-  const corallineInstances = new THREE.InstancedMesh(corallineGeometry, corallineMaterial, 28)
+  const corallineInstances = new THREE.InstancedMesh(corallineGeometry, corallineMaterial, 48)
   corallineInstances.name = 'AragoniteCorallineInstances'
   corallineInstances.receiveShadow = true
   corallineInstances.raycast = () => {}
