@@ -543,15 +543,20 @@ float rearFade = smoothstep(-5.2, -0.4, vSandWorldPos.z);
 vec3 rearWaterTint = vec3(0.18, 0.30, 0.50);
 vec3 frontSandTint = vec3(0.96, 0.95, 0.92);
 diffuseColor.rgb *= mix(rearWaterTint, frontSandTint, rearFade);
-// Center arch and side-wall vignette shadow on the sandbed
+// Shadowed contact where the substrate reaches the dark rear wall.
+// Confine this contact transition to the final 0.95 display units of substrate;
+// no screen-space gradient or lateral vignette darkens the foreground.
+float rearWallDistance = max(vSandWorldPos.z + 5.5, 0.0);
+float rearWallContact = mix(0.035, 1.0, smoothstep(0.0, 0.95, rearWallDistance));
+diffuseColor.rgb *= rearWallContact;
+// Local central arch pocket remains tied to the reef footprint.
 float centerArchPocket = exp(-pow(vSandWorldPos.x / 1.45, 2.0) - pow((vSandWorldPos.z + 1.25) / 1.15, 2.0)) * 0.42 * (1.0 - uSingleIslandMode);
-float sideSandVignette = smoothstep(2.2, 6.2, abs(vSandWorldPos.x)) * 0.35;
 // Visual-check fix: the dual-scale UV blend only swaps grain phase, so at
 // overview distance (mipmapped) both samples average to the same mean and
 // the field reads flat white. Modulate luminance by the same macro signal
 // so broad warm patches (±10%, zero mean change) survive at any distance.
 diffuseColor.rgb *= 0.90 + 0.20 * sandMacroBlend;
-diffuseColor.rgb *= rockContactAo * (1.0 - centerArchPocket) * (1.0 - sideSandVignette);
+diffuseColor.rgb *= rockContactAo * (1.0 - centerArchPocket);
 // AQ-70.6: the sand's own caustic ridge network was removed. The shared
 // cellular caustic chunk (caustics.ts) is applied to the sand material in
 // rebuildHabitat, so the sand, rock, coral, and fish all show the one

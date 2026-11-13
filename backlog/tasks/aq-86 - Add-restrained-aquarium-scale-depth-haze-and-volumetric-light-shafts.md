@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-08'
-updated_date: '2026-11-13 00:15'
+updated_date: '2026-11-13 05:44'
 labels:
   - optics
   - photorealism
@@ -53,6 +53,8 @@ Give the tank visible depth with a restrained haze that starts behind the primar
 
 <!-- SECTION:PLAN:BEGIN -->
 Root renderer correction: verify the existing shaft offscreen/additive blend path against Three WebGLState, remove repeated alpha attenuation so soft shaft radiance survives compositing, and preserve exact motion/depth/tier contracts. Cover the actual pass materials/render-state restoration, then compare native fixed-pose scenes at both target viewports before tuning intensity. Keep haze/seam and measured-budget acceptance open until separately demonstrated.
+
+Root rear-seam iteration: compare settled native two-size views, then replace generic lateral sand darkening with bounded rear-wall contact illumination falloff. Preserve warm foreground, sharp grain geometry, water clarity and current substrate work. Verify actual shader compilation/captures before acceptance; no blur, full-frame vignette, model or navigation changes.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -61,4 +63,6 @@ Root renderer correction: verify the existing shaft offscreen/additive blend pat
 Root renderer correction2026-11-12: Three WebGLState confirms normal offscreen blending and straight-alpha additive compositing were multiplying already-weighted shaft radiance by alpha again. Store shaft radiance with NoBlending, composite premultiplied ONE/ONE, and use the same premultiplied convention for the fallback plane. Raymarch now starts behind front glass z2.8 and stops at depth/rear glass z-5.5, skipping samples above the actual surface or below substrate rather than lighting the air before the tank. Restored shared surfaceY3.75 for rendered surface/shaft/caustic projection (visible surface had drifted from the old2.66 projection constant). Added pass-level material/state regressions covering depth and both shaft-draw exceptions.66 focused tests and typecheck14script checks pass. Native final-pose art/seam/budget gates remain open; no Done claim.
 
 Root native review of35581ed at both exactDPR1 sizes saved under docs/asset-evidence/aq86/compositing-20261112/. All current assets ready, no captured shader warnings/errors. Soft overhead light now survives blending, foreground objects stay sharp; hard rear-sand seam remains visibly unresolved, and full reference-level shaft shape/freeze/budget acceptance is not claimed. Keep task open.
+
+Root native trial softens the bright floor/rear-wall cut with substrate-only contact illumination over the final0.95display units, retaining sharp warm foreground grains. Removed the old arbitrary lateral sand vignette. No geometry, fish/navigation, full-frame overlay or blur changes.18sand/caustic tests pass; exact-source final captures and shader-log review follow. This is a functional/art iteration handoff, not full shaft/freeze/performance acceptance.
 <!-- SECTION:NOTES:END -->
