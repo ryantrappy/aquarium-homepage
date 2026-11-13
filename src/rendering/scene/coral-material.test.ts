@@ -84,6 +84,119 @@ describe('coral-raw-masks-v1 material and shader adapter (AQ-53 / AQ-42)', () =>
     expect(mockDepthShader.vertexShader).not.toContain('objectNormal = normalize(objectNormal +')
   })
 
+  it('keeps baked-PBR coral on the shared raw-mask/depth motion clock and preserves authored maps', () => {
+    const sourceMap = new THREE.Texture()
+    const sourceNormalMap = new THREE.Texture()
+    const sourceRoughnessMap = new THREE.Texture()
+    const legacyMaterial = new THREE.MeshStandardMaterial({ map: sourceMap, normalMap: sourceNormalMap, roughnessMap: sourceRoughnessMap })
+    const bakedMaterial = new THREE.MeshStandardMaterial({ map: sourceMap, normalMap: sourceNormalMap, roughnessMap: sourceRoughnessMap })
+    const legacy = applyCoralRawMaskMaterial(legacyMaterial, { role: 'coral-soft' })
+    const baked = applyCoralRawMaskMaterial(bakedMaterial, {
+      role: 'coral-soft',
+      paletteOverride: {
+        surfaceMode: 'baked-pbr',
+        baseColor: '#98766a', tipColor: '#c49b84', creviceColor: '#49342f',
+      },
+    })
+
+    expect(baked.material.map).toBe(sourceMap)
+    expect(baked.material.normalMap).toBe(sourceNormalMap)
+    expect(baked.material.roughnessMap).toBe(sourceRoughnessMap)
+    expect(baked.uniforms.uRoughnessOverride.value).toBe(1)
+    expect(baked.uniforms.uSubsurfaceStrength.value).toBe(0)
+    expect(baked.material.customProgramCacheKey()).not.toBe(legacy.material.customProgramCacheKey())
+    expect(baked.depthMaterial.customProgramCacheKey()).not.toBe(legacy.depthMaterial.customProgramCacheKey())
+
+    const compile = (material: THREE.MeshStandardMaterial) => {
+      const shader = {
+        uniforms: {},
+        vertexShader: THREE.ShaderLib.standard.vertexShader,
+        fragmentShader: THREE.ShaderLib.standard.fragmentShader,
+      } as unknown as THREE.WebGLProgramParametersWithUniforms
+      material.onBeforeCompile(shader, {} as THREE.WebGLRenderer)
+      return shader
+    }
+    const compileDepth = (material: THREE.MeshDepthMaterial) => {
+      const shader = {
+        uniforms: {},
+        vertexShader: THREE.ShaderLib.depth.vertexShader,
+        fragmentShader: THREE.ShaderLib.depth.fragmentShader,
+      } as unknown as THREE.WebGLProgramParametersWithUniforms
+      material.onBeforeCompile(shader, {} as THREE.WebGLRenderer)
+      return shader
+    }
+    const legacyShader = compile(legacy.material)
+    const bakedShader = compile(baked.material)
+    const legacyDepth = compileDepth(legacy.depthMaterial)
+    const bakedDepth = compileDepth(baked.depthMaterial)
+    expect(bakedShader.vertexShader).toBe(legacyShader.vertexShader)
+    expect(bakedDepth.vertexShader).toBe(legacyDepth.vertexShader)
+    expect(bakedShader.vertexShader).toContain('transformed.x += coralSwayX * coralFlex;')
+    expect(bakedShader.vertexShader).toContain('transformed.z += coralSwayZ * coralFlex;')
+    expect(bakedDepth.vertexShader).toContain('transformed.x += coralSwayX * coralFlex;')
+    expect(bakedDepth.vertexShader).toContain('transformed.z += coralSwayZ * coralFlex;')
+    legacy.update(3.25)
+    baked.update(3.25)
+    expect(baked.uniforms.uTime.value).toBe(legacy.uniforms.uTime.value)
+    expect(baked.uniforms.uMotionScale.value).toBe(legacy.uniforms.uMotionScale.value)
+    legacy.update(4.5, true)
+    baked.update(4.5, true)
+    expect(baked.uniforms.uTime.value).toBe(legacy.uniforms.uTime.value)
+    expect(baked.uniforms.uMotionScale.value).toBe(0)
+    legacy.update(5.5, false, true)
+    baked.update(5.5, false, true)
+    expect(baked.uniforms.uTime.value).toBe(legacy.uniforms.uTime.value)
+    expect(baked.uniforms.uMotionScale.value).toBe(0)
+  })
+
+  it('uses authored PBR roughness and G-only fluorescence in baked mode while retaining legacy grading once', () => {
+    const baked = applyCoralRawMaskMaterial(new THREE.MeshStandardMaterial({ roughness: 0.63 }), {
+      role: 'coral-soft',
+      paletteOverride: {
+        surfaceMode: 'baked-pbr',
+        baseColor: '#98766a', tipColor: '#c49b84', creviceColor: '#49342f',
+      },
+    })
+    const legacy = applyCoralRawMaskMaterial(new THREE.MeshStandardMaterial(), {
+      role: 'coral-soft',
+      paletteOverride: { baseColor: '#98766a', tipColor: '#c49b84', creviceColor: '#49342f' },
+    })
+    const compile = (binding: ReturnType<typeof applyCoralRawMaskMaterial>) => {
+      const shader = {
+        uniforms: {},
+        vertexShader: THREE.ShaderLib.standard.vertexShader,
+        fragmentShader: THREE.ShaderLib.standard.fragmentShader,
+      } as unknown as THREE.WebGLProgramParametersWithUniforms
+      binding.material.onBeforeCompile(shader, {} as THREE.WebGLRenderer)
+      return shader.fragmentShader
+    }
+    const bakedShader = compile(baked)
+    const legacyShader = compile(legacy)
+
+    expect(bakedShader.match(/#include <roughnessmap_fragment>/g)).toHaveLength(1)
+    expect(bakedShader).toContain('roughnessFactor = clamp(roughnessFactor * uRoughnessOverride, 0.04, 1.0);')
+    expect(bakedShader).not.toContain('roughnessFactor = uRoughnessOverride;')
+    expect(bakedShader).not.toContain('float pEps = 0.0025;')
+    expect(bakedShader).not.toContain('float coralTopExposure =')
+    expect(bakedShader).not.toContain('reflectedLight.directDiffuse *= coralContactAo;')
+    expect(bakedShader).not.toContain('reflectedLight.directSpecular *= 0.28;')
+    expect(bakedShader.match(/reflectedLight\.indirectDiffuse \*= coralContactAo;/g)).toHaveLength(1)
+    expect(bakedShader.match(/reflectedLight\.indirectSpecular \*= coralContactAo;/g)).toHaveLength(1)
+    expect(bakedShader).toContain('float coralTipMask = clamp(vCoralMask.g, 0.0, 1.0);')
+    expect(bakedShader).toContain('pow(coralTipMask, 1.35)')
+    expect(bakedShader).not.toContain('max(coralTipMask, polypHighlight * 0.65)')
+
+    expect(legacyShader.match(/#include <roughnessmap_fragment>/g)).toHaveLength(1)
+    expect(legacyShader).toContain('roughnessFactor = uRoughnessOverride;')
+    expect(legacyShader.match(/float pEps = 0\.0025;/g)).toHaveLength(1)
+    expect(legacyShader.match(/float coralTopExposure =/g)).toHaveLength(1)
+    expect(legacyShader.match(/reflectedLight\.directDiffuse \*= coralContactAo;/g)).toHaveLength(1)
+    expect(legacyShader.match(/reflectedLight\.directSpecular \*= 0\.28;/g)).toHaveLength(1)
+    expect(legacyShader.match(/float polypHighlight = smoothstep\(0\.46, 0\.78, polypDots\);/g)).toHaveLength(1)
+    expect(legacyShader.match(/naturalGrad \*= \(0\.86 \+ 0\.22 \* texLuma \+ 0\.16 \* \(polypHighlight - 0\.4\)\);/g)).toHaveLength(1)
+    expect(legacyShader.match(/max\(coralTipMask, polypHighlight \* 0\.65\)/g)).toHaveLength(1)
+  })
+
   it('pins proximal bases (R=0), keeps rigid skeletons immobile, de-synchronizes tentacles by B phaseSeed, and zeroes motion when paused or reduced-motion is active', () => {
     const tipPos = { x: 0.03, y: 0.12, z: -0.02 }
     const pinnedBase = evaluateCoralVertexDisplacement(

@@ -1,0 +1,24 @@
+{
+  "reviewer": "Root",
+  "recordedAt": "2026-11-13T19:44:11.593242+00:00",
+  "decision": "Accept this bounded Acropora morphology/PBR pilot for left primary crest only; full AQ70.11 art/variants requirements remain open",
+  "packageSha256": "8a0ed7c40e012d48eabef55e37833cc5616c06ff50914cf2d963ea2e22443844",
+  "nativeSha256": "984a6b2e5f5960c57b3b85c0fb576572fbeadf62773e0185aead803b750e459b",
+  "generatorSha256": "fe248796bb4e81273ac00a6f2e494555d8b816cb3cbf02aa57148c77017e8502",
+  "reviewSource": "Uncommitted isolated proof trial based on d454c27; bridge commit field identifies base only",
+  "proofSourceSha256": {
+    "src/rendering/scene/reef-assembly.ts": "0fddd4ee4c06dce7355b8a5896e351990f447a94f1f3490eeaf161a3377a1b74",
+    "src/rendering/scene/coral-material.ts": "ae7d3453ae389712daff2d3b180c9f0b8834342153ef20428501db13774078da"
+  },
+  "reviewed": [
+    "Current-left/new-right neutral clay at comparable height",
+    "New neutral textured render",
+    "Native laptop and phone full-scene and coral-macro views"
+  ],
+  "limits": [
+    "One original custom branching colony; not all archetypes or two variants each",
+    "Source0.218m height is a chosen art comparison scale, not specimen calibration",
+    "Generic macro crops some branch tips; full-scene views establish full framing",
+    "No animated fish-envelope clearance or performance certification"
+  ]
+}

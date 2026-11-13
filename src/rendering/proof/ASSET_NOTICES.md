@@ -4,7 +4,7 @@
 Category: Evidence / Asset Attribution
 Status: Active
 Authority: Evidentiary
-Backlog: AQ-12, AQ-40, AQ-70.10, AQ-70.12, AQ-94
+Backlog: AQ-12, AQ-40, AQ-70.10, AQ-70.11, AQ-70.12, AQ-94
 Owner: @root
 Updated: 2026-11-13
 Upstream: docs/requirements.md, src/rendering/proof/asset-manifest.json
@@ -137,3 +137,16 @@ The separate custom-rock registry pins native, generator, raw export and install
 package hashes. This additive background module is used in the laptop reef;
 phone retains the taller single island. It does not replace the supplied Gemini
 foundations or claim completion of the modular library/final reef art.
+
+## Custom Acropora-like antler colony — AQ-70.11
+
+`src/rendering/assets/corals/custom-colonies/reef-acropora-antler.glb` is original
+project geometry with original baked tissue/normal/roughness maps and raw coral
+masks. No external imagery or paid assets. The selected main left crest uses this
+colony; the supplied canonical models remain preserved. Packed Blender source,
+raw override, original generator and PNG bake copies are committed under the
+reserved `splat-fish/blend/reef-acropora-antler*` / `overrides/reef-acropora-antler.glb`
+paths. The custom-colonies registry pins source/package hashes. Its morphology
+and comparison scale are chosen art, without exact species/physical calibration
+or whole-fish clearance claims. Root approved this bounded pilot before promotion;
+full eight-archetype/two-variant photorealism acceptance remains open.

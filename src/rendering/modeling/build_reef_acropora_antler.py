@@ -33,7 +33,7 @@ def tube(a,b,c,r0,r1,tip=True):
         seed=Vector((0,0,1)) if abs(tangent.z)<.9 else Vector((1,0,0))
         n=seed.cross(tangent).normalized();v=tangent.cross(n).normalized()
         radius=r0*(1-t)+r1*t
-        if tip and t>.94: radius=max(.00018,radius*math.cos((t-.94)/.06*math.pi*.47))
+        if tip and t>.98: radius=max(.00035,radius*math.cos((t-.98)/.02*math.pi*.45))
         for j in range(sides):
             angle=j*2*math.pi/sides
             # Mild irregularity, rather than identical straight circular rods.
@@ -56,6 +56,9 @@ branches=[
     (.80,(.017,.003,.163),(.043,.023,.238)),
     (.47,(.043,-.028,.105),(.093,-.062,.181)),
     (.63,(.047,.032,.132),(.101,.050,.191)),
+    (.37,(-.015,-.025,.110),(-.025,-.055,.175)),
+    (.58,(-.045,.005,.130),(-.110,.015,.188)),
+    (.35,(.035,-.025,.085),(.075,-.040,.135)),
 ]
 for index,(start_t,mid,end) in enumerate(branches):
     a=bezier(*stem,start_t);b=Vector(mid);c=Vector(end)
@@ -69,7 +72,7 @@ for index,(start_t,mid,end) in enumerate(branches):
         q=p+direction*length*.53
         e=p+(direction+Vector((0,0,.13))).normalized()*length
         tube(p,q,e,r0*.62,.0021)
-        if fork_i==0 and index%2==0:
+        if fork_i==0:
             base=bezier(p,q,e,.54)
             lateral=(direction*.45-side*.50+Vector((0,0,.55))).normalized()
             tube(base,base+lateral*.018,base+lateral*.038,.0027,.0017)
@@ -100,23 +103,12 @@ for p in body.data.polygons:p.use_smooth=True
 low=body.copy();low.data=body.data.copy();low.name='Reef_Acropora_Antler';bpy.context.collection.objects.link(low)
 body.select_set(False);low.select_set(True);bpy.context.view_layer.objects.active=low
 low.data.calc_loop_triangles();before=len(low.data.loop_triangles)
-decimate=low.modifiers.new('Runtime_LOD','DECIMATE');decimate.ratio=min(1,26000/before)
+decimate=low.modifiers.new('Runtime_LOD','DECIMATE');decimate.ratio=min(1,25000/before)
 bpy.ops.object.modifier_apply(modifier=decimate.name)
 low.data.validate(verbose=True);low.data.update()
-for p in low.data.polygons:p.use_smooth=True
-bpy.ops.object.mode_set(mode='EDIT');bpy.ops.mesh.select_all(action='SELECT');bpy.ops.uv.smart_project(angle_limit=math.radians(66),island_margin=.012);bpy.ops.object.mode_set(mode='OBJECT')
-attr=low.data.color_attributes.new(name='COLOR_0',type='FLOAT_COLOR',domain='CORNER')
-low.data.color_attributes.active_color=attr;low.data.color_attributes.render_color_index=0
-for loop in low.data.loops:
-    p=low.data.vertices[loop.vertex_index].co
-    distances=[(p-tip).length for tip in scaled_tips]
-    nearest=min(range(len(distances)),key=lambda i:distances[i]);d=distances[nearest]
-    t=max(0,min(1,(.014-d)/.011));growth=t*t*(3-2*t)
-    attr.data[loop.index].color=(0,growth,((nearest*137+31)%997)/997,1)
-
-# Small radial corallite cups exist only on the high bake source. The runtime
-# keeps the clean joined silhouette and receives their tangent-space detail.
-cv,cf=[],[]
+# Bake the dense cups; retain every tenth cup as small silhouette geometry.
+cv,cf,lv,lf,lr=[],[],[],[],[]
+cup_index=0
 for branch_index,(a,b,c,r0,r1) in enumerate(branch_records):
     count=max(5,int(((b-a).length+(c-b).length)*480))
     for k in range(count):
@@ -140,12 +132,43 @@ for branch_index,(a,b,c,r0,r1) in enumerate(branch_records):
                 nxt=(j+1)%7
                 cf.append((start+ring*7+j,start+ring*7+nxt,start+(ring+1)*7+nxt,start+(ring+1)*7+j))
         cf.append(tuple(start+4*7+j for j in range(7)))
+        if cup_index%10==0:
+            low_start=len(lv)
+            for height,radius,rim in ((0,.00062,0),(.00105,.00074,1),(.00105,.00039,.7)):
+                for j in range(5):
+                    phi=j*2*math.pi/5
+                    lv.append(tuple(origin+axis*height+(math.cos(phi)*cn+math.sin(phi)*cb)*radius));lr.append(rim)
+            floor_index=len(lv);lv.append(tuple(origin+axis*.00063));lr.append(.3)
+            for ring in range(2):
+                for j in range(5):
+                    nxt=(j+1)%5
+                    lf.append((low_start+ring*5+j,low_start+ring*5+nxt,low_start+(ring+1)*5+nxt,low_start+(ring+1)*5+j))
+            for j in range(5):lf.append((low_start+10+j,low_start+10+(j+1)%5,floor_index))
+        cup_index+=1
 cmesh=bpy.data.meshes.new('High_Radial_Corallite_Cups');cmesh.from_pydata(cv,[],cf);cmesh.update()
 cups=bpy.data.objects.new('High_Radial_Corallites',cmesh);bpy.context.collection.objects.link(cups)
 for poly in cups.data.polygons:poly.use_smooth=True
 bpy.ops.object.select_all(action='DESELECT');cups.select_set(True);body.hide_set(False);body.select_set(True);bpy.context.view_layer.objects.active=body;bpy.ops.object.join()
 body.data.validate(verbose=True);body.data.update();body.data.calc_loop_triangles();high_final=len(body.data.loop_triangles)
-body.select_set(False);low.select_set(True);bpy.context.view_layer.objects.active=low
+body.select_set(False)
+lmesh=bpy.data.meshes.new('Runtime_Corallite_Silhouettes');lmesh.from_pydata(lv,[],lf);lmesh.update()
+rims=lmesh.attributes.new(name='__polyp_rim',type='FLOAT',domain='POINT')
+for i,value in enumerate(lr):rims.data[i].value=value
+lcups=bpy.data.objects.new('Runtime_Corallites',lmesh);bpy.context.collection.objects.link(lcups)
+bpy.ops.object.select_all(action='DESELECT');lcups.select_set(True);low.select_set(True);bpy.context.view_layer.objects.active=low;bpy.ops.object.join()
+low.data.validate(verbose=True);low.data.update()
+for p in low.data.polygons:p.use_smooth=True
+bpy.ops.object.mode_set(mode='EDIT');bpy.ops.mesh.select_all(action='SELECT');bpy.ops.uv.smart_project(angle_limit=math.radians(66),island_margin=.012);bpy.ops.object.mode_set(mode='OBJECT')
+attr=low.data.color_attributes.new(name='COLOR_0',type='FLOAT_COLOR',domain='CORNER')
+low.data.color_attributes.active_color=attr;low.data.color_attributes.render_color_index=0
+for loop in low.data.loops:
+    p=low.data.vertices[loop.vertex_index].co
+    distances=[(p-tip).length for tip in scaled_tips]
+    nearest=min(range(len(distances)),key=lambda i:distances[i]);d=distances[nearest]
+    t=max(0,min(1,(.014-d)/.011));growth=t*t*(3-2*t)
+    rim=low.data.attributes.get('__polyp_rim')
+    growth=max(growth,rim.data[loop.vertex_index].value if rim else 0)
+    attr.data[loop.index].color=(0,growth,((nearest*137+31)%997)/997,1)
 
 mat=bpy.data.materials.new('Living_Calcified_Tissue');mat.use_nodes=True
 nodes,links=mat.node_tree.nodes,mat.node_tree.links;nodes.clear()
@@ -193,13 +216,13 @@ ntex=nodes.new('ShaderNodeTexImage');ntex.image=normal_image;nm=nodes.new('Shade
 mat.use_backface_culling=True
 if low.data.validate(verbose=True): raise RuntimeError('Runtime mesh changed after bake; rebuild before persisting')
 body.hide_set(True);low.select_set(True);bpy.context.view_layer.objects.active=low
-low['authoring_notes']='Original custom thin irregular joined antler graph. Height0.218m is a chosen comparison scale. R0 rigid; G tip distance; B nearest tip phase; A sampled baked AO floored0.18. Native high mesh retained; no imported visuals. No taxonomy or animated clearance claim.'
+low['authoring_notes']='Original custom thin irregular joined antler graph. Height0.218m is a chosen comparison scale. R0 rigid; G tip distance and corallite rims; B nearest tip phase; A sampled baked AO floored0.18. Native high mesh retained; no imported visuals. No taxonomy or animated clearance claim.'
 low.data.calc_loop_triangles();triangles=len(low.data.loop_triangles)
 blend=OUT/'blend'/f'{ID}.blend';blend.parent.mkdir(parents=True,exist_ok=True)
 bpy.ops.wm.save_as_mainfile(filepath=str(blend),compress=False)
 override=OUT/'overrides'/f'{ID}.glb';override.parent.mkdir(parents=True,exist_ok=True)
-bpy.ops.export_scene.gltf(filepath=str(override),export_format='GLB',use_selection=True,export_yup=True,export_extras=True,export_animations=False,export_tangents=True,export_vertex_color='ACTIVE',export_all_vertex_colors=False,export_active_vertex_color_when_no_material=True)
-print('ANTLER_SAVED_EXPORTED',json.dumps({'native':str(blend),'override':str(override),'triangles':triangles,'highTriangles':high_final,'tips':len(tips),'coralliteCups':sum(max(5,int(((b-a).length+(c-b).length)*480)) for a,b,c,r0,r1 in branch_records)}),flush=True)
+bpy.ops.export_scene.gltf(filepath=str(override),export_format='GLB',use_selection=True,export_yup=True,export_extras=True,export_animations=False,export_tangents=True,export_vertex_color='ACTIVE',export_all_vertex_colors=False,export_active_vertex_color_when_no_material=True,export_attributes=False)
+print('ANTLER_SAVED_EXPORTED',json.dumps({'native':str(blend),'override':str(override),'triangles':triangles,'highTriangles':high_final,'tips':len(tips),'runtimeCoralliteCups':math.ceil(cup_index/10),'coralliteCups':sum(max(5,int(((b-a).length+(c-b).length)*480)) for a,b,c,r0,r1 in branch_records)}),flush=True)
 # Review-only views: after native/export persistence, never save these scene edits.
 bpy.ops.object.select_all(action='DESELECT');before_objects=set(bpy.data.objects)
 bpy.ops.import_scene.gltf(filepath=str(ROOT/'src/rendering/assets/corals/coral-acropora-staghorn.glb'))

@@ -34,6 +34,8 @@ export const CORAL_DEFAULT_PALETTE = Object.freeze({
 export type CoralPrimitiveRole = 'coral-rigid' | 'coral-soft'
 
 export type CoralPaletteOverride = {
+  /** Keep authored PBR maps instead of applying legacy normal/contrast overrides. */
+  surfaceMode?: 'legacy-grade' | 'baked-pbr'
   baseColor: THREE.ColorRepresentation
   tipColor: THREE.ColorRepresentation
   creviceColor?: THREE.ColorRepresentation
@@ -291,6 +293,7 @@ function injectCoralRawMaskShader(
   shader: THREE.WebGLProgramParametersWithUniforms,
   uniforms: CoralFlowUniforms,
   isDepthPass: boolean,
+  bakedSurface = false,
 ) {
   Object.assign(shader.uniforms, uniforms)
 
@@ -462,14 +465,17 @@ if (uAnemoneMode > 1.5) {
 
   shader.fragmentShader = shader.fragmentShader.replace(
     '#include <roughnessmap_fragment>',
-    `#include <roughnessmap_fragment>
+    bakedSurface ? `#include <roughnessmap_fragment>
+// Preserve the authored roughness map and its spatial variation.
+roughnessFactor = clamp(roughnessFactor * uRoughnessOverride, 0.04, 1.0);
+` : `#include <roughnessmap_fragment>
 if (uRoughnessOverride > 0.0) {
   roughnessFactor = uRoughnessOverride;
 }
 `,
   )
 
-  shader.fragmentShader = shader.fragmentShader.replace(
+  if (!bakedSurface) shader.fragmentShader = shader.fragmentShader.replace(
     '#include <normal_fragment_maps>',
     `#include <normal_fragment_maps>
 // Velvety micro-polyp normal bump breaks up smooth specular reflections on domes & branches
@@ -487,16 +493,19 @@ normal = normalize(normal - vec3(px - p0, py - p0, pz - p0) * bumpScale);
   shader.fragmentShader = shader.fragmentShader.replace(
     '#include <aomap_fragment>',
     `#include <aomap_fragment>
+${bakedSurface ? `// Authored PBR uses the real light/shadow rig; baked contact AO affects indirect light only.
 reflectedLight.indirectDiffuse *= coralContactAo;
+reflectedLight.indirectSpecular *= coralContactAo;
+` : `reflectedLight.indirectDiffuse *= coralContactAo;
 reflectedLight.indirectSpecular *= coralContactAo * 0.35;
 reflectedLight.directSpecular *= 0.28;
 reflectedLight.directDiffuse *= coralContactAo;
-
 // Deep 3D reef self-shadowing: downward-facing overhangs and interior branch/polyp crevices
 // drop into rich dark actinic shadow while upward-facing tips catch the overhead key light.
 float coralTopExposure = smoothstep(-0.35, 0.65, normal.y) * (0.38 + 0.62 * smoothstep(0.0, 0.75, coralHeightMask * 0.6 + coralTipMask * 0.4));
 reflectedLight.directDiffuse *= mix(0.22, 1.05, coralTopExposure);
 reflectedLight.indirectDiffuse *= mix(0.18, 0.88, coralTopExposure);
+`}
 
 // Restrained upward-facing reef caustic shimmer (AQ-14.2) was removed in
 // AQ-70.6: the shared cellular caustic chunk (caustics.ts, applied to
@@ -507,7 +516,7 @@ vec3 coralSss = diffuseColor.rgb * (0.45 + 0.55 * coralTipMask) * coralRim * uSu
 // AQ-70.6 AC #3: fluorescence stays mask-driven (COLOR_0.g tip mask +
 // polyp highlight) and now scales with the fixture's actinic share via
 // uActinicLevel; no blanket emissive is added anywhere.
-vec3 coralGlow = uFluorescenceTint * pow(max(coralTipMask, polypHighlight * 0.65), 1.35) * (0.40 + 0.60 * coralRim) * uFluorescenceStrength * uActinicLevel * coralContactAo;
+vec3 coralGlow = uFluorescenceTint * pow(${bakedSurface ? 'coralTipMask' : 'max(coralTipMask, polypHighlight * 0.65)'}, 1.35) * (0.40 + 0.60 * coralRim) * uFluorescenceStrength * uActinicLevel * coralContactAo;
 totalEmissiveRadiance += coralSss + coralGlow;
 `,
   )
@@ -730,6 +739,7 @@ export function applyCoralRawMaskMaterial(
   material.depthWrite = true
 
   const pal = options.paletteOverride
+  const bakedSurface = pal?.surfaceMode === 'baked-pbr'
   const uniforms: CoralFlowUniforms = {
     uTime: { value: 0 },
     uMotionScale: { value: paused || reducedMotion ? 0 : roleIsSoft },
@@ -737,7 +747,7 @@ export function applyCoralRawMaskMaterial(
     uPrimaryFrequencyHz: { value: options.primaryFrequencyHz ?? DEFAULT_PRIMARY_FREQ_HZ },
     uSecondaryFrequencyHz: { value: options.secondaryFrequencyHz ?? DEFAULT_SECONDARY_FREQ_HZ },
     uRoleIsSoft: { value: roleIsSoft },
-    uSubsurfaceStrength: { value: pal?.subsurfaceStrength ?? options.subsurfaceStrength ?? (options.role === 'coral-soft' ? 0.38 : 0.28) },
+    uSubsurfaceStrength: { value: pal?.subsurfaceStrength ?? options.subsurfaceStrength ?? (bakedSurface ? 0 : options.role === 'coral-soft' ? 0.38 : 0.28) },
     uFluorescenceStrength: { value: pal?.fluorescenceStrength ?? options.fluorescenceStrength ?? (options.role === 'coral-soft' ? 0.16 : 0.10) },
     uActinicLevel: {
       value:
@@ -755,14 +765,14 @@ export function applyCoralRawMaskMaterial(
     uPaletteTip: { value: new THREE.Color(pal?.tipColor ?? CORAL_DEFAULT_PALETTE.tipColor) },
     uPaletteCrevice: { value: new THREE.Color(pal?.creviceColor ?? CORAL_DEFAULT_PALETTE.creviceColor) },
     uPaletteRegrade: { value: pal?.regradeStrength ?? CORAL_DEFAULT_REGRADE },
-    uRoughnessOverride: { value: pal?.roughness ?? (options.role === 'coral-soft' ? 0.74 : 0.78) },
+    uRoughnessOverride: { value: pal?.roughness ?? (bakedSurface ? 1 : options.role === 'coral-soft' ? 0.74 : 0.78) },
     uAnemoneMode: { value: options.anemoneMode === 'tentacles' ? 2 : options.anemoneMode === 'column' ? 1 : 0 },
   }
 
-  const cacheKey = `coral-raw-masks-v1:${options.role}`
+  const cacheKey = `coral-raw-masks-v1:${options.role}${bakedSurface ? ':baked-pbr' : ''}`
   material.customProgramCacheKey = () => cacheKey
   material.onBeforeCompile = shader => {
-    injectCoralRawMaskShader(shader, uniforms, false)
+    injectCoralRawMaskShader(shader, uniforms, false, bakedSurface)
   }
   material.userData.coralRawMasks = {
     schema: CORAL_RAW_MASK_SCHEMA,
@@ -777,7 +787,7 @@ export function applyCoralRawMaskMaterial(
   })
   depthMaterial.customProgramCacheKey = () => `${cacheKey}:depth`
   depthMaterial.onBeforeCompile = shader => {
-    injectCoralRawMaskShader(shader, uniforms, true)
+    injectCoralRawMaskShader(shader, uniforms, true, bakedSurface)
   }
 
   return {

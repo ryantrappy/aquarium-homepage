@@ -22,6 +22,7 @@ export type ModularCoralMountEntry = {
   tiltZRad?: number
   offsetM?: readonly [number, number, number]
   paletteOverride?: CoralPaletteOverride
+  scatterPaletteOverride?: CoralPaletteOverride
   columnPaletteOverride?: CoralPaletteOverride
 }
 
@@ -102,6 +103,7 @@ export const LIVE_ROCK_ISLAND_URLS: Readonly<Record<'left' | 'right', string>> =
 })
 
 export const MODULAR_CORAL_ASSET_URLS: Readonly<Record<string, string>> = Object.freeze({
+  'reef-acropora-antler': new URL('../assets/corals/custom-colonies/reef-acropora-antler.glb', import.meta.url).href,
   'coral-acropora-staghorn': new URL('../assets/corals/coral-acropora-staghorn.glb', import.meta.url).href,
   'coral-acropora-table': new URL('../assets/corals/coral-acropora-table.glb', import.meta.url).href,
   'coral-montipora-plate': new URL('../assets/corals/coral-montipora-plate.glb', import.meta.url).href,
@@ -406,17 +408,22 @@ const PALETTE_ROSE_MAUVE_ANEMONE: CoralPaletteOverride = {
  *   peach-pink Goniopora/anemone in the lower-front, and deep cobalt-blue Tridacna mantle on the right apron.
  */
 export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
-  // 1. Left Peak Apex: Royal Violet-Blue & Coral-Rose Branching Acropora (from reef-full-model.blend)
+  // 1. Left Peak Apex: custom baked-PBR antler Acropora; companion scatters keep the legacy violet palette.
   {
     socketName: 'socket_sps_crest_01',
-    coralAssetId: 'coral-acropora-staghorn',
+    coralAssetId: 'reef-acropora-antler',
     archetype: 'branching-sps',
     yawRad: 0.20,
     scale: 2.35,
     tiltXRad: 0.04,
     tiltZRad: 0.06,
     offsetM: [0.0, -0.008, 0.0],
-    paletteOverride: PALETTE_ROYAL_VIOLET_ACROPORA,
+    paletteOverride: {
+      surfaceMode: 'baked-pbr',
+      baseColor: '#8b71a8', tipColor: '#c1afca', creviceColor: '#383047',
+      regradeStrength: 0.45, roughness: 1.0, fluorescenceStrength: 0.08,
+    },
+    scatterPaletteOverride: PALETTE_ROYAL_VIOLET_ACROPORA,
   },
   {
     socketName: 'socket_sps_crest_02',
@@ -1226,7 +1233,7 @@ function buildInstancedCoralScatters(
       tiltXRad: (hash01(5) - 0.5) * 0.16,
       tiltZRad: (hash01(6) - 0.5) * 0.16,
       scale: mount.scale * (0.14 + hash01(7) * 0.06),
-      palette: mount.paletteOverride ?? PALETTE_ZOANTHID_ORANGE_GREEN,
+      palette: mount.scatterPaletteOverride ?? mount.paletteOverride ?? PALETTE_ZOANTHID_ORANGE_GREEN,
       rimTint,
     })
     scatterGroups.set(scatterAssetId, list)

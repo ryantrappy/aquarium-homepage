@@ -74,6 +74,7 @@ function buildMockCoralTemplates(): Map<string, THREE.Object3D> {
     ['coral-anemone-bta', [['anemone_column_disc', 'coral-soft'], ['anemone_tentacle_crown', 'coral-soft']]],
     ['coral-acropora-table', [['acropora_table_colony', 'coral-rigid']]],
     ['coral-acropora-staghorn', [['acropora_staghorn_colony', 'coral-rigid']]],
+    ['reef-acropora-antler', [['reef_acropora_antler', 'coral-rigid']]],
     ['coral-montipora-plate', [['montipora_plate_colony', 'coral-rigid']]],
     ['coral-brain-diploria', [['diploria_brain_colony', 'coral-soft']]],
     ['coral-zoanthid-mat', [['zoanthid_button_cluster', 'coral-soft']]],
@@ -217,6 +218,22 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     expect((rockMesh.material as THREE.MeshStandardMaterial).userData.liveRockShader).toBe('live-rock-3d-aragonite-v1')
   })
 
+  it('keeps the custom baked-PBR primary palette separate from its legacy violet scatter palette', () => {
+    const templates = buildMockCoralTemplates()
+    const rockRoot = buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json')
+    const assembly = assembleCoralsOnRockSockets(rockRoot, templates, DEFAULT_LEFT_ISLAND_MOUNTS)
+    const primary = assembly.mountedCorals.find(mounted => mounted.coralAssetId === 'reef-acropora-antler')!
+    const primaryBinding = primary.materialControllers[0]!
+    const zoanthidScatter = assembly.instancedMeshes.find(mesh => mesh.name.startsWith('instanced_coral-zoanthid-mat_'))!
+    const scatterMaterial = zoanthidScatter.material as THREE.MeshStandardMaterial
+    const scatterUniforms = scatterMaterial.userData.coralRawMasks.uniforms
+
+    expect(primaryBinding.material.customProgramCacheKey()).toContain(':baked-pbr')
+    expect(primaryBinding.uniforms.uPaletteBase.value.getHexString()).toBe('8b71a8')
+    expect(scatterMaterial.customProgramCacheKey()).not.toContain(':baked-pbr')
+    expect(scatterUniforms.uPaletteBase.value.getHexString()).toBe('5c46c8')
+  })
+
   it('forwards the fixture actinic level to every mounted coral material, defaulting to 1 (AQ-70.6 AC #3)', () => {
     const templates = buildMockCoralTemplates()
     const leftRock = buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json')
@@ -317,8 +334,11 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
 
   it('keeps a rigid basal vertex that shader-tucks into view from being culled by the original geometry sphere', () => {
     const templates = buildMockCoralTemplates()
-    const template = templates.get('coral-acropora-staghorn')!
-    const rigid = template.getObjectByName('acropora_staghorn_colony') as THREE.Mesh
+    const mount = DEFAULT_LEFT_ISLAND_MOUNTS[0]
+    const template = templates.get(mount.coralAssetId)!
+    const rigid = template.children.find(child =>
+      child instanceof THREE.Mesh && child.userData.reefPrimitive?.role === 'coral-rigid',
+    ) as THREE.Mesh
     const localVertices: Array<[number, number, number]> = [
       [1.01, 0, 0],
       [1.02, 0, 0.003],
@@ -330,9 +350,9 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     const assembly = assembleCoralsOnRockSockets(
       buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json'),
       templates,
-      [DEFAULT_LEFT_ISLAND_MOUNTS[0]],
+      [mount],
     )
-    const assembledMesh = assembly.mountedCorals[0].root.getObjectByName('acropora_staghorn_colony') as THREE.Mesh
+    const assembledMesh = assembly.mountedCorals[0].root.getObjectByName(rigid.name) as THREE.Mesh
     assembledMesh.updateWorldMatrix(true, false)
     expect(assembledMesh.geometry).toBe(geometry)
     expect(assembledMesh.frustumCulled).toBe(true)
