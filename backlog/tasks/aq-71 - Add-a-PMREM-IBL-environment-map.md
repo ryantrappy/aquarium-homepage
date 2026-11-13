@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-08 00:30'
-updated_date: '2026-11-12 05:37'
+updated_date: '2026-11-13 06:28'
 labels:
   - photorealism
   - rendering
@@ -49,6 +49,8 @@ The main scene currently lacks a scene.environment PMREM texture, causing MeshSt
 
 <!-- SECTION:NOTES:BEGIN -->
 2026-11-08 audit: PR #9 merged procedural PMREM environment map generation (src/rendering/scene/environment-map.ts, 6 passing tests in environment-map.test.ts) and wired scene.environment and per-role envMapIntensity into src/rendering/scene/aquarium.ts. Moved to In Progress (ready-for-review / gemini approved) awaiting Root 2-viewport exposure/performance sign-off (ACs #3-#4).
+
+Luna/Root2026-11-13 read-only audit: procedural PMREM initialization/scene.environment and teardown are wired; fish/reef receiveexplicit intensities. Sand declaration0.2 is currentlynotapplied to sandBed.group (materials retain default1.0); evaluate a scoped integration fix against current warm foreground before acceptance. Water surface is customShaderMaterial, so its oldenvironmentintensity entry is compatibility-only and shouldnot be applied asPBR. Topmodulecomments reference stale exposure/hemi/backdrop values. Successful WebGL_PMREM and view-angle specular evidence still need explicitreview; no asset/license change. CI/FPSdisplay tasks remain excluded; no newframe-ratebenchmarkrun in this audit.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
