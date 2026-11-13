@@ -3,10 +3,11 @@ id: AQ-82
 title: >-
   Replace monolithic coral canopy collision boxes with permeable coral
   interaction zones and socket-derived habitat anchors
-status: To Do
+status: In Progress
 assignee:
-  - '@Luna'
+  - '@root'
 created_date: '2026-11-08T20:07:00Z'
+updated_date: '2026-11-13 06:18'
 labels:
   - behavior
   - navigation
@@ -53,3 +54,15 @@ Separate rigid calcified collision cores (live rock and stony coral bases/stalks
 - [ ] #1 Root agent reviews the completed work before the task is marked Done.
 - [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Root current-source alignment: existing typed coral interactions are implemented, but habitat generation still uses canonical socket coordinates even though runtime mounts now use different reef-full-model exports. Derive a copied island-local socket-position map from actual assembled rock nodes, pass it explicitly to habitat derivation, and use it for coral-base bounds and socket anchors. Preserve canonical defaults for historical/offline callers; an explicit runtime map must not fall back to stale coordinates for missing entries. Keep species compatibility, conservative clearance, placement and navigation contracts. Validate nested/transformed socket extraction, updated runtime nodes, missing/duplicate/nonfinite handling, actual GLB-backed differences and focused controller/reef tests. Full animated clearance/permeability art gates stay open.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Root current-source audit: runtime habitat still uses SOCKET_ANCHOR_POSITIONS_M from canonical socket reports although rendered coral mounts use reef-full-model GLB nodes. AQ58fallback source split is now corrected in d862bf9 without changing anchor derivation. Planned actual-mounted socket-position alignment remains next; no implementation/AC acceptance underAQ82 yet. Do not treat completed fallback coverage as coral permeability or anatomical contact acceptance.
+<!-- SECTION:NOTES:END -->
