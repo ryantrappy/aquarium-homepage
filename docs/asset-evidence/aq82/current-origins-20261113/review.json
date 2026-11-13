@@ -1,0 +1,62 @@
+{
+  "sourceCommit": "6be5dcc",
+  "scope": "Mounted coral origins now drive main runtime socket anchors and calcified-base origins; not final visible nesting, permeability or animated clearance acceptance.",
+  "changes": [
+    "Copy/freeze actual rendered mount root local positions including offsets.",
+    "Explicit origin maps require all mounted entries; malformed or missing origins stop reef setup safely, including resize.",
+    "Keep canonical optional-input callers, existing front stand-off, lifts, species compatibility, clamping, island-ledges and burrow behavior.",
+    "Use supplied mount keys for rigid bases, including future SPS sockets outside the canonical table."
+  ],
+  "capture": "Native CUA Chrome Page.captureScreenshot PNG/no clip/DPR1, seed2026/time1.25/full-scene/labels off. renderFrozen sidecars. Detached exact-source checkout with infrastructure-only Vite fs allow-list.",
+  "verification": {
+    "fullTests": 755,
+    "fullFiles": 66,
+    "focusedTests": 75,
+    "focusedFiles": 4,
+    "typecheck": "Passed including14script syntax checks",
+    "productionBuild": "Passed; existing chunk-size advisory",
+    "capturedPhoneConsoleWarningsErrors": [],
+    "unitScope": [
+      "Actual runtime GLB mapping vs historical canonical coordinates",
+      "Offset exactly once and immutable copied origins",
+      "Current scaled/yawed laptop and phone placements independently compared with Three world transforms",
+      "Missing/duplicate/nonfinite origins rejected",
+      "Actual controller malformed-origin resize remains failed and retains native links"
+    ]
+  },
+  "captures": [
+    {
+      "image": "laptop.png",
+      "sidecar": "laptop.json",
+      "dimensions": [
+        1440,
+        900
+      ],
+      "sha256": "ceefa32747773d35be719fb429b758df41e854af16eb77465e6d3c841458c041",
+      "inhabitants": 11,
+      "ready": true
+    },
+    {
+      "image": "phone.png",
+      "sidecar": "phone.json",
+      "dimensions": [
+        402,
+        874
+      ],
+      "sha256": "d3ca2d5cc78d72ba9851eb7977c2e8c618f73b8aa358d1559e838093a2632a78",
+      "inhabitants": 11,
+      "ready": true
+    }
+  ],
+  "captureRecovery": "Laptop saved before browser session disconnected during resumed goal. Phone saved from a fresh native tab on the same exact source6be5dcc. Earlier owned tab1298077987 could not be closed through its stale debugger handle; the fresh review tab closed and its metrics were reset.",
+  "remaining": [
+    "Existing front stand-off and static rock ledge definitions are preserved; this does not establish close anatomical contact.",
+    "Mesh coral envelope permeability, actual visible nesting and whole animated-body clearance remain open underAQ82/AQ58/AQ60.",
+    "Raw socket-input-deltas.json audits input coordinates, not sampled runtime anchor poses. No model/Blender edits or export/provenance promotion by Root."
+  ],
+  "phoneTargets": {
+    "count": 8,
+    "minCssDimension": 57.6015625,
+    "allWithinViewport": true
+  }
+}

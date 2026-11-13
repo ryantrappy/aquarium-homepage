@@ -6,12 +6,23 @@ Status: Active
 Authority: Binding Checkpoint; Backlog controls acceptance
 Backlog: AQ-44, AQ-49, AQ-54, AQ-59, AQ-70.2, AQ-70.13, AQ-74, AQ-86
 Owner: @root
-Updated: 2026-11-12
+Updated: 2026-11-13
 Upstream: AGENTS.md, agent_scratch.md, docs/requirements.md
 Downstream: Current implementation and review work
 -->
 
 Root verified this checkpoint against the current checkout. The goal remains active and incomplete: finish the backlog and make the living aquarium resemble the supplied reference. Passing functional tests does not accept final art.
+
+## Latest Root checkpoint — 2026-11-13 coral-origin alignment
+
+This section supersedes older process/source/count details below. The full goal remains active and incomplete.
+
+- AQ82source alignment6be5dcc copies/freezes actual mounted coral roots in island-local coordinates; main habitat uses those origins with offsets exactly once. Static canonical tables remain only for omitted-input historical callers. Explicit runtime maps require every mounted entry, reject duplicates/nonfinite coordinates, and include new supplied SPSbase names. Invalid origins fail reef setup/clock safely on resize while native service links remain available. Luna helper/tests and Root integration reviewed; no asset/Blender edits.
+- Exact isolated6be5dcc:755tests/66files,75focusedtests/4files, typecheck14scripts and productionbuild pass. Independent Threeworld-transform assertions cover both current layouts and an actual runtime GLB fixture source-bound through LIVE_ROCK_ISLAND_URLS. No new full-taskAC/Done: front stand-off/lifts/clamps, unmeasuredledges, coral-envelope permeability and animated-body clearance still need work. Whole visible nesting is not accepted.
+- Native two-size integration evidence docs/asset-evidence/aq82/current-origins-20261113/: ready/no failed assets,11inhabitants,8phone native targets>=44px contained inviewport; recovered phone logs show zero warnings/errors. socket-input-deltas.json audits raw inputs, not runtime anchor-pose samples. Laptop captured before browser disconnection; phone recovered on same exactsource after goalresume. Fresh reviewtabclosed/metricsreset; earlier owned tab1298077987 at5215 remains uncloseable through its stale debugger handle. Preserve user5210tab.
+- Proofworktree /tmp/aquarium-aq87-proof-8b2d7cc detached6be5dcc, only infrastructure Viteconfigdirty. Owneddev5215PID57486 pins6be5dcc; verify before stopping. Original5214/5212remain stale until independently restarted; preserve user3000/5210. No deployment/configwrites.
+- Externalfb432d2 committed AQ71audit notes plus saved reef-full-model.blend/.blend1; original checkout is now clean apart from this evidence/handoff work. Root did not edit/save/export models. Historical native inventory0b hashes remain historical; do not claim current saved-native/export parity without fresh review.
+- AQ71read-only audit found declared sand IBLintensity0.2 not applied to sandBed.group and stale env-module light/exposure comments. CustomShaderMaterial water surface does not consume PBR intensity (compatibility-only). Candidate next bounded visual fix, not yet implemented. AQ21blue-tang task still needs actual rendered movement/retreat art review despite existing checkedACs; no Done from metadata alone. Core reef geometry/arch/library and species-envelopes remain primary larger gaps.
 
 ## Current Root checkpoint — 2026-11-13
 
