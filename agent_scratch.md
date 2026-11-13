@@ -36,3 +36,8 @@
 ### 2026-11-13 — Main Acropora morphology resume
 *Root reviewed2026-11-13 every retained entry: standing policies current; older process checkpoints historical; final reef/bodyclearance/art pending.*
 - Previous goalturn progress: d454c27/4601a5a saved/synced/used/committed4archcorals and791tests/nativeproof. Currentcheckout clean4601a5a before tasknotes. AQ70.11nowactiveRoot morphology pilot preservingoldcorals/canonicalmanifest; newcustommodelmust nativepack/export/sync/use/commit. Root reserves Blender; nootheragentusesit.
+
+### 2026-11-13 — Antler pilot and taller secondary crest verified
+*Root reviewed every retained entry2026-11-13: standing policies current; older process checkpoints superseded by latest AGENT_TASKS.md; full art/model/clearance pending.*
+- 949ccb7 original antler savedpacked/exported/synced/used/committed with3PBRmaps; Root artgate beforepromotion. f4d4f24raises3rightcrestscales17–28%; nativebothsizesready/11inhabitants/8phonetargets>=44/noerrors.817tests/70files/typecheck16scripts/buildpass. Evidence docs/asset-evidence/aq70-11/antler-20261113/. AQ70.11/70.13remainopenforfullrubric/variants/physicalscale/clearance/budgets.
+- Proofdetachedf4d4f24/dev5215pinsexactsource; verifyownershipbeforestop. Reviewtabclosed/metricsreset, oldstale1298077987remains. Preserveuser3000/5210/liveBlender. Nextmajorvisualwork remainingcoralarchetypes/variants; CI/FPSexcluded. No deployment.

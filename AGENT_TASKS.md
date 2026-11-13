@@ -13,6 +13,15 @@ Downstream: Current implementation and review work
 
 Root verified this checkpoint against the current checkout. The goal remains active and incomplete: finish the backlog and make the living aquarium resemble the supplied reference. Passing functional tests does not accept final art.
 
+## Latest Root checkpoint — 2026-11-13 antler coral and taller secondary crest
+
+This section supersedes older source/count/process details. Full goal remains active and incomplete.
+
+- Root949ccb7 saves/exports/syncs/uses original reef-acropora-antler on primaryleftcrest only.32tips/124runtimecups/28099triangles, highsource245319triangles/1235cups;3packed512tissue/normal/roughnessimages. AO diskbake is sampled into rawA, not a fourth active nativeimage. Native/export/package/generator/provenance committed together, preserving external029675d preliminarypipelinecommit and all suppliedcanonicalmodels. Root neutral/two-size isolated artapproval recorded before promotion; trial captures identify dirtyproofbase d454c27, not exactsource. Explicit baked-pbr honors maps/realLEDshadows, indirectAO/rawGfluorescence/defaultSSS0; legacy companion scatter palette remains separate.
+- f4d4f24 enlarges only3upperrightcolonies from1.60/1.75/1.45 to2.05/2.15/1.70 for latestuserverticalfillrequest. Root native review accepts this bounded refinement; highest righttip roughly414->365px laptop, dominantleftnear190px, arch remainsopen. Phone retainsleftsingleisland. Exact native evidence docs/asset-evidence/aq70-11/antler-20261113/ at1440x900/402x874DPR1 ready/noassetfailures/11inhabitants/8phonetargets>=44insideviewport/zerocapturedwarnings-errors.
+- Exact isolatedf4d4f24 passes817tests/70files, typecheck16scripts and productionbuild;59focusedartifact/pipeline/material/assemblytests pass. AQ70.11/AQ70.13stayInProgress: all8archetypes/twovariants/fullrubric/physicalscale/wholecolonyandanimatedfishclearance/performance remainopen. Newcolonywholecrownbounds do not certify permeableforks. Fullgoalreferenceartnotaccepted; nextmajorwork remainingcoralarchetypes/variants and broaderreef/fishfidelity, not repeating closureaudits.
+- Proof /tmp/aquarium-aq87-proof-8b2d7cc detachedf4d4f24, onlyinfraViteconfigdirty. Dev5215pinsf4d4f24; verifyPID/cwd beforestop. Original5214/5212stale; preserveuser3000/5210. Finalreviewtabclosed/metricsreset; olderstale1298077987remains. Root sequentialbackgroundBlenderonly/liveuserdocumentuntouched; everynewmodel committedandused. Lunaidle; RootreservesBlender. No deployment. CI/FPSdisplayexcluded.
+
 ## Latest Root checkpoint — 2026-11-13 supported arch growth
 
 This section supersedes older process/source/count details. Full goal remains active and incomplete.
