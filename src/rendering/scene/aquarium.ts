@@ -1572,7 +1572,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       const stoppedFlags = swimmers.map(item => {
         const focused = document.activeElement === item.anchor
         if (!focused) item.releasedFocus = false
-        return paused || document.hidden || (focused && !item.releasedFocus)
+        return paused || document.hidden || (!lookDevConfig && reducedMotion) || (focused && !item.releasedFocus)
       })
       stepSwimmingSchool(swimmers.map(item => item.motion), habitat, SIMULATION_STEP_SECONDS, stoppedFlags, { reducedMotion })
       swimmers.forEach((item, index) => {

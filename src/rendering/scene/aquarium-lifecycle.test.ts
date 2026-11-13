@@ -38,15 +38,38 @@ vi.mock('three/addons/loaders/GLTFLoader.js', async () => {
       if (url.includes('left-rock') || url.includes('right-rock') || url === 'coral') return { scene: root, animations: [] }
       if (state.failFishLoads && url.includes('.glb')) throw new Error('Fixture fish asset failure')
       if (state.deferFishLoads && url.includes('.glb')) await new Promise<void>(resolve => state.pendingFishLoadReleases.push(resolve))
-      const bone = new T.Bone(); bone.name = 'spine_0'; root.add(bone)
+      const turningRig = url.includes('splat-fish/blue-tang.glb')
+      const spine: InstanceType<typeof T.Bone>[] = []
+      for (let index = 0; index < (turningRig ? 6 : 1); index++) {
+        const bone = new T.Bone(); bone.name = `spine_${index}`
+        if (index > 0) spine[index - 1]!.add(bone)
+        else root.add(bone)
+        spine.push(bone)
+      }
+      const pectoralLeft = new T.Bone(), pectoralRight = new T.Bone()
+      if (turningRig) {
+        pectoralLeft.name = 'pectoral_L'; pectoralRight.name = 'pectoral_R'
+        root.add(pectoralLeft, pectoralRight)
+      }
       const geometry = new T.BufferGeometry()
       geometry.setAttribute('position', new T.Float32BufferAttribute([-.2, 0, 0, .2, 0, 0, 0, .2, 0], 3))
       geometry.setAttribute('skinIndex', new T.Uint16BufferAttribute(new Array(12).fill(0), 4))
       geometry.setAttribute('skinWeight', new T.Float32BufferAttribute([1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0], 4)); geometry.setIndex([0, 1, 2])
       const mesh = new T.SkinnedMesh(geometry, new T.MeshBasicMaterial({ side: T.DoubleSide })); root.add(mesh)
-      root.updateMatrixWorld(true); mesh.bind(new T.Skeleton([bone]))
+      const bones = turningRig ? [...spine, pectoralLeft, pectoralRight] : spine
+      root.updateMatrixWorld(true); mesh.bind(new T.Skeleton(bones))
       const end = new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 0, 1), .7)
-      const clip = new T.AnimationClip('fixture-swim', 1, [new T.QuaternionKeyframeTrack('spine_0.quaternion', [0, 1], [0, 0, 0, 1, ...end.toArray()])])
+      const tracks = [new T.QuaternionKeyframeTrack('spine_0.quaternion', [0, 1], [0, 0, 0, 1, ...end.toArray()])]
+      if (turningRig) {
+        const tailEnd = new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 0, 1), .24)
+        const finEnd = new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 0, 1), .36)
+        tracks.push(
+          new T.QuaternionKeyframeTrack('spine_5.quaternion', [0, 1], [0, 0, 0, 1, ...tailEnd.toArray()]),
+          new T.QuaternionKeyframeTrack('pectoral_L.quaternion', [0, 1], [0, 0, 0, 1, ...finEnd.toArray()]),
+          new T.QuaternionKeyframeTrack('pectoral_R.quaternion', [0, 1], [0, 0, 0, 1, ...finEnd.toArray()]),
+        )
+      }
+      const clip = new T.AnimationClip('fixture-swim', 1, tracks)
       state.sources.push(root)
       return { scene: root, animations: [clip] }
     }
@@ -231,6 +254,84 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     expect(sampledSeconds).toHaveLength(3)
     for (const delta of sampledSeconds) expect(delta).toBeCloseTo(2 / 60)
     expect(sampledSeconds.reduce((sum, delta) => sum + delta, 0)).toBeCloseTo(0.1)
+  })
+
+  it('freezes fish motion, swim clips and turn poses under a live reduced-motion toggle without catch-up', async () => {
+    let reducedMotion = false
+    vi.stubGlobal('matchMedia', () => ({
+      get matches() { return reducedMotion },
+      addEventListener() {},
+      removeEventListener() {},
+    }))
+    const services = [service('tang', 'blue-tang')]
+    await start(services)
+    await vi.waitFor(() => expect(state.players).toHaveLength(1))
+
+    const fish = state.created[0]!
+    const player = state.players[0]!
+    const root = rootFor('tang')
+    const mesh = meshFor('tang')
+    const bones = new Map(mesh.skeleton.bones.map(bone => [bone.name, bone]))
+    expect(bones.has('spine_5')).toBe(true)
+    expect(bones.has('pectoral_L')).toBe(true)
+    expect(bones.has('pectoral_R')).toBe(true)
+
+    // Force a large heading change in the actual controller fixture so the
+    // resumed pose contains both a swim clip and a turn-rig overlay.
+    const origin = { ...fish.position }
+    fish.yaw = 0
+    fish.speed = 0.4
+    fish.route = [origin, { x: origin.x - 1.5, y: origin.y, z: origin.z }]
+    fish.waypoint = 1
+    fish.targetWait = 0
+    fish.routeGeneration = fish.behavior.navigationGeneration
+    state.renderer!.loop?.(0)
+    state.renderer!.loop?.(100)
+    expect(fish.position).not.toEqual(origin)
+    expect(Math.abs(fish.turnKinematics.turnCurvature)).toBeGreaterThan(0)
+    const turnPose = bones.get('spine_5')!.quaternion.clone()
+    const finPose = bones.get('pectoral_L')!.quaternion.clone()
+    expect(turnPose.angleTo(new THREE.Quaternion())).toBeGreaterThan(0.01)
+    expect(finPose.angleTo(new THREE.Quaternion())).toBeGreaterThan(0.01)
+
+    const movingPose = {
+      position: { ...fish.position },
+      yaw: fish.yaw,
+      pitch: fish.pitch,
+      bank: fish.bank,
+      speed: fish.speed,
+      turnKinematics: { ...fish.turnKinematics },
+      spine: bones.get('spine_5')!.quaternion.toArray(),
+      leftPectoral: bones.get('pectoral_L')!.quaternion.toArray(),
+      rightPectoral: bones.get('pectoral_R')!.quaternion.toArray(),
+    }
+    const originalAdvance = player.advance
+    const advanceSpy = vi.spyOn(player, 'advance').mockImplementation(delta => originalAdvance(delta))
+
+    reducedMotion = true
+    state.renderer!.loop?.(300)
+    state.renderer!.loop?.(800)
+    expect({
+      position: fish.position,
+      yaw: fish.yaw,
+      pitch: fish.pitch,
+      bank: fish.bank,
+      speed: fish.speed,
+      turnKinematics: fish.turnKinematics,
+      spine: bones.get('spine_5')!.quaternion.toArray(),
+      leftPectoral: bones.get('pectoral_L')!.quaternion.toArray(),
+      rightPectoral: bones.get('pectoral_R')!.quaternion.toArray(),
+    }).toEqual(movingPose)
+    expect(advanceSpy).not.toHaveBeenCalled()
+
+    reducedMotion = false
+    state.renderer!.loop?.(800)
+    expect(fish.position).toEqual(movingPose.position)
+    expect(advanceSpy).not.toHaveBeenCalled()
+    state.renderer!.loop?.(850)
+    expect(fish.position).not.toEqual(movingPose.position)
+    expect(advanceSpy).toHaveBeenCalledTimes(3)
+    expect(rootFor('tang')).toBe(root)
   })
 
   it('upgrades every schoolmate when its shared lazy-loaded species arrives', async () => {
