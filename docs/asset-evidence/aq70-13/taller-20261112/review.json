@@ -1,0 +1,61 @@
+{
+  "tasks": [
+    "AQ-70.13",
+    "AQ-102"
+  ],
+  "date": "2026-11-12",
+  "sourceCommit": "e5fd2e1d7b081d1b350343942e734a2dc72a0db2",
+  "userRequest": "Fill more vertical space with more/larger coral structures",
+  "change": "Uniformly enlarged the six existing upper branching colonies, with the largest mature colony on the left and a lower secondary right crest. Existing rock footprint, socket positions, shape proportions and central lane retained.",
+  "captures": [
+    {
+      "image": "laptop.png",
+      "sidecar": "laptop.json",
+      "viewport": [
+        1440,
+        900
+      ],
+      "sha256": "43b99209e1a670e1144df776b9dcb5bde4b155b89038b4e11b74762f569f271f"
+    },
+    {
+      "image": "phone.png",
+      "sidecar": "phone.json",
+      "viewport": [
+        402,
+        874
+      ],
+      "sha256": "bfad0231a44efd89779c329025f03875765073fc59e9e8107863f80549e1e30c"
+    }
+  ],
+  "comparison": {
+    "before": "../layout-20261112/review.json",
+    "laptopCrestApproxY": [
+      350,
+      180
+    ],
+    "phoneCrestApproxY": [
+      440,
+      306
+    ],
+    "note": "Root visual crest estimates in native PNGs, not automated segmentation; fish restaging can change poses as navigation adapts."
+  },
+  "verification": [
+    "722tests/65files pass; production build and typecheck including14scripts pass",
+    "Both native DPR1 PNGs have correct signatures/IHDR and ready snapshots with no pending/failed/unresolved assets",
+    "All8 phone service anchors visible, minimum target extent remains above44px",
+    "No captured browser shader warnings/errors",
+    "Actual mounted coral geometry feeds current navigation rebuild/relocation"
+  ],
+  "glassHandoff": [
+    "Subtle corner seams and clear front/side/back panes render without global blur or refraction",
+    "Side panes use true Three Reflector scene samples,256x384/noMSAA; High2Hz and Balanced1Hz per side, staggered; Low and zoom/inspection disable mirror passes",
+    "All glass meshes have no-op raycast and are excluded from shaft depth/reflection recursion",
+    "9 pass tests cover real reflection callbacks, cache/clock/camera/revision/stagger, failure recovery and disposal"
+  ],
+  "remaining": [
+    "AQ-70.13 physical metric scale and final reference composition/user acceptance remain open",
+    "AQ-102 bottom-lip framing and controlled moving-scene reflection costs/final art review remain open",
+    "Fixed High frozen snapshots do not establish normal-runtime performance acceptance"
+  ],
+  "models": "No Blender/model asset edits or new model files; existing colony instances scaled uniformly."
+}

@@ -20,3 +20,9 @@
 - AQ49 reduced-motion fix reviewed/committed with native hold/resume evidence; full turning art pending. AQ80 GO decision Done. Root next owns AQ102 glass enclosure/reflection implementation. Child agents completed/idle; no Blender agent.
 - Live Blender reef file dirty; left untouched. Newer blue-tang.blend only unused-image cleanup, verified against prior saved revision; no export freshness defect remains.
 - Root dev5214 pins35581ed; production5212 now serves51e4274. All713tests/64files, typecheck14scripts and productionbuild pass at that milestone. Verify ownership before stopping; preserve user3000/5210. All completed-phase browser tabs closed. No deployment or config writes.
+
+### 2026-11-12 — Taller-colony request and enclosure handoff
+*Root reviewed2026-11-12: actioned for requested vertical coverage; full goal and final art pending.*
+- User asked to fill vertical space.5514b60 uniformly enlarges existing upper colonies, highest left crest near180px laptop/306px phone. No new coral geometry or Blender edits. Both native captures/evidence: docs/asset-evidence/aq70-13/taller-20261112/.
+- Enclosure functional handoffe5fd2e1 includes clear panes/seams/lips and bounded/staggered true side reflections. Bottom-lip framing and controlled cost/final glass art still open underAQ102. All722tests/65files, typecheck14scripts and productionbuild pass.
+- Dev5214 and production5212 now servee5fd2e1; completed-phase browser tabs closed. Original user3000/5210 untouched. All child agents idle/completed.
