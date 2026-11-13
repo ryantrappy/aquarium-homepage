@@ -244,7 +244,9 @@ export class RaymarchedShaftPass {
       uAlpha: { value: cfg.shaftRaymarchAlpha },
     }
     const shaftMaterial = new THREE.ShaderMaterial({
-      transparent: true,
+      // The shader already writes radiance weighted by light. Store it
+      // directly; alpha blending here would attenuate faint beams twice.
+      blending: THREE.NoBlending,
       depthWrite: false,
       depthTest: false,
       uniforms: this.uniforms,
@@ -274,7 +276,13 @@ export class RaymarchedShaftPass {
           viewPos /= viewPos.w;
           vec3 worldPos = (uViewInv * viewPos).xyz;
           vec3 rayDir = normalize(worldPos - uCameraPos);
-          float rayLen = length(worldPos - uCameraPos);
+          // The overview/zoom camera stays in front of z=2.8. March only
+          // water behind that front glass, never the air before the tank.
+          float rayZ = min(rayDir.z, -0.0001);
+          float entryT = max(0.0, (2.8 - uCameraPos.z) / rayZ);
+          float exitT = min(length(worldPos - uCameraPos), (-5.5 - uCameraPos.z) / rayZ);
+          if (exitT <= entryT) { gl_FragColor = vec4(0.0); return; }
+          float rayLen = exitT - entryT;
           // View-angle fade: beams read from the side, not when looking
           // straight up the beam axis (where step banding would show).
           float axisFade = 1.0 - smoothstep(0.75, 0.95, abs(dot(rayDir, uSunDir)));
@@ -283,8 +291,9 @@ export class RaymarchedShaftPass {
           float accum = 0.0;
           for (int i = 0; i < 32; i++) {
             if (i >= uSteps) break;
-            float t = (float(i) + jitter) * stepLen;
+            float t = entryT + (float(i) + jitter) * stepLen;
             vec3 p = uCameraPos + rayDir * t;
+            if (p.y > uSurfaceY || p.y < -2.8) continue;
             // Surface footpoint the light passed through (gentle vertical sun-slant).
             float dist = (uSurfaceY - p.y) / max(uSunDir.y, 0.2);
             vec2 surf = p.xz + uSunDir.xz * dist * 0.25;
@@ -308,6 +317,7 @@ export class RaymarchedShaftPass {
       depthWrite: false,
       depthTest: false,
       blending: THREE.AdditiveBlending,
+      premultipliedAlpha: true,
       uniforms: this.copyUniforms,
       vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
       fragmentShader: `
@@ -349,12 +359,16 @@ export class RaymarchedShaftPass {
       }
     }
     const previousOverride = scene.overrideMaterial
-    scene.overrideMaterial = this.depthMaterial
-    this.renderer.setRenderTarget(this.depthTarget)
-    this.renderer.render(scene, camera)
-    this.renderer.setRenderTarget(null)
-    scene.overrideMaterial = previousOverride
-    for (const object of hidden) object.visible = true
+    const previousTarget = this.renderer.getRenderTarget()
+    try {
+      scene.overrideMaterial = this.depthMaterial
+      this.renderer.setRenderTarget(this.depthTarget)
+      this.renderer.render(scene, camera)
+    } finally {
+      this.renderer.setRenderTarget(previousTarget)
+      scene.overrideMaterial = previousOverride
+      for (const object of hidden) object.visible = true
+    }
   }
 
   /** Half-res raymarch quad, then an additive fullscreen copy to canvas.
@@ -363,14 +377,16 @@ export class RaymarchedShaftPass {
    * the scene the main render just drew, leaving only the additive
    * shafts on black. */
   renderShafts(): void {
-    this.renderer.setRenderTarget(this.shaftTarget)
-    this.renderer.render(this.quadScene, this.quadCamera)
-    this.renderer.setRenderTarget(null)
+    const previousTarget = this.renderer.getRenderTarget()
     const autoClear = this.renderer.autoClear
-    this.renderer.autoClear = false
     try {
+      this.renderer.setRenderTarget(this.shaftTarget)
+      this.renderer.render(this.quadScene, this.quadCamera)
+      this.renderer.setRenderTarget(previousTarget)
+      this.renderer.autoClear = false
       this.renderer.render(this.copyScene, this.quadCamera)
     } finally {
+      this.renderer.setRenderTarget(previousTarget)
       this.renderer.autoClear = autoClear
     }
   }

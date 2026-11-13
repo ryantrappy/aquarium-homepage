@@ -1,11 +1,11 @@
 ---
 id: AQ-86
 title: Add restrained aquarium-scale depth haze and volumetric light shafts
-status: To Do
+status: In Progress
 assignee:
-  - '@Luna'
+  - '@root'
 created_date: '2026-11-08'
-updated_date: '2026-11-08'
+updated_date: '2026-11-13 00:13'
 labels:
   - optics
   - photorealism
@@ -47,3 +47,15 @@ Give the tank visible depth with a restrained haze that starts behind the primar
 - [ ] #1 Root agent reviews the completed work before the task is marked Done.
 - [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Root renderer correction: verify the existing shaft offscreen/additive blend path against Three WebGLState, remove repeated alpha attenuation so soft shaft radiance survives compositing, and preserve exact motion/depth/tier contracts. Cover the actual pass materials/render-state restoration, then compare native fixed-pose scenes at both target viewports before tuning intensity. Keep haze/seam and measured-budget acceptance open until separately demonstrated.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Root renderer correction2026-11-12: Three WebGLState confirms normal offscreen blending and straight-alpha additive compositing were multiplying already-weighted shaft radiance by alpha again. Store shaft radiance with NoBlending, composite premultiplied ONE/ONE, and use the same premultiplied convention for the fallback plane. Raymarch now starts behind front glass z2.8 and stops at depth/rear glass z-5.5, skipping samples above the actual surface or below substrate rather than lighting the air before the tank. Restored shared surfaceY3.75 for rendered surface/shaft/caustic projection (visible surface had drifted from the old2.66 projection constant). Added pass-level material/state regressions covering depth and both shaft-draw exceptions.66 focused tests and typecheck14script checks pass. Native final-pose art/seam/budget gates remain open; no Done claim.
+<!-- SECTION:NOTES:END -->

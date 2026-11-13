@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import * as THREE from 'three'
 import {
   SHAFT_BEAM_CELL_M,
@@ -10,7 +10,78 @@ import {
   evaluateGodRayEdgeFade,
   evaluateShaftBeamPattern,
   evaluateVoronoiF1,
+  RaymarchedShaftPass,
 } from './light-shafts'
+
+function passFixture() {
+  let target: THREE.WebGLRenderTarget | null = new THREE.WebGLRenderTarget(8, 8)
+  const originalTarget = target
+  const draws: Array<{ scene: THREE.Scene; target: THREE.WebGLRenderTarget | null; autoClear: boolean }> = []
+  const renderer = {
+    autoClear: true,
+    getDrawingBufferSize: (v: THREE.Vector2) => v.set(1440, 900),
+    getRenderTarget: () => target,
+    setRenderTarget: (next: THREE.WebGLRenderTarget | null) => { target = next },
+    render: vi.fn((scene: THREE.Scene) => { draws.push({ scene, target, autoClear: renderer.autoClear }) }),
+  }
+  return { renderer, originalTarget, draws }
+}
+
+describe('shaft render pass compositing and recovery', () => {
+  it('stores weighted radiance without blending and adds it once without source-alpha attenuation', () => {
+    const { renderer, originalTarget, draws } = passFixture()
+    const pass = new RaymarchedShaftPass(renderer as unknown as THREE.WebGLRenderer)
+    pass.renderShafts()
+    const march = (draws[0].scene.children[0] as THREE.Mesh).material as THREE.ShaderMaterial
+    const composite = (draws[1].scene.children[0] as THREE.Mesh).material as THREE.ShaderMaterial
+    expect(march.blending).toBe(THREE.NoBlending)
+    expect(composite.blending).toBe(THREE.AdditiveBlending)
+    expect(composite.premultipliedAlpha).toBe(true)
+    // Three WebGLState uses ONE/ONE for premultiplied additive output.
+    // A radiance of 0.02 must remain 0.02, rather than 0.02 * sourceAlpha.
+    const sourceRadiance = 0.02
+    const sourceAlpha = 0.1
+    const sourceFactor = composite.premultipliedAlpha ? 1 : sourceAlpha
+    expect(sourceRadiance * sourceFactor).toBe(sourceRadiance)
+    expect(draws[1].target).toBe(originalTarget)
+    expect(draws[1].autoClear).toBe(false)
+    expect(renderer.getRenderTarget()).toBe(originalTarget)
+    expect(renderer.autoClear).toBe(true)
+    pass.dispose()
+    originalTarget.dispose()
+  })
+
+  it('restores scene visibility, override material and render target when depth rendering fails', () => {
+    const { renderer, originalTarget } = passFixture()
+    const visible = new THREE.Object3D(), alreadyHidden = new THREE.Object3D()
+    alreadyHidden.visible = false
+    const scene = new THREE.Scene()
+    const previousMaterial = new THREE.MeshBasicMaterial()
+    scene.overrideMaterial = previousMaterial
+    const pass = new RaymarchedShaftPass(renderer as unknown as THREE.WebGLRenderer, { nonOccluders: [visible, alreadyHidden] })
+    renderer.render.mockImplementation(() => { throw new Error('depth unavailable') })
+    expect(() => pass.renderDepth(scene, new THREE.PerspectiveCamera())).toThrow('depth unavailable')
+    expect(visible.visible).toBe(true)
+    expect(alreadyHidden.visible).toBe(false)
+    expect(scene.overrideMaterial).toBe(previousMaterial)
+    expect(renderer.getRenderTarget()).toBe(originalTarget)
+    pass.dispose()
+    originalTarget.dispose()
+    previousMaterial.dispose()
+  })
+
+  it.each([1, 2])('restores render target and clearing policy after shaft draw failure %i', failedDraw => {
+    const { renderer, originalTarget } = passFixture()
+    const pass = new RaymarchedShaftPass(renderer as unknown as THREE.WebGLRenderer)
+    let draw = 0
+    renderer.render.mockImplementation(() => { if (++draw === failedDraw) throw new Error('shaft unavailable') })
+    expect(() => pass.renderShafts()).toThrow('shaft unavailable')
+    expect(renderer.getRenderTarget()).toBe(originalTarget)
+    expect(renderer.autoClear).toBe(true)
+    pass.dispose()
+    originalTarget.dispose()
+  })
+})
 
 describe('raymarched shaft beam pattern (AQ-98 / AQ-86)', () => {
   it('returns inverted-Voronoi-F1 columns: bright at cell centres, dark far from them', () => {

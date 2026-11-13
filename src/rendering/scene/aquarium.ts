@@ -367,6 +367,8 @@ diffuseColor.rgb = waterCol;
     transparent: true,
     depthWrite: false,
     blending: THREE.AdditiveBlending,
+    // Fragment RGB already contains alpha; add that radiance once.
+    premultipliedAlpha: true,
     uniforms: shaftUniforms,
     vertexShader: 'varying vec3 vShaftWorldPos; varying vec2 vShaftUv; void main() { vShaftUv = uv; vec4 shaftWp = modelMatrix * vec4(position, 1.0); vShaftWorldPos = shaftWp.xyz; gl_Position = projectionMatrix * viewMatrix * shaftWp; }',
     fragmentShader: `
@@ -591,7 +593,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   })
   const waterSurface = new THREE.Mesh(waterSurfaceGeometry, waterSurfaceMaterial)
   waterSurface.rotation.x = Math.PI / 2 - 0.065
-  waterSurface.position.set(0, 3.75, -1.2)
+  waterSurface.position.set(0, optics.surfaceY, -1.2)
   waterSurface.raycast = () => {}
   scene.add(waterSurface)
 
