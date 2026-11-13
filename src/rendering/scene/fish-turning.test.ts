@@ -7,6 +7,8 @@ import {
   applyFishTurningRigOverlay,
   bindFishTurningRig,
   computeCurvilinearStepVector,
+  computeLookaheadTarget,
+  computeMaxBiomechanicalYawRate,
   evaluateSpineTurnAngles,
   evaluateSpriteTurnScaleX,
   evaluateTurnSpeedFactor,
@@ -141,6 +143,7 @@ function buildHierarchyFromDocument(gltf: GlbDocument): THREE.Group {
 function expectedModifiedJointNames(snapshot: RigAssetSnapshot): string[] {
   const firstFlex = snapshot.speciesId === 'yellow-tang' ? 3 : 1
   return [
+    snapshot.spineNames[0],
     ...snapshot.spineNames.slice(firstFlex),
     snapshot.pectoralLeftName,
     snapshot.pectoralRightName,
@@ -165,13 +168,13 @@ function expectQuaternionAccessorIsNormalized(asset: NonNullable<ReturnType<type
 }
 
 describe('biomechanical fish turning and curvilinear spine bending (AQ-49)', () => {
-  it('enforces the exact 65-degree two-stage maneuver threshold (brake-pivot -> exit-stroke -> none)', () => {
-    expect(SHARP_TURN_THRESHOLD_RAD).toBeCloseTo((65 * Math.PI) / 180, 10)
+  it('enforces the exact 115-degree two-stage maneuver threshold (brake-pivot -> exit-stroke -> none)', () => {
+    expect(SHARP_TURN_THRESHOLD_RAD).toBeCloseTo((115 * Math.PI) / 180, 10)
 
-    const belowThreshold = resolveTurnManeuverStage('none', 0, (64 * Math.PI) / 180, 0)
+    const belowThreshold = resolveTurnManeuverStage('none', 0, (114 * Math.PI) / 180, 0)
     expect(belowThreshold.stage).toBe('none')
 
-    const atThreshold = resolveTurnManeuverStage('none', 0, (65.1 * Math.PI) / 180, 0)
+    const atThreshold = resolveTurnManeuverStage('none', 0, (115.1 * Math.PI) / 180, 0)
     expect(atThreshold.stage).toBe('brake-pivot')
 
     const intoExitStroke = resolveTurnManeuverStage(
@@ -184,6 +187,7 @@ describe('biomechanical fish turning and curvilinear spine bending (AQ-49)', () 
 
     expect(evaluateTurnSpeedFactor(Math.PI, 0, 'brake-pivot')).toBeCloseTo(0.38, 6)
     expect(evaluateTurnSpeedFactor(0.4, 0, 'exit-stroke')).toBeCloseTo(1.16, 6)
+    expect(evaluateTurnSpeedFactor(Math.PI / 2, 0, 'none')).toBeGreaterThan(0.85)
   })
 
   it('locks forward translation strictly to the fish heading axis (dot === 1.0) during 180-degree reversals with zero backward/sideways crab-sliding', () => {
@@ -417,6 +421,7 @@ describe('biomechanical fish turning and curvilinear spine bending (AQ-49)', () 
       expect(contract.quaternionComposition).toBe('mixerQuaternion-times-localAxisAngle')
       expect(contract.jointNames).toEqual(expectedModifiedJointNames(snapshot))
       expect(contract.maxSummedSpineAngleAbsRad).toBeCloseTo(1.275, 12)
+      expect(contract.maxSpineRollAbsRad).toBeCloseTo(0.18, 12)
       expect(contract.spineJointCaps.map(cap => cap.jointName)).toEqual(snapshot.spineNames)
       expect(contract.spineJointCaps.reduce((sum, cap) => sum + cap.maxAbsAngleRad, 0)).toBeCloseTo(1.275, 12)
 
@@ -554,5 +559,22 @@ describe('biomechanical fish turning and curvilinear spine bending (AQ-49)', () 
     expect(evaluateSpriteTurnScaleX(0.05)).toBeLessThan(0.35)
     expect(evaluateSpriteTurnScaleX(-0.05)).toBeLessThan(-0.28)
     expect(evaluateSpriteTurnScaleX(-0.05)).toBeGreaterThan(-0.35)
+  })
+
+  it('scales lookahead fillet radius with cruise speed and archetype and caps yaw rate by curvature (AQ-12.1)', () => {
+    const route = [
+      { x: 0, y: 0, z: 0 },
+      { x: 2, y: 0, z: 0 },
+      { x: 2, y: 0, z: 2 },
+    ]
+    const fastLookahead = computeLookaheadTarget({ x: 1.0, y: 0, z: 0 }, route, 1, 1.2, 'labriform_cruiser')!
+    const slowLookahead = computeLookaheadTarget({ x: 1.0, y: 0, z: 0 }, route, 1, 0.3, 'benthic_percher_dragonet')!
+    expect(fastLookahead.z).toBeGreaterThan(slowLookahead.z)
+    expect(fastLookahead.z).toBeGreaterThan(0)
+
+    const cruisingCap = computeMaxBiomechanicalYawRate(0.8, 1.5, 0.4, 0, Math.PI / 4)
+    const slowCap = computeMaxBiomechanicalYawRate(0.25, 1.5, 0.4, 0, Math.PI / 4)
+    expect(cruisingCap).toBeGreaterThan(slowCap)
+    expect(slowCap).toBeCloseTo(0.25 / 0.4 + 0.65, 6)
   })
 })

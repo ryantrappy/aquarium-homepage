@@ -77,7 +77,7 @@ describe('rendered fish travel adapter', () => {
     expect(Math.abs(yawDelta)).toBeGreaterThan(0)
     expect(Math.abs(yawDelta)).toBeLessThanOrEqual(maxTurn + 1e-9)
     expect(fish.position).toEqual(start)
-    expect(fish.speed).toBe(0)
+    expect(fish.speed).toBeLessThan(0.6)
     expect(fish.route).toHaveLength(2)
     expect(isWaterSegmentSafe({ start, target: fish.position, waterBounds: bounded.bounds, obstacles: bounded.obstacles, fishClearanceRadius: fish.clearance })).toBe(true)
 
@@ -330,7 +330,7 @@ describe('rendered fish travel adapter', () => {
     for (let i = 0; i < 200 && !blocked.length; i++) stepSwimmingFish(fish, meshHabitat(query), 1 / 30)
     expect(blocked.length).toBeGreaterThan(0)
     expect(fish.position.x).toBeLessThan(-.44)
-    expect(fish.speed).toBe(0)
+    expect(fish.speed).toBeLessThan(0.05)
   })
   it('fails closed on missing metric configuration before stale near-waypoint arrival', () => {
     const query = vi.fn(() => ({ status: 'clear' as const, work: { nodeVisits: 0, triangleTests: 0 } }))
@@ -951,5 +951,32 @@ describe('socket-derived anchor interactions (AQ-82)', () => {
     expect(evaluateSwimSpeedSynchronizedFlexRate(0.6, 0.3, 1)).toBeGreaterThan(evaluateSwimSpeedSynchronizedFlexRate(0.1, 0.3, 1))
     expect(evaluateSwimSpeedSynchronizedFlexRate(0.6, 0.3, 1, { paused: true })).toBe(0)
     expect(evaluateSwimSpeedSynchronizedFlexRate(0.6, 0.3, 1, { reducedMotion: true })).toBe(0)
+  })
+
+  it('carves continuous forward arcs through intermediate 90-degree corners without stopping to spin (AQ-12.1)', () => {
+    const openWater: WaterHabitat = { bounds: { min: { x: -5, y: -2.4, z: -4 }, max: { x: 5, y: 2.8, z: 4 } }, obstacles: [], anchors: [] }
+    const fish = createSwimmingFish('arc-tang', 'blue-tang', { x: -1.5, y: 0.5, z: 0 }, 0.3)
+    fish.behavior = { ...fish.behavior, state: 'swim' }
+    fish.behavior.variation.cruiseSpeedTankWidthsPerSecond = 0.12
+    fish.yaw = Math.PI / 2 // Facing +X
+    fish.speed = 1.0
+    fish.routeGeneration = fish.behavior.navigationGeneration
+    fish.route = [
+      { x: -1.5, y: 0.5, z: 0 },
+      { x: 0.5, y: 0.5, z: 0 },
+      { x: 0.5, y: 0.5, z: 2.0 },
+    ]
+    fish.waypoint = 1
+
+    let minSpeedAroundCorner = Infinity
+    for (let i = 0; i < 240 && fish.waypoint < fish.route.length; i++) {
+      fish.routeGeneration = fish.behavior.navigationGeneration
+      stepSwimmingFish(fish, openWater, 1 / 60)
+      if (fish.waypoint === 1) {
+        minSpeedAroundCorner = Math.min(minSpeedAroundCorner, fish.speed)
+      }
+    }
+    expect(minSpeedAroundCorner).toBeGreaterThan(0.55)
+    expect(fish.waypoint).toBeGreaterThanOrEqual(2)
   })
 })

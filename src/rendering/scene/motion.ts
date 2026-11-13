@@ -10,10 +10,11 @@ import { simulationSubsteps } from './clock'
 import { fishBodyRadiusM, ANCHOR_APPROACH_MARGIN_M } from './fish-scale'
 import { evaluateTieredVerticalDepthRange } from './fish-spawn'
 import {
-  SHARP_TURN_THRESHOLD_RAD,
   computeCurvilinearStepVector,
   computeLookaheadTarget,
+  computeMaxBiomechanicalYawRate,
   evaluateTurnSpeedFactor,
+  getRigArchetypeForSpecies,
   stepFishTurnKinematics,
   type FishTurnKinematics,
 } from './fish-turning'
@@ -415,6 +416,13 @@ function planMesh(fish: SwimmingFish, habitat: WaterHabitat) {
       ? { x: clamp(fish.position.x + Math.sin(evasiveYaw) * 1.4, min.x + r, max.x - r), y: clamp(fish.position.y + .15, min.y + r, max.y - r), z: clamp(fish.position.z + Math.cos(evasiveYaw) * 1.4, min.z + r, max.z - r) }
       : { x: min.x + r + random(fish) * (max.x - min.x - 2 * r), y: clamp(max.y - depth * (max.y - min.y), min.y + r, max.y - r), z: min.z + r + random(fish) * (max.z - min.z - 2 * r) }
     if (distance(fish.position, target) < .7) continue
+    if (fish.startleSeconds <= 0 && attempt < 6 && fish.speed > 0.05) {
+      const toDx = target.x - fish.position.x
+      const toDz = target.z - fish.position.z
+      const toHoriz = Math.hypot(toDx, toDz)
+      const forwardDot = toHoriz > 1e-6 ? (toDx * Math.sin(fish.yaw) + toDz * Math.cos(fish.yaw)) / toHoriz : 1
+      if (forwardDot < 0.25) continue
+    }
     const result = findMeshRoute({ start: fish.position, target, waterBounds: habitat.bounds,
       fishClearanceRadius: r, spacingM: mesh.spacingM, queryCapsule: mesh.queryCapsule!, budget: planBudget.remaining })
     spendPlanBudget(planBudget, result.work)
@@ -456,6 +464,13 @@ function plan(fish: SwimmingFish, habitat: WaterHabitat) {
       ? { x: clamp(fish.position.x + Math.sin(evasiveYaw) * 1.4, min.x + r, max.x - r), y: clamp(fish.position.y + .15, min.y + r, max.y - r), z: clamp(fish.position.z + Math.cos(evasiveYaw) * 1.4, min.z + r, max.z - r) }
       : { x: min.x + r + random(fish) * (max.x - min.x - 2 * r), y: clamp(max.y - depth * (max.y - min.y), min.y + r, max.y - r), z: min.z + r + random(fish) * (max.z - min.z - 2 * r) }
     if (distance(fish.position, target) < .7) continue
+    if (fish.startleSeconds <= 0 && attempt < 6 && fish.speed > 0.05) {
+      const toDx = target.x - fish.position.x
+      const toDz = target.z - fish.position.z
+      const toHoriz = Math.hypot(toDx, toDz)
+      const forwardDot = toHoriz > 1e-6 ? (toDx * Math.sin(fish.yaw) + toDz * Math.cos(fish.yaw)) / toHoriz : 1
+      if (forwardDot < 0.25) continue
+    }
     // AQ-82: a fish leaving an anchor zone it nestled into routes out with
     // the same body-radius clearance it arrived with (escape rule); open
     // water keeps the legacy envelope.
@@ -665,7 +680,15 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   const schoolHeadingMag = schooling ? Math.hypot(schooling.dx, schooling.dz) : 0
   const schoolHeading = schoolHeadingMag > 1e-9 ? Math.atan2(schooling!.dx, schooling!.dz) : fish.yaw
   const schoolDelta = Math.atan2(Math.sin(schoolHeading - fish.yaw), Math.cos(schoolHeading - fish.yaw))
-  const schoolMaxTurn = fish.behavior.variation.turnDegreesPerSecond * Math.PI / 180 * dt
+  const baseTurnRateRad = (fish.behavior.variation.turnDegreesPerSecond * Math.PI) / 180
+  const minTurnRadiusM = Math.max(0.14, fishBodyRadiusM(fish.speciesId) * 4.5)
+  const schoolMaxTurn = computeMaxBiomechanicalYawRate(
+    fish.speed,
+    baseTurnRateRad,
+    minTurnRadiusM,
+    fish.startleSeconds,
+    schoolDelta,
+  ) * dt
   const schoolTurn = clamp(schoolDelta, -schoolMaxTurn, schoolMaxTurn)
   fish.yaw += schoolTurn
   fish.startleSeconds = Math.max(0, fish.startleSeconds - dt); fish.targetWait -= dt
@@ -673,14 +696,17 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
     fish.behavior = dispatchBehaviorEvent(fish.behavior, { type: 'behavior-opportunity', instanceId: fish.id, trigger: 'foraging-opportunity' })
   }
   const request = getNavigationRequest(fish.behavior)
-  if (request && request.generation !== fish.routeGeneration && fish.startleSeconds <= 0) fish.route = []
+  if (request && request.generation !== fish.routeGeneration && fish.startleSeconds <= 0) {
+    if (fish.route.length > 0) fish.targetWait = 0
+    fish.route = []
+  }
   if ((!fish.route.length || fish.waypoint >= fish.route.length) && fish.targetWait <= 0) plan(fish, habitat)
   const rawTarget = fish.route[fish.waypoint]
   if (!rawTarget) {
-    fish.speed *= Math.exp(-dt * 4)
+    fish.speed *= Math.exp(-dt * 1.8)
     // Level out after a traveling turn; stationary school pivots do not
     // sustain the bank inherited from the preceding route.
-    fish.bank *= Math.exp(-dt * 4)
+    fish.bank *= Math.exp(-dt * 3.5)
     // AQ-84: with no route to follow the fish still turns in place toward
     // the school, and the turn kinematics record that turn.
     fish.turnKinematics = stepFishTurnKinematics(fish.turnKinematics, schoolTurn, dt, fish.speed, fish.startleSeconds, schoolDelta)
@@ -706,11 +732,13 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   // The per-substep movement-safety checks stay the collision guard in both
   // modes, so passing a waypoint early can only cut a corner the fish could
   // already cut via the lookahead fillet, never an obstacle.
+  const isFinalWaypoint = fish.waypoint + 1 >= fish.route.length
   const horizontalRemaining = Math.hypot(rawDx, rawDz)
-  const waypointAbeam = horizontalRemaining > 0.5 * rawRemaining
-    && (rawDx * Math.sin(fish.yaw) + rawDz * Math.cos(fish.yaw)) / Math.max(horizontalRemaining, 1e-9) < 0.5
-  const passedWaypoint = rawRemaining < .35 && waypointAbeam && fish.speed > .05
-  const turnWaypointReady = rawRemaining < .025 || (fish.waypoint + 1 < fish.route.length && rawRemaining < .18) || passedWaypoint
+  const waypointAbeam = horizontalRemaining > 0.4 * rawRemaining
+    && (rawDx * Math.sin(fish.yaw) + rawDz * Math.cos(fish.yaw)) / Math.max(horizontalRemaining, 1e-9) < 0.7
+  const passRadius = Math.max(0.35, Math.min(0.6, fish.speed * 0.55))
+  const passedWaypoint = rawRemaining < passRadius && waypointAbeam && fish.speed > .04
+  const turnWaypointReady = rawRemaining < .025 || (!isFinalWaypoint && rawRemaining < .28) || passedWaypoint
   const meshWaypointWithinSubstep = habitat.meshNavigation === undefined || rawRemaining <= .015 * dt + 1e-12 || passedWaypoint
   if (turnWaypointReady && meshWaypointWithinSubstep) {
     if (habitat.meshNavigation !== undefined) {
@@ -732,14 +760,30 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
     fish.turnKinematics = stepFishTurnKinematics(fish.turnKinematics, schoolTurn, dt, fish.speed, fish.startleSeconds, schoolDelta)
     return
   }
-  const steerTarget = habitat.meshNavigation !== undefined
-    ? rawTarget
-    : computeLookaheadTarget(fish.position, fish.route, fish.waypoint) ?? rawTarget
+  const cruise = fish.behavior.variation.cruiseSpeedTankWidthsPerSecond * (habitat.bounds.max.x - habitat.bounds.min.x)
+  const candidateLookahead = computeLookaheadTarget(
+    fish.position,
+    fish.route,
+    fish.waypoint,
+    cruise,
+    getRigArchetypeForSpecies(fish.speciesId),
+  )
+  const steerTarget =
+    candidateLookahead &&
+    movementSafety(fish, habitat, candidateLookahead, effectiveClearance) === 'clear'
+      ? candidateLookahead
+      : rawTarget
   const dx = steerTarget.x - fish.position.x, dy = steerTarget.y - fish.position.y, dz = steerTarget.z - fish.position.z, remaining = Math.hypot(dx, dy, dz)
   const heading = Math.atan2(dx, dz), delta = Math.atan2(Math.sin(heading - fish.yaw), Math.cos(heading - fish.yaw))
-  const sharpTurnBoost = Math.abs(delta) >= SHARP_TURN_THRESHOLD_RAD ? 1.65 : 1.0
-  const proximityTurnBoost = rawRemaining < 0.35 ? 2.2 : 1.0
-  const maxTurn = fish.behavior.variation.turnDegreesPerSecond * Math.PI / 180 * (fish.startleSeconds > 0 ? 3 : sharpTurnBoost * proximityTurnBoost) * dt
+  const bioMaxTurn = computeMaxBiomechanicalYawRate(
+    fish.speed,
+    baseTurnRateRad,
+    minTurnRadiusM,
+    fish.startleSeconds,
+    delta,
+  )
+  const anchorDocking = fish.navigationAnchor !== undefined && rawRemaining < 0.35
+  const maxTurn = (anchorDocking ? Math.max(bioMaxTurn, baseTurnRateRad * 1.4) : bioMaxTurn) * dt
   // AQ-84: the route turn shares the species turn budget with the schooling
   // turn already applied above, so the total turn in one substep never
   // exceeds the species limit.
@@ -754,13 +798,12 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   } else {
     fish.pitch += (desiredPitch - fish.pitch) * Math.min(1, dt * (rawRemaining < 0.45 ? 10 : 4))
   }
-  // AQ-84: banking and the turning rig reflect the total turn (schooling +
-  // route) in this substep, so the spine bends and banks into school turns.
-  fish.bank += (clamp(-(turn + schoolTurn) / dt * .12, -.18, .18) - fish.bank) * Math.min(1, dt * 4)
-
+  // AQ-84: banking and the turning rig reflect the smoothed total turn rate
+  // (schooling + route) so bank never jerks on single-substep target switches.
   fish.turnKinematics = stepFishTurnKinematics(fish.turnKinematics, turn + schoolTurn, dt, fish.speed, fish.startleSeconds, delta)
+  const targetBank = clamp(-fish.turnKinematics.smoothedYawRate * 0.12, -0.18, 0.18)
+  fish.bank += (targetBank - fish.bank) * Math.min(1, dt * 5.5)
   const multiplier = profile.states[fish.behavior.state]?.speedMultiplier ?? 1
-  const cruise = fish.behavior.variation.cruiseSpeedTankWidthsPerSecond * (habitat.bounds.max.x - habitat.bounds.min.x)
   // AQ-84: a lagging outer fish accelerates forward along its heading toward
   // the schoolmates' cruise speed (blended 25%, capped at +20% of its own
   // cruise) instead of being dragged sideways to catch up.
@@ -770,12 +813,13 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
     : cruise
   const effort = fish.startleSeconds > 0 ? 2.8 : multiplier
   const turnSpeedFactor = evaluateTurnSpeedFactor(delta, fish.startleSeconds, fish.turnKinematics.maneuverStage)
-  const wanted = effectiveCruise * effort * turnSpeedFactor * Math.min(1, rawRemaining / .22)
+  const arrivalSlowdown = isFinalWaypoint ? Math.min(1, rawRemaining / 0.18) : 1.0
+  const wanted = effectiveCruise * effort * turnSpeedFactor * arrivalSlowdown
   fish.speed += (wanted - fish.speed) * Math.min(1, dt * (fish.startleSeconds > 0 ? 8 : 3.2))
 
   const travel = Math.min(rawRemaining, Math.max(.015, fish.speed) * dt)
   const chordDir = { x: rawDx / rawRemaining, y: rawDy / rawRemaining, z: rawDz / rawRemaining }
-  const stepVec = computeCurvilinearStepVector(fish.yaw, fish.pitch, chordDir, delta, travel, rawRemaining)
+  const stepVec = computeCurvilinearStepVector(fish.yaw, fish.pitch, chordDir, delta, travel, rawRemaining, isFinalWaypoint)
   const headingNext = { x: fish.position.x + stepVec.x, y: fish.position.y + stepVec.y, z: fish.position.z + stepVec.z }
   const chordNext = { x: fish.position.x + chordDir.x * travel, y: fish.position.y + chordDir.y * travel, z: fish.position.z + chordDir.z * travel }
   const headingSafety = movementSafety(fish, habitat, headingNext, effectiveClearance)
@@ -790,9 +834,11 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   }
   if (headingSafety === 'clear') fish.position = headingNext
   else if (chordSafety === 'clear') {
-    // Keep the route and pivot in place until the body-heading step clears.
-    // Moving along the chord here would turn a safe recovery into crab-sliding.
-    fish.speed = 0
+    // Keep the route, decay speed smoothly, and steer toward the safe chord instead of freezing.
+    fish.speed *= Math.exp(-dt * 5)
+    const chordYaw = Math.atan2(chordDir.x, chordDir.z)
+    const recoveryDelta = Math.atan2(Math.sin(chordYaw - fish.yaw), Math.cos(chordYaw - fish.yaw))
+    fish.yaw += clamp(recoveryDelta, -maxTurn * 0.35, maxTurn * 0.35)
   } else {
     const failure = headingSafety === 'unavailable' || chordSafety === 'unavailable' ? 'unavailable' : 'blocked'
     fish.route = []; fish.speed = 0; fish.targetWait = failure === 'blocked' ? .2 : .7
