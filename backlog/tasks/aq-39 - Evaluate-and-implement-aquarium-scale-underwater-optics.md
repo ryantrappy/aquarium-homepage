@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-03 12:33'
-updated_date: '2026-11-13 00:22'
+updated_date: '2026-11-13 05:41'
 labels: []
 dependencies:
   - AQ-5
@@ -22,6 +22,7 @@ references:
   - 'https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0128697'
   - >-
     https://research.engr.oregonstate.edu/parrish/index-refraction-seawater-and-freshwater-function-wavelength-and-temperature
+  - AQ-103
 documentation:
   - docs/modular-coral-and-live-rock-spec.md
   - docs/open-source-asset-and-motion-research.md
@@ -105,5 +106,11 @@ author: @root
 created: 2026-11-12 05:37
 ---
 Root review 2026-11-11: Returned to To Do. AC3 remains unverified: current two-viewport active/paused/reduced-motion visual and performance evidence is incomplete. Live review is exploratory only: browser zoom prevented exact CSS viewport dimensions, so it cannot close this criterion.
+---
+
+author: @Junie
+created: 2026-11-13 05:41
+---
+2026-11-12 user direction update: AQ-103 replaces only the earlier §1.3 surface-interface recommendation to use a subtle plane at y=+2.72. The surface must instead be level at configured surfaceY, bounded by the current enclosure, and use the softened Snell-window/TIR, rear fade, and front meniscus described in AQ-103. AQ-39’s broader attenuation, fluorescence, and glass-optics scope remains unchanged.
 ---
 <!-- COMMENTS:END -->

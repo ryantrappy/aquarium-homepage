@@ -36,7 +36,8 @@ import { SURFACE_WAVE_GLSL } from './surface-waves'
 import { RaymarchedShaftPass, SHAFT_BEAM_GLSL } from './light-shafts'
 import { createAragoniteSandBed, getRockFootprintsForViewport } from './aragonite-sand'
 import { reefPlacementsForViewport } from './reef-layout'
-import { createGlassEnclosure } from './glass-enclosure'
+import { createGlassEnclosure, glassEnclosureLayout } from './glass-enclosure'
+import { createWaterSurface } from './water-surface'
 import { estimateCaptionRect, labelLiftPx, resolveLabelDeconflicts } from './fish-label-layout'
 import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
 import { createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
@@ -411,191 +412,10 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   shaftPlane.raycast = () => {}
   scene.add(shaftPlane)
 
-  // Visible Rippling Top Water Surface / Meniscus (AQ-14.2 AC #1 & AQ-14.6 AC #2,
-  // rebuilt AQ-96): a custom ShaderMaterial driven by the shared surface
-  // wave field — GPU vertex displacement (the old per-frame CPU loop over
-  // 1,029 vertices is deleted) + per-pixel analytic normals + glitter +
-  // Snell's-window brightening + Fresnel grazing brightening. The surface
-  // is a light-emitting boundary seen from below, not a PBR object, so a
-  // MeshStandardMaterial (whose flat normal could never glitter) buys
-  // nothing here; `envMapIntensity.waterSurface` is no longer consumed
-  // by the surface (the key stays in environment-map.ts for API compat).
-  // uTime freezes at 0 on pause / reduced-motion / hidden, exactly like
-  // uCausticTime and uShaftTime.
-  const surfaceUniforms = {
-    uTime: { value: 0 },
-    uSunDir: { value: new THREE.Vector3(SUN_DIRECTION.x, SUN_DIRECTION.y, SUN_DIRECTION.z) },
-  }
-  const waterSurfaceGeometry = new THREE.PlaneGeometry(32, 12, 64, 28)
-  const waterSurfaceMaterial = new THREE.ShaderMaterial({
-    transparent: true,
-    depthWrite: false,
-    side: THREE.DoubleSide,
-    uniforms: surfaceUniforms,
-    vertexShader: `
-      uniform float uTime;
-      varying vec3 vSurfaceWorldPos;
-      varying float vSurfaceLocalY;
-      ${SURFACE_WAVE_GLSL}
-      void main() {
-        vSurfaceLocalY = position.y;
-        vec4 wp = modelMatrix * vec4(position, 1.0);
-        // Local +z maps to world -y under rotation.x = PI/2, so the
-        // heightfield displaces local -z to raise the world surface.
-        vec3 displaced = position;
-        displaced.z -= surfaceWaveHeight(wp.xz, uTime) * 1.15;
-        vec4 displacedWp = modelMatrix * vec4(displaced, 1.0);
-        vSurfaceWorldPos = displacedWp.xyz;
-        gl_Position = projectionMatrix * viewMatrix * displacedWp;
-      }`,
-    fragmentShader: `
-      uniform float uTime;
-      uniform vec3 uSunDir;
-      varying vec3 vSurfaceWorldPos;
-      varying float vSurfaceLocalY;
-      ${SURFACE_WAVE_GLSL}
-
-      float surfHash21(vec2 p) {
-        p = fract(p * vec2(123.34, 456.21));
-        p += dot(p, p + 45.32);
-        return fract(p.x * p.y);
-      }
-
-      float surfNoise(vec2 p) {
-        vec2 i = floor(p);
-        vec2 f = fract(p);
-        vec2 u = f * f * (3.0 - 2.0 * f);
-        return mix(
-          mix(surfHash21(i + vec2(0.0, 0.0)), surfHash21(i + vec2(1.0, 0.0)), u.x),
-          mix(surfHash21(i + vec2(0.0, 1.0)), surfHash21(i + vec2(1.0, 1.0)), u.x),
-          u.y
-        );
-      }
-
-      // Evaluates foreshortened oval ripple cells with bright Snell's-window cores and dark TIR rims
-      vec2 ovalRippleLens(vec2 uv, float t) {
-        vec2 i = floor(uv);
-        vec2 f = fract(uv);
-        float d1 = 8.0;
-        float d2 = 8.0;
-        for (int dy = -1; dy <= 1; dy++) {
-          for (int dx = -1; dx <= 1; dx++) {
-            vec2 g = vec2(float(dx), float(dy));
-            float h = surfHash21(i + g);
-            vec2 o = 0.5 + 0.38 * sin(t * 1.15 + 6.28318 * vec2(h, fract(h * 17.3)));
-            vec2 r = g + o - f;
-            // Foreshorten horizontally so each wave cell reads as a crisp horizontal oval lens
-            r.y *= 1.35;
-            float d = length(r);
-            if (d < d1) {
-              d2 = d1;
-              d1 = d;
-            } else if (d < d2) {
-              d2 = d;
-            }
-          }
-        }
-        return vec2(d1, d2 - d1);
-      }
-
-      void main() {
-        vec2 p = vSurfaceWorldPos.xz;
-        vec3 n = surfaceWaveNormal(p, uTime);
-        float focus = surfaceWaveFocus(p, uTime);
-
-        // Anisotropic horizontal wave coordinates for foreshortened oval meniscus ripples
-        vec2 waveWarp = n.xz * 2.8 + vec2(
-          0.18 * sin(p.y * 3.6 + p.x * 1.4 + uTime * 1.3),
-          0.14 * cos(p.x * 2.9 - p.y * 4.2 - uTime * 1.1)
-        );
-        vec2 ovalCoord1 = vec2(p.x * 1.15, p.y * 3.10) + waveWarp * 0.65;
-        vec2 ovalCoord2 = vec2(p.x * 2.35 - 1.7, p.y * 5.80 + 0.9) - waveWarp * 0.85;
-        vec2 lens1 = ovalRippleLens(ovalCoord1, uTime * 0.65);
-        vec2 lens2 = ovalRippleLens(ovalCoord2, uTime * 0.92 + 3.7);
-
-        // Oval caustic bright centers and dark navy TIR border rings
-        float ovalCore1 = 1.0 - smoothstep(0.06, 0.34, lens1.x);
-        float ovalCore2 = 1.0 - smoothstep(0.05, 0.28, lens2.x);
-        float ovalRing1 = exp(-pow((lens1.x - 0.36) / 0.095, 2.0));
-        float ovalRing2 = exp(-pow((lens2.x - 0.32) / 0.085, 2.0));
-
-        // High-frequency horizontal liquid striations between the oval lenses
-        float ribbonWave = 0.5 + 0.28 * sin(p.x * 4.2 + p.y * 16.5 + n.x * 9.0 + uTime * 1.45)
-                               + 0.22 * cos(p.x * 7.8 - p.y * 24.0 + n.z * 11.0 - uTime * 1.75);
-        float darkCrestRing = clamp(ovalRing1 * 0.75 + ovalRing2 * 0.55 + smoothstep(0.68, 0.92, 1.0 - ribbonWave) * 0.45, 0.0, 1.0);
-
-        vec3 viewToCamera = normalize(cameraPosition - vSurfaceWorldPos);
-        float grazing = 1.0 - clamp(abs(viewToCamera.y), 0.0, 1.0);
-        // Fresnel Total Internal Reflection (TIR) weight: strong mirror reflection outside Snell's window
-        float tirWeight = smoothstep(0.42, 0.92, grazing) * (0.65 + 0.35 * sin(p.y * 9.5 + n.z * 6.0));
-
-        // Reflected reef coordinate warped by the undulating underside water normal
-        vec2 refXz = p + n.xz * 3.6 + vec2(sin(p.y * 6.2 + uTime * 1.2) * 0.45, cos(p.x * 3.4 - uTime * 0.9) * 0.30);
-        float rippleBreakup = surfNoise(vec2(refXz.x * 2.2, refXz.y * 6.8 + uTime * 0.35));
-
-        // Spatially mapped Total Internal Reflection (TIR) of the reef below (matching 9.36.15 PM reference):
-        // 1. Royal violet & magenta reflection over the left Peak & right Acropora / coralline rock
-        float violetLeft = exp(-pow((refXz.x + 3.2) / 2.1, 2.0));
-        float violetMidRight = exp(-pow((refXz.x - 1.9) / 1.9, 2.0));
-        float violetFarRight = exp(-pow((refXz.x - 4.1) / 1.6, 2.0));
-        float violetMask = clamp(violetLeft * 0.95 + violetMidRight * 0.78 + violetFarRight * 0.65, 0.0, 1.0)
-          * smoothstep(0.28, 0.76, rippleBreakup);
-
-        // 2. Glowing chartreuse / lime-gold reflection over the Euphyllia torch & hammer colonies
-        float greenLeft = exp(-pow((refXz.x + 1.55) / 1.05, 2.0));
-        float greenRight = exp(-pow((refXz.x - 0.95) / 1.15, 2.0));
-        float greenMask = clamp(greenLeft * 0.92 + greenRight * 0.95, 0.0, 1.0)
-          * smoothstep(0.32, 0.80, surfNoise(vec2(refXz.x * 2.8 + 4.1, refXz.y * 7.5 - uTime * 0.4)));
-
-        // 3. Warm coral-orange / amber reflection over the Montipora plate & Acanthastrea apron
-        float orangeLeft = exp(-pow((refXz.x + 2.25) / 0.95, 2.0));
-        float orangeCenter = exp(-pow((refXz.x + 0.15) / 1.10, 2.0));
-        float orangeMask = clamp(orangeLeft * 0.85 + orangeCenter * 0.72, 0.0, 1.0)
-          * smoothstep(0.36, 0.82, surfNoise(vec2(refXz.x * 3.1 - 2.3, refXz.y * 8.2 + uTime * 0.3)));
-
-        vec3 tirViolet = mix(vec3(0.26, 0.07, 0.44), vec3(0.52, 0.16, 0.46), ribbonWave);
-        vec3 tirGreen = mix(vec3(0.24, 0.48, 0.10), vec3(0.62, 0.66, 0.14), ribbonWave);
-        vec3 tirOrange = mix(vec3(0.48, 0.18, 0.06), vec3(0.68, 0.34, 0.12), ribbonWave);
-
-        vec3 tirReefColor = vec3(0.0);
-        tirReefColor = mix(tirReefColor, tirViolet, violetMask * 0.82);
-        tirReefColor = mix(tirReefColor, tirGreen, greenMask * 0.85);
-        tirReefColor = mix(tirReefColor, tirOrange, orangeMask * 0.72);
-
-        // Deep marine sapphire-cyan base water color + dark navy TIR wave rings
-        vec3 deepNavyRim = vec3(0.002, 0.009, 0.030);
-        vec3 marineCyan = vec3(0.018, 0.115, 0.285);
-        vec3 snellWindowCyan = vec3(0.18, 0.56, 0.88);
-        vec3 causticLensWhite = vec3(0.78, 0.95, 1.00);
-
-        vec3 halfVec = normalize(uSunDir + viewToCamera);
-        float specGlitter = pow(max(dot(n, halfVec), 0.0), 95.0);
-        float snellFocus = clamp(ovalCore1 * 0.72 + ovalCore2 * 0.54 + max(focus, 0.0) * 0.42, 0.0, 1.0);
-        float hotspotCore = pow(snellFocus, 1.85) + specGlitter * 0.85;
-
-        // Combine marine water base, colorful TIR reef reflections, dark navy wave rings, and bright oval Snell lenses
-        vec3 col = mix(marineCyan, tirReefColor + marineCyan * 0.35, tirWeight * 0.88);
-        col = mix(col, deepNavyRim, darkCrestRing * 0.82);
-        col = mix(col, snellWindowCyan, smoothstep(0.18, 0.68, snellFocus) * 0.72);
-        col += causticLensWhite * clamp(hotspotCore, 0.0, 1.15) * 0.32;
-
-        // Subtle rear-glass meniscus water-line seam where the surface meets the back wall
-        float rearMeniscusLine = exp(-pow((vSurfaceLocalY + 2.65) / 0.24, 2.0));
-        col = mix(col, vec3(0.003, 0.014, 0.042), rearMeniscusLine * 0.65);
-
-        float alpha = clamp(0.42 + 0.20 * clamp(snellFocus + darkCrestRing * 0.5 + tirWeight * 0.4, 0.0, 1.0), 0.0, 0.62);
-        // Smoothly feather the rear meniscus edge right behind the upper Acropora tips
-        alpha *= smoothstep(-3.15, -2.35, vSurfaceLocalY);
-        alpha *= smoothstep(2.6, 0.1, vSurfaceLocalY);
-        gl_FragColor = vec4(col, alpha);
-        #include <tonemapping_fragment>
-        #include <colorspace_fragment>
-      }`,
-  })
-  const waterSurface = new THREE.Mesh(waterSurfaceGeometry, waterSurfaceMaterial)
-  waterSurface.rotation.x = Math.PI / 2 - 0.065
-  waterSurface.position.set(0, optics.surfaceY, -1.2)
-  waterSurface.raycast = () => {}
+  // The surface is a bounded water-air interface: continuous shared-wave
+  // facets, softened Snell-window/TIR shading, rear fade, and front meniscus.
+  const waterSurfaceController = createWaterSurface(glassEnclosureLayout(false, optics.surfaceY))
+  const waterSurface = waterSurfaceController.mesh
   scene.add(waterSurface)
 
   // Depth-graded suspended particulate (AQ-43 as amended 2026-11-08):
@@ -1509,7 +1329,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     // AQ-86: the shaft sway freezes at its t=0 phase with everything else.
     shaftUniforms.uShaftTime.value = effectiveEnvTime
     // AQ-96: the water surface time freezes at 0 with everything else.
-    surfaceUniforms.uTime.value = effectiveEnvTime
+    waterSurfaceController.updateTime(effectiveEnvTime)
     // Shaft tier (AQ-98 / AQ-76): High runs the raymarched pass and
     // hides the plane; Balanced shows the upgraded plane; Low shows it
     // at half alpha. The tier is the adaptive controller's, with the
@@ -1810,6 +1630,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     const newNarrow = width < 600
     if (glassLayoutNarrow !== newNarrow) {
       glassEnclosure.setLayout(newNarrow)
+      waterSurfaceController.setLayout(glassEnclosureLayout(newNarrow, optics.surfaceY))
       glassLayoutNarrow = newNarrow
     }
     const recoveringFromUnavailableSpawn = spawnUnavailable
@@ -2167,7 +1988,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       rejectLookDevWaiters(new Error('Aquarium was disposed before look-dev capture readiness.'))
       glassEnclosure.dispose()
       if (import.meta.env.DEV && lookDevBridge && window.__AQUARIUM_LOOKDEV__ === lookDevBridge) delete window.__AQUARIUM_LOOKDEV__
-      removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sandBed.dispose(); rear.geometry.dispose(); rear.material.dispose(); hazePlane.geometry.dispose(); hazeMaterial.dispose(); shaftPlane.geometry.dispose(); shaftMaterial.dispose(); waterSurfaceGeometry.dispose(); waterSurfaceMaterial.dispose(); shaftPass?.dispose(); shaftPass = null; foregroundParticleGeometry.dispose(); foregroundParticleMaterial.dispose(); backgroundParticleGeometry.dispose(); backgroundParticleMaterial.dispose(); bubbleGeometry.dispose(); bubbleMaterial.dispose(); caustics.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
+      removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sandBed.dispose(); rear.geometry.dispose(); rear.material.dispose(); hazePlane.geometry.dispose(); hazeMaterial.dispose(); shaftPlane.geometry.dispose(); shaftMaterial.dispose(); waterSurfaceController.dispose(); shaftPass?.dispose(); shaftPass = null; foregroundParticleGeometry.dispose(); foregroundParticleMaterial.dispose(); backgroundParticleGeometry.dispose(); backgroundParticleMaterial.dispose(); bubbleGeometry.dispose(); bubbleMaterial.dispose(); caustics.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
     },
   }
 }

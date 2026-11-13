@@ -127,6 +127,7 @@ vi.mock('../../lib/fish', async importOriginal => {
 
 const service = (id: string, fishId = 'ocellaris-clownfish'): ServiceConfig => ({ id, fishId, name: id, url: `https://${id}.example.test`, isExample: false })
 let controller: AquariumController, host: HTMLDivElement, overlay: HTMLDivElement, status: ReturnType<typeof vi.fn<(value: SceneStatus) => void>>
+let documentHidden = false
 function anchors(services: ServiceConfig[]) {
   const old = new Map([...overlay.querySelectorAll<HTMLAnchorElement>('a')].map(a => [a.dataset.serviceId!, a]))
   const next = services.map(s => {
@@ -159,13 +160,14 @@ function spriteAlphaAt(texture: THREE.DataTexture, fx: number, fy: number): numb
 }
 
 beforeEach(() => {
+  documentHidden = false
   state.created = []; state.players = []; state.sources = []; state.textures = []; state.blockedSpawn = false; state.throwCreateForId = ''; state.beforeCreateFailure = undefined
   state.deferFishLoads = false; state.failFishLoads = false; state.pendingFishLoadReleases = []; state.resizeCallback = undefined
   state.deferMeshNavigation = false; state.pendingMeshNavigationReleases = []; state.meshNavigationResult = undefined
   state.forceLabelExposure = false
   vi.stubGlobal('devicePixelRatio', 1)
   vi.stubGlobal('ResizeObserver', class { constructor(callback: () => void) { state.resizeCallback = callback } observe() {} disconnect() {} })
-  vi.spyOn(document, 'hidden', 'get').mockReturnValue(false)
+  vi.spyOn(document, 'hidden', 'get').mockImplementation(() => documentHidden)
   vi.spyOn(THREE.TextureLoader.prototype, 'load').mockImplementation((_url, _loaded, _progress, error) => {
     const texture = new THREE.Texture(document.createElement('img')); vi.spyOn(texture, 'dispose'); state.textures.push({ texture, load: () => _loaded?.(texture), error }); return texture
   })
@@ -366,6 +368,60 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     expect(fish.position).not.toEqual(movingPose.position)
     expect(advanceSpy).toHaveBeenCalledTimes(3)
     expect(rootFor('tang')).toBe(root)
+  })
+
+  it('drives the actual water-surface clock through active, paused, reduced-motion, and hidden states', async () => {
+    let reducedMotion = false
+    vi.stubGlobal('matchMedia', () => ({
+      get matches() { return reducedMotion },
+      addEventListener() {},
+      removeEventListener() {},
+    }))
+    const services = [service('surface-clock')]
+    await start(services)
+
+    const surface = state.renderer!.scene!.getObjectByName('AquariumWaterSurface') as THREE.Mesh
+    const surfaceMaterial = surface.material as THREE.ShaderMaterial
+    const surfaceTime = () => surfaceMaterial.uniforms.uTime.value as number
+    expect(surface).toBeInstanceOf(THREE.Mesh)
+    expect(surfaceTime()).toBe(0)
+
+    state.renderer!.loop?.(0)
+    state.renderer!.loop?.(100)
+    const activeTime = surfaceTime()
+    expect(activeTime).toBeGreaterThan(0)
+
+    // Hidden scenes stop drawing, so the last visible surface phase is held.
+    documentHidden = true
+    document.dispatchEvent(new Event('visibilitychange'))
+    expect(state.renderer!.loop).toBeNull()
+    expect(surfaceTime()).toBe(activeTime)
+    documentHidden = false
+    document.dispatchEvent(new Event('visibilitychange'))
+    state.renderer!.loop?.(5000) // First frame resets the suspended clock.
+    expect(surfaceTime()).toBe(activeTime)
+    state.renderer!.loop?.(5050)
+    expect(surfaceTime()).toBeGreaterThan(activeTime)
+    expect(surfaceTime()).toBeLessThan(activeTime + 0.1)
+
+    const beforePauseTime = surfaceTime()
+    controller.update(services, true)
+    expect(surfaceTime()).toBe(0)
+    controller.update(services, false)
+    state.renderer!.loop?.(5100) // Resume without consuming the paused wall-clock gap.
+    expect(surfaceTime()).toBe(0)
+    state.renderer!.loop?.(5150)
+    expect(surfaceTime()).toBeCloseTo(beforePauseTime + 0.05)
+
+    reducedMotion = true
+    state.renderer!.loop?.(5200)
+    state.renderer!.loop?.(5250)
+    expect(surfaceTime()).toBe(0)
+    reducedMotion = false
+    state.renderer!.loop?.(5250)
+    expect(surfaceTime()).toBe(0)
+    state.renderer!.loop?.(5300)
+    expect(surfaceTime()).toBeCloseTo(beforePauseTime + 0.1)
   })
 
   it('upgrades every schoolmate when its shared lazy-loaded species arrives', async () => {

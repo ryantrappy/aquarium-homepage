@@ -4,11 +4,11 @@
 Category: Architecture / Rendering
 Status: Active
 Authority: Active Architectural Specification
-Backlog: AQ-5, AQ-38, AQ-12, AQ-34, AQ-13, AQ-70.2
+Backlog: AQ-5, AQ-38, AQ-12, AQ-34, AQ-13, AQ-70.2, AQ-103
 Owner: @root
 Updated: 2026-11-12
 Upstream: docs/requirements.md, docs/design-principles.md
-Downstream: src/rendering/scene/aquarium.ts, src/components/AquariumScene.tsx, src/rendering/proof/*
+Downstream: src/rendering/scene/aquarium.ts, src/rendering/scene/water-surface.ts, src/rendering/scene/water-surface.test.ts, src/components/AquariumScene.tsx, src/rendering/proof/*
 -->
 
 > [!NOTE]
@@ -16,8 +16,8 @@ Downstream: src/rendering/scene/aquarium.ts, src/components/AquariumScene.tsx, s
 > - **Category**: 3D Architecture & Rendering Engine Baseline
 > - **Status**: Active Technical Baseline
 > - **Authority**: Active Specification
-> - **Backlog Reference**: `AQ-5`, `AQ-38`, `AQ-12`
-> - **Summary**: Three.js engine selection, scene lifecycle, bounded rAF clock, alpha-aware raycasting/picking, and baseline test evidence.
+> - **Backlog Reference**: `AQ-5`, `AQ-38`, `AQ-12`, `AQ-103`
+> - **Summary**: Three.js scene lifecycle, bounded animation clock, alpha-aware picking, and the bounded underwater surface interface baseline.
 
 Three.js is selected for the first main-scene integration. The application now has the technical baseline described below. The separate `engine-study.html` fixture compares Three.js, Babylon.js and PlayCanvas with the same two animated fish and reef LOD; that fixture reports targets without opening services. Its results and limitations remain separate from main-page evidence.
 
@@ -38,6 +38,14 @@ The former alpha-picking failure—an empty-water corner opening Jellyfin—is r
 Main links retain native actions and signal only the selected instance; label/keyboard activation refreshes occlusion, and body targets recheck the actual pointer point. A 60-rAF-sample main-page observation on the desktop in-app browser measured median **33.3 ms**, p95 **35.0 ms**, maximum **35.4 ms**. These are desktop-host frame intervals, not GPU timings, physical-phone measurements or full-roster performance evidence.
 
 This is a functional technical baseline, not completed realism or all acceptance criteria. The reef remains a coarse/dead scan with baked shading and limited source coverage; the two fish retain approximate fins/materials, and thirteen roster species lack rigged assets. Production-quality fish, a mature living reef, validated interactions, optics, full-roster performance and final accessibility remain open work. Development/review is local-first; the user handles deployment after approved source is pushed.
+
+## Underwater water-surface interface (AQ-103)
+
+`aquarium.ts` owns the shared scene clock and lifecycle for `createWaterSurface` in [`water-surface.ts`](../src/rendering/scene/water-surface.ts). The surface stays horizontal at configured `surfaceY`; its geometry and shader front/rear/side bounds come from [`glassEnclosureLayout`](../src/rendering/scene/glass-enclosure.ts) and are updated with the enclosure on a responsive layout change.
+
+The vertex height uses the canonical `SURFACE_WAVE_GLSL` field, while the fragment shader combines its analytic slope with smooth, distance-filtered capillary slopes. The underside normal shades a softened Snell-window/TIR transition centered near the water-to-air critical-angle cosine; fixture transmission is bounded to a tank footprint, and coral bounce is faint and restricted to grazing rear/mid-water reflection. This is a visually grounded approximation, not ray-traced refraction or a reconstructed coral reflection.
+
+Dense cellular highlights and high-frequency stripe patterns are intentionally absent. Alpha fades into the backdrop's top color at the rear and inside the side walls; a thin silver-cyan meniscus is placed just inside the front-glass plane. `water-surface.test.ts` covers desktop/narrow geometry, responsive bounds, shader structure, shared time updates, non-interactive raycasting, and resource disposal. Browser appearance still requires visual review at 402×874 and 1440×900.
 
 ## Open the study
 
