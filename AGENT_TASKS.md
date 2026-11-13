@@ -13,6 +13,17 @@ Downstream: Current implementation and review work
 
 Root verified this checkpoint against the current checkout. The goal remains active and incomplete: finish the backlog and make the living aquarium resemble the supplied reference. Passing functional tests does not accept final art.
 
+## Current Root checkpoint — 2026-11-13
+
+This section supersedes older process, source and count checkpoints below; retain their milestone evidence as history. Goal remains active/incomplete.
+
+- AQ103water interfacea5e64a2 (Junie implementation, Luna/Root review) replaces noisy static/dots/stripes with enclosure-bounded level shared-wave facets. Root exact two-size native captures at docs/asset-evidence/aq103/interface-20261113/; AC1/4/5/6 accepted. AC2fixture/finalcontrast andAC3frontmeniscus visibility remain open: its front line is above overview frustum. Actual-controller live-uniform test proves pause/reduced/hidden/resume and resource tests pass. No final realism acceptance.
+- AQ58fallbackd862bf9 now derives conservative world boxes from actual displayed static rock vertex buffers/matrices after runtime sculpting, replacing canonical manual rock bands in main runtime while retaining coral bases. Mesh BVH remains authoritative when ready. Invalid/missing/skinned/instanced rocks fail closed, retain native links, and cannot be reset ready by update/resize. Source-bound active GLB tests, stale-cache/sculpt/ancestor/nonuniform tests and real controller spawn rejection pass. No animated-envelope/cave certification; old canonical AC2unchecked for current scope. Native proof docs/asset-evidence/aq58/current-fallback-20261113/.
+- Exact isolatedd862bf9 verification:748tests/66files,52focused tests/2files, typecheck14scripts and productionbuild pass. Both nativeDPR1sizes ready/no failed assets/no captured warnings/errors,11inhabitants and8phone targets>=44px withinviewport. No Root model/native/export edits.
+- Proofworktree /tmp/aquarium-aq87-proof-8b2d7cc detachedd862bf9, infrastructure-only Viteallowlistdirty. Owneddev5215PID40411 pinsd862bf9; verify before stopping. Original5214metadatae5fd2e1 and original5212build/process remain stale; preserve user3000/5210. Completed CUA phases closed/metricsreset. No deployment/configwrites.
+- AQ82next: actual rendered coral sockets differ from staticcanonical SOCKET_ANCHOR_POSITIONS_M used by habitat anchors/coralbase bounds. Plan recorded inBacklog58fcf78, no implementation/AC acceptance yet. Preserve current compatibility/clearance; derive actual mounted coordinates without asset rollback. Core geometry/reef-art/metric/animated clearance gates stay open under94/101/59/60/58.
+- Concurrent user reef-full-model.blend/.blend1 dirty; preserve. Junie AQ103source/docs are committed and Root-reviewed; remaining annotation/checkpoint notes follow. All Luna agents currently idle/completed after bounded helper/test work. CI/FPS lanes remain excluded.
+
 ## Current workspace and delivery
 
 Work in `/Users/ryantrapp/Desktop/Code/aquarium-homepage`, branch `review`. Historical isolated-worktree/PR4 instructions are superseded. Preserve concurrent user changes and candidate assets; stage specific task files only. PR45 was externally merged into main (`34b7279`); current draft PR47 is https://github.com/ryantrappy/aquarium-homepage/pull/47. User handles deployment to `trappserv.er`; never deploy.

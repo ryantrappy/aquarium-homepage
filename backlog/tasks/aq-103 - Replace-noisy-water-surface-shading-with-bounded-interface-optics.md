@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-13 05:41'
-updated_date: '2026-11-13 06:09'
+updated_date: '2026-11-13 06:19'
 labels:
   - rendering
   - optics
@@ -61,6 +61,10 @@ Root reviewed Junie implementation and Luna read-only integration audit. Luna ad
 - Root review remains requested before completion. AC #2 and #3 are intentionally unchecked: the overview captures do not clearly expose the front meniscus, and the final visual surface/reflection balance still needs Root judgment. Chrome emitted macOS CVDisplayLink/GPU mailbox warnings and Vite logged a generic root-route notFound warning; screenshots rendered the aquarium, and no shader compilation error was visible in the captured output. Changes remain uncommitted per AGENT_TASKS.md; unrelated Blender, reef-navigation, AQ-58, and AQ-82 work was preserved.
 
 Root exact-sourcea5e64a2 native1440x900/402x874DPR1 evidence under docs/asset-evidence/aq103/interface-20261113/: all assets ready, zero captured consolewarnings/errors, visible bounded smooth facets replacing static/dots/stripes, all service links retained.55focused tests/4files, finaltypecheck14scripts and productionbuild pass. Actualcontroller clock proves active/paused/reduced/hidden/resume behavior; disposedgeometry/material and noninteractive raycast tests pass. Root acceptsAC1/4/5/6. AC2retains fixture-transmission/finalcontrast art check; AC3frontmeniscus lies outside overview frustum and still needs targeted framing review. Do not markDone from a hidden meniscus or shader-marker tests. No Root Blender/asset edits; exactsource proof excludes ongoingAQ58fallback changes.
+
+2026-11-13 Root review update: implementation commit a5e64a2 and native two-size review/evidence commit 1f25f9a are now in HEAD. Root accepts AC #1/#4/#5/#6; AC #2 still needs fixture-transmission/final-contrast review and AC #3 needs targeted front-meniscus framing. This supersedes the earlier Junie note that described the pre-review working-tree state. AQ-103 remains In Progress; do not mark Done until the open visual gates are reviewed.
+
+Root2026-11-13 checkpoint: native final-sourcea5e64a2 evidence and later combinedd862bf9 source both load at the two exacttargetviewports without captured warnings/errors. Combined source passes748tests/66files/typecheck14scripts/build. Previous Junie/headless warnings remain historical environment observations, not present in Root native captures. OpenAC2/3 remain unchanged; no Done claim.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
