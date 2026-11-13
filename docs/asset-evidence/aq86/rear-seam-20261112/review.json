@@ -1,0 +1,72 @@
+{
+  "scope": "Root visual acceptance of softer rear substrate transition; not final shaft art, freeze or runtime frame-time acceptance.",
+  "beforeCommit": "bfb8e9c",
+  "afterCommit": "219e3da",
+  "capture": "CUA Chrome native PNG, no clip, DPR1, seed2026/time1.25/full-scene/labels off; detached proof checkout with infrastructure-only Vite fs allow-list. renderFrozen sidecars saved for each view.",
+  "changes": [
+    "Contact illumination falloff confined to last0.95display units before rear wall; no geometry, full-frame gradient or blur.",
+    "Removed arbitrary lateral sand vignette; warm foreground/edge illumination retained.",
+    "Repaired mapless front-edge UV varying (AQ70.12); before load had known front-edge shader compile failures, corrected after reload. This disqualifies timing comparison, not the visible floor transition comparison."
+  ],
+  "verification": {
+    "focusedTests": 43,
+    "testFiles": 4,
+    "typecheck": "Pass;14script syntax checks",
+    "productionBuild": "Pass; existing chunk-size advisory",
+    "afterCapturedConsoleWarningsErrors": []
+  },
+  "captures": [
+    {
+      "image": "before-laptop.png",
+      "sidecar": "before-laptop.json",
+      "dimensions": [
+        1440,
+        900
+      ],
+      "sha256": "8fe762a54924aa70599201e24f561a0076a1eb3701eb6c7a8c397723c42a340c",
+      "ready": true
+    },
+    {
+      "image": "before-phone.png",
+      "sidecar": "before-phone.json",
+      "dimensions": [
+        402,
+        874
+      ],
+      "sha256": "1d0b6d9e8d26126d1a6899357a49fbccd37b6c5017147d527c2175daa1ea9d51",
+      "ready": true
+    },
+    {
+      "image": "after-laptop.png",
+      "sidecar": "after-laptop.json",
+      "dimensions": [
+        1440,
+        900
+      ],
+      "sha256": "2d13a6fa21522887bd2c8ca7f050934f78401e2940ed336667c451775f7850ce",
+      "ready": true
+    },
+    {
+      "image": "after-phone.png",
+      "sidecar": "after-phone.json",
+      "dimensions": [
+        402,
+        874
+      ],
+      "sha256": "c2f21f6eff9655185e913e11e7e9f304b473426b930f00de8589cf98dc1e101d",
+      "ready": true
+    }
+  ],
+  "remaining": [
+    "Physical floor/wall boundary is still geometrically present; the harsh bright horizontal cut is softened.",
+    "No measured runtime frame-time no-regression acceptance: fixed inspection timing and before shader errors are not a valid runtime performance baseline.",
+    "AQ86shaft shape/freeze/rear haze final reference acceptance remains open."
+  ],
+  "localSeamContrast": {
+    "measurement": "seam-row-measurements.json",
+    "beforeMaxAdjacentRowJumpSrgbBytes": 108.25372999999998,
+    "afterMaxAdjacentRowJumpSrgbBytes": 28.658649999999987,
+    "reductionFraction": 0.7352640874360634,
+    "scope": "20x30laptop clear channel only; supports visual softening, not whole-frame or phone numeric acceptance."
+  }
+}

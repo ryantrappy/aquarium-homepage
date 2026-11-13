@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-08'
-updated_date: '2026-11-13 05:44'
+updated_date: '2026-11-13 05:47'
 labels:
   - optics
   - photorealism
@@ -39,7 +39,7 @@ Give the tank visible depth with a restrained haze that starts behind the primar
 - [ ] #1 Haze is visible in the rear water column / graded background, starts behind the primary fish volume (z < -1.5), and leaves foreground and mid-tank fish colours un-veiled at 1440x900 and 402x874
 - [ ] #2 Soft volumetric shafts descend from the surface, weaken with depth, freeze under pause / reduced motion / page-hidden, and never flicker
 - [ ] #3 No open-ocean fog, blue veil, blur, or dark vignette is added; any vignette decision is recorded with amended ACs in AQ-39, AQ-14.6, and AQ-14.2 first
-- [ ] #4 The hard horizontal background/sand seam is gone at 1440x900 and 402x874, verified in look-dev captures
+- [x] #4 The hard horizontal background/sand seam is gone at 1440x900 and 402x874, verified in look-dev captures
 - [ ] #5 No frame-time regression at either viewport; Root reviews the captures before Done
 <!-- AC:END -->
 
@@ -65,4 +65,6 @@ Root renderer correction2026-11-12: Three WebGLState confirms normal offscreen b
 Root native review of35581ed at both exactDPR1 sizes saved under docs/asset-evidence/aq86/compositing-20261112/. All current assets ready, no captured shader warnings/errors. Soft overhead light now survives blending, foreground objects stay sharp; hard rear-sand seam remains visibly unresolved, and full reference-level shaft shape/freeze/budget acceptance is not claimed. Keep task open.
 
 Root native trial softens the bright floor/rear-wall cut with substrate-only contact illumination over the final0.95display units, retaining sharp warm foreground grains. Removed the old arbitrary lateral sand vignette. No geometry, fish/navigation, full-frame overlay or blur changes.18sand/caustic tests pass; exact-source final captures and shader-log review follow. This is a functional/art iteration handoff, not full shaft/freeze/performance acceptance.
+
+Root final exact-source219e3da two-size review: native before/after PNGs and ready renderFrozen sidecars under docs/asset-evidence/aq86/rear-seam-20261112/. Harsh bright horizontal cut is now a soft rear-floor contact transition at both1440x900/402x874; Root acceptsAC4. Physical floor/wall boundary remains geometrically present. Laptop clear-channel20x30region max adjacent-row display-luminance jump falls108.25 to28.66 (~73.5percent); no whole-frame/phone numeric claim. After reload zero captured consolewarnings/errors; mapless front-edge shader repairedAQ70.12. Isolated43focused tests/4files, typecheck14scripts, productionbuild pass. Before shadererrors and frozen inspection timings invalidate runtime cost comparison; AC5 and fullshaft/haze/freezegates remain open. No model/Blender edits.
 <!-- SECTION:NOTES:END -->
