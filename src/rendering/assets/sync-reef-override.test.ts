@@ -14,6 +14,65 @@ import { extractShapeGuideFromOverride, fishOverrideFiles } from '../../../scrip
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
 const fishRoot = path.join(repoRoot, 'src/rendering/assets/splat-fish')
+const fishWorkflowPaths = [
+  'scripts/build-splat-fish-glbs.mjs',
+  'src/rendering/assets/splat-fish/manifest.json',
+  'src/rendering/assets/splat-fish/README.md',
+  'src/rendering/assets/splat-fish/overrides/README.md',
+  'src/rendering/assets/splat-fish/overrides/learned-shape-guide.json',
+  'src/rendering/assets/splat-fish/blend/README.md',
+]
+
+function snapshotFishWorkflow(root: string) {
+  return fishWorkflowPaths.map(relative => {
+    const file = path.join(root, relative)
+    if (!fs.existsSync(file)) return [relative, null]
+    const digest = createHash('sha256').update(fs.readFileSync(file)).digest('hex')
+    return [relative, digest]
+  })
+}
+
+function installFixtureInputs(root: string, id: string) {
+  const copies = [
+    [path.join(fishRoot, 'blend', `${id}.blend`), path.join(root, 'src/rendering/assets/splat-fish/blend', `${id}.blend`)],
+    [path.join(fishRoot, 'overrides', `${id}.glb`), path.join(root, 'src/rendering/assets/splat-fish/overrides', `${id}.glb`)],
+    [path.join(repoRoot, 'src/rendering/modeling', `build_${id.replaceAll('-', '_')}.py`), path.join(root, 'src/rendering/modeling', `build_${id.replaceAll('-', '_')}.py`)],
+  ] as const
+  for (const [source, destination] of copies) {
+    fs.mkdirSync(path.dirname(destination), { recursive: true })
+    fs.copyFileSync(source, destination)
+  }
+  for (const relative of fishWorkflowPaths) {
+    const source = path.join(repoRoot, relative), destination = path.join(root, relative)
+    if (!fs.existsSync(source)) continue
+    fs.mkdirSync(path.dirname(destination), { recursive: true })
+    fs.copyFileSync(source, destination)
+  }
+  return copies[1]![1]
+}
+
+function rewriteGlbJson(source: Buffer, mutate: (document: any) => void): Buffer {
+  const jsonLength = source.readUInt32LE(12)
+  const binHeaderOffset = 20 + jsonLength
+  const binLength = source.readUInt32LE(binHeaderOffset)
+  const document = JSON.parse(source.toString('utf8', 20, binHeaderOffset))
+  mutate(document)
+  const json = Buffer.from(JSON.stringify(document), 'utf8')
+  const paddedJson = Buffer.alloc(Math.ceil(json.length / 4) * 4, 0x20)
+  json.copy(paddedJson)
+  const bin = source.subarray(binHeaderOffset + 8, binHeaderOffset + 8 + binLength)
+  const totalLength = 12 + 8 + paddedJson.length + 8 + bin.length
+  const header = Buffer.alloc(20)
+  header.writeUInt32LE(0x46546c67, 0)
+  header.writeUInt32LE(2, 4)
+  header.writeUInt32LE(totalLength, 8)
+  header.writeUInt32LE(paddedJson.length, 12)
+  header.writeUInt32LE(0x4e4f534a, 16)
+  const binHeader = Buffer.alloc(8)
+  binHeader.writeUInt32LE(bin.length, 0)
+  binHeader.writeUInt32LE(0x004e4942, 4)
+  return Buffer.concat([header, paddedJson, binHeader, bin])
+}
 
 describe('reef sync CLI argument parser', () => {
   it('accepts a single reef identifier with the required guide flag', () => {
@@ -68,19 +127,7 @@ describe('fish-only shape guide discovery', () => {
 })
 
 function fishWorkflowSnapshot() {
-  const paths = [
-    path.join(repoRoot, 'scripts/build-splat-fish-glbs.mjs'),
-    path.join(fishRoot, 'manifest.json'),
-    path.join(fishRoot, 'README.md'),
-    path.join(fishRoot, 'overrides/README.md'),
-    path.join(fishRoot, 'overrides/learned-shape-guide.json'),
-    path.join(fishRoot, 'blend/README.md'),
-  ]
-  return paths.map(file => {
-    if (!fs.existsSync(file)) return [path.relative(repoRoot, file), null]
-    const digest = createHash('sha256').update(fs.readFileSync(file)).digest('hex')
-    return [path.relative(repoRoot, file), digest]
-  })
+  return snapshotFishWorkflow(repoRoot)
 }
 
 describe('reef sync early CLI dispatch', () => {
@@ -163,7 +210,12 @@ describe('reef sync early CLI dispatch', () => {
       })
       expect(glbDoc.nodes[glbDoc.scenes[glbDoc.scene ?? 0].nodes[0]].extras.reefAsset).toEqual(inspection.extras.reefAsset)
       const sockets = JSON.parse(fs.readFileSync(socketReportPath, 'utf8'))
-      expect(sockets.supportedSockets).toEqual([])
+      expect(sockets.supportedSockets.map((socket: { name: string }) => socket.name).sort()).toEqual([
+        'socket_plate_ledge_11',
+        'socket_soft_mat_11',
+        'socket_soft_mat_12',
+        'socket_sps_crest_11',
+      ])
       expect(sockets.rejectedSockets).toEqual([])
 
       const manifestBeforeRepeat = fs.readFileSync(manifestPath)
@@ -172,6 +224,56 @@ describe('reef sync early CLI dispatch', () => {
       expect(fs.readFileSync(manifestPath)).toEqual(manifestBeforeRepeat)
       expect(fs.readFileSync(packagedPath)).toEqual(packagedBeforeRepeat)
       expect(fishWorkflowSnapshot()).toEqual(beforeMainRepo)
+    } finally {
+      fs.rmSync(fixtureRoot, { recursive: true, force: true })
+    }
+  })
+
+  it.each([
+    {
+      label: 'a child mesh',
+      mutate: (doc: any) => {
+        const root = doc.nodes[doc.scenes[doc.scene ?? 0].nodes[0]]
+        const childIndex = doc.nodes.length
+        root.children.push(childIndex)
+        doc.nodes.push({ name: 'socket_soft_mat_99', mesh: root.mesh, extras: { reefSocket: { role: 'coral-mount' } } })
+      },
+      expected: /one applied rock mesh root|empty coral socket intents/i,
+    },
+    {
+      label: 'an unknown empty child',
+      mutate: (doc: any) => {
+        const root = doc.nodes[doc.scenes[doc.scene ?? 0].nodes[0]]
+        root.children.push(doc.nodes.length)
+        doc.nodes.push({ name: 'socket_soft_mat_99' })
+      },
+      expected: /empty coral socket intents/i,
+    },
+    {
+      label: 'a socket moved off its supported footprint',
+      mutate: (doc: any) => {
+        const root = doc.nodes[doc.scenes[doc.scene ?? 0].nodes[0]]
+        const movedSocket = doc.nodes[root.children[0]]
+        movedSocket.translation = [0, 0, 10]
+      },
+      expected: /Unverified coral sockets/i,
+    },
+  ])('rejects $label before writing reef outputs and leaves fish workflow files unchanged', ({ mutate, expected }) => {
+    const id = 'reef-center-arch'
+    const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'reef-override-invalid-'))
+    try {
+      const overridePath = installFixtureInputs(fixtureRoot, id)
+      const input = fs.readFileSync(overridePath)
+      fs.writeFileSync(overridePath, rewriteGlbJson(input, mutate))
+      const fishBefore = snapshotFishWorkflow(fixtureRoot)
+      const outputDir = path.join(fixtureRoot, 'src/rendering/assets/corals/custom-rocks')
+
+      expect(() => syncReefOverride(fixtureRoot, id)).toThrow(expected)
+      expect(fs.existsSync(outputDir)).toBe(false)
+      expect(fishWorkflowPaths.map(relative => {
+        const file = path.join(fixtureRoot, relative)
+        return fs.existsSync(file) ? [relative, createHash('sha256').update(fs.readFileSync(file)).digest('hex')] : [relative, null]
+      })).toEqual(fishBefore)
     } finally {
       fs.rmSync(fixtureRoot, { recursive: true, force: true })
     }

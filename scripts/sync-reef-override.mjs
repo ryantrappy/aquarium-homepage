@@ -47,7 +47,14 @@ export function syncReefOverride(repoRoot, id) {
   if (roots?.length !== 1 || doc.animations?.length || doc.skins?.length || doc.extensionsRequired?.length
     || doc.buffers?.length !== 1 || doc.buffers[0].uri || doc.images?.some(image => image.uri)) throw new Error('Require one static, embedded canonical rock root')
   const root = doc.nodes[roots[0]], meshNodes = doc.nodes.filter(node => node.mesh !== undefined)
-  if (meshNodes.length !== 1 || meshNodes[0] !== root || root.children?.length) throw new Error('Require one applied mesh root without children')
+  if (meshNodes.length !== 1 || meshNodes[0] !== root) throw new Error('Require one applied rock mesh root')
+  const childIndices = root.children ?? []
+  if (new Set(childIndices).size !== childIndices.length || childIndices.includes(roots[0]) || doc.nodes.length !== childIndices.length + 1) throw new Error('Only direct socket children are supported')
+  for (const index of childIndices) {
+    const child = doc.nodes[index]
+    if (!child || !/^socket_[a-z_]+_\d{2}$/.test(child.name ?? '') || child.mesh !== undefined || child.children?.length
+      || child.skin !== undefined || child.extensions || child.extras?.reefSocket?.role !== 'coral-mount') throw new Error('Rock children must be empty coral socket intents')
+  }
   const matrix = root.matrix ?? identity
   if (matrix.some((n, i) => n !== identity[i]) || root.translation?.some(n => n !== 0)
     || root.scale?.some(n => n !== 1) || root.rotation?.some((n, i) => n !== [0, 0, 0, 1][i])) throw new Error('Apply root transforms before export')
@@ -79,9 +86,9 @@ export function syncReefOverride(repoRoot, id) {
   const packaged = buildGlb(doc, bin), geometry = readRockCollisionGeometry(packaged)
   const dir = 'src/rendering/assets/corals/custom-rocks', socketPath = `${dir}/${id}-socket-report.json`
   const sockets = inspectRockSockets(packaged, socketPath)
-  if (sockets.rejectedSockets.length || sockets.supportedSockets.length) throw new Error('Standalone module must not declare unverified coral sockets')
+  if (sockets.rejectedSockets.length) throw new Error(`Unverified coral sockets: ${JSON.stringify(sockets.rejectedSockets)}`)
   const inspection = { extras: { reefAsset }, rootTransform: { translation: [0, 0, 0], rotation: [0, 0, 0, 1], scale: [1, 1, 1] },
-    boundsM: geometry.boundsM, primitives: [primitiveRecord], sockets: [], collisionParts: [] }
+    boundsM: geometry.boundsM, primitives: [primitiveRecord], sockets: sockets.supportedSockets, collisionParts: [] }
   const result = validateAssetContract(inspection)
   if (!result.valid) throw new Error(JSON.stringify(result.issues))
   const manifestPath = path.join(repoRoot, dir, 'manifest.json')

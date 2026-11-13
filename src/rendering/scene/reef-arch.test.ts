@@ -1,11 +1,23 @@
 import { readFileSync } from 'node:fs'
 import * as THREE from 'three'
 import { describe, expect, it, vi } from 'vitest'
-import { CENTER_ARCH_PLACEMENT, CENTER_ARCH_URL, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
+import { CENTER_ARCH_MOUNTS, CENTER_ARCH_PLACEMENT, CENTER_ARCH_URL, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
 import { createReefMeshNavigation, MESH_NAVIGATION_COLLISION_RADIUS_M, MESH_NAVIGATION_MOVEMENT_BUDGET } from './reef-mesh-navigation'
 
 type Point = { x: number; y: number; z: number }
 type Triangle = { a: Point; b: Point; c: Point }
+type ArchNode = { name?: string; children?: number[]; translation?: number[]; rotation?: number[]; scale?: number[] }
+
+function readArchNodes(): { nodes: ArchNode[]; sceneRoot: number } {
+  const bytes = readFileSync(new URL(CENTER_ARCH_URL))
+  const jsonLength = bytes.readUInt32LE(12)
+  const document = JSON.parse(bytes.toString('utf8', 20, 20 + jsonLength)) as {
+    nodes: ArchNode[]
+    scenes: Array<{ nodes: number[] }>
+    scene?: number
+  }
+  return { nodes: document.nodes, sceneRoot: document.scenes[document.scene ?? 0]!.nodes[0]! }
+}
 
 function readGlbTriangles(bytes: Uint8Array): Triangle[] {
   const buffer = Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength)
@@ -109,6 +121,18 @@ function sourceArch(): { root: THREE.Group; mesh: THREE.Mesh; map: THREE.Texture
   mesh.userData.reefPrimitive = { role: 'rock' }
   const root = new THREE.Group()
   root.add(mesh)
+  const sourceNodes = readArchNodes()
+  const rootNode = sourceNodes.nodes[sourceNodes.sceneRoot]!
+  for (const childIndex of rootNode.children ?? []) {
+    const sourceSocket = sourceNodes.nodes[childIndex]!
+    if (!sourceSocket.name?.startsWith('socket_')) continue
+    const socket = new THREE.Object3D()
+    socket.name = sourceSocket.name
+    socket.position.fromArray(sourceSocket.translation ?? [0, 0, 0])
+    socket.quaternion.fromArray(sourceSocket.rotation ?? [0, 0, 0, 1])
+    socket.scale.fromArray(sourceSocket.scale ?? [1, 1, 1])
+    mesh.add(socket)
+  }
   return { root, mesh, map, normalMap }
 }
 
@@ -132,11 +156,13 @@ describe('createCenterArch', () => {
   it('preserves packaged geometry and texture maps while cloning role materials and applying scene transforms', () => {
     const { root, mesh: sourceMesh, map, normalMap } = sourceArch()
     const originalMaterial = sourceMesh.material as THREE.MeshStandardMaterial
+    const originalPositions = sourceMesh.geometry.getAttribute('position').array.slice()
     const arch = createCenterArch(root)
     const archMesh = arch.children[0] as THREE.Mesh
     const material = archMesh.material as THREE.MeshStandardMaterial
 
     expect(archMesh.geometry).toBe(sourceMesh.geometry)
+    expect(archMesh.geometry.getAttribute('position').array).toEqual(originalPositions)
     expect(material).not.toBe(originalMaterial)
     expect(material.map).toBe(map)
     expect(material.normalMap).toBe(normalMap)
@@ -149,19 +175,55 @@ describe('createCenterArch', () => {
     expect(arch.scale.toArray()).toEqual([CENTER_ARCH_PLACEMENT.scale, CENTER_ARCH_PLACEMENT.scale, CENTER_ARCH_PLACEMENT.scale])
   })
 
+  it('keeps actual inspected socket mounts, authored transforms, and required templates in sync', () => {
+    const inspection = JSON.parse(readFileSync(new URL('../assets/corals/custom-rocks/reef-center-arch-inspection.json', import.meta.url), 'utf8')) as {
+      sockets: Array<{ name: string; archetype: string }>
+    }
+    const inspectedSockets = new Map(inspection.sockets.map(socket => [socket.name, socket]))
+    const { root, mesh: sourceMesh } = sourceArch()
+    const sourceSockets = new Map<string, { position: number[]; quaternion: number[] }>()
+    sourceMesh.traverse(node => {
+      if (!node.name.startsWith('socket_')) return
+      sourceSockets.set(node.name, { position: node.position.toArray(), quaternion: node.quaternion.toArray() })
+    })
+
+    expect(CENTER_ARCH_MOUNTS).toHaveLength(4)
+    for (const mount of CENTER_ARCH_MOUNTS) {
+      expect(inspectedSockets.get(mount.socketName)?.archetype).toBe(mount.archetype)
+      expect(readFileSync(new URL(`../assets/corals/${mount.coralAssetId}.glb`, import.meta.url)).byteLength).toBeGreaterThan(0)
+      expect(sourceSockets.has(mount.socketName)).toBe(true)
+    }
+
+    const arch = createCenterArch(root)
+    const archMesh = arch.children[0] as THREE.Mesh
+    for (const [name, authored] of sourceSockets) {
+      const clone = archMesh.getObjectByName(name)!
+      expect(clone.position.toArray()).toEqual(authored.position)
+      expect(clone.quaternion.toArray()).toEqual(authored.quaternion)
+    }
+  })
+
   it('disposes its cloned materials once without disposing borrowed geometry or maps', () => {
     const { root, mesh: sourceMesh, map, normalMap } = sourceArch()
     const arch = createCenterArch(root)
     const archMesh = arch.children[0] as THREE.Mesh
     const material = archMesh.material as THREE.MeshStandardMaterial
+    const depthMaterial = new THREE.MeshDepthMaterial()
+    const distanceMaterial = new THREE.MeshDistanceMaterial()
+    archMesh.customDepthMaterial = depthMaterial
+    archMesh.customDistanceMaterial = distanceMaterial
     const geometryDispose = vi.spyOn(archMesh.geometry, 'dispose')
     const materialDispose = vi.spyOn(material, 'dispose')
+    const depthDispose = vi.spyOn(depthMaterial, 'dispose')
+    const distanceDispose = vi.spyOn(distanceMaterial, 'dispose')
     const mapDispose = vi.spyOn(map, 'dispose')
     const normalMapDispose = vi.spyOn(normalMap, 'dispose')
 
     disposeCenterArchMaterials(arch)
 
     expect(materialDispose).toHaveBeenCalledOnce()
+    expect(depthDispose).toHaveBeenCalledOnce()
+    expect(distanceDispose).toHaveBeenCalledOnce()
     expect(geometryDispose).not.toHaveBeenCalled()
     expect(mapDispose).not.toHaveBeenCalled()
     expect(normalMapDispose).not.toHaveBeenCalled()

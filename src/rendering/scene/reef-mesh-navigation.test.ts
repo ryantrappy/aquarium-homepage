@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import * as THREE from 'three'
 import {
+  createMountedCoralFallbackObstacles,
   createRockFallbackObstacles,
   createReefMeshNavigation,
   MESH_NAVIGATION_COLLISION_RADIUS_M,
@@ -388,6 +389,85 @@ describe('createRockFallbackObstacles', () => {
     expect(createRockFallbackObstacles(instanced, 'reef-instanced')).toEqual({
       status: 'unavailable', reason: 'rock-dynamic-transform-unsupported',
     })
+  })
+})
+
+describe('createMountedCoralFallbackObstacles', () => {
+  it('uses current transformed bounding spheres including the premeasured sway margin without fish inflation', () => {
+    const ancestor = new THREE.Group()
+    ancestor.position.set(5, -2, 3)
+    ancestor.rotation.y = 0.4
+    ancestor.scale.set(2, 0.5, 3)
+    const mountedRoot = new THREE.Group()
+    mountedRoot.position.set(-0.5, 2, 0.25)
+    ancestor.add(mountedRoot)
+
+    const geometry = new THREE.BoxGeometry(1, 2, 0.5)
+    geometry.computeBoundingSphere()
+    const swayMargin = 0.12
+    geometry.boundingSphere!.radius += swayMargin
+    const mesh = new THREE.Mesh(geometry)
+    mesh.position.set(1, 0, 0)
+    mesh.scale.set(0.5, 2, 1.5)
+    mountedRoot.add(mesh)
+    const bindings = [{ socketName: 'socket_fixture', coralAssetId: 'fixture', root: mountedRoot, materialControllers: [] }]
+
+    const result = createMountedCoralFallbackObstacles(bindings, 'reef-3')
+
+    expect(result.status).toBe('ready')
+    if (result.status !== 'ready') return
+    expect(result.obstacles).toHaveLength(1)
+    expect(result.obstacles[0]!.id).toBe('reef-3-coral-0')
+    const bounds = result.obstacles[0]!.bounds
+    const center = geometry.boundingSphere!.center.clone().applyMatrix4(mesh.matrixWorld)
+    const elements = mesh.matrixWorld.elements
+    const worldScale = Math.max(
+      Math.hypot(elements[0]!, elements[1]!, elements[2]!),
+      Math.hypot(elements[4]!, elements[5]!, elements[6]!),
+      Math.hypot(elements[8]!, elements[9]!, elements[10]!),
+    )
+    const expectedRadius = (geometry.boundingSphere!.radius) * worldScale
+    expect(bounds.min.x).toBeCloseTo(center.x - expectedRadius)
+    expect(bounds.max.x).toBeCloseTo(center.x + expectedRadius)
+    expect(bounds.min.y).toBeCloseTo(center.y - expectedRadius)
+    expect(bounds.max.y).toBeCloseTo(center.y + expectedRadius)
+    expect(bounds.min.z).toBeCloseTo(center.z - expectedRadius)
+    expect(bounds.max.z).toBeCloseTo(center.z + expectedRadius)
+    expect(bounds.max.x - center.x).toBeGreaterThan(swayMargin * worldScale)
+  })
+
+  it('allows an empty mounted list and fails closed for invalid IDs, origins, missing bounds, and thrown updates', () => {
+    expect(createMountedCoralFallbackObstacles([], 'reef-empty')).toEqual({ status: 'ready', obstacles: [] })
+    expect(createMountedCoralFallbackObstacles([], '  ')).toEqual({ status: 'unavailable', reason: 'invalid-island-id' })
+
+    const nanRoot = new THREE.Group()
+    nanRoot.position.x = Number.NaN
+    const nanGeometry = new THREE.BoxGeometry(1, 1, 1)
+    nanGeometry.computeBoundingSphere()
+    nanRoot.add(new THREE.Mesh(nanGeometry))
+    expect(createMountedCoralFallbackObstacles([
+      { socketName: 'nan', coralAssetId: 'fixture', root: nanRoot, materialControllers: [] },
+    ], 'reef-nan').status).toBe('unavailable')
+
+    const missingSphereGeometry = new THREE.BufferGeometry()
+    missingSphereGeometry.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 1, 0, 0, 0, 1, 0], 3))
+    const missingSphereRoot = new THREE.Group()
+    missingSphereRoot.add(new THREE.Mesh(missingSphereGeometry))
+    expect(createMountedCoralFallbackObstacles([
+      { socketName: 'missing', coralAssetId: 'fixture', root: missingSphereRoot, materialControllers: [] },
+    ], 'reef-missing').status).toBe('unavailable')
+
+    const emptyGeometryRoot = new THREE.Group()
+    emptyGeometryRoot.add(new THREE.Mesh(new THREE.BufferGeometry()))
+    expect(createMountedCoralFallbackObstacles([
+      { socketName: 'empty', coralAssetId: 'fixture', root: emptyGeometryRoot, materialControllers: [] },
+    ], 'reef-empty-geometry').status).toBe('unavailable')
+
+    const throwingRoot = new THREE.Group()
+    throwingRoot.updateWorldMatrix = () => { throw new Error('fixture transform failure') }
+    expect(createMountedCoralFallbackObstacles([
+      { socketName: 'throws', coralAssetId: 'fixture', root: throwingRoot, materialControllers: [] },
+    ], 'reef-throws').status).toBe('unavailable')
   })
 })
 

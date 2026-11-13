@@ -15,7 +15,7 @@
       "provenance": {
         "license": "original",
         "creator": "Aquarium project",
-        "sourceSha256": "2861f56024bb6bc21a68857cede7ad1c52c706b4865a0e0b0c9824a92c8b8305",
+        "sourceSha256": "bfc545fa507497b0d7ba8bafb43ea1cbc91a116a488fdc81b606102f1411fd97",
         "recipe": "Blender background --python src/rendering/modeling/build_reef_center_arch.py; node scripts/sync-blender-override.mjs --reef reef-center-arch --learn-guide",
         "attribution": "Original custom procedural limestone arch and embedded textures; no imported visual assets."
       }
@@ -55,7 +55,7 @@
     {
       "id": "reef_center_arch",
       "role": "rock",
-      "vertexCount": 9555,
+      "vertexCount": 9427,
       "boundsM": {
         "min": [
           -0.5483332276344299,
@@ -75,6 +75,179 @@
       }
     }
   ],
-  "sockets": [],
+  "sockets": [
+    {
+      "name": "socket_plate_ledge_11",
+      "role": "coral-mount",
+      "parentMesh": "reef_center_arch",
+      "archetype": "plating-sps",
+      "positionM": [
+        -0.07999999821186066,
+        0.5495697855949402,
+        0
+      ],
+      "normal": [
+        0.004858370484757632,
+        0.9745625463066234,
+        0.224063025893571
+      ],
+      "rotation": [
+        0.11275004103392985,
+        -1.2616931692634522e-11,
+        -0.0024462589625844945,
+        0.9936203722065763
+      ],
+      "footprintRadiusM": 0.024,
+      "clearanceRadiusM": 0.042,
+      "support": {
+        "pointM": [
+          -0.07999999821835926,
+          0.5495697842913553,
+          -2.9970899633607884e-10
+        ],
+        "normal": [
+          0.004858370484757632,
+          0.9745625463066234,
+          0.224063025893571
+        ],
+        "supportedRadiusM": 0.024,
+        "freeRadiusM": 0.042,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "863acb1e81ae5552ff27cba747ee302bfddd31d21d8c98fedb48dcb3d65a5d9c",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-center-arch-socket-report.json"
+        }
+      }
+    },
+    {
+      "name": "socket_soft_mat_11",
+      "role": "coral-mount",
+      "parentMesh": "reef_center_arch",
+      "archetype": "zoanthid-mat",
+      "positionM": [
+        -0.27000001072883606,
+        0.44149264693260193,
+        0.0421450138092041
+      ],
+      "normal": [
+        0.14347924085250172,
+        0.4758980385173366,
+        0.8677181364819693
+      ],
+      "rotation": [
+        0.5050511397482769,
+        -1.1589607342913487e-9,
+        -0.08351128680084945,
+        0.8590397029333585
+      ],
+      "footprintRadiusM": 0.025,
+      "clearanceRadiusM": 0.04,
+      "support": {
+        "pointM": [
+          -0.27000001104954,
+          0.44149264586887743,
+          0.042145011869685584
+        ],
+        "normal": [
+          0.14347924085250172,
+          0.4758980385173366,
+          0.8677181364819693
+        ],
+        "supportedRadiusM": 0.025,
+        "freeRadiusM": 0.04,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "863acb1e81ae5552ff27cba747ee302bfddd31d21d8c98fedb48dcb3d65a5d9c",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-center-arch-socket-report.json"
+        }
+      }
+    },
+    {
+      "name": "socket_soft_mat_12",
+      "role": "coral-mount",
+      "parentMesh": "reef_center_arch",
+      "archetype": "zoanthid-mat",
+      "positionM": [
+        0.14000000059604645,
+        0.4933972656726837,
+        0.0628432035446167
+      ],
+      "normal": [
+        -0.2929596080381008,
+        0.5429868773029494,
+        0.7869815240111766
+      ],
+      "rotation": [
+        0.44798997386837336,
+        2.0574423913456e-9,
+        0.16676748045812653,
+        0.8783470787650305
+      ],
+      "footprintRadiusM": 0.025,
+      "clearanceRadiusM": 0.04,
+      "support": {
+        "pointM": [
+          0.14000000134873172,
+          0.4933972642776169,
+          0.06284320152266763
+        ],
+        "normal": [
+          -0.2929596080381008,
+          0.5429868773029494,
+          0.7869815240111766
+        ],
+        "supportedRadiusM": 0.025,
+        "freeRadiusM": 0.04,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "863acb1e81ae5552ff27cba747ee302bfddd31d21d8c98fedb48dcb3d65a5d9c",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-center-arch-socket-report.json"
+        }
+      }
+    },
+    {
+      "name": "socket_sps_crest_11",
+      "role": "coral-mount",
+      "parentMesh": "reef_center_arch",
+      "archetype": "branching-sps",
+      "positionM": [
+        0.23999999463558197,
+        0.47760939598083496,
+        0.04500000178813934
+      ],
+      "normal": [
+        -0.007629332901620014,
+        0.9940573319867613,
+        0.10859011926892004
+      ],
+      "rotation": [
+        0.05437676042342793,
+        4.2324862140326794e-11,
+        0.003820931695858511,
+        0.9985131788849002
+      ],
+      "footprintRadiusM": 0.022,
+      "clearanceRadiusM": 0.04,
+      "support": {
+        "pointM": [
+          0.23999999465039348,
+          0.47760939405097824,
+          0.04500000157732316
+        ],
+        "normal": [
+          -0.007629332901620014,
+          0.9940573319867613,
+          0.10859011926892004
+        ],
+        "supportedRadiusM": 0.022,
+        "freeRadiusM": 0.04,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "863acb1e81ae5552ff27cba747ee302bfddd31d21d8c98fedb48dcb3d65a5d9c",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-center-arch-socket-report.json"
+        }
+      }
+    }
+  ],
   "collisionParts": []
 }

@@ -8,6 +8,7 @@ import type { FishClipPlayer } from './fish-animation'
 import { refreshFishLink } from './fish-inhabitants'
 import { createAquarium, type AquariumController, type SceneStatus } from './aquarium'
 import { ENVIRONMENT_MAP_INTENSITY } from './environment-map'
+import { CENTER_ARCH_MOUNTS } from './reef-arch'
 import type { FishExtensionConfig, FishExtensionSnapshot } from '../../simulation/fish-extensions'
 
 const state = vi.hoisted(() => ({
@@ -17,9 +18,13 @@ const state = vi.hoisted(() => ({
   deferFishLoads: false, failFishLoads: false, pendingFishLoadReleases: [] as Array<() => void>, resizeCallback: undefined as undefined | (() => void),
   deferMeshNavigation: false, pendingMeshNavigationReleases: [] as Array<() => void>, meshNavigationResult: undefined as unknown,
   reefFallbackIslandIds: [] as string[], reefNavigationIslandIds: [] as string[][],
+  reefNavigationCoralSockets: [] as string[][],
+  reefAssemblyCalls: [] as Array<{ reefName: string; mounts: readonly unknown[]; options: unknown }>,
+  coralFallbackCalls: [] as Array<{ islandId: string; sockets: string[]; status: string; obstacleIds: string[] }>,
   rockFallbackUnavailable: false,
   rockFallbackObstacles: undefined as undefined | import('../../simulation/habitat-navigation').SolidObstacleVolume[],
   mountedCoralBindings: [] as Array<{ socketName: string; coralAssetId: string; root: import('three').Group; materialControllers: never[] }>,
+  archMountedCoralBindings: undefined as undefined | import('./reef-assembly').AssembledCoralBinding[],
   fakeEnvironmentMap: undefined as undefined | { texture: import('three').Texture; dispose: () => void },
   standardFishMaterials: false,
   blockedSpawn: false, throwCreateForId: '', beforeCreateFailure: undefined as (() => void) | undefined,
@@ -104,7 +109,14 @@ vi.mock('./reef-assembly', async importOriginal => {
     ...real,
     LIVE_ROCK_ISLAND_URLS: { left: 'left-rock', right: 'right-rock' }, MODULAR_CORAL_ASSET_URLS: { fixture: 'coral' },
     DEFAULT_LEFT_ISLAND_MOUNTS: [], DEFAULT_RIGHT_ISLAND_MOUNTS: [],
-    assembleCoralsOnRockSockets: () => ({ update() {}, mountedCorals: state.mountedCoralBindings }),
+    assembleCoralsOnRockSockets: (...args: Parameters<typeof real.assembleCoralsOnRockSockets>) => {
+      const [reef, , mounts, options] = args
+      const mountedCorals = reef.name === 'reef-center-arch' && state.archMountedCoralBindings !== undefined
+        ? state.archMountedCoralBindings
+        : state.mountedCoralBindings
+      state.reefAssemblyCalls.push({ reefName: reef.name, mounts, options })
+      return { update() {}, mountedCorals }
+    },
     instantiateModularReefHabitat: () => ({ obstacles: [], anchors: [] }),
   }
 })
@@ -123,11 +135,22 @@ vi.mock('./reef-mesh-navigation', async importOriginal => {
     },
     createReefMeshNavigation: (...args: Parameters<typeof real.createReefMeshNavigation>) => {
       state.reefNavigationIslandIds.push(args[0].map(island => island.islandId))
+      state.reefNavigationCoralSockets.push(args[0].flatMap(island => island.mountedCorals.map(coral => coral.socketName)))
       return state.deferMeshNavigation
         ? new Promise<Awaited<ReturnType<typeof real.createReefMeshNavigation>>>(resolve => {
             state.pendingMeshNavigationReleases.push(() => resolve(state.meshNavigationResult as Awaited<ReturnType<typeof real.createReefMeshNavigation>>))
           })
         : real.createReefMeshNavigation(...args)
+    },
+    createMountedCoralFallbackObstacles: (...args: Parameters<typeof real.createMountedCoralFallbackObstacles>) => {
+      const result = real.createMountedCoralFallbackObstacles(...args)
+      state.coralFallbackCalls.push({
+        islandId: args[1],
+        sockets: args[0].map(coral => coral.socketName),
+        status: result.status,
+        obstacleIds: result.status === 'ready' ? result.obstacles.map(obstacle => obstacle.id) : [],
+      })
+      return result
     },
   }
 })
@@ -213,9 +236,11 @@ beforeEach(() => {
   state.deferFishLoads = false; state.failFishLoads = false; state.pendingFishLoadReleases = []; state.resizeCallback = undefined
   state.deferMeshNavigation = false; state.pendingMeshNavigationReleases = []; state.meshNavigationResult = undefined
   state.reefFallbackIslandIds = []; state.reefNavigationIslandIds = []
+  state.reefNavigationCoralSockets = []; state.reefAssemblyCalls = []; state.coralFallbackCalls = []
   state.rockFallbackUnavailable = false
   state.rockFallbackObstacles = undefined
   state.mountedCoralBindings = []
+  state.archMountedCoralBindings = undefined
   state.fakeEnvironmentMap = undefined
   state.standardFishMaterials = false
   state.forceLabelExposure = false
@@ -300,10 +325,30 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
   })
 
   it('registers the center arch in desktop collision setup and omits it from the narrow scene', async () => {
+    const coralRoot = new THREE.Group()
+    const coralGeometry = new THREE.SphereGeometry(0.16, 8, 6)
+    coralGeometry.computeBoundingSphere()
+    coralRoot.add(new THREE.Mesh(coralGeometry, new THREE.MeshBasicMaterial()))
+    state.archMountedCoralBindings = [{
+      socketName: CENTER_ARCH_MOUNTS[0]!.socketName,
+      coralAssetId: CENTER_ARCH_MOUNTS[0]!.coralAssetId,
+      root: coralRoot,
+      materialControllers: [],
+    }]
     await start([service('center-arch-link')])
     expect(state.renderer!.scene!.getObjectByName('reef-center-arch')).toBeDefined()
     expect(state.reefFallbackIslandIds).toContain('reef-center-arch')
     expect(state.reefNavigationIslandIds.at(-1)).toContain('reef-center-arch')
+    const archAssembly = state.reefAssemblyCalls.find(call => call.reefName === 'reef-center-arch')!
+    expect(archAssembly.mounts).toEqual(CENTER_ARCH_MOUNTS)
+    expect(archAssembly.options).toMatchObject({ preserveAuthoredRock: true, includeScatter: false })
+    expect(state.coralFallbackCalls).toContainEqual({
+      islandId: 'reef-center-arch',
+      sockets: [CENTER_ARCH_MOUNTS[0]!.socketName],
+      status: 'ready',
+      obstacleIds: ['reef-center-arch-coral-0'],
+    })
+    expect(state.reefNavigationCoralSockets.at(-1)).toContain(CENTER_ARCH_MOUNTS[0]!.socketName)
 
     Object.defineProperty(host, 'clientWidth', { configurable: true, value: 402 })
     state.resizeCallback?.()
@@ -311,6 +356,57 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     expect(state.renderer!.scene!.getObjectByName('reef-center-arch')).toBeUndefined()
     expect(state.reefFallbackIslandIds.slice(state.reefFallbackIslandIds.indexOf('reef-center-arch') + 1)).not.toContain('reef-center-arch')
     expect(state.reefNavigationIslandIds.at(-1)).not.toContain('reef-center-arch')
+    expect(state.reefNavigationCoralSockets.at(-1)).not.toContain(CENTER_ARCH_MOUNTS[0]!.socketName)
+  })
+
+  it('fails closed if an arch-mounted coral has no measurable fallback bounds after resize', async () => {
+    window.history.replaceState({}, '', '/?lookdev=1&seed=94')
+    const services = [service('arch-coral-link')]
+    await start(services)
+    const bridge = window.__AQUARIUM_LOOKDEV__!
+    await bridge.ready()
+
+    Object.defineProperty(host, 'clientWidth', { configurable: true, value: 402 })
+    state.resizeCallback?.()
+    await vi.waitFor(() => expect(status).toHaveBeenLastCalledWith('ready'))
+
+    const malformedRoot = new THREE.Group()
+    const missingSphereGeometry = new THREE.BufferGeometry()
+    missingSphereGeometry.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 1, 0, 0, 0, 1, 0], 3))
+    malformedRoot.add(new THREE.Mesh(missingSphereGeometry, new THREE.MeshBasicMaterial()))
+    state.archMountedCoralBindings = [{
+      socketName: CENTER_ARCH_MOUNTS[0]!.socketName,
+      coralAssetId: CENTER_ARCH_MOUNTS[0]!.coralAssetId,
+      root: malformedRoot,
+      materialControllers: [],
+    }]
+    const createdBeforeFailure = state.created.length
+    Object.defineProperty(host, 'clientWidth', { configurable: true, value: 1440 })
+    state.resizeCallback?.()
+
+    await vi.waitFor(() => expect(status).toHaveBeenLastCalledWith('failed'))
+    expect(state.coralFallbackCalls.at(-1)).toMatchObject({
+      islandId: 'reef-center-arch',
+      status: 'unavailable',
+    })
+    expect(state.renderer!.loop).toBeNull()
+    expect(state.created).toHaveLength(createdBeforeFailure)
+    expect(overlay.querySelectorAll('a')).toHaveLength(1)
+    expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(services[0]!.url + '/')
+    expect(bridge.state().ready).toBe(false)
+    expect(bridge.state().failure).toMatch(/Arch coral bounds unavailable/i)
+    await expect(bridge.ready()).rejects.toThrow(/Arch coral bounds unavailable/i)
+
+    const updated = [service('arch-coral-link-updated', 'yellow-tang')]
+    anchors(updated)
+    controller.update(updated, false)
+    Object.defineProperty(host, 'clientWidth', { configurable: true, value: 402 })
+    state.resizeCallback?.()
+    expect(status).toHaveBeenLastCalledWith('failed')
+    expect(state.renderer!.loop).toBeNull()
+    expect(state.created).toHaveLength(createdBeforeFailure)
+    expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(updated[0]!.url + '/')
+    expect(bridge.state().ready).toBe(false)
   })
 
   it('holds capture readiness until the application finishes loading saved configuration', async () => {

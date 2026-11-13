@@ -301,6 +301,62 @@ function coralMeshBoxes(mountedCorals: readonly AssembledCoralBinding[]): Box[] 
   return boxes
 }
 
+/**
+ * Build uninflated world-space fallback volumes from mounted coral geometry.
+ * The same measured bounding spheres used by mesh navigation already include
+ * shader sway margin; callers must not add fish clearance here.
+ */
+export function createMountedCoralFallbackObstacles(
+  mountedCorals: readonly AssembledCoralBinding[],
+  islandId: string,
+): RockFallbackObstaclesResult {
+  if (typeof islandId !== 'string' || islandId.trim().length === 0 || islandId !== islandId.trim()) {
+    return { status: 'unavailable', reason: 'invalid-island-id' }
+  }
+  if (!Array.isArray(mountedCorals)) return { status: 'unavailable', reason: 'mounted-coral-bindings-unavailable' }
+  if (mountedCorals.length === 0) return { status: 'ready', obstacles: [] }
+
+  let meshCount = 0
+  let invalidMeshGeometry = false
+  try {
+    for (const mounted of mountedCorals) {
+      if (!(mounted.root instanceof THREE.Object3D)) throw new Error('Mounted coral root is unavailable')
+      mounted.root.updateWorldMatrix(true, true)
+      mounted.root.traverse((node: THREE.Object3D) => {
+        if (!(node instanceof THREE.Mesh)) return
+        meshCount++
+        const position = node.geometry.getAttribute('position')
+        if (!position || position.count <= 0) invalidMeshGeometry = true
+      })
+    }
+  } catch {
+    return { status: 'unavailable', reason: 'mounted-coral-transform-unavailable' }
+  }
+  if (meshCount === 0) return { status: 'unavailable', reason: 'mounted-coral-mesh-missing' }
+  if (invalidMeshGeometry) return { status: 'unavailable', reason: 'mounted-coral-positions-unavailable' }
+
+  let boxes: Box[] | undefined
+  try {
+    boxes = coralMeshBoxes(mountedCorals)
+  } catch {
+    return { status: 'unavailable', reason: 'mounted-coral-bounds-unavailable' }
+  }
+  if (!boxes) return { status: 'unavailable', reason: 'mounted-coral-bounds-unavailable' }
+  if (boxes.length === 0) return { status: 'unavailable', reason: 'mounted-coral-mesh-missing' }
+
+  const obstacles: SolidObstacleVolume[] = []
+  for (const [index, bounds] of boxes.entries()) {
+    if (!finiteVec3(bounds.min) || !finiteVec3(bounds.max)) {
+      return { status: 'unavailable', reason: 'mounted-coral-bounds-nonfinite' }
+    }
+    if (!(bounds.min.x < bounds.max.x && bounds.min.y < bounds.max.y && bounds.min.z < bounds.max.z)) {
+      return { status: 'unavailable', reason: 'mounted-coral-bounds-degenerate' }
+    }
+    obstacles.push({ id: `${islandId}-coral-${index}`, bounds })
+  }
+  return { status: 'ready', obstacles }
+}
+
 async function sha256Hex(text: string): Promise<string | undefined> {
   try {
     if (typeof crypto === 'undefined' || !crypto.subtle) return undefined

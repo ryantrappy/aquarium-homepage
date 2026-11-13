@@ -114,14 +114,17 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     const templates = buildMockCoralTemplates()
     const leftRock = buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json')
     const rightRock = buildRockFixtureFromSocketReport('live-rock-island-right-socket-report.json')
+    const originalLeftRockMaterial = (leftRock.getObjectByName('Live_Rock_Island') as THREE.Mesh).material
 
     const leftAssembly = assembleCoralsOnRockSockets(leftRock, templates, DEFAULT_LEFT_ISLAND_MOUNTS)
     const rightAssembly = assembleCoralsOnRockSockets(rightRock, templates, DEFAULT_RIGHT_ISLAND_MOUNTS)
 
     expect(leftAssembly.mountedCorals).toHaveLength(12)
     expect(rightAssembly.mountedCorals).toHaveLength(11)
+    expect(leftAssembly.instancedMeshes.length).toBeGreaterThan(0)
 
     const leftRockMesh = leftRock.getObjectByName('Live_Rock_Island') as THREE.Mesh
+    expect(leftRockMesh.material).not.toBe(originalLeftRockMaterial)
     expect((leftRockMesh.material as THREE.MeshStandardMaterial).userData.liveRockShader).toBe('live-rock-3d-aragonite-v1')
     expect((leftRockMesh.material as THREE.MeshStandardMaterial).map).toBeNull()
 
@@ -149,6 +152,69 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     for (const ctrl of softControllers) {
       expect(ctrl.uniforms.uMotionScale.value).toBe(1)
     }
+  })
+
+  it('preserves an authored rock while mounting requested coral and updating its controller clock', () => {
+    const templates = buildMockCoralTemplates()
+    const rockRoot = new THREE.Group()
+    const authoredGeometry = new THREE.BoxGeometry(1, 1, 1, 4, 4, 4)
+    const authoredPositions = authoredGeometry.getAttribute('position')
+    const authoredPositionBytes = authoredPositions.array.slice()
+    const authoredMap = new THREE.Texture()
+    const authoredMaterial = new THREE.MeshStandardMaterial({ map: authoredMap, roughness: 0.42, metalness: 0.16 })
+    const rockMesh = new THREE.Mesh(authoredGeometry, authoredMaterial)
+    rockMesh.name = 'reef-center-arch-rock'
+    rockMesh.userData.reefPrimitive = { id: 'reef_center_arch', role: 'rock' }
+    const socket = new THREE.Group()
+    socket.name = 'socket_anemone_crevice_01'
+    socket.position.set(0.2, 0.3, -0.1)
+    rockRoot.add(rockMesh, socket)
+
+    const assembly = assembleCoralsOnRockSockets(rockRoot, templates, [{
+      socketName: 'socket_anemone_crevice_01',
+      coralAssetId: 'coral-anemone-bta',
+      archetype: 'host-anemone',
+      yawRad: 0.3,
+      scale: 1.2,
+    }], { preserveAuthoredRock: true, includeScatter: false })
+
+    expect(rockMesh.geometry).toBe(authoredGeometry)
+    expect(rockMesh.geometry.getAttribute('position')).toBe(authoredPositions)
+    expect(authoredPositions.array).toEqual(authoredPositionBytes)
+    expect(rockMesh.material).toBe(authoredMaterial)
+    expect(authoredMaterial.map).toBe(authoredMap)
+    expect(authoredMaterial.roughness).toBe(0.42)
+    expect(authoredMaterial.metalness).toBe(0.16)
+    expect(rockMesh.castShadow).toBe(false)
+    expect(rockMesh.receiveShadow).toBe(false)
+
+    expect(assembly.mountedCorals).toHaveLength(1)
+    expect(assembly.mountedCorals[0]!.root.parent).toBe(rockRoot)
+    expect(assembly.mountedCorals[0]!.root.position.toArray()).toEqual([0.2, 0.3, -0.1])
+    const controllers = assembly.mountedCorals[0]!.materialControllers
+    expect(controllers.length).toBeGreaterThan(0)
+    expect(controllers.every(controller => Boolean(controller.material.userData.coralRawMasks))).toBe(true)
+    assembly.update(1.25, false, false)
+    expect(controllers.every(controller => controller.uniforms.uTime.value === 1.25)).toBe(true)
+    expect(controllers.every(controller => controller.uniforms.uMotionScale.value === 1)).toBe(true)
+    assembly.update(2, true, false)
+    expect(controllers.every(controller => controller.uniforms.uTime.value === 2)).toBe(true)
+    expect(controllers.every(controller => controller.uniforms.uMotionScale.value === 0)).toBe(true)
+
+    expect(assembly.instancedMeshes).toEqual([])
+    expect(rockRoot.children.filter(child => child.name.startsWith('mounted_'))).toHaveLength(1)
+  })
+
+  it('omits instance scatter only when explicitly requested', () => {
+    const templates = buildMockCoralTemplates()
+    const rockRoot = buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json')
+    const assembly = assembleCoralsOnRockSockets(rockRoot, templates, DEFAULT_LEFT_ISLAND_MOUNTS, { includeScatter: false })
+
+    expect(assembly.mountedCorals).toHaveLength(DEFAULT_LEFT_ISLAND_MOUNTS.length)
+    expect(assembly.instancedMeshes).toEqual([])
+    expect(rockRoot.children.some(child => child instanceof THREE.InstancedMesh)).toBe(false)
+    const rockMesh = rockRoot.getObjectByName('Live_Rock_Island') as THREE.Mesh
+    expect((rockMesh.material as THREE.MeshStandardMaterial).userData.liveRockShader).toBe('live-rock-3d-aragonite-v1')
   })
 
   it('forwards the fixture actinic level to every mounted coral material, defaulting to 1 (AQ-70.6 AC #3)', () => {

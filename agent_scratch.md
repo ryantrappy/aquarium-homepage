@@ -86,3 +86,8 @@
 - AQ94Root6e57f2d original centralarch saved packednative/exported/synced/used/committed. Dedicated reef override path preserves fish workflow; native textures allpacked. Existing Gemini/user reef untouched; background Blenderonly, liveuserfileuntouched. Full5–8library/2048atlas/finalrockart stillopen.
 - Exact6e57f2d782tests/68files, typecheck15scripts/buildpass; native2sizes ready/nofailures/11inhabitants/8phonetargets>=44/zeroconsolewarnings. docs/asset-evidence/aq94/central-arch-20261113/. Technical0.04sceneopening probe only, no animatedbody certification.
 - Proofdetached6e57f2d/dev5215PID86121; verifyownershipbeforestopping. Native reviewtabsclosed/metricsreset, oldstale1298077987 remains. Preserve user3000/5210; original5214/5212stale. No deployment. Nextvisualworkarchcolonization/materialcohesion and broader referenceart; do notmarkfullAQ94Done.
+
+### 2026-11-13 — Arch colonization resume
+*Root reviewed2026-11-13 all prior entries: standing policies current; vertical-fill request actioned; older process checkpoints historical; full art/model/clearance goal pending.*
+- Previous turn classified progress: saved/synced/used/committed central arch and effective lighting, native two-size proof and782tests. Current original checkout clean at84f644f before task-plan update. Next actualmodel iteration adds measured savedsocket mounts/reused coral templates and refines striped arch surface texture. Root reserves Blender; liveuserdocument preserved.
+- Luna readonly closure audit found AQ73/AQ41 checked boxes still lack task-scoped current visual/performance proof, so no unsupportedDone. CI/FPSdisplay excluded.

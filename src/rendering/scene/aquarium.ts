@@ -37,13 +37,13 @@ import { SURFACE_WAVE_GLSL } from './surface-waves'
 import { RaymarchedShaftPass, SHAFT_BEAM_GLSL } from './light-shafts'
 import { createAragoniteSandBed, getRockFootprintsForViewport } from './aragonite-sand'
 import { reefPlacementsForViewport } from './reef-layout'
-import { CENTER_ARCH_URL, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
+import { CENTER_ARCH_URL, CENTER_ARCH_MOUNTS, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
 import { createGlassEnclosure, glassEnclosureLayout } from './glass-enclosure'
 import { createWaterSurface } from './water-surface'
 import { estimateCaptionRect, labelLiftPx, resolveLabelDeconflicts } from './fish-label-layout'
 import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
 import { createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
-import { createReefMeshNavigation, createRockFallbackObstacles, MESH_NAVIGATION_COLLISION_RADIUS_M, type ReefMeshIslandInput } from './reef-mesh-navigation'
+import { createReefMeshNavigation, createRockFallbackObstacles, createMountedCoralFallbackObstacles, MESH_NAVIGATION_COLLISION_RADIUS_M, type ReefMeshIslandInput } from './reef-mesh-navigation'
 import { applyFishTurningRigOverlay, bindFishTurningRig, evaluateSpriteTurnScaleX, type FishTurningRig } from './fish-turning'
 import { SPRITE_PLANE_WIDTH, fishBodyRadiusM, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale } from './fish-scale'
 import { canRunFishSceneLoop, evaluateTieredVerticalDepthRange, findSafeFishHeading, findSafeFishSpawn, fishSceneStatus, fishSpawnPreference, fishSpawnSlotsForServices, isSafeFishPosition } from './fish-spawn'
@@ -910,10 +910,21 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     if (width >= 600 && centerArchBase) {
       const arch = createCenterArch(centerArchBase.scene)
       centerArchPlacement = arch
+      const archController = assembleCoralsOnRockSockets(arch, coralTemplates, CENTER_ARCH_MOUNTS, {
+        paused: paused || document.hidden,
+        reducedMotion,
+        actinicLevel: evaluateFluorescenceActinicFactor(optics.fixtureWhiteBalance),
+        preserveAuthoredRock: true,
+        includeScatter: false,
+      })
+      reefControllers.push(archController)
       arch.traverse(node => {
         if (!(node instanceof THREE.Mesh)) return
         for (const material of Array.isArray(node.material) ? node.material : [node.material]) {
-          if (material instanceof THREE.MeshStandardMaterial) applyCaustics(material, caustics, { scaleA: 0.25, scaleB: 0.4 })
+          if (material instanceof THREE.MeshStandardMaterial) {
+            const role = node.userData?.reefPrimitive?.role
+            applyCaustics(material, caustics, role === 'rock' ? { scaleA: 0.25, scaleB: 0.4 } : undefined)
+          }
         }
         hitMeshes.push(node)
       })
@@ -926,7 +937,13 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         return
       }
       habitat.obstacles.push(...fallback.obstacles)
-      meshIslands.push({ reef: arch, islandId: 'reef-center-arch', mountedCorals: [] })
+      const coralFallback = createMountedCoralFallbackObstacles(archController.mountedCorals, 'reef-center-arch')
+      if (coralFallback.status !== 'ready') {
+        failReefSetup(`Arch coral bounds unavailable: ${coralFallback.reason}`)
+        return
+      }
+      habitat.obstacles.push(...coralFallback.obstacles)
+      meshIslands.push({ reef: arch, islandId: 'reef-center-arch', mountedCorals: archController.mountedCorals })
     }
     hitMeshes.push(sand)
     // Mesh routing builds after first paint (~1 s per island on the main

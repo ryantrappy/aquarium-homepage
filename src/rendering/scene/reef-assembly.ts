@@ -1293,20 +1293,28 @@ export function assembleCoralsOnRockSockets(
   rockRoot: THREE.Object3D,
   coralTemplates: ReadonlyMap<string, THREE.Object3D>,
   mounts: readonly ModularCoralMountEntry[],
-  options?: { paused?: boolean; reducedMotion?: boolean; actinicLevel?: number },
+  options?: {
+    paused?: boolean
+    reducedMotion?: boolean
+    actinicLevel?: number
+    preserveAuthoredRock?: boolean
+    includeScatter?: boolean
+  },
 ): {
   mountedCorals: AssembledCoralBinding[]
   instancedMeshes: THREE.InstancedMesh[]
   update(timeSeconds: number, paused?: boolean, reducedMotion?: boolean): void
 } {
   let hasRockGeometry = false
+  const preserveAuthoredRock = options?.preserveAuthoredRock === true
   rockRoot.traverse(node => {
     if (!(node instanceof THREE.Mesh)) return
     const reefPrim = node.userData?.reefPrimitive ?? node.parent?.userData?.reefPrimitive
     if (reefPrim?.role === 'rock' || node.name.toLowerCase().includes('live_rock')) {
-      if ((node.geometry.getAttribute('position')?.count ?? 0) > 100) {
+      if (!preserveAuthoredRock && (node.geometry.getAttribute('position')?.count ?? 0) > 100) {
         hasRockGeometry = true
       }
+      if (preserveAuthoredRock) return
       const rockMats = (Array.isArray(node.material) ? node.material : [node.material]).map(mat => {
         const stdMat = mat instanceof THREE.MeshStandardMaterial ? mat.clone() : new THREE.MeshStandardMaterial()
         return applyLiveRockMaterial(stdMat)
@@ -1411,15 +1419,17 @@ export function assembleCoralsOnRockSockets(
     })
   }
 
-  const instancedMeshes = buildInstancedCoralScatters(
-    rockRoot,
-    coralTemplates,
-    mounts,
-    socketNodes,
-    options,
-    instancedControllers,
-    geometryBindings,
-  )
+  const instancedMeshes = options?.includeScatter === false
+    ? []
+    : buildInstancedCoralScatters(
+      rockRoot,
+      coralTemplates,
+      mounts,
+      socketNodes,
+      options,
+      instancedControllers,
+      geometryBindings,
+    )
 
   return {
     mountedCorals,
