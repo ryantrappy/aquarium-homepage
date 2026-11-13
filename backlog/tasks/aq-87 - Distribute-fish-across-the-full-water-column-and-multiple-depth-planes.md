@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-08'
-updated_date: '2026-11-13 01:03'
+updated_date: '2026-11-13 05:31'
 labels:
   - behavior
   - photorealism
@@ -38,10 +38,10 @@ Stop fish clustering in the top half of the tank on a single depth plane by enfo
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 Each species' declared depthRange / height band is honoured by spawn placement and route targets — no species is confined to the top half by default
-- [ ] #2 Look-dev captures at 1440x900 and 402x874 show fish spread through the full water column and on at least two visibly distinct depth planes, with fish still prominent and legible
+- [x] #2 Look-dev captures at 1440x900 and 402x874 show fish spread through the full water column and on at least two visibly distinct depth planes, with fish still prominent and legible
 - [ ] #3 Fish still pass in front of / behind reef without intersecting solid geometry, and labels / hit targets stay correct at all depths
-- [ ] #4 Existing schooling, startle, pause / reduced-motion behaviour is unchanged; tests cover the new distribution
-- [ ] #5 Root accepts the distribution against reference captures before Done
+- [x] #4 Existing schooling, startle, pause / reduced-motion behaviour is unchanged; tests cover the new distribution
+- [x] #5 Root accepts the distribution against reference captures before Done
 <!-- AC:END -->
 
 ## Definition of Done
@@ -62,4 +62,6 @@ Native diagnostic showed a second cause: height strata reused horizontal ID orde
 
 <!-- SECTION:NOTES:BEGIN -->
 Root reviewed two-size native trial: independent ecological height order plus height-preserving safe search restores low foreground fish (gramma aroundY-1.51, butterfly aroundY-1.10) while clown/cardinal remain upper water and tangs span farther depth. DEV snapshots now copy positions/allowedY for objective checks. Root accepts the visible spread for current eight-service roster, but not full-task completion: explicit anchor/startle state targets may leave general cruise bands, clown profile currently ends at normalizedDepth0.48, and exact animated-body solid-clearance gates remain with AQ58/AQ60. Do not infer AC1/AC3 from point-safe snapshots.130focused spawn/scale/controller/motion/schooling/runtime tests and typecheck14scripts pass. Existing spawn test fixtures now consume actual shared reef placements and physical-spacing arguments instead of obsolete hardcoded layout values.
+
+Root exact-source review at 8b2d7cc: docs/asset-evidence/aq87/distribution-20261112/ contains native 1440x900 and 402x874 PNGs, ready sidecars and phone target bounds. All eleven inhabitants remain within declared staging bands; eight service fish span Y3.35655 and visibly multiple depth planes. Eight phone targets exceed44px. Root accepts this saved-roster distribution against the taller reef reference direction. Isolated full732tests/65files, typecheck14scripts and production build pass; prior behavior regression scope retained. AC2/4/5 accepted. AC1/3 remain explicitly open: clown profile is upper-half and anchor/startle targets are separate; animated-body/solid clearance is not proven by point snapshots. Initial proof-server403 infrastructure errors were corrected before final ready captures; no clean-console certification is claimed.
 <!-- SECTION:NOTES:END -->

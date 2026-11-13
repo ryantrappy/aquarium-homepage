@@ -197,4 +197,6 @@ Root captures through CUA CDP at 1440×900 or 402×874 CSS pixels, DPR1. After `
 
 Statistics distinguish RAF presentation intervals, complete CPU render calls, and explicit frozen-render CPU calls. They are not GPU timers. Renderer counts aggregate depth, shadow, main and shaft passes rather than counting unique geometry. Resource Timing reports encoded response bytes and transfer bytes separately; cached bodies, restricted timing and zero sizes must not be mistaken for complete network-download or GPU-memory measurements.
 
+Capture sidecars also include copied `inhabitants` positions and allowed world-height ranges. The [AQ-87 distribution review](asset-evidence/aq87/distribution-20261112/review.json) uses them to verify staged ecological bands and depth spread; these point snapshots do not certify animated-body clearance.
+
 The [committed before baseline](asset-evidence/aq70-2/baseline-before/review.json) records source0e958a0, four presets at both required viewports and two full-reload runs per view. All eight pairs are byte-identical with zero tolerance. Each of16 PNGs has a sidecar. This fixed High inspection mode disables adaptive quality, so its frame timings do not certify normal-runtime budgets. The baseline also does not accept final fish, coral, rock or composition art.
