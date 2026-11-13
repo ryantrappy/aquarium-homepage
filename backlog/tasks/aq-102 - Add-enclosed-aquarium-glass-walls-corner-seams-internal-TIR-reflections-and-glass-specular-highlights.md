@@ -3,11 +3,11 @@ id: AQ-102
 title: >-
   Add enclosed aquarium glass walls, corner seams, internal TIR reflections, and
   glass specular highlights
-status: To Do
+status: In Progress
 assignee:
-  - '@Luna'
+  - '@root'
 created_date: '2026-11-12 05:15'
-updated_date: '2026-11-13 00:22'
+updated_date: '2026-11-13 00:28'
 labels:
   - rendering
   - optics
@@ -53,6 +53,8 @@ Comparison between the photorealism reference images and the live WebGL build sh
 
 <!-- SECTION:PLAN:BEGIN -->
 Implement the Root-approved GO as restrained tank enclosure only: (1) bound the water and aragonite bed with front/left/right/back planes, subtle corner seams, and a bottom glass lip; (2) add faint left/right interior reflections by mirroring actual outer reef and sand/caustic scene content, never painted silhouettes; (3) keep the front pane optically clear, using edge/grazing Fresnel highlight and faint diagonal sheen only—no full-frame blur, refraction, color veil, or scene-blocking glare; (4) set raycast to no-op on every glass mesh; (5) advance/freeze all glass reflection motion on the existing scene clock for active, pause, reduced-motion, and page-hidden states; (6) verify pointer/link behavior and the two required DPR1 viewports, plus scoped unit tests/typecheck/build.
+
+Root next visual iteration after reviewed PR47: build a separate glass-enclosure scene module with clear front/back/side boundaries, corner seams and sand lip. Prototype real side-plane reflected scene content using the established Three reflector path at bounded resolution/tier/update cadence; compare against a no-reflection baseline before accepting costs or appearance. Exclude enclosure from reflection recursion, shaft depth occluders and picking; use shared paused/reduced/hidden scene clocks. Preserve all supplied models/Blender work. Verify both exact viewports and native link/focus controls; keep scene readability and overall reference fidelity as the acceptance gate, not mere mesh presence.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes

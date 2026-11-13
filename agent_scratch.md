@@ -16,7 +16,7 @@
 
 ### 2026-11-12 — Active review and restart
 *Reviewed2026-11-12: current/pending.*
-- Branchreview in original checkout. PR45 externally merged; next reviewed milestone needs fresh PR. Preserve user concurrent commits, including5ac6ed6.
-- Luna ready_audit implements only AQ49 reduced-motion freeze/controller regressions. Root owns visual review and Done. Other child agents idle/completed; no Blender agent.
+- Branchreview in original checkout. PR45 externally merged; reviewed milestone pushed to fresh draft PR47. Preserve user concurrent commits, including5ac6ed6.
+- AQ49 reduced-motion fix reviewed/committed with native hold/resume evidence; full turning art pending. AQ80 GO decision Done. Root next owns AQ102 glass enclosure/reflection implementation. Child agents completed/idle; no Blender agent.
 - Live Blender reef file dirty; left untouched. Newer blue-tang.blend only unused-image cleanup, verified against prior saved revision; no export freshness defect remains.
-- Root dev5214 pins35581ed; production5212 is older0e958a0. Verify ownership before stopping; preserve user3000/5210. All completed-phase browser tabs closed. No deployment or config writes.
+- Root dev5214 pins35581ed; production5212 now serves51e4274. All713tests/64files, typecheck14scripts and productionbuild pass at that milestone. Verify ownership before stopping; preserve user3000/5210. All completed-phase browser tabs closed. No deployment or config writes.
