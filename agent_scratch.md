@@ -74,3 +74,9 @@
 - AQ82sourcealignment6be5dcc uses copied actualmountedcoralorigins, offsets once, explicit failclosed map and safe resize failure.755tests/66files,75focused tests, typecheck14scripts/build pass. Native two-sizeproof docs/asset-evidence/aq82/current-origins-20261113/ retains8phone links>=44px/no recoveredconsolewarnings. No full nesting/permeability/animatedclearance acceptance.
 - Proofworktree detached6be5dcc/dev5215PID57486 pins6be5dcc. Freshreviewtabclosed/metricsreset; oldowned1298077987tab at5215 has stale/unattached debugger and couldnotclose. User5210untouched. Original5214/5212stale, verifyownershipbeforestopping.
 - Externalfb432d2 commits AQ71auditnotes and saved reefnative.blend/.blend1; originalcheckoutnowcleanotherwise. No Root Blenderedits/export. AQ71sandenvintensity0.2unapplied and stalecomments are nextcandidatefix; AQ21actualanimation/retreat visual review stillpending. CI/FPSexcluded, no deployments.
+
+### 2026-11-13 — Effective lighting verified handoff
+*Root reviewed2026-11-13: actioned exposure correction; remaining art/model/performance gates pending. Prior policies current; previous process checkpoints superseded here.*
+- AQ71 explicit shared PMREM fixes renderer override;69cad24 rear fill0.65 accepted bothsizes under AC3, AC4 open.758tests/66files,45focused/typecheck14scripts/build pass. Native evidence docs/asset-evidence/aq71/sand-ibl-20261113/. No Root Blender edits or deployment.
+- Proofdetached69cad24/dev5215 pins69cad24; verifyownershipbeforestopping. Reviewtabclosed/metricsreset; oldstale1298077987 remains. User3000/5210 preserved, original5214/5212 stale.
+- AQ94 central arch next major visual iteration, plan recorded only. Root owns new model/isolated reef pipeline; no competing Blender agent. Preserve existing supplied models; all new used models must save/pack/export/sync/commit.

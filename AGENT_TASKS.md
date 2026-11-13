@@ -13,6 +13,15 @@ Downstream: Current implementation and review work
 
 Root verified this checkpoint against the current checkout. The goal remains active and incomplete: finish the backlog and make the living aquarium resemble the supplied reference. Passing functional tests does not accept final art.
 
+## Latest Root checkpoint — 2026-11-13 effective PMREM and next arch
+
+This section supersedes older process/source/count details. Full goal remains active and incomplete.
+
+- AQ71: df6227e applied sand intensity, but native identical-pixel A/B exposed Three r187 scene.environmentIntensity override. 3fd9c98 explicitly binds one scene-owned PMREM to PBR roles and protects it from asset disposal; 69cad24 rebalances rear-water fill0.65 with fish0.55/reef0.35/sand0.2 and unchanged ACES0.80/LEDs. Root accepts AC3 exposure at both native sizes; AC4 controlled performance remains open. Evidence docs/asset-evidence/aq71/sand-ibl-20261113/. No FPSdisplay work, no model edits.
+- Exact69cad24 passes758tests/66files,45focused tests, typecheck14scripts and production build. Both native snapshots ready/no failures,11inhabitants, finalreload consolewarnings/errors zero. Sand foreground encoded mean luminance0.875452->0.718763 laptop/0.883600->0.741830 phone. This is exposure evidence, not physical radiometry or final reference art.
+- Fresh reviewtab closed/metricsreset; earlier stale owned1298077987 at5215 remains uncloseable. Proofworktree /tmp/aquarium-aq87-proof-8b2d7cc detached69cad24, infrastructure-only Viteconfigdirty; dev5215 pins69cad24. Verify PID/cwd before stopping. Original5214/5212 stale; preserve user3000/5210. No deployment/configwrites.
+- Next major visual work AQ94: Root additive central arch, preserve existing Gemini/user models; isolated reef-only override sync path before fish side effects, mandated saved packed native/export paths, separate registry/inspection, actual scene use and collider, native two-size review. No new model/pipeline changes yet; full5–8piece library/2048atlas/animated clearance remain open. Luna read-only integration audit only; Root reserves Blender.
+
 ## Latest Root checkpoint — 2026-11-13 coral-origin alignment
 
 This section supersedes older process/source/count details below. The full goal remains active and incomplete.

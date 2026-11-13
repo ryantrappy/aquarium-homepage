@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-08 00:30'
-updated_date: '2026-11-13 14:41'
+updated_date: '2026-11-13 14:50'
 labels:
   - photorealism
   - rendering
@@ -35,7 +35,7 @@ The main scene currently lacks a scene.environment PMREM texture, causing MeshSt
 <!-- AC:BEGIN -->
 - [x] #1 A PMREM environment map is loaded and applied to the scene without breaking the existing 3-tier LED rig
 - [x] #2 Fish materials show visible specular / iridescent response that changes with viewing angle
-- [ ] #3 Exposure and light intensities are re-tuned so the scene is not over- or under-exposed at 1440x900 and 402x874
+- [x] #3 Exposure and light intensities are re-tuned so the scene is not over- or under-exposed at 1440x900 and 402x874
 - [ ] #4 Performance is verified at both viewports with no regression in frame rate
 <!-- AC:END -->
 
@@ -70,6 +70,8 @@ Luna/Root2026-11-13 read-only audit: procedural PMREM initialization/scene.envir
 Root reviewed Luna sand-intensity integration: actual sand group now receives declared0.2 rather than default1.0, including floor/frontedge/scatter. Actualcontroller regression covers five PBRmaterials.43focused environment/controller tests and typecheck14scripts pass. Root also removes stale comments claiming visible backdrop and lighting-proxy gradients are identical, and obsolete fishasset counts; no numeric lights/exposure/shader colors changed. This is a verified code handoff; native A/B exposure review follows before acceptance. Water customShaderMaterial retains compatibility-only entry. No FPSdisplay work, model/asset edits or performance claim.
 
 Root native diagnostic atdf6227e: laptop/phone foreground ROI statistics were exactly unchanged from6be5dcc baseline despite sand.envMapIntensity changing1.0->0.2. Installed Three r187 WebGLRenderer.js2747 explicitly substitutes scene.environmentIntensity while material.envMap isnull; WebGLMaterials refresh uses material.envMapIntensity only for an explicitmap. Root/Luna now explicitly bind the one shared PMREMtexture to all PBRroles and markchanged bindings forrefresh; numeric intensities remain unchanged. Generic asset disposal skips only that borrowed texture by identity; scene/render-target owner releasesonce. Real controller regression supplies actualshared map to sand/twofish/backdrop and asserts removal/teardowndoesnotdisposeitthroughmodels.45focusedtests/typecheck14scripts pass; final native review follows. No newenvironmentasset or perframePMREM work.
+
+Root native review at69cad24 accepts AC3 two-size exposure. Shared explicit PMREM now effective; fish0.55/reef0.35/sand0.2/backdrop0.65 with existing ACES0.80/LED rig. Evidence docs/asset-evidence/aq71/sand-ibl-20261113/: ready/no failures at1440x900/402x874DPR1, zero final reload console warnings. Fixed foreground encoded mean luminance laptop0.875452->0.718763 and phone0.883600->0.741830, preserves caustic detail. Initial property-only df6227e PNGs byte-identical to6be5dcc diagnostic explains Three override. Exact69cad24 all758tests/66files,45focused/typecheck14scripts/productionbuild pass. Borrowed sharedtexture disposal covered by realcontroller regression. AC4 controlled runtime parity remains open; no FPSdisplay work. No model changes/deployment.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

@@ -1,0 +1,35 @@
+{
+  "file": "docs/asset-evidence/aq71/sand-ibl-20261113/laptop.png",
+  "image": {
+    "width": 1440,
+    "height": 900
+  },
+  "region": {
+    "x": 600,
+    "y": 840,
+    "width": 250,
+    "height": 45
+  },
+  "pixelsMeasured": 11250,
+  "luminance": {
+    "mean": 0.875452109106674,
+    "p10": 0.8619270588235293,
+    "p50": 0.8745254901960783,
+    "p90": 0.8927333333333334
+  },
+  "saturation": {
+    "mean": 0.020285972803240827,
+    "p50": 0.017857142857142794,
+    "p90": 0.02678571428571432,
+    "fractionAbove06": 0,
+    "fractionAbove08": 0
+  },
+  "hueFractions": {
+    "red": 0,
+    "yellow": 0,
+    "green": 0,
+    "cyan": 1,
+    "blue": 0,
+    "magenta": 0
+  }
+}
