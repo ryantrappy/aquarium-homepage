@@ -32,3 +32,7 @@
 - d454c27 saved/exported/synced/used/committed arch4measuredsocketcorals plus isotropictexture/UVfix.4supported/0rejected/384samples. Bothnative sizes ready/noerrors/8phonetargets>=44.791tests/68files, typecheck15scripts/build pass. docs/asset-evidence/aq94/arch-growth-20261113/. No fullNSA/library/atlas/bodyclearance acceptance; AQ94InProgress.
 - Proofdetachedd454c27/dev5215pinsd454c27; verifyPID/cwd beforestopping. Allfinalreviewtabsclosed/metricsreset; oldstale1298077987 remains. Preserve user3000/5210, original5214/5212stale. LiveuserBlenderfileuntouched, backgroundRootonly, allnewnative/artifactscommitted. No deployment. Lunaidle.
 - Nextprimary visualpriority maincoral morphology/texture, not more tinyarchplacement. Preserve suppliedsourcework, verifyactualcurrentasset/native beforeediting. CI/FPSdisplay excluded. AQ73/AQ41read-onlytriage remains unverifiedcurrentart/performance, no unsupportedDone.
+
+### 2026-11-13 — Main Acropora morphology resume
+*Root reviewed2026-11-13 every retained entry: standing policies current; older process checkpoints historical; final reef/bodyclearance/art pending.*
+- Previous goalturn progress: d454c27/4601a5a saved/synced/used/committed4archcorals and791tests/nativeproof. Currentcheckout clean4601a5a before tasknotes. AQ70.11nowactiveRoot morphology pilot preservingoldcorals/canonicalmanifest; newcustommodelmust nativepack/export/sync/use/commit. Root reserves Blender; nootheragentusesit.

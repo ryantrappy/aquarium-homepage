@@ -1,0 +1,25 @@
+{
+  "schema": "custom-coral-colonies-v1",
+  "assets": [
+    {
+      "id": "reef-acropora-antler",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-acropora-antler.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-acropora-antler-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-acropora-antler.blend",
+      "nativeSha256": "0de67905e31644ea70d4ef972fa06e1a0bc6390ceeee489fa9fc20a7a4aca089",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-acropora-antler.glb",
+      "overrideSha256": "f6fc5f0cd72eb5d8458b9afbdd6cb0ab05bec71c9237c9838304c755c9231b68",
+      "generatorPath": "src/rendering/modeling/build_reef_acropora_antler.py",
+      "generatorSha256": "5f1165e1b3ffa6c0d425a0f672eed476fefb66a9f014e934665cd73d814a3ea4",
+      "sha256": "5bfee31968f27ceaacfffe6f16880d6c0b4e618fe67d2738cc86b3dfe9f67ec0",
+      "bytes": 1780856,
+      "triangles": 25999,
+      "dimensionsM": [
+        0.16468972712755203,
+        0.21813770940207178,
+        0.11427919194102287
+      ]
+    }
+  ]
+}

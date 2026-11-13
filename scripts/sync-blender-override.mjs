@@ -19,6 +19,8 @@
  *
  *   - After exporting a custom reef rock override:
  *     node scripts/sync-blender-override.mjs --reef reef-center-arch --learn-guide
+ *   - After exporting a custom rigid coral override:
+ *     node scripts/sync-blender-override.mjs --coral reef-acropora-antler --learn-guide
  */
 
 import { execFileSync } from 'node:child_process'
@@ -402,6 +404,11 @@ function sampleLearnedGuideMultiplier(specId, s, v) {
 
 async function main() {
   const args = process.argv.slice(2)
+  if (args.includes('--coral')) {
+    const { parseCoralSyncArgs, syncCoralOverride } = await import('./sync-coral-override.mjs')
+    syncCoralOverride(REPO_ROOT, parseCoralSyncArgs(args))
+    return
+  }
   // Rocks are not fish: dispatch before documentation, guide learning or builds.
   if (args.includes('--reef')) {
     const { syncReefOverride, parseReefSyncArgs } = await import('./sync-reef-override.mjs')

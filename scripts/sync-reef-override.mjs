@@ -17,7 +17,7 @@ export function parseReefSyncArgs(args) {
   return id
 }
 
-function parseGlb(bytes) {
+export function parseGlb(bytes) {
   if (bytes.length < 28 || bytes.readUInt32LE(0) !== 0x46546c67 || bytes.readUInt32LE(4) !== 2
     || bytes.readUInt32LE(8) !== bytes.length || bytes.readUInt32LE(16) !== 0x4e4f534a) throw new Error('Invalid GLB2')
   const length = bytes.readUInt32LE(12), offset = 20 + length
@@ -25,7 +25,7 @@ function parseGlb(bytes) {
     || offset + 8 + bytes.readUInt32LE(offset) !== bytes.length) throw new Error('Require one embedded BIN chunk')
   return { doc: JSON.parse(bytes.toString('utf8', 20, offset).trim()), bin: bytes.subarray(offset + 8) }
 }
-function buildGlb(doc, bin) {
+export function buildGlb(doc, bin) {
   const json = Buffer.from(JSON.stringify(doc)), padded = Buffer.alloc(Math.ceil(json.length / 4) * 4, 32)
   json.copy(padded)
   const header = Buffer.alloc(20), chunk = Buffer.alloc(8)
