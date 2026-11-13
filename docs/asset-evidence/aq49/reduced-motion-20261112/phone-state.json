@@ -1,0 +1,182 @@
+{
+  "before": {
+    "anchors": [
+      {
+        "id": "starter-komodo",
+        "rect": {
+          "height": 96.3671875,
+          "width": 142.0859375,
+          "x": 183.47946166992188,
+          "y": 373.962646484375
+        },
+        "transform": "visibility: visible; transform: translate3d(183.479px, 373.963px, 0px); width: 142.089px; height: 96.3737px; z-index: 942; --fish-label-lift: 24px; --fish-label-dy: 57.38040544030679px; --fish-label-dx: -65.30044965883332px;"
+      },
+      {
+        "id": "starter-watchmybirds",
+        "rect": {
+          "height": 61.1171875,
+          "width": 80.03904724121094,
+          "x": 233.70204162597656,
+          "y": 434.59271240234375
+        },
+        "transform": "visibility: visible; transform: translate3d(233.702px, 434.593px, 0px); width: 80.0434px; height: 61.1241px; z-index: 1118; --fish-label-lift: 15px; --fish-label-dy: 16.308191257045166px; --fish-label-dx: 0px;"
+      },
+      {
+        "id": "05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+        "rect": {
+          "height": 61.078125,
+          "width": 79.98436737060547,
+          "x": 88.65494537353516,
+          "y": 375.5262145996094
+        },
+        "transform": "visibility: visible; transform: translate3d(88.6549px, 375.526px, 0px); width: 79.9896px; height: 61.083px; z-index: 1117; --fish-label-lift: 15px; --fish-label-dy: 75.41582260781354px; --fish-label-dx: 0px;"
+      },
+      {
+        "id": "example-home-assistant",
+        "rect": {
+          "height": 49.8984375,
+          "width": 65.578125,
+          "x": 176.1688690185547,
+          "y": 307.1261901855469
+        },
+        "transform": "visibility: visible; transform: translate3d(176.169px, 307.126px, 0px); width: 65.5849px; height: 49.9016px; z-index: 942; --fish-label-lift: 12px; --fish-label-dy: 0px; --fish-label-dx: 0px;"
+      },
+      {
+        "id": "starter-ombi",
+        "rect": {
+          "height": 133.8359375,
+          "width": 197.32032775878903,
+          "x": 123.03996276855467,
+          "y": 355.1851806640625
+        },
+        "transform": "visibility: visible; transform: translate3d(123.04px, 355.185px, 0px); width: 197.328px; height: 133.84px; z-index: 945; --fish-label-lift: 33px; --fish-label-dy: 77px; --fish-label-dx: 0px;"
+      },
+      {
+        "id": "e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+        "rect": {
+          "height": 95.8671875,
+          "width": 141.35154724121094,
+          "x": 122.61439514160156,
+          "y": 374.2896423339844
+        },
+        "transform": "visibility: visible; transform: translate3d(122.614px, 374.29px, 0px); width: 141.352px; height: 95.8738px; z-index: 937; --fish-label-lift: 24px; --fish-label-dy: 50.861526435160556px; --fish-label-dx: -4.0668450289000475px;"
+      },
+      {
+        "id": "060212ad-1343-4890-a57f-c4c60ca162d8",
+        "rect": {
+          "height": 44,
+          "width": 54.65625,
+          "x": 199.53530883789065,
+          "y": 373.04156494140625
+        },
+        "transform": "visibility: visible; transform: translate3d(199.535px, 373.042px, 0px); width: 54.6628px; height: 44px; z-index: 755; --fish-label-lift: 11px; --fish-label-dy: 72.29482693051051px; --fish-label-dx: -29.664673977704325px;"
+      },
+      {
+        "id": "92394d96-38ec-4738-a61e-064af46849a5",
+        "rect": {
+          "height": 44,
+          "width": 54.96875,
+          "x": 152.67453002929688,
+          "y": 334.36322021484375
+        },
+        "transform": "visibility: visible; transform: translate3d(152.675px, 334.363px, 0px); width: 54.9742px; height: 44px; z-index: 761; --fish-label-lift: 11px; --fish-label-dy: 77.24592578787406px; --fish-label-dx: -46.18216340344438px;"
+      }
+    ],
+    "reduced": true,
+    "viewport": [
+      402,
+      874,
+      1
+    ]
+  },
+  "after": {
+    "anchors": [
+      {
+        "id": "starter-komodo",
+        "rect": {
+          "height": 96.3671875,
+          "width": 142.0859375,
+          "x": 183.47946166992188,
+          "y": 373.962646484375
+        },
+        "transform": "visibility: visible; transform: translate3d(183.479px, 373.963px, 0px); width: 142.089px; height: 96.3737px; z-index: 942; --fish-label-lift: 24px; --fish-label-dy: 57.38040544030679px; --fish-label-dx: -65.30044965883332px;"
+      },
+      {
+        "id": "starter-watchmybirds",
+        "rect": {
+          "height": 61.1171875,
+          "width": 80.03904724121094,
+          "x": 233.70204162597656,
+          "y": 434.59271240234375
+        },
+        "transform": "visibility: visible; transform: translate3d(233.702px, 434.593px, 0px); width: 80.0434px; height: 61.1241px; z-index: 1118; --fish-label-lift: 15px; --fish-label-dy: 16.308191257045166px; --fish-label-dx: 0px;"
+      },
+      {
+        "id": "05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+        "rect": {
+          "height": 61.078125,
+          "width": 79.98436737060547,
+          "x": 88.65494537353516,
+          "y": 375.5262145996094
+        },
+        "transform": "visibility: visible; transform: translate3d(88.6549px, 375.526px, 0px); width: 79.9896px; height: 61.083px; z-index: 1117; --fish-label-lift: 15px; --fish-label-dy: 75.41582260781354px; --fish-label-dx: 0px;"
+      },
+      {
+        "id": "example-home-assistant",
+        "rect": {
+          "height": 49.8984375,
+          "width": 65.578125,
+          "x": 176.1688690185547,
+          "y": 307.1261901855469
+        },
+        "transform": "visibility: visible; transform: translate3d(176.169px, 307.126px, 0px); width: 65.5849px; height: 49.9016px; z-index: 942; --fish-label-lift: 12px; --fish-label-dy: 0px; --fish-label-dx: 0px;"
+      },
+      {
+        "id": "starter-ombi",
+        "rect": {
+          "height": 133.8359375,
+          "width": 197.32032775878903,
+          "x": 123.03996276855467,
+          "y": 355.1851806640625
+        },
+        "transform": "visibility: visible; transform: translate3d(123.04px, 355.185px, 0px); width: 197.328px; height: 133.84px; z-index: 945; --fish-label-lift: 33px; --fish-label-dy: 77px; --fish-label-dx: 0px;"
+      },
+      {
+        "id": "e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+        "rect": {
+          "height": 95.8671875,
+          "width": 141.35154724121094,
+          "x": 122.61439514160156,
+          "y": 374.2896423339844
+        },
+        "transform": "visibility: visible; transform: translate3d(122.614px, 374.29px, 0px); width: 141.352px; height: 95.8738px; z-index: 937; --fish-label-lift: 24px; --fish-label-dy: 50.861526435160556px; --fish-label-dx: -4.0668450289000475px;"
+      },
+      {
+        "id": "060212ad-1343-4890-a57f-c4c60ca162d8",
+        "rect": {
+          "height": 44,
+          "width": 54.65625,
+          "x": 199.53530883789065,
+          "y": 373.04156494140625
+        },
+        "transform": "visibility: visible; transform: translate3d(199.535px, 373.042px, 0px); width: 54.6628px; height: 44px; z-index: 755; --fish-label-lift: 11px; --fish-label-dy: 72.29482693051051px; --fish-label-dx: -29.664673977704325px;"
+      },
+      {
+        "id": "92394d96-38ec-4738-a61e-064af46849a5",
+        "rect": {
+          "height": 44,
+          "width": 54.96875,
+          "x": 152.67453002929688,
+          "y": 334.36322021484375
+        },
+        "transform": "visibility: visible; transform: translate3d(152.675px, 334.363px, 0px); width: 54.9742px; height: 44px; z-index: 761; --fish-label-lift: 11px; --fish-label-dy: 77.24592578787406px; --fish-label-dx: -46.18216340344438px;"
+      }
+    ],
+    "reduced": true,
+    "viewport": [
+      402,
+      874,
+      1
+    ]
+  }
+}

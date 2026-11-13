@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-04T19:20:00Z'
-updated_date: '2026-11-13 00:21'
+updated_date: '2026-11-13 00:26'
 labels: []
 dependencies:
   - AQ-35
@@ -17,6 +17,7 @@ references:
   - src/rendering/scene/fish-turning.test.ts
   - src/rendering/scene/motion.ts
   - src/rendering/scene/aquarium.ts
+  - docs/asset-evidence/aq49/reduced-motion-20261112/review.json
 documentation:
   - docs/fish-turning-and-maneuvering-plan.md
   - docs/fish-behavior-design.md
@@ -39,7 +40,7 @@ Implement the biomechanical turning and curvilinear spine-bending plan documente
 - [x] #1 Forward translation in src/rendering/scene/motion.ts follows actual heading axis rather than sliding sideways during turns, while preserving obstacle-safe routing and tank margins. Habitat-anchor arrival within the accepted 0.35m area is sufficient; exact point arrival is not required.
 - [x] #2 Waypoint transitions use lookahead corner filleting for smooth arcs, and large direction changes (`|delta| >= 65°` or startle turns) execute a two-stage maneuver (`brake-pivot` deceleration + rapid yaw rotation followed by an `exit-stroke` propulsive tail pulse and acceleration).
 - [x] #3 `src/rendering/scene/aquarium.ts` applies a post-mixer procedural turn overlay on rigged 3D fish bones: archetype-appropriate curvilinear spine bending (`spine_mid`/`tail_base`/`tail_tip` ramp for `subcarangiform_schooler`; peduncle/tail-only bend for `labriform_rigid_disc` so tang sails never shear) with a delayed traveling tail wave, plus asymmetric inside-pectoral braking flare and outside-pectoral rowing boost.
-- [ ] #4 Fallback 2D sprite planes replace the single-frame `scale.x` binary flip with a smoothed foreshortening turn transition, and all turn states freeze deterministically when `paused`, hidden, or under `prefers-reduced-motion`.
+- [x] #4 Fallback 2D sprite planes replace the single-frame `scale.x` binary flip with a smoothed foreshortening turn transition, and all turn states freeze deterministically when `paused`, hidden, or under `prefers-reduced-motion`.
 - [x] #5 Unit tests verify zero backward/sideways crab-sliding on 180° reversals, two-stage turn curvature progression, obstacle clearance, and 1440x900 / 402x874 browser responsiveness.
 - [x] #6 Fish pitch is clamped to ±0.28 rad (±16.0°) in AABB/legacy mode at all times, including during turns, vertical movement, and idle sway; in metric (mesh) mode pitch is instead bounded to ±π/2 and rate-limited to 1.2 rad/s. No fish exceeds the bound for its mode in a recorded run.
 <!-- AC:END -->
@@ -92,6 +93,8 @@ Root audit AQ57, 2026-11-04: active motion.ts/aquarium.ts/motion.test.ts match 5
 - Not changed: cruise speeds, turn rates, the proximity speed law, the capture radii themselves, LOD/sprite code, or any anchor-hold behavior. A fresh recording after merge (same view) is the visual check.
 
 Root reviewed Luna reduced-motion controller fix: normal stoppedFlags now include the system preference; motion, clip time, flex and procedural turn poses hold together, while DEV fixed-time inspection stays exempt. Actual controller regression starts with active turn/fin poses, toggles preference on/off, proves exact pose/kinematic hold and zero clip advances, then exactly three active steps with no elapsed catch-up. Root independently ran that test against the prior controller expression: it fails with changed position/yaw/bank/spine/pectoral poses, proving the regression detects the reported bug. Restored fixed source.89 focused lifecycle/motion/turn/player tests and typecheck14scripts pass from agent; final native/whole-task visual review remains open.
+
+Root native reduced-motion verification of production built from51e4274: exact1440x900/402x874DPR1, eight anchor styles/bounds hold exactly at both. Phone entire PNG pair is byte-identical. Laptop differs only44pixels with maximumRGBdelta6 in a small caption/compositor area; no full-frame byte-identity claim. Clearing system preference restores Pause control and changes all8 phone anchor positions. No captured warnings/errors. Evidence docs/asset-evidence/aq49/reduced-motion-20261112/review.json. Root independently confirmed controller regression fails against prior code.713tests/64files, productionbuild and typecheck14scripts pass; capture bridge strings absent from production. AC4 accepted; complete main-scene biomechanical turning/art review remains open.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

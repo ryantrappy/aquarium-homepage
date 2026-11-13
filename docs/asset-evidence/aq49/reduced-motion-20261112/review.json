@@ -1,0 +1,55 @@
+{
+  "task": "AQ-49",
+  "date": "2026-11-12",
+  "builtSourceCommit": "51e4274",
+  "status": "Reduced-motion criterion verified; full turning/art task remains open",
+  "pairs": [
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "dpr": 1,
+      "images": [
+        "laptop-held1.png",
+        "laptop-held2.png"
+      ],
+      "sha256": [
+        "7766a3cf2d12ffc40f8dcf53d5c1f08ac2329bd1832b6da5d87f8cb9a37d695e",
+        "5b5ecb47c0a1e2c506b3cfea601f10d7e8592c47024527e3d36163939b3adfc6"
+      ],
+      "anchorsStable": true,
+      "anchorCount": 8,
+      "changedPixels": 44,
+      "maximumChannelDelta": 6
+    },
+    {
+      "viewport": [
+        402,
+        874
+      ],
+      "dpr": 1,
+      "images": [
+        "phone-held1.png",
+        "phone-held2.png"
+      ],
+      "sha256": [
+        "80180aa51a1f4409bdf024fc569bbe3c8977acc0a633e7a1ea8626dd37e2fa0a",
+        "80180aa51a1f4409bdf024fc569bbe3c8977acc0a633e7a1ea8626dd37e2fa0a"
+      ],
+      "anchorsStable": true,
+      "anchorCount": 8,
+      "changedPixels": 0,
+      "maximumChannelDelta": 0
+    }
+  ],
+  "nativeResume": "On phone, clearing reduced preference restored normal Pause control and changed all8 anchor positions; no captured browser warnings/errors",
+  "controllerRegression": "Active body/fin turn poses hold exactly during dynamic reduced preference and resume with3active steps/no catchup. Root confirmed failure against previous stoppedFlags expression.89focused tests pass.",
+  "milestoneValidation": "713 tests in64files, production build, typecheck including14script checks pass; production bridge strings absent",
+  "limits": [
+    "Native UI already surfaces system preference and sets its stopped prop; actual-controller regression isolates the missing renderer-level reduced-motion stop contract",
+    "Laptop whole-frame PNGs differ in44pixels with maximumRGBdelta6 around small caption/compositor area; all anchor style/bounds and other image regions stay stable. No whole-frame byte-identity claim for laptop",
+    "Phone held PNGs are byte-identical",
+    "This does not establish final main-scene biomechanical turning art acceptance"
+  ]
+}
