@@ -10,6 +10,7 @@ import {
   MODULAR_CORAL_ASSET_URLS,
   assembleCoralsOnRockSockets,
   instantiateModularReefHabitat,
+  snapshotMountedCoralOrigins,
 } from './reef-assembly'
 import {
   DEFAULT_AQUARIUM_OPTICS_CONFIG,
@@ -785,6 +786,12 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       habitat.obstacles,
     )
   }
+  function failReefSetup(reason: string) {
+    failed = true
+    renderer.setAnimationLoop(null)
+    failLookDevCapture(reason)
+    status('failed')
+  }
   function rebuildHabitat() {
     if (lookDevConfig) lookDevNeedsStaging = true
     // Invalidate any previous mesh routing before the reefs are replaced; a
@@ -874,13 +881,17 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       if (fallback.status !== 'ready') {
         // Never keep swimming with incomplete solid geometry, including on
         // resize. Native service links remain available in the failed view.
-        failed = true
-        renderer.setAnimationLoop(null)
-        failLookDevCapture(`Reef collision geometry unavailable: ${fallback.reason}`)
-        status('failed')
+        failReefSetup(`Reef collision geometry unavailable: ${fallback.reason}`)
         return
       }
-      const result = instantiateModularReefHabitat(islandKind, uniformScale, position, `reef-${i}`, yaw, mounts, habitat.bounds)
+      let result: ReturnType<typeof instantiateModularReefHabitat>
+      try {
+        const mountedOrigins = snapshotMountedCoralOrigins(assembled.mountedCorals)
+        result = instantiateModularReefHabitat(islandKind, uniformScale, position, `reef-${i}`, yaw, mounts, habitat.bounds, mountedOrigins)
+      } catch (error) {
+        failReefSetup(`Reef habitat geometry unavailable: ${String(error)}`)
+        return
+      }
       // Keep the calcified coral bases; historical hand-authored rock bands
       // are replaced by bounds of the same current meshes used for rendering.
       habitat.obstacles.push(...fallback.obstacles, ...result.obstacles.filter(obstacle => obstacle.id.startsWith(`reef-${i}-coral-base-`)))

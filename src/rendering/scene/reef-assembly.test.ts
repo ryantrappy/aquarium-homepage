@@ -10,6 +10,8 @@ import {
   assembleCoralsOnRockSockets,
   inferSocketArchetype,
   instantiateModularReefHabitat,
+  LIVE_ROCK_ISLAND_URLS,
+  snapshotMountedCoralOrigins,
   SOCKET_ANCHOR_POSITIONS_M,
 } from './reef-assembly'
 import { evaluateCoralVertexDisplacement } from './coral-material'
@@ -37,6 +39,30 @@ function buildRockFixtureFromSocketReport(reportFile: string): THREE.Group {
     node.quaternion.set(socket.rotation[0], socket.rotation[1], socket.rotation[2], socket.rotation[3])
     root.add(node)
   }
+  return root
+}
+
+function buildRockFixtureFromRuntimeGlb(): THREE.Group {
+  type GlbNode = { name?: string; translation?: number[]; rotation?: number[]; scale?: number[]; children?: number[] }
+  const runtimeUrl = new URL(LIVE_ROCK_ISLAND_URLS.left)
+  runtimeUrl.search = ''
+  const bytes = readFileSync(runtimeUrl)
+  const jsonLength = bytes.readUInt32LE(12)
+  const document = JSON.parse(bytes.toString('utf8', 20, 20 + jsonLength)) as { nodes: GlbNode[] }
+  const root = new THREE.Group()
+  root.name = 'Live_Rock_Island_Left'
+
+  document.nodes.forEach((node, index) => {
+    if (!node.name?.startsWith('socket_sps_crest_')) return
+    const parent = document.nodes.find(candidate => candidate.children?.includes(index))
+    if (parent?.name !== root.name) throw new Error(`Runtime socket ${node.name} is not a direct reef child.`)
+    const socket = new THREE.Group()
+    socket.name = node.name
+    socket.position.fromArray(node.translation ?? [0, 0, 0])
+    if (node.rotation) socket.quaternion.fromArray(node.rotation)
+    if (node.scale) socket.scale.fromArray(node.scale)
+    root.add(socket)
+  })
   return root
 }
 
@@ -401,6 +427,165 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
         expect(Math.abs(z - socket.positionM[2])).toBeLessThan(1e-4)
       }
     }
+  })
+
+  it('snapshots frozen copies of mounted root positions without applying parent world transforms', () => {
+    const reefRoot = new THREE.Group()
+    reefRoot.position.set(8, -3, 5)
+    reefRoot.rotation.y = Math.PI / 3
+    reefRoot.scale.setScalar(2)
+    const coralRoot = new THREE.Group()
+    coralRoot.position.set(0.12, 0.34, -0.56)
+    reefRoot.add(coralRoot)
+    reefRoot.updateMatrixWorld(true)
+    const binding = {
+      socketName: 'socket_sps_crest_01',
+      coralAssetId: 'coral-acropora-staghorn',
+      root: coralRoot,
+      materialControllers: [],
+    }
+
+    const snapshot = snapshotMountedCoralOrigins([binding])
+    const worldPosition = coralRoot.getWorldPosition(new THREE.Vector3())
+    expect(Object.isFrozen(snapshot)).toBe(true)
+    expect(Object.isFrozen(snapshot[binding.socketName])).toBe(true)
+    expect(snapshot[binding.socketName]).toEqual({ x: 0.12, y: 0.34, z: -0.56 })
+    expect(worldPosition.distanceTo(coralRoot.position)).toBeGreaterThan(1)
+
+    coralRoot.position.set(1, 2, 3)
+    expect(snapshot[binding.socketName]).toEqual({ x: 0.12, y: 0.34, z: -0.56 })
+    expect(Object.keys(snapshotMountedCoralOrigins([]))).toEqual([])
+  })
+
+  it('rejects invalid mounted-origin names, duplicates, missing entries, and non-finite coordinates', () => {
+    const rootAt = (x: number, y = 0, z = 0) => {
+      const root = new THREE.Group()
+      root.position.set(x, y, z)
+      return root
+    }
+    const binding = (socketName: string, root: THREE.Group) => ({
+      socketName,
+      coralAssetId: 'coral-acropora-staghorn',
+      root,
+      materialControllers: [],
+    })
+    expect(() => snapshotMountedCoralOrigins([binding(' ', rootAt(0))])).toThrow(/non-empty, trimmed/)
+    expect(() => snapshotMountedCoralOrigins([
+      binding('socket_sps_crest_01', rootAt(0)),
+      binding('socket_sps_crest_01', rootAt(1)),
+    ])).toThrow(/Duplicate mounted coral socket/)
+    expect(() => snapshotMountedCoralOrigins([binding('socket_sps_crest_01', rootAt(Number.NaN))])).toThrow(/finite island-local origin/)
+
+    const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(item => item.socketName === 'socket_sps_crest_01')!
+    const bounds = { min: { x: -100, y: -100, z: -100 }, max: { x: 100, y: 100, z: 100 } }
+    expect(() => instantiateModularReefHabitat('left', 1, { x: 0, y: 0, z: 0 }, 'missing', 0, [mount], bounds, {})).toThrow(/origin.*missing/)
+    expect(() => instantiateModularReefHabitat(
+      'left', 1, { x: 0, y: 0, z: 0 }, 'nonfinite', 0, [mount], bounds,
+      { [mount.socketName]: { x: 0, y: Number.POSITIVE_INFINITY, z: 0 } },
+    )).toThrow(/finite island-local origin/)
+    expect(() => instantiateModularReefHabitat(
+      'left', 1, { x: 0, y: 0, z: 0 }, 'duplicate', 0, [mount, mount], bounds,
+      { [mount.socketName]: { x: 0, y: 0, z: 0 } },
+    )).toThrow(/Duplicate coral mount socket/)
+  })
+
+  it('uses mounted root origins with mount offsets exactly once and preserves canonical defaults', () => {
+    const socketName = 'socket_sps_crest_01'
+    const mount = {
+      ...DEFAULT_LEFT_ISLAND_MOUNTS.find(item => item.socketName === socketName)!,
+      offsetM: [0.2, 0.3, 0.4] as const,
+    }
+    const [canonicalX, canonicalY, canonicalZ] = SOCKET_ANCHOR_POSITIONS_M.left[socketName]!
+    const root = new THREE.Group()
+    root.position.set(canonicalX + 0.2, canonicalY + 0.3, canonicalZ + 0.4)
+    const origins = snapshotMountedCoralOrigins([{
+      socketName,
+      coralAssetId: mount.coralAssetId,
+      root,
+      materialControllers: [],
+    }])
+    const waterBounds = { min: { x: -100, y: -100, z: -100 }, max: { x: 100, y: 100, z: 100 } }
+    const actual = instantiateModularReefHabitat('left', 1, { x: 0, y: 0, z: 0 }, 'offset', 0, [mount], waterBounds, origins)
+    const legacy = instantiateModularReefHabitat('left', 1, { x: 0, y: 0, z: 0 }, 'offset', 0, [mount], waterBounds)
+    const actualBase = actual.obstacles.find(item => item.id === 'offset-coral-base-socket_sps_crest_01')!
+    const legacyBase = legacy.obstacles.find(item => item.id === 'offset-coral-base-socket_sps_crest_01')!
+    expect(actualBase.bounds.min).toEqual({ x: root.position.x - 0.07, y: root.position.y, z: root.position.z - 0.07 })
+    expect(legacyBase.bounds.min).toEqual({ x: canonicalX - 0.07, y: canonicalY, z: canonicalZ - 0.07 })
+
+    const shelter = actual.anchors.find(item => item.anchor === 'branchingCoralShelter')!
+    expect(shelter.position).toEqual({ x: root.position.x, y: root.position.y + 0.17, z: root.position.z })
+    const legacyShelter = legacy.anchors.find(item => item.anchor === 'branchingCoralShelter')!
+    expect(legacyShelter.position).toEqual({ x: canonicalX + 0.2, y: canonicalY + 0.3 + 0.17, z: canonicalZ + 0.4 })
+  })
+
+  it('uses mounted origins from the current runtime GLB when they differ from canonical socket reports', () => {
+    const rock = buildRockFixtureFromRuntimeGlb()
+    const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(item => item.socketName === 'socket_sps_crest_03')!
+    const assembly = assembleCoralsOnRockSockets(rock, buildMockCoralTemplates(), [mount])
+    const binding = assembly.mountedCorals[0]!
+    const origins = snapshotMountedCoralOrigins(assembly.mountedCorals)
+    const canonical = SOCKET_ANCHOR_POSITIONS_M.left[mount.socketName]!
+    expect(Math.abs(origins[mount.socketName]!.y - canonical[1])).toBeGreaterThan(0.1)
+    expect(origins[mount.socketName]!.y).toBeCloseTo(binding.root.position.y, 7)
+
+    const waterBounds = { min: { x: -100, y: -100, z: -100 }, max: { x: 100, y: 100, z: 100 } }
+    const habitat = instantiateModularReefHabitat(
+      'left', 1, { x: 0, y: 0, z: 0 }, 'runtime-glb', 0, [mount], waterBounds, origins,
+    )
+    const base = habitat.obstacles.find(item => item.id === `runtime-glb-coral-base-${mount.socketName}`)!
+    expect(base.bounds.min.y).toBeCloseTo(binding.root.position.y, 7)
+    expect(base.bounds.max.y).toBeCloseTo(binding.root.position.y + 0.06, 7)
+    const refuge = habitat.anchors.find(item => item.anchor === 'branchingCoralRefuge')!
+    expect(refuge.position.y).toBeCloseTo(binding.root.position.y + 0.12, 7)
+    expect(refuge.position.z).toBeCloseTo(binding.root.position.z - 0.03, 7)
+  })
+
+  it('keeps mounted-origin refuge anchors aligned at two scaled and yawed scene placements', () => {
+    const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(item => item.socketName === 'socket_sps_crest_03')!
+    const waterBounds = { min: { x: -100, y: -100, z: -100 }, max: { x: 100, y: 100, z: 100 } }
+    const placements = [
+      { scale: 1.6, yaw: 0.14, position: new THREE.Vector3(-2.35, -2.7, -1.35) },
+      { scale: 1.35, yaw: -0.21, position: new THREE.Vector3(2.65, -2.7, -1.2) },
+    ]
+
+    for (const [index, placement] of placements.entries()) {
+      const rock = buildRockFixtureFromRuntimeGlb()
+      rock.position.copy(placement.position)
+      rock.rotation.y = placement.yaw
+      rock.scale.setScalar(placement.scale)
+      const assembly = assembleCoralsOnRockSockets(rock, buildMockCoralTemplates(), [mount])
+      const binding = assembly.mountedCorals[0]!
+      const mountedOrigins = snapshotMountedCoralOrigins(assembly.mountedCorals)
+      const habitat = instantiateModularReefHabitat(
+        'left', placement.scale, placement.position, `viewport-${index}`, placement.yaw,
+        [mount], waterBounds, mountedOrigins,
+      )
+      const refuge = habitat.anchors.find(item => item.anchor === 'branchingCoralRefuge')!
+      const expected = binding.root.getWorldPosition(new THREE.Vector3())
+      const parentWorldQuaternion = rock.getWorldQuaternion(new THREE.Quaternion())
+      expected.add(new THREE.Vector3(0, 0.12, -0.03).applyQuaternion(parentWorldQuaternion).multiplyScalar(placement.scale))
+      expect(new THREE.Vector3(refuge.position.x, refuge.position.y, refuge.position.z).distanceTo(expected)).toBeLessThan(1e-6)
+    }
+  })
+
+  it('builds a rigid base for an explicitly mounted SPS socket outside the canonical table', () => {
+    const mount = {
+      socketName: 'socket_sps_crest_07',
+      coralAssetId: 'coral-acropora-staghorn',
+      archetype: 'branching-sps' as const,
+      yawRad: 0,
+      scale: 1,
+    }
+    const origin = { x: 0.4, y: 0.5, z: -0.2 }
+    const habitat = instantiateModularReefHabitat(
+      'left', 1, { x: 0, y: 0, z: 0 }, 'future-sps', 0, [mount],
+      { min: { x: -100, y: -100, z: -100 }, max: { x: 100, y: 100, z: 100 } },
+      { [mount.socketName]: origin },
+    )
+    const base = habitat.obstacles.find(item => item.id === 'future-sps-coral-base-socket_sps_crest_07')!
+    expect(base.bounds.min).toEqual({ x: origin.x - 0.07, y: origin.y, z: origin.z - 0.07 })
+    expect(base.bounds.max).toEqual({ x: origin.x + 0.07, y: origin.y + 0.06, z: origin.z + 0.07 })
+    expect(habitat.anchors.some(item => item.id.includes('socket_sps_crest_07'))).toBe(false)
   })
 
   it('emits typed socket-derived anchors for every interaction kind and no unmounted socket (AQ-82 AC #2)', () => {

@@ -17,6 +17,7 @@ const state = vi.hoisted(() => ({
   deferMeshNavigation: false, pendingMeshNavigationReleases: [] as Array<() => void>, meshNavigationResult: undefined as unknown,
   rockFallbackUnavailable: false,
   rockFallbackObstacles: undefined as undefined | import('../../simulation/habitat-navigation').SolidObstacleVolume[],
+  mountedCoralBindings: [] as Array<{ socketName: string; coralAssetId: string; root: import('three').Group; materialControllers: never[] }>,
   blockedSpawn: false, throwCreateForId: '', beforeCreateFailure: undefined as (() => void) | undefined,
   forceLabelExposure: false,
 }))
@@ -77,11 +78,16 @@ vi.mock('three/addons/loaders/GLTFLoader.js', async () => {
     }
   } }
 })
-vi.mock('./reef-assembly', () => ({
-  LIVE_ROCK_ISLAND_URLS: { left: 'left-rock', right: 'right-rock' }, MODULAR_CORAL_ASSET_URLS: { fixture: 'coral' },
-  DEFAULT_LEFT_ISLAND_MOUNTS: [], DEFAULT_RIGHT_ISLAND_MOUNTS: [],
-  assembleCoralsOnRockSockets: () => ({ update() {} }), instantiateModularReefHabitat: () => ({ obstacles: [], anchors: [] }),
-}))
+vi.mock('./reef-assembly', async importOriginal => {
+  const real = await importOriginal<typeof import('./reef-assembly')>()
+  return {
+    ...real,
+    LIVE_ROCK_ISLAND_URLS: { left: 'left-rock', right: 'right-rock' }, MODULAR_CORAL_ASSET_URLS: { fixture: 'coral' },
+    DEFAULT_LEFT_ISLAND_MOUNTS: [], DEFAULT_RIGHT_ISLAND_MOUNTS: [],
+    assembleCoralsOnRockSockets: () => ({ update() {}, mountedCorals: state.mountedCoralBindings }),
+    instantiateModularReefHabitat: () => ({ obstacles: [], anchors: [] }),
+  }
+})
 vi.mock('./reef-mesh-navigation', async importOriginal => {
   const real = await importOriginal<typeof import('./reef-mesh-navigation')>()
   return {
@@ -174,6 +180,7 @@ beforeEach(() => {
   state.deferMeshNavigation = false; state.pendingMeshNavigationReleases = []; state.meshNavigationResult = undefined
   state.rockFallbackUnavailable = false
   state.rockFallbackObstacles = undefined
+  state.mountedCoralBindings = []
   state.forceLabelExposure = false
   vi.stubGlobal('devicePixelRatio', 1)
   vi.stubGlobal('ResizeObserver', class { constructor(callback: () => void) { state.resizeCallback = callback } observe() {} disconnect() {} })
@@ -260,6 +267,49 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     expect(state.created).toHaveLength(0)
     expect(overlay.querySelectorAll('a')).toHaveLength(1)
     expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(services[0]!.url + '/')
+  })
+
+  it('fails closed on resize when a mounted coral has a nonfinite origin', async () => {
+    window.history.replaceState({}, '', '/?lookdev=1&seed=82')
+    const services = [service('coral-origin-service')]
+    await start(services)
+    const bridge = window.__AQUARIUM_LOOKDEV__!
+    await bridge.ready()
+    const createdBeforeInvalidOrigin = state.created.length
+
+    const invalidRoot = new THREE.Group()
+    invalidRoot.position.set(Number.NaN, 0, 0)
+    state.mountedCoralBindings = [{
+      socketName: 'socket_fixture_bad_origin',
+      coralAssetId: 'fixture',
+      root: invalidRoot,
+      materialControllers: [],
+    }]
+    Object.defineProperty(host, 'clientWidth', { configurable: true, value: 402 })
+    state.resizeCallback?.()
+
+    await vi.waitFor(() => expect(status).toHaveBeenLastCalledWith('failed'))
+    expect(state.renderer!.loop).toBeNull()
+    expect(state.created).toHaveLength(createdBeforeInvalidOrigin)
+    expect(overlay.querySelectorAll('a')).toHaveLength(1)
+    expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(services[0]!.url + '/')
+    expect(bridge.state().ready).toBe(false)
+    expect(bridge.state().failure).toBeTruthy()
+    await expect(bridge.ready()).rejects.toThrow(/socket_fixture_bad_origin|finite|origin/i)
+
+    const updated = [service('still-linked', 'yellow-tang')]
+    anchors(updated)
+    controller.update(updated, false)
+    Object.defineProperty(host, 'clientWidth', { configurable: true, value: 1440 })
+    state.resizeCallback?.()
+
+    expect(status).toHaveBeenLastCalledWith('failed')
+    expect(state.renderer!.loop).toBeNull()
+    expect(state.created).toHaveLength(createdBeforeInvalidOrigin)
+    expect(overlay.querySelectorAll('a')).toHaveLength(1)
+    expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(updated[0]!.url + '/')
+    expect(bridge.state().ready).toBe(false)
+    expect(bridge.state().failure).toBeTruthy()
   })
 
   it('stages the same final look-dev roster whether saved services arrive early or late', async () => {

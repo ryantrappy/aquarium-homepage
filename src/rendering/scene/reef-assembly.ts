@@ -32,6 +32,70 @@ export type AssembledCoralBinding = {
   materialControllers: Array<ReturnType<typeof applyCoralRawMaskMaterial>>
 }
 
+export type MountedCoralOrigins = Readonly<Record<string, Readonly<Vec3>>>
+
+function validateSocketName(socketName: unknown): asserts socketName is string {
+  if (typeof socketName !== 'string' || socketName.trim().length === 0 || socketName !== socketName.trim()) {
+    throw new TypeError('Mounted coral socket names must be non-empty, trimmed strings.')
+  }
+}
+
+function finiteMountedOrigin(origin: unknown): origin is Vec3 {
+  return typeof origin === 'object' && origin !== null &&
+    Number.isFinite((origin as Vec3).x) && Number.isFinite((origin as Vec3).y) && Number.isFinite((origin as Vec3).z)
+}
+
+/**
+ * Copies the island-local positions actually used to mount coral roots.
+ * Binding roots are direct children of the reef assembly and already include
+ * each mount's offsetM; deliberately read `.position`, not world position.
+ */
+export function snapshotMountedCoralOrigins(bindings: readonly AssembledCoralBinding[]): MountedCoralOrigins {
+  const origins: Record<string, Readonly<Vec3>> = Object.create(null)
+  for (const binding of bindings) {
+    validateSocketName(binding?.socketName)
+    if (Object.prototype.hasOwnProperty.call(origins, binding.socketName)) {
+      throw new Error(`Duplicate mounted coral socket "${binding.socketName}".`)
+    }
+    const position = binding.root?.position
+    if (!finiteMountedOrigin(position)) {
+      throw new RangeError(`Mounted coral socket "${binding.socketName}" must have a finite island-local origin.`)
+    }
+    origins[binding.socketName] = Object.freeze({ x: position.x, y: position.y, z: position.z })
+  }
+  return Object.freeze(origins)
+}
+
+function snapshotExplicitMountedOrigins(
+  originsInput: MountedCoralOrigins,
+  mounts: readonly ModularCoralMountEntry[],
+): MountedCoralOrigins {
+  if (typeof originsInput !== 'object' || originsInput === null || Array.isArray(originsInput)) {
+    throw new TypeError('Mounted coral origins must be a socket-name record.')
+  }
+  const origins: Record<string, Readonly<Vec3>> = Object.create(null)
+  for (const [socketName, origin] of Object.entries(originsInput)) {
+    validateSocketName(socketName)
+    if (!finiteMountedOrigin(origin)) {
+      throw new RangeError(`Mounted coral socket "${socketName}" must have a finite island-local origin.`)
+    }
+    origins[socketName] = Object.freeze({ x: origin.x, y: origin.y, z: origin.z })
+  }
+
+  const mountedSockets = new Set<string>()
+  for (const mount of mounts) {
+    validateSocketName(mount.socketName)
+    if (mountedSockets.has(mount.socketName)) {
+      throw new Error(`Duplicate coral mount socket "${mount.socketName}".`)
+    }
+    mountedSockets.add(mount.socketName)
+    if (!Object.prototype.hasOwnProperty.call(origins, mount.socketName)) {
+      throw new Error(`Mounted coral origin for socket "${mount.socketName}" is missing.`)
+    }
+  }
+  return Object.freeze(origins)
+}
+
 export const LIVE_ROCK_ISLAND_URLS: Readonly<Record<'left' | 'right', string>> = Object.freeze({
   left: new URL('../assets/corals/reef-full-model-left.glb?v=reef-full-1', import.meta.url).href,
   right: new URL('../assets/corals/reef-full-model-right.glb?v=reef-full-1', import.meta.url).href,
@@ -1386,9 +1450,11 @@ export function assembleCoralsOnRockSockets(
  * calcified-base box per branching-SPS crest mount — the old monolithic
  * `coral-canopy-crest` boxes are gone, so fish can swim close to and shelter
  * among the permeable coral crowns. Anchors are derived from the measured
- * socket positions (`SOCKET_ANCHOR_POSITIONS_M`) plus the mount offsets of
- * the `mounts` actually assembled (defaults to the island's default mounts),
- * the rock ledges, and one sand burrow per island. An anchor is emitted
+ * canonical socket positions (`SOCKET_ANCHOR_POSITIONS_M`) plus mount offsets
+ * when `mountedOrigins` is omitted, or the copied positions of the actual
+ * mounted roots when it is supplied. `mounts` defaults to the island's
+ * default mounts. Rock ledges and one sand burrow per island are also emitted.
+ * An anchor is emitted
  * only when its socket has a mount: an unmounted socket is a bare rock
  * feature, not a coral interaction. `rockCrevice` is not derived (no
  * measured cave-mouth coordinates; AQ-14.3 AC #3).
@@ -1401,12 +1467,25 @@ export function instantiateModularReefHabitat(
   yaw = 0,
   mounts: readonly ModularCoralMountEntry[] = islandKind === 'left' ? DEFAULT_LEFT_ISLAND_MOUNTS : DEFAULT_RIGHT_ISLAND_MOUNTS,
   waterBounds: AxisAlignedBox = AQUARIUM_WATER_BOUNDS,
+  mountedOrigins?: MountedCoralOrigins,
 ): {
   obstacles: SolidObstacleVolume[]
   anchors: HabitatAnchorLocation[]
 } {
   const cosY = Math.cos(yaw)
   const sinY = Math.sin(yaw)
+  // An explicit runtime map is fail-closed: every supplied mount must have a
+  // finite actual mounted-root origin, with no fallback to stale reports.
+  // The copied origins already include mount.offsetM, so they are not added
+  // again during anchor derivation.
+  const canonicalSocketOrigins: Record<string, Readonly<Vec3>> = Object.create(null)
+  for (const [socketName, [x, y, z]] of Object.entries(SOCKET_ANCHOR_POSITIONS_M[islandKind])) {
+    canonicalSocketOrigins[socketName] = { x, y, z }
+  }
+  const socketOrigins = mountedOrigins === undefined
+    ? canonicalSocketOrigins
+    : snapshotExplicitMountedOrigins(mountedOrigins, mounts)
+  const hasMountedOrigins = mountedOrigins !== undefined
   const transform = (pt: Vec3): Vec3 => ({
     x: (pt.x * cosY + pt.z * sinY) * uniformScale + position.x,
     y: pt.y * uniformScale + position.y,
@@ -1433,10 +1512,14 @@ export function instantiateModularReefHabitat(
   // rigid coral geometry. Each protrudes above the rock top (crest sockets
   // sit at/above it); plate/brain stalks sit inside the rock AABB already
   // and need no separate box. Soft anemone/Euphyllia columns are not rigid.
-  for (const socket of Object.keys(SOCKET_ANCHOR_POSITIONS_M[islandKind])) {
+  for (const socket of mountBySocket.keys()) {
     if (!socket.startsWith('socket_sps_crest_')) continue
-    if (!mountBySocket.has(socket)) continue
-    const [sx, sy, sz] = SOCKET_ANCHOR_POSITIONS_M[islandKind][socket]!
+    const socketOrigin = socketOrigins[socket]
+    if (!socketOrigin) {
+      if (hasMountedOrigins) throw new Error(`Mounted coral origin for socket "${socket}" is missing.`)
+      continue
+    }
+    const { x: sx, y: sy, z: sz } = socketOrigin
     localObstacles.push({
       id: `coral-base-${socket}`,
       min: [sx - CORAL_BASE_HALF_EXTENT_M, sy, sz - CORAL_BASE_HALF_EXTENT_M],
@@ -1470,17 +1553,19 @@ export function instantiateModularReefHabitat(
   })
 
   const anchors: HabitatAnchorLocation[] = []
-  const socketPositions = SOCKET_ANCHOR_POSITIONS_M[islandKind]
   for (const spec of SOCKET_ANCHOR_SPECS[islandKind]) {
     const mount = mountBySocket.get(spec.socket)
     if (!mount) continue
-    const socketPos = socketPositions[spec.socket]
-    if (!socketPos) continue
-    const offset = mount.offsetM ?? [0, 0, 0]
+    const socketOrigin = socketOrigins[spec.socket]
+    if (!socketOrigin) {
+      if (hasMountedOrigins) throw new Error(`Mounted coral origin for socket "${spec.socket}" is missing.`)
+      continue
+    }
+    const offset = hasMountedOrigins ? [0, 0, 0] : mount.offsetM ?? [0, 0, 0]
     const local: Vec3 = {
-      x: socketPos[0] + offset[0],
-      y: socketPos[1] + offset[1] + spec.liftM,
-      z: (spec.zMode === 'front' ? FRONT_PROUD_Z_LOCAL_M : socketPos[2] + offset[2]) + (spec.zShiftM ?? 0),
+      x: socketOrigin.x + offset[0],
+      y: socketOrigin.y + offset[1] + spec.liftM,
+      z: (spec.zMode === 'front' ? FRONT_PROUD_Z_LOCAL_M : socketOrigin.z + offset[2]) + (spec.zShiftM ?? 0),
     }
     anchors.push({
       id: `${prefix}-anchor-${spec.socket}-${spec.anchor}`,
