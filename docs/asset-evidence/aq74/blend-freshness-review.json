@@ -1,0 +1,29 @@
+{
+  "task": "AQ-74",
+  "date": "2026-11-12",
+  "finding": "The newer Blender-only commit is an unused-image cleanup; sampled model payload is unchanged",
+  "comparedRevisions": [
+    "68ffe2c^",
+    "68ffe2c"
+  ],
+  "method": "Read both tracked .blend files separately using background Blender5.2.3, without altering live Blender or saving files",
+  "identical": [
+    "Scene object identities, transforms, render visibility and parents",
+    "Mesh vertex positions, polygon indices, UV coordinates, vertex groups/weights, armature modifiers",
+    "Armature rest bone hierarchy/matrices",
+    "Action channels, key coordinates, handles and interpolation",
+    "Material node types, image references, scalar input values and links",
+    "All retained packed image dimensions and decoded Float32 pixel hashes"
+  ],
+  "removedUnusedImages": [
+    "blue-tang_BaseColor",
+    "blue-tang_Normal",
+    "blue-tang_ORM",
+    "Render Result"
+  ],
+  "remaining": [
+    "Native two-viewport close-up articulation/click review",
+    "Overall species visual acceptance"
+  ],
+  "limits": "Does not assert complete binary identity or final art acceptance. No mesh/model changes, exports or sync needed for this non-model cleanup."
+}

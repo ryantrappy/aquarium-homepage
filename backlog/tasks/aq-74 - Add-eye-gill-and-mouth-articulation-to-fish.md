@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-08 00:30'
-updated_date: '2026-11-12 05:43'
+updated_date: '2026-11-13 00:07'
 labels:
   - modeling
   - photorealism
@@ -21,6 +21,7 @@ references:
   - scripts/verify-fish-clip-player.mjs
   - AQ-49.1
   - AQ-70.8
+  - docs/asset-evidence/aq74/blend-freshness-review.json
 documentation:
   - docs/rendering.md
   - docs/fish-assets.md
@@ -67,6 +68,8 @@ Implemented AQ-74 for the Regal Blue Tang (blue-tang) across both the procedural
 - 3D Operculum Plate, Gill Slit & Swim-Synchronized Ventilation (AC #2): Sculpted C2-continuous 3D operculum gill-cover plate (+0.0092m) and recessed posterior gill-slit crease (-0.0070m) with cavity AO and normal relief, plus runtime swim-synchronized opercular flare (evaluateOperculumArticulationBL / uFlexGillAmplitude in fish-body-flex.ts and fish-flex-material.ts).
 - 3D Mouth Lips, Buccal Cleft & Swim-Synchronized Jaw Ventilation (AC #3): Sculpted 3D upper premaxillary and lower mandibular lip ridges (+0.0055m) and recessed buccal mouth cleft (-0.0065m), plus subtle lower-jaw mouth ventilation (evaluateMouthArticulationBL / uFlexMouthAmplitude) leading opercular flare by 90 degrees (pi/2) at the active swim frequency and zeroing out under prefers-reduced-motion.
 - Saved src/rendering/assets/splat-fish/blend/blue-tang.blend (packed textures), exported src/rendering/assets/splat-fish/overrides/blue-tang.glb, synced src/rendering/assets/splat-fish/blue-tang.glb + learned-shape-guide.json + manifest.json, and rendered close-up verification previews (.output/blue-tang-aq74-head-closeup.png and .output/blue-tang-aq74-3q.png).
+
+Root2026-11-12 reconciled the apparent newer-.blend export gap with direct background-Blender comparison of68ffe2c and its parent. Model vertices/topology/UVs/weights, rig hierarchy/rest transforms, action tracks/keys/handles, material image/scalar/link graph and retained packed image pixels are identical. Newer file only removes duplicate unused images plus Render Result; no newer fish appearance is stranded. Evidence docs/asset-evidence/aq74/blend-freshness-review.json. Live Blender reef file is dirty and was left untouched. No model edits/export/sync were performed or required for this non-model cleanup. Native articulation/click review remains.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
