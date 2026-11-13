@@ -7,6 +7,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-12 05:15'
+updated_date: '2026-11-13 00:22'
 labels:
   - rendering
   - optics
@@ -47,3 +48,15 @@ Comparison between the photorealism reference images and the live WebGL build sh
 - [ ] #4 Glass enclosure meshes disable pointer raycasting (`raycast = () => {}`) so fish hover, click-to-focus, and link activation are unaffected, and caustic/reflection motion freezes cleanly when paused or under `prefers-reduced-motion`
 - [ ] #5 Verified visually at `402x874` and `1440x900` (DPR 1) alongside passing unit tests, typecheck, and production build
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Implement the Root-approved GO as restrained tank enclosure only: (1) bound the water and aragonite bed with front/left/right/back planes, subtle corner seams, and a bottom glass lip; (2) add faint left/right interior reflections by mirroring actual outer reef and sand/caustic scene content, never painted silhouettes; (3) keep the front pane optically clear, using edge/grazing Fresnel highlight and faint diagonal sheen only—no full-frame blur, refraction, color veil, or scene-blocking glare; (4) set raycast to no-op on every glass mesh; (5) advance/freeze all glass reflection motion on the existing scene clock for active, pause, reduced-motion, and page-hidden states; (6) verify pointer/link behavior and the two required DPR1 viewports, plus scoped unit tests/typecheck/build.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-11-12 Root product decision for AQ-80: GO for this restrained glass enclosure. AQ-102 is the implementation task. Preserve AQ-39's heavy-front-reflection prohibition and all fish/coral/link readability constraints. Side-pane reflection must be genuine mirrored outer reef/sand render content. No glass mesh may raycast. Follow the existing pause/reduced-motion/page-hidden scene clock. AQ-80 remains decision-only with no renderer edits.
+<!-- SECTION:NOTES:END -->

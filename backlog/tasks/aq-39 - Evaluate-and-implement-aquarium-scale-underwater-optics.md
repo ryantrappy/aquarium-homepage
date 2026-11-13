@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-03 12:33'
-updated_date: '2026-11-12 05:37'
+updated_date: '2026-11-13 00:22'
 labels: []
 dependencies:
   - AQ-5
@@ -72,6 +72,8 @@ Per `docs/open-source-asset-and-motion-research.md` §6.2:
   - Fish textures remain vivid and un-veiled across the swimming volume.
   - Coral tips and basal crevices show clean depth separation without bloom/halo artifacts.
   - Frame times remain smooth with zero console errors or WebGL warnings.
+
+2026-11-12 AQ-80 decision update: retain the §1.3 omission of heavy front-pane reflections, screen-space distortion, and chromatic aberration. Clarify that this does not prohibit an optically clear physical enclosure, edge/grazing Fresnel highlight, or faint diagonal sheen. AQ-102 may add only those restrained front cues plus faint genuine mirrored outer-reef/sand content on side panes; no full-frame blur/refraction/color veil or scene-blocking glare. Glass raycasts stay disabled and glass/caustic motion follows the existing pause/reduced-motion/page-hidden clock. This update supersedes the 2026-11-08 conflict note's unresolved go/no-go; AQ-80 records GO and AQ-102 owns implementation.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -86,6 +88,8 @@ Per `docs/open-source-asset-and-motion-research.md` §6.2:
 2026-11-08 (backlog mapping, PR 10) — glass-pane conflict note: AQ-39 §1.3 omits heavy front-pane reflections (they degrade fish readability and violate AQ-14.6 AC #3). Tracker item #13 proposes a glass pane, which would introduce front-pane reflections and therefore conflicts with this omission. Before implementing heavy front-pane reflections or a glass pane, resolve the conflict explicitly: either keep the AQ-39 omission and defer/reject the glass pane, or update AQ-39 to specify the intended reflection behaviour. Do not implement both the omission and the glass pane silently. This note changes no implementation scope.
 
 2026-11-08 audit: PR #7 merged DEFAULT_AQUARIUM_OPTICS_CONFIG and evaluateDepthTintedColor in src/rendering/scene/underwater-optics.ts (9 passing tests in underwater-optics.test.ts) and wired Beer-Lambert depth-tinted water column (#082d50), fog (18..36), and LED intensities into src/rendering/scene/aquarium.ts. Moved to In Progress (ready-for-review / gemini approved) awaiting Root 2-viewport visual sign-off (AC #3).
+
+2026-11-12 AQ-80 conflict resolved GO with restrained enclosure cues; heavy front-pane reflections remain prohibited. Searched docs and Backlog references for a canonical standalone tracker item #13 file and found none; no such tracker record was edited or inferred. The decision is recorded here and in AQ-80; AQ-102 carries implementation.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
