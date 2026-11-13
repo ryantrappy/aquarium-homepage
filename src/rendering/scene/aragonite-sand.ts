@@ -634,16 +634,30 @@ normal = perturbNormalArb(-vViewPosition, normal, dHdxy_fwd(), faceDirection);
   const compactedBedColor = new THREE.Color('#6d6558')
   const oxygenatedCrustColor = new THREE.Color('#c6baa4')
   frontEdgeMaterial.onBeforeCompile = shader => {
+    // MeshStandardMaterial only supplies vUv when a UV-consuming map define
+    // is enabled. The geometry's uv attribute is available in the vertex
+    // program, so pass it through our own varying for the mapless case too.
+    shader.vertexShader = 'varying vec2 vFrontEdgeUv;\n' + shader.vertexShader
+    shader.vertexShader = shader.vertexShader.replace(
+      '#include <uv_vertex>',
+      `#include <uv_vertex>
+vFrontEdgeUv = uv;`,
+    )
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <common>',
+      `#include <common>
+varying vec2 vFrontEdgeUv;`,
+    )
     shader.fragmentShader = shader.fragmentShader.replace(
       '#include <color_fragment>',
       `#include <color_fragment>
 vec3 deepBedColor = vec3(${deepBedColor.r.toFixed(4)}, ${deepBedColor.g.toFixed(4)}, ${deepBedColor.b.toFixed(4)});
 vec3 compactedBedColor = vec3(${compactedBedColor.r.toFixed(4)}, ${compactedBedColor.g.toFixed(4)}, ${compactedBedColor.b.toFixed(4)});
 vec3 oxygenatedCrustColor = vec3(${oxygenatedCrustColor.r.toFixed(4)}, ${oxygenatedCrustColor.g.toFixed(4)}, ${oxygenatedCrustColor.b.toFixed(4)});
-float middleLayerMask = smoothstep(0.25, 0.29, vUv.y) * (1.0 - smoothstep(0.78, 0.82, vUv.y));
-float strataNoise = sin(vUv.y * 115.0 + sin(vUv.x * 8.0) * 1.5) * 0.014;
-vec3 edgeColor = mix(deepBedColor, compactedBedColor, smoothstep(0.23, 0.27, vUv.y));
-edgeColor = mix(edgeColor, oxygenatedCrustColor, smoothstep(0.80, 0.84, vUv.y));
+float middleLayerMask = smoothstep(0.25, 0.29, vFrontEdgeUv.y) * (1.0 - smoothstep(0.78, 0.82, vFrontEdgeUv.y));
+float strataNoise = sin(vFrontEdgeUv.y * 115.0 + sin(vFrontEdgeUv.x * 8.0) * 1.5) * 0.014;
+vec3 edgeColor = mix(deepBedColor, compactedBedColor, smoothstep(0.23, 0.27, vFrontEdgeUv.y));
+edgeColor = mix(edgeColor, oxygenatedCrustColor, smoothstep(0.80, 0.84, vFrontEdgeUv.y));
 edgeColor += strataNoise * middleLayerMask * vec3(0.70, 0.65, 0.55);
 diffuseColor.rgb = edgeColor;`,
     )

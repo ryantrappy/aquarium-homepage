@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import * as THREE from 'three'
 import { describe, expect, it } from 'vitest'
 import {
@@ -122,14 +123,33 @@ describe('photoreal aragonite sand bed (AQ-70.12)', () => {
 
   it('uses a warm, stratified front-glass cross-section', () => {
     const bed = createAragoniteSandBed({ textureSize: 64, narrow: false })
+    bed.frontEdgeMesh.material.map = null
     const shader = compileMaterialShader(bed.frontEdgeMesh.material)
+    const threeWebglProgram = readFileSync(
+      new URL('../../../node_modules/three/src/renderers/webgl/WebGLProgram.js', import.meta.url),
+      'utf8',
+    )
 
-    expect(shader.fragmentShader).toContain('vUv.y')
-    expect(shader.fragmentShader).toContain('smoothstep(0.80, 0.84, vUv.y)')
+    // In the installed Three version, uv is always in the WebGLProgram
+    // attribute prefix while vUv itself is conditional on USE_UV. The edge
+    // shader therefore passes the always-present attribute through its own
+    // varying instead of depending on the optional standard varying.
+    expect(bed.frontEdgeMesh.material.map).toBeNull()
+    const uvAttributeIndex = threeWebglProgram.indexOf("'attribute vec2 uv;'")
+    expect(uvAttributeIndex).toBeGreaterThan(0)
+    expect(threeWebglProgram.slice(uvAttributeIndex - 240, uvAttributeIndex)).not.toContain('#ifdef USE_UV')
+    expect(THREE.ShaderChunk.uv_pars_vertex).toContain('#if defined( USE_UV ) || defined( USE_ANISOTROPY )')
+    expect(THREE.ShaderChunk.uv_pars_vertex).toContain('varying vec2 vUv;')
+    expect(shader.vertexShader).toContain('varying vec2 vFrontEdgeUv;')
+    expect(shader.vertexShader).toContain('vFrontEdgeUv = uv;')
+    expect(shader.fragmentShader).toContain('varying vec2 vFrontEdgeUv;')
+    expect(shader.fragmentShader).not.toContain('vUv.')
+    expect(shader.fragmentShader).toContain('smoothstep(0.80, 0.84, vFrontEdgeUv.y)')
     expect(shader.fragmentShader).toContain('vec3 oxygenatedCrustColor = vec3(0.5647, 0.4910, 0.3712)')
     expect(shader.fragmentShader).toContain('vec3 compactedBedColor = vec3(0.1529, 0.1301, 0.0976)')
     expect(shader.fragmentShader).toContain('vec3 deepBedColor = vec3(0.0194, 0.0222, 0.0369)')
-    expect(shader.fragmentShader).toContain('strataNoise')
+    expect(shader.fragmentShader).toContain('sin(vFrontEdgeUv.y * 115.0 + sin(vFrontEdgeUv.x * 8.0) * 1.5)')
+    expect(shader.fragmentShader).toContain('strataNoise * middleLayerMask')
 
     bed.dispose()
   })
