@@ -36,6 +36,7 @@ import { SURFACE_WAVE_GLSL } from './surface-waves'
 import { RaymarchedShaftPass, SHAFT_BEAM_GLSL } from './light-shafts'
 import { createAragoniteSandBed, getRockFootprintsForViewport } from './aragonite-sand'
 import { reefPlacementsForViewport } from './reef-layout'
+import { createGlassEnclosure } from './glass-enclosure'
 import { estimateCaptionRect, labelLiftPx, resolveLabelDeconflicts } from './fish-label-layout'
 import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
 import { createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
@@ -685,6 +686,12 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   // list by reconcileSchoolmates() below.
   let schoolmates: Inhabitant[] = []
   const loadedAssets = new Set<GLTF>()
+  const glassEnclosure = createGlassEnclosure({
+    surfaceY: optics.surfaceY,
+    excludeFromReflections: () => [waterSurface, shaftPlane, hazePlane, foregroundParticles, backgroundParticles, bubbles, ...fish.map(item => item.root), ...schoolmates.map(item => item.root)],
+  })
+  scene.add(glassEnclosure.group)
+  let glassLayoutNarrow: boolean | undefined
   let habitat: WaterHabitat = { bounds: { min: { x: -4, y: -2.25, z: -4.6 }, max: { x: 4, y: 2.8, z: 2.8 } }, obstacles: [], anchors: [] }
   let width = 1, height = 1, labelClock = 0, spawnUnavailable = false
   let lookDevPreset: LookDevPreset = lookDevConfig?.preset ?? 'full-scene'
@@ -1648,12 +1655,18 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     const renderStartedAt = lookDevConfig ? performance.now() : 0
     const previousInfoAutoReset = renderer.info.autoReset
     if (lookDevConfig) { renderer.info.reset(); renderer.info.autoReset = false }
+    // Reflections are a full-tank depth cue. Keep zoom/inspection clear and
+    // avoid reflected scene renders on every frame of a tracking camera.
+    const reflectOverview = lookDevConfig
+      ? lookDevPreset === 'full-scene'
+      : isOverviewZoomState(cameraZoomCurrent) && isOverviewZoomState(cameraZoomDesired)
+    glassEnclosure.update(effectiveEnvTime, reflectOverview ? qualityTier : 'low', loadedAssets.size * 1000 + meshNavigationGeneration)
     try {
     if (shaftMode === 'raymarch' && !shaftPassFailed) {
       if (!shaftPass) {
         try {
           shaftPass = new RaymarchedShaftPass(renderer, {
-            nonOccluders: [waterSurface, shaftPlane, hazePlane, foregroundParticles, backgroundParticles, bubbles],
+            nonOccluders: [waterSurface, shaftPlane, hazePlane, foregroundParticles, backgroundParticles, bubbles, glassEnclosure.group],
           })
           const bufferSize = renderer.getDrawingBufferSize(new THREE.Vector2())
           shaftPass.setSize(bufferSize.x, bufferSize.y)
@@ -1791,6 +1804,10 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     const halfWidth = Math.min(5.0, (DEFAULT_CAMERA_DISTANCE_M - 2.8) * Math.tan(THREE.MathUtils.degToRad(21)) * camera.aspect * .96)
     habitat.bounds = { min: { x: -halfWidth, y: -2.25, z: -4.6 }, max: { x: halfWidth, y: 2.8, z: 2.8 } }
     const newNarrow = width < 600
+    if (glassLayoutNarrow !== newNarrow) {
+      glassEnclosure.setLayout(newNarrow)
+      glassLayoutNarrow = newNarrow
+    }
     const recoveringFromUnavailableSpawn = spawnUnavailable
     let rebuildSucceeded: boolean | undefined
     // AQ-73: the sand bed follows the single-/dual-island layout with the
@@ -1912,6 +1929,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   }, { signal: abort.signal })
   canvas.addEventListener('webglcontextrestored', () => {
     if (!lookDevConfig || disposed) return
+    glassEnclosure.invalidate()
     lookDevContextLost = false
     lookDevReady = false
     lookDevResetTiming()
@@ -2143,6 +2161,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     dispose() {
       if (disposed) return; disposed = true; abort.abort(); observer.disconnect(); renderer.setAnimationLoop(null); lazyQueue = []
       rejectLookDevWaiters(new Error('Aquarium was disposed before look-dev capture readiness.'))
+      glassEnclosure.dispose()
       if (import.meta.env.DEV && lookDevBridge && window.__AQUARIUM_LOOKDEV__ === lookDevBridge) delete window.__AQUARIUM_LOOKDEV__
       removeFish(); loadedAssets.forEach(model => disposeTree(model.scene)); loadedAssets.clear(); sandBed.dispose(); rear.geometry.dispose(); rear.material.dispose(); hazePlane.geometry.dispose(); hazeMaterial.dispose(); shaftPlane.geometry.dispose(); shaftMaterial.dispose(); waterSurfaceGeometry.dispose(); waterSurfaceMaterial.dispose(); shaftPass?.dispose(); shaftPass = null; foregroundParticleGeometry.dispose(); foregroundParticleMaterial.dispose(); backgroundParticleGeometry.dispose(); backgroundParticleMaterial.dispose(); bubbleGeometry.dispose(); bubbleMaterial.dispose(); caustics.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
     },
