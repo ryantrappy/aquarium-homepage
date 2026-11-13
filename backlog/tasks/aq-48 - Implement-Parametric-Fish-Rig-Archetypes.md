@@ -4,7 +4,7 @@ title: Implement Parametric Fish Rig Archetypes
 status: Done
 assignee:
   - '@Luna'
-created_date: 2026-11-04 02:24
+created_date: '2026-11-04 02:24'
 updated_date: '2026-11-04T06:23:00Z'
 labels: []
 dependencies:
@@ -13,7 +13,7 @@ dependencies:
   - AQ-40
 priority: high
 type: task
-ordinal: 16000
+ordinal: 19000
 ---
 
 ## Description

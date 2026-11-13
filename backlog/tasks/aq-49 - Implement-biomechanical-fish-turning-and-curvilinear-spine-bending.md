@@ -1,11 +1,11 @@
 ---
 id: AQ-49
 title: Implement biomechanical fish turning and curvilinear spine bending
-status: In Progress
+status: Done
 assignee:
   - '@root'
 created_date: '2026-11-04T19:20:00Z'
-updated_date: '2026-11-13 00:26'
+updated_date: '2026-11-13 05:14'
 labels: []
 dependencies:
   - AQ-35
@@ -24,7 +24,7 @@ documentation:
 parent_task_id: AQ-12
 priority: '10'
 type: enhancement
-ordinal: 10
+ordinal: 137000
 ---
 
 ## Description

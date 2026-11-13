@@ -1,11 +1,11 @@
 ---
 id: AQ-83
 title: Add a Settings toggle to display a debug FPS and frame-time counter
-status: In Progress
+status: Done
 assignee:
   - '@Luna'
 created_date: '2026-11-08T20:07:00Z'
-updated_date: '2026-11-12 06:03'
+updated_date: '2026-11-13 05:14'
 labels:
   - ui
   - performance
@@ -33,11 +33,11 @@ As photorealistic fish, coral shaders, caustics, and post-processing passes are 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The Settings modal (ServiceManager) includes a clear, accessible toggle (defaulting to off) to enable or disable the debug FPS counter, persisted locally across page reloads.
-- [ ] #2 When enabled, a compact, non-intrusive debug badge in the aquarium HUD displays smoothed FPS and frame time (ms) updated at a readable cadence (e.g., 2-4 Hz) without layout shift or per-frame React re-render overhead.
-- [ ] #3 The FPS overlay uses pointer-events: none (or non-overlapping HUD placement) so it never intercepts fish link clicks, caption selection, context menus, or keyboard focus at 1440x900 or 402x874.
-- [ ] #4 When the aquarium is paused or the document tab is hidden, the counter reflects the paused/suspended state cleanly and stops sampling timers.
-- [ ] #5 Component and unit tests cover toggling the setting, persistence, pause/hidden handling, and non-interference with fish link activation.
+- [x] #1 The Settings modal (ServiceManager) includes a clear, accessible toggle (defaulting to off) to enable or disable the debug FPS counter, persisted locally across page reloads.
+- [x] #2 When enabled, a compact, non-intrusive debug badge in the aquarium HUD displays smoothed FPS and frame time (ms) updated at a readable cadence (e.g., 2-4 Hz) without layout shift or per-frame React re-render overhead.
+- [x] #3 The FPS overlay uses pointer-events: none (or non-overlapping HUD placement) so it never intercepts fish link clicks, caption selection, context menus, or keyboard focus at 1440x900 or 402x874.
+- [x] #4 When the aquarium is paused or the document tab is hidden, the counter reflects the paused/suspended state cleanly and stops sampling timers.
+- [x] #5 Component and unit tests cover toggling the setting, persistence, pause/hidden handling, and non-interference with fish link activation.
 <!-- AC:END -->
 
 ## Definition of Done

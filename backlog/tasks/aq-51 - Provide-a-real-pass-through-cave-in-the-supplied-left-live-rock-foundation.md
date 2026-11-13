@@ -20,7 +20,7 @@ documentation:
   - docs/asset-contract.md
 priority: high
 type: bug
-ordinal: 11800
+ordinal: 16000
 ---
 
 ## Description
