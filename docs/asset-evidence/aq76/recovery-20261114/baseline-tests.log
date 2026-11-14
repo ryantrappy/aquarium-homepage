@@ -1,0 +1,12 @@
+
+> test
+> vitest run src/rendering/scene/runtime-quality.test.ts
+
+
+ RUN  v5.1.0 /Users/ryantrapp/Desktop/Code/aquarium-homepage
+
+
+ Test Files  1 passed (1)
+      Tests  24 passed (24)
+   Start at  09:15:28
+   Duration  1.88s (transform 95%, tests 2%, import 2%, worker 1%)

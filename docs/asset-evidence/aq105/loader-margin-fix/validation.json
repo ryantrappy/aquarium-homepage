@@ -1,0 +1,21 @@
+{
+  "sourcePins": {
+    "src/rendering/scene/anemone-host.test.ts": "358afbb92109026a5f01d066340f211bad1c693759e019c3f5efde038316f027",
+    "src/rendering/scene/reef-assembly.ts": "a862591cc9a045bb9e2c572a5f1cfdaa9817e88733338f0a72c9b9cffb45a8cd",
+    "src/rendering/scene/reef-mesh-navigation.test.ts": "de32e190fc679e9caa43d913d8f634ab2cb81ced223db2f1e24ead00cf51e6d5",
+    "src/rendering/scene/reef-mesh-navigation.ts": "6538b90d7eb24fa9212a95f1b5fe7bb22d86de9174006237e47b74810bf8f43b"
+  },
+  "tests": {
+    "count": 875,
+    "files": 75,
+    "workers": 1,
+    "status": "pass"
+  },
+  "typecheck": "pass including16script checks",
+  "build": "pass",
+  "threeVersion": "0.187.0",
+  "installedGlbLoaderSha256": "532ac726e120039acbcd6cf54328c57acbf7b438176afaa6951257126d11bff1",
+  "basis": "GLTFLoader.computeBounds uses accessor bounding-box diagonal for its base sphere. Assembly maxMargin is independent of that slack.",
+  "modelsUnchanged": true,
+  "nativeAcceptance": "pending exact committed correction"
+}

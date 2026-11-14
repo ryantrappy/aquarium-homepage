@@ -1,0 +1,16 @@
+
+> test
+> vitest run --maxWorkers=2
+
+
+ RUN  v5.1.0 /private/tmp/aquarium-aq87-proof-8b2d7cc
+
+
+ Test Files  75 passed (75)
+      Tests  872 passed (872)
+   Start at  00:50:17
+   Duration  59.19s (tests 90%, import 7%, environment 3%, transform 1%)
+
+    Isolate  75 workers spawned · ~345ms startup each (spawn + environment, per file)
+             at least ~12.58s faster with isolate: false — reuses workers across files instead of one per file
+

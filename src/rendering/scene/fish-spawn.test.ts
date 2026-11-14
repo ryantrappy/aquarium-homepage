@@ -7,14 +7,21 @@ import { EXAMPLE_SERVICES } from '../../lib/services'
 import { EMPTY_FISH_EXTENSIONS } from '../../simulation/fish-extensions'
 import { fishBodyRadiusM, fishClearanceRadius, fishRenderLength } from './fish-scale'
 import { projectFishLinkBounds } from './fish-link-projection'
+import { overviewHalfWidthAtDepth } from './camera-zoom'
 import { createSwimmingFish, stepSwimmingFish } from './motion'
 import { canRunFishSceneLoop, classifySpeciesVerticalTier, evaluateTieredVerticalDepthRange, findSafeFishHeading, findSafeFishSpawn, fishSceneStatus, fishSpawnPreference, fishSpawnSlotsForServices, isSafeFishPosition, FISH_SPAWN_DEPTH_PLANES, FISH_SPAWN_DEPTH_PLANE_JITTER, TIERED_VERTICAL_DEPTH_ZONES, type OccupiedFishSpawn } from './fish-spawn'
 import { instantiateModularReefHabitat } from './reef-assembly'
 import { reefPlacementsForViewport } from './reef-layout'
 
 function waterBounds(width: number, height: number): AxisAlignedBox {
-  const halfWidth = Math.min(5, (9 - 2.8) * Math.tan(21 * Math.PI / 180) * (width / height) * .96)
+  const halfWidth = overviewHalfWidthAtDepth(width / height, -1.35)
   return { min: { x: -halfWidth, y: -2.25, z: -4.6 }, max: { x: halfWidth, y: 2.8, z: 2.8 } }
+}
+
+function maxAbsXAtDepth(width: number, height: number) {
+  const aspect = width / height
+  const habitatHalfWidth = overviewHalfWidthAtDepth(aspect, -1.35)
+  return (z: number) => Math.min(habitatHalfWidth, overviewHalfWidthAtDepth(aspect, z))
 }
 
 function obstaclesFor(narrow: boolean) {
@@ -42,18 +49,19 @@ function spread(points: readonly Vec3[], axis: keyof Vec3) {
 
 function planStarters(width: number, height: number, stratified = true) {
   const bounds = waterBounds(width, height), narrow = width < 600, obstacles = obstaclesFor(narrow)
+  const lateralLimit = maxAbsXAtDepth(width, height)
   const occupied: OccupiedFishSpawn[] = []
   const slots = fishSpawnSlotsForServices(EXAMPLE_SERVICES)
   const placements = EXAMPLE_SERVICES.map(service => {
     const clearance = fishClearanceRadius(service.fishId)
     const bodyRadiusM = fishBodyRadiusM(service.fishId)
-    const preference = fishSpawnPreference(service.id, service.fishId, bounds, clearance, stratified ? slots.get(service.id) : undefined)
+    const preference = fishSpawnPreference(service.id, service.fishId, bounds, clearance, stratified ? slots.get(service.id) : undefined, lateralLimit)
     expect(preference, service.fishId).toBeDefined()
     const verticalRange = evaluateTieredVerticalDepthRange(service.fishId, bounds, clearance)
     expect(verticalRange, service.fishId).toBeDefined()
-    const position = findSafeFishSpawn(preference!.position, bounds, obstacles, clearance, occupied, undefined, bodyRadiusM, verticalRange!.worldYRange)
+    const position = findSafeFishSpawn(preference!.position, bounds, obstacles, clearance, occupied, undefined, bodyRadiusM, verticalRange!.worldYRange, lateralLimit)
     expect(position, service.fishId).toBeDefined()
-    const yaw = findSafeFishHeading(position!, preference!.yaw, bounds, obstacles, clearance)
+    const yaw = findSafeFishHeading(position!, preference!.yaw, bounds, obstacles, clearance, lateralLimit)
     expect(yaw, service.fishId).toBeDefined()
     occupied.push({ position: position!, clearance, bodyRadiusM })
     return { service, clearance, bodyRadiusM, verticalRange: verticalRange!, preference: preference!, position: position!, yaw: yaw! }
@@ -62,6 +70,57 @@ function planStarters(width: number, height: number, stratified = true) {
 }
 
 describe('safe aquarium fish spawning', () => {
+  it('uses the wider reef-plane spawn spread while keeping each depth inside the overview frustum', () => {
+    for (const [width, height] of [[1440, 900], [402, 874]]) {
+      const bounds = waterBounds(width, height)
+      const lateralLimit = maxAbsXAtDepth(width, height)
+      const clearance = fishClearanceRadius('yellow-tang')
+      const left = fishSpawnPreference('left-side-slot', 'yellow-tang', bounds, clearance, { index: 0, count: 2 }, lateralLimit)!
+      const right = fishSpawnPreference('right-side-slot', 'yellow-tang', bounds, clearance, { index: 1, count: 2 }, lateralLimit)!
+      const leftSpawn = findSafeFishSpawn(left.position, bounds, [], clearance, [], undefined, undefined, undefined, lateralLimit)!
+      const rightSpawn = findSafeFishSpawn(right.position, bounds, [], clearance, [], undefined, undefined, undefined, lateralLimit)!
+
+      expect(Math.abs(leftSpawn.x)).toBeLessThanOrEqual(lateralLimit(leftSpawn.z) - clearance + 1e-9)
+      expect(Math.abs(rightSpawn.x)).toBeLessThanOrEqual(lateralLimit(rightSpawn.z) - clearance + 1e-9)
+      if (width > 600) {
+        expect(leftSpawn.x).toBeLessThan(-3.1)
+        expect(rightSpawn.x).toBeGreaterThan(3.1)
+      } else {
+        expect(Math.abs(leftSpawn.x)).toBeGreaterThan(.5)
+        expect(Math.abs(rightSpawn.x)).toBeGreaterThan(.5)
+      }
+    }
+  })
+
+  it('relocates a front-depth fish that would be outside the resized overview frustum', () => {
+    const bounds = waterBounds(1440, 900)
+    const lateralLimit = maxAbsXAtDepth(1440, 900)
+    const clearance = .2
+    const back = { x: 4.3, y: 0, z: -1.35 }
+    const front = { x: 4.3, y: 0, z: 2.4 }
+    expect(isSafeFishPosition(back, clearance, bounds, [], lateralLimit)).toBe(true)
+    expect(isSafeFishPosition(front, clearance, bounds, [], lateralLimit)).toBe(false)
+    const relocated = findSafeFishSpawn(front, bounds, [], clearance, [], undefined, undefined, undefined, lateralLimit)!
+    expect(isSafeFishPosition(relocated, clearance, bounds, [], lateralLimit)).toBe(true)
+    expect(Math.abs(relocated.x)).toBeLessThanOrEqual(lateralLimit(relocated.z) - clearance + 1e-9)
+
+    const edge = { x: lateralLimit(2.4) - clearance - .01, y: 0, z: 2.4 }
+    expect(findSafeFishHeading(edge, Math.PI / 2, bounds, [], clearance, lateralLimit)).not.toBe(Math.PI / 2)
+    expect(isSafeFishPosition(back, clearance, bounds, [], () => Number.NaN)).toBe(false)
+    expect(findSafeFishSpawn(back, bounds, [], clearance, [], undefined, undefined, undefined, () => { throw new Error('frustum unavailable') })).toBeUndefined()
+  })
+
+  it('searches wider back-depth water when the preferred front-depth lane is unavailable', () => {
+    const bounds: AxisAlignedBox = { min: { x: -5, y: -2, z: -2 }, max: { x: 5, y: 2, z: 2 } }
+    const lateralLimit = (z: number) => z > 0 ? 1 : 5
+    const spawn = findSafeFishSpawn({ x: 0, y: 0, z: 1.5 }, bounds, [], .1, [],
+      candidate => candidate.z < 0 && candidate.x > 3, undefined, undefined, lateralLimit)
+    expect(spawn).toBeDefined()
+    expect(spawn!.x).toBeGreaterThan(3)
+    expect(spawn!.z).toBeLessThan(0)
+    expect(isSafeFishPosition(spawn!, .1, bounds, [], lateralLimit)).toBe(true)
+  })
+
   it.each([
     ['phone 402x874', 402, 874, true],
     ['laptop 1440x900', 1440, 900, false],

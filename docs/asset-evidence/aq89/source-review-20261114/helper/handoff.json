@@ -1,0 +1,47 @@
+{
+  "sourceHead": "cbf6567d9488b2c5b87bdc94c1e67c8546903683",
+  "pins": {
+    "src/rendering/scene/fish-label-layout.ts": "0aedeaeda8753eb30dbfc096e21a0ebcfd29699d6d5aa4736b5f5ac78c6f43c6",
+    "src/rendering/scene/fish-label-layout.test.ts": "d52a1366aeefd2453d07b02c58aa1e3cadd1a88fd94646e2e5ac62d51693d9d1"
+  },
+  "evidence": {
+    "before-results.json": {
+      "sha256": "ea1ad406b8ebf396fd8b5e39b8c1edf22affab981890339a93e491cd82dbef36",
+      "passed": 3,
+      "failed": 24,
+      "failures": [
+        "retains the old estimate while accepting measured width and height verbatim",
+        "returns offsets from the supplied caption origin, never from the native hitbox centre",
+        "hides an impossible crowded caption instead of leaving it over another fish or detaching it downward",
+        "separates overlapping wide captions horizontally while staying under their own bodies",
+        "moves a bottom-edge caption immediately beside its fish and keeps the full measured pill in frame",
+        "places a long right-edge pill beside the body when clamping below would detach its centre",
+        "treats an ambient body as an obstacle without adding a caption or a native link",
+        "checks every obstacle after an escape rather than clearing one and covering the next",
+        "finds a safe attached horizontal escape around a local body obstacle",
+        "hides a caption when a zoomed fish leaves no in-frame attached position",
+        "keeps all visible results clear across deterministic mixed-size clusters",
+        "hides an impossible crowded caption instead of leaving it over another fish or detaching it downward",
+        "separates overlapping wide captions horizontally while staying under their own bodies",
+        "moves a bottom-edge caption immediately beside its fish and keeps the full measured pill in frame",
+        "places a long right-edge pill beside the body when clamping below would detach its centre",
+        "treats an ambient body as an obstacle without adding a caption or a native link",
+        "checks every obstacle after an escape rather than clearing one and covering the next",
+        "finds a safe attached horizontal escape around a local body obstacle",
+        "hides a caption when a zoomed fish leaves no in-frame attached position",
+        "keeps all visible results clear across deterministic mixed-size clusters",
+        "uses near-first then stable-id priority independently of input/ambient ordering",
+        "ignores its own duplicate body obstacle but not a different fish with the same rectangle",
+        "does not emit visible captions for invalid viewports, metrics, identities or unknown body bounds",
+        "does not accept a position lost by finite offset cancellation"
+      ]
+    },
+    "after-results.json": {
+      "sha256": "de27ee6f63ed49e6ca04e86a4f340d91f8424d70184f6339dbe3d9b0cb6e1fa4",
+      "passed": 27,
+      "failed": 0,
+      "failures": []
+    }
+  },
+  "scope": "Pure helper correction only; actual rendered geometry/caption measurement and native links/visual acceptance are Root integration work."
+}

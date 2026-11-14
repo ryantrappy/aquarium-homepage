@@ -1,0 +1,36 @@
+
+> test
+> vitest run src/rendering/scene/anemone-host.test.ts --maxWorkers=2
+
+
+ RUN  v5.1.0 /private/tmp/aquarium-aq87-proof-8b2d7cc
+
+ ❯ src/rendering/scene/anemone-host.test.ts (3 tests | 2 failed) 1238ms
+   × keeps actual mounted crown hosting safe in the current layout (narrow=false) 612ms
+   × keeps actual mounted crown hosting safe in the current layout (narrow=true) 624ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/rendering/scene/anemone-host.test.ts > keeps actual mounted crown hosting safe in the current layout (narrow=false)
+ FAIL  src/rendering/scene/anemone-host.test.ts > keeps actual mounted crown hosting safe in the current layout (narrow=true)
+AssertionError: expected 'blocked' to be 'clear' // Object.is equality
+
+Expected: "clear"
+Received: "blocked"
+
+ ❯ src/rendering/scene/anemone-host.test.ts:69:102
+     67|   expect(resident).toBeTypeOf('function')
+     68|   expect(config.queryCapsule!(host.position, host.position, .04, { ...…
+     69|   expect(resident(host.position, host.position, .04, { ...MESH_NAVIGAT…
+       |                                                                                                      ^
+     70|   const aspect = narrow ? 402 / 874 : 1440 / 900, halfWidth = overview…
+     71|   const bounds = { min: { x: -halfWidth, y: -2.25, z: -4.6 }, max: { x…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  00:33:13
+   Duration  1.66s (tests 87%, import 9%, transform 4%)
+

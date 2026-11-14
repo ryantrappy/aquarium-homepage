@@ -1,0 +1,87 @@
+{
+  "laptopMotion": {
+    "viewport": [
+      1440,
+      900,
+      1
+    ],
+    "changed": 5,
+    "clownChanged": false
+  },
+  "laptopHosting": {
+    "viewport": [
+      1440,
+      900,
+      1
+    ],
+    "changed": 5,
+    "clownChanged": false
+  },
+  "laptopPause": {
+    "viewport": [
+      1440,
+      900,
+      1
+    ],
+    "changed": 0,
+    "clownChanged": false
+  },
+  "phoneMotion": {
+    "viewport": [
+      402,
+      874,
+      1
+    ],
+    "changed": 8,
+    "clownChanged": true
+  },
+  "phonePause": {
+    "viewport": [
+      402,
+      874,
+      1
+    ],
+    "changed": 0,
+    "clownChanged": false
+  },
+  "phoneReduced": {
+    "viewport": [
+      402,
+      874,
+      1
+    ],
+    "changed": 0,
+    "clownChanged": false
+  },
+  "images": [
+    {
+      "file": "laptop-approach.png",
+      "size": [
+        1440,
+        900
+      ],
+      "sha256": "f73a35bfb51935852ab6c0b00a9e38e20c4e7e2dd833a03dc52c9164860611c6"
+    },
+    {
+      "file": "laptop-hosting.png",
+      "size": [
+        1440,
+        900
+      ],
+      "sha256": "40d5df16e102e74b7a035539031d6d413ad41aab0212638b097573967bc496ec"
+    },
+    {
+      "file": "phone.png",
+      "size": [
+        402,
+        874
+      ],
+      "sha256": "195231c90574f580704866d74f9507dc2afabaa04124d3c255d03942d2f5a804"
+    }
+  ],
+  "sourceCommit": "7842bd6a8eabfde05f7b0550c7a9ee193a9aece8",
+  "warningsErrors": 0,
+  "findings": [
+    "Laptop normal-mode clownfish remains at the right anemone position over repeated observations; no hosting bobbing accepted. Full right-formation regression required. Phone observation is resize/approach and controls only, not settled hosting acceptance."
+  ]
+}

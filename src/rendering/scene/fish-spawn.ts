@@ -1,4 +1,4 @@
-import { isWaterSegmentSafe, type AxisAlignedBox, type SolidObstacleVolume, type Vec3 } from '../../simulation/habitat-navigation'
+import { isWaterSegmentSafe, type AxisAlignedBox, type MaxAbsXAtDepth, type SolidObstacleVolume, type Vec3 } from '../../simulation/habitat-navigation'
 import { getSpeciesBehaviorProfile } from '../../lib/fish-behavior'
 
 const SPAWN_SEARCH_DIVISIONS = 4
@@ -148,9 +148,15 @@ export function canRunFishSceneLoop(paused: boolean, hidden: boolean, spawnUnava
 }
 
 /** Point occupancy uses the existing legacy scene-unit clearance query. */
-export function isSafeFishPosition(position: Vec3, clearance: number, waterBounds: AxisAlignedBox, obstacles: readonly SolidObstacleVolume[]): boolean {
+export function isSafeFishPosition(
+  position: Vec3,
+  clearance: number,
+  waterBounds: AxisAlignedBox,
+  obstacles: readonly SolidObstacleVolume[],
+  maxAbsXAtDepth?: MaxAbsXAtDepth,
+): boolean {
   try {
-    return isWaterSegmentSafe({ start: position, target: position, waterBounds, obstacles, fishClearanceRadius: clearance })
+    return isWaterSegmentSafe({ start: position, target: position, waterBounds, obstacles, fishClearanceRadius: clearance, maxAbsXAtDepth })
   } catch {
     return false
   }
@@ -163,6 +169,7 @@ export function findSafeFishHeading(
   waterBounds: AxisAlignedBox,
   obstacles: readonly SolidObstacleVolume[],
   clearance: number,
+  maxAbsXAtDepth?: MaxAbsXAtDepth,
 ): number | undefined {
   if (![position.x, position.y, position.z, preferredYaw, clearance].every(Number.isFinite) || clearance < 0) return undefined
   const segmentLength = Math.max(.25, Math.min(.6, clearance * .75))
@@ -170,7 +177,7 @@ export function findSafeFishHeading(
     const yaw = preferredYaw + i * TWO_PI / INITIAL_HEADING_ALTERNATIVES
     const target = { x: position.x + Math.sin(yaw) * segmentLength, y: position.y, z: position.z + Math.cos(yaw) * segmentLength }
     try {
-      if (isWaterSegmentSafe({ start: position, target, waterBounds, obstacles, fishClearanceRadius: clearance })) return yaw
+      if (isWaterSegmentSafe({ start: position, target, waterBounds, obstacles, fishClearanceRadius: clearance, maxAbsXAtDepth })) return yaw
     } catch {
       // A malformed/unsupported segment is not a clear heading.
     }
@@ -196,7 +203,14 @@ function seededUnit(seed: number, salt: number): number {
  * supplies only its declared normalized depth preference; this does not invent
  * an anchor or claim a real habitat position.
  */
-export function fishSpawnPreference(instanceId: string, speciesId: string, waterBounds: AxisAlignedBox, clearance: number, horizontalSlot?: FishSpawnSlot): FishSpawnPreference | undefined {
+export function fishSpawnPreference(
+  instanceId: string,
+  speciesId: string,
+  waterBounds: AxisAlignedBox,
+  clearance: number,
+  horizontalSlot?: FishSpawnSlot,
+  maxAbsXAtDepth?: MaxAbsXAtDepth,
+): FishSpawnPreference | undefined {
   const values = [waterBounds.min.x, waterBounds.min.y, waterBounds.min.z, waterBounds.max.x, waterBounds.max.y, waterBounds.max.z, clearance]
   if (!instanceId.trim() || !values.every(Number.isFinite) || clearance < 0) return undefined
   if (horizontalSlot && (!Number.isSafeInteger(horizontalSlot.index) || !Number.isSafeInteger(horizontalSlot.count)
@@ -236,7 +250,6 @@ export function fishSpawnPreference(instanceId: string, speciesId: string, water
       : (horizontalSlot.index + (horizontalNoise - .5) * .08) / (horizontalSlot.count - 1)
     : horizontalNoise
   const xFraction = horizontalSlot ? .02 + .96 * clamp(horizontalFraction, 0, 1) : .04 + .92 * horizontalFraction
-  const preferredX = safeMin.x + (safeMax.x - safeMin.x) * xFraction
   const zNoise = seededUnit(seed, 0x85ebca6b)
   // AQ-87: quantize spawn depth onto the three distinct depth planes
   // (far / mid / near) instead of a continuous z draw. The outer
@@ -249,6 +262,15 @@ export function fishSpawnPreference(instanceId: string, speciesId: string, water
     : Math.min(FISH_SPAWN_DEPTH_PLANES.length - 1, Math.floor(zNoise * FISH_SPAWN_DEPTH_PLANES.length))
   const zFraction = FISH_SPAWN_DEPTH_PLANES[planeIndex]! + (zNoise * 2 - 1) * FISH_SPAWN_DEPTH_PLANE_JITTER
   const preferredZ = safeMin.z + (safeMax.z - safeMin.z) * zFraction
+  let maxAbsX = Math.max(Math.abs(waterBounds.min.x), Math.abs(waterBounds.max.x))
+  if (maxAbsXAtDepth) {
+    try { maxAbsX = maxAbsXAtDepth(preferredZ) } catch { return undefined }
+  }
+  if (!Number.isFinite(maxAbsX) || maxAbsX < clearance) return undefined
+  const safeMinX = Math.max(safeMin.x, -maxAbsX + clearance)
+  const safeMaxX = Math.min(safeMax.x, maxAbsX - clearance)
+  if (safeMinX > safeMaxX) return undefined
+  const preferredX = safeMinX + (safeMaxX - safeMinX) * xFraction
   const y = clamp(preferredY, ecologicalRange.worldYRange[0], ecologicalRange.worldYRange[1])
 
   return {
@@ -285,6 +307,7 @@ export function findSafeFishSpawn(
   spawningBodyRadiusM?: number,
   /** Additional world-Y restriction (inclusive), intersected with the clearance-safe water interval. */
   safeHeightRange?: readonly [number, number],
+  maxAbsXAtDepth?: MaxAbsXAtDepth,
 ): Vec3 | undefined {
   const coordinates = [preferred.x, preferred.y, preferred.z,
     waterBounds.min.x, waterBounds.min.y, waterBounds.min.z,
@@ -310,6 +333,15 @@ export function findSafeFishSpawn(
     y: clamp(preferred.y, safeMin.y, safeMax.y),
     z: clamp(preferred.z, safeMin.z, safeMax.z),
   }
+  if (maxAbsXAtDepth) {
+    let maxAbsX: number
+    try { maxAbsX = maxAbsXAtDepth(clamped.z) } catch { return undefined }
+    if (!Number.isFinite(maxAbsX) || maxAbsX < clearance) return undefined
+    const preferredMinX = Math.max(safeMin.x, -maxAbsX + clearance)
+    const preferredMaxX = Math.min(safeMax.x, maxAbsX - clearance)
+    if (preferredMinX > preferredMaxX) return undefined
+    clamped.x = clamp(clamped.x, preferredMinX, preferredMaxX)
+  }
   const candidatesOnAxis = (axis: 'x' | 'y' | 'z') => {
     const values = [clamped[axis]]
     for (let division = 0; division <= SPAWN_SEARCH_DIVISIONS; division++) {
@@ -327,7 +359,7 @@ export function findSafeFishSpawn(
     return distanceA - distanceB || a.x - b.x || a.y - b.y || a.z - b.z
   })
 
-  const safeCandidates = candidates.filter(candidate => isSafeFishPosition(candidate, clearance, waterBounds, obstacles))
+  const safeCandidates = candidates.filter(candidate => isSafeFishPosition(candidate, clearance, waterBounds, obstacles, maxAbsXAtDepth))
   if (!safeCandidates.length) return undefined
   const targetDistance = (candidate: Vec3) => (candidate.x - clamped.x) ** 2 + (candidate.y - clamped.y) ** 2 + (candidate.z - clamped.z) ** 2
   // Fish-vs-fish separation (PR #28 follow-up): body radii when both sides
@@ -356,10 +388,21 @@ export function findSafeFishSpawn(
     }
     // Preserve intended swimming height when searching around a reef.
     // Prefer moving forward/back at that height over escaping above the
-    // canopy merely because that is the shorter Euclidean displacement.
+    // canopy merely because that is the shorter Euclidean displacement, and
+    // prefer remaining in the assigned lateral lane in visible fore-reef water
+    // over jumping across the tank or hiding behind the rear rock wall.
     if (safeHeightRange) {
       const heightDifference = Math.abs(a.y - clamped.y) - Math.abs(b.y - clamped.y)
       if (heightDifference) return heightDifference
+      if (obstacles.length > 0) {
+        const rearWallCutoffZ = waterBounds.min.z + (waterBounds.max.z - waterBounds.min.z) * 0.52
+        const aRear = a.z < rearWallCutoffZ ? 1 : 0
+        const bRear = b.z < rearWallCutoffZ ? 1 : 0
+        if (aRear !== bRear) return aRear - bRear
+      }
+      const lateralBand = (candidate: Vec3) => Math.floor(Math.abs(candidate.x - clamped.x) / 0.5)
+      const lateralDifference = lateralBand(a) - lateralBand(b)
+      if (lateralDifference) return lateralDifference
     }
     return targetDistance(a) - targetDistance(b) || a.x - b.x || a.y - b.y || a.z - b.z
   })

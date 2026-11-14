@@ -7,8 +7,10 @@ import {
 } from './fish-body-flex'
 import {
   bindFishFlexToModel,
+  evaluateFishFlexVertex,
   patchFishFlexShader,
   updateFishFlex,
+  type FishFlexUniforms,
 } from './fish-flex-material'
 import { SPECIES_LOCOMOTION_SIGNATURES } from './species-locomotion-extensions'
 
@@ -43,6 +45,31 @@ const swimInput = {
 }
 
 describe('fish flex material (AQ-12 / AQ-49 / AQ-74)', () => {
+  it('projects the live GPU wave, fin, gill and mouth offsets on CPU, including stopped/disposed bindings', () => {
+    const {root,mesh}=makeSkinnedFish(), binding=bindFishFlexToModel(root,'ocellaris-clownfish',42)!
+    updateFishFlex(binding,'ocellaris-clownfish',swimInput,1,false)
+    const shader={vertexShader:THREE.ShaderLib.standard.vertexShader,uniforms:{}}
+    ;(mesh.material as THREE.MeshStandardMaterial).onBeforeCompile(shader as never,undefined as never)
+    const u=shader.uniforms as FishFlexUniforms
+    // Independently chosen phases isolate the lateral, gill and mouth terms.
+    u.uFlexTime.value=0;u.uFlexPhase.value=Math.PI;u.uFlexFrequencyHz.value=1;u.uFlexWaveNumber.value=Math.PI
+    u.uFlexTailAmplitude.value=.2;u.uFlexFinRippleAmp.value=.03;u.uFlexGillAmplitude.value=.04;u.uFlexMouthAmplitude.value=.05
+    u.uFlexEnvelopeA.value=.1;u.uFlexEnvelopeP.value=2
+    const tail=new THREE.Vector3(.1,.3,-1);binding.vertexDeformerFor(mesh)!(tail)
+    expect(tail.x).toBeCloseTo(.07,9) // full fin mask, sin(2π−π/2)=-1
+    const gill=new THREE.Vector3(.1,-.03,.58);binding.vertexDeformerFor(mesh)!(gill)
+    const s=.21, wave=.2*(.1+.9*s*s)*Math.sin(Math.PI*s+Math.PI)
+    expect(gill.x).toBeCloseTo(.1+wave+.02,9)
+    const mouth=new THREE.Vector3(0,-.018,1);binding.vertexDeformerFor(mesh)!(mouth)
+    expect(mouth.y).toBeCloseTo(-.068,9);expect(mouth.z).toBeCloseTo(1-.05*.35,9)
+    const foreign=mouth.clone();expect(binding.vertexDeformerFor(new THREE.Mesh())).toBeUndefined();expect(foreign).toEqual(mouth)
+    const stopped=mouth.clone();updateFishFlex(binding,'ocellaris-clownfish',swimInput,0,false)
+    const first=stopped.clone();binding.vertexDeformerFor(mesh)!(first);const second=stopped.clone();binding.vertexDeformerFor(mesh)!(second);expect(first).toEqual(second)
+    updateFishFlex(binding,'ocellaris-clownfish',swimInput,0,true)
+    const reduced=mouth.clone();expect(binding.vertexDeformerFor(mesh)).toBeUndefined();expect(reduced).toEqual(mouth)
+    binding.dispose();u.uFlexEnabled.value=1;const disposed=mouth.clone();expect(binding.vertexDeformerFor(mesh)).toBeUndefined();expect(disposed).toEqual(mouth)
+    const disabled=mouth.clone();u.uFlexEnabled.value=0;evaluateFishFlexVertex(disabled,u);expect(disabled).toEqual(mouth)
+  })
   it('injects the travelling-wave and buccal-opercular displacement after skinning, never before it', () => {
     const shader = {
       vertexShader: THREE.ShaderLib.standard.vertexShader,

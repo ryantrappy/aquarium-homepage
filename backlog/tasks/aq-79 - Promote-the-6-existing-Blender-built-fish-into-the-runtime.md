@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-08'
-updated_date: '2026-11-13 00:26'
+updated_date: '2026-11-14 15:07'
 labels:
   - modeling
   - photorealism
@@ -56,4 +56,6 @@ Perform per-species visual and contract comparison between the 6 candidate model
 
 <!-- SECTION:NOTES:BEGIN -->
 Root2026-11-12 read-only candidate audit (Luna, reviewed against current URL/scale tables): the six assets/fish candidate GLBs are not the current runtime mappings. Current clown/yellow use download/proof assets and blue/gramma/Banggai/mandarin use splat-fish variants. Candidate manifest axis lengths are about0.075-0.153m while fish-scale.ts expects current models around2units; a URL-only swap would shrink candidates drastically. Promotion must update measured model extents and validate scale before visual acceptance. Candidate contract/manifest tests15pass, scale7pass and six clip-player checks pass; those are structural proofs, not anatomy/material/continuous-deformation acceptance. Procedural source scripts exist, but no six per-species native.blend files were found; manual Blender edits require saved native sources and sync. No assets promoted or removed and no model files touched.
+
+Root2026-11-14 read-only subagent audit atcbf6567: six candidate GLB and generator hashes match manifests;15contract/manifest checks pass, proving packaging only. Current runtime URLs do not select these candidates. Candidate long-axis lengths .075-.153m differ from current ~2scene-unit model assumptions, so a direct URL swap would shrink fish roughly13-27times. No per-species visual/animation comparison or Root promotion approval exists; cleanup/picking/two-size acceptance remains open. Current blue-tang generated manifest also lacks explicit override source/hash lineage. No assets/Blender/runtime changes by audit. Preserve current models; require bounded comparison, measured scale and explicit per-species Root decisions before promotion. Listed art/scale/collision dependencies remain open; no AC accepted from metadata.
 <!-- SECTION:NOTES:END -->

@@ -1,0 +1,109 @@
+diff --git a/src/rendering/scene/fish-spawn.ts b/src/rendering/scene/fish-spawn.ts
+index ec1b7ee..607ecae 100644
+--- a/src/rendering/scene/fish-spawn.ts
++++ b/src/rendering/scene/fish-spawn.ts
+@@ -394,15 +394,15 @@ export function findSafeFishSpawn(
+     if (safeHeightRange) {
+       const heightDifference = Math.abs(a.y - clamped.y) - Math.abs(b.y - clamped.y)
+       if (heightDifference) return heightDifference
+-      const lateralBand = (candidate: Vec3) => Math.floor(Math.abs(candidate.x - clamped.x) / 0.5)
+-      const lateralDifference = lateralBand(a) - lateralBand(b)
+-      if (lateralDifference) return lateralDifference
+       if (obstacles.length > 0) {
+-        const rearWallCutoffZ = waterBounds.min.z + (waterBounds.max.z - waterBounds.min.z) * 0.24
++        const rearWallCutoffZ = waterBounds.min.z + (waterBounds.max.z - waterBounds.min.z) * 0.52
+         const aRear = a.z < rearWallCutoffZ ? 1 : 0
+         const bRear = b.z < rearWallCutoffZ ? 1 : 0
+         if (aRear !== bRear) return aRear - bRear
+       }
++      const lateralBand = (candidate: Vec3) => Math.floor(Math.abs(candidate.x - clamped.x) / 0.5)
++      const lateralDifference = lateralBand(a) - lateralBand(b)
++      if (lateralDifference) return lateralDifference
+     }
+     return targetDistance(a) - targetDistance(b) || a.x - b.x || a.y - b.y || a.z - b.z
+   })
+diff --git a/src/rendering/scene/motion.ts b/src/rendering/scene/motion.ts
+index 474f7af..e963f9f 100644
+--- a/src/rendering/scene/motion.ts
++++ b/src/rendering/scene/motion.ts
+@@ -287,7 +287,11 @@ function schoolStationState(fish: SwimmingFish): {
+   const flankEpoch = Math.max(0, Math.floor(simulationSeconds / 90))
+   const baseSeed = defaultHomeAnchorSeed(fish)
+   const seed = (baseSeed ^ Math.imul(epoch, 0x9e3779b1)) >>> 0
+-  const initialSideBit = baseSeed & 1
++  const initialSideBit = fish.speciesId === 'lyretail-anthias'
++    ? 1
++    : fish.speciesId === 'blue-green-chromis'
++      ? 0
++      : (baseSeed & 1)
+   const shiftBit = flankEpoch === 0 ? 0 : (Math.imul(flankEpoch, 0x85ebca6b) ^ (baseSeed >>> 16)) & 1
+   const side: LateralSector = (initialSideBit ^ shiftBit) === 0 ? -1 : 1
+   const unit1 = ((seed >>> 8) & 0xff) / 255
+@@ -368,9 +372,7 @@ function sampleFreeWaterTarget(
+     y = clamp(max.y - depth * (max.y - min.y), min.y + clearance, max.y - clearance)
+     const zDraw = random(fish)
+     const zFraction = preferForeReefZ
+-      ? zDraw < 0.25
+-        ? 0.14 + zDraw * 1.1
+-        : 0.68 + (zDraw - 0.25) * 0.36
++      ? 0.75 + zDraw * 0.20
+       : zDraw
+     z = min.z + clearance + zFraction * zSpan
+   }
+@@ -597,6 +599,7 @@ function planMesh(fish: SwimmingFish, habitat: WaterHabitat) {
+       if (!withinBudget) { failure = 'unavailable'; break }
+       if (result.status === 'route') {
+         fish.routeGeneration = request.generation
++        fish.targetWait = 0
+         installMeshRoute(fish, result.path, request.anchor)
+         return
+       }
+@@ -604,8 +607,10 @@ function planMesh(fish: SwimmingFish, habitat: WaterHabitat) {
+       if (result.status === 'work-limit' && result.reason.startsWith('lattice-')) break
+     }
+     fish.routeGeneration = request.generation
+-    fish.navigationAnchor = undefined
+     fish.behavior = reportNavigationOutcome(fish.behavior, request.generation, request.anchor, failure)
++    if (!fish.navigationAnchor && fish.route.length > 0 && fish.waypoint < fish.route.length) return
++    fish.route = []
++    fish.navigationAnchor = undefined
+   }
+ 
+   // AQ-82 AC #4 (mesh mode): same hold-at-anchor rule as the AABB planner —
+@@ -663,8 +668,11 @@ function plan(fish: SwimmingFish, habitat: WaterHabitat) {
+     const approachClearance = anchorApproachClearanceM(fish)
+     const result = resolveHabitatRoute({ request, start: fish.position, waterBounds: habitat.bounds, obstacles: habitat.obstacles, anchorLocations: habitat.anchors, fishClearanceRadius: approachClearance, maxAbsXAtDepth: habitat.maxAbsXAtDepth, lateralClearanceRadius: lateralClearanceForFish(fish, habitat, approachClearance) })
+     fish.routeGeneration = request.generation
+-    if (result.status === 'route') { fish.route = result.path; fish.waypoint = 1; fish.navigationAnchor = request.anchor; return }
++    if (result.status === 'route') { fish.targetWait = 0; fish.route = result.path; fish.waypoint = 1; fish.navigationAnchor = request.anchor; return }
+     fish.behavior = reportNavigationOutcome(fish.behavior, request.generation, request.anchor, result.status)
++    if (!fish.navigationAnchor && fish.route.length > 0 && fish.waypoint < fish.route.length) return
++    fish.route = []
++    fish.navigationAnchor = undefined
+   }
+   // AQ-82 AC #4: a fish that has already arrived at its state's anchor stays
+   // there — holding, with the interaction pose applied per substep — instead
+@@ -929,15 +937,19 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
+   }
+   const request = getNavigationRequest(fish.behavior)
+   const urgentTransition = fish.behavior.state === 'retreat' || fish.behavior.state === 'burst'
+-  if (fish.startleSeconds <= 0 && fish.behavior.navigationGeneration !== fish.routeGeneration && (
+-    urgentTransition || (request && hasCompatibleAnchor(fish, habitat, request.anchor))
+-  )) {
++  const pendingAnchorPreempt = Boolean(
++    fish.startleSeconds <= 0
++    && fish.behavior.navigationGeneration !== fish.routeGeneration
++    && request
++    && hasCompatibleAnchor(fish, habitat, request.anchor),
++  )
++  if (fish.startleSeconds <= 0 && fish.behavior.navigationGeneration !== fish.routeGeneration && urgentTransition) {
+     if (fish.route.length > 0) fish.targetWait = 0
+     fish.route = []
+     fish.navigationAnchor = undefined
+     if (!request) fish.routeGeneration = fish.behavior.navigationGeneration
+   }
+-  if ((!fish.route.length || fish.waypoint >= fish.route.length) && fish.targetWait <= 0) plan(fish, habitat)
++  if (((!fish.route.length || fish.waypoint >= fish.route.length) && fish.targetWait <= 0) || pendingAnchorPreempt) plan(fish, habitat)
+   const rawTarget = fish.route[fish.waypoint]
+   if (!rawTarget) {
+     fish.speed *= Math.exp(-dt * 1.8)

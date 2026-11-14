@@ -1,0 +1,15 @@
+
+> test
+> vitest run src/rendering/scene/fish-link-projection.test.ts src/rendering/scene/fish-flex-material.test.ts src/rendering/scene/aquarium-lifecycle.test.ts src/rendering/scene/fish-label-layout.test.ts src/components/AquariumScene.test.tsx src/rendering/scene/fish-link-focus.test.ts src/rendering/scene/alpha-picking.test.ts src/rendering/scene/runtime-quality.test.ts --maxWorkers=1
+
+
+ RUN  v5.1.0 /Users/ryantrapp/Desktop/Code/aquarium-homepage
+
+
+ Test Files  8 passed (8)
+      Tests  170 passed (170)
+   Start at  09:31:14
+   Duration  14.89s (tests 72%, environment 15%, import 6%, transform 6%)
+
+    Isolate  8 workers spawned · ~602ms startup each (spawn + environment, per file)
+             at least ~4.21s faster with isolate: false — reuses workers across files instead of one per file

@@ -3,14 +3,16 @@ import { BoxGeometry } from 'three'
 import { MAX_PITCH_RAD_LEGACY, MAX_PITCH_RAD_METRIC, MAX_PITCH_RATE_RAD_PER_SEC_METRIC, anchorApproachClearanceM, createSwimmingFish, distance, disturbSchool, evaluateSwimSpeedSynchronizedFlexRate, generateCatmullRomSwimCurve, smoothWaterRouteWithCatmullRom, startleFish, stepSwimmingFish, stepSwimmingSchool, type WaterHabitat } from './motion'
 import { instantiateModularReefHabitat } from './reef-assembly'
 import { fishBodyRadiusM, fishClearanceRadius } from './fish-scale'
-import { findSafeFishSpawn } from './fish-spawn'
+import { evaluateTieredVerticalDepthRange, findSafeFishSpawn, fishSpawnPreference, fishSpawnSlotsForServices } from './fish-spawn'
+import { resolveSchoolPopulation, schoolmateSpawnOffset } from './school-population'
 import { EXAMPLE_SERVICES } from '../../lib/services'
-import { findWaterRoute, isWaterSegmentSafe, resolveHabitatRoute } from '../../simulation/habitat-navigation'
+import { findWaterRoute, isWaterSegmentSafe, preferredLateralSide, resolveHabitatRoute } from '../../simulation/habitat-navigation'
 import { buildMeshCollider } from '../../simulation/mesh-collision'
 import { createMeshClearanceQuery } from '../../simulation/mesh-habitat'
 import { findMeshRoute, type CapsuleClearanceQuery, type MeshNavigationBudget } from '../../simulation/mesh-navigation'
-import { advanceFishBehavior, dispatchBehaviorEvent } from '../../simulation/behavior-runtime'
+import { advanceFishBehavior, dispatchBehaviorEvent, getNavigationRequest } from '../../simulation/behavior-runtime'
 import type { FishExtensionConfig } from '../../simulation/fish-extensions'
+import { overviewHalfWidthAtDepth } from './camera-zoom'
 
 const habitat: WaterHabitat = { bounds: { min: { x: -5, y: -2.4, z: -3 }, max: { x: 5, y: 2.8, z: 2.8 } }, obstacles: [{ id: 'real-reef-envelope', bounds: { min: { x: -1.2, y: -2.8, z: -.8 }, max: { x: 1.2, y: .1, z: .8 } } }], anchors: [] }
 const meshWater = { min: { x: -1, y: -1, z: -1 }, max: { x: 1, y: 1, z: 1 } }
@@ -41,6 +43,174 @@ function meshHabitat(queryCapsule?: CapsuleClearanceQuery, anchors: WaterHabitat
 function collisionQuery() { return createMeshClearanceQuery([overhangCollider()]) }
 
 describe('rendered fish travel adapter', () => {
+  it('keeps an active route when a swim transition requests an unavailable habitat anchor', () => {
+    const fish = createSwimmingFish('missing-anchor-route', 'royal-gramma', { x: -3.8, y: 0, z: 0 }, .2)
+    fish.behavior = {
+      ...fish.behavior,
+      state: 'swim',
+      stateElapsedSeconds: 0,
+      stateDurationSeconds: 100,
+      navigationGeneration: 4,
+      targetAnchor: 'rockCrevice',
+    }
+    fish.routeGeneration = 3
+    fish.route = [fish.position, { x: 3.8, y: 0, z: 0 }]
+    fish.waypoint = 1
+    fish.speed = 0
+    fish.targetWait = 5
+    const activeRoute = fish.route
+    const openWater: WaterHabitat = {
+      bounds: { min: { x: -5.2, y: -2.25, z: -4.6 }, max: { x: 5.2, y: 2.8, z: 2.8 } },
+      obstacles: [], anchors: [],
+    }
+
+    stepSwimmingFish(fish, openWater, 1 / 60)
+
+    expect(fish.route).toBe(activeRoute)
+    expect(fish.routeGeneration).toBe(3)
+  })
+
+  it('interrupts an active route for an urgent retreat even when its refuge is unavailable', () => {
+    const fish = createSwimmingFish('missing-refuge-retreat', 'royal-gramma', { x: -3, y: 0, z: 0 }, .2)
+    fish.behavior = {
+      ...fish.behavior,
+      state: 'retreat',
+      stateElapsedSeconds: 0,
+      stateDurationSeconds: 100,
+      navigationGeneration: 4,
+      targetAnchor: 'rockCrevice',
+    }
+    fish.routeGeneration = 3
+    fish.route = [fish.position, { x: 3, y: 0, z: 0 }]
+    fish.waypoint = 1
+    fish.targetWait = 5
+    const activeRoute = fish.route
+    const openWater: WaterHabitat = {
+      bounds: { min: { x: -5.2, y: -2.25, z: -4.6 }, max: { x: 5.2, y: 2.8, z: 2.8 } },
+      obstacles: [], anchors: [],
+    }
+
+    stepSwimmingFish(fish, openWater, 1 / 60)
+
+    expect(fish.route).not.toBe(activeRoute)
+    expect(fish.routeGeneration).toBe(4)
+  })
+
+  it('keeps an anchorless idle fish loitering near its current side', () => {
+    const fish = createSwimmingFish('left-idle-loiter', 'yellow-tang', { x: -4, y: .5, z: 0 }, .2)
+    fish.behavior = {
+      ...fish.behavior,
+      state: 'idle',
+      stateElapsedSeconds: 0,
+      stateDurationSeconds: 100,
+      targetAnchor: undefined,
+    }
+    fish.routeGeneration = fish.behavior.navigationGeneration
+    fish.targetWait = 0
+    fish.speed = 0
+    const openWater: WaterHabitat = {
+      bounds: { min: { x: -5.2, y: -2.25, z: -4.6 }, max: { x: 5.2, y: 2.8, z: 2.8 } },
+      obstacles: [], anchors: [],
+    }
+
+    stepSwimmingFish(fish, openWater, 1 / 60)
+
+    expect(fish.route[fish.waypoint]!.x).toBeLessThan(-2.8)
+    expect(Math.abs(fish.route[fish.waypoint]!.x - fish.position.x)).toBeLessThanOrEqual(1.2)
+  })
+
+  it('maintains left, center, and right occupancy after a 60-second reef swim', () => {
+    const bounds = { min: { x: -5.2, y: -2.25, z: -4.6 }, max: { x: 5.2, y: 2.8, z: 2.8 } }
+    const reefObstacles = [
+      { id: 'left-reef', bounds: { min: { x: -3.2, y: -2.25, z: -1.6 }, max: { x: -1.15, y: 1.05, z: .8 } } },
+      { id: 'right-reef', bounds: { min: { x: 1.05, y: -2.25, z: -1.5 }, max: { x: 3.2, y: .85, z: .8 } } },
+    ]
+    const fish = Array.from({ length: 11 }, (_, index) => {
+      const swimmer = createSwimmingFish(`distribution-${index}`, 'royal-gramma', { x: -3 + index * .6, y: .35, z: 1.8 }, fishClearanceRadius('royal-gramma'))
+      swimmer.behavior = {
+        ...swimmer.behavior,
+        state: 'swim',
+        stateElapsedSeconds: 0,
+        stateDurationSeconds: 2.5 + (index % 4) * .6,
+        targetAnchor: 'rockCrevice',
+      }
+      swimmer.routeGeneration = swimmer.behavior.navigationGeneration
+      return swimmer
+    })
+    const reefWater: WaterHabitat = { bounds, maxAbsXAtDepth: z => overviewHalfWidthAtDepth(1440 / 900, z), obstacles: reefObstacles, anchors: [] }
+
+    for (let frame = 0; frame < 60 * 60; frame++) for (const swimmer of fish) stepSwimmingFish(swimmer, reefWater, 1 / 60)
+
+    const left = fish.filter(swimmer => swimmer.position.x < -1.5).length
+    const center = fish.filter(swimmer => Math.abs(swimmer.position.x) <= 1.5).length
+    const right = fish.filter(swimmer => swimmer.position.x > 1.5).length
+    const meanAbsoluteX = fish.reduce((total, swimmer) => total + Math.abs(swimmer.position.x), 0) / fish.length
+    expect(left).toBeGreaterThanOrEqual(2)
+    expect(center).toBeGreaterThanOrEqual(2)
+    expect(right).toBeGreaterThanOrEqual(2)
+    expect(meanAbsoluteX).toBeGreaterThan(1.5)
+    expect(Math.min(...fish.map(swimmer => swimmer.position.x))).toBeLessThan(-3.5)
+    expect(Math.max(...fish.map(swimmer => swimmer.position.x))).toBeGreaterThan(3.5)
+  })
+
+  it('samples outer sectors more often than center and favors a fish’s current side', () => {
+    const openWater: WaterHabitat = {
+      bounds: { min: { x: -5.2, y: -2.25, z: -4.6 }, max: { x: 5.2, y: 2.8, z: 2.8 } },
+      obstacles: [], anchors: [],
+    }
+    const targetSector = (id: string, startX: number) => {
+      const fish = createSwimmingFish(id, 'yellow-tang', { x: startX, y: 0, z: 0 }, .2)
+      fish.behavior = { ...fish.behavior, state: 'swim', stateElapsedSeconds: 0, stateDurationSeconds: 100, targetAnchor: undefined }
+      fish.routeGeneration = fish.behavior.navigationGeneration
+      stepSwimmingFish(fish, openWater, 1 / 60)
+      const x = fish.route[fish.route.length - 1]!.x
+      return x < -1.64 ? -1 : x > 1.64 ? 1 : 0
+    }
+    const centered = Array.from({ length: 300 }, (_, index) => targetSector(`sector-center-${index}`, 0))
+    const left = centered.filter(side => side === -1).length
+    const center = centered.filter(side => side === 0).length
+    const right = centered.filter(side => side === 1).length
+    expect(left).toBeGreaterThan(90)
+    expect(right).toBeGreaterThan(90)
+    expect(center).toBeGreaterThan(35)
+    expect(center).toBeLessThan(90)
+    for (const side of [-1, 1] as const) {
+      const choices = Array.from({ length: 200 }, (_, index) => targetSector(`sector-${side}-${index}`, side * 3))
+      expect(choices.filter(choice => choice === side).length).toBeGreaterThan(choices.filter(choice => choice === -side).length * 2)
+    }
+  })
+
+  it.each([[1440, 900], [402, 874]])('keeps both AABB and mesh movement in the %i×%i depth-aware frustum', (width, height) => {
+    const aspect = width / height
+    const halfWidth = overviewHalfWidthAtDepth(aspect, -1.35)
+    const bounds = { min: { x: -halfWidth, y: -2.25, z: -4.6 }, max: { x: halfWidth, y: 2.8, z: 2.8 } }
+    const lateralLimit = (z: number) => Math.min(halfWidth, overviewHalfWidthAtDepth(aspect, z))
+    const clear: CapsuleClearanceQuery = () => ({ status: 'clear', work: { nodeVisits: 0, triangleTests: 0 } })
+    for (const mesh of [false, true]) {
+      const visualClearance = fishClearanceRadius('blue-tang')
+      const start = { x: lateralLimit(-1.35) - visualClearance - .12, y: 0, z: -1.35 }
+      const fish = createSwimmingFish(`frustum-${width}-${mesh}`, 'blue-tang', start, visualClearance, undefined, { collisionRadiusM: mesh ? .04 : undefined, initialYaw: 0 })
+      fish.behavior = { ...fish.behavior, state: 'swim', stateElapsedSeconds: 0, stateDurationSeconds: 100, targetAnchor: undefined }
+      fish.routeGeneration = fish.behavior.navigationGeneration
+      fish.route = [start, { x: start.x, y: 0, z: 2.5 }]
+      fish.waypoint = 1
+      fish.speed = .3
+      const habitat: WaterHabitat = mesh ? meshHabitat(clear) : { bounds, obstacles: [], anchors: [] }
+      habitat.bounds = bounds
+      habitat.maxAbsXAtDepth = lateralLimit
+      const clearance = mesh ? .04 : visualClearance
+      let traveled = 0
+      for (let frame = 0; frame < 360; frame++) {
+        const previous = { ...fish.position }
+        stepSwimmingFish(fish, habitat, 1 / 60)
+        traveled += distance(previous, fish.position)
+        expect(isWaterSegmentSafe({ start: previous, target: fish.position, waterBounds: bounds, obstacles: [], fishClearanceRadius: clearance, maxAbsXAtDepth: lateralLimit })).toBe(true)
+        expect(Math.abs(fish.position.x)).toBeLessThanOrEqual(lateralLimit(fish.position.z) - visualClearance + 1e-8)
+      }
+      expect(traveled).toBeGreaterThan(.2)
+    }
+  })
+
   it('moves and turns both rigged species, retaining collision clearance on every step', () => {
     for (const species of ['ocellaris-clownfish', 'yellow-tang']) {
       const fish = createSwimmingFish(`travel-${species}`, species, { x: -3, y: 1.4, z: 1.8 }, .5)
@@ -376,6 +546,72 @@ describe('rendered fish travel adapter', () => {
     expect(fish.route).toEqual([])
     expect(fish.behavior.navigationOutcome).toBe('unavailable')
     expect(fish.routeGeneration).toBe(fish.behavior.navigationGeneration)
+  })
+  it('falls back to a free-water mesh route after the requested anchor is unavailable', () => {
+    const clear: CapsuleClearanceQuery = () => ({ status: 'clear', work: { nodeVisits: 0, triangleTests: 0 } })
+    const fish = createSwimmingFish('mesh-missing-anchor-fallback', 'yellow-tang', { x: -.6, y: 0, z: 0 }, .2, undefined, { collisionRadiusM: .04 })
+    fish.behavior = dispatchBehaviorEvent(fish.behavior, { type: 'behavior-opportunity', instanceId: fish.id, trigger: 'foraging-opportunity' })
+    expect(fish.behavior.state).toBe('forage')
+
+    stepSwimmingFish(fish, meshHabitat(clear), 1 / 60)
+
+    expect(fish.route.length).toBeGreaterThan(1)
+    expect(fish.navigationAnchor).toBeUndefined()
+    expect(fish.targetWait).toBeLessThanOrEqual(0)
+  })
+  it('balances mesh-anchor selection across reef flanks by fish and request generation', () => {
+    const clear: CapsuleClearanceQuery = () => ({ status: 'clear', work: { nodeVisits: 0, triangleTests: 0 } })
+    const mesh = meshHabitat(clear, [
+      { id: 'reef-0-grazing', anchor: 'grazingSurface', position: { x: -.7, y: 0, z: 0 }, compatibleSpecies: ['yellow-tang'] },
+      { id: 'reef-1-grazing', anchor: 'grazingSurface', position: { x: .7, y: 0, z: 0 }, compatibleSpecies: ['yellow-tang'] },
+    ])
+    const selectedSide = (id: string, generation: number) => {
+      const fish = createSwimmingFish(id, 'yellow-tang', { x: 0, y: 0, z: 0 }, .2, undefined, { collisionRadiusM: .04 })
+      fish.behavior = { ...fish.behavior, state: 'forage', stateElapsedSeconds: 0, stateDurationSeconds: 100, navigationGeneration: generation, targetAnchor: 'grazingSurface' }
+      stepSwimmingFish(fish, mesh, 1 / 60)
+      expect(fish.navigationAnchor).toBe('grazingSurface')
+      return Math.sign(fish.route[fish.route.length - 1]!.x)
+    }
+    const choices = Array.from({ length: 32 }, (_, index) => selectedSide(`mesh-balanced-${index}`, 0))
+    expect(choices.filter(side => side === -1).length).toBeGreaterThanOrEqual(12)
+    expect(choices.filter(side => side === 1).length).toBeGreaterThanOrEqual(12)
+    expect(selectedSide('mesh-generation', 0)).not.toBe(selectedSide('mesh-generation', 1))
+  })
+  it('reuses the per-search lattice cap for a second non-direct anchor candidate', () => {
+    const fish = createSwimmingFish('mesh-lattice-retry', 'yellow-tang', { x: 0, y: 0, z: 0 }, .2, undefined, { collisionRadiusM: .04 })
+    fish.behavior = dispatchBehaviorEvent(fish.behavior, { type: 'behavior-opportunity', instanceId: fish.id, trigger: 'foraging-opportunity' })
+    const request = getNavigationRequest(fish.behavior)!
+    const preferredSide = preferredLateralSide(request)
+    const start = { x: -preferredSide * 1.2, y: 0, z: 0 }
+    const blockedTarget = { x: preferredSide * 1.2, y: 0, z: 0 }
+    const reachableTarget = { x: -preferredSide * .8, y: 0, z: .65 }
+    fish.position = start
+    const bounds = { min: { x: -2, y: -1, z: -1 }, max: { x: 2, y: 1, z: 1 } }
+    const samePoint = (a: typeof start, b: typeof start) => distance(a, b) < 1e-9
+    const attemptedAnchors: string[] = []
+    const query: CapsuleClearanceQuery = (a, b) => {
+      if (samePoint(a, b) && samePoint(a, blockedTarget)) attemptedAnchors.push('blocked')
+      if (samePoint(a, b) && samePoint(a, reachableTarget)) attemptedAnchors.push('reachable')
+      const crossesWall = (a.x < 0 && b.x >= 0) || (a.x >= 0 && b.x < 0)
+      const blockedDirect = (samePoint(a, start) && samePoint(b, reachableTarget)) || (samePoint(b, start) && samePoint(a, reachableTarget))
+      return { status: crossesWall || blockedDirect ? 'blocked' : 'clear', work: { nodeVisits: 0, triangleTests: 0 } }
+    }
+    const retryHabitat = meshHabitat(query, [
+      { id: 'blocked-preferred-side', anchor: 'grazingSurface', position: blockedTarget, compatibleSpecies: ['yellow-tang'] },
+      { id: 'reachable-other-side', anchor: 'grazingSurface', position: reachableTarget, compatibleSpecies: ['yellow-tang'] },
+    ], { ...meshBudget, maxLatticeNodes: 600 })
+    retryHabitat.bounds = bounds
+    retryHabitat.meshNavigation!.spacingM = .4
+
+    stepSwimmingFish(fish, retryHabitat, 1 / 60)
+
+    expect(attemptedAnchors.slice(0, 2)).toEqual(['blocked', 'reachable'])
+    expect(fish.navigationAnchor).toBe('grazingSurface')
+    expect(fish.route.length).toBeGreaterThan(2)
+    expect(fish.route[fish.route.length - 1]).toEqual(reachableTarget)
+    const oversized = findMeshRoute({ start, target: reachableTarget, waterBounds: bounds, fishClearanceRadius: .04,
+      spacingM: .4, queryCapsule: query, budget: { ...meshBudget, maxLatticeNodes: 100 } })
+    expect(oversized).toMatchObject({ status: 'work-limit', reason: 'lattice-node-budget-exceeded' })
   })
   it('holds safely if configured mesh budget objects are absent', () => {
     const fish = createSwimmingFish('mesh-missing-budget', 'yellow-tang', { x: 0, y: 0, z: 0 }, .5, undefined, { collisionRadiusM: .04 })
@@ -978,5 +1214,133 @@ describe('socket-derived anchor interactions (AQ-82)', () => {
     }
     expect(minSpeedAroundCorner).toBeGreaterThan(0.55)
     expect(fish.waypoint).toBeGreaterThanOrEqual(2)
+  })
+})
+
+describe('flank school stations and whole-tank distribution (AQ-104)', () => {
+  const reefBounds = { min: { x: -5.2, y: -2.25, z: -4.6 }, max: { x: 5.2, y: 2.8, z: 2.8 } }
+  const tallLaptopReefObstacles = [
+    { id: 'left-tall-island', bounds: { min: { x: -4.4, y: -2.25, z: -2.98 }, max: { x: -0.5, y: 1.8, z: 0.25 } } },
+    { id: 'right-tall-island', bounds: { min: { x: 0.5, y: -2.25, z: -2.9 }, max: { x: 4.7, y: 2.4, z: 0.25 } } },
+  ]
+  const laptopReefHabitat = (): WaterHabitat => ({
+    bounds: reefBounds,
+    maxAbsXAtDepth: z => overviewHalfWidthAtDepth(1440 / 900, z),
+    obstacles: tallLaptopReefObstacles,
+    anchors: [],
+  })
+
+  it('keeps schooling anthias and chromis groups on fore-reef tank flanks instead of collapsing into x ≈ 0', () => {
+    const water = laptopReefHabitat()
+    for (const [leadId, speciesId, count] of [
+      ['anthias-lead', 'lyretail-anthias', 4],
+      ['chromis-lead', 'blue-green-chromis', 6],
+    ] as const) {
+      const clearance = fishClearanceRadius(speciesId)
+      const lead = createSwimmingFish(leadId, speciesId, { x: 0, y: 0.6, z: 1.8 }, clearance)
+      const school = [lead]
+      for (let index = 1; index < count; index++) {
+        const mateId = `${leadId}::schoolmate-${index}`
+        const offset = schoolmateSpawnOffset(mateId, speciesId, 10.4, index - 1, count - 1)
+        const pos = findSafeFishSpawn(
+          { x: lead.position.x + offset.x, y: lead.position.y + offset.y, z: lead.position.z + offset.z },
+          water.bounds,
+          water.obstacles,
+          clearance,
+          school.map(member => ({ position: member.position, clearance: member.clearance, bodyRadiusM: fishBodyRadiusM(member.speciesId) })),
+          undefined,
+          fishBodyRadiusM(speciesId),
+          undefined,
+          water.maxAbsXAtDepth,
+        )!
+        school.push(createSwimmingFish(mateId, speciesId, pos, clearance))
+      }
+
+      for (let frame = 0; frame < 60 * 30; frame++) {
+        stepSwimmingSchool(school, water, 1 / 30)
+      }
+
+      const meanX = school.reduce((sum, member) => sum + member.position.x, 0) / school.length
+      const meanZ = school.reduce((sum, member) => sum + member.position.z, 0) / school.length
+      const maxSpreadX = Math.max(...school.map(member => Math.abs(member.position.x - meanX)))
+      expect(Math.abs(meanX), `${speciesId} school should hold a flank station`).toBeGreaterThan(1.2)
+      expect(meanZ, `${speciesId} school should stay in visible fore-reef water`).toBeGreaterThan(-0.3)
+      expect(maxSpreadX, `${speciesId} schoolmates should remain cohesive`).toBeLessThan(2.5)
+    }
+  })
+
+  it('spreads the 8-service reef cohort across left, center, and right sectors over 60 seconds', () => {
+    const services = [
+      { id: 'starter-komodo', name: 'Komodo', url: 'https://komodo.local', fishId: 'yellow-tang', isExample: false },
+      { id: 'starter-watchmybirds', name: 'WatchMyBirds', url: 'https://birds.local', fishId: 'banggai-cardinalfish', isExample: false },
+      { id: '05880da0-3cdd-4c1c-8a7a-a92758c73da2', name: 'Paperless', url: 'https://paperless.local', fishId: 'royal-gramma', isExample: false },
+      { id: 'example-home-assistant', name: 'Home Assistant', url: 'https://ha.local', fishId: 'ocellaris-clownfish', isExample: false },
+      { id: 'starter-ombi', name: 'Ombi', url: 'https://ombi.local', fishId: 'blue-tang', isExample: false },
+      { id: 'e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a', name: 'radarr', url: 'https://radarr.local', fishId: 'copperband-butterflyfish', isExample: false },
+      { id: '060212ad-1343-4890-a57f-c4c60ca162d8', name: 'Sonarr', url: 'https://sonarr.local', fishId: 'mccoskers-flasher-wrasse', isExample: false },
+      { id: '92394d96-38ec-4738-a61e-064af46849a5', name: 'Basketball', url: 'https://bball.local', fishId: 'lyretail-anthias', isExample: false },
+    ]
+    const water = laptopReefHabitat()
+    const slots = fishSpawnSlotsForServices(services)
+    const cohort: ReturnType<typeof createSwimmingFish>[] = []
+    const occupied: Array<{ position: { x: number; y: number; z: number }; clearance: number; bodyRadiusM: number }> = []
+    const leadSpawnByService = new Map<string, { x: number; y: number; z: number }>()
+
+    for (const service of services) {
+      const clearance = fishClearanceRadius(service.fishId)
+      const bodyRadiusM = fishBodyRadiusM(service.fishId)
+      const pref = fishSpawnPreference(service.id, service.fishId, water.bounds, clearance, slots.get(service.id), water.maxAbsXAtDepth)!
+      const safeHeightRange = evaluateTieredVerticalDepthRange(service.fishId, water.bounds, clearance)?.worldYRange
+      const spawn = findSafeFishSpawn(pref.position, water.bounds, water.obstacles, clearance, occupied, undefined, bodyRadiusM, safeHeightRange, water.maxAbsXAtDepth)!
+      expect(spawn, `${service.name} should get a safe spawn`).toBeDefined()
+      leadSpawnByService.set(service.id, spawn)
+      occupied.push({ position: spawn, clearance, bodyRadiusM })
+      cohort.push(createSwimmingFish(service.id, service.fishId, spawn, clearance))
+    }
+
+    const schoolmates = resolveSchoolPopulation(services)
+    const matesPerService = new Map<string, number>()
+    for (const mate of schoolmates) matesPerService.set(mate.serviceId, (matesPerService.get(mate.serviceId) ?? 0) + 1)
+    for (const mate of schoolmates) {
+      const clearance = fishClearanceRadius(mate.speciesId)
+      const bodyRadiusM = fishBodyRadiusM(mate.speciesId)
+      const leadSpawn = leadSpawnByService.get(mate.serviceId)!
+      const offset = schoolmateSpawnOffset(mate.id, mate.speciesId, reefBounds.max.x - reefBounds.min.x, mate.index - 1, matesPerService.get(mate.serviceId) ?? 1)
+      const spawn = findSafeFishSpawn(
+        { x: leadSpawn.x + offset.x, y: leadSpawn.y + offset.y, z: leadSpawn.z + offset.z },
+        water.bounds,
+        water.obstacles,
+        clearance,
+        occupied,
+        undefined,
+        bodyRadiusM,
+        undefined,
+        water.maxAbsXAtDepth,
+      )!
+      occupied.push({ position: spawn, clearance, bodyRadiusM })
+      cohort.push(createSwimmingFish(mate.id, mate.speciesId, spawn, clearance))
+    }
+    expect(cohort).toHaveLength(11)
+
+    let leftSamples = 0
+    let centerSamples = 0
+    let rightSamples = 0
+    for (let frame = 0; frame < 60 * 30; frame++) {
+      stepSwimmingSchool(cohort, water, 1 / 30)
+      if (frame % 30 === 29) {
+        for (const swimmer of cohort) {
+          if (swimmer.position.x < -1.5) leftSamples++
+          else if (swimmer.position.x > 1.5) rightSamples++
+          else centerSamples++
+        }
+      }
+    }
+
+    const totalSamples = leftSamples + centerSamples + rightSamples
+    expect(leftSamples / totalSamples).toBeGreaterThan(0.2)
+    expect(rightSamples / totalSamples).toBeGreaterThan(0.2)
+    expect(centerSamples / totalSamples).toBeLessThan(0.45)
+    expect(cohort.some(swimmer => swimmer.position.x < -1.5)).toBe(true)
+    expect(cohort.some(swimmer => swimmer.position.x > 1.5)).toBe(true)
   })
 })

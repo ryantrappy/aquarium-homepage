@@ -4,6 +4,7 @@ import {
   ADAPTIVE_MIN_WINDOW_FRAMES,
   ADAPTIVE_STEP_DOWN_EMA_MS,
   ADAPTIVE_STEP_DOWN_P95_MS,
+  ADAPTIVE_STEP_UP_EMA_MS,
   ADAPTIVE_WINDOW_DURATION_MS,
   ADAPTIVE_WINDOW_FRAMES,
   AdaptiveQualityController,
@@ -243,6 +244,69 @@ describe('AdaptiveQualityController (AQ-76 AC #3)', () => {
     expect(feedWindow(controller, 10, 30000)).toBe('balanced')
     expect(feedWindow(controller, 10, 40000)).toBe('balanced')
     expect(feedWindow(controller, 10, 50000)).toBe('high')
+  })
+
+  it('restores Low all the way to High on healthy 60 Hz RAF intervals', () => {
+    const controller = new AdaptiveQualityController('low')
+    const intervalMs = 1000 / 60
+    const feed60HzWindow = (startAtMs: number) => {
+      for (let frame = 0; frame < ADAPTIVE_WINDOW_FRAMES; frame++) {
+        controller.recordFrameInterval(intervalMs, startAtMs + frame * intervalMs)
+      }
+      return controller.evaluate(startAtMs + ADAPTIVE_WINDOW_FRAMES * intervalMs)
+    }
+
+    expect(feed60HzWindow(0)).toBe('low')
+    expect(feed60HzWindow(10000)).toBe('low')
+    expect(feed60HzWindow(20000)).toBe('balanced')
+    expect(feed60HzWindow(30000)).toBe('balanced')
+    expect(feed60HzWindow(40000)).toBe('balanced')
+    expect(feed60HzWindow(50000)).toBe('high')
+    expect(ADAPTIVE_STEP_UP_EMA_MS).toBe(17.5)
+  })
+
+  it('does not restore on a stable 18 ms deadband', () => {
+    const controller = new AdaptiveQualityController('low')
+    expect(feedWindow(controller, 18, 0)).toBe('low')
+    expect(feedWindow(controller, 18, 10000)).toBe('low')
+    expect(feedWindow(controller, 18, 20000)).toBe('low')
+  })
+
+  it('does not restore when a fast EMA hides a p95-spiky window', () => {
+    const controller = new AdaptiveQualityController('low')
+    const feedSpikyWindow = (now: number) => {
+      // Put six slow intervals first so EMA settles back near 60 Hz, while
+      // more than five percent of samples still push p95 over the budget.
+      for (let i = 0; i < ADAPTIVE_WINDOW_FRAMES; i++) {
+        controller.recordFrameInterval(i < 6 ? 25 : 1000 / 60, now + i)
+      }
+      return controller.evaluate(now + ADAPTIVE_WINDOW_FRAMES)
+    }
+
+    expect(feedSpikyWindow(0)).toBe('low')
+    expect(feedSpikyWindow(10000)).toBe('low')
+    expect(feedSpikyWindow(20000)).toBe('low')
+  })
+
+  it('keeps recovery streaks separated by exclusions and honors cooldown after repeated tier changes', () => {
+    const controller = new AdaptiveQualityController('low')
+    expect(feedWindow(controller, 1000 / 60, 0)).toBe('low')
+    expect(feedWindow(controller, 1000 / 60, 10000)).toBe('low')
+    controller.recordFrameInterval(1000 / 60, 21000, true)
+    expect(controller.evaluate(21000)).toBe('low')
+    expect(feedWindow(controller, 1000 / 60, 30000)).toBe('low')
+    expect(feedWindow(controller, 1000 / 60, 40000)).toBe('low')
+    expect(feedWindow(controller, 1000 / 60, 50000)).toBe('balanced')
+
+    expect(feedWindow(controller, 1000 / 60, 60000)).toBe('balanced')
+    expect(feedWindow(controller, 1000 / 60, 70000)).toBe('balanced')
+    expect(feedWindow(controller, 1000 / 60, 80000)).toBe('high')
+    // Further tier changes keep requiring sustained windows; after the last
+    // recovery, sustained overload still steps back down once cooldown clears.
+    expect(feedWindow(controller, 25, 82000)).toBe('high')
+    expect(feedWindow(controller, 25, 83000)).toBe('high')
+    expect(feedWindow(controller, 25, 84000)).toBe('high')
+    expect(feedWindow(controller, 25, 85000)).toBe('balanced')
   })
 
   it('does not oscillate: cooldown blocks a change within 5 s of the last one', () => {

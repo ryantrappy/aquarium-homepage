@@ -206,20 +206,19 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .aquarium-three.is-rendered { background: #04152d; }
 .aquarium-link-layer { position: absolute; inset: 0; pointer-events: none; }
 .aquarium-fish-link { position: absolute; display: block; min-width: 44px; min-height: 44px; pointer-events: auto; text-decoration: none; transform-origin: 0 0; border-radius: 45%; }
-.aquarium-fish-link .fish-name { position: absolute; top: calc(100% - var(--fish-label-lift, 10px) + var(--fish-label-dy, 0px)); left: 50%; transform: translateX(calc(-50% + var(--fish-label-dx, 0px))); max-width: 170px; min-width: 44px; min-height: 32px; justify-content: center; margin: 0; font-size: 11px; }
-/* AQ-89: a caption that would clip past a frame edge is clamped inside
- * it, and a caption that cannot clear another fish fades out — the
- * native link and its 44px target stay usable either way. Horizontal
- * placement is carried by --fish-label-dx (set by positionLabels from
- * the layout pass); the fish-label-align-left/right classes remain as
- * layout markers only, because anchoring the caption to the link box
- * cannot keep it in-frame when the box itself sits partly past the
- * frame edge (mobile zoomed WatchMyBirds). */
+.aquarium-fish-link .fish-name { position: absolute; top: var(--fish-label-y, calc(100% - 10px)); left: var(--fish-label-x, 50%); transform: var(--fish-label-transform, translateX(-50%)); width: max-content; max-width: 170px; min-width: 44px; min-height: 32px; justify-content: center; margin: 0; font-size: 11px; }
+/* AQ-89: measured captions use body-relative screen coordinates carried
+ * by --fish-label-x/y. An impossible placement hides only the caption;
+ * the native link, accessible name and44px target remain available. */
 .aquarium-three.is-rendered .aquarium-fish-link.fish-label-deconflicted .fish-name,
 .aquarium-three.is-rendered .aquarium-fish-link.fish-label-deconflicted:hover .fish-name,
 .aquarium-three.is-rendered .aquarium-fish-link.fish-label-deconflicted:focus-visible .fish-name,
 .aquarium-three.is-rendered .aquarium-fish-link.fish-label-deconflicted:focus-within .fish-name,
-.aquarium-three.is-rendered .aquarium-fish-link.fish-label-deconflicted.is-acknowledged .fish-name { opacity: 0; }
+.aquarium-three.is-rendered .aquarium-fish-link.fish-label-deconflicted.is-acknowledged .fish-name { opacity: 0; pointer-events: none; }
+/* The measured caption already brightens on hover/focus. Its duplicate
+ * tooltip must not bypass caption/body de-confliction. Native titles and
+ * accessible link names remain available. */
+.aquarium-three.is-rendered .aquarium-fish-link .fish-link-tooltip { display: none; }
 .aquarium-three.is-rendered .aquarium-fish-link { margin-left: calc(-.5 * var(--fish-width, 0px)); }
 .aquarium-three.is-rendered .aquarium-fish-link > .fish-figure { display: none; }
 .aquarium-fish-link:hover .fish-name, .aquarium-fish-link:focus-visible .fish-name, .aquarium-fish-link.is-acknowledged .fish-name { border-color: #d4f2e8; background: #16434dec; box-shadow: 0 0 16px #b8efe84d; }
@@ -348,7 +347,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   border-color: rgba(229, 247, 237, .76);
   color: #f4fcf7;
   background: rgba(11, 45, 49, .84);
-  box-shadow: 0 0 12px rgba(180, 239, 220, .22);
+  box-shadow: none;
 }
 
 /* AQ-13 hover/focus affordances (tracker #16). Anchor-only: no canvas click

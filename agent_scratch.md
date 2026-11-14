@@ -1,61 +1,32 @@
 <!-- Keep this header. Append brief handoff notes below, newest at the bottom, and trim stale entries when resolved. -->
 <!-- Keep roughly the last 5 entries or ~100 lines max. Summarize what changed, verification run, and what remains. -->
 
-### 2026-11-12 — Standing policy review
-*Root reviewed2026-11-13: standing policy current; older process/count checkpoints superseded by the latest AGENT_TASKS.md section; remaining art/model/clearance work pending.*
-*Root reviewed every prior entry2026-11-12: standing policies current; old workspace/PR/count/process checkpoints superseded by AGENT_TASKS.md. Prior Gemini short-term-lead restriction superseded by returned Codex Root and explicit user authorization to mark verified work Done.*
-*Junie reviewed 2026-11-12: current policy; preserve concurrent work, keep viewport verification to the two target sizes, and leave Blender untouched.*
-- Primary goal: realistic living reef matching supplied reference; finish backlog with Luna bounded implementation and Root review. Keep scope intact; functional tests alone do not accept art.
-- Commit each verified task/handoff with scoped staging; push reviewed milestones and keep a review PR. No blanket staging/reset/clean. User deploys to trappserv.er; never deploy.
-- Verify only402x874 and1440x900 DPR1. Preserve Gemini/concurrent assets and user changes. Root reserves Blender; one agent at a time. All model edits must be saved/exported/synced/committed.
-- User confirms blue_tang.ply and all nine other supplied splat models/derivatives are theirs to share. Permission resolved; source identity/derivative records and art remain independent gates.
+### 2026-11-14 — Standing user policy
+*Root resume review2026-11-14: all earlier scratch entries inspected/consolidated; current policy, not blanket completion.*
+- Complete every open Backlog task using agents and Root review with objective evidence. Scoped commits and pushes to shared rolling draftPR48 https://github.com/ryantrappy/aquarium-homepage/pull/48 with running contents. Full goal active/incomplete; never deploy/merge. User deploys to trappserv.er.
+- Preserve Gemini/user assets and concurrent work; no blanket staging/reset/clean. Goal docs/more-realistic-reef-guide.png, tall reef mass retained. Only402x874/1440x900DPR1. CI/FPS-display lanes excluded. All supplied splat references/derivatives owned/shareable per user; rights blocker resolved.
+- Root reserves Blender single actor. Preserve live user work. Any future edit requires packed native save, override export, --learn-guide sync and every specified source/runtime/inspection/manifest commit. No model/Blender edits in AQ104/105 review.
 
-### 2026-11-13 — Effective lighting verified handoff
-*Root reviewed2026-11-13: actioned exposure correction; remaining art/model/performance gates pending. Prior policies current; previous process checkpoints superseded here.*
-- AQ71 explicit shared PMREM fixes renderer override;69cad24 rear fill0.65 accepted bothsizes under AC3, AC4 open.758tests/66files,45focused/typecheck14scripts/build pass. Native evidence docs/asset-evidence/aq71/sand-ibl-20261113/. No Root Blender edits or deployment.
-- Proofdetached69cad24/dev5215 pins69cad24; verifyownershipbeforestopping. Reviewtabclosed/metricsreset; oldstale1298077987 remains. User3000/5210 preserved, original5214/5212 stale.
-- AQ94 central arch next major visual iteration, plan recorded only. Root owns new model/isolated reef pipeline; no competing Blender agent. Preserve existing supplied models; all new used models must save/pack/export/sync/commit.
+### 2026-11-14 — Saved reef and pending primary visual work
+*Root resume review2026-11-14: bounded saved milestones actioned; broad art/library/physical/body gates pending.*
+- Arch6e57f2d, growthd454c27, antler949ccb7, corymbosec52b969, torchf95d68c packed/exported/synced/used/committed. Tall mass f95d68c/2eda799: projected extents82.49left/77.63right/81.29phone percent, not pixel-area. Supplied assets preserved.
+- Fill exposed left-front mid-rock with supported plate/zoa terraces, preserving height. All12left/11right sockets occupied; new sites require current runtime-surface support, not stale canonical reports. Full NSA5–8library/2048atlas/tissue/physical scale/animated clearance remain open. No competing model creation delegated.
 
-### 2026-11-13 — Central arch persisted and integrated
-*Root reviewed2026-11-13 all entries: vertical-fill request actioned; standing policies current; older process checkpoints superseded. Full art/model/clearance goal pending.*
-- AQ94Root6e57f2d original centralarch saved packednative/exported/synced/used/committed. Dedicated reef override path preserves fish workflow; native textures allpacked. Existing Gemini/user reef untouched; background Blenderonly, liveuserfileuntouched. Full5–8library/2048atlas/finalrockart stillopen.
-- Exact6e57f2d782tests/68files, typecheck15scripts/buildpass; native2sizes ready/nofailures/11inhabitants/8phonetargets>=44/zeroconsolewarnings. docs/asset-evidence/aq94/central-arch-20261113/. Technical0.04sceneopening probe only, no animatedbody certification.
-- Proofdetached6e57f2d/dev5215PID86121; verifyownershipbeforestopping. Native reviewtabsclosed/metricsreset, oldstale1298077987 remains. Preserve user3000/5210; original5214/5212stale. No deployment. Nextvisualworkarchcolonization/materialcohesion and broader referenceart; do notmarkfullAQ94Done.
+### 2026-11-14 — AQ104 completed
+*Root review2026-11-14: actioned; all5AC verified, Done and pushed1224ebb.*
+- Source604c8aa preserves seeded school/fore-reef work, safe alternate flank after8preferred attempts. Both AABB/mesh counterexamples pass without weakened budgets. Mixed8species11fish60s fixture has all3sectors100percent settled samples, unsafe0, all move/replayequal. Legacyunits/controlledtwo-box fixture, not fullreef/body certification.
+-865tests/73files, typecheck16scripts/build, exacttwo-size native movement/Pause/8entrydialogs pass. Evidence docs/asset-evidence/aq104/current-604c8aa/README.md. Former user untracked AQ104screenshots later disappeared externally; Root never staged/deleted them.
 
-### 2026-11-13 — Arch colonization resume
-*Root reviewed2026-11-13 all prior entries: standing policies current; vertical-fill request actioned; older process checkpoints historical; full art/model/clearance goal pending.*
-- Previous turn classified progress: saved/synced/used/committed central arch and effective lighting, native two-size proof and782tests. Current original checkout clean at84f644f before task-plan update. Next actualmodel iteration adds measured savedsocket mounts/reused coral templates and refines striped arch surface texture. Root reserves Blender; liveuserdocument preserved.
-- Luna readonly closure audit found AQ73/AQ41 checked boxes still lack task-scoped current visual/performance proof, so no unsupportedDone. CI/FPSdisplay excluded.
+### 2026-11-14 — AQ105 final review
+*Root review2026-11-14: actioned, all4AC verified and Done; broader goal incomplete.*
+- Source7842bd6 integrates mounted crown targets/resident soft access and preserved incoming spawnpriority/transactional anchorpreemption.4df19de corrects loader sphere slack using actual shader maxMargin; unknown geometry stays conservative. Incoming patch/sourcepins and beforefailures retained. Concurrent docs6a2e3ea preserved/pushed.
+-54focused/875tests75files pass1worker, typecheck16scripts/build pass. Earlier2worker socket timeouts and unchangedisolated6pass retained. Final exact4df19de native bothsizes samehost idle/swim bobbing and finite varying8boneposes; visible60rAF normal8of8move/Pause-reduced0of8. SettledphonePausePNGs identical; Services/Settings8fit; actualclownfish link opens correctlocalURL; capturedwarningserrors0.395runtimeinputs match proof/original.
+- Evidence/reproducible summary docs/asset-evidence/aq105/final-4df19de/README.md. No final art/physicalbody/runtimebudget acceptance; all existing gates remain open. Older784phoneblockfailure superseded by verified4dfcorrection.
 
-### 2026-11-13 — Supported arch growth verified
-*Root reviewed2026-11-13 all prior entries: policies current; previous process checkpoints superseded; archive details remain in Git/AGENT_TASKS.md and evidence. Full reef/model/clearance goal pending.*
-- d454c27 saved/exported/synced/used/committed arch4measuredsocketcorals plus isotropictexture/UVfix.4supported/0rejected/384samples. Bothnative sizes ready/noerrors/8phonetargets>=44.791tests/68files, typecheck15scripts/build pass. docs/asset-evidence/aq94/arch-growth-20261113/. No fullNSA/library/atlas/bodyclearance acceptance; AQ94InProgress.
-- Proofdetachedd454c27/dev5215pinsd454c27; verifyPID/cwd beforestopping. Allfinalreviewtabsclosed/metricsreset; oldstale1298077987 remains. Preserve user3000/5210, original5214/5212stale. LiveuserBlenderfileuntouched, backgroundRootonly, allnewnative/artifactscommitted. No deployment. Lunaidle.
-- Nextprimary visualpriority maincoral morphology/texture, not more tinyarchplacement. Preserve suppliedsourcework, verifyactualcurrentasset/native beforeediting. CI/FPSdisplay excluded. AQ73/AQ41read-onlytriage remains unverifiedcurrentart/performance, no unsupportedDone.
-
-### 2026-11-13 — Main Acropora morphology resume
-*Root reviewed2026-11-13 every retained entry: standing policies current; older process checkpoints historical; final reef/bodyclearance/art pending.*
-- Previous goalturn progress: d454c27/4601a5a saved/synced/used/committed4archcorals and791tests/nativeproof. Currentcheckout clean4601a5a before tasknotes. AQ70.11nowactiveRoot morphology pilot preservingoldcorals/canonicalmanifest; newcustommodelmust nativepack/export/sync/use/commit. Root reserves Blender; nootheragentusesit.
-
-### 2026-11-13 — Antler pilot and taller secondary crest verified
-*Root reviewed every retained entry2026-11-13: standing policies current; older process checkpoints superseded by latest AGENT_TASKS.md; full art/model/clearance pending.*
-- 949ccb7 original antler savedpacked/exported/synced/used/committed with3PBRmaps; Root artgate beforepromotion. f4d4f24raises3rightcrestscales17–28%; nativebothsizesready/11inhabitants/8phonetargets>=44/noerrors.817tests/70files/typecheck16scripts/buildpass. Evidence docs/asset-evidence/aq70-11/antler-20261113/. AQ70.11/70.13remainopenforfullrubric/variants/physicalscale/clearance/budgets.
-- Proofdetachedf4d4f24/dev5215pinsexactsource; verifyownershipbeforestop. Reviewtabclosed/metricsreset, oldstale1298077987remains. Preserveuser3000/5210/liveBlender. Nextmajorvisualwork remainingcoralarchetypes/variants; CI/FPSexcluded. No deployment.
-
-### 2026-11-13 — Corymbose coral resume
-*Root reviewed all retained entries2026-11-13: standing policies current; prior completed milestones actioned; older process details superseded; overall art/model/clearance pending.*
-- Prior goalturn progress:949ccb7/f4d4f24/573715b saved antler used/committed/pushed plus taller secondary crest/817tests/nativeproof. Cleanreview checkout before newplan. Next AQ70.11 original bushy branching colony; Root reserves Blender, separatebackgroundprocess/liveuserfilepreserved. No competing modelagent.
-
-### 2026-11-13 — Bushy right colony verified
-*Root reviewed every retained entry2026-11-13: standing policies current; prior milestones actioned; older source/process checkpoints superseded by latest AGENT_TASKS.md; full art/scale/clearance pending.*
-- c52b969 originalcorymbose savedpacked/exported/synced/used/committed at rightcrest05;112tips/25725runtime triangles,3PBRmaps. Safeatlasfill+EXTEND removedblackgutters; Rootgate beforepromotion. Exact821tests/70files/typecheck16scripts/build andnative2sizesready/11inhabitants/8phonetargets>=44/noerrors. Evidence docs/asset-evidence/aq70-11/corymbose-20261113/. Phone usesleftisland; no newrightmacrobothsizes/artfulltaskacceptance.
-- Proofdetachedc52b969/dev5215pinsit, onlyinfraViteconfigdirty. Finaltabclosed/metricsreset; oldstale1298077987remains. iCloudreadblock recovered with exacthashcopies; no globalsettingschanges. Preserveuser3000/5210/liveBlender; backgroundRootonly/allnewmodelscommitted. Next remainingLPS/softcoralfidelity; CI/FPSexcluded; no deployment.
-
-### 2026-11-13 — Flowing torch resume
-*Root reviewed all retained entries2026-11-13: current policies stand; previous milestones actioned; older process details superseded; full art/scale/clearance pending.*
-- Prior goalturn progress c52b969/b3dd749: saved/synced/used/committed/pushed bushyrightcoral,821tests/nativeproof. Currentcleanreview beforeplan. AQ70.11next originalflowingtorch plus explicitsoft/rigid installer; RootreservesBlender/backgroundonly/liveuserfilepreserved. Existingtorchandsuppliedmodels preserved.
-
-### 2026-11-13 — Eighty-percent reef and torch verified
-*Root reviewed all retained entries2026-11-13: standing policies current; prior milestones actioned; latest80%massrequest actioned; older process checkpoints superseded by AGENT_TASKS.md; full art/scale/support/clearance pending.*
-- f95d68c tallerfoundations (laptopL2/R3.1,phone2.8) +root-spaceinheritedsockets/undistortedcorals. Trialextent82.49%L/77.63%R/81.29%phone; exactnativebothsizesready/11inhabitants/8usablephonetargets/noerrors.845tests/71files/typecheck16scripts/buildpass. Newflowingtorch savedpacked/exported/synced/used/committed,6maps/soft-rigidroles/actualloaderpauseproof. Evidence aq70-13/fill-80-20261113 andaq70-11/flowing-torch-20261113.
-- Proofdetachedf95d68c/dev5215pinsexactsource/onlyViteconfigdirty; verifyownershipbeforestop. Allfinaltabsclosed/metricsreset; oldstale1298077987remains. Preserveuserports3000/5210/liveBlender; Rootbackgroundonly/no deployment. Nextcoralcolonizationofnewmidrockfaces, notlessheight. CI/FPSexcluded, wholeart/metric/clearance stillopen.
+### 2026-11-14 — Label/recovery review and current process
+*Root resume review2026-11-14: all earlier entries inspected; policies current, AQ104/105 actioned, broader art/support/promotion/label-native work pending.*
+- Agents resumed successfully. Root explicitly chose stronger collision-layout/review lanes; defaultLuna/high handled adaptive policy. AQ89 InProgress/all5AC+2DoDunchecked pending exactnative; AQ76open. AQ76 source milestone1e1105e pushed; this commit carries reviewedAQ89source/evidence before exactnative review; neverdeploy/merge.
+- AQ89 measured captions use current full posed vertices plus liveflex, independent44px links; bounded32candidate solver avoids allbody/caption overlaps or hidescaptiononly.27helpercases pass/oldhelperfails24. Initial~27msCPU pass rejected; same53878vertex11fish Nodefixture optimized to7.2/9.3msp50,9.7/10.9p95. Notbrowser/mobile/GPUbudget proof. No vertex sampling.
+- AQ76 healthy60Hz recovery threshold17.5ms is distinct from unchanged16.7target/19slowEMA/22p95; cooldown/window/exclusions retained. First combined901pass/1stalebudget13msfailure fixed transparently; final902tests75files,42focusedpolicychecks/typecheck16scripts/build pass. Fulltask/performancegatesremainopen.
+- Current13file source snapshot hashmatchesoriginal/proof; taskscoped76and89commits/pushes follow to sharedPR48/updaterunninglist. Audits a09ae53(79)/b3fdf38(70.13) pushed, tasksopen. Queue64Done/68open, CI/FPSdisplayexcluded. PreserveGemini/concurrentassets; noModel/Blender/config edits.
+- Proof /tmp/aquarium-aq87-proof-8b2d7cc detached4df19de+13reviewedfiles+Viteallowlist. Owneddev5215PID46280stillstale4dfVITEpin; verifyownership/snapshotownfiles/checkoutsharedmilestone/restartaccurately before nativeproof. Disposablelocalhostconfigunchanged; preserveuser3000/5210. Priorreviewtabsclosed,Chrome4retained; no currentownedreviewtab.

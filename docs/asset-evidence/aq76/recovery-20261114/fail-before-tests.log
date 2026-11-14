@@ -1,0 +1,51 @@
+
+> test
+> vitest run src/rendering/scene/runtime-quality.test.ts
+
+
+ RUN  v5.1.0 /Users/ryantrapp/Desktop/Code/aquarium-homepage
+
+ ❯ src/rendering/scene/runtime-quality.test.ts (28 tests | 2 failed) 47ms
+   ❯ AdaptiveQualityController (AQ-76 AC #3) (14)
+     × restores Low all the way to High on healthy 60 Hz RAF intervals 15ms
+     × keeps recovery streaks separated by exclusions and honors cooldown after repeated tier changes 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/rendering/scene/runtime-quality.test.ts > AdaptiveQualityController (AQ-76 AC #3) > restores Low all the way to High on healthy 60 Hz RAF intervals
+AssertionError: expected 'low' to be 'balanced' // Object.is equality
+
+Expected: "balanced"
+Received: "low"
+
+ ❯ src/rendering/scene/runtime-quality.test.ts:261:35
+    259|     expect(feed60HzWindow(0)).toBe('low')
+    260|     expect(feed60HzWindow(10000)).toBe('low')
+    261|     expect(feed60HzWindow(20000)).toBe('balanced')
+       |                                   ^
+    262|     expect(feed60HzWindow(30000)).toBe('balanced')
+    263|     expect(feed60HzWindow(40000)).toBe('balanced')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/rendering/scene/runtime-quality.test.ts > AdaptiveQualityController (AQ-76 AC #3) > keeps recovery streaks separated by exclusions and honors cooldown after repeated tier changes
+AssertionError: expected 'low' to be 'balanced' // Object.is equality
+
+Expected: "balanced"
+Received: "low"
+
+ ❯ src/rendering/scene/runtime-quality.test.ts:299:54
+    297|     expect(feedWindow(controller, 1000 / 60, 30000)).toBe('low')
+    298|     expect(feedWindow(controller, 1000 / 60, 40000)).toBe('low')
+    299|     expect(feedWindow(controller, 1000 / 60, 50000)).toBe('balanced')
+       |                                                      ^
+    300|
+    301|     expect(feedWindow(controller, 1000 / 60, 60000)).toBe('balanced')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 26 passed (28)
+   Start at  09:16:22
+   Duration  891ms (transform 43%, tests 24%, import 23%, worker 9%)

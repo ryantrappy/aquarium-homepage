@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { mountedAnemoneHosts } from './anemone-host'
 import { GLTFLoader, type GLTF } from 'three/addons/loaders/GLTFLoader.js'
 import { clone } from 'three/addons/utils/SkeletonUtils.js'
 import type { ServiceConfig } from '../../lib/services'
@@ -40,9 +41,9 @@ import { reefPlacementsForViewport } from './reef-layout'
 import { CENTER_ARCH_URL, CENTER_ARCH_MOUNTS, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
 import { createGlassEnclosure, glassEnclosureLayout } from './glass-enclosure'
 import { createWaterSurface } from './water-surface'
-import { estimateCaptionRect, labelLiftPx, resolveLabelDeconflicts } from './fish-label-layout'
+import { estimateCaptionRect, resolveLabelDeconflicts, type LabelRect } from './fish-label-layout'
 import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
-import { createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
+import { meshQueryForSpecies, createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
 import { createReefMeshNavigation, createRockFallbackObstacles, createMountedCoralFallbackObstacles, MESH_NAVIGATION_COLLISION_RADIUS_M, type ReefMeshIslandInput } from './reef-mesh-navigation'
 import { applyFishTurningRigOverlay, bindFishTurningRig, evaluateSpriteTurnScaleX, type FishTurningRig } from './fish-turning'
 import { SPRITE_PLANE_WIDTH, fishBodyRadiusM, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale } from './fish-scale'
@@ -51,7 +52,7 @@ import { EMPTY_FISH_EXTENSIONS, type FishExtensionConfig } from '../../simulatio
 import { consumeFrameSteps, createFrameClock, SIMULATION_STEP_SECONDS, suspendFrameClock } from './clock'
 import { handleArtworkTextureFailure, nearestVisibleIntersection, readArtworkAlpha, type SpriteMasks } from './alpha-picking'
 import { applyFishLinkVisibility, isLabelSampleExposed } from './fish-link-focus'
-import { projectFishLinkBounds } from './fish-link-projection'
+import { projectFishBodyBounds, projectFishLinkBounds } from './fish-link-projection'
 import { createFishClipPlayer, type FishClipPlayer } from './fish-animation'
 import { bindFishFlexToModel, updateFishFlex, type FishFlexBinding } from './fish-flex-material'
 import { reconcileFishInhabitants, refreshFishLink } from './fish-inhabitants'
@@ -60,11 +61,11 @@ import { applyCaustics, createCaustics } from './caustics'
 import { AdaptiveQualityController, LAZY_MAX_CONCURRENT_LOADS, QUALITY_TIERS, consumeLodAnimationDelta, createLodAnimationDeltaState, orderLazyLoadQueue, phase0SpeciesIds, projectedFishLengthPx, selectFishLod, shaftModeForTier, type FishLod, type QualityTier } from './runtime-quality'
 import { FRAME_RATE_PUSH_INTERVAL_MS, FrameRateSampler, type FrameRateSample } from './frame-rate'
 import {
-  DEFAULT_CAMERA_DISTANCE_M,
   DEFAULT_CAMERA_ZOOM_STATE,
   clampCameraZoomState,
   dampCameraZoomState,
   isOverviewZoomState,
+  overviewHalfWidthAtDepth,
   panCameraZoomState,
   stepZoomDistance,
   zoomStateForFishPosition,
@@ -520,7 +521,11 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   })
   scene.add(glassEnclosure.group)
   let glassLayoutNarrow: boolean | undefined
-  let habitat: WaterHabitat = { bounds: { min: { x: -4, y: -2.25, z: -4.6 }, max: { x: 4, y: 2.8, z: 2.8 } }, obstacles: [], anchors: [] }
+  let habitat: WaterHabitat = {
+    bounds: { min: { x: -4, y: -2.25, z: -4.6 }, max: { x: 4, y: 2.8, z: 2.8 } },
+    maxAbsXAtDepth: z => Math.min(4, overviewHalfWidthAtDepth(camera.aspect, z)),
+    obstacles: [], anchors: [],
+  }
   let width = 1, height = 1, labelClock = 0, spawnUnavailable = false
   let lookDevPreset: LookDevPreset = lookDevConfig?.preset ?? 'full-scene'
   let lookDevTimeSeconds = lookDevConfig?.timeSeconds ?? 0
@@ -773,6 +778,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       const r = MESH_NAVIGATION_COLLISION_RADIUS_M
       const { min, max } = habitat.bounds
       const p = item.motion.position
+      if (!isSafeFishPosition(p, r, habitat.bounds, [], habitat.maxAbsXAtDepth)) return false
       if (
         p.x < min.x + r || p.x > max.x - r ||
         p.y < min.y + r || p.y > max.y - r ||
@@ -781,7 +787,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         return false
       }
       return (
-        habitat.meshNavigation.queryCapsule(p, p, r, {
+        meshQueryForSpecies(habitat.meshNavigation, item.service.fishId)!(p, p, r, {
           ...habitat.meshNavigation.movementBudget,
         }).status === 'clear'
       )
@@ -791,6 +797,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       item.motion.clearance,
       habitat.bounds,
       habitat.obstacles,
+      habitat.maxAbsXAtDepth,
     )
   }
   function failReefSetup(reason: string) {
@@ -894,7 +901,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         return
       }
       let result: ReturnType<typeof instantiateModularReefHabitat>
+      let hostAnchors: ReturnType<typeof mountedAnemoneHosts>
       try {
+        hostAnchors = mountedAnemoneHosts(assembled.mountedCorals, `reef-${i}`)
         const mountedOrigins = snapshotMountedCoralOrigins(assembled.mountedCorals)
         result = instantiateModularReefHabitat(islandKind, uniformScale, position, `reef-${i}`, yaw, mounts, habitat.bounds, mountedOrigins)
       } catch (error) {
@@ -904,7 +913,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       // Keep the calcified coral bases; historical hand-authored rock bands
       // are replaced by bounds of the same current meshes used for rendering.
       habitat.obstacles.push(...fallback.obstacles, ...result.obstacles.filter(obstacle => obstacle.id.startsWith(`reef-${i}-coral-base-`)))
-      habitat.anchors.push(...result.anchors)
+      habitat.anchors.push(...result.anchors.filter(anchor => anchor.anchor !== 'hostAnemone'), ...hostAnchors)
       reef.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) })
       meshIslands.push({ reef, islandId: `reef-${i}`, mountedCorals: assembled.mountedCorals })
     }
@@ -957,7 +966,8 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         // Relocate any fish or schoolmate that drifted into a coral envelope
         // during the brief AABB window before the async mesh collider resolved.
         const meshCheck = (candidate: SwimmingFish['position']) =>
-          result.meshNavigation.queryCapsule!(
+          isSafeFishPosition(candidate, MESH_NAVIGATION_COLLISION_RADIUS_M, habitat.bounds, [], habitat.maxAbsXAtDepth)
+          && result.meshNavigation.queryCapsule!(
             candidate,
             candidate,
             MESH_NAVIGATION_COLLISION_RADIUS_M,
@@ -981,6 +991,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
             meshCheck,
             fishBodyRadiusM(item.service.fishId),
             evaluateTieredVerticalDepthRange(item.service.fishId, habitat.bounds, item.motion.clearance)?.worldYRange,
+            habitat.maxAbsXAtDepth,
           )
           if (relocated) {
             item.motion.position = relocated
@@ -1209,9 +1220,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       const clearance = fishClearanceRadius(mate.speciesId)
       const offset = schoolmateSpawnOffset(mate.id, mate.speciesId, tankWidth, mate.index, SCHOOL_TOTAL_COUNT[mate.speciesId] - 1)
       const preferred = { x: lead.x + offset.x, y: lead.y + offset.y, z: lead.z + offset.z }
-      const position = findSafeFishSpawn(preferred, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(mate.speciesId), evaluateTieredVerticalDepthRange(mate.speciesId, habitat.bounds, clearance)?.worldYRange)
+      const position = findSafeFishSpawn(preferred, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(mate.speciesId), evaluateTieredVerticalDepthRange(mate.speciesId, habitat.bounds, clearance)?.worldYRange, habitat.maxAbsXAtDepth)
       if (!position) continue
-      const yaw = findSafeFishHeading(position, Math.atan2(offset.x, offset.z), habitat.bounds, habitat.obstacles, clearance)
+      const yaw = findSafeFishHeading(position, Math.atan2(offset.x, offset.z), habitat.bounds, habitat.obstacles, clearance, habitat.maxAbsXAtDepth)
       if (yaw === undefined) continue
       nextMates.push(createInhabitant(
         { id: mate.id, name: '', url: '', fishId: mate.speciesId, isExample: false },
@@ -1248,7 +1259,8 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     const meshSpawnCheck = habitat.meshNavigation?.queryCapsule
       ? (candidate: SwimmingFish['position']) => {
           const mesh = habitat.meshNavigation!
-          return mesh.queryCapsule!(candidate, candidate, MESH_NAVIGATION_COLLISION_RADIUS_M, { ...mesh.movementBudget }).status === 'clear'
+          return isSafeFishPosition(candidate, MESH_NAVIGATION_COLLISION_RADIUS_M, habitat.bounds, [], habitat.maxAbsXAtDepth)
+            && mesh.queryCapsule!(candidate, candidate, MESH_NAVIGATION_COLLISION_RADIUS_M, { ...mesh.movementBudget }).status === 'clear'
         }
       : undefined
     for (const service of nextServices) {
@@ -1256,21 +1268,21 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       if (previous?.service.fishId === service.fishId) continue
       const species = getFishById(service.fishId)!
       const clearance = fishClearanceRadius(service.fishId)
-      const preference = fishSpawnPreference(spawnOrderKey(service.id), service.fishId, habitat.bounds, clearance, horizontalSlots.get(service.id))
+      const preference = fishSpawnPreference(spawnOrderKey(service.id), service.fishId, habitat.bounds, clearance, horizontalSlots.get(service.id), habitat.maxAbsXAtDepth)
       // The tall portrait reef fills the rear water column. Start the two
       // broad cruisers in front water, still subject to every clearance test.
       const foregroundCruiser = width < 600 && (service.fishId === 'blue-tang' || service.fishId === 'yellow-tang')
       const preferredPosition = preference && foregroundCruiser
         ? { ...preference.position, z: habitat.bounds.max.z - clearance - (service.fishId === 'blue-tang' ? 0.65 : 0.25) }
         : preference?.position
-      const position = preference && preferredPosition && findSafeFishSpawn(preferredPosition, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(service.fishId), evaluateTieredVerticalDepthRange(service.fishId, habitat.bounds, clearance)?.worldYRange)
+      const position = preference && preferredPosition && findSafeFishSpawn(preferredPosition, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(service.fishId), evaluateTieredVerticalDepthRange(service.fishId, habitat.bounds, clearance)?.worldYRange, habitat.maxAbsXAtDepth)
       if (!position || !preference) {
         // Keep existing instances intact during the truthful full-native fallback.
         // A later fitting configuration can reuse their exact poses and clocks.
         refreshRetainedLinks()
         spawnUnavailable = true; syncLoop(); return false
       }
-      const yaw = findSafeFishHeading(position, preference.yaw, habitat.bounds, habitat.obstacles, clearance)
+      const yaw = findSafeFishHeading(position, preference.yaw, habitat.bounds, habitat.obstacles, clearance, habitat.maxAbsXAtDepth)
       if (yaw === undefined) {
         refreshRetainedLinks()
         spawnUnavailable = true; syncLoop(); return false
@@ -1295,9 +1307,19 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   }
   function rebuildFish(): boolean | undefined { removeFish(); return reconcileFish() }
   function positionLabels(force = false) {
-    // AQ-89: two passes — place every visible label tight under its fish,
-    // then de-conflict the captions so none covers another fish or caption.
-    const placedLabels: Array<{ anchor: HTMLAnchorElement; id: string; label: string; bounds: { x: number; y: number; width: number; height: number }; lift: number; depth: number }> = []
+    // Read intrinsic caption sizes together before any position writes. The
+    // visible body and the padded44px native link are separate rectangles.
+    camera.updateMatrixWorld(true)
+    const bodies = new Map<Inhabitant, LabelRect>()
+    for (const item of [...fish, ...schoolmates]) {
+      const body = projectFishBodyBounds(item.root, camera, width, height, projected, item.flex?.vertexDeformerFor)
+      if (body) bodies.set(item, body)
+    }
+    const sizes = new Map(fish.map(item => {
+      const caption = item.anchor?.querySelector<HTMLElement>('.fish-name')
+      return [item, { width: caption?.offsetWidth ?? 0, height: caption?.offsetHeight ?? 0 }] as const
+    }))
+    const placedLabels: Array<{ anchor: HTMLAnchorElement; id: string; label: string; bounds: LabelRect; body: LabelRect; caption: LabelRect; depth: number }> = []
     for (const item of fish) {
       const anchor = item.anchor; if (!anchor) continue
       const bounds = projectFishLinkBounds(item.root.position, camera, width, height, fishRenderLength(item.service.fishId), projected)
@@ -1321,15 +1343,12 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       if (anchor.style.height !== heightVal) anchor.style.height = heightVal
       const zIndexVal = String(Math.round((item.root.position.z + 10) * 100))
       if (anchor.style.zIndex !== zIndexVal) anchor.style.zIndex = zIndexVal
-      // AQ-89 AC #1: tuck the caption tight under the fish's belly — the
-      // link box is centred on the fish and taller than the body, so a
-      // caption at top: 100% would float with a visible gap.
-      const lift = labelLiftPx(bounds.height)
-      const liftVal = `${lift}px`
-      if (anchor.style.getPropertyValue('--fish-label-lift') !== liftVal) {
-        anchor.style.setProperty('--fish-label-lift', liftVal)
-      }
-      placedLabels.push({ anchor, id: item.service.id, label: item.service.name, bounds, lift, depth: item.root.position.z })
+      const body = bodies.get(item) ?? bounds
+      const measured = sizes.get(item)!
+      const estimate = estimateCaptionRect(body, 0, item.service.name)
+      const captionWidth = measured.width || estimate.width, captionHeight = measured.height || estimate.height
+      const caption = { x: body.x + (body.width - captionWidth) / 2, y: body.y + body.height + 1, width: captionWidth, height: captionHeight }
+      placedLabels.push({ anchor, id: item.service.id, label: item.service.name, bounds, body, caption, depth: item.root.position.z })
       // AQ-13: keep the hover tooltip on-screen — flip it below the caption
       // near the top edge and align it inward near the left/right edges.
       const tooltipCenterX = bounds.x + bounds.width / 2
@@ -1337,35 +1356,35 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       anchor.classList.toggle('fish-link-tooltip-left', tooltipCenterX < 110)
       anchor.classList.toggle('fish-link-tooltip-right', tooltipCenterX > width - 110)
     }
-    // Visual-check fix: the de-conflict pass also runs for a lone label —
-    // the old `length > 1` guard meant a single visible fish (common in a
-    // zoomed mobile view) never got its caption clamped into the frame,
-    // so WatchMyBirds clipped at the right edge. The resolved horizontal
-    // shift reaches the DOM as --fish-label-dx (the align classes alone
-    // anchor the caption to the link box, which can itself sit partly
-    // past the frame edge).
+    // Even a lone caption needs frame-edge recovery. The solver returns
+    // offsets from its measured initial rectangle; native link bounds stay
+    // independent of every caption placement and suppression decision.
     if (placedLabels.length >= 1) {
       const resolved = resolveLabelDeconflicts(
         placedLabels.map(entry => ({
           id: entry.id,
-          caption: estimateCaptionRect(entry.bounds, entry.lift, entry.label),
-          body: entry.bounds,
+          caption: entry.caption,
+          body: entry.body,
           depth: entry.depth,
           label: entry.label,
         })),
         { width, height },
+        // Also reserve bodies whose native origin projection is unavailable
+        // (for example a near-plane crossing) and ambient fish with no link.
+        [...bodies].map(([item, body]) => ({ id: item.service.id, body })),
       )
       for (const result of resolved) {
         const entry = placedLabels.find(candidate => candidate.id === result.id)
         if (!entry) continue
-        const dyVal = `${result.dy}px`
-        if (entry.anchor.style.getPropertyValue('--fish-label-dy') !== dyVal) {
-          entry.anchor.style.setProperty('--fish-label-dy', dyVal)
+        const top = `${entry.caption.y + result.dy - entry.bounds.y}px`
+        if (entry.anchor.style.getPropertyValue('--fish-label-y') !== top) {
+          entry.anchor.style.setProperty('--fish-label-y', top)
         }
-        const dxVal = `${result.dx}px`
-        if (entry.anchor.style.getPropertyValue('--fish-label-dx') !== dxVal) {
-          entry.anchor.style.setProperty('--fish-label-dx', dxVal)
+        const left = `${entry.caption.x + result.dx - entry.bounds.x}px`
+        if (entry.anchor.style.getPropertyValue('--fish-label-x') !== left) {
+          entry.anchor.style.setProperty('--fish-label-x', left)
         }
+        entry.anchor.style.setProperty('--fish-label-transform', 'none')
         entry.anchor.classList.toggle('fish-label-deconflicted', result.faded)
         entry.anchor.classList.toggle('fish-label-align-left', result.align === 'left')
         entry.anchor.classList.toggle('fish-label-align-right', result.align === 'right')
@@ -1702,8 +1721,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     // AQ-62: the envelope is measured from the overview camera distance,
     // not the live camera — zooming in must not shrink the fish roaming
     // volume or trigger a habitat rebuild.
-    const halfWidth = Math.min(5.0, (DEFAULT_CAMERA_DISTANCE_M - 2.8) * Math.tan(THREE.MathUtils.degToRad(21)) * camera.aspect * .96)
+    const halfWidth = overviewHalfWidthAtDepth(camera.aspect, -1.35)
     habitat.bounds = { min: { x: -halfWidth, y: -2.25, z: -4.6 }, max: { x: halfWidth, y: 2.8, z: 2.8 } }
+    habitat.maxAbsXAtDepth = z => Math.min(halfWidth, overviewHalfWidthAtDepth(camera.aspect, z))
     const newNarrow = width < 600
     if (glassLayoutNarrow !== newNarrow) {
       glassEnclosure.setLayout(newNarrow)

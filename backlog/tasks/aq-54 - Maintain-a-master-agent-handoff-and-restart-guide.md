@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@storage'
 created_date: '2026-11-04T13:56:00Z'
-updated_date: '2026-11-04 19:29'
+updated_date: '2026-11-14 05:47'
 labels: []
 dependencies: []
 documentation:
@@ -45,6 +45,8 @@ Created repo-root AGENT_TASKS.md as a compact restart guide and added its pointe
 Addressed Root review comment #1: corrected AQ-40 to all three ACs checked with status still In Progress pending Root main output build and Firefish runtime QA; marked intentional four legacy WebP and unused reef-background removals as in-scope and provenance-recorded. Corrected listener roles (PID 11418 node .output/server/index.mjs on 5173; PID 14378 proof Vite on 5189), added root-reported transient session hints and warning that running output may predate Git source. Added repo path, main branch, public origin and trappserv.er host; recorded bounded-frame-clock, species-identity, catalog-thumbnail aspect/alpha picking, raw coral mask handling, legacy coordinates and height-column cave limitations. Recast worker roles as last-assigned, with most source work held and reconfirmation required. Kept docs/deployment 2.md and old prototypes as unrelated material. Updated AGENTS pointer to require reading all policies before master. Checked AQ-49 AC #1-#3 only; Root review of AC #4 and finalization remain pending.
 
 2026-11-04 identifier repair: Backlog doctor rekeyed this completed master-handoff task from AQ49 to AQ54 after a concurrent biomechanical-turning task reused AQ49. The historical Implementation Notes reference to AQ49 refers to this master-handoff task, now AQ54. AQ49 now identifies biomechanical turning. No acceptance status or implementation evidence changed.
+
+2026-11-13 Root reference-path repair: user AGENTS and docs/photorealism-reference.md specify docs/more-realistic-reef-guide.png, but the existing tracked image is docs/more_realistic_reef_guide.png. Added a byte-identical hyphenated alias to satisfy those links while preserving the original file. SHA verification confirms identical bytes; no image edits, model edits, runtime changes or new visual acceptance.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

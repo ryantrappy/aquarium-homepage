@@ -1,0 +1,219 @@
+{
+  "sourceCommit": "4df19dee01ccf4e95a49904bfa51eb3a71730ba4",
+  "laptopCycle": {
+    "samples": 60,
+    "activeTimeRange": [
+      131.7333333333303,
+      137.633333333335
+    ],
+    "states": [
+      "idle",
+      "swim"
+    ],
+    "host": "reef-0-anchor-socket_anemone_crevice_01-hostAnemone",
+    "maxDistanceLegacyUnits": 0.2690311509245006,
+    "positionSpanLegacyUnits": {
+      "x": 0.2507706717152465,
+      "y": 0.06654360144478488,
+      "z": 0.2692285749879949
+    },
+    "uniqueBonePoses": {
+      "spine_0": 43,
+      "spine_1": 60,
+      "spine_2": 60,
+      "spine_3": 60,
+      "spine_4": 60,
+      "spine_5": 60,
+      "pectoral_L": 60,
+      "pectoral_R": 60
+    },
+    "allFinite": true,
+    "allNearestHostPointsClear": true
+  },
+  "phoneCycle": {
+    "samples": 200,
+    "activeTimeRange": [
+      157.76666666668436,
+      169.30000000002687
+    ],
+    "states": [
+      "idle",
+      "swim"
+    ],
+    "host": "reef-0-anchor-socket_anemone_crevice_01-hostAnemone",
+    "maxDistanceLegacyUnits": 0.24269766175280263,
+    "positionSpanLegacyUnits": {
+      "x": 0.22371464359403676,
+      "y": 0.07029404921865101,
+      "z": 0.24341935102878198
+    },
+    "uniqueBonePoses": {
+      "spine_0": 106,
+      "spine_1": 179,
+      "spine_2": 179,
+      "spine_3": 179,
+      "spine_4": 179,
+      "spine_5": 179,
+      "pectoral_L": 179,
+      "pectoral_R": 179
+    },
+    "allFinite": true,
+    "allNearestHostPointsClear": true
+  },
+  "controls": {
+    "laptopResume": {
+      "changedOf8": 8,
+      "frames": 60,
+      "visible": true,
+      "viewport": [
+        1440,
+        900,
+        1
+      ]
+    },
+    "laptopPauseVisible": {
+      "changedOf8": 0,
+      "frames": 60,
+      "visible": true,
+      "viewport": [
+        1440,
+        900,
+        1
+      ]
+    },
+    "laptopReducedVisible": {
+      "changedOf8": 0,
+      "frames": 60,
+      "visible": true,
+      "viewport": [
+        1440,
+        900,
+        1
+      ]
+    },
+    "phoneResumeVisible": {
+      "changedOf8": 8,
+      "frames": 60,
+      "visible": true,
+      "viewport": [
+        402,
+        874,
+        1
+      ]
+    },
+    "phonePauseVisible": {
+      "changedOf8": 0,
+      "frames": 60,
+      "visible": true,
+      "viewport": [
+        402,
+        874,
+        1
+      ]
+    },
+    "phoneReducedVisible": {
+      "changedOf8": 0,
+      "frames": 60,
+      "visible": true,
+      "viewport": [
+        402,
+        874,
+        1
+      ]
+    }
+  },
+  "dialogs": {
+    "laptopServices": {
+      "entries": 8,
+      "contained": true,
+      "rect": {
+        "bottom": 820,
+        "height": 740,
+        "left": 400,
+        "right": 1040,
+        "top": 80,
+        "width": 640,
+        "x": 400,
+        "y": 80
+      }
+    },
+    "laptopSettings": {
+      "entries": 8,
+      "contained": true,
+      "rect": {
+        "bottom": 886,
+        "height": 872,
+        "left": 410,
+        "right": 1030,
+        "top": 14,
+        "width": 620,
+        "x": 410,
+        "y": 14
+      }
+    },
+    "phoneServices": {
+      "entries": 8,
+      "contained": true,
+      "rect": {
+        "bottom": 792.5,
+        "height": 711,
+        "left": 11,
+        "right": 391,
+        "top": 81.5,
+        "width": 380,
+        "x": 11,
+        "y": 81.5
+      }
+    },
+    "phoneSettings": {
+      "entries": 8,
+      "contained": true,
+      "rect": {
+        "bottom": 860,
+        "height": 846,
+        "left": 14,
+        "right": 388,
+        "top": 14,
+        "width": 374,
+        "x": 14,
+        "y": 14
+      }
+    }
+  },
+  "openedService": {
+    "id": "1298078137",
+    "url": "http://127.0.0.1:5215/review-service/example-home-assistant"
+  },
+  "capturedWarningsErrors": 0,
+  "images": {
+    "laptop.png": {
+      "sha256": "654936996abd5b9f7f486d7062c7346443e4bd95bea9cfbfc8fa4898e3bb5b2d",
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    "phone.png": {
+      "sha256": "9d4b8ad298a8b0c5e4d5c0a8faaad0224046e43c25bb43cefdbdd00d99d94264",
+      "dimensions": [
+        402,
+        874
+      ]
+    },
+    "phone-paused-settled-a.png": {
+      "sha256": "18f88e335a3afe9e6691e2992091bb83b7bb092e818fa44b22ee8eb4be401ca6",
+      "dimensions": [
+        402,
+        874
+      ]
+    },
+    "phone-paused-settled-b.png": {
+      "sha256": "18f88e335a3afe9e6691e2992091bb83b7bb092e818fa44b22ee8eb4be401ca6",
+      "dimensions": [
+        402,
+        874
+      ]
+    }
+  },
+  "settledPausedPngPairIdentical": true
+}

@@ -1,0 +1,719 @@
+{
+  "laptop": {
+    "assets": {
+      "assetResourceCount": 36,
+      "encodedAssetBytes": 30651116,
+      "encodedBytesUnavailableCount": 0,
+      "encodedZeroByteCount": 0,
+      "transferBytes": 10800,
+      "transferBytesUnavailableCount": 0,
+      "transferZeroByteCount": 0
+    },
+    "commit": "f0844cfee1eeb7c2a0c46450470521fb1e2d1757",
+    "failedAssets": [],
+    "inhabitants": [
+      {
+        "heightRange": [
+          -0.7349999999999999,
+          1.6889999999999998
+        ],
+        "id": "starter-komodo",
+        "position": {
+          "x": 4.63,
+          "y": 0.7517087914750444,
+          "z": -4.029999999999999
+        },
+        "schoolmate": false,
+        "speciesId": "yellow-tang"
+      },
+      {
+        "heightRange": [
+          -0.129,
+          1.7899999999999998
+        ],
+        "id": "starter-watchmybirds",
+        "position": {
+          "x": 3.907487309145244,
+          "y": 1.4746640817292207,
+          "z": 1.248674037992954
+        },
+        "schoolmate": false,
+        "speciesId": "banggai-cardinalfish"
+      },
+      {
+        "heightRange": [
+          -1.644,
+          0.3759999999999999
+        ],
+        "id": "05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+        "position": {
+          "x": -2.35,
+          "y": -1.5076210346984444,
+          "z": 1.1925870040953157
+        },
+        "schoolmate": false,
+        "speciesId": "royal-gramma"
+      },
+      {
+        "heightRange": [
+          0.3759999999999999,
+          1.891
+        ],
+        "id": "example-home-assistant",
+        "position": {
+          "x": 0.5019136259678616,
+          "y": 1.848931649094098,
+          "z": 1.5310013143420216
+        },
+        "schoolmate": false,
+        "speciesId": "ocellaris-clownfish"
+      },
+      {
+        "heightRange": [
+          -0.33099999999999996,
+          1.6889999999999998
+        ],
+        "id": "starter-ombi",
+        "position": {
+          "x": 3.0612746679977514,
+          "y": 1.1462214770398564,
+          "z": -3.83
+        },
+        "schoolmate": false,
+        "speciesId": "blue-tang"
+      },
+      {
+        "heightRange": [
+          -1.4420000000000002,
+          0.7799999999999998
+        ],
+        "id": "e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+        "position": {
+          "x": -0.6452408132778573,
+          "y": -1.0950146679718746,
+          "z": 2.2299999999999995
+        },
+        "schoolmate": false,
+        "speciesId": "copperband-butterflyfish"
+      },
+      {
+        "heightRange": [
+          -0.9369999999999998,
+          0.982
+        ],
+        "id": "060212ad-1343-4890-a57f-c4c60ca162d8",
+        "position": {
+          "x": -2.658398746817656,
+          "y": -0.3978522742443604,
+          "z": 1.4750416130423547
+        },
+        "schoolmate": false,
+        "speciesId": "mccoskers-flasher-wrasse"
+      },
+      {
+        "heightRange": [
+          -0.5330000000000004,
+          1.487
+        ],
+        "id": "92394d96-38ec-4738-a61e-064af46849a5",
+        "position": {
+          "x": -1.9039096457397933,
+          "y": 0.260703255940927,
+          "z": 2.3
+        },
+        "schoolmate": false,
+        "speciesId": "lyretail-anthias"
+      },
+      {
+        "heightRange": [
+          -0.5330000000000004,
+          1.487
+        ],
+        "id": "92394d96-38ec-4738-a61e-064af46849a5::schoolmate-1",
+        "position": {
+          "x": -2.1720550049956833,
+          "y": 0.0389021651362885,
+          "z": 2.3
+        },
+        "schoolmate": true,
+        "speciesId": "lyretail-anthias"
+      },
+      {
+        "heightRange": [
+          -0.5330000000000004,
+          1.487
+        ],
+        "id": "92394d96-38ec-4738-a61e-064af46849a5::schoolmate-2",
+        "position": {
+          "x": -1.5556766537811717,
+          "y": -0.05066627048494943,
+          "z": 1.6046446708298334
+        },
+        "schoolmate": true,
+        "speciesId": "lyretail-anthias"
+      },
+      {
+        "heightRange": [
+          -0.5330000000000004,
+          1.487
+        ],
+        "id": "92394d96-38ec-4738-a61e-064af46849a5::schoolmate-3",
+        "position": {
+          "x": -1.4378598067504904,
+          "y": 0.04759976199974589,
+          "z": 2.0603790364801196
+        },
+        "schoolmate": true,
+        "speciesId": "lyretail-anthias"
+      }
+    ],
+    "labelsVisible": true,
+    "pendingAssetCount": 0,
+    "preset": "full-scene",
+    "ready": true,
+    "renderer": {
+      "memory": {
+        "geometries": 56,
+        "textures": 106
+      },
+      "render": {
+        "calls": 326,
+        "lines": 0,
+        "points": 80,
+        "triangles": 5873726
+      }
+    },
+    "seed": 2026,
+    "timeSeconds": 1.25,
+    "timing": {
+      "cpuRenderCall": {
+        "p50Ms": 4.299999982118607,
+        "p95Ms": 15.519999998807906,
+        "sampleCount": 120
+      },
+      "frozenPoseRenderCall": {
+        "p50Ms": 7.899999976158142,
+        "p95Ms": 7.899999976158142,
+        "sampleCount": 1
+      },
+      "rafInterval": {
+        "p50Ms": 166.60000000000582,
+        "p95Ms": 250.1050000000061,
+        "sampleCount": 120
+      },
+      "windowFrames": 120
+    },
+    "unresolvedFishIds": [],
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 900,
+      "width": 1440
+    }
+  },
+  "laptopLinks": [
+    {
+      "href": "http://127.0.0.1:5215/review-service/starter-komodo",
+      "id": "starter-komodo",
+      "name": "Open Komodo in a new tab",
+      "occluded": "true",
+      "rect": {
+        "bottom": 432.3504638671875,
+        "height": 72.9765625,
+        "left": 1082.753173828125,
+        "right": 1190.354736328125,
+        "top": 359.3739013671875,
+        "width": 107.6015625,
+        "x": 1082.753173828125,
+        "y": 359.3739013671875
+      }
+    },
+    {
+      "href": "http://127.0.0.1:5215/review-service/starter-watchmybirds",
+      "id": "starter-watchmybirds",
+      "name": "Open WatchMyBirds in a new tab",
+      "occluded": "false",
+      "rect": {
+        "bottom": 281.4170837402344,
+        "height": 63.515625,
+        "left": 1269.3677978515625,
+        "right": 1352.5474853515625,
+        "top": 217.9014587402344,
+        "width": 83.1796875,
+        "x": 1269.3677978515625,
+        "y": 217.9014587402344
+      }
+    },
+    {
+      "href": "http://127.0.0.1:5215/review-service/05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+      "id": "05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+      "name": "Open Paperless in a new tab",
+      "occluded": "false",
+      "rect": {
+        "bottom": 730.424072265625,
+        "height": 63.0625,
+        "left": 325.8538818359375,
+        "right": 408.4320068359375,
+        "top": 667.361572265625,
+        "width": 82.578125,
+        "x": 325.8538818359375,
+        "y": 667.361572265625
+      }
+    },
+    {
+      "href": "http://127.0.0.1:5215/review-service/example-home-assistant",
+      "id": "example-home-assistant",
+      "name": "Open Home Assistant in a new tab",
+      "occluded": "false",
+      "rect": {
+        "bottom": 216.29937744140625,
+        "height": 65.9140625,
+        "left": 755.4580688476562,
+        "right": 842.0908813476562,
+        "top": 150.38531494140625,
+        "width": 86.6328125,
+        "x": 755.4580688476562,
+        "y": 150.38531494140625
+      }
+    },
+    {
+      "href": "http://127.0.0.1:5215/review-service/starter-ombi",
+      "id": "starter-ombi",
+      "name": "Open Ombi in a new tab",
+      "occluded": "true",
+      "rect": {
+        "bottom": 410.2852783203125,
+        "height": 102.625,
+        "left": 924.0565795898438,
+        "right": 1075.361328125,
+        "top": 307.6602783203125,
+        "width": 151.30474853515625,
+        "x": 924.0565795898438,
+        "y": 307.6602783203125
+      }
+    },
+    {
+      "href": "http://127.0.0.1:5215/review-service/e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+      "id": "e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+      "name": "Open radarr in a new tab",
+      "occluded": "false",
+      "rect": {
+        "bottom": 735.8135986328125,
+        "height": 140.4609375,
+        "left": 504.7210083007813,
+        "right": 711.8147583007812,
+        "top": 595.3526611328125,
+        "width": 207.09375,
+        "x": 504.7210083007813,
+        "y": 595.3526611328125
+      }
+    },
+    {
+      "href": "http://127.0.0.1:5215/review-service/060212ad-1343-4890-a57f-c4c60ca162d8",
+      "id": "060212ad-1343-4890-a57f-c4c60ca162d8",
+      "name": "Open Sonarr in a new tab",
+      "occluded": "false",
+      "rect": {
+        "bottom": 568.0626220703125,
+        "height": 65.42965698242188,
+        "left": 263.0148620605469,
+        "right": 348.6945495605469,
+        "top": 502.6329650878906,
+        "width": 85.6796875,
+        "x": 263.0148620605469,
+        "y": 502.6329650878906
+      }
+    },
+    {
+      "href": "http://127.0.0.1:5215/review-service/92394d96-38ec-4738-a61e-064af46849a5",
+      "id": "92394d96-38ec-4738-a61e-064af46849a5",
+      "name": "Open Basketball in a new tab",
+      "occluded": "false",
+      "rect": {
+        "bottom": 467.3713684082031,
+        "height": 73.484375,
+        "left": 338.75909423828125,
+        "right": 434.9856567382813,
+        "top": 393.8869934082031,
+        "width": 96.2265625,
+        "x": 338.75909423828125,
+        "y": 393.8869934082031
+      }
+    }
+  ],
+  "phone": {
+    "assets": {
+      "assetResourceCount": 36,
+      "encodedAssetBytes": 30651116,
+      "encodedBytesUnavailableCount": 0,
+      "encodedZeroByteCount": 0,
+      "transferBytes": 10800,
+      "transferBytesUnavailableCount": 0,
+      "transferZeroByteCount": 0
+    },
+    "commit": "f0844cfee1eeb7c2a0c46450470521fb1e2d1757",
+    "failedAssets": [],
+    "inhabitants": [
+      {
+        "heightRange": [
+          -0.7349999999999999,
+          1.6889999999999998
+        ],
+        "id": "starter-komodo",
+        "position": {
+          "x": 0.49558069114522096,
+          "y": 0.7517087914750444,
+          "z": 1.9799999999999995
+        },
+        "schoolmate": false,
+        "speciesId": "yellow-tang"
+      },
+      {
+        "heightRange": [
+          -0.129,
+          1.7899999999999998
+        ],
+        "id": "starter-watchmybirds",
+        "position": {
+          "x": 0.7812771011701862,
+          "y": 1.4746640817292207,
+          "z": 1.248674037992954
+        },
+        "schoolmate": false,
+        "speciesId": "banggai-cardinalfish"
+      },
+      {
+        "heightRange": [
+          -1.644,
+          0.3759999999999999
+        ],
+        "id": "05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+        "position": {
+          "x": -0.7881161693003469,
+          "y": -1.5076210346984444,
+          "z": 1.1925870040953157
+        },
+        "schoolmate": false,
+        "speciesId": "royal-gramma"
+      },
+      {
+        "heightRange": [
+          0.3759999999999999,
+          1.891
+        ],
+        "id": "example-home-assistant",
+        "position": {
+          "x": 0.09848113013398684,
+          "y": 1.848931649094098,
+          "z": 1.5310013143420216
+        },
+        "schoolmate": false,
+        "speciesId": "ocellaris-clownfish"
+      },
+      {
+        "heightRange": [
+          -0.33099999999999996,
+          1.6889999999999998
+        ],
+        "id": "starter-ombi",
+        "position": {
+          "x": 0.5215708924652307,
+          "y": 1.1462214770398564,
+          "z": 1.38
+        },
+        "schoolmate": false,
+        "speciesId": "blue-tang"
+      },
+      {
+        "heightRange": [
+          -1.4420000000000002,
+          0.7799999999999998
+        ],
+        "id": "e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+        "position": {
+          "x": -0.14562082819847078,
+          "y": -1.0950146679718746,
+          "z": 0.665
+        },
+        "schoolmate": false,
+        "speciesId": "copperband-butterflyfish"
+      },
+      {
+        "heightRange": [
+          -0.9369999999999998,
+          0.982
+        ],
+        "id": "060212ad-1343-4890-a57f-c4c60ca162d8",
+        "position": {
+          "x": -0.523641186754572,
+          "y": -0.3978522742443604,
+          "z": 1.4750416130423547
+        },
+        "schoolmate": false,
+        "speciesId": "mccoskers-flasher-wrasse"
+      },
+      {
+        "heightRange": [
+          -0.5330000000000004,
+          1.487
+        ],
+        "id": "92394d96-38ec-4738-a61e-064af46849a5",
+        "position": {
+          "x": -0.457345130283536,
+          "y": 0.260703255940927,
+          "z": 0.7000000000000002
+        },
+        "schoolmate": false,
+        "speciesId": "lyretail-anthias"
+      },
+      {
+        "heightRange": [
+          -0.5330000000000004,
+          1.487
+        ],
+        "id": "92394d96-38ec-4738-a61e-064af46849a5::schoolmate-1",
+        "position": {
+          "x": -0.62714952342619,
+          "y": 0.1858752862891202,
+          "z": 0.8331563626530505
+        },
+        "schoolmate": true,
+        "speciesId": "lyretail-anthias"
+      },
+      {
+        "heightRange": [
+          -0.5330000000000004,
+          1.487
+        ],
+        "id": "92394d96-38ec-4738-a61e-064af46849a5::schoolmate-2",
+        "position": {
+          "x": 0,
+          "y": 0.15565801297404397,
+          "z": 0.7000000000000002
+        },
+        "schoolmate": true,
+        "speciesId": "lyretail-anthias"
+      },
+      {
+        "heightRange": [
+          -0.5330000000000004,
+          1.487
+        ],
+        "id": "92394d96-38ec-4738-a61e-064af46849a5::schoolmate-3",
+        "position": {
+          "x": 0.6271495234261899,
+          "y": 0.18880955280594125,
+          "z": 0.6191602254021589
+        },
+        "schoolmate": true,
+        "speciesId": "lyretail-anthias"
+      }
+    ],
+    "labelsVisible": true,
+    "pendingAssetCount": 0,
+    "preset": "full-scene",
+    "ready": true,
+    "renderer": {
+      "memory": {
+        "geometries": 53,
+        "textures": 100
+      },
+      "render": {
+        "calls": 226,
+        "lines": 0,
+        "points": 64,
+        "triangles": 3165161
+      }
+    },
+    "seed": 2026,
+    "timeSeconds": 1.25,
+    "timing": {
+      "cpuRenderCall": {
+        "p50Ms": 8,
+        "p95Ms": 8.180000042915344,
+        "sampleCount": 5
+      },
+      "frozenPoseRenderCall": {
+        "p50Ms": 8,
+        "p95Ms": 8,
+        "sampleCount": 1
+      },
+      "rafInterval": {
+        "p50Ms": 708.3500000000004,
+        "p95Ms": 1240.835,
+        "sampleCount": 2
+      },
+      "windowFrames": 120
+    },
+    "unresolvedFishIds": [],
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 874,
+      "width": 402
+    }
+  },
+  "phoneLinks": [
+    {
+      "href": "http://127.0.0.1:5215/review-service/starter-komodo",
+      "id": "starter-komodo",
+      "name": "Open Komodo in a new tab",
+      "occluded": "false",
+      "rect": {
+        "bottom": 405.1929626464844,
+        "height": 131.546875,
+        "left": 184.3907928466797,
+        "right": 378.3439331054687,
+        "top": 273.6460876464844,
+        "width": 193.95314025878903,
+        "x": 184.3907928466797,
+        "y": 273.6460876464844
+      }
+    },
+    {
+      "href": "http://127.0.0.1:5215/review-service/starter-watchmybirds",
+      "id": "starter-watchmybirds",
+      "name": "Open WatchMyBirds in a new tab",
+      "occluded": "false",
+      "rect": {
+        "bottom": 273.28619384765625,
+        "height": 61.67967224121094,
+        "left": 275.3560485839844,
+        "right": 356.1294860839844,
+        "top": 211.6065216064453,
+        "width": 80.7734375,
+        "x": 275.3560485839844,
+        "y": 211.6065216064453
+      }
+    },
+    {
+      "href": "http://127.0.0.1:5215/review-service/05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+      "id": "05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+      "name": "Open Paperless in a new tab",
+      "occluded": "false",
+      "rect": {
+        "bottom": 709.316650390625,
+        "height": 61.234375,
+        "left": 45.98362350463867,
+        "right": 126.17893600463869,
+        "top": 648.082275390625,
+        "width": 80.1953125,
+        "x": 45.98362350463867,
+        "y": 648.082275390625
+      }
+    },
+    {
+      "href": "http://127.0.0.1:5215/review-service/example-home-assistant",
+      "id": "example-home-assistant",
+      "name": "Open Home Assistant in a new tab",
+      "occluded": "false",
+      "rect": {
+        "bottom": 210.05648803710935,
+        "height": 64.015625,
+        "left": 173.94259643554688,
+        "right": 258.0754089355469,
+        "top": 146.04086303710938,
+        "width": 84.1328125,
+        "x": 173.94259643554688,
+        "y": 146.04086303710938
+      }
+    },
+    {
+      "href": "http://127.0.0.1:5215/review-service/starter-ombi",
+      "id": "starter-ombi",
+      "name": "Open Ombi in a new tab",
+      "occluded": "false",
+      "rect": {
+        "bottom": 372.0669860839844,
+        "height": 167.8046875,
+        "left": 155.2196502685547,
+        "right": 402.61810302734375,
+        "top": 204.2622985839844,
+        "width": 247.39845275878903,
+        "x": 155.2196502685547,
+        "y": 204.2622985839844
+      }
+    },
+    {
+      "href": "http://127.0.0.1:5215/review-service/e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+      "id": "e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+      "name": "Open radarr in a new tab",
+      "occluded": "false",
+      "rect": {
+        "bottom": 662.4393310546875,
+        "height": 110.7890625,
+        "left": 99.43362426757812,
+        "right": 262.7851867675781,
+        "top": 551.6502685546875,
+        "width": 163.3515625,
+        "x": 99.43362426757812,
+        "y": 551.6502685546875
+      }
+    },
+    {
+      "href": "http://127.0.0.1:5215/review-service/060212ad-1343-4890-a57f-c4c60ca162d8",
+      "id": "060212ad-1343-4890-a57f-c4c60ca162d8",
+      "name": "Open Sonarr in a new tab",
+      "occluded": "false",
+      "rect": {
+        "bottom": 551.6514892578125,
+        "height": 63.539031982421875,
+        "left": 80.17644500732422,
+        "right": 163.37957763671875,
+        "top": 488.1124572753906,
+        "width": 83.20313262939453,
+        "x": 80.17644500732422,
+        "y": 488.1124572753906
+      }
+    },
+    {
+      "href": "http://127.0.0.1:5215/review-service/92394d96-38ec-4738-a61e-064af46849a5",
+      "id": "92394d96-38ec-4738-a61e-064af46849a5",
+      "name": "Open Basketball in a new tab",
+      "occluded": "false",
+      "rect": {
+        "bottom": 450.6140747070313,
+        "height": 57.6015625,
+        "left": 100.5519027709961,
+        "right": 175.98941040039062,
+        "top": 393.0125122070313,
+        "width": 75.43750762939453,
+        "x": 100.5519027709961,
+        "y": 393.0125122070313
+      }
+    }
+  ],
+  "phoneModalLinks": [
+    "KomodoYellow tang\u2197",
+    "WatchMyBirdsBanggai cardinalfish\u2197",
+    "PaperlessRoyal gramma\u2197",
+    "Home AssistantOcellaris clownfish\u2197",
+    "OmbiBlue tang\u2197",
+    "radarrCopperband butterflyfish\u2197",
+    "SonarrMcCosker\u2019s flasher wrasse\u2197",
+    "BasketballLyretail anthias\u2197"
+  ],
+  "logs": [],
+  "metadata": {
+    "category": "Evidence",
+    "authority": "Evidentiary",
+    "backlog": "AQ-104",
+    "owner": "Root",
+    "date": "2026-11-13",
+    "sourceCommit": "f0844cfee1eeb7c2a0c46450470521fb1e2d1757",
+    "scope": "Frozen deterministic staging, not sustained normal movement. Disposable config uses current8-service roster with localhost-only URLs. No original config/model edits or deployment."
+  },
+  "captures": {
+    "laptop": {
+      "sha256": "f227a8af89c5635baf527c27adcbf5db214299f68bdc3735a4c0b0716f7cf946",
+      "width": 1440,
+      "height": 900,
+      "bytes": 1633951
+    },
+    "phone": {
+      "sha256": "8b9751a510e5a85093410b1595517c837e77676eafd2288849a72d07dd72e84e",
+      "width": 402,
+      "height": 874,
+      "bytes": 509887
+    }
+  },
+  "limits": "Phone all8labels are named and unoccluded, with44px-plus targets and complete modal access. Ombi conservative link rectangle extends0.618CSSpx beyond the right viewport edge; do not claim all proxy rectangles are fully contained. Laptop2occluded fish retain complete Services modal navigation. No body-envelope, art or runtime budget certification."
+}

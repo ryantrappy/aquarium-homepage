@@ -1,0 +1,6 @@
+{
+  "src/rendering/scene/motion.ts": "3389b424989bd706f20a155b61d0b97990149671e7ca2c5dae4c037578918b68",
+  "src/rendering/scene/fish-spawn.ts": "fef2147f0b182435b3268c81b861e05e241d8048552ce3c5db76a41ce6b8432f",
+  "src/rendering/scene/motion.test.ts": "900d53a415b320716f688c44c80b56c3f963d62083c8a3350fb30f49ca1cd776",
+  "src/rendering/scene/aq104-fallback.test.ts": "d584521e8a736a87ff8fb174a22848950c3574c8263deb48fcdf79b7aaf4790a"
+}

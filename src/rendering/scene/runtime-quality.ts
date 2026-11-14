@@ -53,8 +53,12 @@ export const ADAPTIVE_MIN_WINDOW_FRAMES = 30
 export const ADAPTIVE_STEP_DOWN_EMA_MS = 19
 /** Step down after sustained windows with p95 above this (ms). */
 export const ADAPTIVE_STEP_DOWN_P95_MS = 22
-/** Step up after sustained windows with EMA below this (ms). */
-export const ADAPTIVE_STEP_UP_EMA_MS = 13
+/** Step up after sustained windows with EMA below this (ms). Keep a 1.5 ms
+ * gap below the 19 ms slow EMA threshold while allowing steady 60 Hz RAF
+ * intervals (~16.67 ms) to restore quality. This is a bounded recovery
+ * probe: a vsync-capped 60 Hz stream cannot prove extra GPU headroom, and a
+ * restored tier can still step down under the unchanged overload criteria. */
+export const ADAPTIVE_STEP_UP_EMA_MS = 17.5
 /** Consecutive slow windows required to step down one tier. */
 export const ADAPTIVE_STEP_DOWN_WINDOWS = 2
 /** Consecutive fast windows required to step up one tier. */
@@ -259,7 +263,7 @@ export class AdaptiveQualityController {
         this.slowWindows = 0
         this.lastChangeAtMs = nowMs
       }
-    } else if (ema < ADAPTIVE_STEP_UP_EMA_MS) {
+    } else if (ema < ADAPTIVE_STEP_UP_EMA_MS && p95 <= ADAPTIVE_STEP_DOWN_P95_MS) {
       this.fastWindows++
       this.slowWindows = 0
       if (this.fastWindows >= ADAPTIVE_STEP_UP_WINDOWS && cooledDown) {

@@ -1,0 +1,12 @@
+
+> test
+> vitest run src/rendering/assets/socket-report-freshness.test.ts --maxWorkers=1
+
+
+ RUN  v5.1.0 /private/tmp/aquarium-aq87-proof-8b2d7cc
+
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  08:14:40
+   Duration  54.36s (tests 100%)

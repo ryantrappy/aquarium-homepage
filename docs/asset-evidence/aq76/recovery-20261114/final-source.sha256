@@ -1,0 +1,4 @@
+bc13089a1772e79e5f09ecc7ca0ecda07b27b94e2b942ab4c0e6fe16f99dda8e  src/rendering/assets/budgets.ts
+51bfdd99fca00ef91faa0cf0398fec31b329e4a0c3cb5ec1383f680fa2a924ab  src/rendering/assets/budgets.test.ts
+745823837f3e02150723c5e92884c677e2486fdd5c0871b6c63ac46a574992e0  src/rendering/scene/runtime-quality.ts
+9c5b5d70a2d1b20d410479677892850ffe1530b0552270aea4d0925d85a39c9f  src/rendering/scene/runtime-quality.test.ts

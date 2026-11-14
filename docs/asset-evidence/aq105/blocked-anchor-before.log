@@ -1,0 +1,81 @@
+
+> test
+> vitest run src/rendering/scene/aq105-anchor-before.tmp.test.ts --maxWorkers=2
+
+
+ RUN  v5.1.0 /private/tmp/aquarium-aq87-proof-8b2d7cc
+
+ ❯ src/rendering/scene/aq105-anchor-before.tmp.test.ts (2 tests | 2 failed) 17ms
+   × preserves an active safe crossing when an existing anchor is blocked (aabb) 12ms
+   × preserves an active safe crossing when an existing anchor is blocked (mesh) 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/rendering/scene/aq105-anchor-before.tmp.test.ts > preserves an active safe crossing when an existing anchor is blocked (aabb)
+AssertionError: expected [ { x: -3, y: 1.8, z: 1.8 }, …(1) ] to be [ { x: -3, y: 1.8, z: 1.8 }, …(1) ] // Object.is equality
+
+- Expected
++ Received
+
+@@ -3,10 +3,10 @@
+      "x": -3,
+      "y": 1.8,
+      "z": 1.8,
+    },
+    {
+-     "x": 3,
+-     "y": 1.8,
+-     "z": 1.8,
++     "x": -2.245317028416321,
++     "y": 0.4250730485301464,
++     "z": -1.7273752525314685,
+    },
+  ]
+
+ ❯ src/rendering/scene/aq105-anchor-before.tmp.test.ts:22:22
+     20|   const crossing=fish.route, before={...fish.position}
+     21|   stepSwimmingFish(fish,habitat,1/60)
+     22|   expect(fish.route).toBe(crossing)
+       |                      ^
+     23|   expect(fish.behavior.navigationOutcome).toBe('blocked')
+     24|   expect(fish.position.x).toBeGreaterThan(before.x)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/rendering/scene/aq105-anchor-before.tmp.test.ts > preserves an active safe crossing when an existing anchor is blocked (mesh)
+AssertionError: expected [ { x: -3, y: 1.8, z: 1.8 }, …(1) ] to be [ { x: -3, y: 1.8, z: 1.8 }, …(1) ] // Object.is equality
+
+- Expected
++ Received
+
+@@ -3,10 +3,10 @@
+      "x": -3,
+      "y": 1.8,
+      "z": 1.8,
+    },
+    {
+-     "x": 3,
+-     "y": 1.8,
+-     "z": 1.8,
++     "x": -2.5077566810883583,
++     "y": 0.4250730485301464,
++     "z": -1.870574815469607,
+    },
+  ]
+
+ ❯ src/rendering/scene/aq105-anchor-before.tmp.test.ts:22:22
+     20|   const crossing=fish.route, before={...fish.position}
+     21|   stepSwimmingFish(fish,habitat,1/60)
+     22|   expect(fish.route).toBe(crossing)
+       |                      ^
+     23|   expect(fish.behavior.navigationOutcome).toBe('blocked')
+     24|   expect(fish.position.x).toBeGreaterThan(before.x)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  00:49:36
+   Duration  495ms (import 59%, transform 32%, tests 7%, worker 2%)
+

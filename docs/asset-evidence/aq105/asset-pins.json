@@ -1,0 +1,17 @@
+{
+  "src/rendering/assets/corals/reef-full-model-right.glb": "009a847175661ea2fdcf273d994a30cc12834ff6720b4d7bd4aea2391179bd3b",
+  "src/rendering/assets/corals/coral-euphyllia-hammer.glb": "6e1974d5f72ec3a898d84f559a5d4397a6002d8534387c47697452d6c2157fc8",
+  "src/rendering/assets/corals/coral-anemone-bta.glb": "b95f24977cce9c2e2acf723b4720c7c0913dee04e04a8a2cfa6761f5ebc39917",
+  "src/rendering/assets/corals/coral-acropora-table.glb": "ad4c0f5d74fe4efe06f0faa7d57af4e61d8756952b63a54d6424675c9face10d",
+  "src/rendering/assets/corals/coral-zoanthid-mat.glb": "a60d91258fcf9a64d43a628dbe0f4027a91a1fce73104153d7f3ea424cc2463d",
+  "src/rendering/assets/corals/live-rock-island-right.glb": "7d8cc1ce22d850d199f28652437c6d95d64ab4cc80606cc451c4c58c702558c1",
+  "src/rendering/assets/corals/coral-brain-diploria.glb": "904f471bb1a1094004b04294c4166ff309487f3333cea82e6105bf96ca1f100d",
+  "src/rendering/assets/corals/reef-full-model-left.glb": "8d04c4fce1e6e1bf3c2e021968c205b4c9e4af9041a23d9304a7e291fcf6414f",
+  "src/rendering/assets/corals/coral-euphyllia-torch.glb": "e267292425df202d816b5f8a93336e2e5255962a87116f9cc8fd680ac260c022",
+  "src/rendering/assets/corals/live-rock-island-left.glb": "2f81f8fc212886aa3eea9a0d316ca0a1f4badccac20044583f8ad4f0bdd9c2ef",
+  "src/rendering/assets/corals/coral-acropora-staghorn.glb": "629781835efee49bea46f109cfdeeef0ba434d94a8dc3bf33d769eb31f99c0ea",
+  "src/rendering/assets/corals/coral-montipora-plate.glb": "87f4e1052e44f29b27b948f9c9f45cae42855c1948fdf8ee519ea7c70ae21252",
+  "src/rendering/assets/corals/custom-colonies/reef-euphyllia-flowing-torch.glb": "26df54fed418b5b645d2b89840b429642bae7763dc9e2d40bd0002e541f62504",
+  "src/rendering/assets/corals/custom-colonies/reef-acropora-corymbose.glb": "b1808ce01bcb7013e29e0e46a399130da13c12a83bbdaccd08c439e25d62b6c3",
+  "src/rendering/assets/corals/custom-colonies/reef-acropora-antler.glb": "8a0ed7c40e012d48eabef55e37833cc5616c06ff50914cf2d963ea2e22443844"
+}

@@ -1,0 +1,30 @@
+
+> test
+> vitest run src/rendering/scene/motion.test.ts src/rendering/scene/aq104-distribution.test.ts src/rendering/scene/aq104-fallback.test.ts --maxWorkers=2
+
+
+ RUN  v5.1.0 /private/tmp/aquarium-aq87-proof-8b2d7cc
+
+ ❯ src/rendering/scene/aq104-distribution.test.ts (1 test | 1 failed) 6551ms
+   × sustains a moving mixed roster across all three sectors with unchanged collision checks 6550ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/rendering/scene/aq104-distribution.test.ts > sustains a moving mixed roster across all three sectors with unchanged collision checks
+AssertionError: expected 0.16755793226381463 to be greater than or equal to 0.2
+ ❯ src/rendering/scene/aq104-distribution.test.ts:61:28
+     59|   expect(result.shares[0]).toBeGreaterThanOrEqual(.2)
+     60|   expect(result.shares[1]).toBeGreaterThanOrEqual(.1)
+     61|   expect(result.shares[2]).toBeGreaterThanOrEqual(.2)
+       |                            ^
+     62|   expect(result.longestGap).toBeLessThanOrEqual(3)
+     63|   // Reject stationary staging masquerading as successful distribution.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 59 passed (60)
+   Start at  00:48:04
+   Duration  7.09s (tests 92%, import 6%, transform 2%)
+

@@ -12,6 +12,7 @@ import {
   MAX_CAMERA_DISTANCE_M,
   MIN_CAMERA_DISTANCE_M,
   MIN_CAMERA_POSITION_Z_M,
+  overviewHalfWidthAtDepth,
   panCameraZoomState,
   stepZoomDistance,
   trackFocusedFishCameraState,
@@ -50,6 +51,17 @@ describe('camera zoom clamping (AQ-62 AC #2)', () => {
 
   it('clamps distance to the overview distance at the far end', () => {
     expect(clampCameraZoomState(state({ distance: 99 })).distance).toBe(MAX_CAMERA_DISTANCE_M)
+  })
+})
+
+describe('overview frustum habitat width', () => {
+  it('uses the reef-plane width for tank bounds and narrows fish at the front glass', () => {
+    expect(overviewHalfWidthAtDepth(1440 / 900, 2.8)).toBeCloseTo(3.65, 1)
+    expect(overviewHalfWidthAtDepth(1440 / 900, -1.35)).toBe(5.2)
+    expect(overviewHalfWidthAtDepth(1440 / 900, -4.6)).toBe(5.2)
+    expect(overviewHalfWidthAtDepth(402 / 874, -1.35)).toBeGreaterThan(overviewHalfWidthAtDepth(402 / 874, 2.8))
+    expect(overviewHalfWidthAtDepth(0, 0)).toBe(0)
+    expect(overviewHalfWidthAtDepth(1, Number.NaN)).toBe(0)
   })
 })
 
