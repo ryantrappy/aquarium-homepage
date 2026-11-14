@@ -41,7 +41,7 @@ import { reefPlacementsForViewport } from './reef-layout'
 import { CENTER_ARCH_URL, CENTER_ARCH_MOUNTS, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
 import { createGlassEnclosure, glassEnclosureLayout } from './glass-enclosure'
 import { createWaterSurface } from './water-surface'
-import { estimateCaptionRect, labelLiftPx, resolveLabelDeconflicts } from './fish-label-layout'
+import { estimateCaptionRect, resolveLabelDeconflicts, type LabelRect } from './fish-label-layout'
 import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
 import { meshQueryForSpecies, createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
 import { createReefMeshNavigation, createRockFallbackObstacles, createMountedCoralFallbackObstacles, MESH_NAVIGATION_COLLISION_RADIUS_M, type ReefMeshIslandInput } from './reef-mesh-navigation'
@@ -52,7 +52,7 @@ import { EMPTY_FISH_EXTENSIONS, type FishExtensionConfig } from '../../simulatio
 import { consumeFrameSteps, createFrameClock, SIMULATION_STEP_SECONDS, suspendFrameClock } from './clock'
 import { handleArtworkTextureFailure, nearestVisibleIntersection, readArtworkAlpha, type SpriteMasks } from './alpha-picking'
 import { applyFishLinkVisibility, isLabelSampleExposed } from './fish-link-focus'
-import { projectFishLinkBounds } from './fish-link-projection'
+import { projectFishBodyBounds, projectFishLinkBounds } from './fish-link-projection'
 import { createFishClipPlayer, type FishClipPlayer } from './fish-animation'
 import { bindFishFlexToModel, updateFishFlex, type FishFlexBinding } from './fish-flex-material'
 import { reconcileFishInhabitants, refreshFishLink } from './fish-inhabitants'
@@ -1307,9 +1307,19 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   }
   function rebuildFish(): boolean | undefined { removeFish(); return reconcileFish() }
   function positionLabels(force = false) {
-    // AQ-89: two passes — place every visible label tight under its fish,
-    // then de-conflict the captions so none covers another fish or caption.
-    const placedLabels: Array<{ anchor: HTMLAnchorElement; id: string; label: string; bounds: { x: number; y: number; width: number; height: number }; lift: number; depth: number }> = []
+    // Read intrinsic caption sizes together before any position writes. The
+    // visible body and the padded44px native link are separate rectangles.
+    camera.updateMatrixWorld(true)
+    const bodies = new Map<Inhabitant, LabelRect>()
+    for (const item of [...fish, ...schoolmates]) {
+      const body = projectFishBodyBounds(item.root, camera, width, height, projected, item.flex?.vertexDeformerFor)
+      if (body) bodies.set(item, body)
+    }
+    const sizes = new Map(fish.map(item => {
+      const caption = item.anchor?.querySelector<HTMLElement>('.fish-name')
+      return [item, { width: caption?.offsetWidth ?? 0, height: caption?.offsetHeight ?? 0 }] as const
+    }))
+    const placedLabels: Array<{ anchor: HTMLAnchorElement; id: string; label: string; bounds: LabelRect; body: LabelRect; caption: LabelRect; depth: number }> = []
     for (const item of fish) {
       const anchor = item.anchor; if (!anchor) continue
       const bounds = projectFishLinkBounds(item.root.position, camera, width, height, fishRenderLength(item.service.fishId), projected)
@@ -1333,15 +1343,12 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       if (anchor.style.height !== heightVal) anchor.style.height = heightVal
       const zIndexVal = String(Math.round((item.root.position.z + 10) * 100))
       if (anchor.style.zIndex !== zIndexVal) anchor.style.zIndex = zIndexVal
-      // AQ-89 AC #1: tuck the caption tight under the fish's belly — the
-      // link box is centred on the fish and taller than the body, so a
-      // caption at top: 100% would float with a visible gap.
-      const lift = labelLiftPx(bounds.height)
-      const liftVal = `${lift}px`
-      if (anchor.style.getPropertyValue('--fish-label-lift') !== liftVal) {
-        anchor.style.setProperty('--fish-label-lift', liftVal)
-      }
-      placedLabels.push({ anchor, id: item.service.id, label: item.service.name, bounds, lift, depth: item.root.position.z })
+      const body = bodies.get(item) ?? bounds
+      const measured = sizes.get(item)!
+      const estimate = estimateCaptionRect(body, 0, item.service.name)
+      const captionWidth = measured.width || estimate.width, captionHeight = measured.height || estimate.height
+      const caption = { x: body.x + (body.width - captionWidth) / 2, y: body.y + body.height + 1, width: captionWidth, height: captionHeight }
+      placedLabels.push({ anchor, id: item.service.id, label: item.service.name, bounds, body, caption, depth: item.root.position.z })
       // AQ-13: keep the hover tooltip on-screen — flip it below the caption
       // near the top edge and align it inward near the left/right edges.
       const tooltipCenterX = bounds.x + bounds.width / 2
@@ -1349,35 +1356,35 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       anchor.classList.toggle('fish-link-tooltip-left', tooltipCenterX < 110)
       anchor.classList.toggle('fish-link-tooltip-right', tooltipCenterX > width - 110)
     }
-    // Visual-check fix: the de-conflict pass also runs for a lone label —
-    // the old `length > 1` guard meant a single visible fish (common in a
-    // zoomed mobile view) never got its caption clamped into the frame,
-    // so WatchMyBirds clipped at the right edge. The resolved horizontal
-    // shift reaches the DOM as --fish-label-dx (the align classes alone
-    // anchor the caption to the link box, which can itself sit partly
-    // past the frame edge).
+    // Even a lone caption needs frame-edge recovery. The solver returns
+    // offsets from its measured initial rectangle; native link bounds stay
+    // independent of every caption placement and suppression decision.
     if (placedLabels.length >= 1) {
       const resolved = resolveLabelDeconflicts(
         placedLabels.map(entry => ({
           id: entry.id,
-          caption: estimateCaptionRect(entry.bounds, entry.lift, entry.label),
-          body: entry.bounds,
+          caption: entry.caption,
+          body: entry.body,
           depth: entry.depth,
           label: entry.label,
         })),
         { width, height },
+        // Also reserve bodies whose native origin projection is unavailable
+        // (for example a near-plane crossing) and ambient fish with no link.
+        [...bodies].map(([item, body]) => ({ id: item.service.id, body })),
       )
       for (const result of resolved) {
         const entry = placedLabels.find(candidate => candidate.id === result.id)
         if (!entry) continue
-        const dyVal = `${result.dy}px`
-        if (entry.anchor.style.getPropertyValue('--fish-label-dy') !== dyVal) {
-          entry.anchor.style.setProperty('--fish-label-dy', dyVal)
+        const top = `${entry.caption.y + result.dy - entry.bounds.y}px`
+        if (entry.anchor.style.getPropertyValue('--fish-label-y') !== top) {
+          entry.anchor.style.setProperty('--fish-label-y', top)
         }
-        const dxVal = `${result.dx}px`
-        if (entry.anchor.style.getPropertyValue('--fish-label-dx') !== dxVal) {
-          entry.anchor.style.setProperty('--fish-label-dx', dxVal)
+        const left = `${entry.caption.x + result.dx - entry.bounds.x}px`
+        if (entry.anchor.style.getPropertyValue('--fish-label-x') !== left) {
+          entry.anchor.style.setProperty('--fish-label-x', left)
         }
+        entry.anchor.style.setProperty('--fish-label-transform', 'none')
         entry.anchor.classList.toggle('fish-label-deconflicted', result.faded)
         entry.anchor.classList.toggle('fish-label-align-left', result.align === 'left')
         entry.anchor.classList.toggle('fish-label-align-right', result.align === 'right')

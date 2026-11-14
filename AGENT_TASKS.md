@@ -15,7 +15,7 @@ Root verified this checkpoint against the current checkout. The goal remains act
 
 ## Latest Root checkpoint — 2026-11-14 label/recovery source review
 
-This section supersedes older process/source details. Full goal active/incomplete; AQ89 In Progress with all5AC/2DoD unchecked; AQ76 remains open.
+This section supersedes older process/source details. Full goal active/incomplete; AQ89 In Progress with all5AC/2DoD unchecked; AQ76 remains open. AQ76 milestone1e1105e is pushed; this scoped commit now carries the reviewed AQ89 source/evidence, followed by exact native review.
 
 - Agents resumed successfully: stronger-model collision-layout implementation/review explicitly selected by Root; default Luna/high implemented pure adaptive recovery, while other agents audited actual asset support/provenance and measured current-pose projection cost. Root integrated/reviewed all sources. No model/Blender/asset edits.
 - AQ89 candidate anchors measured captions to current posed mesh vertices (skin/morph/turn plus live shader-flex CPU counterpart), separately preserving native44px targets. Bounded32candidate solver checks all foreign service/ambient bodies and visible captions; impossible attached placements hide caption only.27helper cases pass; old helper fails24of27. Existing component/access tests remain. Exact native two-size acceptance still pending.

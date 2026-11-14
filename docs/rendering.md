@@ -4,7 +4,7 @@
 Category: Architecture / Rendering
 Status: Active
 Authority: Active Architectural Specification
-Backlog: AQ-5, AQ-38, AQ-12, AQ-34, AQ-13, AQ-70.2, AQ-76, AQ-103
+Backlog: AQ-5, AQ-38, AQ-12, AQ-34, AQ-13, AQ-70.2, AQ-76, AQ-89, AQ-103
 Owner: @root
 Updated: 2026-11-14
 Upstream: docs/requirements.md, docs/design-principles.md
@@ -38,6 +38,12 @@ The former alpha-picking failure—an empty-water corner opening Jellyfin—is r
 Main links retain native actions and signal only the selected instance; label/keyboard activation refreshes occlusion, and body targets recheck the actual pointer point. A 60-rAF-sample main-page observation on the desktop in-app browser measured median **33.3 ms**, p95 **35.0 ms**, maximum **35.4 ms**. These are desktop-host frame intervals, not GPU timings, physical-phone measurements or full-roster performance evidence.
 
 This is a functional technical baseline, not completed realism or all acceptance criteria. The reef remains a coarse/dead scan with baked shading and limited source coverage; the two fish retain approximate fins/materials, and thirteen roster species lack rigged assets. Production-quality fish, a mature living reef, validated interactions, optics, full-roster performance and final accessibility remain open work. Development/review is local-first; the user handles deployment after approved source is pushed.
+
+## Service caption placement (AQ-89)
+
+Native fish links retain their independently projected44px minimum targets. Captions use actual DOM dimensions and the current posed mesh's screen rectangle, including morphs, bone/turn pose and a CPU counterpart of live shader flex. They start immediately below the fish, or beside it at frame edges. The bounded near-first layout tests all foreign service/ambient bodies and visible captions; when no attached clear placement fits, it hides caption ink only. ARIA names, native link actions, focus/occlusion policy and Services access remain available. The caption itself brightens on hover/focus; its redundant rendered tooltip is suppressed to prevent an unchecked second label.
+
+[Source review and cost diagnostics](asset-evidence/aq89/source-review-20261114/README.md) separate full-vertex CPU observations from frame budgets and native acceptance. AQ-89 remains open until exact two-size Root review.
 
 ## Underwater water-surface interface (AQ-103)
 
