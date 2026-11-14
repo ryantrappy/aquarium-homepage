@@ -13,6 +13,17 @@ Downstream: Current implementation and review work
 
 Root verified this checkpoint against the current checkout. The goal remains active and incomplete: finish the backlog and make the living aquarium resemble the supplied reference. Passing functional tests does not accept final art.
 
+## Latest Root checkpoint — 2026-11-14 label/recovery source review
+
+This section supersedes older process/source details. Full goal active/incomplete; AQ89 In Progress with all5AC/2DoD unchecked; AQ76 remains open.
+
+- Agents resumed successfully: stronger-model collision-layout implementation/review explicitly selected by Root; default Luna/high implemented pure adaptive recovery, while other agents audited actual asset support/provenance and measured current-pose projection cost. Root integrated/reviewed all sources. No model/Blender/asset edits.
+- AQ89 candidate anchors measured captions to current posed mesh vertices (skin/morph/turn plus live shader-flex CPU counterpart), separately preserving native44px targets. Bounded32candidate solver checks all foreign service/ambient bodies and visible captions; impossible attached placements hide caption only.27helper cases pass; old helper fails24of27. Existing component/access tests remain. Exact native two-size acceptance still pending.
+- Root rejected initial projection-only CPU cost ~27ms p50. Same11fish/53878vertices historical timing fixture: full-vertex matrix/flex/buffer optimizations reduce p50 to7.2/9.3ms laptop/phone; p959.7/10.9ms. Node desktop CPU-only, excluding DOM/GPU and not mobile/whole-frame budgets. All raw iterations retained under docs/asset-evidence/aq89/source-review-20261114/.
+- AQ76 recovery permits healthy60Hz intervals via17.5ms EMA, distinct from unchanged16.7ms frame target,19ms slow EMA and22ms p95. Three fast/two slow windows, elapsed policy/exclusions and5s cooldown retained. First combined full run901pass/1stale13ms metadata failure retained; corrected metadata/test invariant now preserves reachability and recovery-versus-overload hysteresis, not recovery<frame-target.42focused policy/budget checks and final combined902tests/75files pass; typecheck16scripts/build pass. No fulltask/native budget acceptance.
+- Current reviewed13source-file snapshot is hash-identical in original/proof, pins in source-review evidence. Task76 source/docs and task89 source/evidence will be separate scoped reviewed milestone commits/pushes to shared draftPR48. Existing docs audit commits a09ae53(AQ79) and b3fdf38(AQ70.13) already pushed; both tasks stay open with precise promotion/support prerequisites. Queue64Done/68open (50ToDo/18InProgress); CI/FPS-display excluded.
+- Proof /tmp/aquarium-aq87-proof-8b2d7cc detached4df19de plus reviewed13files and infrastructureViteallowlist; owneddev5215PID46280 still has stale4df19deVITEpin. Verify ownership, snapshot own proof files, checkout shared source milestone and restart with accurate pin before native claims. Preserve user3000/5210. Prior AQ105 reviewtabs closed/media-metricsreset. Chrome4 retained. No deployment/merge/original config save.
+
 ## Latest Root checkpoint — 2026-11-14 AQ105 complete
 
 This section supersedes older status/source/process details below. Full goal remains active/incomplete.

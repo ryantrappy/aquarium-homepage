@@ -1,0 +1,40 @@
+
+> test
+> vitest run --maxWorkers=1
+
+
+ RUN  v5.1.0 /private/tmp/aquarium-aq87-proof-8b2d7cc
+
+ ❯ src/rendering/assets/budgets.test.ts (14 tests | 1 failed) 151ms
+   ❯ frame-time budget matches the runtime tier mechanism (AQ-70.3 AC #3) (1)
+     × the adaptive-quality thresholds sit inside the documented budget 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/rendering/assets/budgets.test.ts > frame-time budget matches the runtime tier mechanism (AQ-70.3 AC #3) > the adaptive-quality thresholds sit inside the documented budget
+AssertionError: expected 17.5 to be 13 // Object.is equality
+
+- Expected
++ Received
+
+- 13
++ 17.5
+
+ ❯ src/rendering/assets/budgets.test.ts:371:37
+    369|     expect(ADAPTIVE_STEP_DOWN_P95_MS).toBe(FRAME_TIME_BUDGET.p95MaxMs)
+    370|     expect(ADAPTIVE_STEP_DOWN_EMA_MS).toBe(FRAME_TIME_BUDGET.stepDownE…
+    371|     expect(ADAPTIVE_STEP_UP_EMA_MS).toBe(FRAME_TIME_BUDGET.stepUpEmaMs)
+       |                                     ^
+    372|     expect(FRAME_TIME_BUDGET.stepDownEmaMs).toBeGreaterThan(FRAME_TIME…
+    373|     expect(FRAME_TIME_BUDGET.targetMs).toBeGreaterThan(FRAME_TIME_BUDG…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 74 passed (75)
+      Tests  1 failed | 901 passed (902)
+   Start at  09:32:12
+   Duration  109.45s (tests 91%, import 6%, environment 2%, transform 1%)
+
+    Isolate  75 workers spawned · ~307ms startup each (spawn + environment, per file)
+             at least ~22.75s faster with isolate: false — reuses workers across files instead of one per file

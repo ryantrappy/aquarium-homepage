@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-08 00:30'
-updated_date: '2026-11-12 14:48'
+updated_date: '2026-11-14 15:39'
 labels:
   - performance
   - rendering
@@ -20,6 +20,8 @@ references:
 documentation:
   - docs/rendering.md
   - docs/asset-evidence/aq76/native-20261112/review.json
+  - docs/asset-evidence/aq76/recovery-20261114/README.md
+  - docs/photorealism-budgets.md
 priority: '4'
 type: feature
 ordinal: 134000
@@ -51,6 +53,8 @@ Coordinate with AQ-70.3 (photoreal asset-delivery and frame-time budgets) to imp
 1. Add a pure runtime-quality helper that accrues fixed simulation deltas for clip and flex updates across LOD cadence, emitting the full elapsed simulation delta only when due. 2. Make pause/resume and LOD transitions deterministic by resetting or re-basing the cadence accumulator at those boundaries so paused time is never applied and changing tiers does not create a burst or lose elapsed active time. 3. Add focused unit tests for LOD0/LOD1 total animation time, odd/even skipped-step sequences, pause/resume, and LOD changes; leave aquarium.ts integration to Root after the capture agent finishes.
 
 Add a 2,000 ms adaptive-quality window alternative requiring at least 30 valid frame samples, while preserving the 120-sample path, thresholds, slow/fast window counts and cooldown. Start the elapsed window at the first valid sample and reset it on evaluation or excluded samples. Add low-FPS and exclusion-reset regressions.
+
+Root2026-11-14 adaptive restoration correction: current recovery EMA13ms cannot be reached by a healthy60Hz vsynced browser whose observed intervals are16.7ms. Delegate a narrow pure-policy/test iteration to default Luna/high: inspect current measurement semantics, define documented reachable recovery headroom with hysteresis and existing sustained-window/cooldown rules, add a failed-before60Hz restore regression and retain overloaded/noise/exclusion safeguards. Root reviews thresholds and native control evidence separately; do not alter LOD geometry, asset/model maps, aquarium integration or claim whole-task performance acceptance.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -88,4 +92,18 @@ Root native production comparison recorded underdocs/asset-evidence/aq76/native-
 2026-11-12 adaptive-quality correction: retained the 120-sample window and added a 2,000 ms elapsed-time alternative requiring at least 30 valid samples. Window timing begins at the first valid record and resets after evaluation or excluded samples; p95/EMA thresholds, 2/3 sustained-window counts and 5,000 ms cooldown are unchanged. Added 15 FPS two-window step-down and excluded-window restart regressions. Verification: npm test -- src/rendering/scene/runtime-quality.test.ts — 24 tests passed; git diff --check passed.
 
 Root review2026-11-12 accepted elapsed-time adaptive windows: evaluate after120 valid samples or at least30 samples spanning2s, retaining p95/EMA thresholds,2/3 slow/fast windows and5s cooldown. At15FPS the tested first fallback now occurs around4.1s instead of waiting for240 frames (~16s). Exclusion resets elapsed window and slow/fast counters.24 focused policy tests pass. Native settled budget acceptance still requires repeat measurement after this source change.
+
+2026-11-14 recovery-policy implementation (verified subset only; no AC/DoD/status changes): raised recovery EMA threshold to 17.5 ms, retaining 1.5 ms hysteresis under the unchanged 19 ms step-down EMA; recovery now also requires p95 <= the existing 22 ms slow-frame bound. Comments document the bounded nature of 60 Hz RAF recovery: a vsync-capped stream cannot establish additional GPU headroom, and overload still causes the unchanged step-down. Added regressions for fail-before/fixed steady 60 Hz restoration from Low through Balanced to High, an 18 ms deadband, p95-spiky intervals with recovered EMA, exclusion-reset recovery streaks, and overload after recovery/cooldown. Existing 120-sample/elapsed-window, slow-threshold, sustained-count, and general cooldown tests remain unchanged. Evidence: baseline focused run 24/24 passed; pre-fix regression run 26 passed/2 failed at the expected 60 Hz restoration and exclusion-separated restoration assertions; post-fix `npm test -- src/rendering/scene/runtime-quality.test.ts` passed 28/28; `git diff --check` passed. Logs and source hashes: `/tmp/aq76-recovery-review/`. This validates only the pure policy/helper tests; no native performance claim, aquarium integration review, AQ-76 acceptance check, or task completion.
+
+2026-11-14 Root-reviewed budget metadata iteration (verified subset; no AC/DoD/status changes): synchronized FRAME_TIME_BUDGET.stepUpEmaMs to the 17.5 ms recovery-probe threshold while preserving the independent 16.7 ms frame target and unchanged 19 ms step-down EMA / 22 ms p95 overload gates. Replaced target>recovery assertion with explicit reachable steady-60-Hz RAF bound, recovery<slow hysteresis, and exact target/p95/step-down assertions; runtime constants remain cross-checked against metadata. Existing asset, scene, and performance budget checks are untouched. Focused reproduction before fix: runtime-quality + budgets tests had 41 pass / 1 expected stale-metadata failure. After final assertions: `npm test -- src/rendering/scene/runtime-quality.test.ts src/rendering/assets/budgets.test.ts` passed 42/42; `git diff --check` passed. Fail/pass logs and updated SHA256/Git blob pins (all four policy/runtime-quality files) are in `/tmp/aq76-recovery-review/`. No performance-budget pass is inferred from recovery at 17.5 ms; no AC/Done/task status change.
 <!-- SECTION:NOTES:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @root
+created: 2026-11-14 15:34
+---
+Root combined full suite901pass/1failure catches a second old13ms declaration in assets/budgets.ts and its target>recoveryEMA invariant. Healthy60Hz RAF cannot meet that invariant at a16.7ms budget. Next iteration must reconcile recovery-observation policy with budget metadata/docs while retaining actual frame targets16.7ms andp95limit22ms, slow19/22 thresholds, cooldown/window counts and existing runtime performance gates. This is an explicit policy correction, not a claim that17.5ms meets the16.7ms frame target; retain the full failure log. Root expands agent scope to budgets.ts/.test.ts only; Root handles documentation. NoAC/Done.
+---
+<!-- COMMENTS:END -->

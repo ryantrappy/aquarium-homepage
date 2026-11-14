@@ -4,12 +4,15 @@
 Category: Specification / Budgets
 Status: Active
 Authority: Active Specification
-Backlog: AQ-70.3
+Backlog: AQ-70.3, AQ-76
 Owner: @Luna
-Updated: 2026-11-09
+Updated: 2026-11-14
 Upstream: docs/requirements.md, docs/asset-contract.md, docs/rendering.md
 Downstream: src/rendering/assets/budgets.ts, src/rendering/assets/budgets.test.ts
 -->
+
+> [!NOTE]
+> **Agent Context & Authority** — Active budget policy. The2026-11-14 update corrects reachable quality recovery, while retaining every frame, asset and scene cap. Historical totals below are dated measurements; they do not certify the current rendered scene's performance.
 
 Photorealism raises texture resolution, geometry density and shading cost.
 These budgets exist so each photoreal task can prove it fits — before the
@@ -19,7 +22,7 @@ this document is `src/rendering/assets/budgets.ts`; the automated check is
 and fails the suite when any live manifest asset exceeds its class budget
 or a non-grandfathered asset lacks compressed texture delivery.
 
-**Scope note.** Budgets cover what the scene actually loads: the manifest
+**Historical measurement scope (2026-11-09).** The recorded totals cover the manifest
 GLBs (6 Blender hero fish, 8 coral colonies, 2 rock islands, 13 splat-fish)
 plus the two licensed proof-candidate fish that load at runtime. The sand
 bed is procedural (AQ-73 aragonite bed, 512² pixel-gen cache) with no GLB
@@ -111,7 +114,7 @@ figures above (20,699,092 B fish GLBs, 214,958,050 B GPU).
 | --- | ---: | --- |
 | Frame-time target (p50) | ≤ 16.7 ms (60 fps) | Target, not a tripwire |
 | Sustained p95 | ≤ 22 ms | Above this, the quality tier steps down |
-| Sustained EMA | > 19 ms steps down, < 13 ms steps back up | `AdaptiveQualityController` |
+| Sustained EMA policy | >19ms steps down; <17.5ms with p95 ≤22ms probes recovery | `AdaptiveQualityController`; recovery is not a frame-budget pass |
 | Viewports | 1440×900 and 402×874, scale 1 | No broader device matrix |
 
 The runtime quality-tier mechanism (AQ-70.3 AC #3) already exists and is
@@ -119,15 +122,13 @@ wired in: `AdaptiveQualityController` (`src/rendering/scene/runtime-quality.ts`)
 records every frame interval in `aquarium.ts` `tick()`, evaluates ~2 s
 windows, steps down High → Balanced → Low after 2 consecutive slow windows
 (EMA > 19 ms or p95 > 22 ms), steps back up after 3 fast windows
-(EMA < 13 ms), with a 5 s cooldown. Tiers lower cost automatically:
+(EMA <17.5ms and p95 ≤22ms), with a5s cooldown. The former13ms recovery condition was unreachable on a healthy60Hz vsynced browser (~16.67ms intervals). Recovery now admits that observation while retaining a1.5ms hysteresis gap below the19ms slow EMA. A vsync-capped interval cannot establish spare GPU capacity; this is a bounded probe and the unchanged overload rules may lower quality again. Neither the16.7ms target nor the22ms p95limit is relaxed. Tiers lower cost automatically:
 High caps pixel ratio at 1.5 with shadows on, Balanced caps it at 1.0,
 Low additionally disables the key-light shadow pass and tightens the LOD
 depth bands 15%. Hidden, paused and prefers-reduced-motion frames never
 count as load. The controller's thresholds are asserted against
 `FRAME_TIME_BUDGET` in `budgets.test.ts`, so the doc and the code cannot
-drift apart silently. No runtime change was needed for this task — the
-mechanism was delivered by PR #22 (AQ-76); this task documents it and
-guards its thresholds.
+drift apart silently. The original mechanism was delivered by PR #22 (AQ-76); the2026-11-14 recovery-policy correction is tracked under AQ-76. [Recovery evidence](asset-evidence/aq76/recovery-20261114/README.md) separates helper correctness from native runtime-budget acceptance.
 
 Surface-driven lighting (AQ-96 / AQ-98, 2026-11-11) adds no asset bytes
 and no GPU texture memory — the wave field, surface shader, shaft plane,

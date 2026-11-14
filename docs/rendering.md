@@ -4,9 +4,9 @@
 Category: Architecture / Rendering
 Status: Active
 Authority: Active Architectural Specification
-Backlog: AQ-5, AQ-38, AQ-12, AQ-34, AQ-13, AQ-70.2, AQ-103
+Backlog: AQ-5, AQ-38, AQ-12, AQ-34, AQ-13, AQ-70.2, AQ-76, AQ-103
 Owner: @root
-Updated: 2026-11-12
+Updated: 2026-11-14
 Upstream: docs/requirements.md, docs/design-principles.md
 Downstream: src/rendering/scene/aquarium.ts, src/rendering/scene/water-surface.ts, src/rendering/scene/water-surface.test.ts, src/components/AquariumScene.tsx, src/rendering/proof/*
 -->
@@ -156,7 +156,7 @@ Measured on `gemini_control` at the AQ-76 implementation (base tip `85e7623`, PR
 
 **Distance LOD.** The single band is calibrated to the real camera geometry (camera z = 9, fish z in −4.6…2.8, depth 6.2–13.6): LOD0 full GLB below ~8.5 m, LOD1 full GLB at half clip rate beyond ~8.5 m, with ±0.75 m hysteresis and a projected-screen-size override (≥140 px stays LOD0). There is no sprite tier any more: the LOD2 thumbnail-sprite swap (far fish replaced by a flat 2D sprite above ~11 m) was removed 2026-11-09 at Ryan's direction — it read as a visible snap from a lifelike 3D fish to a flat model. Fish keep their full GLB at every depth; LOD is animation-rate only, so the scene renders ~133k triangles regardless of fish distance. The thumbnail sprite survives only as the no-GLB fallback before a lazy load lands. No decimated `*_lod1.glb` assets are generated: decimating skinned GLBs risks breaking the skeleton/clip/turning-rig binding, and LOD1 is animation-rate only by design.
 
-**Adaptive quality.** Tiers: High (pixel ratio min(devicePixelRatio, 1.5), shadows on), Balanced (pixel ratio 1.0), Low (pixel ratio 1.0 + `keyLight.castShadow = false`, LOD bands tightened 15%). Step down after 2 consecutive ~2 s windows with EMA > 19 ms or p95 > 22 ms; step up after 3 consecutive windows with EMA < 13 ms; 5 s cooldown; hidden/paused/reduced-motion frames never count as load. The shadow toggle is not a no-op: reef meshes set `castShadow = true` (`reef-assembly.ts`, rock/coral assembly).
+**Adaptive quality.** Tiers: High (pixel ratio min(devicePixelRatio, 1.5), shadows on), Balanced (pixel ratio 1.0), Low (pixel ratio 1.0 + `keyLight.castShadow = false`, LOD bands tightened 15%). Step down after2consecutive ~2s windows with EMA >19ms or p95 >22ms; step up after3consecutive windows with EMA <17.5ms and p95 ≤22ms;5s cooldown; hidden/paused/reduced-motion frames never count as load. The recovery threshold admits a healthy60Hz vsync stream (~16.67ms) that could never meet the former13ms condition. It is a bounded quality-recovery probe, not proof of spare GPU capacity or a relaxed frame budget: the target remains16.7ms and the p95limit22ms; unchanged overload rules can lower the tier again. The shadow toggle is not a no-op: reef meshes set `castShadow = true` (`reef-assembly.ts`, rock/coral assembly).
 
 **Not yet measured.** Browser frame intervals (median/p95) and `renderer.info.render` triangle counts before/after at 1440×900 and 402×874, time-to-first-fish, and screenshot pairs for LOD transitions and sprite→GLB swaps still need a live browser run and Root visual review; the unit tests cover the controller thresholds, hysteresis, queue ordering, and failure isolation, not live frame rates.
 

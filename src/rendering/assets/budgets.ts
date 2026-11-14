@@ -19,12 +19,14 @@
  *   for PNG/JPEG, and as BC7 (~1 byte/px + mipmaps) for KTX2. That is why
  *   compressed delivery matters: the same 1024 px maps cost 16 MiB
  *   uncompressed and ~4 MiB as KTX2.
- * - The frame-time budget is the target the runtime tier mechanism
- *   (`runtime-quality.ts`) already enforces: step down at EMA > 19 ms or
- *   p95 > 22 ms, step back up below EMA 13 ms. `FRAME_TIME_BUDGET`
- *   records those thresholds as the budget so the two cannot drift apart
- *   silently; `budgets.test.ts` asserts the controller constants sit
- *   inside it.
+ * - The frame-time target is 16.7 ms. The runtime tier mechanism
+ *   (`runtime-quality.ts`) steps down at EMA > 19 ms or p95 > 22 ms and
+ *   permits recovery below EMA 17.5 ms when p95 <= 22 ms. That recovery
+ *   threshold is reachable on steady 60 Hz RAF intervals (~16.67 ms), but
+ *   is a bounded recovery probe rather than the frame-time target or proof
+ *   of extra GPU headroom. `FRAME_TIME_BUDGET` records the target and policy
+ *   thresholds separately; `budgets.test.ts` checks their correspondence
+ *   and the recovery hysteresis without treating recovery as a budget pass.
  *
  * Compressed delivery (KTX2/Basis Universal) is required for every asset
  * that is not grandfathered. All 29 manifest assets predate this budget
@@ -155,8 +157,8 @@ export interface FrameTimeBudget {
   /** Sustained EMA above this steps the quality tier down. This must
    * equal ADAPTIVE_STEP_DOWN_EMA_MS in runtime-quality.ts. */
   stepDownEmaMs: number
-  /** Sustained EMA below this steps the quality tier back up. This must
-   * equal ADAPTIVE_STEP_UP_EMA_MS in runtime-quality.ts. */
+  /** Recovery-probe EMA threshold. This must equal ADAPTIVE_STEP_UP_EMA_MS
+   * in runtime-quality.ts. It is intentionally not the frame-time target. */
   stepUpEmaMs: number
 }
 
@@ -164,7 +166,7 @@ export const FRAME_TIME_BUDGET: Readonly<FrameTimeBudget> = Object.freeze({
   targetMs: 16.7,
   p95MaxMs: 22,
   stepDownEmaMs: 19,
-  stepUpEmaMs: 13,
+  stepUpEmaMs: 17.5,
 })
 
 /** Manifest asset ids whose PNG textures predate this budget and are
