@@ -60,11 +60,11 @@ import { applyCaustics, createCaustics } from './caustics'
 import { AdaptiveQualityController, LAZY_MAX_CONCURRENT_LOADS, QUALITY_TIERS, consumeLodAnimationDelta, createLodAnimationDeltaState, orderLazyLoadQueue, phase0SpeciesIds, projectedFishLengthPx, selectFishLod, shaftModeForTier, type FishLod, type QualityTier } from './runtime-quality'
 import { FRAME_RATE_PUSH_INTERVAL_MS, FrameRateSampler, type FrameRateSample } from './frame-rate'
 import {
-  DEFAULT_CAMERA_DISTANCE_M,
   DEFAULT_CAMERA_ZOOM_STATE,
   clampCameraZoomState,
   dampCameraZoomState,
   isOverviewZoomState,
+  overviewHalfWidthAtDepth,
   panCameraZoomState,
   stepZoomDistance,
   zoomStateForFishPosition,
@@ -520,7 +520,11 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   })
   scene.add(glassEnclosure.group)
   let glassLayoutNarrow: boolean | undefined
-  let habitat: WaterHabitat = { bounds: { min: { x: -4, y: -2.25, z: -4.6 }, max: { x: 4, y: 2.8, z: 2.8 } }, obstacles: [], anchors: [] }
+  let habitat: WaterHabitat = {
+    bounds: { min: { x: -4, y: -2.25, z: -4.6 }, max: { x: 4, y: 2.8, z: 2.8 } },
+    maxAbsXAtDepth: z => Math.min(4, overviewHalfWidthAtDepth(camera.aspect, z)),
+    obstacles: [], anchors: [],
+  }
   let width = 1, height = 1, labelClock = 0, spawnUnavailable = false
   let lookDevPreset: LookDevPreset = lookDevConfig?.preset ?? 'full-scene'
   let lookDevTimeSeconds = lookDevConfig?.timeSeconds ?? 0
@@ -773,6 +777,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       const r = MESH_NAVIGATION_COLLISION_RADIUS_M
       const { min, max } = habitat.bounds
       const p = item.motion.position
+      if (!isSafeFishPosition(p, r, habitat.bounds, [], habitat.maxAbsXAtDepth)) return false
       if (
         p.x < min.x + r || p.x > max.x - r ||
         p.y < min.y + r || p.y > max.y - r ||
@@ -791,6 +796,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       item.motion.clearance,
       habitat.bounds,
       habitat.obstacles,
+      habitat.maxAbsXAtDepth,
     )
   }
   function failReefSetup(reason: string) {
@@ -957,7 +963,8 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         // Relocate any fish or schoolmate that drifted into a coral envelope
         // during the brief AABB window before the async mesh collider resolved.
         const meshCheck = (candidate: SwimmingFish['position']) =>
-          result.meshNavigation.queryCapsule!(
+          isSafeFishPosition(candidate, MESH_NAVIGATION_COLLISION_RADIUS_M, habitat.bounds, [], habitat.maxAbsXAtDepth)
+          && result.meshNavigation.queryCapsule!(
             candidate,
             candidate,
             MESH_NAVIGATION_COLLISION_RADIUS_M,
@@ -981,6 +988,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
             meshCheck,
             fishBodyRadiusM(item.service.fishId),
             evaluateTieredVerticalDepthRange(item.service.fishId, habitat.bounds, item.motion.clearance)?.worldYRange,
+            habitat.maxAbsXAtDepth,
           )
           if (relocated) {
             item.motion.position = relocated
@@ -1209,9 +1217,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       const clearance = fishClearanceRadius(mate.speciesId)
       const offset = schoolmateSpawnOffset(mate.id, mate.speciesId, tankWidth, mate.index, SCHOOL_TOTAL_COUNT[mate.speciesId] - 1)
       const preferred = { x: lead.x + offset.x, y: lead.y + offset.y, z: lead.z + offset.z }
-      const position = findSafeFishSpawn(preferred, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(mate.speciesId), evaluateTieredVerticalDepthRange(mate.speciesId, habitat.bounds, clearance)?.worldYRange)
+      const position = findSafeFishSpawn(preferred, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(mate.speciesId), evaluateTieredVerticalDepthRange(mate.speciesId, habitat.bounds, clearance)?.worldYRange, habitat.maxAbsXAtDepth)
       if (!position) continue
-      const yaw = findSafeFishHeading(position, Math.atan2(offset.x, offset.z), habitat.bounds, habitat.obstacles, clearance)
+      const yaw = findSafeFishHeading(position, Math.atan2(offset.x, offset.z), habitat.bounds, habitat.obstacles, clearance, habitat.maxAbsXAtDepth)
       if (yaw === undefined) continue
       nextMates.push(createInhabitant(
         { id: mate.id, name: '', url: '', fishId: mate.speciesId, isExample: false },
@@ -1248,7 +1256,8 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     const meshSpawnCheck = habitat.meshNavigation?.queryCapsule
       ? (candidate: SwimmingFish['position']) => {
           const mesh = habitat.meshNavigation!
-          return mesh.queryCapsule!(candidate, candidate, MESH_NAVIGATION_COLLISION_RADIUS_M, { ...mesh.movementBudget }).status === 'clear'
+          return isSafeFishPosition(candidate, MESH_NAVIGATION_COLLISION_RADIUS_M, habitat.bounds, [], habitat.maxAbsXAtDepth)
+            && mesh.queryCapsule!(candidate, candidate, MESH_NAVIGATION_COLLISION_RADIUS_M, { ...mesh.movementBudget }).status === 'clear'
         }
       : undefined
     for (const service of nextServices) {
@@ -1256,21 +1265,21 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       if (previous?.service.fishId === service.fishId) continue
       const species = getFishById(service.fishId)!
       const clearance = fishClearanceRadius(service.fishId)
-      const preference = fishSpawnPreference(spawnOrderKey(service.id), service.fishId, habitat.bounds, clearance, horizontalSlots.get(service.id))
+      const preference = fishSpawnPreference(spawnOrderKey(service.id), service.fishId, habitat.bounds, clearance, horizontalSlots.get(service.id), habitat.maxAbsXAtDepth)
       // The tall portrait reef fills the rear water column. Start the two
       // broad cruisers in front water, still subject to every clearance test.
       const foregroundCruiser = width < 600 && (service.fishId === 'blue-tang' || service.fishId === 'yellow-tang')
       const preferredPosition = preference && foregroundCruiser
         ? { ...preference.position, z: habitat.bounds.max.z - clearance - (service.fishId === 'blue-tang' ? 0.65 : 0.25) }
         : preference?.position
-      const position = preference && preferredPosition && findSafeFishSpawn(preferredPosition, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(service.fishId), evaluateTieredVerticalDepthRange(service.fishId, habitat.bounds, clearance)?.worldYRange)
+      const position = preference && preferredPosition && findSafeFishSpawn(preferredPosition, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(service.fishId), evaluateTieredVerticalDepthRange(service.fishId, habitat.bounds, clearance)?.worldYRange, habitat.maxAbsXAtDepth)
       if (!position || !preference) {
         // Keep existing instances intact during the truthful full-native fallback.
         // A later fitting configuration can reuse their exact poses and clocks.
         refreshRetainedLinks()
         spawnUnavailable = true; syncLoop(); return false
       }
-      const yaw = findSafeFishHeading(position, preference.yaw, habitat.bounds, habitat.obstacles, clearance)
+      const yaw = findSafeFishHeading(position, preference.yaw, habitat.bounds, habitat.obstacles, clearance, habitat.maxAbsXAtDepth)
       if (yaw === undefined) {
         refreshRetainedLinks()
         spawnUnavailable = true; syncLoop(); return false
@@ -1702,8 +1711,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     // AQ-62: the envelope is measured from the overview camera distance,
     // not the live camera — zooming in must not shrink the fish roaming
     // volume or trigger a habitat rebuild.
-    const halfWidth = Math.min(5.0, (DEFAULT_CAMERA_DISTANCE_M - 2.8) * Math.tan(THREE.MathUtils.degToRad(21)) * camera.aspect * .96)
+    const halfWidth = overviewHalfWidthAtDepth(camera.aspect, -1.35)
     habitat.bounds = { min: { x: -halfWidth, y: -2.25, z: -4.6 }, max: { x: halfWidth, y: 2.8, z: 2.8 } }
+    habitat.maxAbsXAtDepth = z => Math.min(halfWidth, overviewHalfWidthAtDepth(camera.aspect, z))
     const newNarrow = width < 600
     if (glassLayoutNarrow !== newNarrow) {
       glassEnclosure.setLayout(newNarrow)

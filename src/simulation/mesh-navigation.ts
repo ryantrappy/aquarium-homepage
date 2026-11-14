@@ -1,4 +1,4 @@
-import type { AxisAlignedBox, Vec3 } from './habitat-navigation'
+import type { AxisAlignedBox, MaxAbsXAtDepth, Vec3 } from './habitat-navigation'
 
 export type MeshNavigationWork = Readonly<{ nodeVisits: number; triangleTests: number }>
 export type MeshNavigationWorkBudget = Readonly<{ maxNodeVisits: number; maxTriangleTests: number }>
@@ -30,6 +30,8 @@ export type MeshNavigationInput = {
   spacingM: number
   queryCapsule: CapsuleClearanceQuery
   budget?: Partial<MeshNavigationBudget>
+  maxAbsXAtDepth?: MaxAbsXAtDepth
+  lateralClearanceRadius?: number
 }
 
 export type MeshNavigationWorkReport = MeshNavigationWork & Readonly<{
@@ -154,6 +156,7 @@ export function findMeshRoute(input: MeshNavigationInput): MeshNavigationResult 
   const budget = { ...DEFAULT_BUDGET, ...(input && typeof input === 'object' ? input.budget : undefined) }
   const spacingM = input?.spacingM ?? 0
   const fishClearanceRadius = input?.fishClearanceRadius ?? Number.NaN
+  const lateralClearanceRadius = input?.lateralClearanceRadius ?? fishClearanceRadius
   const queryCapsule = input?.queryCapsule
   const invalidPoint = { x: Number.NaN, y: Number.NaN, z: Number.NaN }
   const start = input?.start && typeof input.start === 'object' ? { ...input.start } : invalidPoint
@@ -173,6 +176,7 @@ export function findMeshRoute(input: MeshNavigationInput): MeshNavigationResult 
   if (typeof queryCapsule !== 'function' || !finiteVec(start) || !finiteVec(target)
     || !finiteVec(waterBounds.min) || !finiteVec(waterBounds.max)
     || !Number.isFinite(fishClearanceRadius) || fishClearanceRadius < 0
+    || !Number.isFinite(lateralClearanceRadius) || lateralClearanceRadius < 0
     || !Number.isFinite(spacingM) || spacingM <= 0) return unavailable('invalid-navigation-input')
   for (const axis of AXES) if (!(waterBounds.min[axis] < waterBounds.max[axis])
     || !Number.isFinite(waterBounds.max[axis] - waterBounds.min[axis])) return unavailable('invalid-water-bounds')
@@ -180,18 +184,27 @@ export function findMeshRoute(input: MeshNavigationInput): MeshNavigationResult 
 
   const safeBounds = {
     min: {
-      x: waterBounds.min.x + fishClearanceRadius,
+      x: waterBounds.min.x + lateralClearanceRadius,
       y: waterBounds.min.y + fishClearanceRadius,
       z: waterBounds.min.z + fishClearanceRadius,
     },
     max: {
-      x: waterBounds.max.x - fishClearanceRadius,
+      x: waterBounds.max.x - lateralClearanceRadius,
       y: waterBounds.max.y - fishClearanceRadius,
       z: waterBounds.max.z - fishClearanceRadius,
     },
   }
   for (const axis of AXES) if (!(safeBounds.min[axis] < safeBounds.max[axis])) return unavailable('clearance-collapses-water-bounds')
-  const insideSafeWater = (point: Vec3) => AXES.every((axis) => point[axis] >= safeBounds.min[axis] && point[axis] <= safeBounds.max[axis])
+  const insideSafeWater = (point: Vec3) => {
+    if (!AXES.every((axis) => point[axis] >= safeBounds.min[axis] && point[axis] <= safeBounds.max[axis])) return false
+    if (!input.maxAbsXAtDepth) return true
+    try {
+      const maxAbsX = input.maxAbsXAtDepth(point.z)
+      return Number.isFinite(maxAbsX) && maxAbsX >= lateralClearanceRadius && Math.abs(point.x) <= maxAbsX - lateralClearanceRadius
+    } catch {
+      return false
+    }
+  }
   if (!insideSafeWater(start) || !insideSafeWater(target)) return unavailable('endpoint-outside-clearance-shrunk-water-bounds')
 
   let sawIndeterminate = false
@@ -260,6 +273,7 @@ export function findMeshRoute(input: MeshNavigationInput): MeshNavigationResult 
   const testPoint = (node: GridNode): boolean => {
     if (node.checked) return node.clear
     node.checked = true
+    if (!insideSafeWater(node.position)) return false
     const result = query(node.position, node.position)
     node.clear = result === 'clear'
     return node.clear

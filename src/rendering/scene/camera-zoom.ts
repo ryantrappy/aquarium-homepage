@@ -22,9 +22,21 @@ export type CameraZoomState = {
 /** Default full-tank overview: the camera setup from createAquarium(). */
 export const DEFAULT_CAMERA_TARGET = { x: 0, y: 0.15, z: 0 }
 export const DEFAULT_CAMERA_DISTANCE_M = 9
+export const OVERVIEW_CAMERA_FOV_DEGREES = 42
+export const MAX_HABITAT_HALF_WIDTH_M = 5.2
+const OVERVIEW_FRUSTUM_MARGIN = 0.96
 /** Closest the camera may come to its focal target. */
 export const MIN_CAMERA_DISTANCE_M = 4.5
 export const MAX_CAMERA_DISTANCE_M = DEFAULT_CAMERA_DISTANCE_M
+
+/** Horizontal overview-frustum half-width at a world-space depth plane. */
+export function overviewHalfWidthAtDepth(aspect: number, depthZ: number): number {
+  if (!Number.isFinite(aspect) || aspect <= 0 || !Number.isFinite(depthZ)) return 0
+  const cameraZ = DEFAULT_CAMERA_TARGET.z + DEFAULT_CAMERA_DISTANCE_M
+  const depth = cameraZ - depthZ
+  if (depth <= 0) return 0
+  return Math.min(MAX_HABITAT_HALF_WIDTH_M, depth * Math.tan(OVERVIEW_CAMERA_FOV_DEGREES * Math.PI / 360) * aspect * OVERVIEW_FRUSTUM_MARGIN)
+}
 /**
  * Closest the camera itself may come to the reef, in world z. The fish
  * volume runs to z = 2.8, so the camera never sits among the fish: the

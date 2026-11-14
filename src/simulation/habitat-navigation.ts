@@ -3,6 +3,7 @@ import type { NavigationRequest } from './behavior-runtime'
 
 export type Vec3 = Readonly<{ x: number; y: number; z: number }>
 export type AxisAlignedBox = Readonly<{ min: Vec3; max: Vec3 }>
+export type MaxAbsXAtDepth = (z: number) => number
 
 export type SolidObstacleVolume = {
   id: string
@@ -24,6 +25,8 @@ export type ResolveHabitatRouteInput = {
   obstacles: readonly SolidObstacleVolume[]
   anchorLocations: readonly HabitatAnchorLocation[]
   fishClearanceRadius: number
+  maxAbsXAtDepth?: MaxAbsXAtDepth
+  lateralClearanceRadius?: number
 }
 
 export type HabitatRouteResult =
@@ -69,6 +72,9 @@ function validateInput(input: ResolveHabitatRouteInput) {
   if (!finiteVec(start)) throw new RangeError('Fish start position must use finite 3D coordinates.')
   if (!Number.isFinite(fishClearanceRadius) || fishClearanceRadius < 0) {
     throw new RangeError('Fish clearance radius must be finite and non-negative.')
+  }
+  if (input.lateralClearanceRadius !== undefined && (!Number.isFinite(input.lateralClearanceRadius) || input.lateralClearanceRadius < 0)) {
+    throw new RangeError('Lateral clearance radius must be finite and non-negative.')
   }
   validateBox(waterBounds, 'Water bounds')
   if (obstacles.length > MAX_OBSTACLE_VOLUMES) throw new RangeError(`Navigation supports at most ${MAX_OBSTACLE_VOLUMES} obstacle volumes per request.`)
@@ -150,10 +156,37 @@ export function getClearanceExpandedObstacles(
   return expanded
 }
 
-function safePoint(point: Vec3, waterBounds: AxisAlignedBox, clearanceRadius: number, obstacles: readonly AxisAlignedBox[]): boolean {
-  if (point.x < waterBounds.min.x + clearanceRadius || point.x > waterBounds.max.x - clearanceRadius
+export function isWithinDepthAwareWaterBounds(
+  point: Vec3,
+  waterBounds: AxisAlignedBox,
+  clearanceRadius: number,
+  maxAbsXAtDepth?: MaxAbsXAtDepth,
+  lateralClearanceRadius = clearanceRadius,
+): boolean {
+  if (!finiteVec(point) || !finiteVec(waterBounds.min) || !finiteVec(waterBounds.max)
+    || !Number.isFinite(clearanceRadius) || clearanceRadius < 0
+    || !Number.isFinite(lateralClearanceRadius) || lateralClearanceRadius < 0) return false
+  if (point.x < waterBounds.min.x + lateralClearanceRadius || point.x > waterBounds.max.x - lateralClearanceRadius
     || point.y < waterBounds.min.y + clearanceRadius || point.y > waterBounds.max.y - clearanceRadius
     || point.z < waterBounds.min.z + clearanceRadius || point.z > waterBounds.max.z - clearanceRadius) return false
+  if (!maxAbsXAtDepth) return true
+  try {
+    const maxAbsX = maxAbsXAtDepth(point.z)
+    return Number.isFinite(maxAbsX) && maxAbsX >= lateralClearanceRadius && Math.abs(point.x) <= maxAbsX - lateralClearanceRadius
+  } catch {
+    return false
+  }
+}
+
+function safePoint(
+  point: Vec3,
+  waterBounds: AxisAlignedBox,
+  clearanceRadius: number,
+  obstacles: readonly AxisAlignedBox[],
+  maxAbsXAtDepth?: MaxAbsXAtDepth,
+  lateralClearanceRadius = clearanceRadius,
+): boolean {
+  if (!isWithinDepthAwareWaterBounds(point, waterBounds, clearanceRadius, maxAbsXAtDepth, lateralClearanceRadius)) return false
   return obstacles.every((obstacle) => !strictPointInside(point, obstacle))
 }
 
@@ -198,15 +231,21 @@ function distance(a: Vec3, b: Vec3): number {
   return Math.hypot(x, y, z)
 }
 
-function obstacleCorners(obstacles: readonly AxisAlignedBox[], waterBounds: AxisAlignedBox, clearanceRadius: number): Vec3[] {
+function obstacleCorners(
+  obstacles: readonly AxisAlignedBox[],
+  waterBounds: AxisAlignedBox,
+  clearanceRadius: number,
+  maxAbsXAtDepth?: MaxAbsXAtDepth,
+  lateralClearanceRadius = clearanceRadius,
+): Vec3[] {
   const corners: Vec3[] = []
   const safeMin = {
-    x: waterBounds.min.x + clearanceRadius,
+    x: waterBounds.min.x + lateralClearanceRadius,
     y: waterBounds.min.y + clearanceRadius,
     z: waterBounds.min.z + clearanceRadius,
   }
   const safeMax = {
-    x: waterBounds.max.x - clearanceRadius,
+    x: waterBounds.max.x - lateralClearanceRadius,
     y: waterBounds.max.y - clearanceRadius,
     z: waterBounds.max.z - clearanceRadius,
   }
@@ -226,7 +265,7 @@ function obstacleCorners(obstacles: readonly AxisAlignedBox[], waterBounds: Axis
         z: clampToWater(z, 'z'),
       }
       const key = `${corner.x},${corner.y},${corner.z}`
-      if (safePoint(corner, waterBounds, clearanceRadius, obstacles) && !seen.has(key)) {
+      if (safePoint(corner, waterBounds, clearanceRadius, obstacles, maxAbsXAtDepth, lateralClearanceRadius) && !seen.has(key)) {
         corners.push(corner)
         seen.add(key)
       }
@@ -287,6 +326,45 @@ function requestedStateAnchor(request: NavigationRequest): HabitatAnchor | undef
   return target === request.anchor ? target : undefined
 }
 
+export type LateralSide = -1 | 1
+
+function identityHash(instanceId: string): number {
+  let hash = 2166136261
+  for (const char of instanceId) hash = Math.imul(hash ^ char.charCodeAt(0), 16777619)
+  return hash >>> 0
+}
+
+/** A stable side preference that flips on each new navigation generation. */
+export function preferredLateralSide(request: Pick<NavigationRequest, 'instanceId' | 'generation'>): LateralSide {
+  return ((identityHash(request.instanceId) ^ request.generation) & 1) === 0 ? -1 : 1
+}
+
+export function habitatAnchorSidePenalty(position: Vec3, waterBounds: AxisAlignedBox, preferredSide: LateralSide): number {
+  const width = waterBounds.max.x - waterBounds.min.x
+  const centerX = (waterBounds.min.x + waterBounds.max.x) * .5
+  const centerTolerance = width * .06
+  const side = position.x < centerX - centerTolerance ? -1 : position.x > centerX + centerTolerance ? 1 : 0
+  if (side === preferredSide) return 0
+  return side === 0 ? width * .18 : width * .45
+}
+
+/** Stable side-prioritized anchor ordering shared by both route planners. */
+export function orderHabitatAnchorsForRequest<T extends Pick<HabitatAnchorLocation, 'id' | 'position'>>(
+  request: Pick<NavigationRequest, 'instanceId' | 'generation'>,
+  waterBounds: AxisAlignedBox,
+  candidates: readonly T[],
+): T[] {
+  if (candidates.length < 2) return candidates.slice()
+  const preferredSide = preferredLateralSide(request)
+  const stable = candidates.slice().sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
+  const rotation = (Math.imul(identityHash(request.instanceId) ^ request.generation, 0x9e3779b1) >>> 0) % stable.length
+  const rotated = [...stable.slice(rotation), ...stable.slice(0, rotation)]
+  const rotatedIndex = new Map(rotated.map((candidate, index) => [candidate.id, index]))
+  return rotated.sort((a, b) => habitatAnchorSidePenalty(a.position, waterBounds, preferredSide)
+    - habitatAnchorSidePenalty(b.position, waterBounds, preferredSide)
+    || rotatedIndex.get(a.id)! - rotatedIndex.get(b.id)!)
+}
+
 function resultBase(request: NavigationRequest) {
   return {
     instanceId: request.instanceId,
@@ -299,51 +377,54 @@ function resultBase(request: NavigationRequest) {
 /** Resolve a typed profile request through caller-supplied tank bounds, anchors, and solid obstacle volumes. */
 export function resolveHabitatRoute(input: ResolveHabitatRouteInput): HabitatRouteResult {
   validateInput(input)
-  const { request, start, waterBounds, obstacles, anchorLocations, fishClearanceRadius } = input
+  const { request, start, waterBounds, obstacles, anchorLocations, fishClearanceRadius, maxAbsXAtDepth } = input
+  const lateralClearanceRadius = input.lateralClearanceRadius ?? fishClearanceRadius
   const profile = getSpeciesBehaviorProfile(request.speciesId)
   if (!profile || !requestedStateAnchor(request)) return { ...resultBase(request), status: 'unavailable' }
 
   const candidates = anchorLocations
     .filter((location) => location.anchor === request.anchor
       && (!location.compatibleSpecies || location.compatibleSpecies.includes(profile.speciesId)))
-    .slice()
-    .sort((a, b) => a.id.localeCompare(b.id))
-  if (candidates.length === 0) return { ...resultBase(request), status: 'unavailable' }
+  const orderedCandidates = orderHabitatAnchorsForRequest(request, waterBounds, candidates)
+  if (orderedCandidates.length === 0) return { ...resultBase(request), status: 'unavailable' }
 
   const expandedObstacles = getClearanceExpandedObstacles(obstacles, fishClearanceRadius)
   for (const [index, obstacle] of expandedObstacles.entries()) validateBox(obstacle, `Clearance-expanded obstacle ${obstacles[index].id}`)
   const safeBounds = {
     min: {
-      x: waterBounds.min.x + fishClearanceRadius,
+      x: waterBounds.min.x + lateralClearanceRadius,
       y: waterBounds.min.y + fishClearanceRadius,
       z: waterBounds.min.z + fishClearanceRadius,
     },
     max: {
-      x: waterBounds.max.x - fishClearanceRadius,
+      x: waterBounds.max.x - lateralClearanceRadius,
       y: waterBounds.max.y - fishClearanceRadius,
       z: waterBounds.max.z - fishClearanceRadius,
     },
   }
   if (!finiteVec(safeBounds.min) || !finiteVec(safeBounds.max)) throw new RangeError('Fish clearance exceeds finite tank bounds.')
-  if (!safePoint(start, waterBounds, fishClearanceRadius, expandedObstacles)) {
+  if (!safePoint(start, waterBounds, fishClearanceRadius, expandedObstacles, maxAbsXAtDepth, lateralClearanceRadius)) {
     return { ...resultBase(request), status: 'blocked' }
   }
-  const reachableCandidates = candidates.filter((candidate) => safePoint(candidate.position, waterBounds, fishClearanceRadius, expandedObstacles))
+  const reachableCandidates = candidates.filter((candidate) => safePoint(candidate.position, waterBounds, fishClearanceRadius, expandedObstacles, maxAbsXAtDepth, lateralClearanceRadius))
   if (reachableCandidates.length === 0) return { ...resultBase(request), status: 'blocked' }
 
   const startNode = 0
-  const corners = obstacleCorners(expandedObstacles, waterBounds, fishClearanceRadius)
-  const points = [start, ...corners, ...reachableCandidates.map((candidate) => candidate.position)]
+  const corners = obstacleCorners(expandedObstacles, waterBounds, fishClearanceRadius, maxAbsXAtDepth, lateralClearanceRadius)
+  const orderedReachableCandidates = orderHabitatAnchorsForRequest(request, waterBounds, reachableCandidates)
+  const points = [start, ...corners, ...orderedReachableCandidates.map((candidate) => candidate.position)]
   const anchorNodeById = new Map<string, number>()
-  reachableCandidates.forEach((candidate, index) => anchorNodeById.set(candidate.id, 1 + corners.length + index))
+  orderedReachableCandidates.forEach((candidate, index) => anchorNodeById.set(candidate.id, 1 + corners.length + index))
   const graph = buildVisibilityGraph(points, expandedObstacles)
   const { distances, previous } = shortestPaths(graph, startNode)
 
-  let best: { candidate: HabitatAnchorLocation; node: number; length: number } | undefined
-  for (const candidate of reachableCandidates) {
+  const preferredSide = preferredLateralSide(request)
+  let best: { candidate: HabitatAnchorLocation; node: number; length: number; score: number } | undefined
+  for (const candidate of orderedReachableCandidates) {
     const node = anchorNodeById.get(candidate.id)!
     const length = distances[node]
-    if (Number.isFinite(length) && (!best || length < best.length)) best = { candidate, node, length }
+    const score = length + habitatAnchorSidePenalty(candidate.position, waterBounds, preferredSide)
+    if (Number.isFinite(length) && (!best || score < best.score - COORDINATE_EPSILON)) best = { candidate, node, length, score }
   }
   if (!best) return { ...resultBase(request), status: 'blocked' }
   const path = pathToNode(previous, best.node).map((node) => points[node])
@@ -363,25 +444,28 @@ export type WaterRouteInput = {
   waterBounds: AxisAlignedBox
   obstacles: readonly SolidObstacleVolume[]
   fishClearanceRadius: number
+  maxAbsXAtDepth?: MaxAbsXAtDepth
+  lateralClearanceRadius?: number
 }
 
 export function isWaterSegmentSafe(input: WaterRouteInput): boolean {
   validateBox(input.waterBounds, 'Water bounds')
   if (!finiteVec(input.start) || !finiteVec(input.target) || !Number.isFinite(input.fishClearanceRadius) || input.fishClearanceRadius < 0) throw new RangeError('Water route requires finite points and non-negative clearance.')
+  if (input.lateralClearanceRadius !== undefined && (!Number.isFinite(input.lateralClearanceRadius) || input.lateralClearanceRadius < 0)) throw new RangeError('Lateral clearance radius must be finite and non-negative.')
   if (input.obstacles.length > MAX_OBSTACLE_VOLUMES) throw new RangeError('Too many obstacle volumes.')
   input.obstacles.forEach(obstacle => validateBox(obstacle.bounds, 'Obstacle'))
   const expanded = getClearanceExpandedObstacles(input.obstacles, input.fishClearanceRadius)
-  return safePoint(input.start, input.waterBounds, input.fishClearanceRadius, expanded)
-    && safePoint(input.target, input.waterBounds, input.fishClearanceRadius, expanded)
+  return safePoint(input.start, input.waterBounds, input.fishClearanceRadius, expanded, input.maxAbsXAtDepth, input.lateralClearanceRadius)
+    && safePoint(input.target, input.waterBounds, input.fishClearanceRadius, expanded, input.maxAbsXAtDepth, input.lateralClearanceRadius)
     && segmentClear(input.start, input.target, expanded)
 }
 
 export function findWaterRoute(input: WaterRouteInput): readonly Vec3[] | undefined {
   if (isWaterSegmentSafe(input)) return [{ ...input.start }, { ...input.target }]
   const expanded = getClearanceExpandedObstacles(input.obstacles, input.fishClearanceRadius)
-  if (!safePoint(input.start, input.waterBounds, input.fishClearanceRadius, expanded)
-    || !safePoint(input.target, input.waterBounds, input.fishClearanceRadius, expanded)) return undefined
-  const points = [input.start, ...obstacleCorners(expanded, input.waterBounds, input.fishClearanceRadius), input.target]
+  if (!safePoint(input.start, input.waterBounds, input.fishClearanceRadius, expanded, input.maxAbsXAtDepth, input.lateralClearanceRadius)
+    || !safePoint(input.target, input.waterBounds, input.fishClearanceRadius, expanded, input.maxAbsXAtDepth, input.lateralClearanceRadius)) return undefined
+  const points = [input.start, ...obstacleCorners(expanded, input.waterBounds, input.fishClearanceRadius, input.maxAbsXAtDepth, input.lateralClearanceRadius), input.target]
   const { distances, previous } = shortestPaths(buildVisibilityGraph(points, expanded), 0)
   const target = points.length - 1
   return Number.isFinite(distances[target]) ? pathToNode(previous, target).map(index => ({ ...points[index] })) : undefined
