@@ -4,7 +4,7 @@
 Category: Governance / Checkpoint
 Status: Active
 Authority: Binding Checkpoint; Backlog controls acceptance
-Backlog: AQ-44, AQ-49, AQ-54, AQ-59, AQ-70.2, AQ-70.13, AQ-74, AQ-86, AQ-104
+Backlog: AQ-44, AQ-49, AQ-54, AQ-59, AQ-70.2, AQ-70.13, AQ-74, AQ-86, AQ-104, AQ-105
 Owner: @root
 Updated: 2026-11-14
 Upstream: AGENTS.md, agent_scratch.md, docs/requirements.md
@@ -12,6 +12,17 @@ Downstream: Current implementation and review work
 -->
 
 Root verified this checkpoint against the current checkout. The goal remains active and incomplete: finish the backlog and make the living aquarium resemble the supplied reference. Passing functional tests does not accept final art.
+
+## Latest Root checkpoint — 2026-11-14 AQ105 complete
+
+This section supersedes older status/source/process details below. Full goal remains active/incomplete.
+
+- AQ105 Done after Root all4criterion review at4df19dee01ccf4e95a49904bfa51eb3a71730ba4. Actual mounted crown targets and resident-only soft access retain rigid geometry/budgets. Loader-faithful correction reads measured shader margin independently of importer sphere slack, with conservative unmeasured fallback. No model/Blender edits.
+- Exact native1440x900/402x874DPR1 shows same-host idle/swim bobbing, clear home points and finite varying8bone poses. Visible60rAF control windows: normal8of8transforms move, Pause/reduced0of8both sizes. Settled phone Pause PNG pair identical. Both Services/Settings8entries fit; actual clownfish link opens correct disposable localhost URL. Captured final warnings/errors0. Evidence/reproducible summary docs/asset-evidence/aq105/final-4df19de/README.md;395runtime inputs match original/proof.
+-54focused and875tests/75files pass with1worker; typecheck16scripts/build pass. Earlier unchanged socket timeouts retained. These technical/native checks do not certify final art, physical scale, full animated body clearance or runtime budgets. Existing gates remain open; no other task closed.
+- Shared draftPR48 https://github.com/ryantrappy/aquarium-homepage/pull/48, review branch.4df19de already pushed; scoped AQ105 completion evidence/status commit follows and must be pushed immediately with running contents. Queue132:64Done/68open (51ToDo/17InProgress); CI/FPS-display lanes excluded. No deployment/merge/original config save.
+- Proof /tmp/aquarium-aq87-proof-8b2d7cc detached4df19de, only Vitefilesystem allowlist dirty. Owned dev5215 session93643 pins4df19de with disposable config /tmp/aquarium-aq104-root-config/reef-config.json. Verify PID/cwd/command before stopping. Preserve user3000/5210. Final reviewtab1298078134 and local popup closed, breakpoint removed, media/metrics reset. Chrome4 binding retained; stale Chrome3 handles remain invalid.
+- Primary next visual work: supported left-front plate/zoa terraces against goal reference, preserving tall mass/Gemini assets. All existing12left/11right sockets used; new supports require current surface measurements. Broad modular rock library/atlas/tissue/physical/body gates remain open. Prior subagents report usage limits; independent Root work continues.
 
 ## Latest Root checkpoint — 2026-11-14 loader-faithful hosting correction
 

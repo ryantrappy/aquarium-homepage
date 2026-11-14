@@ -12,7 +12,7 @@ Downstream: src/rendering/scene/anemone-host.ts, src/rendering/scene/motion.ts, 
 -->
 
 > [!NOTE]
-> **Agent Context & Authority** — Root technical handoff for AQ-105. The task remains In Progress until current-source native hosting, articulation and control review. This does not accept all AQ-82 interactions, final species art, physical size calibration or full animated body clearance.
+> **Agent Context & Authority** — Root accepts AQ-105 at source4df19de after the [final native review](final-4df19de/README.md),875passing tests, typecheck/build and criterion-by-criterion audit. Earlier pending/failure records below are retained as history. This does not accept all AQ-82 interactions, final species art, physical size calibration or full animated body clearance.
 
 The production host point is measured from the actual mounted `anemone_tentacle_crown` vertices with all reef/mount transforms applied. It lies in the upper viewer-facing crown rather than on the old detached front plane. Missing or invalid crown geometry is unavailable; it is never clamped into a fabricated host point. A geometry-derived soft home radius feeds the existing artistic interaction cycle.
 

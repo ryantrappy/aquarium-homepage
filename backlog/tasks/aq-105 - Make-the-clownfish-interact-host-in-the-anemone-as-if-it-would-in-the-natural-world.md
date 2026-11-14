@@ -3,15 +3,16 @@ id: AQ-105
 title: >-
   Make the clownfish interact/host in the anemone as if it would in the natural
   world
-status: In Progress
+status: Done
 assignee:
   - '@root'
 created_date: '2026-11-14 05:06'
-updated_date: '2026-11-14 14:19'
+updated_date: '2026-11-14 14:51'
 labels: []
 dependencies: []
 documentation:
   - docs/asset-evidence/aq105/README.md
+  - docs/asset-evidence/aq105/final-4df19de/README.md
 priority: '3'
 type: feature
 ordinal: 142000
@@ -25,10 +26,10 @@ Use the supplied mounted anemone as the clownfish home. Replace detached stand-o
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The clownfish home target follows the actual mounted anemone tentacle crown in both current layouts, rather than a detached front-plane or clamped socket point; missing or invalid geometry remains unavailable.
-- [ ] #2 A compatible clownfish can enter its soft anemone region and remain near the same host across idle/swim transitions, with bobbing and brief peeks/returns; an absent or blocked host never causes teleportation or fabricated contact.
-- [ ] #3 Planning and every interaction movement retain rigid-rock, glass, unrelated-coral and query-budget checks; other fish retain the conservative anemone envelope and existing species behavior.
-- [ ] #4 Root reviews focused and full tests, typecheck/build and exact1440x900/402x874 native evidence for visible hosting, articulated motion, working service links and pause/reduced-motion behavior before completion.
+- [x] #1 The clownfish home target follows the actual mounted anemone tentacle crown in both current layouts, rather than a detached front-plane or clamped socket point; missing or invalid geometry remains unavailable.
+- [x] #2 A compatible clownfish can enter its soft anemone region and remain near the same host across idle/swim transitions, with bobbing and brief peeks/returns; an absent or blocked host never causes teleportation or fabricated contact.
+- [x] #3 Planning and every interaction movement retain rigid-rock, glass, unrelated-coral and query-budget checks; other fish retain the conservative anemone envelope and existing species behavior.
+- [x] #4 Root reviews focused and full tests, typecheck/build and exact1440x900/402x874 native evidence for visible hosting, articulated motion, working service links and pause/reduced-motion behavior before completion.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -55,6 +56,8 @@ Native cycle review correction at7842bd6: initial12rAF endpoints caught a hold p
 Loader-margin correction full run with2workers:872pass/3socket-report-freshness cases hit pre-existing30000ms limits; one10000ms cleanup hook also times out. Their unchanged isolated file passes all6tests with1worker in54.36s. Typecheck16scripts passes. Running the entire875test suite with1worker, retaining all existing deadlines/assertions, before productionbuild/adoption. Both raw timeout and isolated-pass logs are preserved; this is not a runtime performance-budget claim. Concurrent docs-only6a2e3ea is present/pushed and preserved; application source still7842bd6 until reviewed adoption.
 
 Root loader-margin handoff verified: all875tests/75files pass with1worker; typecheck including16scripts and productionbuild pass. No deadlines/assertions changed; initial2worker timeouts and isolated6test pass retained. Four original destination files still match7842bd6 and all pinned coral assets unchanged before adoption; copied bytes match loader-margin-fix/source-pins. The corrected fixture mirrors actual GLTFLoader accessor-box spheres and includes left/right current layouts, shared-template laptop-to-phone rebuild, no lost authored cycle and unknown-margin conservative fallback. All criteria remain unchecked until native exact-correction verification. Concurrent6a2e3ea docs preserved.
+
+Root final acceptance at4df19de:395runtime inputs match the proof checkout. Exact1440x900/402x874DPR1 native same-host idle/swim bobbing and finite eight-bone articulation pass. Visible60rAF controls: normal8of8move, Pause/reduced0of8 at both sizes; settled phone Pause PNG pair identical. Both Services/Settings8entries fit; actual clownfish service opens expected localhost destination. Captured final warning/error window0.54focused and875tests/75files pass, typecheck16scripts/build pass; prior unchanged socket timeouts retained. Evidence docs/asset-evidence/aq105/final-4df19de/README.md and reproducible summary. All4AC satisfied; no DoD items. No model/Blender/original-config edits or deployment. Broader art/physical scale/animated-body/runtime gates remain open in existing tasks.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
@@ -72,3 +75,9 @@ created: 2026-11-14 07:08
 Root exact7842bd6 native review keeps AQ105 open: laptop clownfish was position-stationary in two normal-mode12rAF samples while five other service transforms moved. Pause holds all8in both views; phone reduced-motion holds all8, normal phone8move; Services/Settings both8entries fit, captured warnings/errors0. Actual live VM diagnosis (read-only locals with temporary debugger pause, removed/resumed/disabled after capture) shows no focus/startle/reduced-motion cause, valid right host, and a blocked full interaction chord during approach. Later sampled offsets can be clear; an independently loaded right reef fixture passes. Therefore no root-cause claim or native hosting acceptance yet. Extend regression to full-cycle/actual combined scene and resolve intermittent stationarity; retain all ACs unchecked. Raw native and debugger records: docs/asset-evidence/aq105/native-7842bd6/.
 ---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Implemented actual mounted-crown hosting with narrowly scoped soft access, safe approach/interaction chords and continuous local bobbing across idle/swim. Corrected importer-sphere slack without reducing measured shader margin or rigid checks. Root verified54focused checks,875tests, typecheck/build and exact two-size native hosting/articulation/links/Pause/reduced-motion evidence at4df19de. See docs/asset-evidence/aq105/final-4df19de/README.md. Broader art/body/budget tasks remain open.
+<!-- SECTION:FINAL_SUMMARY:END -->
