@@ -1,8 +1,21 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createCpuTemperatureStore, DEFAULT_CPU_TEMPERATURE_SENSOR_ID } from '../../../server/cpu-temperature'
 
+export const DEFAULT_CPU_HWMON_ROOTS = [
+  '/run/host-sensors/coretemp.0',
+  '/sys/devices/platform/coretemp.0',
+  '/sys/class/hwmon',
+] as const
+
+export function resolveCpuHwmonRoots(
+  env: NodeJS.ProcessEnv = process.env,
+): string | readonly string[] {
+  const explicit = env.REEF_CPU_HWMON_ROOT?.trim()
+  return explicit ? explicit : DEFAULT_CPU_HWMON_ROOTS
+}
+
 const store = createCpuTemperatureStore({
-  rootPath: process.env.REEF_CPU_HWMON_ROOT ?? '/run/host-sensors/coretemp.0',
+  rootPath: resolveCpuHwmonRoots(),
 })
 
 export function createCpuTemperatureGetHandler(

@@ -6,6 +6,20 @@ import { ServicesDialog } from '../components/ServicesDialog'
 import { ServiceManager } from '../components/ServiceManager'
 import { exportServices } from '../lib/services'
 import { readFpsCounterEnabled, writeFpsCounterEnabled } from '../lib/debug-settings'
+import {
+  DEFAULT_CPU_TEMPERATURE_SENSOR_ID,
+  DEFAULT_THERMOMETER_PLACEMENT,
+  normalizeThermometerPlacement,
+  normalizeThermometerSensorId,
+  readThermometerPlacement,
+  readThermometerSensorId,
+  startCpuTemperaturePolling,
+  writeThermometerPlacement,
+  writeThermometerSensorId,
+  type CpuTemperatureReading,
+  type CpuTemperatureSensor,
+  type ThermometerPlacement,
+} from '../lib/thermometer-settings'
 import { useServices } from '../lib/useServices'
 
 export const Route = createFileRoute('/')({ component: ReefHome })
@@ -21,8 +35,31 @@ function ReefHome() {
   // hydration mismatch (React error #418) from a render-time localStorage
   // read is gone. The badge itself is also mount-gated in AquariumScene.
   const [fpsCounterEnabled, setFpsCounterEnabled] = useState(false)
+  const [thermometerPlacement, setThermometerPlacement] = useState<ThermometerPlacement>(DEFAULT_THERMOMETER_PLACEMENT)
+  const [thermometerSensorId, setThermometerSensorId] = useState<string>(DEFAULT_CPU_TEMPERATURE_SENSOR_ID)
+  const [thermometerPrefsLoaded, setThermometerPrefsLoaded] = useState(false)
+  const [thermometerSensors, setThermometerSensors] = useState<CpuTemperatureSensor[]>([])
+  const [thermometerReading, setThermometerReading] = useState<CpuTemperatureReading | undefined>(undefined)
 
-  useEffect(() => { setFpsCounterEnabled(readFpsCounterEnabled()) }, [])
+  useEffect(() => {
+    setFpsCounterEnabled(readFpsCounterEnabled())
+    setThermometerPlacement(readThermometerPlacement())
+    setThermometerSensorId(readThermometerSensorId())
+    setThermometerPrefsLoaded(true)
+  }, [])
+
+  useEffect(() => {
+    if (!thermometerPrefsLoaded) return
+    if (thermometerPlacement === 'hidden' && !managerOpen) return
+
+    return startCpuTemperaturePolling({
+      sensorId: thermometerSensorId,
+      onTelemetry: (telemetry) => {
+        setThermometerSensors(telemetry.sensors)
+        setThermometerReading(telemetry.reading)
+      },
+    })
+  }, [managerOpen, thermometerPlacement, thermometerPrefsLoaded, thermometerSensorId])
   const [reducedBySystem, setReducedBySystem] = useState(false)
   const servicesTrigger = useRef<HTMLButtonElement | null>(null)
   const managerTrigger = useRef<HTMLElement | null>(null)
@@ -78,9 +115,30 @@ function ReefHome() {
     writeFpsCounterEnabled(enabled)
   }
 
+  function changeThermometerPlacement(placement: ThermometerPlacement) {
+    const normalized = normalizeThermometerPlacement(placement)
+    setThermometerPlacement(normalized)
+    writeThermometerPlacement(normalized)
+  }
+
+  function changeThermometerSensorId(sensorId: string) {
+    const normalized = normalizeThermometerSensorId(sensorId)
+    setThermometerSensorId(normalized)
+    writeThermometerSensorId(normalized)
+  }
+
   return (
     <main className="page-shell">
-      <AquariumScene services={services} paused={motionStopped} configurationReady={isLoaded} focusFallbackRef={servicesTrigger} fpsCounterEnabled={fpsCounterEnabled} />
+      <AquariumScene
+        services={services}
+        paused={motionStopped}
+        configurationReady={isLoaded}
+        focusFallbackRef={servicesTrigger}
+        fpsCounterEnabled={fpsCounterEnabled}
+        thermometerPlacement={thermometerPlacement}
+        thermometerSensorId={thermometerSensorId}
+        thermometerReading={thermometerReading}
+      />
       <div className="aquarium-controls" role="group" aria-label="Aquarium controls">
         <button ref={servicesTrigger} className="scene-control services-control" type="button" onClick={openServices} aria-haspopup="dialog" aria-expanded={servicesOpen} title="Open service shortcuts"><ServicesIcon /><span>Services</span></button>
         <button className="scene-control icon-control" type="button" onClick={() => setPaused(!paused)} aria-pressed={motionStopped} disabled={reducedBySystem} aria-label={reducedBySystem ? 'Reduced motion enabled by system' : paused ? 'Resume fish movement' : 'Pause fish movement'} title={reducedBySystem ? 'Reduced motion' : paused ? 'Resume motion' : 'Pause motion'}><PauseIcon paused={paused && !reducedBySystem} /></button>
@@ -100,6 +158,12 @@ function ReefHome() {
         onReset={resetServices}
         fpsCounterEnabled={fpsCounterEnabled}
         onToggleFpsCounter={toggleFpsCounter}
+        thermometerPlacement={thermometerPlacement}
+        onChangeThermometerPlacement={changeThermometerPlacement}
+        thermometerSensorId={thermometerSensorId}
+        onChangeThermometerSensorId={changeThermometerSensorId}
+        thermometerSensors={thermometerSensors}
+        thermometerReading={thermometerReading}
       />}
     </main>
   )

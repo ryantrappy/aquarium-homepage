@@ -239,7 +239,64 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .debug-setting { display: flex; align-items: center; gap: 9px; min-height: 44px; color: #e8f4ec; font-size: 12px; cursor: pointer; }
 .debug-setting input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--seafoam); }
 .debug-settings p { margin: 6px 0 0; color: #a7c7c0; font-size: 11px; line-height: 1.45; }
-@media (max-width: 599px) { .aquarium-fish-link .fish-name { min-height: 32px; padding: 4px 7px; font-size: 10px; } .aquarium-three.is-fallback .aquarium-fish-link { width: 38vw !important; height: 90px !important; } }
+
+/* Stick-on acrylic 7-segment aquarium thermometer (AQ-15 AC #1/#3/#4).
+ * Uses pointer-events: none so clicking or inspecting fish through/near
+ * the thermometer housing never blocks aquarium links or scene controls. */
+.aquarium-thermometer { position: absolute; z-index: 4; pointer-events: none; user-select: none; }
+.aquarium-thermometer--front { top: max(18px, env(safe-area-inset-top)); left: max(20px, env(safe-area-inset-left)); width: 186px; }
+.aquarium-thermometer--side { top: 18%; left: max(10px, env(safe-area-inset-left)); width: 182px; perspective: 540px; }
+
+.thermometer-acrylic-shell { position: relative; padding: 4px; border: 1.5px solid rgba(242, 252, 248, .74); border-radius: 3px; background: linear-gradient(155deg, rgba(255, 255, 255, .34) 0%, rgba(226, 245, 238, .12) 45%, rgba(255, 255, 255, .28) 100%); box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .76), inset -1px -1px 0 rgba(16, 40, 34, .34), 0 6px 16px rgba(0, 12, 16, .34), 0 1px 3px rgba(0, 10, 14, .28); backdrop-filter: blur(.6px); }
+.aquarium-thermometer--side .thermometer-acrylic-shell { transform-origin: left center; transform: rotateY(41deg) rotateZ(-1.5deg) skewY(2.2deg); box-shadow: -5px 2px 0 rgba(226, 248, 240, .42), -7px 3px 0 rgba(14, 34, 38, .44), inset 1px 1px 0 rgba(255, 255, 255, .76), 6px 10px 18px rgba(0, 12, 16, .34); }
+
+.thermometer-top-latch { position: absolute; top: -4px; right: 2px; width: 38.5%; height: 4px; padding: 0 3px; border: 1px solid rgba(240, 252, 248, .74); border-bottom: 0; border-radius: 2px 2px 0 0; background: linear-gradient(180deg, rgba(248, 255, 252, .56), rgba(188, 224, 210, .24)); display: flex; align-items: flex-start; justify-content: space-between; }
+.thermometer-latch-notch { width: 4px; height: 2.5px; border-radius: 0 0 1px 1px; background: rgba(12, 32, 26, .52); }
+
+.thermometer-inner-tray { display: grid; grid-template-columns: 62fr 2.5px 38fr; align-items: stretch; height: 52px; border: 2px solid rgba(10, 22, 16, .88); border-radius: 1.5px; overflow: hidden; }
+.thermometer-gasket-seam { background: rgba(10, 22, 16, .9); }
+
+.thermometer-lcd-pane { position: relative; overflow: hidden; background: linear-gradient(155deg, rgba(128, 224, 72, .56) 0%, rgba(74, 184, 48, .44) 52%, rgba(166, 240, 92, .52) 100%); box-shadow: inset 0 1px 3px rgba(6, 24, 12, .38), inset 0 -1px 0 rgba(215, 255, 175, .22); }
+.aquarium-thermometer.is-stale .thermometer-lcd-pane { background: linear-gradient(155deg, rgba(226, 204, 108, .44) 0%, rgba(176, 150, 74, .30) 55%, rgba(235, 214, 122, .38) 100%); }
+.aquarium-thermometer.is-unavailable .thermometer-lcd-pane { background: linear-gradient(155deg, rgba(178, 198, 196, .38) 0%, rgba(124, 146, 148, .28) 55%, rgba(196, 214, 212, .34) 100%); }
+
+.thermometer-lcd-svg { display: block; width: 100%; height: 100%; padding: 2px 3px 10px 3px; }
+.lcd-segment.is-lit { fill: rgba(7, 16, 9, .94); }
+.aquarium-thermometer.is-stale .lcd-segment.is-lit { fill: rgba(20, 22, 9, .86); }
+.aquarium-thermometer.is-unavailable .lcd-segment.is-lit { fill: rgba(18, 29, 31, .92); }
+.lcd-segment.is-ghost { fill: rgba(8, 28, 12, .085); }
+.lcd-degree-ring.is-lit { fill: none; stroke: rgba(7, 16, 9, .94); stroke-width: 2; }
+.aquarium-thermometer.is-stale .lcd-degree-ring.is-lit { stroke: rgba(20, 22, 9, .86); }
+.aquarium-thermometer.is-unavailable .lcd-degree-ring.is-lit { stroke: rgba(18, 29, 31, .92); }
+
+.thermometer-lcd-footer { position: absolute; right: 3px; bottom: 1.5px; left: 3px; display: flex; align-items: center; justify-content: space-between; gap: 3px; }
+.thermometer-sensor-tag { min-width: 0; overflow: hidden; color: rgba(7, 20, 10, .78); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 6px; font-weight: 700; line-height: 1.1; letter-spacing: .02em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+.thermometer-status-annunciator { flex: 0 0 auto; padding: .5px 3px; border-radius: 2px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 6px; font-weight: 800; line-height: 1.15; letter-spacing: .03em; text-transform: uppercase; }
+.thermometer-status-annunciator.is-stale { background: rgba(242, 196, 78, .92); color: #161104; }
+.thermometer-status-annunciator.is-unavailable { background: rgba(21, 34, 38, .86); color: #f2d5cf; }
+
+.thermometer-metal-block { position: relative; background: repeating-linear-gradient(180deg, rgba(246, 250, 236, .48) 0px, rgba(246, 250, 236, .48) 1px, rgba(58, 66, 52, .42) 1px, rgba(58, 66, 52, .42) 2.1px, rgba(168, 178, 146, .34) 2.1px, rgba(168, 178, 146, .34) 3px), linear-gradient(142deg, rgba(168, 184, 152, .76) 0%, rgba(198, 182, 128, .72) 48%, rgba(130, 144, 124, .80) 100%); box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .38), inset 0 -1px 2px rgba(10, 24, 16, .42); }
+.thermometer-metal-sheen { position: absolute; inset: 0; background: linear-gradient(115deg, rgba(255, 255, 255, .30) 0%, transparent 44%, rgba(255, 244, 210, .18) 100%); }
+
+/* Thermometer placement & sensor settings in ServiceManager (AQ-15 AC #2/#5). */
+.thermometer-settings { padding: 16px 0; border-top: 1px solid var(--line); display: grid; gap: 12px; }
+.thermometer-settings h3 { margin: 0; color: #dfefe4; font-family: var(--font-ui); font-size: 16px; letter-spacing: -.02em; }
+.thermometer-settings-fieldset { margin: 0; padding: 0; border: 0; display: grid; gap: 8px; }
+.thermometer-settings-fieldset legend { margin: 0 0 2px; padding: 0; color: #e8f4ec; font-size: 12px; font-weight: 600; }
+.thermometer-placement-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.thermometer-placement-option { min-height: 44px; display: flex; align-items: flex-start; gap: 8px; padding: 9px 10px; border: 1px solid rgba(199, 231, 208, .19); border-radius: 7px; background: rgba(9, 41, 46, .58); cursor: pointer; }
+.thermometer-placement-option.is-selected { border-color: #87bfa4; background: rgba(63, 112, 88, .28); }
+.thermometer-placement-option:focus-within { outline: 2px solid var(--seafoam); outline-offset: 2px; }
+.thermometer-placement-option input[type="radio"] { flex: 0 0 auto; width: 16px; height: 16px; margin: 2px 0 0; accent-color: var(--seafoam); cursor: pointer; }
+.thermometer-placement-option input[type="radio"]:focus-visible { outline: 0; }
+.thermometer-placement-option label { flex: 1 1 auto; display: grid; gap: 2px; cursor: pointer; color: #eff8ee; font-size: 12px; font-weight: 600; }
+.thermometer-placement-option label small { color: #a7c7c0; font-size: 10px; font-weight: 400; line-height: 1.35; }
+.thermometer-sensor-field { display: grid; gap: 6px; }
+.thermometer-sensor-field label { color: #e8f4ec; font-size: 12px; font-weight: 600; }
+.thermometer-sensor-field select { width: 100%; min-width: 0; height: 44px; padding: 0 10px; border: 1px solid rgba(199, 231, 208, .17); border-radius: 6px; color: #eaf4ed; background: #102f35; font-size: 12px; }
+.thermometer-status-summary { margin: 0; color: #a7c7c0; font-size: 11px; line-height: 1.45; }
+
+@media (max-width: 599px) { .aquarium-fish-link .fish-name { min-height: 32px; padding: 4px 7px; font-size: 10px; } .aquarium-three.is-fallback .aquarium-fish-link { width: 38vw !important; height: 90px !important; } .aquarium-thermometer--front { top: max(62px, calc(env(safe-area-inset-top) + 52px)); left: max(12px, env(safe-area-inset-left)); width: 150px; } .aquarium-thermometer--side { top: 18%; left: max(6px, env(safe-area-inset-left)); width: 146px; } .aquarium-thermometer--side .thermometer-acrylic-shell { transform: rotateY(38deg) rotateZ(-1.2deg) skewY(2deg); } .thermometer-inner-tray { height: 42px; } .thermometer-sensor-tag, .thermometer-status-annunciator { font-size: 5.4px; } .thermometer-placement-grid { grid-template-columns: 1fr; } }
 .manager-footer a.text-action { display: inline-flex; align-items: center; text-decoration: none; }
 .manager-footer { flex-wrap: wrap; }
 .aquarium-fish-link[data-occluded="true"] { cursor: default; }

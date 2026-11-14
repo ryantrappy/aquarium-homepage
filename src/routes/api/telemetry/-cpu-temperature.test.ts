@@ -3,7 +3,12 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createCpuTemperatureStore } from '../../../server/cpu-temperature'
-import { createCpuTemperatureGetHandler, createCpuTemperatureHandlers } from './cpu-temperature'
+import {
+  createCpuTemperatureGetHandler,
+  createCpuTemperatureHandlers,
+  DEFAULT_CPU_HWMON_ROOTS,
+  resolveCpuHwmonRoots,
+} from './cpu-temperature'
 
 const roots: string[] = []
 
@@ -79,5 +84,12 @@ describe('CPU temperature API handler', () => {
         unit: '°C', observedAt: '2027-01-15T08:00:00.000Z', ageMs: 0,
       },
     })
+  })
+
+  it('resolves candidate Docker and Linux sysfs hwmon roots when env is unset or empty, and honors explicit root', () => {
+    expect(resolveCpuHwmonRoots({})).toEqual(DEFAULT_CPU_HWMON_ROOTS)
+    expect(resolveCpuHwmonRoots({ REEF_CPU_HWMON_ROOT: '' })).toEqual(DEFAULT_CPU_HWMON_ROOTS)
+    expect(resolveCpuHwmonRoots({ REEF_CPU_HWMON_ROOT: '   ' })).toEqual(DEFAULT_CPU_HWMON_ROOTS)
+    expect(resolveCpuHwmonRoots({ REEF_CPU_HWMON_ROOT: ' /run/custom-sensors ' })).toBe('/run/custom-sensors')
   })
 })
