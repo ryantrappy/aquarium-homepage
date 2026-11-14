@@ -13,6 +13,14 @@ Downstream: Current implementation and review work
 
 Root verified this checkpoint against the current checkout. The goal remains active and incomplete: finish the backlog and make the living aquarium resemble the supplied reference. Passing functional tests does not accept final art.
 
+## Current delivery override — 2026-11-14
+
+PR48 was merged externally during native review. The current branch is `refinements`; preserve it and use shared draftPR49 https://github.com/ryantrappy/aquarium-homepage/pull/49. AQ89completionbac3d8e is committed/pushed there. Earlier PR48/process references below are historical. Root did not merge/deploy. AQ103 water surface is active priority; no more phone checks per user.
+
+## Current water review — 2026-11-14
+
+The first curvature-brightness trial was rejected: native laptop evidence shows repeated oval spots. Original production water source is restored. Private proof `cb88689` and the owned port-5215 server still serve that rejected trial until replaced; do not use them as current-source evidence. The agent is preparing phase-coherent, screen-filtered ripple normals and a refracted fixture ray for Root review, with the existing camera, waves and threshold preserved. The corrected finite continuous-field sampler includes all camera-vector components and sampled displaced height; it still finds no open Snell window in the baseline sample. No new acceptance or shader milestone yet. Rejected evidence is cataloged under `docs/asset-evidence/aq103/rejected-curvature-20261114/`.
+
 ## Latest Root checkpoint — user water-surface priority2026-11-14
 
 - User stops phone checks; assume phone behavior, laptop1440x900 only going forward. This supersedes all earlier two-view testing policy. Requirements/scratch record the override.

@@ -38,3 +38,7 @@
 - AQ89 native observations retained in /tmp/aq89-native-e0def59/review.json and fourPNGs; ownedtab1298078142 already closed by interrupted-turn cleanup. Native records include transient viewport resets, preserved rather than silently accepted. Task89 stillopen pending durable Root finalization; do not lose this work.
 
 - AQ89 Rootfinalreview actioned: all5AC/2DoD Done at e0def59, evidence docs/asset-evidence/aq89/native-e0def59/README.md. Source902tests/typecheck/build pass; historicalnativechecks acceptedbeforephone-stop instruction. Queue65Done/67open; completioncommit/push now. AQ103waterdiagnosis remainsactivepriority.
+
+- Delivery correction: PR48 externally merged2026-11-14; currentbranchrefinements preserved. AQ89completionbac3d8e is pushed on refinements to new shared draftPR49 https://github.com/ryantrappy/aquarium-homepage/pull/49. UsePR49 for subsequent reviewed milestones/runninglist. Root did not merge/deploy.
+
+- AQ103 curvature-highlight trial rejected after laptopnative: regular ovalspots, not reference water. Originalsurface restored; privateproofcb88689/dev5215session85659 stillrejectedtrial. Root also found wrong3Dview-vector math in initialsampler; corrected evidence/revisedplan pending. No acceptedshadercommit/AC change. RejectedPNG durable docs/asset-evidence/aq103/rejected-curvature-20261114/.

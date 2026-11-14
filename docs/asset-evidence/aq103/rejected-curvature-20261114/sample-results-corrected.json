@@ -1,0 +1,95 @@
+{
+  "units": "legacy scene units; not a physical metre calibration",
+  "camera": {
+    "position": [
+      0.0,
+      0.15,
+      9.0
+    ],
+    "target": [
+      0,
+      0.15,
+      0
+    ],
+    "fovDeg": 42.0,
+    "viewport": [
+      1440,
+      900
+    ]
+  },
+  "surface": {
+    "surfaceY": 4.4,
+    "glassBounds": {
+      "backZ": -5.48,
+      "frontZ": 2.84,
+      "halfWidth": 6.0
+    }
+  },
+  "visibility": {
+    "topFrustumIntersectionZ": -2.0716285249486575,
+    "visibleZ": [
+      -5.48,
+      -2.0716285249486575
+    ],
+    "visibleDepthUnits": 3.408371475051343,
+    "totalDepthUnits": 8.32,
+    "visibleDepthPercent": 40.96600330590556,
+    "visibleStripHeightPx": 105.92314666941326
+  },
+  "sweep": {
+    "timeSeconds": [
+      0,
+      29.5,
+      0.5
+    ],
+    "samplesPerMode": 243000,
+    "equations": "current surfaceWaveHeight/slope/focus, current capillarySlope, detailFade, normal and camera dot; continuous field sampled before raster interpolation",
+    "flatPlane": {
+      "NoV": {
+        "min": 0.20671713927157281,
+        "p50": 0.3038698400241701,
+        "p95": 0.37278937455369543,
+        "max": 0.47055120318078486
+      },
+      "SnellWindow": {
+        "min": 0,
+        "p50": 0,
+        "p95": 0,
+        "max": 0
+      },
+      "detailFade": {
+        "min": 0,
+        "p50": 0.06667803104872805,
+        "p95": 0.24522294329284566,
+        "max": 0.3011254435971882
+      },
+      "windowPositiveFraction": 0.0
+    },
+    "waveDisplaced": {
+      "NoV": {
+        "min": 0.2076150703731128,
+        "p50": 0.3038614038488791,
+        "p95": 0.3727853594061266,
+        "max": 0.47144829678074834
+      },
+      "SnellWindow": {
+        "min": 0,
+        "p50": 0,
+        "p95": 0,
+        "max": 0
+      },
+      "detailFade": {
+        "min": 0,
+        "p50": 0.06676200570760638,
+        "p95": 0.24520030256043213,
+        "max": 0.3025588682599044
+      },
+      "windowPositiveFraction": 0.0
+    }
+  },
+  "limitations": [
+    "Continuous shader field is sampled, not exact per-fragment interpolation from 96x48 displaced mesh vertices.",
+    "Finite x/z/time sweep, not an analytic global bound.",
+    "Visibility intersection assumes overview camera is level and horizontal as in source."
+  ]
+}

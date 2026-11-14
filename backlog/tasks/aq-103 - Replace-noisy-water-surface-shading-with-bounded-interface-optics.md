@@ -3,9 +3,9 @@ id: AQ-103
 title: Replace noisy water-surface shading with bounded interface optics
 status: In Progress
 assignee:
-  - '@Luna'
+  - '@root'
 created_date: '2026-11-13 05:41'
-updated_date: '2026-11-13 06:19'
+updated_date: '2026-11-14 20:38'
 labels:
   - rendering
   - optics
@@ -45,6 +45,12 @@ The water-surface plane in aquarium.ts reads as stretched static due to cellular
 3. Add focused tests for shader behavior, narrow/desktop geometry bounds, layout updates, uniform time, and resource lifecycle.
 4. Update requirements and active rendering documentation, and record the scoped supersession in AQ-39 through the Backlog CLI.
 5. Run focused surface/wave/enclosure/lifecycle tests, typecheck, and production build; review the two required browser viewports if a usable local browser is available.
+
+User2026-11-14 reports water surface regressed against docs/more-realistic-reef-guide.png. Root will compare current laptop1440x900 view/reference, audit visible surface patch and shader contrast/detail/fixture response, implement a bounded renderer-only correction, preserve canonical shared clock/enclosure and Gemini assets, and verify focused/full checks plus laptop native evidence. User explicitly stops phone checks; no further phone verification is required or to be performed. Existing art gates remain open until actual reviewed evidence.
+
+Visible-surface diagnostic and bounded TIR candidate: use only the supplied 1440x900 capture and goal reference; analytically quantify the current overview camera's water-plane visible region, NoV, Snell-window branch, and distance-filtered slope fade; preserve camera, enclosure, canonical waves, shared clock, and transmitted-fixture branch; adjust only TIR reflected underwater radiance with coherent localized cyan/white facet contrast and restrained rear colors; add focused regression coverage, run surface-related checks and typecheck, then hand off source pins and candidate for Root laptop visual review. Do not accept AC2/3 or Done.
+
+Root revised iteration 2026-11-14 supersedes the rejected curvature-radiance plan: evaluate phase-coherent height-gradient capillary normals with screen-footprint filtering and physically consistent refracted fixture direction; retain camera, enclosure, canonical waves, clock and existing .53/.76 transition. Record roughness and finite corrected sweep before native preview. Do not increase slope merely to force transmission; a naturally closed window is valid. If contrast remains inadequate, report the reflection-radiance limitation for Root review before expanding scope. No new AC/Done or shared source commit without Root laptop-only visual review. The old sampler is superseded because its view vector omitted x and reversed the Z-slope sign.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -65,6 +71,8 @@ Root exact-sourcea5e64a2 native1440x900/402x874DPR1 evidence under docs/asset-ev
 2026-11-13 Root review update: implementation commit a5e64a2 and native two-size review/evidence commit 1f25f9a are now in HEAD. Root accepts AC #1/#4/#5/#6; AC #2 still needs fixture-transmission/final-contrast review and AC #3 needs targeted front-meniscus framing. This supersedes the earlier Junie note that described the pre-review working-tree state. AQ-103 remains In Progress; do not mark Done until the open visual gates are reviewed.
 
 Root2026-11-13 checkpoint: native final-sourcea5e64a2 evidence and later combinedd862bf9 source both load at the two exacttargetviewports without captured warnings/errors. Combined source passes748tests/66files/typecheck14scripts/build. Previous Junie/headless warnings remain historical environment observations, not present in Root native captures. OpenAC2/3 remain unchanged; no Done claim.
+
+Latest user steering: discontinue phone checks and assume phone behavior; prioritize re-review of water surface versus realistic example. Current source e0def59 surface still a5e64a2 shader: recent changes were label/recovery only, so visual regression may be framing/contrast relative to reference rather than a recent shader diff. Root is verifying before selecting correction; no root-cause claim yet.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
@@ -74,5 +82,23 @@ author: @root
 created: 2026-11-13 06:01
 ---
 Root review2026-11-13: initial native laptop/phone preview of extracted surface has no captured shader warnings/errors and visibly removes dense cellular/static pattern. Luna added actual-controller surface-clock regression in aquarium-lifecycle.test.ts;33lifecycle tests and isolated full740tests/66files/typecheck pass for first snapshot. Current shader/test have since been tuned by concurrent author; Root will refresh to final hashes before acceptance. Front-glass meniscus lies outside the normal overview frustum at current camera/surfaceY, so do not infer visible-front-line acceptance from overview screenshot alone. No Done/AC changes yet; native final-source evidence pending.
+---
+
+author: @navigation_recovery
+created: 2026-11-14 20:20
+---
+Root 2026-11-14: laptop-only AQ103 review found the overview frustum sees only z=-5.48..-2.07 (about a 106px strip) of the surface. A 243,000-sample sweep of current canonical+capillary slopes over visible x/z and t=0..29.5 s measured NoV 0.228..0.464, with current SnellWindow exactly zero throughout; visible detailFade is 0.005..0.301 (median 0.111). Keep Snell thresholds and fixture transmission unchanged. Root approved a bounded TIR-only reflected-radiance/facet-contrast candidate in water-surface.ts/test, no camera/geometry/wave/asset change; AC2/3 remain open pending Root's exact laptop visual review.
+---
+
+author: @root
+created: 2026-11-14 20:27
+---
+Root laptop native review rejects candidate8a934cb1/privateproofcb88689. Exact1440x900 capture /tmp/aq103-visible-surface-review/native/candidate-laptop.png shows repeated stretched oval spots across the surface. Brightness improved but this recreates the artificial dot/cellular failure and does not match the reference irregular sharp reflected wave structure. No AC/Done/sharedsourcecommit/push. Preserve rejected candidate/evidence; revise reflection approach instead of accepting shader markers or merely lowering spot intensity. No phone checks. Root closed owned preview/resetmetrics; current proof privatecb88689/dev5215session85659.
+---
+
+author: @navigation_recovery
+created: 2026-11-14 20:35
+---
+2026-11-14 navigation_recovery diagnostic correction: Root identified that the first sampler omitted the lateral x component in camera distance and the x-facing term in dot(N,V). Its original NoV/detailFade values and conclusion are superseded; old script/results remain preserved as historical only. Corrected script/results/pins are in /tmp/aq103-visible-surface-review/sample_visible_surface_corrected.py, sample-results-corrected.json, and corrected-pins.sha256. Corrected continuous-field sweep across 243,000 samples (x included; flat and ±wave Y both sampled) reports NoV .207–.471 flat and .208–.471 displaced, with the unchanged Snell window zero in both; detailFade median .067, max .301. This is a finite continuous-field sample, not an analytic bound or exact raster interpolation from the 96x48 geometry. Rejected focus-lobe screenshot and exact shader are preserved in /tmp/aq103-visible-surface-review/native/candidate-laptop.png and rejected-candidate/water-surface.ts; scoped source has been restored to its pre-candidate hash. Revised implementation direction is pending Root approval.
 ---
 <!-- COMMENTS:END -->

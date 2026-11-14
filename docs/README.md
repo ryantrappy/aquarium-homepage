@@ -83,6 +83,7 @@ Directory of project documentation and verification evidence:
 ### Tier 4: Audits & Verification Evidence (Evidentiary)
 | Document | Status | Authority | Backlog | Scope / Purpose |
 |---|---|---|---|---|
+| [Rejected surface-curvature trial](asset-evidence/aq103/rejected-curvature-20261114/README.md) | **Historical** | Evidentiary | `AQ-103` | Laptop-only rejected oval-highlight trial; incorrect initial numeric sampler explicitly excluded; surface correction remains open. |
 | [AQ-105 mounted-anemone hosting](asset-evidence/aq105/README.md), [final Root review](asset-evidence/aq105/final-4df19de/README.md) | **Active** | Evidentiary | `AQ-105` | Accepted mounted hosting, species-scoped soft access,875tests and exact two-size native pose/link/control evidence at4df19de; broader art/body/budget gates remain open. |
 | [AQ-104 final Root distribution review](asset-evidence/aq104/current-604c8aa/README.md) | **Complete** | Evidentiary | `AQ-104` | Current-source sustained sector utilization, blocked-school recovery, 865 passing tests and both-size native motion/Pause/control evidence; broader art/body/performance gates remain separate. |
 | [AQ-104 mixed-roster temporal evidence](asset-evidence/aq104/f084-temporal-investigation.json) / [native staging](asset-evidence/aq104/f084-staging/review.json) | **Active** | Evidentiary | `AQ-104` | Historical f084 controlled60s distribution and frozen staging; superseded for final task acceptance by the current-source Root review above. |
