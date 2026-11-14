@@ -1,0 +1,59 @@
+
+> test
+> vitest run
+
+
+ RUN  v5.1.0 /private/tmp/aquarium-aq87-proof-8b2d7cc
+
+stdout | src/rendering/assets/custom-coral-colony.test.ts > reef-acropora-antler custom rigid coral colony package > repackages the exact saved sources byte-identically and idempotently in a temporary root
+Synced coral colony reef-acropora-antler: 28099 triangles, 2069268 bytes; canonical catalogs untouched
+Synced coral colony reef-acropora-antler: 28099 triangles, 2069268 bytes; canonical catalogs untouched
+
+stdout | src/rendering/assets/sync-reef-override.test.ts > reef sync early CLI dispatch > packages a valid reef source idempotently in an isolated fixture without touching fish workflow files
+Synced reef reef-center-arch: 18560 triangles, 1333640 bytes; fish catalogs untouched
+Synced reef reef-center-arch: 18560 triangles, 1333640 bytes; fish catalogs untouched
+
+ ❯ src/rendering/assets/sync-reef-override.test.ts (23 tests | 1 failed) 8695ms
+   ❯ reef sync early CLI dispatch (6)
+     × packages a valid reef source idempotently in an isolated fixture without touching fish workflow files 5516ms
+ ❯ src/rendering/assets/custom-coral-colony.test.ts (6 tests | 1 failed) 9574ms
+   ❯ reef-acropora-antler custom rigid coral colony package (3)
+     × repackages the exact saved sources byte-identically and idempotently in a temporary root 5512ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/rendering/assets/custom-coral-colony.test.ts > reef-acropora-antler custom rigid coral colony package > repackages the exact saved sources byte-identically and idempotently in a temporary root
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/rendering/assets/custom-coral-colony.test.ts:268:3
+    266|   })
+    267|
+    268|   it('repackages the exact saved sources byte-identically and idempote…
+       |   ^
+    269|     const registry = JSON.parse(fs.readFileSync(path.join(repoRoot, re…
+    270|     const entry = registry.assets.find((asset: { id: string }) => asse…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/rendering/assets/sync-reef-override.test.ts > reef sync early CLI dispatch > packages a valid reef source idempotently in an isolated fixture without touching fish workflow files
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/rendering/assets/sync-reef-override.test.ts:150:3
+    148|   })
+    149|
+    150|   it('packages a valid reef source idempotently in an isolated fixture…
+       |   ^
+    151|     const id = 'reef-center-arch'
+    152|     const beforeMainRepo = fishWorkflowSnapshot()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 70 passed (72)
+      Tests  2 failed | 859 passed (861)
+   Start at  23:42:55
+   Duration  60.02s (tests 86%, import 8%, environment 3%, transform 3%)
+
+    Isolate  72 workers spawned · ~771ms startup each (spawn + environment, per file)
+             at least ~5.39s faster with isolate: false — reuses workers across files instead of one per file
+

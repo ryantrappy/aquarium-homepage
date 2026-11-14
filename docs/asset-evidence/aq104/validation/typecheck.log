@@ -1,0 +1,9 @@
+
+> typecheck
+> tsc --noEmit && npm run scripts:check
+
+
+> scripts:check
+> node scripts/validate-scripts.mjs
+
+Syntax checked 16 scripts.

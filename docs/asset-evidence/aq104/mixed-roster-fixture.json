@@ -1,0 +1,166 @@
+{
+  "metadata": {
+    "category": "Evidence / Regression Fixture",
+    "authority": "Evidentiary",
+    "backlog": "AQ-104",
+    "sourceCommit": "f0844cfee1eeb7c2a0c46450470521fb1e2d1757",
+    "scope": "Eight configured species, eleven inhabitants including three extra anthias. Positions copied from exact-source deterministic laptop staging. Tests relocate safely in a controlled two-box reef; this is not an exact displayed-reef or animated-envelope certificate.",
+    "units": "Legacy scene/world coordinates; fixed mesh probe is the existing0.04 query convention."
+  },
+  "inhabitants": [
+    {
+      "heightRange": [
+        -0.7349999999999999,
+        1.6889999999999998
+      ],
+      "id": "starter-komodo",
+      "position": {
+        "x": 4.63,
+        "y": 0.7517087914750444,
+        "z": -4.029999999999999
+      },
+      "schoolmate": false,
+      "speciesId": "yellow-tang"
+    },
+    {
+      "heightRange": [
+        -0.129,
+        1.7899999999999998
+      ],
+      "id": "starter-watchmybirds",
+      "position": {
+        "x": 3.907487309145244,
+        "y": 1.4746640817292207,
+        "z": 1.248674037992954
+      },
+      "schoolmate": false,
+      "speciesId": "banggai-cardinalfish"
+    },
+    {
+      "heightRange": [
+        -1.644,
+        0.3759999999999999
+      ],
+      "id": "05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+      "position": {
+        "x": -2.35,
+        "y": -1.5076210346984444,
+        "z": 1.1925870040953157
+      },
+      "schoolmate": false,
+      "speciesId": "royal-gramma"
+    },
+    {
+      "heightRange": [
+        0.3759999999999999,
+        1.891
+      ],
+      "id": "example-home-assistant",
+      "position": {
+        "x": 0.5019136259678616,
+        "y": 1.848931649094098,
+        "z": 1.5310013143420216
+      },
+      "schoolmate": false,
+      "speciesId": "ocellaris-clownfish"
+    },
+    {
+      "heightRange": [
+        -0.33099999999999996,
+        1.6889999999999998
+      ],
+      "id": "starter-ombi",
+      "position": {
+        "x": 3.0612746679977514,
+        "y": 1.1462214770398564,
+        "z": -3.83
+      },
+      "schoolmate": false,
+      "speciesId": "blue-tang"
+    },
+    {
+      "heightRange": [
+        -1.4420000000000002,
+        0.7799999999999998
+      ],
+      "id": "e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+      "position": {
+        "x": -0.6452408132778573,
+        "y": -1.0950146679718746,
+        "z": 2.2299999999999995
+      },
+      "schoolmate": false,
+      "speciesId": "copperband-butterflyfish"
+    },
+    {
+      "heightRange": [
+        -0.9369999999999998,
+        0.982
+      ],
+      "id": "060212ad-1343-4890-a57f-c4c60ca162d8",
+      "position": {
+        "x": -2.658398746817656,
+        "y": -0.3978522742443604,
+        "z": 1.4750416130423547
+      },
+      "schoolmate": false,
+      "speciesId": "mccoskers-flasher-wrasse"
+    },
+    {
+      "heightRange": [
+        -0.5330000000000004,
+        1.487
+      ],
+      "id": "92394d96-38ec-4738-a61e-064af46849a5",
+      "position": {
+        "x": -1.9039096457397933,
+        "y": 0.260703255940927,
+        "z": 2.3
+      },
+      "schoolmate": false,
+      "speciesId": "lyretail-anthias"
+    },
+    {
+      "heightRange": [
+        -0.5330000000000004,
+        1.487
+      ],
+      "id": "92394d96-38ec-4738-a61e-064af46849a5::schoolmate-1",
+      "position": {
+        "x": -2.1720550049956833,
+        "y": 0.0389021651362885,
+        "z": 2.3
+      },
+      "schoolmate": true,
+      "speciesId": "lyretail-anthias"
+    },
+    {
+      "heightRange": [
+        -0.5330000000000004,
+        1.487
+      ],
+      "id": "92394d96-38ec-4738-a61e-064af46849a5::schoolmate-2",
+      "position": {
+        "x": -1.5556766537811717,
+        "y": -0.05066627048494943,
+        "z": 1.6046446708298334
+      },
+      "schoolmate": true,
+      "speciesId": "lyretail-anthias"
+    },
+    {
+      "heightRange": [
+        -0.5330000000000004,
+        1.487
+      ],
+      "id": "92394d96-38ec-4738-a61e-064af46849a5::schoolmate-3",
+      "position": {
+        "x": -1.4378598067504904,
+        "y": 0.04759976199974589,
+        "z": 2.0603790364801196
+      },
+      "schoolmate": true,
+      "speciesId": "lyretail-anthias"
+    }
+  ]
+}
