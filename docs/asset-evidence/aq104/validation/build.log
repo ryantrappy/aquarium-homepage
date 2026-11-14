@@ -43,7 +43,7 @@ computing gzip size...
 .output/public/assets/index-CPkW8Emx.js                            339.45 kB │ gzip: 109.70 kB
 .output/public/assets/aquarium-BBwLe4Ph.js                         909.75 kB │ gzip: 243.84 kB
 
-[plugin builtin:vite-reporter] 
+[plugin builtin:vite-reporter]
 (!) Some chunks are larger than 500 kB after minification. Consider:
 - Using dynamic import() to code-split the application
 - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting

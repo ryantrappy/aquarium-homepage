@@ -56,4 +56,3 @@ If this is a long-running test, pass a timeout value as the last argument or con
 
     Isolate  72 workers spawned · ~771ms startup each (spawn + environment, per file)
              at least ~5.39s faster with isolate: false — reuses workers across files instead of one per file
-
