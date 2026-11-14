@@ -1,0 +1,28 @@
+
+ RUN  v5.1.0 /private/tmp/aquarium-aq87-proof-8b2d7cc
+
+ ❯ src/rendering/scene/aq104-fallback.test.ts (2 tests | 2 failed) 17ms
+   × keeps a free-water escape when the school preferred flank is blocked (aabb) 11ms
+   × keeps a free-water escape when the school preferred flank is blocked (mesh) 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/rendering/scene/aq104-fallback.test.ts > keeps a free-water escape when the school preferred flank is blocked (aabb)
+ FAIL  src/rendering/scene/aq104-fallback.test.ts > keeps a free-water escape when the school preferred flank is blocked (mesh)
+AssertionError: expected 0 to be greater than 1
+ ❯ src/rendering/scene/aq104-fallback.test.ts:22:28
+     20|  expect(getNavigationRequest(fish.behavior)?.anchor).toBe('schoolCente…
+     21|  stepSwimmingFish(fish,h,1/60)
+     22|  expect(fish.route.length).toBeGreaterThan(1)
+       |                            ^
+     23|  expect(fish.route[fish.route.length-1].x*side).toBeLessThan(.65-.04)
+     24| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  00:04:21
+   Duration  529ms (import 67%, transform 25%, tests 6%, worker 2%)
+

@@ -1,11 +1,11 @@
 ---
 id: AQ-104
 title: 'Distribute fish across left, center, and right tank sectors'
-status: In Progress
+status: Done
 assignee:
   - '@Luna'
 created_date: '2026-11-14 04:01'
-updated_date: '2026-11-14 06:08'
+updated_date: '2026-11-14 06:19'
 labels:
   - behavior
   - rendering
@@ -17,6 +17,8 @@ references:
   - src/rendering/scene/motion.ts
   - src/simulation/habitat-navigation.ts
   - src/lib/fish-behavior.ts
+documentation:
+  - docs/asset-evidence/aq104/current-604c8aa/README.md
 priority: '2'
 type: bug
 ordinal: 141000
@@ -30,11 +32,11 @@ At 1440×900, the configured 11-fish tank was simulated for 60 seconds: despite 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The 60-second multi-fish regression demonstrates sustained left, center, and right occupancy and broad lateral utilization rather than convergence into the center corridor.
-- [ ] #2 Spawn placement and route targets use available lateral tank width while keeping fish within the perspective frustum at their current depth and inside glass clearances.
-- [ ] #3 Unavailable anchor requests do not interrupt active cross-tank routes; idle fish without valid anchors can loiter locally, and failed mesh-anchor requests still receive a safe free-water fallback.
-- [ ] #4 Lateral route choices and habitat-anchor choices are repeatable per fish/request and balanced across left and right sectors; mesh-search retries respect the per-search lattice cap and cumulative work budgets.
-- [ ] #5 Focused regression tests, the full npm test suite, typecheck/build, and local browser verification at 1440×900 and 402×874 pass without weakening existing obstacle or fish-spacing checks.
+- [x] #1 The 60-second multi-fish regression demonstrates sustained left, center, and right occupancy and broad lateral utilization rather than convergence into the center corridor.
+- [x] #2 Spawn placement and route targets use available lateral tank width while keeping fish within the perspective frustum at their current depth and inside glass clearances.
+- [x] #3 Unavailable anchor requests do not interrupt active cross-tank routes; idle fish without valid anchors can loiter locally, and failed mesh-anchor requests still receive a safe free-water fallback.
+- [x] #4 Lateral route choices and habitat-anchor choices are repeatable per fish/request and balanced across left and right sectors; mesh-search retries respect the per-search lattice cap and cumulative work budgets.
+- [x] #5 Focused regression tests, the full npm test suite, typecheck/build, and local browser verification at 1440×900 and 402×874 pass without weakening existing obstacle or fish-spacing checks.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -63,6 +65,8 @@ Root exact-f084 full validation: npm test -- --maxWorkers=2 passes all861tests a
 Root verified handoff complete for exactf084source plus new mixed-roster fixture: all861tests/72files pass with2workers; typecheck16scripts and productionbuild pass. Durable reports, full validation logs and true exact-size staged PNGs are in docs/asset-evidence/aq104/. New assertions reject stationary-staging false positives and verify deterministic repeated60s runs. This preserves currentconcurrent motion/spawn/test source changes without accepting them; AQ104 stays In Progress and ACs are not checked from old-source evidence alone.
 
 2026-11-14 Root reviewed and adopted the preserved school-station/fore-reef refinements after snapshot validation. Found and corrected a blocked-preferred-flank regression: after8preferred tries schools may use the other safe sectors, with identical clearance and planner work caps. Valid schoolCenter requests plus a blocked station reproduce failure in BOTH AABB and real mesh-query modes on the uncorrected candidate and pass with the correction; fixture is typechecked. Current mixed-roster temporal runs occupy all3sectors100percent in both modes, with zero unsafe segments, finite positions, active movement and exact replay. Full865tests/73files with2workers, typecheck16scripts and productionbuild pass. Original source stayed byte-identical to the reviewed isolated snapshot until adoption; models/config remain untouched. Native current-source acceptance and final AC checks follow this verified handoff.
+
+Final Root review 2026-11-14 accepts all five criteria at source604c8aa2a894865aeb1d22345da91d54540ac2dd. Durable criterion-by-criterion evidence: docs/asset-evidence/aq104/current-604c8aa/README.md, raw temporal/native sidecars, source hashes, valid-anchor failure/pass logs and full865tests/73files, typecheck16scripts/build logs. Native exact1440x900 and402x874 DPR1: ready11inhabitants/no failedassets/no captured warning-error logs; normal mode bridge absent, motion observed7of8/8of8 service transforms over12frames, Pause holds all8in bothviews. Resume and phone Settings/complete8-entry Services modal exercised with dialogs inside viewport. Controlled temporal fixture has100percent all-sector occupancy in both modes with zero unsafe segments, movement and exact replay; paths are legacyunits. No weaker clearance/spacing/planner caps; no performance/art/full-body claim. Source model files and concurrent screenshots preserved. No deployment/configuration saves.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
@@ -80,3 +84,9 @@ created: 2026-11-14 05:59
 Root current-candidate review found a concrete AC3 regression at motion SHA12b819d9: selectFreeWaterAttemptTarget keeps EVERY schooling retry on the preferred flank via (isSchool || attempt<8). If that flank is blocked, a safe opposite side is never tried and both AABB and mesh fish get no route. New two-mode real-collider counterexample fails both cases; existing115focused checks pass, so this was not covered. Source originals are preserved. Root will test a minimal fallback-sector correction in the isolated snapshot, with no clearance/budget relaxation, before applying it to the unchanged original candidate. Evidence /tmp/aq104-candidate-fallback.log.
 ---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Spread spawns and routes across the available depth-aware tank width, retain cross-tank routes through unavailable-anchor requests, and let schools escape blocked preferred flanks. Root accepted all five criteria using repeatable mixed-roster60second AABB/real-mesh regressions, blocked-flank failure/pass cases,865passing tests, typecheck/build and exact laptop/phone native motion/Pause/control checks. Evidence: docs/asset-evidence/aq104/current-604c8aa/README.md. Broader art, physical calibration, animated envelopes and runtime budgets remain tracked separately.
+<!-- SECTION:FINAL_SUMMARY:END -->

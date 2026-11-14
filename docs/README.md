@@ -6,7 +6,7 @@ Status: Canonical / Active
 Authority: Binding Single Source of Documentation Truth
 Backlog: AQ-61, AQ-63, AQ-65, AQ-66, AQ-64, AQ-53, AQ-60, AQ-42
 Owner: @documentation
-Updated: 2026-11-13
+Updated: 2026-11-14
 Upstream: AGENTS.md, AGENT_TASKS.md, docs/requirements.md, docs/framework/DOCUMENTATION_FRAMEWORK.md
 Downstream: All repository documentation and active agent workflows
 -->
@@ -29,7 +29,7 @@ Find the authoritative documents for your task area:
 | **3D Rendering & Scene** | [`rendering.md`](rendering.md) | [`rendering-research-history.md`](rendering-research-history.md) | [`asset-pipeline-proof.md`](asset-pipeline-proof.md), [candidate donor provenance](asset-evidence/aq12/splat-candidate-provenance.json), [AQ-59 runtime material review](asset-evidence/aq59/runtime-20261112/review.json), [AQ-76 native runtime comparison](asset-evidence/aq76/native-20261112/review.json), [repeatable look-dev baseline](asset-evidence/aq70-2/baseline-before/review.json), [AQ-70.12 sand functional proof](asset-evidence/aq70-12/functional-review.json) |
 | **Fish Motion & Biomechanics** | [`fish-turning-and-maneuvering-plan.md`](fish-turning-and-maneuvering-plan.md) | [`sketchfab-motion-review.md`](sketchfab-motion-review.md), [`mesh2motion-review.md`](mesh2motion-review.md) | [`asset-evidence/fish-rig-inventory.md`](asset-evidence/fish-rig-inventory.md)  [AQ-58 reset proof](asset-evidence/aq58/fish-player-review.json) |
 | **Fish Behavior & AI Runtime** | [`behavior-runtime-contract.md`](behavior-runtime-contract.md) | [`fish-behavior-design.md`](fish-behavior-design.md), [`reef-fish-roster.md`](reef-fish-roster.md) | [AQ-41 controller CPU samples](asset-evidence/aq41/current-controller-benchmark.json), `src/simulation/behavior-runtime.test.ts`  [AQ-64 state preservation](asset-evidence/aq64/review.json) |
-| **Reef Navigation & Habitat** | [`habitat-navigation-core-contract.md`](habitat-navigation-core-contract.md) | [`modular-coral-and-live-rock-spec.md`](modular-coral-and-live-rock-spec.md) | `src/simulation/habitat-navigation.test.ts`, [AQ-104 sustained distribution](asset-evidence/aq104/f084-temporal-investigation.json) |
+| **Reef Navigation & Habitat** | [`habitat-navigation-core-contract.md`](habitat-navigation-core-contract.md) | [`modular-coral-and-live-rock-spec.md`](modular-coral-and-live-rock-spec.md) | `src/simulation/habitat-navigation.test.ts`, [AQ-104 final distribution review](asset-evidence/aq104/current-604c8aa/README.md) |
 | **3D Collision & Geometry** | [`asset-evidence/aq58/3d-collision-review.md`](asset-evidence/aq58/3d-collision-review.md) | [`asset-evidence/aq58/README.md`](asset-evidence/aq58/README.md) | [`asset-evidence/aq58/`](asset-evidence/aq58/) |
 | **Biological Asset Pipeline** | [`asset-contract.md`](asset-contract.md) | [`open-source-asset-and-motion-research.md`](open-source-asset-and-motion-research.md) | [`asset-pipeline-proof.md`](asset-pipeline-proof.md), [`asset-evidence/aq57/`](asset-evidence/aq57/) |
 | **Fish Roster & Adult Scaling** | [`fish-scale-reference.md`](fish-scale-reference.md) | [`reef-fish-roster.md`](reef-fish-roster.md) | `src/rendering/scene/fish-scale.test.ts`, [AQ-60 initial spread proof](asset-evidence/aq60/spawn-review.json) |
@@ -82,7 +82,8 @@ Directory of project documentation and verification evidence:
 ### Tier 4: Audits & Verification Evidence (Evidentiary)
 | Document | Status | Authority | Backlog | Scope / Purpose |
 |---|---|---|---|---|
-| [AQ-104 mixed-roster temporal evidence](asset-evidence/aq104/f084-temporal-investigation.json) / [native staging](asset-evidence/aq104/f084-staging/review.json) | **Active** | Evidentiary | `AQ-104` | Exact f084 controlled60s distribution, real bounded mesh-query fixture and two-size frozen staging; task remains open for current concurrent-source review. |
+| [AQ-104 final Root distribution review](asset-evidence/aq104/current-604c8aa/README.md) | **Complete** | Evidentiary | `AQ-104` | Current-source sustained sector utilization, blocked-school recovery, 865 passing tests and both-size native motion/Pause/control evidence; broader art/body/performance gates remain separate. |
+| [AQ-104 mixed-roster temporal evidence](asset-evidence/aq104/f084-temporal-investigation.json) / [native staging](asset-evidence/aq104/f084-staging/review.json) | **Active** | Evidentiary | `AQ-104` | Historical f084 controlled60s distribution and frozen staging; superseded for final task acceptance by the current-source Root review above. |
 | [Schooling controller CPU samples](asset-evidence/aq41/current-controller-benchmark.json) | **Active** | Evidentiary | `AQ-41` | Raw Node CPU simulation timings for40/48 inhabitants and both aspect-specific layouts; explicitly excludes browser/GPU timing and does not establish a population cap. |
 | [Live-rock runtime material review](asset-evidence/aq59/runtime-20261112/review.json) | **Active** | Evidentiary | `AQ-59` | Neutral carbonate/limited coralline shader refinement at both viewports; exact-export geometry, cave and final art gates remain open. |
 | [Native runtime comparison](asset-evidence/aq76/native-20261112/review.json) | **Active** | Evidentiary | `AQ-76` | Both-view native rAF comparison before/after complete-school upgrades; budget failures and warmup limitations remain explicit. |

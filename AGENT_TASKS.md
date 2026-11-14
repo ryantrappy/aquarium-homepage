@@ -6,12 +6,24 @@ Status: Active
 Authority: Binding Checkpoint; Backlog controls acceptance
 Backlog: AQ-44, AQ-49, AQ-54, AQ-59, AQ-70.2, AQ-70.13, AQ-74, AQ-86, AQ-104
 Owner: @root
-Updated: 2026-11-13
+Updated: 2026-11-14
 Upstream: AGENTS.md, agent_scratch.md, docs/requirements.md
 Downstream: Current implementation and review work
 -->
 
 Root verified this checkpoint against the current checkout. The goal remains active and incomplete: finish the backlog and make the living aquarium resemble the supplied reference. Passing functional tests does not accept final art.
+
+## Latest Root checkpoint — 2026-11-14 AQ104 complete
+
+This section supersedes older source, status and process details below. The full goal remains active and incomplete.
+
+- AQ104 is Done after Root criterion-by-criterion review at source604c8aa. Reviewed preserved school-station/fore-reef refinements plus minimal blocked-school fallback: after eight preferred-side attempts other safe sectors remain eligible. Valid schoolCenter AABB and real mesh counterexamples fail before/pass after; collision and planner budgets unchanged.
+- Current mixed eight-species/eleven-inhabitant60s regression: all three sectors occupied100% of settled samples in both modes; AABB shares41.00/26.38/32.62%, mesh38.32/26.56/35.12%; no unsafe segments or missing-outer samples; all move and repeated runs match. Legacy world units/controlled two-box fixtures, not assembled-reef or articulated-body certification.
+- Exact604c8aa validation:865tests/73files with2workers, typecheck16scripts and productionbuild pass. Native1440x900/402x874DPR1 ready11inhabitants/no failedassets/zero captured warnings-errors; normal bridge absent, moving transforms7of8/8of8 over12frames, Pause holds all8in bothviews. Resume, phone Settings and eight-entry Services modal work and fit. Durable final review/rawlogs/PNG/sidecars: docs/asset-evidence/aq104/current-604c8aa/README.md. Earlierf084 evidence is historical. Performance/art/physical-scale/body-envelope gates remain open.
+- Shared rolling draft PR48 https://github.com/ryantrappy/aquarium-homepage/pull/48, branchreview. Source604c8aa already pushed; this task-finalization commit carries evidence/status/checkpoint and will be pushed immediately. No deployment/merge/model changes/original configuration saves. User's two untracked AQ104 screenshots preserved.
+- Queue132tasks:63Done/52ToDo/17InProgress (69open). CI/FPS-display lanes explicitly excluded by user despite stale statuses. New AQ105 requests natural clownfish hosting; inspect Backlog criteria before implementation. No other task closed from this review.
+- Root-owned proof /tmp/aquarium-aq87-proof-8b2d7cc detached604c8aa, infrastructure-only Vitefsallowlistdirty. Dev5215PID130 verifiedcwd/command, disposable localhost-URL config /tmp/aquarium-aq104-root-config/reef-config.json. Preserve user3000/5210; old original5214/5212 stale. Native tab closed/metricsreset; Chrome3 binding retained. No Blender edits; preserve user live scene and obey latest packed/save/export/sync/commit rule for any future model edits.
+- Next primary visual work remains supported left-front plate/zoa terraces against goal visual without shrinking tall foundations; current12left/11right sockets occupied and runtime exports differ from canonical support pins, so new sites need current-surface measurement. Preserve Gemini assets; no competing visual modeling. Full modular library/atlas, physical scale, body clearance and art stay open. Subagent prior usage errors do not block independent Root work.
 
 ## Latest Root checkpoint — 2026-11-13 sustained-distribution review
 

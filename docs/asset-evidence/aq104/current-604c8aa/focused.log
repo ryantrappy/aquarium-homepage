@@ -1,0 +1,9 @@
+
+ RUN  v5.1.0 /private/tmp/aquarium-aq87-proof-8b2d7cc
+
+
+ Test Files  6 passed (6)
+      Tests  117 passed (117)
+   Start at  23:59:46
+   Duration  8.08s (tests 80%, import 14%, transform 6%)
+
