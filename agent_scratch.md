@@ -42,3 +42,5 @@
 - Delivery correction: PR48 externally merged2026-11-14; currentbranchrefinements preserved. AQ89completionbac3d8e is pushed on refinements to new shared draftPR49 https://github.com/ryantrappy/aquarium-homepage/pull/49. UsePR49 for subsequent reviewed milestones/runninglist. Root did not merge/deploy.
 
 - AQ103 curvature-highlight trial rejected after laptopnative: regular ovalspots, not reference water. Originalsurface restored; privateproofcb88689/dev5215session85659 stillrejectedtrial. Root also found wrong3Dview-vector math in initialsampler; corrected evidence/revisedplan pending. No acceptedshadercommit/AC change. RejectedPNG durable docs/asset-evidence/aq103/rejected-curvature-20261114/.
+
+- Root resume review 2026-11-14: all current scratch entries inspected. Latest PR49/laptop-only/preserve-assets/no-deploy policies current; AQ89 complete. AQ103 diagnosis checkpoint94c4b95 pushed, corrected finite sampler independently reproduced. Ray-driven shader trial now being implemented by navigation_recovery; pending Root technical/native review. Earlier restored-baseline/private-rejected-proof descriptions remain historical until proof is refreshed.

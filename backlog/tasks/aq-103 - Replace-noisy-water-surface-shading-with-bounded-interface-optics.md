@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-13 05:41'
-updated_date: '2026-11-14 20:38'
+updated_date: '2026-11-14 20:47'
 labels:
   - rendering
   - optics
@@ -51,6 +51,8 @@ User2026-11-14 reports water surface regressed against docs/more-realistic-reef-
 Visible-surface diagnostic and bounded TIR candidate: use only the supplied 1440x900 capture and goal reference; analytically quantify the current overview camera's water-plane visible region, NoV, Snell-window branch, and distance-filtered slope fade; preserve camera, enclosure, canonical waves, shared clock, and transmitted-fixture branch; adjust only TIR reflected underwater radiance with coherent localized cyan/white facet contrast and restrained rear colors; add focused regression coverage, run surface-related checks and typecheck, then hand off source pins and candidate for Root laptop visual review. Do not accept AC2/3 or Done.
 
 Root revised iteration 2026-11-14 supersedes the rejected curvature-radiance plan: evaluate phase-coherent height-gradient capillary normals with screen-footprint filtering and physically consistent refracted fixture direction; retain camera, enclosure, canonical waves, clock and existing .53/.76 transition. Record roughness and finite corrected sweep before native preview. Do not increase slope merely to force transmission; a naturally closed window is valid. If contrast remains inadequate, report the reflection-radiance limitation for Root review before expanding scope. No new AC/Done or shared source commit without Root laptop-only visual review. The old sampler is superseded because its view vector omitted x and reversed the Z-slope sign.
+
+Root-approved replacement trial: remove the rejected curvature-maxima lobe; add modest phase-coherent height-gradient microfacet normals filtered by actual screen-space phase footprint; preserve camera, enclosure, canonical wave field, shared clock and .53/.76 Snell threshold; compute TIR radiance from a bounded reflected-view ray projected into a low-frequency bilinear reef-color proxy (explicitly not actual mesh hits); compute fixture transmission only from a valid water-to-air refracted ray; add CPU analytic tests for reflect/refract orientation, critical angle and projection bounds. Verify corrected legacy-unit sample sweep, focused surface/lifecycle tests and typecheck, then hand the shader hash to Root for laptop-only native review. Do not accept AC2/3 or Done.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -100,5 +102,11 @@ author: @navigation_recovery
 created: 2026-11-14 20:35
 ---
 2026-11-14 navigation_recovery diagnostic correction: Root identified that the first sampler omitted the lateral x component in camera distance and the x-facing term in dot(N,V). Its original NoV/detailFade values and conclusion are superseded; old script/results remain preserved as historical only. Corrected script/results/pins are in /tmp/aq103-visible-surface-review/sample_visible_surface_corrected.py, sample-results-corrected.json, and corrected-pins.sha256. Corrected continuous-field sweep across 243,000 samples (x included; flat and ±wave Y both sampled) reports NoV .207–.471 flat and .208–.471 displaced, with the unchanged Snell window zero in both; detailFade median .067, max .301. This is a finite continuous-field sample, not an analytic bound or exact raster interpolation from the 96x48 geometry. Rejected focus-lobe screenshot and exact shader are preserved in /tmp/aq103-visible-surface-review/native/candidate-laptop.png and rejected-candidate/water-surface.ts; scoped source has been restored to its pre-candidate hash. Revised implementation direction is pending Root approval.
+---
+
+author: @navigation_recovery
+created: 2026-11-14 20:47
+---
+Root 2026-11-14 selects the ray-driven analytic reflected-radiance trial proposed by quality_recovery. No new reflection pass/texture, no geometry/camera/canonical-wave/clock changes, no curvature maxima or periodic spot pattern. Current visible overview samples remain TIR; natural transmission is optional and must not be forced by slope amplitude. Surface tones are an analytic palette proxy, not actual coral ray intersections. Phone checks remain stopped.
 ---
 <!-- COMMENTS:END -->
