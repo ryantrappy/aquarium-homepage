@@ -431,6 +431,7 @@ function createSpeciesAnimationExtension(signature: SpeciesLocomotionSignature):
     id,
     create(initialSnapshot: FishExtensionSnapshot) {
       let elapsedTotal = (initialSnapshot.instanceId.length * 0.37) % 10
+      let smoothedRate = signature.basePlaybackByState[initialSnapshot.state] ?? 1
       return {
         step(snapshot: FishExtensionSnapshot, elapsedSeconds: number) {
           elapsedTotal = (elapsedTotal + elapsedSeconds) % 3600
@@ -439,8 +440,11 @@ function createSpeciesAnimationExtension(signature: SpeciesLocomotionSignature):
             signature.pulseAmplitude *
             Math.sin(elapsedTotal * Math.PI * 2 * signature.pulseFrequencyHz)
           const speedBoost = Math.min(0.35, snapshot.speed * signature.speedPlaybackGain)
+          const targetRate = clampPlaybackRate(base + pulse + speedBoost)
+          const blend = Math.min(1, Math.max(0, elapsedSeconds) * 4.5)
+          smoothedRate += (targetRate - smoothedRate) * blend
           return {
-            playbackRate: clampPlaybackRate(base + pulse + speedBoost),
+            playbackRate: clampPlaybackRate(smoothedRate),
           }
         },
       }

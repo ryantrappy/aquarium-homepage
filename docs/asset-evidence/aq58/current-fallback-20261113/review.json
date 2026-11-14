@@ -1,0 +1,62 @@
+{
+  "sourceCommit": "d862bf9",
+  "scope": "Current render-source fallback coverage and failure/picking integration only; no cave or animated-envelope certification.",
+  "method": "One uninflated world AABB per actual assembled static rock mesh. Scan current vertex buffers after ancestor/world transform refresh, ignoring cached geometry bounds. Every point/triangle/solid lies inside this conservative convex box. Exact mesh BVH remains the full-scene route representation after readiness.",
+  "capture": "Native CUA Chrome, seed2026/time1.25/full-scene/labels off; renderFrozen sidecars; detached exact-source checkout with infrastructure-only Vite fs allow-list.",
+  "checks": {
+    "fullTests": 748,
+    "fullFiles": 66,
+    "focusedTests": 52,
+    "focusedFiles": 2,
+    "typecheck": "Pass including14script syntax checks",
+    "productionBuild": "Pass; existing chunk-size advisory",
+    "capturedConsoleWarningsErrors": []
+  },
+  "assets": [
+    {
+      "path": "src/rendering/assets/corals/reef-full-model-left.glb",
+      "sha256": "8d04c4fce1e6e1bf3c2e021968c205b4c9e4af9041a23d9304a7e291fcf6414f",
+      "bytes": 770644
+    },
+    {
+      "path": "src/rendering/assets/corals/reef-full-model-right.glb",
+      "sha256": "009a847175661ea2fdcf273d994a30cc12834ff6720b4d7bd4aea2391179bd3b",
+      "bytes": 770536
+    }
+  ],
+  "captures": [
+    {
+      "image": "laptop.png",
+      "sidecar": "laptop.json",
+      "dimensions": [
+        1440,
+        900
+      ],
+      "sha256": "ceefa32747773d35be719fb429b758df41e854af16eb77465e6d3c841458c041",
+      "ready": true,
+      "inhabitants": 11
+    },
+    {
+      "image": "phone.png",
+      "sidecar": "phone.json",
+      "dimensions": [
+        402,
+        874
+      ],
+      "sha256": "d3ca2d5cc78d72ba9851eb7977c2e8c618f73b8aa358d1559e838093a2632a78",
+      "ready": true,
+      "inhabitants": 11
+    }
+  ],
+  "remaining": [
+    "Current measured through-cave passage at calibrated animated fish envelopes and actual-mesh route/occlusion acceptance still open.",
+    "Fallback intentionally blocks concavities/caves while mesh navigation is unavailable; it is not a claim that a cave is safe.",
+    "Historical canonical collision reports stay historical; no automatic metadata/source promotion or model asset changes.",
+    "Socket-derived coral-base and interaction anchors still need current-runtime alignment underAQ82; fish probe radii/metric scale remain independently open."
+  ],
+  "phoneTargets": {
+    "count": 8,
+    "minimumCssDimension": 57.6015625,
+    "allWithinViewport": true
+  }
+}

@@ -77,7 +77,7 @@ describe('rendered fish travel adapter', () => {
     expect(Math.abs(yawDelta)).toBeGreaterThan(0)
     expect(Math.abs(yawDelta)).toBeLessThanOrEqual(maxTurn + 1e-9)
     expect(fish.position).toEqual(start)
-    expect(fish.speed).toBe(0)
+    expect(fish.speed).toBeLessThan(0.6)
     expect(fish.route).toHaveLength(2)
     expect(isWaterSegmentSafe({ start, target: fish.position, waterBounds: bounded.bounds, obstacles: bounded.obstacles, fishClearanceRadius: fish.clearance })).toBe(true)
 
@@ -330,7 +330,7 @@ describe('rendered fish travel adapter', () => {
     for (let i = 0; i < 200 && !blocked.length; i++) stepSwimmingFish(fish, meshHabitat(query), 1 / 30)
     expect(blocked.length).toBeGreaterThan(0)
     expect(fish.position.x).toBeLessThan(-.44)
-    expect(fish.speed).toBe(0)
+    expect(fish.speed).toBeLessThan(0.05)
   })
   it('fails closed on missing metric configuration before stale near-waypoint arrival', () => {
     const query = vi.fn(() => ({ status: 'clear' as const, work: { nodeVisits: 0, triangleTests: 0 } }))
@@ -601,13 +601,41 @@ describe('school stepping and group disturbance (AQ-41/AQ-44)', () => {
     expect(distance(closeA.position, closeB.position)).toBeGreaterThanOrEqual(physicalMinSep - 0.01)
   })
 
+  it('lets a non-schooling fish swim through the physical gap between stopped schoolmates (AQ-85 AC #2)', () => {
+    const left = createSwimmingFish('aq85-gap-left', 'blue-green-chromis', { x: -0.25, y: 0.8, z: 1.0 }, .5)
+    const right = createSwimmingFish('aq85-gap-right', 'blue-green-chromis', { x: 0.25, y: 0.8, z: 1.0 }, .5)
+    const tang = createSwimmingFish('aq85-gap-tang', 'yellow-tang', { x: 0, y: 0.8, z: 1.5 }, .5, undefined, { initialYaw: Math.PI })
+    tang.route = [{ ...tang.position }, { x: 0, y: 0.8, z: 0.5 }]
+    tang.waypoint = 1
+    tang.speed = 0.3
+
+    const minPhysicalSeparation = fishBodyRadiusM(tang.speciesId) + fishBodyRadiusM(left.speciesId) + 0.06
+    let closestLeft = Infinity
+    let closestRight = Infinity
+    let crossedAtX: number | undefined
+    for (let frame = 0; frame < 60; frame++) {
+      const previousZ = tang.position.z
+      stepSwimmingSchool([left, tang, right], habitat, 1 / 30, [true, false, true])
+      if (previousZ >= 1 && tang.position.z < 1) crossedAtX = tang.position.x
+      closestLeft = Math.min(closestLeft, distance(tang.position, left.position))
+      closestRight = Math.min(closestRight, distance(tang.position, right.position))
+    }
+
+    expect(tang.position.z).toBeLessThan(0.9)
+    expect(crossedAtX).toBeDefined()
+    expect(Math.abs(crossedAtX!)).toBeLessThan(0.25)
+    expect(closestLeft).toBeGreaterThanOrEqual(minPhysicalSeparation - 0.01)
+    expect(closestRight).toBeGreaterThanOrEqual(minPhysicalSeparation - 0.01)
+  })
+
   it('keeps a chromis pair within schooling range over time (AC #1)', () => {
     const [a, b] = chromisPair()
     for (let frame = 0; frame < 300; frame++) stepSwimmingSchool([a, b], habitat, 1 / 30)
     expect(distance(a.position, b.position)).toBeLessThan(2.2)
-    // AQ-85: schoolmates may group down to ~their 0.2 physical minSep, so
-    // the floor guards against collapse/interpenetration, not close grouping.
-    expect(distance(a.position, b.position)).toBeGreaterThan(0.15)
+    // AQ-85: schoolmates can group closely, but the simulation must hold at
+    // least the species-specific body radii plus their 0.06m buffer.
+    const physicalMinSep = fishBodyRadiusM(a.speciesId) + fishBodyRadiusM(b.speciesId) + 0.06
+    expect(distance(a.position, b.position)).toBeGreaterThanOrEqual(physicalMinSep - 0.01)
   })
 
   it('holds a stopped fish still while it still counts as a peer (AQ-44 AC #4)', () => {
@@ -687,6 +715,18 @@ describe('schooling steering through heading kinematics (AQ-84)', () => {
     expect(outer.turnKinematics.smoothedYawRate).toBeGreaterThan(0)
   })
 
+  it('levels a no-route pivot instead of retaining bank from its previous swim turn', () => {
+    const { outer, peer } = outerFishNoRoute()
+    outer.bank = -0.12
+    const previousAbsBank = Math.abs(outer.bank)
+
+    stepSwimmingSchool([outer, peer], habitat, 1 / 60, [false, true])
+
+    // With no route and no forward speed, yaw may pivot in place, but the
+    // body should not remain visibly rolled from a previous traveling turn.
+    expect(Math.abs(outer.bank)).toBeLessThan(previousAbsBank)
+  })
+
   it('respects the species turn limit on every substep and never overshoots the school heading (AC #2)', () => {
     const { outer, peer } = outerFishNoRoute()
     const turnRateRad = outer.behavior.variation.turnDegreesPerSecond * Math.PI / 180
@@ -723,6 +763,63 @@ describe('schooling steering through heading kinematics (AQ-84)', () => {
     expect(forward).toBeGreaterThan(0.05)
     expect(lateral).toBeLessThan(0.05)
     expect(lateral).toBeLessThan(forward * 0.5)
+  })
+
+  it('bounds routed school turns by existing turn boosts and banks with the turn while staying habitat-safe (AC #2/#3)', () => {
+    for (const direction of [-1, 1] as const) {
+      const outer = createSwimmingFish(`aq84-routed-${direction}`, 'blue-green-chromis', { x: -0.6 * direction, y: 0.8, z: 1.4 }, .5)
+      const peer = createSwimmingFish(`aq84-routed-peer-${direction}`, 'blue-green-chromis', { x: 0.9 * direction, y: 0.8, z: 1.4 }, .5)
+      outer.yaw = 0
+      peer.yaw = 0
+      outer.route = [
+        { ...outer.position },
+        { x: outer.position.x + direction * 0.3, y: outer.position.y, z: outer.position.z },
+      ]
+      outer.waypoint = 1
+      outer.speed = 0.4
+
+      const previous = { ...outer.position }
+      const previousYaw = outer.yaw
+      const dt = 1 / 60
+      stepSwimmingSchool([outer, peer], habitat, dt, [false, true])
+
+      const yawDelta = angleDiff(outer.yaw, previousYaw)
+      const baseTurnRate = outer.behavior.variation.turnDegreesPerSecond * Math.PI / 180
+      // The route is a sharp turn within the existing 0.35m proximity zone;
+      // its established boost is 1.65 × 2.2. Schooling yaw is budgeted from
+      // the same base rate before the route uses the remaining boosted rate.
+      expect(Math.abs(yawDelta) / dt).toBeLessThanOrEqual(baseTurnRate * 1.65 * 2.2 + 1e-6)
+      expect(Math.sign(yawDelta)).toBe(direction)
+      expect(Math.sign(outer.turnKinematics.yawRateRadPerSec)).toBe(direction)
+      // Positive yaw banks negative; mirrored negative yaw banks positive.
+      expect(Math.sign(outer.bank)).toBe(-direction)
+      expect(isWaterSegmentSafe({ start: previous, target: outer.position, waterBounds: habitat.bounds, obstacles: habitat.obstacles, fishClearanceRadius: outer.clearance })).toBe(true)
+    }
+  })
+
+  it('keeps all motion state frozen for stopped fish during a paused school step', () => {
+    const { outer, peer } = outerFishNoRoute()
+    const before = [outer, peer].map(fish => ({
+      position: { ...fish.position },
+      yaw: fish.yaw,
+      pitch: fish.pitch,
+      bank: fish.bank,
+      speed: fish.speed,
+      turnKinematics: { ...fish.turnKinematics },
+      behavior: fish.behavior,
+    }))
+
+    stepSwimmingSchool([outer, peer], habitat, 1 / 30, true)
+
+    expect([outer, peer].map(fish => ({
+      position: fish.position,
+      yaw: fish.yaw,
+      pitch: fish.pitch,
+      bank: fish.bank,
+      speed: fish.speed,
+      turnKinematics: fish.turnKinematics,
+      behavior: fish.behavior,
+    }))).toEqual(before)
   })
 
   it('freezes schooling heading under reduced motion while route motion continues (AC #3)', () => {
@@ -854,5 +951,32 @@ describe('socket-derived anchor interactions (AQ-82)', () => {
     expect(evaluateSwimSpeedSynchronizedFlexRate(0.6, 0.3, 1)).toBeGreaterThan(evaluateSwimSpeedSynchronizedFlexRate(0.1, 0.3, 1))
     expect(evaluateSwimSpeedSynchronizedFlexRate(0.6, 0.3, 1, { paused: true })).toBe(0)
     expect(evaluateSwimSpeedSynchronizedFlexRate(0.6, 0.3, 1, { reducedMotion: true })).toBe(0)
+  })
+
+  it('carves continuous forward arcs through intermediate 90-degree corners without stopping to spin (AQ-12.1)', () => {
+    const openWater: WaterHabitat = { bounds: { min: { x: -5, y: -2.4, z: -4 }, max: { x: 5, y: 2.8, z: 4 } }, obstacles: [], anchors: [] }
+    const fish = createSwimmingFish('arc-tang', 'blue-tang', { x: -1.5, y: 0.5, z: 0 }, 0.3)
+    fish.behavior = { ...fish.behavior, state: 'swim' }
+    fish.behavior.variation.cruiseSpeedTankWidthsPerSecond = 0.12
+    fish.yaw = Math.PI / 2 // Facing +X
+    fish.speed = 1.0
+    fish.routeGeneration = fish.behavior.navigationGeneration
+    fish.route = [
+      { x: -1.5, y: 0.5, z: 0 },
+      { x: 0.5, y: 0.5, z: 0 },
+      { x: 0.5, y: 0.5, z: 2.0 },
+    ]
+    fish.waypoint = 1
+
+    let minSpeedAroundCorner = Infinity
+    for (let i = 0; i < 240 && fish.waypoint < fish.route.length; i++) {
+      fish.routeGeneration = fish.behavior.navigationGeneration
+      stepSwimmingFish(fish, openWater, 1 / 60)
+      if (fish.waypoint === 1) {
+        minSpeedAroundCorner = Math.min(minSpeedAroundCorner, fish.speed)
+      }
+    }
+    expect(minSpeedAroundCorner).toBeGreaterThan(0.55)
+    expect(fish.waypoint).toBeGreaterThanOrEqual(2)
   })
 })

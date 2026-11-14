@@ -8,21 +8,18 @@ import * as THREE from 'three'
  * external or paid HDR/EXR asset is fetched. It is generated once at scene
  * init via `PMREMGenerator.fromScene()`; there is no per-frame cost and no
  * regeneration on resize. `scene.background` is never set to this texture:
- * the painted rear backdrop plane and the `#183654` background stay.
+ * the rear backdrop and configured display background remain separate.
  *
- * Light re-tune that goes with this map: hemi 0.62 -> 0.40 (in
- * `aquarium.ts`), key 2.45 -> 2.1 and fill 1.12 -> 0.95 in
- * `DEFAULT_AQUARIUM_OPTICS_CONFIG` (`underwater-optics.ts`). Since PR #7
- * the optics config is the single source of truth for light intensities, so
- * the key/fill constructors and the caustic-light-controller config — which
- * re-asserts its base values every frame — all pick the new values up from
- * there. Rim 0.45 unchanged, exposure left at 1.02 pending a visual check —
- * see the PR description.
+ * Current display and fixture values live in aquarium.ts and
+ * `DEFAULT_AQUARIUM_OPTICS_CONFIG` (`underwater-optics.ts`): ACES exposure
+ * 0.80, hemisphere intensity 0.22, key 2.1, fill 0.95, and rim 0.28.
+ * Key/fill are resolved from the optics config, which also feeds the
+ * caustic-light controller. Two-viewport exposure review remains a separate
+ * visual acceptance gate.
  */
 
-// Gradient stops of the rear backdrop shader, as linear RGB triples.
-// They are the same stops as `aquarium.ts`'s rear backdrop
-// (deep indigo bottom -> cobalt mid -> aquamarine-violet top).
+// Linear RGB stops for the lighting proxy's blue water-column fill.
+// These are lighting values, independently graded from the visible backdrop.
 export const AQUARIUM_ENVIRONMENT_GRADIENT_STOPS = [
   { position: 0, color: [0.06, 0.11, 0.24] as const },
   { position: 0.58, color: [0.12, 0.26, 0.44] as const },
@@ -36,17 +33,18 @@ export const AQUARIUM_ENVIRONMENT_PANEL_COLORS = {
   sandBounce: '#d8cbb0',
 } as const
 
-// Per-material envMapIntensity. Every MeshStandardMaterial in the scene gets
-// an explicit value — none is left at the three.js default of 1.0 by accident.
-// Fish 0.55 is a starting point: the 13/15 extruded-silhouette GLBs can look
-// plasticky/grey under full IBL, so visual review decides the final value;
-// the fallback is lowering the fish intensity, not removing the env map.
+// Environment intensities for PBR roles wired by aquarium.ts. The water
+// surface remains a custom shader material; its value is retained for config
+// compatibility and is not applied as a MeshStandardMaterial intensity.
+// Fish intensity remains a review parameter for the current skin/eye assets;
+// successful PMREM generation alone does not accept their final appearance.
 export const ENVIRONMENT_MAP_INTENSITY = {
   fish: 0.55,
   reef: 0.35,
   sand: 0.2,
   waterSurface: 0.9,
-  backdrop: 0,
+  // Preserve the graded blue rear water after explicit binding makes this role effective.
+  backdrop: 0.65,
 } as const
 
 function gradientColorAt(t: number, out: THREE.Color): THREE.Color {
@@ -196,14 +194,27 @@ export function createAquariumEnvironmentMap(renderer: THREE.WebGLRenderer): Aqu
 /**
  * Sets an explicit `envMapIntensity` on every MeshStandardMaterial (which
  * includes MeshPhysicalMaterial) under `root`. MeshBasicMaterial sprites and
- * PointsMaterials are untouched — they do not take part in IBL.
+ * PointsMaterials are untouched — they do not take part in IBL. When a shared
+ * PMREM texture is supplied, it is borrowed and assigned directly to each PBR
+ * material. Three.js r187 otherwise uses `scene.environmentIntensity` for a
+ * material whose `envMap` is null, overriding its per-material intensity.
+ * The caller retains ownership and is responsible for disposing the texture.
  */
-export function applyEnvironmentMapIntensity(root: THREE.Object3D, intensity: number): void {
+export function applyEnvironmentMapIntensity(
+  root: THREE.Object3D,
+  intensity: number,
+  sharedEnvironment?: THREE.Texture,
+): void {
   root.traverse(object => {
     if (!(object instanceof THREE.Mesh)) return
     const materials = Array.isArray(object.material) ? object.material : [object.material]
     for (const material of materials) {
-      if (material instanceof THREE.MeshStandardMaterial) material.envMapIntensity = intensity
+      if (!(material instanceof THREE.MeshStandardMaterial)) continue
+      if (sharedEnvironment && material.envMap !== sharedEnvironment) {
+        material.envMap = sharedEnvironment
+        material.needsUpdate = true
+      }
+      material.envMapIntensity = intensity
     }
   })
 }

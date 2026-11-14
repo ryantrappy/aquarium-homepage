@@ -1,11 +1,11 @@
 ---
 id: AQ-92
 title: Widen the CI pull_request trigger to run on every PR
-status: In Progress
+status: Done
 assignee:
   - '@Luna'
 created_date: '2026-11-09'
-updated_date: '2026-11-12 05:55'
+updated_date: '2026-11-13 05:13'
 labels:
   - ci
   - testing
@@ -18,7 +18,7 @@ documentation:
   - docs/rendering.md
 priority: medium
 type: task
-ordinal: 98000
+ordinal: 136000
 ---
 
 ## Description

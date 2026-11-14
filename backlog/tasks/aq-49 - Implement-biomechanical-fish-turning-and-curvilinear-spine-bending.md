@@ -1,12 +1,11 @@
 ---
 id: AQ-49
 title: Implement biomechanical fish turning and curvilinear spine bending
-status: To Do
+status: Done
 assignee:
-  - '@render-integration'
-  - '@gemini'
+  - '@root'
 created_date: '2026-11-04T19:20:00Z'
-updated_date: '2026-11-12 05:43'
+updated_date: '2026-11-13 05:21'
 labels: []
 dependencies:
   - AQ-35
@@ -18,13 +17,14 @@ references:
   - src/rendering/scene/fish-turning.test.ts
   - src/rendering/scene/motion.ts
   - src/rendering/scene/aquarium.ts
+  - docs/asset-evidence/aq49/reduced-motion-20261112/review.json
 documentation:
   - docs/fish-turning-and-maneuvering-plan.md
   - docs/fish-behavior-design.md
 parent_task_id: AQ-12
 priority: '10'
 type: enhancement
-ordinal: 10
+ordinal: 137000
 ---
 
 ## Description
@@ -38,7 +38,7 @@ Implement the biomechanical turning and curvilinear spine-bending plan documente
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [x] #1 Forward translation in src/rendering/scene/motion.ts follows actual heading axis rather than sliding sideways during turns, while preserving obstacle-safe routing and tank margins. Habitat-anchor arrival within the accepted 0.35m area is sufficient; exact point arrival is not required.
-- [x] #2 Waypoint transitions use lookahead corner filleting for smooth arcs, and large direction changes (`|delta| >= 65°` or startle turns) execute a two-stage maneuver (`brake-pivot` deceleration + rapid yaw rotation followed by an `exit-stroke` propulsive tail pulse and acceleration).
+- [x] #2 Waypoint transitions use lookahead corner filleting for smooth arcs, and large direction changes (`|delta| >= 115°` or startle turns) execute a two-stage maneuver (`brake-pivot` deceleration + rapid yaw rotation followed by an `exit-stroke` propulsive tail pulse and acceleration). The original65° tuning is superseded by AQ-12.1.
 - [x] #3 `src/rendering/scene/aquarium.ts` applies a post-mixer procedural turn overlay on rigged 3D fish bones: archetype-appropriate curvilinear spine bending (`spine_mid`/`tail_base`/`tail_tip` ramp for `subcarangiform_schooler`; peduncle/tail-only bend for `labriform_rigid_disc` so tang sails never shear) with a delayed traveling tail wave, plus asymmetric inside-pectoral braking flare and outside-pectoral rowing boost.
 - [x] #4 Fallback 2D sprite planes replace the single-frame `scale.x` binary flip with a smoothed foreshortening turn transition, and all turn states freeze deterministically when `paused`, hidden, or under `prefers-reduced-motion`.
 - [x] #5 Unit tests verify zero backward/sideways crab-sliding on 180° reversals, two-stage turn curvature progression, obstacle clearance, and 1440x900 / 402x874 browser responsiveness.
@@ -62,6 +62,8 @@ Implement the biomechanical turning and curvilinear spine-bending plan documente
 2026-11-05 bounded envelope contract: derive immutable per-joint spine caps from the existing normalized flex weights and the true worst-case sum 1.275 rad (including startle/wave/clamp); expose a typed procedural-overlay contract with pectoral flare/pitch bounds and mixer-reset prerequisite. Clamp only finite overlay outputs to those derived caps, normalize modified quaternions, and sanitize malformed kinematics. Add exact GLB skin/rest-axis/clip-reset checks for current clown/tang and canonical gramma, with hash-pinned compact snapshots as clean-checkout fallback; add output quaternion norm and angle-cap/NaN regressions. Touch only fish-turning.ts and fish-turning.test.ts; no aquarium, motion, asset, scene or acceptance-status changes.
 
 2026-11-05 mixer reset correction (Root-owned aquarium integration): add only `src/rendering/scene/fish-animation.ts` and `.test.ts`. `createFishClipPlayer(root, clip, initialTime)` will bind exactly one full-weight Three AnimationAction, discover/dedupe actual `SkinnedMesh.skeleton.bones` with a 32-bone bound, validate and normalize finite near-unit bone quaternions, set initial clip time, and capture a clean quaternion pose. For each finite positive `advance(dt)`, restore the last clean pose before mixer update, then normalize/capture the resulting clip pose; zero dt preserves the rendered overlay. Expose deterministic stop/uncache disposal. Use genuine Three AnimationMixer tracks (constant and changing) in regressions: repeated overlay over hundreds of frames must not accumulate; cover normalized results, pause/resume, independent roots, source clip immutability, and malformed bone pose rejection. Do not edit aquarium.ts, fish-turning.ts, supplied assets, analyzer, acceptance criteria or task status; Root owns runtime call-site integration.
+
+Root reduced-motion correction2026-11-12: the task explicitly requires all turn states to freeze under the system preference, but normal controller stoppedFlags omitted that preference. Include reduced motion in per-inhabitant simulation/clip/overlay stopping, preserving current pose and accumulated active animation time without catch-up on resume. This chooses the explicit task freeze requirement over the older route-continues comment. Keep deliberate camera/UI interactions available and look-dev selected-time staging deterministic. Add actual-controller dynamic media toggle regressions and root native review; retain final art/turn acceptance until verified.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -89,6 +91,12 @@ Root audit AQ57, 2026-11-04: active motion.ts/aquarium.ts/motion.test.ts match 5
 - Fix (`src/rendering/scene/motion.ts`, `integrateSwimmingFish`): a waypoint more than 60° off the fish's heading, inside the 0.35 m approach corridor, while the fish is actually travelling (speed > 0.05 m/s), counts as arrived in both AABB and mesh mode. The fish swims on instead of circling back; per-substep movement-safety checks stay the collision guard, so passing a waypoint early can only cut a corner the lookahead fillet could already cut. After the fix the same 40 s trace turns 948° total with 11 waypoint captures (was 1801° / 5), and the probe geometries complete in 1.0–2.9 s with 75–230° of turning (was up to 4.3 s / 672°, one never completing).
 - Regression test: `src/rendering/scene/motion.test.ts` "does not spiral around a waypoint it approaches at an angle (AQ-49)" — asserts the probe geometry completes within 3 s with < 270° total turn, in both AABB and mesh mode. Verified it fails on the pre-fix code (route never completes in 3 s) and passes with the fix.
 - Not changed: cruise speeds, turn rates, the proximity speed law, the capture radii themselves, LOD/sprite code, or any anchor-hold behavior. A fresh recording after merge (same view) is the visual check.
+
+Root reviewed Luna reduced-motion controller fix: normal stoppedFlags now include the system preference; motion, clip time, flex and procedural turn poses hold together, while DEV fixed-time inspection stays exempt. Actual controller regression starts with active turn/fin poses, toggles preference on/off, proves exact pose/kinematic hold and zero clip advances, then exactly three active steps with no elapsed catch-up. Root independently ran that test against the prior controller expression: it fails with changed position/yaw/bank/spine/pectoral poses, proving the regression detects the reported bug. Restored fixed source.89 focused lifecycle/motion/turn/player tests and typecheck14scripts pass from agent; final native/whole-task visual review remains open.
+
+Root native reduced-motion verification of production built from51e4274: exact1440x900/402x874DPR1, eight anchor styles/bounds hold exactly at both. Phone entire PNG pair is byte-identical. Laptop differs only44pixels with maximumRGBdelta6 in a small caption/compositor area; no full-frame byte-identity claim. Clearing system preference restores Pause control and changes all8 phone anchor positions. No captured warnings/errors. Evidence docs/asset-evidence/aq49/reduced-motion-20261112/review.json. Root independently confirmed controller regression fails against prior code.713tests/64files, productionbuild and typecheck14scripts pass; capture bridge strings absent from production. AC4 accepted; complete main-scene biomechanical turning/art review remains open.
+
+Root2026-11-12 current-source review: AQ12.1 explicitly retunes the earlier65degree reversal threshold to115degrees while conserving forward arcs and removing stacked slow-turn boosts. AC2 updated to the current approved tuning; historical source/evidence notes retain their original values.732current tests and productionbuild pass. --runtime verifier now covers16 exact current URL-map assets; source hashes and120frame clip/reset/pause checks pass. Full AQ49 visual turning/art and AQ58 continuous-envelope acceptance remain open.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

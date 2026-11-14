@@ -2,12 +2,15 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import * as THREE from 'three'
 import {
+  createMountedCoralFallbackObstacles,
+  createRockFallbackObstacles,
   createReefMeshNavigation,
   MESH_NAVIGATION_COLLISION_RADIUS_M,
   MESH_NAVIGATION_MOVEMENT_BUDGET,
   segmentIntersectsInflatedBox,
 } from './reef-mesh-navigation'
-import { DEFAULT_LEFT_ISLAND_MOUNTS, instantiateModularReefHabitat } from './reef-assembly'
+import { DEFAULT_LEFT_ISLAND_MOUNTS, MODULAR_CORAL_ASSET_URLS, instantiateModularReefHabitat, LIVE_ROCK_ISLAND_URLS } from './reef-assembly'
+import { reefPlacementsForViewport } from './reef-layout'
 
 type P = { x: number; y: number; z: number }
 const p = (x: number, y: number, z: number): P => ({ x, y, z })
@@ -232,6 +235,242 @@ function mountMatrix(socket: THREE.Matrix4, mount: { offsetM?: readonly [number,
   return m
 }
 
+describe('createRockFallbackObstacles', () => {
+  it('bounds every active runtime rock vertex at both current viewport placements', () => {
+    const placements = [reefPlacementsForViewport(false), reefPlacementsForViewport(true)]
+    for (const viewportPlacements of placements) {
+      for (const placement of viewportPlacements) {
+        const bytes = readFileSync(new URL(LIVE_ROCK_ISLAND_URLS[placement.islandKind]))
+        const sourceTriangles = glbTriangles(bytes)
+        const reef = new THREE.Group()
+        const rock = meshFromTriangles(sourceTriangles)
+        rock.name = `Live_Rock_Island_${placement.islandKind}`
+        reef.add(rock)
+        reef.scale.setScalar(placement.uniformScale)
+        reef.position.set(placement.position.x, placement.position.y, placement.position.z)
+        reef.rotation.y = placement.yaw
+
+        const result = createRockFallbackObstacles(reef, `reef-${placement.islandKind}`)
+        expect(result.status).toBe('ready')
+        if (result.status !== 'ready') continue
+        expect(result.obstacles).toHaveLength(1)
+        const bounds = result.obstacles[0]!.bounds
+        for (const triangle of sourceTriangles) {
+          for (const local of [triangle.a, triangle.b, triangle.c]) {
+            const world = new THREE.Vector3(local.x, local.y, local.z).applyMatrix4(reef.matrixWorld)
+            expect(world.x).toBeGreaterThanOrEqual(bounds.min.x)
+            expect(world.x).toBeLessThanOrEqual(bounds.max.x)
+            expect(world.y).toBeGreaterThanOrEqual(bounds.min.y)
+            expect(world.y).toBeLessThanOrEqual(bounds.max.y)
+            expect(world.z).toBeGreaterThanOrEqual(bounds.min.z)
+            expect(world.z).toBeLessThanOrEqual(bounds.max.z)
+          }
+        }
+      }
+    }
+  }, 30_000)
+
+  it('reads sculpted vertices instead of stale cached bounds through nested nonuniform transforms', () => {
+    const reef = new THREE.Group()
+    const parent = new THREE.Group()
+    parent.position.set(1, -2, 3)
+    parent.rotation.y = 0.4
+    parent.scale.set(2, 0.5, 3)
+    const geometry = new THREE.BufferGeometry()
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute([
+      -1, -1, -1, 1, -1, -1, -1, 1, -1,
+      -1, -1, 1, 1, -1, 1, -1, 1, 1,
+    ], 3))
+    geometry.computeBoundingBox()
+    const mesh = new THREE.Mesh(geometry)
+    mesh.userData.reefPrimitive = { role: 'rock' }
+    mesh.position.set(-0.5, 2, 0.25)
+    mesh.scale.set(0.5, 2, 1.5)
+    parent.add(mesh)
+    reef.add(parent)
+    // Simulate the runtime vertex sculpt used before navigation is built.
+    const position = geometry.getAttribute('position')
+    position.setXYZ(0, -4, -3, -2)
+    position.needsUpdate = true
+
+    const result = createRockFallbackObstacles(reef, 'reef-test')
+    expect(result.status).toBe('ready')
+    if (result.status !== 'ready') return
+    const bounds = result.obstacles[0]!.bounds
+    const expected = new THREE.Vector3(-4, -3, -2).applyMatrix4(mesh.matrixWorld)
+    expect(bounds.min.x).toBeLessThanOrEqual(expected.x)
+    expect(bounds.min.y).toBeLessThanOrEqual(expected.y)
+    expect(bounds.min.z).toBeLessThanOrEqual(expected.z)
+    expect(bounds.max.x).toBeGreaterThanOrEqual(expected.x)
+    expect(bounds.max.y).toBeGreaterThanOrEqual(expected.y)
+    expect(bounds.max.z).toBeGreaterThanOrEqual(expected.z)
+    expect(bounds.min.x).toBeLessThan(geometry.boundingBox!.min.x)
+  })
+
+  it('refreshes an unupdated ancestor transform before measuring world bounds', () => {
+    const ancestor = new THREE.Group()
+    const reef = new THREE.Group()
+    const rock = boxRock()
+    ancestor.add(reef)
+    reef.add(rock)
+    ancestor.position.set(5, -2, 3)
+    ancestor.rotation.y = 0.3
+    ancestor.scale.set(2, 1, 0.5)
+
+    const result = createRockFallbackObstacles(reef, 'reef-ancestor')
+    expect(result.status).toBe('ready')
+    if (result.status !== 'ready') return
+    const bounds = result.obstacles[0]!.bounds
+    const expected = new THREE.Vector3(0.5, 0.5, 0.5).applyMatrix4(rock.matrixWorld)
+    expect(bounds.max.x).toBeGreaterThanOrEqual(expected.x)
+    expect(bounds.max.y).toBeGreaterThanOrEqual(expected.y)
+    expect(bounds.max.z).toBeGreaterThanOrEqual(expected.z)
+    expect(bounds.min.x).toBeGreaterThan(2)
+    expect(bounds.min.y).toBeLessThan(-1)
+    expect(bounds.min.z).toBeGreaterThan(2)
+  })
+
+  it('returns one stable uninflated volume per rock mesh and rejects invalid transforms', () => {
+    const reef = new THREE.Group()
+    const left = boxRock()
+    const right = boxRock()
+    right.position.x = 3
+    reef.add(left, right)
+    const first = createRockFallbackObstacles(reef, 'reef-pair')
+    const second = createRockFallbackObstacles(reef, 'reef-pair')
+    expect(first.status).toBe('ready')
+    expect(second.status).toBe('ready')
+    if (first.status !== 'ready' || second.status !== 'ready') return
+    expect(first.obstacles.map(obstacle => obstacle.id)).toEqual(['reef-pair-rock-00', 'reef-pair-rock-01'])
+    expect(second.obstacles.map(obstacle => obstacle.id)).toEqual(first.obstacles.map(obstacle => obstacle.id))
+    expect(first.obstacles[0]!.bounds.min.x).toBe(-0.5)
+    expect(first.obstacles[0]!.bounds.max.x).toBe(0.5)
+
+    right.position.y = Number.NaN
+    expect(createRockFallbackObstacles(reef, 'reef-pair')).toEqual({ status: 'unavailable', reason: 'rock-transform-unavailable' })
+  })
+
+  it('fails closed for missing, empty, unreadable, nonfinite, and degenerate rock geometry', () => {
+    expect(createRockFallbackObstacles(new THREE.Group(), 'reef-none').status).toBe('unavailable')
+
+    const empty = new THREE.Group()
+    const emptyGeometryRock = new THREE.Mesh(new THREE.BufferGeometry())
+    emptyGeometryRock.userData.reefPrimitive = { role: 'rock' }
+    empty.add(emptyGeometryRock)
+    expect(createRockFallbackObstacles(empty, 'reef-empty').status).toBe('unavailable')
+
+    const unreadable = boxRock()
+    const unreadablePosition = unreadable.geometry.getAttribute('position')
+    unreadablePosition.getX = () => { throw new Error('unreadable position') }
+    expect(createRockFallbackObstacles(unreadable, 'reef-unreadable')).toEqual({ status: 'unavailable', reason: 'rock-positions-unreadable' })
+
+    const nonfinite = new THREE.Mesh(new THREE.BufferGeometry())
+    nonfinite.geometry.setAttribute('position', new THREE.Float32BufferAttribute([
+      0, 0, 0, 1, 0, 0, 0, Number.NaN, 1,
+    ], 3))
+    nonfinite.userData.reefPrimitive = { role: 'rock' }
+    expect(createRockFallbackObstacles(nonfinite, 'reef-nan')).toEqual({ status: 'unavailable', reason: 'rock-vertex-nonfinite' })
+
+    const degenerate = new THREE.Mesh(new THREE.BufferGeometry())
+    degenerate.geometry.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 1, 0, 0, 0, 1, 0], 3))
+    degenerate.userData.reefPrimitive = { role: 'rock' }
+    expect(createRockFallbackObstacles(degenerate, 'reef-flat')).toEqual({ status: 'unavailable', reason: 'rock-bounds-degenerate' })
+  })
+
+  it('fails closed for skinned and instanced rock meshes whose rendered vertices move independently', () => {
+    const skinned = new THREE.SkinnedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial())
+    skinned.userData.reefPrimitive = { role: 'rock' }
+    expect(createRockFallbackObstacles(skinned, 'reef-skinned')).toEqual({
+      status: 'unavailable', reason: 'rock-dynamic-transform-unsupported',
+    })
+
+    const instanced = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial(), 2)
+    instanced.userData.reefPrimitive = { role: 'rock' }
+    expect(createRockFallbackObstacles(instanced, 'reef-instanced')).toEqual({
+      status: 'unavailable', reason: 'rock-dynamic-transform-unsupported',
+    })
+  })
+})
+
+describe('createMountedCoralFallbackObstacles', () => {
+  it('uses current transformed bounding spheres including the premeasured sway margin without fish inflation', () => {
+    const ancestor = new THREE.Group()
+    ancestor.position.set(5, -2, 3)
+    ancestor.rotation.y = 0.4
+    ancestor.scale.set(2, 0.5, 3)
+    const mountedRoot = new THREE.Group()
+    mountedRoot.position.set(-0.5, 2, 0.25)
+    ancestor.add(mountedRoot)
+
+    const geometry = new THREE.BoxGeometry(1, 2, 0.5)
+    geometry.computeBoundingSphere()
+    const swayMargin = 0.12
+    geometry.boundingSphere!.radius += swayMargin
+    const mesh = new THREE.Mesh(geometry)
+    mesh.position.set(1, 0, 0)
+    mesh.scale.set(0.5, 2, 1.5)
+    mountedRoot.add(mesh)
+    const bindings = [{ socketName: 'socket_fixture', coralAssetId: 'fixture', root: mountedRoot, materialControllers: [] }]
+
+    const result = createMountedCoralFallbackObstacles(bindings, 'reef-3')
+
+    expect(result.status).toBe('ready')
+    if (result.status !== 'ready') return
+    expect(result.obstacles).toHaveLength(1)
+    expect(result.obstacles[0]!.id).toBe('reef-3-coral-0')
+    const bounds = result.obstacles[0]!.bounds
+    const center = geometry.boundingSphere!.center.clone().applyMatrix4(mesh.matrixWorld)
+    const elements = mesh.matrixWorld.elements
+    const worldScale = Math.max(
+      Math.hypot(elements[0]!, elements[1]!, elements[2]!),
+      Math.hypot(elements[4]!, elements[5]!, elements[6]!),
+      Math.hypot(elements[8]!, elements[9]!, elements[10]!),
+    )
+    const expectedRadius = (geometry.boundingSphere!.radius) * worldScale
+    expect(bounds.min.x).toBeCloseTo(center.x - expectedRadius)
+    expect(bounds.max.x).toBeCloseTo(center.x + expectedRadius)
+    expect(bounds.min.y).toBeCloseTo(center.y - expectedRadius)
+    expect(bounds.max.y).toBeCloseTo(center.y + expectedRadius)
+    expect(bounds.min.z).toBeCloseTo(center.z - expectedRadius)
+    expect(bounds.max.z).toBeCloseTo(center.z + expectedRadius)
+    expect(bounds.max.x - center.x).toBeGreaterThan(swayMargin * worldScale)
+  })
+
+  it('allows an empty mounted list and fails closed for invalid IDs, origins, missing bounds, and thrown updates', () => {
+    expect(createMountedCoralFallbackObstacles([], 'reef-empty')).toEqual({ status: 'ready', obstacles: [] })
+    expect(createMountedCoralFallbackObstacles([], '  ')).toEqual({ status: 'unavailable', reason: 'invalid-island-id' })
+
+    const nanRoot = new THREE.Group()
+    nanRoot.position.x = Number.NaN
+    const nanGeometry = new THREE.BoxGeometry(1, 1, 1)
+    nanGeometry.computeBoundingSphere()
+    nanRoot.add(new THREE.Mesh(nanGeometry))
+    expect(createMountedCoralFallbackObstacles([
+      { socketName: 'nan', coralAssetId: 'fixture', root: nanRoot, materialControllers: [] },
+    ], 'reef-nan').status).toBe('unavailable')
+
+    const missingSphereGeometry = new THREE.BufferGeometry()
+    missingSphereGeometry.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 1, 0, 0, 0, 1, 0], 3))
+    const missingSphereRoot = new THREE.Group()
+    missingSphereRoot.add(new THREE.Mesh(missingSphereGeometry))
+    expect(createMountedCoralFallbackObstacles([
+      { socketName: 'missing', coralAssetId: 'fixture', root: missingSphereRoot, materialControllers: [] },
+    ], 'reef-missing').status).toBe('unavailable')
+
+    const emptyGeometryRoot = new THREE.Group()
+    emptyGeometryRoot.add(new THREE.Mesh(new THREE.BufferGeometry()))
+    expect(createMountedCoralFallbackObstacles([
+      { socketName: 'empty', coralAssetId: 'fixture', root: emptyGeometryRoot, materialControllers: [] },
+    ], 'reef-empty-geometry').status).toBe('unavailable')
+
+    const throwingRoot = new THREE.Group()
+    throwingRoot.updateWorldMatrix = () => { throw new Error('fixture transform failure') }
+    expect(createMountedCoralFallbackObstacles([
+      { socketName: 'throws', coralAssetId: 'fixture', root: throwingRoot, materialControllers: [] },
+    ], 'reef-throws').status).toBe('unavailable')
+  })
+})
+
 describe('createReefMeshNavigation (real rock GLB)', () => {
   it('builds the wide-left island: rock ready, cave passage clear, known missed vertex blocked', async () => {
     const leftBytes = readFileSync(new URL('../assets/corals/live-rock-island-left.glb', import.meta.url))
@@ -243,13 +482,15 @@ describe('createReefMeshNavigation (real rock GLB)', () => {
     rock.userData.reefPrimitive = { role: 'rock' }
     reef.add(rock)
 
-    // Mount the hammer coral at socket_lps_mid_01, the way
+    // Mount the flowing torch at socket_lps_mid_01, the way
     // assembleCoralsOnRockSockets does, so the ledge-left-apron anchor sits
     // inside its envelope (measured 0.075 m from the actual tentacles).
     const sockets = glbSocketMatrices(leftBytes)
     const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find((m) => m.socketName === 'socket_lps_mid_01')!
     const coralRoot = new THREE.Group()
-    const coral = meshFromTriangles(glbTriangles(readFileSync(new URL(`../assets/corals/${mount.coralAssetId}.glb`, import.meta.url))))
+    const coralUrl = MODULAR_CORAL_ASSET_URLS[mount.coralAssetId]
+    if (!coralUrl) throw new Error(`No runtime coral URL registered for ${mount.coralAssetId}.`)
+    const coral = meshFromTriangles(glbTriangles(readFileSync(new URL(coralUrl))))
     coralRoot.add(coral)
     coralRoot.applyMatrix4(mountMatrix(sockets.get(mount.socketName)!, mount))
     reef.add(coralRoot)

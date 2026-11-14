@@ -51,6 +51,8 @@ export type FishFlexBinding = Readonly<{
    * `reducedMotion` neutralises the amplitude to zero.
    */
   update(values: FishFlexValues, dtSeconds: number, reducedMotion: boolean): void
+  /** Sets a deterministic absolute scene time while preserving the base phase. */
+  seek(timeSeconds: number): void
   /** Disposes the cloned materials and restores the originals. */
   dispose(): void
 }>
@@ -211,6 +213,10 @@ export function bindFishFlexToModel(
   const TWO_PI = Math.PI * 2
   let flexTimeSeconds = 0
   let accumulatedWavePhaseRad = 0
+  let currentTailAmp = 0
+  let currentFinAmp = 0
+  let currentGillAmp = 0
+  let currentMouthAmp = 0
   let disposed = false
   return Object.freeze({
     bodyLength,
@@ -232,21 +238,35 @@ export function bindFishFlexToModel(
         phaseRad +
         ((TWO_PI * values.frequencyHz * flexTimeSeconds - accumulatedWavePhaseRad) % TWO_PI)
       uniforms.uFlexPhase.value = ((targetPhase % TWO_PI) + TWO_PI) % TWO_PI
+      const ampBlend = reducedMotion ? 1 : Math.min(1, stepDt * 6.0)
       const amplitudeScale = reducedMotion ? 0 : values.amplitudeScale
-      uniforms.uFlexTailAmplitude.value =
-        values.tailAmplitudeBL * amplitudeScale * bodyLength
-      uniforms.uFlexFinRippleAmp.value = reducedMotion
-        ? 0
-        : values.finRippleAmpBL * amplitudeScale * bodyLength
+      const targetTailAmp = values.tailAmplitudeBL * amplitudeScale * bodyLength
+      const targetFinAmp = reducedMotion ? 0 : values.finRippleAmpBL * amplitudeScale * bodyLength
       const respEffort =
         0.45 + 0.55 * Math.min(1, Math.max(0, values.frequencyHz / 2.2))
-      uniforms.uFlexGillAmplitude.value = reducedMotion
-        ? 0
-        : 0.0042 * respEffort * amplitudeScale * bodyLength
-      uniforms.uFlexMouthAmplitude.value = reducedMotion
-        ? 0
-        : 0.0038 * respEffort * amplitudeScale * bodyLength
+      const targetGillAmp = reducedMotion ? 0 : 0.0042 * respEffort * amplitudeScale * bodyLength
+      const targetMouthAmp = reducedMotion ? 0 : 0.0038 * respEffort * amplitudeScale * bodyLength
+      currentTailAmp += (targetTailAmp - currentTailAmp) * ampBlend
+      currentFinAmp += (targetFinAmp - currentFinAmp) * ampBlend
+      currentGillAmp += (targetGillAmp - currentGillAmp) * ampBlend
+      currentMouthAmp += (targetMouthAmp - currentMouthAmp) * ampBlend
+      uniforms.uFlexTailAmplitude.value = currentTailAmp
+      uniforms.uFlexFinRippleAmp.value = currentFinAmp
+      uniforms.uFlexGillAmplitude.value = currentGillAmp
+      uniforms.uFlexMouthAmplitude.value = currentMouthAmp
       uniforms.uFlexEnabled.value = reducedMotion ? 0 : 1
+    },
+    seek(timeSeconds: number): void {
+      if (disposed) return
+      if (!Number.isFinite(timeSeconds) || timeSeconds < 0) throw new RangeError('Fish flex seek time must be finite and nonnegative.')
+      flexTimeSeconds = timeSeconds
+      accumulatedWavePhaseRad = (TWO_PI * uniforms.uFlexFrequencyHz.value * timeSeconds) % TWO_PI
+      uniforms.uFlexTime.value = timeSeconds
+      uniforms.uFlexPhase.value = phaseRad
+      currentTailAmp = uniforms.uFlexTailAmplitude.value
+      currentFinAmp = uniforms.uFlexFinRippleAmp.value
+      currentGillAmp = uniforms.uFlexGillAmplitude.value
+      currentMouthAmp = uniforms.uFlexMouthAmplitude.value
     },
     dispose(): void {
       if (disposed) return

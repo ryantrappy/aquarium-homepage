@@ -1,0 +1,65 @@
+{
+  "schema": "custom-coral-colonies-v1",
+  "assets": [
+    {
+      "id": "reef-acropora-antler",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-acropora-antler.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-acropora-antler-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-acropora-antler.blend",
+      "nativeSha256": "984a6b2e5f5960c57b3b85c0fb576572fbeadf62773e0185aead803b750e459b",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-acropora-antler.glb",
+      "overrideSha256": "fa8549a41253c7d2d26fc5ec49396de2d837021c3346364b7655ea733c54ea76",
+      "generatorPath": "src/rendering/modeling/build_reef_acropora_antler.py",
+      "generatorSha256": "fe248796bb4e81273ac00a6f2e494555d8b816cb3cbf02aa57148c77017e8502",
+      "sha256": "8a0ed7c40e012d48eabef55e37833cc5616c06ff50914cf2d963ea2e22443844",
+      "bytes": 2069268,
+      "triangles": 28099,
+      "dimensionsM": [
+        0.1919904500246048,
+        0.2180592904187506,
+        0.11839304119348526
+      ]
+    },
+    {
+      "id": "reef-acropora-corymbose",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-acropora-corymbose.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-acropora-corymbose-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-acropora-corymbose.blend",
+      "nativeSha256": "da92952ed746c453de1cc77fd01803c0b88e611ed80bd16cdf2cbe4f686021a9",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-acropora-corymbose.glb",
+      "overrideSha256": "6070717940d8587216f435002f872f89f6a7fe29c80dd45ac43878b56ee349a1",
+      "generatorPath": "src/rendering/modeling/build_reef_acropora_corymbose.py",
+      "generatorSha256": "dc4f110f23b099ee81b5e94721c1e80850884f43f2465cfd98d5c9ce9af889ee",
+      "sha256": "b1808ce01bcb7013e29e0e46a399130da13c12a83bbdaccd08c439e25d62b6c3",
+      "bytes": 2284116,
+      "triangles": 25725,
+      "dimensionsM": [
+        0.2127610370516777,
+        0.21796300646383315,
+        0.1956302523612976
+      ]
+    },
+    {
+      "id": "reef-euphyllia-flowing-torch",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-euphyllia-flowing-torch.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-euphyllia-flowing-torch-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-euphyllia-flowing-torch.blend",
+      "nativeSha256": "b708f830b1d5983470f9262f950de468fadf9de5fdd346af5267db22185d486d",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-euphyllia-flowing-torch.glb",
+      "overrideSha256": "b75e75c27217eca5b9c55def325e1ffcc2c5f78f53cb8a2f6bb7160991e9f025",
+      "generatorPath": "src/rendering/modeling/build_reef_euphyllia_flowing_torch.py",
+      "generatorSha256": "9b7e73fbc698c69c02fc08b8fecb1a87f211d2b34a486e06e48bfa90a58b293d",
+      "sha256": "26df54fed418b5b645d2b89840b429642bae7763dc9e2d40bd0002e541f62504",
+      "bytes": 1462704,
+      "triangles": 27870,
+      "dimensionsM": [
+        0.22957362234592438,
+        0.1770000010728836,
+        0.2094828113913536
+      ]
+    }
+  ]
+}

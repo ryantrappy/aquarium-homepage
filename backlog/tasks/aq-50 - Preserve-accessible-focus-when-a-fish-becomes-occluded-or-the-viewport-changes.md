@@ -17,7 +17,7 @@ documentation:
   - src/rendering/scene/aquarium.ts
 priority: high
 type: bug
-ordinal: 11500
+ordinal: 13000
 ---
 
 ## Description

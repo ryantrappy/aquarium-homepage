@@ -1,0 +1,65 @@
+{
+  "assets": {
+    "assetResourceCount": 32,
+    "encodedAssetBytes": 23038176,
+    "encodedBytesUnavailableCount": 0,
+    "encodedZeroByteCount": 4,
+    "transferBytes": 9600,
+    "transferBytesUnavailableCount": 0,
+    "transferZeroByteCount": 0
+  },
+  "commit": "0e958a0786906eff1469853a36db5894069a3b30",
+  "failedAssets": [],
+  "labelsVisible": false,
+  "pendingAssetCount": 0,
+  "preset": "rock-sand-contact",
+  "ready": true,
+  "renderer": {
+    "memory": {
+      "geometries": 40,
+      "textures": 95
+    },
+    "render": {
+      "calls": 161,
+      "lines": 0,
+      "points": 64,
+      "triangles": 2351690
+    }
+  },
+  "seed": 2026,
+  "timeSeconds": 1.25,
+  "timing": {
+    "cpuRenderCall": {
+      "p50Ms": 2.800000011920929,
+      "p95Ms": 4.594999983906746,
+      "sampleCount": 48
+    },
+    "frozenPoseRenderCall": {
+      "p50Ms": 1.5999999642372131,
+      "p95Ms": 1.5999999642372131,
+      "sampleCount": 1
+    },
+    "rafInterval": {
+      "p50Ms": 48.400000000001455,
+      "p95Ms": 82.09999999999927,
+      "sampleCount": 45
+    },
+    "windowFrames": 120
+  },
+  "unresolvedFishIds": [],
+  "viewport": {
+    "devicePixelRatio": 1,
+    "height": 874,
+    "width": 402
+  },
+  "capture": {
+    "file": "phone-rock-sand-contact-run2.png",
+    "format": "png",
+    "width": 402,
+    "height": 874,
+    "sha256": "873a2c96f7d7bdb5051842687827d5c1b0e49fa90aa3b756421d4f9139878e9b",
+    "run": 2
+  },
+  "quality": "High fixed inspection mode; adaptive tier disabled; these are not normal-runtime budget acceptance stats",
+  "timingScope": "RAF presentation intervals and CPU render calls are distinct; no GPU timer"
+}

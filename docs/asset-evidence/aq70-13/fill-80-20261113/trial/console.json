@@ -1,0 +1,8 @@
+[
+  {
+    "level": "error",
+    "message": "Aquarium assets could not load Error: Foundation rise requires direct rock and socket children\n    at raiseFoundation (http://127.0.0.1:5215/src/rendering/scene/reef-assembly.ts?t=1794616943256:1637:94)\n    at assembleCoralsOnRockSockets (http://127.0.0.1:5215/src/rendering/scene/reef-assembly.ts?t=1794616943256:1680:2)\n    at rebuildHabitat (http://127.0.0.1:5215/src/rendering/scene/aquarium.ts?t=1794616943259:834:22)\n    at initialize (http://127.0.0.1:5215/src/rendering/scene/aquarium.ts?t=1794616943259:2169:3)",
+    "timestamp": "2026-11-14T00:42:33.486Z",
+    "url": "chrome-extension://fmkadmapgofadopljbjfkapdkoienihi/build/installHook.js"
+  }
+]

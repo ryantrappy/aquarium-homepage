@@ -1,11 +1,11 @@
 ---
 id: AQ-58
 title: Replace unsafe rock collision declarations with measured conservative geometry
-status: To Do
+status: In Progress
 assignee:
-  - '@collision-validation'
+  - '@root'
 created_date: '2026-11-05 03:13'
-updated_date: '2026-11-12 05:50'
+updated_date: '2026-11-13 06:18'
 labels:
   - modeling
   - validation
@@ -34,7 +34,7 @@ Independent exact-export audit of left rock SHA 2f90be064f3f5b15291dffd25a3ea00e
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 Collision representation conservatively covers exact exported solid rock including sloped cave walls and exposes a measured safe passage with fish-radius clearance; tests include the known under-covered vertex.
-- [x] #2 Evidence pins source hash and documents method/resolution and both coverage and pass-through checks; metadata is absent/unavailable until validation passes.
+- [ ] #2 Evidence pins source hash and documents method/resolution and both coverage and pass-through checks; metadata is absent/unavailable until validation passes.
 - [ ] #3 Root reviews collision and actual-mesh routing/occlusion evidence before modular scene promotion, with original visual geometry preserved unless a coordinated functional change is required.
 <!-- AC:END -->
 
@@ -78,6 +78,8 @@ Proposed explicit analyzer contract before code: optional BoundedFishOverlay inp
 Proof extension: for q_total=q_clip*D1*D2, triangle inequality gives ||R_total-R_reference||<=min(2,clipDifferenceBound+sum_i min(2,cap_i)), because unit rotation operator norms equal1 and 2sin(abs(angle)/2)<=abs(angle). This conservatively covers single spine postrotation and two-axis pectoral composition for every bounded angle, independent of sample phase/correlation/axis direction. Use these larger local differences in the SAME telescoping/scale/weight proof; preserve separate clip-only report and return activeEnvelope=bounded result only when explicit contract qualifies. Return ready result scopes distinguish clip-only from bounded-procedural-overlay, never silently consume clipOnly for an active overlay. Shared analyzer work/numeric bounds remain bounded; all unsupported states fail unavailable. CLI will load a small pinned JSON contract plus bounded producer/reset bytes, verify SHA/re-read freshness and output runtime obligations; no runtime/visual edits. Synthetic producer/reset fixtures stay portable; actual source results remain read-only CLI evidence pending Root exact adapter/review hashes.
 
 Root-approved functional integration iteration2026-11-05: independently review existing fish-animation.ts; make clean-pose capture atomic; restrict the player to one shared skin palette; install sole-clip FishClipPlayer in aquarium initialization/advance/disposal while preserving static unsupported fish/native controls. Retire malformed per-fish playback once without failing the scene. Keep metric collision and overlay certificates uninstalled until separate exact-source review.
+
+Root2026-11-12 current-export fallback correction: derive conservative world-space rock fallback bounds from the same assembled render mesh vertices and matrices passed to mesh navigation, replacing only stale manual rock bands in main runtime. Preserve tight coral-base obstacles, native picking, exact BVH activation/generation checks and truthful unavailable state. One AABB per static rock mesh is deliberately conservative during startup/failure; it does not certify caves/animated envelopes or replace exact mesh routing. Validate actual runtime URL GLBs at both current placements, finite/transformed geometry, stale cached bounding boxes, nonindexed meshes and malformed/no-rock failure. Root wires aquarium only after helper review; no model or canonical source swaps.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -102,6 +104,10 @@ Exact supplied gramma CLI evidence (not installed runtime): GLB SHA1d629137b3fde
 Final retirement correction: mixer.stopAllAction restores original bindings, so FishClipPlayer.dispose now snapshots/restores the final bone quaternions across release. The late-invalid regression checks the complete previous clean pose both immediately after the error and after disposal, preventing a bind-pose jump during per-fish retirement.7player tests/typecheck pass again; actual17source loader/reset proof rerun after this correction.
 
 2026-11-05 Root verified functional handoff: main now installs existing clean-pose player for one supported clip/shared palette, restores/captures normalized joint quaternions before each turning overlay, atomically rejects late invalid rotation tracks and preserves the last complete quaternion pose when retiring that fish player. Other fish/native links remain usable. Independent portable7player tests and combined41tests/typecheck/build pass; read-only real GLTFLoader proof exercises8tracked candidate inputs120frames each, with clean reference error<=4.45e-16, paused overlays stable and shared tracks unchanged. Reproduction:node scripts/verify-fish-clip-player.mjs. Exact reset/producer/source hashes:docs/asset-evidence/aq58/fish-player-review.json. Optional nine-splat study remains unreviewed/excluded from commits. Separate six supplied clip-only report retained; it does not certify active overlays/main collision. Main legacy unit calibration, all rendered animated envelopes, coral geometry and actual assembled mesh navigation/occlusion remain open under AC1/3; no metadata installed and no Done. This verified handoff unlocks scoped AQ64 reconciliation without overwriting concurrent modelURL/axis work.
+
+Root/Luna current-runtime fallback correction: helper scans current assembled rock position buffers and refreshed ancestor/world matrices into uninflated per-mesh bounds, independent of stale cached geometry boxes. Main aquarium replaces historical manual rock bands with these volumes while retaining coral-base obstacles; exact BVH activation/generation handling remains unchanged. Invalid/missing/dynamic geometry fails the scene and capture readiness rather than allowing fish to swim through an incomplete obstacle set; native service anchors remain. Actual-source URL fixtures prove all current exported vertices enclosed at both reef layouts; convex AABBs also enclose their triangles/interior. Nested/nonuniform/ancestor transforms, sculpted positions, stale caches, nonindexed geometry and invalid/skinned/instanced cases covered. Controller regressions prove both unavailable failure and real spawn refusal when a ready obstacle fills water. Historical AC2withdrawn for current-source scope: old canonical hash/probe records remain historical, current measured cave passage/animated envelopes and actual-mesh visual routing acceptance still open. No asset/model/source swaps or Blender edits.
+
+Root final d862bf9 verified handoff: all748tests/66files,52focusedtests/2files, typecheck14scripts and productionbuild pass in isolated exact-source checkout. Native1440x900/402x874DPR1 capture evidence under docs/asset-evidence/aq58/current-fallback-20261113/ is ready with no failed/pending assets and zero captured warnings/errors;11inhabitants staged, all8phone service targets remain>=44px and contained inviewport. This proves current-source fallback integration and retained links, not actual animated-body cave routing. Historical collisionAC2remainsunchecked for current runtime acceptance. No model/asset/Blender edits.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

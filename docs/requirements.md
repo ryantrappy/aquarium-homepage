@@ -4,9 +4,9 @@
 Category: Governance / Requirements
 Status: Canonical / Active
 Authority: Binding Product Specification
-Backlog: AQ-1, AQ-2, AQ-14
+Backlog: AQ-1, AQ-2, AQ-14, AQ-103
 Owner: @root
-Updated: 2026-11-05
+Updated: 2026-11-12
 Upstream: AGENTS.md
 Downstream: All technical tasks and specifications
 -->
@@ -69,6 +69,14 @@ The planned supported reef roster contains 15 species and is documented in the [
 - Deliver the visual direction as an editable design file in OpenPencil, along with a preview that can be opened and reviewed.
 - A later accessibility task performs a thorough audit and polish pass on the keyboard and reduced-motion support already present in the first-pass prototype.
 - Follow the primary success criterion above and the detailed [design principles](design-principles.md); use the editable OpenPencil composition as a baseline that may evolve to achieve photorealism.
+
+### Underwater water surface
+
+- The view from below must read as a continuous water-air interface, not a flat ceiling covered in stretched static. Use the shared canonical wave field with smooth, distance-filtered capillary facets; keep the canonical waves themselves stable for the lighting and caustics that share them.
+- Shade the interface as a softened approximation of the underwater critical-angle transition: steeper facets open Snell's window to the overhead fixture, while grazing facets reflect deep water and only a restrained, soft coral glow in the rear/mid-water region. Do not present this as ray-traced coral reflection.
+- Avoid dense cellular dots, high-frequency stripe/barcode patterns, and bright saturated reef colors painted across the whole ceiling. The overhead fixture should remain readable rather than being replaced by those effects.
+- Keep the plane horizontal at the configured surface height and bounded to the current glass enclosure in both responsive layouts. Fade its rear edge into the existing water backdrop, keep side fades inside the glass, and show a thin silver-cyan meniscus just inside the front-glass water line.
+- Surface animation must follow the shared pause, reduced-motion, and hidden-page clock behavior.
 
 ### Read-only aquarium telemetry
 

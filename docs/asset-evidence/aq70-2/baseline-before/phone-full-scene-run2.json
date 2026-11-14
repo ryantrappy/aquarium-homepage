@@ -1,0 +1,65 @@
+{
+  "assets": {
+    "assetResourceCount": 32,
+    "encodedAssetBytes": 23038176,
+    "encodedBytesUnavailableCount": 0,
+    "encodedZeroByteCount": 4,
+    "transferBytes": 9600,
+    "transferBytesUnavailableCount": 0,
+    "transferZeroByteCount": 0
+  },
+  "commit": "0e958a0786906eff1469853a36db5894069a3b30",
+  "failedAssets": [],
+  "labelsVisible": false,
+  "pendingAssetCount": 0,
+  "preset": "full-scene",
+  "ready": true,
+  "renderer": {
+    "memory": {
+      "geometries": 40,
+      "textures": 95
+    },
+    "render": {
+      "calls": 177,
+      "lines": 0,
+      "points": 64,
+      "triangles": 2495850
+    }
+  },
+  "seed": 2026,
+  "timeSeconds": 1.25,
+  "timing": {
+    "cpuRenderCall": {
+      "p50Ms": 3.300000011920929,
+      "p95Ms": 5.560000014305114,
+      "sampleCount": 49
+    },
+    "frozenPoseRenderCall": {
+      "p50Ms": 0.8999999761581421,
+      "p95Ms": 0.8999999761581421,
+      "sampleCount": 1
+    },
+    "rafInterval": {
+      "p50Ms": 49.25,
+      "p95Ms": 68.25,
+      "sampleCount": 46
+    },
+    "windowFrames": 120
+  },
+  "unresolvedFishIds": [],
+  "viewport": {
+    "devicePixelRatio": 1,
+    "height": 874,
+    "width": 402
+  },
+  "capture": {
+    "file": "phone-full-scene-run2.png",
+    "format": "png",
+    "width": 402,
+    "height": 874,
+    "sha256": "d908dde1813ec2a2c050ada406c6e21a7119d0a970d43dd37645c659ce5d9483",
+    "run": 2
+  },
+  "quality": "High fixed inspection mode; adaptive tier disabled; these are not normal-runtime budget acceptance stats",
+  "timingScope": "RAF presentation intervals and CPU render calls are distinct; no GPU timer"
+}

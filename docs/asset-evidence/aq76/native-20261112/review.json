@@ -1,0 +1,74 @@
+{
+  "task": "AQ-76",
+  "date": "2026-11-12",
+  "reviewer": "Root",
+  "beforeCommit": "cf5703e72b8035bb9cf3822bddc85a396cf0be2b",
+  "afterCommit": "01f140332b02fa29e446c3416ce314efa8399263",
+  "builds": "Independent local production builds, ports5213(before) and5212(after), same read-only local8-service configuration",
+  "method": "Native CUA CDP Runtime diagnostic,120 rAF warmup frames then180 measured intervals; exact CSS viewports/DPR1. One run per size/build; animated routes and adaptive state vary. Not GPU timer measurements.",
+  "files": [
+    {
+      "path": "before-laptop.json",
+      "sha256": "b786a09ad1749f0bd46397e4fab0dd9e8a6430bf9930ade5a7e1352817e598e9"
+    },
+    {
+      "path": "before-phone.json",
+      "sha256": "5fc76a034453d8b35a446ea195f7dff98308bd03be45d531c133dca575f9ff98"
+    },
+    {
+      "path": "after-laptop.json",
+      "sha256": "7118d7f72f8c72bb8d892a39f06fa8f1989af83f0a15bd6c731e513fcca20326"
+    },
+    {
+      "path": "after-phone.json",
+      "sha256": "60044eeff604c2c63732f5f64ca2755e2332757a2fe6ec7727ea4d45a77c80ae"
+    },
+    {
+      "path": "after-laptop-diagnostic.json",
+      "sha256": "6ed2ba7262a996669188414cc6dcb0478788f941cd84fca0dd84a7fc164d6a1e"
+    },
+    {
+      "path": "before-laptop.png",
+      "sha256": "ba8800c4d945f03bbf0fcfc12ddc0d6426f84537d8ba21c929246dfe9a336267",
+      "size": [
+        1440,
+        900
+      ]
+    },
+    {
+      "path": "before-phone.png",
+      "sha256": "77cd487e012af49f37589775626334ce1ec0c21fe7e256c47266409bc30b1722",
+      "size": [
+        402,
+        874
+      ]
+    },
+    {
+      "path": "after-laptop.png",
+      "sha256": "cf9f25bb6dc553f3b528239c1674d2acdb65613791c8574ca385e53a80b2ac10",
+      "size": [
+        1440,
+        900
+      ]
+    },
+    {
+      "path": "after-phone.png",
+      "sha256": "03c57bb78da7035b1b570698a75221aeaaa8cd386da71fbca669fb05cc1f06d4",
+      "size": [
+        402,
+        874
+      ]
+    }
+  ],
+  "result": "No performance acceptance: both builds exceed16.7ms target/22ms p95 budget in these windows; after laptop p95 is substantially higher. Corrected build upgrades all schoolmates to3D and preserves animation speed, increasing real work. This single sample does not isolate causation.",
+  "limits": [
+    "At low FPS,120 warmup frames may not settle the original two120-frame adaptive windows; these are bounded early-runtime observations, not steady-state benchmarks.",
+    "No thermal, background-app or hardware isolation. Renderer identifies ANGLE Metal onAppleM4.",
+    "Temporary rAF/draw CPU diagnostic wrappers were restored before closing owned tab. Mean callback10.29ms versus larger presentation intervals suggests graphics/presentation cost, but no GPU timer proof was collected."
+  ],
+  "next": [
+    "Replace redundant live-rock field evaluations with a derivative gradient and verify visuals",
+    "Make adaptive windows responsive to elapsed time at low FPS without changing thresholds",
+    "Repeat after actual source changes, with an explicit settled/warmup protocol"
+  ]
+}

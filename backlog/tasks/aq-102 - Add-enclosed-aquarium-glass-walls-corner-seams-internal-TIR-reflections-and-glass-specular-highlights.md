@@ -3,10 +3,11 @@ id: AQ-102
 title: >-
   Add enclosed aquarium glass walls, corner seams, internal TIR reflections, and
   glass specular highlights
-status: To Do
+status: In Progress
 assignee:
-  - '@Luna'
+  - '@root'
 created_date: '2026-11-12 05:15'
+updated_date: '2026-11-13 00:44'
 labels:
   - rendering
   - optics
@@ -19,6 +20,7 @@ references:
   - AQ-80
   - AQ-39
   - AQ-70.12
+  - docs/asset-evidence/aq70-13/taller-20261112/review.json
 documentation:
   - docs/photorealism-reference.md
   - docs/photorealism-rubric.md
@@ -47,3 +49,21 @@ Comparison between the photorealism reference images and the live WebGL build sh
 - [ ] #4 Glass enclosure meshes disable pointer raycasting (`raycast = () => {}`) so fish hover, click-to-focus, and link activation are unaffected, and caustic/reflection motion freezes cleanly when paused or under `prefers-reduced-motion`
 - [ ] #5 Verified visually at `402x874` and `1440x900` (DPR 1) alongside passing unit tests, typecheck, and production build
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Implement the Root-approved GO as restrained tank enclosure only: (1) bound the water and aragonite bed with front/left/right/back planes, subtle corner seams, and a bottom glass lip; (2) add faint left/right interior reflections by mirroring actual outer reef and sand/caustic scene content, never painted silhouettes; (3) keep the front pane optically clear, using edge/grazing Fresnel highlight and faint diagonal sheen only—no full-frame blur, refraction, color veil, or scene-blocking glare; (4) set raycast to no-op on every glass mesh; (5) advance/freeze all glass reflection motion on the existing scene clock for active, pause, reduced-motion, and page-hidden states; (6) verify pointer/link behavior and the two required DPR1 viewports, plus scoped unit tests/typecheck/build.
+
+Root next visual iteration after reviewed PR47: build a separate glass-enclosure scene module with clear front/back/side boundaries, corner seams and sand lip. Prototype real side-plane reflected scene content using the established Three reflector path at bounded resolution/tier/update cadence; compare against a no-reflection baseline before accepting costs or appearance. Exclude enclosure from reflection recursion, shaft depth occluders and picking; use shared paused/reduced/hidden scene clocks. Preserve all supplied models/Blender work. Verify both exact viewports and native link/focus controls; keep scene readability and overall reference fidelity as the acceptance gate, not mere mesh presence.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-11-12 Root product decision for AQ-80: GO for this restrained glass enclosure. AQ-102 is the implementation task. Preserve AQ-39's heavy-front-reflection prohibition and all fish/coral/link readability constraints. Side-pane reflection must be genuine mirrored outer reef/sand render content. No glass mesh may raycast. Follow the existing pause/reduced-motion/page-hidden scene clock. AQ-80 remains decision-only with no renderer edits.
+
+Root first functional enclosure handoff: new glass-enclosure.ts builds clear front/back/side panes, four corner seams and bottom lip meshes, plus genuine Three Reflector side views sampling the current reef/sand scene. All enclosure meshes have no-op raycast and are excluded from shaft depth capture/reflection recursion. Front sheen is additive and extremely faint; no screen blur/refraction/color veil. Reflection targets256x384/noMSAA; High2Hz per side staggered, Balanced1Hz, Low off. Reflections are disabled while zoomed/tracking or in inspection macros to preserve focus readability and avoid camera-driven full-scene redraws. Cached clocks hold under pause/reduced/hidden; context restoration invalidates caches; exceptions restore target/XR/shadow/visibility and retain clear panes. Nine pass-level tests include real reflected camera callbacks, cache/camera/revision invalidation, stagger, picking suppression and resource cleanup;62 initial combined tests/typecheck14scripts pass. Native initial laptop/phone previews compile without warnings/errors, show seams and faint side content; bottom-lip framing, exact-source final controls/performance/reference review remain open. No models/Blender files changed.
+
+Exact-source native enclosure/taller-colony handoff images at both target viewports are indexed by docs/asset-evidence/aq70-13/taller-20261112/review.json (sourcee5fd2e1). Full722tests/65files and productionbuild pass; no captured shader warnings/errors. Clear seams/panes render and links remain visible; do not mark Done yet: front bottom-lip framing and controlled moving-scene reflection cost/final art still require review.
+<!-- SECTION:NOTES:END -->

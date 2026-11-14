@@ -5,13 +5,13 @@ import { FishFigure } from './FishFigure'
 import type { AquariumController, SceneStatus } from '../rendering/scene/aquarium'
 import { formatFrameRate, type FrameRateSample } from '../rendering/scene/frame-rate'
 
-type AquariumSceneProps = { services: ServiceConfig[]; paused: boolean; focusFallbackRef?: RefObject<HTMLElement | null>; fpsCounterEnabled?: boolean }
+type AquariumSceneProps = { services: ServiceConfig[]; paused: boolean; configurationReady?: boolean; focusFallbackRef?: RefObject<HTMLElement | null>; fpsCounterEnabled?: boolean }
 
-export function AquariumScene({ services, paused, focusFallbackRef, fpsCounterEnabled = false }: AquariumSceneProps) {
+export function AquariumScene({ services, paused, configurationReady = true, focusFallbackRef, fpsCounterEnabled = false }: AquariumSceneProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null), overlayRef = useRef<HTMLDivElement>(null)
   const fpsBadgeRef = useRef<HTMLDivElement>(null)
   const controller = useRef<AquariumController | undefined>(undefined)
-  const current = useRef({ services, paused, focusFallbackRef }); current.current = { services, paused, focusFallbackRef }
+  const current = useRef({ services, paused, configurationReady, focusFallbackRef }); current.current = { services, paused, configurationReady, focusFallbackRef }
   const [status, setStatus] = useState<SceneStatus>('loading')
   const [zoomed, setZoomed] = useState(false)
   const [focusedServiceId, setFocusedServiceId] = useState<string | undefined>(undefined)
@@ -52,16 +52,16 @@ export function AquariumScene({ services, paused, focusFallbackRef, fpsCounterEn
         if (!badge) return
         badge.textContent = formatFrameRate(sample, { paused: current.current.paused, hidden: document.hidden })
       }
-      controller.current = createAquarium(canvasRef.current, overlayRef.current, current.current.services, current.current.paused, value => { if (!cancelled) setStatus(value) }, () => current.current.focusFallbackRef?.current ?? null, undefined, onFrameRate)
+      controller.current = createAquarium(canvasRef.current, overlayRef.current, current.current.services, current.current.paused, value => { if (!cancelled) setStatus(value) }, () => current.current.focusFallbackRef?.current ?? null, undefined, onFrameRate, current.current.configurationReady)
     }).catch(error => { console.error('Aquarium renderer unavailable', error); if (!cancelled) setStatus('failed') })
     return () => { cancelled = true; controller.current?.dispose(); controller.current = undefined; acknowledgments.current.forEach(clearTimeout); acknowledgments.current.clear() }
   }, [])
   useEffect(() => {
-    controller.current?.update(services, paused)
+    controller.current?.update(services, paused, configurationReady)
     if (focusedServiceId && !services.some(service => service.id === focusedServiceId)) {
       setFocusedServiceId(undefined)
     }
-  }, [services, paused, focusedServiceId])
+  }, [services, paused, focusedServiceId, configurationReady])
   useEffect(() => { if (status !== 'ready') overlayRef.current?.querySelectorAll<HTMLAnchorElement>('a').forEach(anchor => { anchor.tabIndex = 0; anchor.removeAttribute('aria-hidden'); delete anchor.dataset.occluded }) }, [status])
 
   function captionAtPoint(x: number, y: number) {

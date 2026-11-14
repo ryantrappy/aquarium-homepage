@@ -4,7 +4,7 @@ title: Create a verified real-time biological asset pipeline
 status: Done
 assignee:
   - '@render-integration'
-created_date: 2026-11-03 12:33
+created_date: '2026-11-03 12:33'
 updated_date: '2026-11-04T14:42:00Z'
 labels: []
 dependencies:
@@ -12,7 +12,7 @@ dependencies:
 references:
   - docs/gemini_planning.md
   - docs/reef_aquarium_all_code.md
-  - https://polyhaven.com/a/coast_rocks_05
+  - 'https://polyhaven.com/a/coast_rocks_05'
 documentation:
   - docs/gemini-research-links.md
   - docs/open-source-asset-and-motion-research.md
@@ -20,7 +20,7 @@ documentation:
   - docs/asset-pipeline-proof.md
 priority: high
 type: task
-ordinal: 11000
+ordinal: 12000
 ---
 
 ## Description

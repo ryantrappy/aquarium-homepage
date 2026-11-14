@@ -4,9 +4,9 @@
 Category: Evidence / Asset Attribution
 Status: Active
 Authority: Evidentiary
-Backlog: AQ-12, AQ-40, AQ-70.10, AQ-70.12
+Backlog: AQ-12, AQ-40, AQ-70.10, AQ-70.11, AQ-70.12, AQ-94
 Owner: @root
-Updated: 2026-11-06
+Updated: 2026-11-13
 Upstream: docs/requirements.md, src/rendering/proof/asset-manifest.json
 Downstream: Rendering study assets and candidate attribution
 -->
@@ -126,3 +126,52 @@ verifies source integration and temporal invariants only. No scanned/photo-deriv
 map, 1–2mm physical calibration, tiling quality, final sand art or budget criterion
 has been accepted. Earlier reference/calibration descriptions are not evidence of
 those gates. The clean delivery keeps the module separate from the main aquarium.
+
+## Custom central limestone arch — AQ-94
+
+`src/rendering/assets/corals/custom-rocks/reef-center-arch.glb` is original project
+geometry and custom procedural carbonate/normal/roughness textures ($0, no
+imported imagery). Packed Blender source and raw override are committed under
+`splat-fish/blend/reef-center-arch.blend` and `splat-fish/overrides/reef-center-arch.glb`.
+The separate custom-rock registry pins native, generator, raw export and installed
+package hashes. This additive background module is used in the laptop reef;
+phone retains the taller single island. It does not replace the supplied Gemini
+foundations or claim completion of the modular library/final reef art.
+
+## Custom Acropora-like antler colony — AQ-70.11
+
+`src/rendering/assets/corals/custom-colonies/reef-acropora-antler.glb` is original
+project geometry with original baked tissue/normal/roughness maps and raw coral
+masks. No external imagery or paid assets. The selected main left crest uses this
+colony; the supplied canonical models remain preserved. Packed Blender source,
+raw override, original generator and PNG bake copies are committed under the
+reserved `splat-fish/blend/reef-acropora-antler*` / `overrides/reef-acropora-antler.glb`
+paths. The custom-colonies registry pins source/package hashes. Its morphology
+and comparison scale are chosen art, without exact species/physical calibration
+or whole-fish clearance claims. Root approved this bounded pilot before promotion;
+full eight-archetype/two-variant photorealism acceptance remains open.
+
+## Custom bushy Acropora-like colony — AQ-70.11
+
+`src/rendering/assets/corals/custom-colonies/reef-acropora-corymbose.glb` uses
+original project geometry and original procedural/baked PBR maps ($0). Its
+self-contained authoring generator derives the existing original antler baking
+workflow while building a different, wider branching graph. No external imagery
+or model was imported. Packed native, raw override, PNG bakes, generator and
+source-hashed separate registry are committed together; the main right crest05
+uses the model. All canonical/supplied models and antler source remain preserved.
+Root reviewed the matched neutral render and isolated laptop scene before
+promotion. The chosen comparison height and morphology do not certify taxonomy,
+physical scale, all-archetype realism, runtime budgets or animated clearance.
+
+## Original flowing torch colony — AQ-70.11
+
+`custom-colonies/reef-euphyllia-flowing-torch.glb` is original project geometry
+and procedural PBR tissue/skeleton imagery ($0; no external visual asset).
+`build_reef_euphyllia_flowing_torch.py` creates the packed native under
+`splat-fish/blend/` and raw override under `splat-fish/overrides/`; the separate
+registry pins native/export/generator/package hashes. The main left LPS-mid01
+uses it. Explicit soft crown and rigid skeleton roles preserve raw coral masks,
+restrained transmission and separate skeleton appearance. Root accepted a bounded
+neutral/native morphology step before promotion; full physical scale, tissue
+rubric, variant, support and rendering-budget requirements remain open.

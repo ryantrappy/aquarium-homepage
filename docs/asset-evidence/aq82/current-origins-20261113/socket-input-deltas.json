@@ -1,0 +1,433 @@
+{
+  "scope": "Input/source audit, not sampled runtime anchor poses or measured coral contact. Unit tests separately prove rendered mounted origins propagate to habitat with offsets exactly once.",
+  "sources": [
+    {
+      "runtimeAsset": "src/rendering/assets/corals/reef-full-model-left.glb",
+      "sha256": "8d04c4fce1e6e1bf3c2e021968c205b4c9e4af9041a23d9304a7e291fcf6414f",
+      "historicalReport": "src/rendering/assets/corals/live-rock-island-left-socket-report.json",
+      "changedSockets": [
+        {
+          "socket": "socket_anemone_crevice_01",
+          "runtimeLocalPosition": [
+            0.03591227903962135,
+            0.2768547236919403,
+            0.014666666276752949
+          ],
+          "historicalLocalPosition": [
+            0.03591227903962135,
+            0.23600000143051147,
+            0.014666666276752949
+          ],
+          "delta": [
+            0.0,
+            0.04085472226142883,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_brain_apron_01",
+          "runtimeLocalPosition": [
+            -0.31209129095077515,
+            0.11992326378822327,
+            0.15603458881378174
+          ],
+          "historicalLocalPosition": [
+            -0.31209129095077515,
+            0.11800000071525574,
+            0.15603458881378174
+          ],
+          "delta": [
+            0.0,
+            0.0019232630729675293,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_brain_apron_02",
+          "runtimeLocalPosition": [
+            0.2776613235473633,
+            0.1285671442747116,
+            0.1576288342475891
+          ],
+          "historicalLocalPosition": [
+            0.2776613235473633,
+            0.09600000083446503,
+            0.1576288342475891
+          ],
+          "delta": [
+            0.0,
+            0.03256714344024658,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_lps_mid_01",
+          "runtimeLocalPosition": [
+            -0.24323074519634247,
+            0.27226507663726807,
+            0.014550874941051006
+          ],
+          "historicalLocalPosition": [
+            -0.24323074519634247,
+            0.2160000056028366,
+            0.014550874941051006
+          ],
+          "delta": [
+            0.0,
+            0.05626507103443146,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_lps_mid_02",
+          "runtimeLocalPosition": [
+            0.24673360586166382,
+            0.24262964725494385,
+            0.009388045407831669
+          ],
+          "historicalLocalPosition": [
+            0.24673360586166382,
+            0.25600001215934753,
+            0.009388045407831669
+          ],
+          "delta": [
+            0.0,
+            -0.013370364904403687,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_lps_mid_03",
+          "runtimeLocalPosition": [
+            -0.0952456146478653,
+            0.2717564105987549,
+            0.02266666665673256
+          ],
+          "historicalLocalPosition": [
+            -0.0952456146478653,
+            0.23600000143051147,
+            0.02266666665673256
+          ],
+          "delta": [
+            0.0,
+            0.03575640916824341,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_plate_ledge_01",
+          "runtimeLocalPosition": [
+            -0.34569770097732544,
+            0.21550625562667847,
+            -0.09484626352787018
+          ],
+          "historicalLocalPosition": [
+            -0.34569770097732544,
+            0.2680000066757202,
+            -0.09484626352787018
+          ],
+          "delta": [
+            0.0,
+            -0.05249375104904175,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_plate_ledge_02",
+          "runtimeLocalPosition": [
+            0.34326252341270447,
+            0.08670015633106232,
+            -0.09602948278188705
+          ],
+          "historicalLocalPosition": [
+            0.34326252341270447,
+            0.20399999618530273,
+            -0.09602948278188705
+          ],
+          "delta": [
+            0.0,
+            -0.11729983985424042,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_soft_mat_01",
+          "runtimeLocalPosition": [
+            -0.1817210167646408,
+            0.13987962901592255,
+            0.1686696857213974
+          ],
+          "historicalLocalPosition": [
+            -0.1817210167646408,
+            0.11800000071525574,
+            0.1686696857213974
+          ],
+          "delta": [
+            0.0,
+            0.02187962830066681,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_sps_crest_01",
+          "runtimeLocalPosition": [
+            -0.15163661539554596,
+            0.3881886303424835,
+            -0.14551040530204773
+          ],
+          "historicalLocalPosition": [
+            -0.15163661539554596,
+            0.38600000739097595,
+            -0.14551040530204773
+          ],
+          "delta": [
+            0.0,
+            0.0021886229515075684,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_sps_crest_02",
+          "runtimeLocalPosition": [
+            0.017224883660674095,
+            0.2908006012439728,
+            -0.1650913655757904
+          ],
+          "historicalLocalPosition": [
+            0.017224883660674095,
+            0.3479999899864197,
+            -0.1650913655757904
+          ],
+          "delta": [
+            0.0,
+            -0.0571993887424469,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_sps_crest_03",
+          "runtimeLocalPosition": [
+            0.16659396886825562,
+            0.15598027408123016,
+            -0.13694052398204803
+          ],
+          "historicalLocalPosition": [
+            0.16659396886825562,
+            0.3720000088214874,
+            -0.13694052398204803
+          ],
+          "delta": [
+            0.0,
+            -0.21601973474025726,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "runtimeAsset": "src/rendering/assets/corals/reef-full-model-right.glb",
+      "sha256": "009a847175661ea2fdcf273d994a30cc12834ff6720b4d7bd4aea2391179bd3b",
+      "historicalReport": "src/rendering/assets/corals/live-rock-island-right-socket-report.json",
+      "changedSockets": [
+        {
+          "socket": "socket_brain_apron_03",
+          "runtimeLocalPosition": [
+            -0.26345938444137573,
+            0.04123617708683014,
+            0.15573853254318237
+          ],
+          "historicalLocalPosition": [
+            -0.26345938444137573,
+            0.11400000005960464,
+            0.15573853254318237
+          ],
+          "delta": [
+            0.0,
+            -0.0727638229727745,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_brain_apron_04",
+          "runtimeLocalPosition": [
+            0.26579251885414124,
+            0.13588769733905792,
+            0.15446250140666962
+          ],
+          "historicalLocalPosition": [
+            0.26579251885414124,
+            0.10199999809265137,
+            0.15446250140666962
+          ],
+          "delta": [
+            0.0,
+            0.033887699246406555,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_lps_mid_04",
+          "runtimeLocalPosition": [
+            -0.21586120128631592,
+            0.1571047157049179,
+            0.014233670197427273
+          ],
+          "historicalLocalPosition": [
+            -0.21586120128631592,
+            0.18400000035762787,
+            0.014233670197427273
+          ],
+          "delta": [
+            0.0,
+            -0.02689528465270996,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_lps_mid_05",
+          "runtimeLocalPosition": [
+            0.2164137065410614,
+            0.2142980992794037,
+            0.009080026298761368
+          ],
+          "historicalLocalPosition": [
+            0.2164137065410614,
+            0.17399999499320984,
+            0.009080026298761368
+          ],
+          "delta": [
+            0.0,
+            0.04029810428619385,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_lps_mid_06",
+          "runtimeLocalPosition": [
+            0.007456140127032995,
+            0.21179570257663727,
+            0.02203703671693802
+          ],
+          "historicalLocalPosition": [
+            0.007456140127032995,
+            0.21199999749660492,
+            0.02203703671693802
+          ],
+          "delta": [
+            0.0,
+            -0.00020429491996765137,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_plate_ledge_03",
+          "runtimeLocalPosition": [
+            -0.32578107714653015,
+            0.15381596982479095,
+            -0.08807096630334854
+          ],
+          "historicalLocalPosition": [
+            -0.32578107714653015,
+            0.22599999606609344,
+            -0.08807096630334854
+          ],
+          "delta": [
+            0.0,
+            -0.07218402624130249,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_plate_ledge_04",
+          "runtimeLocalPosition": [
+            0.32432544231414795,
+            0.19348226487636566,
+            -0.08784659951925278
+          ],
+          "historicalLocalPosition": [
+            0.32432544231414795,
+            0.20600000023841858,
+            -0.08784659951925278
+          ],
+          "delta": [
+            0.0,
+            -0.012517735362052917,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_soft_mat_02",
+          "runtimeLocalPosition": [
+            0.0015054043615236878,
+            0.21423454582691193,
+            0.16720135509967804
+          ],
+          "historicalLocalPosition": [
+            0.0015054043615236878,
+            0.08399999886751175,
+            0.16720135509967804
+          ],
+          "delta": [
+            0.0,
+            0.13023454695940018,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_sps_crest_04",
+          "runtimeLocalPosition": [
+            0.010259155184030533,
+            0.20348764955997467,
+            -0.1593572199344635
+          ],
+          "historicalLocalPosition": [
+            0.010259155184030533,
+            0.2939999997615814,
+            -0.1593572199344635
+          ],
+          "delta": [
+            0.0,
+            -0.09051235020160675,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_sps_crest_05",
+          "runtimeLocalPosition": [
+            0.15300095081329346,
+            0.2648090422153473,
+            -0.1381639838218689
+          ],
+          "historicalLocalPosition": [
+            0.15300095081329346,
+            0.3179999887943268,
+            -0.1381639838218689
+          ],
+          "delta": [
+            0.0,
+            -0.05319094657897949,
+            0.0
+          ]
+        },
+        {
+          "socket": "socket_sps_crest_06",
+          "runtimeLocalPosition": [
+            -0.15049979090690613,
+            0.23807691037654877,
+            -0.14636912941932678
+          ],
+          "historicalLocalPosition": [
+            -0.15049979090690613,
+            0.335999995470047,
+            -0.14636912941932678
+          ],
+          "delta": [
+            0.0,
+            -0.09792308509349823,
+            0.0
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -165,7 +165,7 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
     expect(a).toEqual(evaluateBubblePosition(2, emitter, bounds, 4.2))
 
     // Rises monotonically between recycles and never passes the recycle
-    // height (below the water surface plane at y = 2.66).
+    // height (below the water surface plane at y = 4.4).
     let previousY = -Infinity
     let sawRecycle = false
     for (let t = 0; t <= 30; t += 0.25) {
@@ -335,7 +335,7 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
   it('carries the surface-driven lighting config: sun direction, surface height, focus gain, raymarch tiers', () => {
     const cfg = DEFAULT_AQUARIUM_OPTICS_CONFIG
     expect(cfg.surfaceY).toBe(WATER_SURFACE_Y)
-    expect(cfg.surfaceY).toBe(2.66)
+    expect(cfg.surfaceY).toBe(4.4)
     expect(Math.hypot(cfg.sunDirection.x, cfg.sunDirection.y, cfg.sunDirection.z)).toBeCloseTo(1, 9)
     expect(cfg.sunDirection).toEqual(SUN_DIRECTION)
     expect(cfg.sunDirection.y).toBeGreaterThan(0.8)
@@ -354,9 +354,9 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
 
   it('slant-projects caustic UVs from the surface footpoint and reports the wave-field focus there', () => {
     // A fragment on the sand (y = -2.8) under a slanted sun: the
-    // footpoint shifts along +sunDir.xz by (2.66 - (-2.8)) / sunDir.y.
+    // footpoint shifts along +sunDir.xz by (surfaceY - (-2.8)) / sunDir.y.
     const slanted = evaluateCausticPatternUV(0, 0, 0, { slant: { worldY: -2.8 } })
-    const dist = (2.66 - -2.8) / SUN_DIRECTION.y
+    const dist = (WATER_SURFACE_Y - -2.8) / SUN_DIRECTION.y
     expect(slanted.surfacePoint.x).toBeCloseTo(SUN_DIRECTION.x * dist, 9)
     expect(slanted.surfacePoint.z).toBeCloseTo(SUN_DIRECTION.z * dist, 9)
     expect(slanted.a.u).toBeCloseTo(
@@ -372,7 +372,7 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
     expect(slanted.focus).toBeGreaterThanOrEqual(-1)
     expect(slanted.focus).toBeLessThanOrEqual(1)
     // At the surface itself the slant vanishes: footpoint == fragment.
-    const atSurface = evaluateCausticPatternUV(1.2, -0.8, 0, { slant: { worldY: 2.66 } })
+    const atSurface = evaluateCausticPatternUV(1.2, -0.8, 0, { slant: { worldY: WATER_SURFACE_Y } })
     expect(atSurface.surfacePoint).toEqual({ x: 1.2, z: -0.8 })
     // Without slant the legacy vertical projection is unchanged.
     const legacy = evaluateCausticPatternUV(1.2, -0.8, 0)

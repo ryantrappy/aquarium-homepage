@@ -48,6 +48,13 @@ means saturation > 0.6. Hue is reported in six buckets (red, yellow, green,
 cyan, blue, magenta). All numeric targets below are whole-frame unless a
 criterion says "region".
 
+**Measurement limit:** this script measures still-image color statistics; it
+does not calculate caustic spatial frequency, contrast, or animation speed.
+No numeric caustic-frequency target or repeatable caustic measurement method
+is established here. The caustic-network criterion W-2 therefore remains a
+visual review item, and the task's caustic-frequency research target remains
+open.
+
 **Calibration (measured 2026-11-09 with the script).** Two public-domain
 references from `docs/photorealism-reference.md`:
 
@@ -157,10 +164,13 @@ Root baseline audit recorded in the AQ-70.1 task file. **The screenshot file
 itself (`docs/asset-evidence/photorealism/baseline-2026-11-05-user-screenshot.jpg`)
 is missing from the repo at the current tip** — it was never committed, so
 its histogram numbers could not be measured for this table; the scores below
-are the audit's findings, and the file must be re-saved into the repo before
-anyone claims a measured baseline. (If it cannot be recovered, the next
-visual check's captures become the new baseline and this table is re-scored
-from them.)
+are the audit's findings, not a reproducible current screenshot review. The
+file must be re-saved into the repo before anyone independently re-scores the
+image or claims measured baseline values. The existing table records
+qualitative fails for the audited items; exposure and whole-frame numeric
+targets remain unmeasured. (If the file cannot be recovered, the next visual
+check's captures become the new baseline and this table is re-scored from
+them.)
 
 | Item | Baseline score | Mapped task(s) |
 |---|---|---|

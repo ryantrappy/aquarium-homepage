@@ -1,0 +1,40 @@
+{
+  "sourceCommit": "a5e64a2",
+  "scope": "Root accepts bounded surface layout, removal of noisy cellular/stripe patterns, shared-clock/lifecycle integration and clear native service links. Final fixture/meniscus art still pending; not complete AQ103 or overall realism acceptance.",
+  "capture": "Native CUA Chrome PNG atDPR1, no clip, seed2026/time1.25/full-scene/labels off; renderFrozen sidecars. Isolated source checkout with infrastructure-only Vite fs allow-list.",
+  "checks": {
+    "finalFocusedTests": 55,
+    "testFiles": 4,
+    "typecheck": "Pass including14script syntax checks",
+    "productionBuild": "Pass with existing chunk-size advisory",
+    "initialFullSuiteBeforeFinalShaderTuning": "740tests/66files passed; do not attribute that count to later source changes",
+    "capturedConsoleWarningsErrors": []
+  },
+  "captures": [
+    {
+      "image": "laptop.png",
+      "sidecar": "laptop.json",
+      "dimensions": [
+        1440,
+        900
+      ],
+      "sha256": "85ea6c7bf4f7c89be65589dc6978f4a10af3515822907f7cac83a534c3de71a4",
+      "ready": true
+    },
+    {
+      "image": "phone.png",
+      "sidecar": "phone.json",
+      "dimensions": [
+        402,
+        874
+      ],
+      "sha256": "d3ca2d5cc78d72ba9851eb7977c2e8c618f73b8aa358d1559e838093a2632a78",
+      "ready": true
+    }
+  ],
+  "open": [
+    "The front-glass meniscus lies above normal overview frustum at current camera/surfaceY; visibility needs targeted framing review rather than inference from shader markers.",
+    "Current smooth liquid facets are quieter than the reference; overhead-fixture clarity and final contrast/meniscus art require further review.",
+    "Frozen inspection timing does not establish runtime/GPU no-regression."
+  ]
+}

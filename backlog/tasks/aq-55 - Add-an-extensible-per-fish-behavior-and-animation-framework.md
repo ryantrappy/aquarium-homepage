@@ -17,7 +17,7 @@ documentation:
   - docs/behavior-runtime-contract.md
 priority: high
 type: enhancement
-ordinal: 11600
+ordinal: 14000
 ---
 
 ## Description

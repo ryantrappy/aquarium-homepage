@@ -27,6 +27,7 @@ import type {
   MeshNavigationBudget,
   MeshNavigationWorkBudget,
 } from '../../simulation/mesh-navigation'
+import type { SolidObstacleVolume } from '../../simulation/habitat-navigation'
 import type { MeshNavigationConfig } from './motion'
 import type { AssembledCoralBinding } from './reef-assembly'
 
@@ -98,6 +99,10 @@ export type ReefMeshNavigationResult =
 
 type Vec3 = { x: number; y: number; z: number }
 type Box = { min: Vec3; max: Vec3 }
+
+export type RockFallbackObstaclesResult =
+  | { status: 'ready'; obstacles: SolidObstacleVolume[] }
+  | { status: 'unavailable'; reason: string }
 
 function isRockMesh(node: THREE.Object3D): node is THREE.Mesh {
   if (!(node instanceof THREE.Mesh)) return false
@@ -172,6 +177,90 @@ function extractRockTriangles(reef: THREE.Object3D): MeshTriangle[] | undefined 
 }
 
 /**
+ * Build conservative, uninflated world-space AABBs from the actual rock mesh
+ * vertices. Bounds use world-space scene units; they are not a certification
+ * that scene units equal metres. This is the fail-closed fallback while the
+ * exact mesh collider is unavailable. Fish radius is applied by the collision
+ * query, not baked into these volumes. Cached geometry bounds are intentionally
+ * ignored because runtime sculpting and nested transforms can make them stale.
+ */
+export function createRockFallbackObstacles(
+  reef: THREE.Object3D,
+  islandId: string,
+): RockFallbackObstaclesResult {
+  if (!islandId.trim()) return { status: 'unavailable', reason: 'invalid-island-id' }
+
+  try {
+    reef.updateWorldMatrix(true, true)
+  } catch {
+    return { status: 'unavailable', reason: 'rock-transform-unavailable' }
+  }
+
+  const obstacles: SolidObstacleVolume[] = []
+  let rockCount = 0
+  let invalidReason: string | undefined
+  const vertex = new THREE.Vector3()
+  reef.traverse(node => {
+    if (invalidReason || !isRockMesh(node)) return
+    rockCount++
+    if (node instanceof THREE.SkinnedMesh || node instanceof THREE.InstancedMesh) {
+      invalidReason = 'rock-dynamic-transform-unsupported'
+      return
+    }
+    const position = node.geometry.getAttribute('position')
+    if (!position || position.itemSize < 3 || !Number.isSafeInteger(position.count) || position.count <= 0) {
+      invalidReason = 'rock-positions-unavailable'
+      return
+    }
+    if (!node.matrixWorld.elements.every(Number.isFinite)) {
+      invalidReason = 'rock-transform-unavailable'
+      return
+    }
+
+    const min = new THREE.Vector3(Infinity, Infinity, Infinity)
+    const max = new THREE.Vector3(-Infinity, -Infinity, -Infinity)
+    try {
+      for (let i = 0; i < position.count; i++) {
+        const x = position.getX(i)
+        const y = position.getY(i)
+        const z = position.getZ(i)
+        if (![x, y, z].every(Number.isFinite)) {
+          invalidReason = 'rock-vertex-nonfinite'
+          return
+        }
+        vertex.set(x, y, z).applyMatrix4(node.matrixWorld)
+        if (![vertex.x, vertex.y, vertex.z].every(Number.isFinite)) {
+          invalidReason = 'rock-transform-nonfinite'
+          return
+        }
+        min.min(vertex)
+        max.max(vertex)
+      }
+    } catch {
+      invalidReason = 'rock-positions-unreadable'
+      return
+    }
+
+    if (!(min.x < max.x && min.y < max.y && min.z < max.z)) {
+      invalidReason = 'rock-bounds-degenerate'
+      return
+    }
+    const suffix = String(rockCount - 1).padStart(2, '0')
+    obstacles.push({
+      id: `${islandId}-rock-${suffix}`,
+      bounds: {
+        min: { x: min.x, y: min.y, z: min.z },
+        max: { x: max.x, y: max.y, z: max.z },
+      },
+    })
+  })
+
+  if (invalidReason) return { status: 'unavailable', reason: invalidReason }
+  if (rockCount === 0 || obstacles.length === 0) return { status: 'unavailable', reason: 'rock-mesh-missing' }
+  return { status: 'ready', obstacles }
+}
+
+/**
  * One world-space AABB per mounted coral mesh, from the geometry bounding
  * sphere. The sphere is the one assembleCoralsOnRockSockets extends by the
  * measured shader sway margin, so the box already covers sway; the radius is
@@ -210,6 +299,62 @@ function coralMeshBoxes(mountedCorals: readonly AssembledCoralBinding[]): Box[] 
   }
   if (boxes.length !== meshCount) return undefined
   return boxes
+}
+
+/**
+ * Build uninflated world-space fallback volumes from mounted coral geometry.
+ * The same measured bounding spheres used by mesh navigation already include
+ * shader sway margin; callers must not add fish clearance here.
+ */
+export function createMountedCoralFallbackObstacles(
+  mountedCorals: readonly AssembledCoralBinding[],
+  islandId: string,
+): RockFallbackObstaclesResult {
+  if (typeof islandId !== 'string' || islandId.trim().length === 0 || islandId !== islandId.trim()) {
+    return { status: 'unavailable', reason: 'invalid-island-id' }
+  }
+  if (!Array.isArray(mountedCorals)) return { status: 'unavailable', reason: 'mounted-coral-bindings-unavailable' }
+  if (mountedCorals.length === 0) return { status: 'ready', obstacles: [] }
+
+  let meshCount = 0
+  let invalidMeshGeometry = false
+  try {
+    for (const mounted of mountedCorals) {
+      if (!(mounted.root instanceof THREE.Object3D)) throw new Error('Mounted coral root is unavailable')
+      mounted.root.updateWorldMatrix(true, true)
+      mounted.root.traverse((node: THREE.Object3D) => {
+        if (!(node instanceof THREE.Mesh)) return
+        meshCount++
+        const position = node.geometry.getAttribute('position')
+        if (!position || position.count <= 0) invalidMeshGeometry = true
+      })
+    }
+  } catch {
+    return { status: 'unavailable', reason: 'mounted-coral-transform-unavailable' }
+  }
+  if (meshCount === 0) return { status: 'unavailable', reason: 'mounted-coral-mesh-missing' }
+  if (invalidMeshGeometry) return { status: 'unavailable', reason: 'mounted-coral-positions-unavailable' }
+
+  let boxes: Box[] | undefined
+  try {
+    boxes = coralMeshBoxes(mountedCorals)
+  } catch {
+    return { status: 'unavailable', reason: 'mounted-coral-bounds-unavailable' }
+  }
+  if (!boxes) return { status: 'unavailable', reason: 'mounted-coral-bounds-unavailable' }
+  if (boxes.length === 0) return { status: 'unavailable', reason: 'mounted-coral-mesh-missing' }
+
+  const obstacles: SolidObstacleVolume[] = []
+  for (const [index, bounds] of boxes.entries()) {
+    if (!finiteVec3(bounds.min) || !finiteVec3(bounds.max)) {
+      return { status: 'unavailable', reason: 'mounted-coral-bounds-nonfinite' }
+    }
+    if (!(bounds.min.x < bounds.max.x && bounds.min.y < bounds.max.y && bounds.min.z < bounds.max.z)) {
+      return { status: 'unavailable', reason: 'mounted-coral-bounds-degenerate' }
+    }
+    obstacles.push({ id: `${islandId}-coral-${index}`, bounds })
+  }
+  return { status: 'ready', obstacles }
 }
 
 async function sha256Hex(text: string): Promise<string | undefined> {

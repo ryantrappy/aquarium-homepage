@@ -1,0 +1,35 @@
+{
+  "file": "docs/asset-evidence/aq71/sand-ibl-20261113/phone.png",
+  "image": {
+    "width": 402,
+    "height": 874
+  },
+  "region": {
+    "x": 230,
+    "y": 810,
+    "width": 150,
+    "height": 40
+  },
+  "pixelsMeasured": 6000,
+  "luminance": {
+    "mean": 0.8835999081044646,
+    "p10": 0.8734086274509804,
+    "p50": 0.8812517647058823,
+    "p90": 0.8969380392156863
+  },
+  "saturation": {
+    "mean": 0.017332617023802607,
+    "p50": 0.01762114537444928,
+    "p90": 0.022026431718061595,
+    "fractionAbove06": 0,
+    "fractionAbove08": 0
+  },
+  "hueFractions": {
+    "red": 0,
+    "yellow": 0,
+    "green": 0,
+    "cyan": 1,
+    "blue": 0,
+    "magenta": 0
+  }
+}

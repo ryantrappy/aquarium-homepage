@@ -189,7 +189,7 @@ export function evaluateLighthillFlexParams(
       ? baseAmplitude * (1 - blend) + gait.tailAmplitudeMaxBL * blend
       : baseAmplitude
   const amplitudeScale =
-    gait.gaitMode === 'benthic_percher' && !isMoving(input) ? 0 : 1
+    gait.gaitMode === 'benthic_percher' ? percherAmplitudeScale(input) : 1
   const frequencyHz =
     input.state === 'idle' ? gait.fMinHz : lighthillFrequencyHz(u, gait)
   return Object.freeze({
@@ -203,14 +203,16 @@ export function evaluateLighthillFlexParams(
   })
 }
 
-function isMoving(input: FishFlexInput): boolean {
-  return (
-    input.speedNorm > 0.25 ||
+function percherAmplitudeScale(input: FishFlexInput): number {
+  if (
     input.state === 'swim' ||
     input.state === 'burst' ||
     input.state === 'retreat' ||
     input.startleSeconds > 0
-  )
+  ) {
+    return 1
+  }
+  return smoothstep(0.05, 0.3, input.speedNorm)
 }
 
 /**

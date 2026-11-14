@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@Luna'
 created_date: '2026-11-03 12:33'
-updated_date: '2026-11-12 05:37'
+updated_date: '2026-11-12 14:08'
 labels: []
 dependencies:
   - AQ-12
@@ -20,8 +20,7 @@ references:
   - 'https://fishesofaustralia.net.au/home/species/4402'
   - 'https://academic.oup.com/beheco/article-abstract/16/3/521/189890'
 documentation:
-  - docs/fish-behavior-design.md
-  - docs/open-source-asset-and-motion-research.md
+  - docs/asset-evidence/aq41/current-controller-benchmark.json
 priority: '18'
 type: enhancement
 ordinal: 18
@@ -51,6 +50,8 @@ The reference proposes boids, spatial hashing and GPU computation for large fish
   * Enforces personal-space separation and isWaterSegmentSafe obstacle boundaries, freezes under pause/reduced-motion, and includes benchmarkSchoolingStep() confirming direct CPU evaluation completes in < 1 ms/frame for realistic homepage populations (N <= 24).
 
 2026-11-08 audit: PR #17 merged species-aware schooling and visual schoolmates (src/rendering/scene/school-population.ts, schooling-navigation.ts, stepSwimmingSchool and disturbSchool in motion.ts, reconcileSchoolmates in aquarium.ts) plus mesh-navigation compatibility fixes (isSafeCurrentInhabitantPosition and isSegmentSafe). All 4 ACs verified by schooling-navigation.test.ts and school-population.test.ts; moved to In Progress (ready-for-review / gemini approved) for Root review.
+
+2026-11-12: Added docs/asset-evidence/aq41/current-controller-benchmark.json with raw 600-sample Node timings per case for production stepSwimmingSchool() at 24/32 deterministic service-link populations, using current aspect-specific modular reef AABB layouts. Each case spawned 16 visual schoolmates (40/48 runtime fish). This is CPU-only, AABB-fallback simulation evidence; no browser/WebGL frame timing or mesh-navigation mode was measured. It does not satisfy viewport-rendered AC #2 evidence or select an indexing threshold/cap.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

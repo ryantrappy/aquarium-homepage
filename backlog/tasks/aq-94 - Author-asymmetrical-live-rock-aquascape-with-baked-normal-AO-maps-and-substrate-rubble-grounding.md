@@ -3,11 +3,11 @@ id: AQ-94
 title: >-
   Author Negative Space Aquascape (NSA) with 5–8 modular rock pieces, pinnacle
   canyon, and 2048px trim sheet
-status: Done
+status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-11 04:55'
-updated_date: '2026-11-11 05:16'
+updated_date: '2026-11-13 15:39'
 labels:
   - modeling
   - blender
@@ -43,9 +43,35 @@ Architect the live rock aquascape from scratch using Negative Space Aquascaping 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [x] #1 Aquascape forms an asymmetrical Negative Space Aquascape (NSA) with a left arch rising to a high pinnacle, lower right island, and central swim canyon
-- [x] #2 Reef is assembled from a reusable library of 5–8 modular sculpted rock pieces sharing a single 2048x2048 PBR texture atlas (Normal, Roughness, AO)
+- [ ] #1 Aquascape forms an asymmetrical Negative Space Aquascape (NSA) with a left arch rising to a high pinnacle, lower right island, and central swim canyon
+- [ ] #2 Reef is assembled from a reusable library of 5–8 modular sculpted rock pieces sharing a single 2048x2048 PBR texture atlas (Normal, Roughness, AO)
 - [x] #3 Upper half of the water column preserves open negative space for unobstructed fish swimming and label visibility
 - [x] #4 Total exported .glb asset size for assembled foundations remains under 5 MB with minimal draw calls
-- [x] #5 Substrate dunes, shell fragments, and rubble eliminate hard intersecting seams at the sand bed base
+- [ ] #5 Substrate dunes, shell fragments, and rubble eliminate hard intersecting seams at the sand bed base
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Root next major visual iteration under the active user goal: preserve supplied left/right foundations and coral work, add a custom central arch module rather than another enlarged mound. Root alone will own Blender; leave live reef-full-model scene untouched and use a separate saved source. Before authoring, add an explicitly isolated --reef <id> dispatch to sync-blender-override.mjs before fish docs/learning/build side effects. Mandated blend/override paths remain under splat-fish; install validated custom rock derivatives with a separate module manifest so ten-coral/fish catalogs are untouched. Never feed rock geometry into fish anatomical guides or run fish rebuilds from reef mode. Package source/blend/export hashes, contract/provenance/inspection, and verify module is actually selected in scene before model commit. Integrate arch as a separate navigation collider/input (verify union behavior; do not introduce overlapping components into a single parity classifier), aspect-specific placements and existing hit/depth/shadow rules. Save/pack/export/sync/commit the new used model; review native two-size composition and measured opening with honest fish-radius scope. This is the first additive visual module, not completion of the full5–8piece library/2048atlas/current foundation art requirements; retain all existing ACs and final reference goal.
+
+Next Root visual iteration: grow four small existing coral colonies on the central arch using real saved Blender socket empties. Shape only local support footprints and measure exact exported contact/orientation/radial support/clearance with existing socket inspector; no invented supported coordinates. Extend isolated reef installer to accept only verified empty socket children under the one applied rock mesh. Preserve authored arch maps/geometry in generic coral mounting via an explicit opt-in, omit legacy companions/scatter for this bridge, register actual mounted coral envelopes/controller clock. Reuse existing supplied templates; Root alone handles Blender/source/export/sync, Luna bounded code/test work. Also replace visibly striped procedural arch surface fields with reproducible isotropic noise and reduce palette mismatch. Save packed native/export/sync/commit used updated model with fresh reports; native two-size final art remains separate from full library/body clearance.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Root2026-11-12 reopened from Done after independent native/export review. Saved reef-full-model.blend contains exactly two merged foundation meshes (Live_Rock_Island_Left/Right), coral previews and sand/scatter, with no5-8 reusable rock-piece meshes or2048px image. Generator NSA_MODULAR_ROCK_LIBRARY is seven scalar field descriptions merged into island heightfields, not a reusable sculpted piece library. Actual runtime reef-full-model-left/right.glb have no embedded maps and are absent from canonical manifest/socket reports. Existing upper-water space and under5MB/draw-count criteria retained; central arch/library/grounding final acceptance withdrawn pending exact-source evidence. Native review is read-only and does not alter the live dirty Blender scene. Detailed evidence follows underAQ59.
+
+Luna read-only pipeline audit confirms current sync main always writes fish docs, learns every override GLB and executes fish builder. Reef path must branch before all those operations and reject mixed fish flags. Existing contract.ts supports kindrock with identityY-upmeter/provenance; socket-inspector.ts can pin source bytes and measure declared socket intent. Existing coral packager is a fixed ten-asset batch, not a callable module installer; existing manifest checker hardcodes counts. Preserve those sources and use separate custom module registry/manifest. No new model/pipeline changes have been made by Root yet.
+
+Root authored additive reef-center-arch in separate background Blender5.2.3 (live user scene untouched), saved uncompressed packed source splat-fish/blend/reef-center-arch.blend and exported raw overrides/reef-center-arch.glb. Separate --reef reef-center-arch --learn-guide installer stamps/validates rock metadata, measured buffers and hashes with dedicated custom-rocks registry; never rebuilds/learns fish. Source has9282vertices/18560triangles, three packed custom images1024carbonate/512normal/512roughness; not a high-poly bake/2048atlas or full5–8modulelibrary. Actual scene uses desktop central bridge with own fallback/exactcollider, hit/depth/shadow/caustics/env handling; phone preserves enlarged single-island composition. Existing supplied foundations untouched. Root first native trial confirms visible opening and additional central height; final exact-source captures/verification follow. Luna actualasset navigation at0.04scene probe clears center and blocks cap/leg; no calibrated fullfish-body envelope claim. Keep full task InProgress.
+
+Root final native review accepts additive central-height iteration at6e57f2d. Evidence docs/asset-evidence/aq94/central-arch-20261113/: bothsizes ready/no failedassets,11inhabitants,8phone targets>=44px insideviewport, zero consolewarnings/errors. Packednative read-only audit confirms9282vertexmesh plus3packedimages. Runtime left/right/arch exports total2963992bytes so retained AC4 remains valid. Exactsource782tests/68files/typecheck15scripts pass; final productionbuild running. Actualmesh0.04sceneprobe passes center and blocks cap/leg, not animated-body certification. Model is saved/exported/synced/used/committed6e57f2d. Full AC1/2/5 art/library/grounding remain open; no Done. Root reserves Blender, no live scene edits/deployment.
+
+Final exact6e57f2d production build completed successfully. Root verified native PNG signatures/dimensions and snapshot source/ready assertions. No final-task completion or runtime-budget claim.
+
+Root implementation handoff: four saved native socket empties now support two small front-facing zoanthid mats, a Montipora plate and a green Acropora table colony reusing existing supplied templates. Smaller footprint25mm with scaled zoa0.16 preservesarchcontour; no legacy scatter/companion extras. Exact exported inspector accepts4/4,384radial samples, zero unsupported footprint samples or cylinder blockers. Added explicit preserveAuthoredRock/includeScatter options (defaultsunchanged), shared-clock controllers, shader-expanded coral fallback boxes and actual mesh-nav envelope inputs. Newcoral materials/depthmaterials released onrebuild/teardown; sourcegeometry/maps remain borrowed. Surface uses isotropic seeded noise; UVassignment followsvertexidentity afterwinding fixes. Read-only saved-native audit shows9282vertices,4empties,3packedimages, positivevolume0.03133588389145,0boundary/nonmanifoldedges/zeroareafaces. No exhaustive selfintersection/wholecolony or fishbodyfit certification. Initial broadpads rejected visually and replaced by smaller frontslopes.107focusedtests/5files passed, final27actualasset/pipeline tests andtypecheck15scripts pass after finalmodelupdate. Root final exactsource native captures/fulltests/build follow; no Done.
+
+Root exactd454c27 verification complete:791tests/68files, typecheck15scripts and productionbuild pass. Native1440x900/402x874DPR1 ready/no failedassets/11inhabitants;8phone targets>=44px contained;zeroconsolewarnings/errors. Evidence docs/asset-evidence/aq94/arch-growth-20261113/. Finalgreenbranchingcolony movedforward fromrightreefshadow, smallzoa mats frontfacing, broadsupportpads rejected/removed. Root accepts bounded colonization/texture iteration; maincoralshape/texture and broader finalreefart stillopen. Current threefoundationpackages2,874,820bytes retain delivery-sizeAC4, not performanceacceptance. Native/exactexport/currentpackage hashes committed withd454c27, no liveBlenderdocumentedit/deployment. Task94remainsInProgressforfullNSA/library/atlas/grounding requirements.
+<!-- SECTION:NOTES:END -->

@@ -1,0 +1,51 @@
+{
+  "sourceCommit": "8b2d7cc2a9a3ea08da0fff9df6a9a417719698ca",
+  "scope": "Root accepts visible distribution for the saved eight-service roster, not full AQ-87 completion or final asset art.",
+  "capture": {
+    "url": "http://127.0.0.1:5215/?lookdev=1&seed=2026&time=1.25&labels=off",
+    "method": "CUA Chrome CDP Page.captureScreenshot; native PNG; DPR1; no clip",
+    "isolation": "Detached source worktree; local Vite fs allow-list includes /private/tmp and shared dependencies. No app source changes. Captured after ready with settled frozen inspection time.",
+    "console": "Initial infrastructure-only 403 errors preceded the corrected Vite allow-list and reload; capture sidecars confirm ready and zero failed/pending assets. Do not interpret historical tab logs as a clean-console certification."
+  },
+  "verification": {
+    "tests": 732,
+    "files": 65,
+    "typecheck": "Passed, including 14 script syntax checks",
+    "productionBuild": "Passed; existing chunk-size advisory"
+  },
+  "views": {
+    "laptop": {
+      "pngDimensions": [
+        1440,
+        900
+      ],
+      "sha256": "c6d88770fae4ff983aa145d63e4052934a9a59c12db620e23d9bb78243c2cad2",
+      "serviceFish": 8,
+      "schoolmates": 3,
+      "allStagedWithinDeclaredHeightBand": true,
+      "ySpan": 3.3565526837925423,
+      "zSpan": 4.712315243849809
+    },
+    "phone": {
+      "pngDimensions": [
+        402,
+        874
+      ],
+      "sha256": "332e289d0abcd44be592baec7db9fb260aa361bfa7f30f9fefc76337d6e62cb5",
+      "serviceFish": 8,
+      "schoolmates": 3,
+      "allStagedWithinDeclaredHeightBand": true,
+      "ySpan": 3.3565526837925423,
+      "zSpan": 0.9715278729700233
+    }
+  },
+  "remaining": [
+    "AC1: explicit anchor/startle targets and clown top-half profile require separate resolution.",
+    "AC3: animated body-solid clearance is not established by collision-safe point staging; metric scale and measured solid envelopes remain open."
+  ],
+  "phoneTargets": {
+    "count": 8,
+    "allAtLeast44CssPixels": true,
+    "minDimension": 57.6015625
+  }
+}

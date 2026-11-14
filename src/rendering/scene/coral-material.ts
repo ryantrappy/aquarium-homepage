@@ -34,6 +34,8 @@ export const CORAL_DEFAULT_PALETTE = Object.freeze({
 export type CoralPrimitiveRole = 'coral-rigid' | 'coral-soft'
 
 export type CoralPaletteOverride = {
+  /** Keep authored PBR maps instead of applying legacy normal/contrast overrides. */
+  surfaceMode?: 'legacy-grade' | 'baked-pbr'
   baseColor: THREE.ColorRepresentation
   tipColor: THREE.ColorRepresentation
   creviceColor?: THREE.ColorRepresentation
@@ -163,7 +165,13 @@ export function evaluateCoralTissueColor(input: CoralTissueGradeInput): { r: num
   const brightness = 0.86 + 0.22 * input.texLuma + 0.16 * (input.polypHighlight - 0.4)
   grad = { r: grad.r * brightness, g: grad.g * brightness, b: grad.b * brightness }
   const luma = 0.299 * grad.r + 0.587 * grad.g + 0.114 * grad.b
-  grad = mix3({ r: luma, g: luma, b: luma }, grad, CORAL_TISSUE_SATURATION_BOOST)
+  // GLSL mix extrapolates when t > 1; the clamped helper above is only for
+  // palette-mask blends, so mirror the saturation step explicitly here.
+  grad = {
+    r: luma + (grad.r - luma) * CORAL_TISSUE_SATURATION_BOOST,
+    g: luma + (grad.g - luma) * CORAL_TISSUE_SATURATION_BOOST,
+    b: luma + (grad.b - luma) * CORAL_TISSUE_SATURATION_BOOST,
+  }
   return {
     r: Math.min(grad.r, CORAL_TISSUE_HIGHLIGHT_CEILING),
     g: Math.min(grad.g, CORAL_TISSUE_HIGHLIGHT_CEILING),
@@ -285,6 +293,7 @@ function injectCoralRawMaskShader(
   shader: THREE.WebGLProgramParametersWithUniforms,
   uniforms: CoralFlowUniforms,
   isDepthPass: boolean,
+  bakedSurface = false,
 ) {
   Object.assign(shader.uniforms, uniforms)
 
@@ -348,6 +357,25 @@ vCoralViewDir = normalize(-mvPosition.xyz);
   )
 
   if (isDepthPass) return
+
+  if (bakedSurface) {
+    // Rare nonfinite pixels in the opaque HDR pass can contaminate coarse
+    // transmission mips. Keep bicubic refraction when finite; otherwise use
+    // the nearest finite lower level, preserving transmission and roughness.
+    const transmission = THREE.ShaderChunk.transmission_pars_fragment.replace(
+      'return textureBicubic( transmissionSamplerMap, fragCoord.xy, lod );',
+      `vec4 sampled = textureBicubic(transmissionSamplerMap, fragCoord.xy, lod);
+      if (!any(isnan(sampled)) && !any(isinf(sampled))) return sampled;
+      float fallbackLod = max(0.0, floor(lod));
+      for (int level = 0; level < 16; level++) {
+        sampled = textureLod(transmissionSamplerMap, fragCoord.xy, fallbackLod);
+        if (!any(isnan(sampled)) && !any(isinf(sampled))) return sampled;
+        fallbackLod = max(0.0, fallbackLod - 1.0);
+      }
+      return vec4(0.0, 0.0, 0.0, 1.0);`,
+    )
+    shader.fragmentShader = shader.fragmentShader.replace('#include <transmission_pars_fragment>', transmission)
+  }
 
   shader.fragmentShader =
     `
@@ -456,14 +484,17 @@ if (uAnemoneMode > 1.5) {
 
   shader.fragmentShader = shader.fragmentShader.replace(
     '#include <roughnessmap_fragment>',
-    `#include <roughnessmap_fragment>
+    bakedSurface ? `#include <roughnessmap_fragment>
+// Preserve the authored roughness map and its spatial variation.
+roughnessFactor = clamp(roughnessFactor * uRoughnessOverride, 0.04, 1.0);
+` : `#include <roughnessmap_fragment>
 if (uRoughnessOverride > 0.0) {
   roughnessFactor = uRoughnessOverride;
 }
 `,
   )
 
-  shader.fragmentShader = shader.fragmentShader.replace(
+  if (!bakedSurface) shader.fragmentShader = shader.fragmentShader.replace(
     '#include <normal_fragment_maps>',
     `#include <normal_fragment_maps>
 // Velvety micro-polyp normal bump breaks up smooth specular reflections on domes & branches
@@ -481,16 +512,19 @@ normal = normalize(normal - vec3(px - p0, py - p0, pz - p0) * bumpScale);
   shader.fragmentShader = shader.fragmentShader.replace(
     '#include <aomap_fragment>',
     `#include <aomap_fragment>
+${bakedSurface ? `// Authored PBR uses the real light/shadow rig; baked contact AO affects indirect light only.
 reflectedLight.indirectDiffuse *= coralContactAo;
+reflectedLight.indirectSpecular *= coralContactAo;
+` : `reflectedLight.indirectDiffuse *= coralContactAo;
 reflectedLight.indirectSpecular *= coralContactAo * 0.35;
 reflectedLight.directSpecular *= 0.28;
 reflectedLight.directDiffuse *= coralContactAo;
-
 // Deep 3D reef self-shadowing: downward-facing overhangs and interior branch/polyp crevices
 // drop into rich dark actinic shadow while upward-facing tips catch the overhead key light.
 float coralTopExposure = smoothstep(-0.35, 0.65, normal.y) * (0.38 + 0.62 * smoothstep(0.0, 0.75, coralHeightMask * 0.6 + coralTipMask * 0.4));
 reflectedLight.directDiffuse *= mix(0.22, 1.05, coralTopExposure);
 reflectedLight.indirectDiffuse *= mix(0.18, 0.88, coralTopExposure);
+`}
 
 // Restrained upward-facing reef caustic shimmer (AQ-14.2) was removed in
 // AQ-70.6: the shared cellular caustic chunk (caustics.ts, applied to
@@ -501,7 +535,7 @@ vec3 coralSss = diffuseColor.rgb * (0.45 + 0.55 * coralTipMask) * coralRim * uSu
 // AQ-70.6 AC #3: fluorescence stays mask-driven (COLOR_0.g tip mask +
 // polyp highlight) and now scales with the fixture's actinic share via
 // uActinicLevel; no blanket emissive is added anywhere.
-vec3 coralGlow = uFluorescenceTint * pow(max(coralTipMask, polypHighlight * 0.65), 1.35) * (0.40 + 0.60 * coralRim) * uFluorescenceStrength * uActinicLevel * coralContactAo;
+vec3 coralGlow = uFluorescenceTint * pow(${bakedSurface ? 'coralTipMask' : 'max(coralTipMask, polypHighlight * 0.65)'}, 1.35) * (0.40 + 0.60 * coralRim) * uFluorescenceStrength * uActinicLevel * coralContactAo;
 totalEmissiveRadiance += coralSss + coralGlow;
 `,
   )
@@ -619,37 +653,37 @@ float fissure = smoothstep(0.04, 0.22, abs(rockNoise3D(wPos * 26.0) - 0.5));
 float overhangShade = smoothstep(-0.45, 0.58, rNorm.y);
 float rockCavityAo = clamp(vugPit * (0.48 + 0.52 * fissure) * (0.28 + 0.72 * overhangShade), 0.05, 1.0);
 
-// Photoreal Fiji/Marco carbonate live rock + vibrant crustose coralline plaques
-// matching reef-full-model.blend (Photoreal_Fiji_Live_Rock_Mat) and more_realistic_reef_guide.png
-vec3 cPoreDeep = vec3(0.016, 0.012, 0.034);
-vec3 cCarbShaded = vec3(0.072, 0.056, 0.118);
-vec3 cCarbSunlit = vec3(0.225, 0.185, 0.255);
-vec3 cOliveFilm = vec3(0.052, 0.058, 0.082);
+// Neutral porous carbonate with restrained rose coralline patches.
+// Keep the substrate distinct from the brighter coral tissue above it.
+vec3 cPoreDeep = vec3(0.012, 0.010, 0.007);
+vec3 cCarbShaded = vec3(0.055, 0.048, 0.036);
+vec3 cCarbSunlit = vec3(0.16, 0.135, 0.095);
+vec3 cOliveFilm = vec3(0.045, 0.046, 0.032);
 
 // Crustose coralline algae (Porolithon & Lithothamnion) — rich violet, plum, and magenta plaques
-vec3 cCorDeep = vec3(0.145, 0.042, 0.165);
-vec3 cCorMagenta = vec3(0.345, 0.095, 0.295);
-vec3 cCorLavender = vec3(0.525, 0.195, 0.445);
-vec3 cCorMargin = vec3(0.685, 0.365, 0.565);
+vec3 cCorDeep = vec3(0.10, 0.035, 0.055);
+vec3 cCorMagenta = vec3(0.21, 0.07, 0.115);
+vec3 cCorLavender = vec3(0.30, 0.13, 0.19);
+vec3 cCorMargin = vec3(0.40, 0.21, 0.24);
 
 vec3 carbColor = mix(cPoreDeep, cCarbShaded, smoothstep(0.10, 0.48, rockCavityAo));
 carbColor = mix(carbColor, cCarbSunlit, smoothstep(0.38, 0.78, rockCavityAo * (0.52 + 0.48 * cragRidge)));
 float ridgeHighlight = smoothstep(0.54, 0.84, cragRidge * 0.60 + medCrag * 0.40) * smoothstep(0.44, 0.82, rockCavityAo) * smoothstep(0.0, 0.75, rNorm.y);
-carbColor = mix(carbColor, vec3(0.36, 0.29, 0.38), ridgeHighlight * 0.52);
+carbColor = mix(carbColor, vec3(0.28, 0.24, 0.17), ridgeHighlight * 0.52);
 
 // Deep underside & lower-apron shadow patina
 float oliveMask = (1.0 - smoothstep(0.04, 0.22, vRockWorldPos.y)) * smoothstep(0.25, 0.75, medCrag) * 0.45;
 carbColor = mix(carbColor, cOliveFilm, oliveMask);
 
 float upwardExp = smoothstep(-0.08, 0.62, rNorm.y);
-float corPatchField = rockNoise3D(wPos * 24.0 + vec3(4.2)) * 0.52 + medCrag * 0.48 + 0.24 * upwardExp;
-float corMask = smoothstep(0.36, 0.62, corPatchField) * (0.38 + 0.62 * upwardExp) * smoothstep(0.16, 0.58, rockCavityAo);
+float corPatchField = rockNoise3D(wPos * 24.0 + vec3(4.2)) * 0.52 + medCrag * 0.48 + 0.12 * upwardExp;
+float corMask = smoothstep(0.48, 0.74, corPatchField) * (0.38 + 0.62 * upwardExp) * smoothstep(0.16, 0.58, rockCavityAo);
 
 vec3 corColor = mix(cCorDeep, cCorMagenta, smoothstep(0.26, 0.64, medCrag));
 corColor = mix(corColor, cCorLavender, smoothstep(0.54, 0.84, cragRidge) * 0.68);
 // Calcified rose-violet margin ring on coralline plaque edges
 float plaqueRim = exp(-pow((corPatchField - 0.54) / 0.032, 2.0)) * upwardExp;
-corColor = mix(corColor, cCorMargin, plaqueRim * 0.52);
+corColor = mix(corColor, cCorMargin, plaqueRim * 0.28);
 
 // Direct encrusting coral & Ricordea mushroom rock patches on sunlit mid-slope shelves (AQ-95 AC #2 & AQ-101 AC #2)
 float encCell = rockNoise3D(wPos * 22.0 + vec3(-3.1, 5.4, 1.8));
@@ -660,7 +694,7 @@ float encGoldMask = smoothstep(0.67, 0.80, 1.0 - encCell) * shelfZone;
 vec3 cEncTeal = mix(vec3(0.06, 0.24, 0.22), vec3(0.14, 0.48, 0.40), polypBead);
 vec3 cEncGold = mix(vec3(0.28, 0.11, 0.06), vec3(0.54, 0.26, 0.10), polypBead);
 
-vec3 finalRockColor = mix(carbColor, corColor, corMask * 0.90);
+vec3 finalRockColor = mix(carbColor, corColor, corMask * 0.72);
 finalRockColor = mix(finalRockColor, cEncTeal, encTealMask * 0.65);
 finalRockColor = mix(finalRockColor, cEncGold, encGoldMask * 0.65);
 finalRockColor *= (0.78 + 0.28 * (0.6 * finePores + 0.4 * microGrain));
@@ -680,13 +714,17 @@ roughnessFactor = mix(0.90, 0.65, corMask * 0.85);
     shader.fragmentShader = shader.fragmentShader.replace(
       '#include <normal_fragment_maps>',
       `#include <normal_fragment_maps>
-float eps = 0.005;
-float h0 = rockRidged3D(wPos * 44.0) * 0.65 + rockNoise3D(rPos * 115.0) * 0.35;
-float hx = rockRidged3D((wPos + vec3(eps, 0.0, 0.0)) * 44.0) * 0.65 + rockNoise3D((rPos + vec3(eps, 0.0, 0.0)) * 115.0) * 0.35;
-float hy = rockRidged3D((wPos + vec3(0.0, eps, 0.0)) * 44.0) * 0.65 + rockNoise3D((rPos + vec3(0.0, eps, 0.0)) * 115.0) * 0.35;
-float hz = rockRidged3D((wPos + vec3(0.0, 0.0, eps)) * 44.0) * 0.65 + rockNoise3D((rPos + vec3(0.0, 0.0, eps)) * 115.0) * 0.35;
-vec3 rockBumpGrad = vec3(hx - h0, hy - h0, hz - h0) / eps;
-normal = normalize(normal - rockBumpGrad * 0.015);
+// Reuse the exact height field already sampled for color. A view-space
+// surface gradient avoids sixteen redundant noise-octave evaluations.
+// Unparametrized bump mapping, as in Three.js perturbNormalArb/Mikkelsen.
+float rockHeight = medCrag * 0.65 + finePores * 0.35;
+vec3 rockSigmaX = dFdx(-vViewPosition);
+vec3 rockSigmaY = dFdy(-vViewPosition);
+vec3 rockR1 = cross(rockSigmaY, normal);
+vec3 rockR2 = cross(normal, rockSigmaX);
+float rockDet = dot(rockSigmaX, rockR1) * faceDirection;
+vec3 rockSurfaceGradient = sign(rockDet) * (dFdx(rockHeight) * rockR1 + dFdy(rockHeight) * rockR2);
+if (abs(rockDet) > 1e-10) normal = normalize(abs(rockDet) * normal - rockSurfaceGradient * 0.05);
 `,
     )
   }
@@ -720,6 +758,7 @@ export function applyCoralRawMaskMaterial(
   material.depthWrite = true
 
   const pal = options.paletteOverride
+  const bakedSurface = pal?.surfaceMode === 'baked-pbr'
   const uniforms: CoralFlowUniforms = {
     uTime: { value: 0 },
     uMotionScale: { value: paused || reducedMotion ? 0 : roleIsSoft },
@@ -727,7 +766,7 @@ export function applyCoralRawMaskMaterial(
     uPrimaryFrequencyHz: { value: options.primaryFrequencyHz ?? DEFAULT_PRIMARY_FREQ_HZ },
     uSecondaryFrequencyHz: { value: options.secondaryFrequencyHz ?? DEFAULT_SECONDARY_FREQ_HZ },
     uRoleIsSoft: { value: roleIsSoft },
-    uSubsurfaceStrength: { value: pal?.subsurfaceStrength ?? options.subsurfaceStrength ?? (options.role === 'coral-soft' ? 0.38 : 0.28) },
+    uSubsurfaceStrength: { value: pal?.subsurfaceStrength ?? options.subsurfaceStrength ?? (bakedSurface ? 0 : options.role === 'coral-soft' ? 0.38 : 0.28) },
     uFluorescenceStrength: { value: pal?.fluorescenceStrength ?? options.fluorescenceStrength ?? (options.role === 'coral-soft' ? 0.16 : 0.10) },
     uActinicLevel: {
       value:
@@ -745,14 +784,14 @@ export function applyCoralRawMaskMaterial(
     uPaletteTip: { value: new THREE.Color(pal?.tipColor ?? CORAL_DEFAULT_PALETTE.tipColor) },
     uPaletteCrevice: { value: new THREE.Color(pal?.creviceColor ?? CORAL_DEFAULT_PALETTE.creviceColor) },
     uPaletteRegrade: { value: pal?.regradeStrength ?? CORAL_DEFAULT_REGRADE },
-    uRoughnessOverride: { value: pal?.roughness ?? (options.role === 'coral-soft' ? 0.74 : 0.78) },
+    uRoughnessOverride: { value: pal?.roughness ?? (bakedSurface ? 1 : options.role === 'coral-soft' ? 0.74 : 0.78) },
     uAnemoneMode: { value: options.anemoneMode === 'tentacles' ? 2 : options.anemoneMode === 'column' ? 1 : 0 },
   }
 
-  const cacheKey = `coral-raw-masks-v1:${options.role}`
+  const cacheKey = `coral-raw-masks-v1:${options.role}${bakedSurface ? ':baked-pbr:finite-transmission-v1' : ''}`
   material.customProgramCacheKey = () => cacheKey
   material.onBeforeCompile = shader => {
-    injectCoralRawMaskShader(shader, uniforms, false)
+    injectCoralRawMaskShader(shader, uniforms, false, bakedSurface)
   }
   material.userData.coralRawMasks = {
     schema: CORAL_RAW_MASK_SCHEMA,
@@ -767,7 +806,7 @@ export function applyCoralRawMaskMaterial(
   })
   depthMaterial.customProgramCacheKey = () => `${cacheKey}:depth`
   depthMaterial.onBeforeCompile = shader => {
-    injectCoralRawMaskShader(shader, uniforms, true)
+    injectCoralRawMaskShader(shader, uniforms, true, bakedSurface)
   }
 
   return {

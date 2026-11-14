@@ -323,20 +323,24 @@ vec2 causticSurf = vCausticWorldPos.xz + uSunDir.xz * causticDist;
 vec2 causticWarp = surfaceWaveSlope(causticSurf, uCausticTime) * 1.45;
 vec2 causticUvA = (causticSurf + causticWarp) * uCausticScaleA + vec2(uCausticTime * 0.022, -uCausticTime * 0.0132);
 vec2 causticUvB = (causticSurf - causticWarp * 0.85) * uCausticScaleB + vec2(-uCausticTime * 0.0296, uCausticTime * 0.0185);
-float causticP = max(texture2D(uCausticMap, causticUvA).r, texture2D(uCausticMap, causticUvB).r);
-causticP = smoothstep(uCausticThreshold, 0.9, causticP);
+vec2 dispOffset = causticWarp * 0.006;
+float cR = max(texture2D(uCausticMap, causticUvA + dispOffset).r, texture2D(uCausticMap, causticUvB - dispOffset).r);
+float cG = max(texture2D(uCausticMap, causticUvA).r, texture2D(uCausticMap, causticUvB).r);
+float cB = max(texture2D(uCausticMap, causticUvA - dispOffset).r, texture2D(uCausticMap, causticUvB + dispOffset).r);
+vec3 causticRGB = smoothstep(vec3(uCausticThreshold), vec3(0.88), vec3(cR, cG, cB));
+causticRGB = pow(causticRGB, vec3(1.55));
+float causticP = pow(smoothstep(uCausticThreshold, 0.88, cG), 1.6);
+causticRGB.g = causticP;
 float causticMask = max(vCausticWorldNormal.y, 0.0) * (1.0 - 0.35 * clamp((2.8 - vCausticWorldPos.y) / 5.6, 0.0, 1.0));
 // Light redistribution (look-dev 2026-11-11): focusing means bright
 // ridges AND dimmer surroundings — the light in the web came from the
 // field around it.
-reflectedLight.directDiffuse *= 1.0 - 0.40 * (1.0 - causticP) * causticMask;
-// Deep blue-water shadow tint between caustic ridges so non-caustic surfaces sit in moody reef water shadow
-vec3 underwaterShadowTint = mix(vec3(1.0), vec3(0.28, 0.44, 0.70), (1.0 - causticP) * clamp(causticMask * 1.25, 0.0, 1.0));
-reflectedLight.directDiffuse *= underwaterShadowTint;
-reflectedLight.indirectDiffuse *= mix(vec3(1.0), vec3(0.24, 0.38, 0.64), (1.0 - causticP) * 0.85);
-float causticBright = causticP * max(0.0, 1.0 + uFocusGain * surfaceWaveFocus(causticSurf, uCausticTime));
-vec3 causticSunlightTint = vec3(1.18, 1.08, 0.90);
-reflectedLight.directDiffuse += diffuseColor.rgb * causticSunlightTint * (causticBright * causticMask * uCausticMaxAdd * 1.35);`,
+// Only redistribute the direct fixture light. Recoloring ambient light
+// here painted the whole sand bed blue between bright polygon outlines.
+reflectedLight.directDiffuse *= 1.0 - 0.14 * (1.0 - cG) * causticMask;
+float focusMod = clamp(1.0 + uFocusGain * surfaceWaveFocus(causticSurf, uCausticTime), 0.0, 1.2);
+vec3 causticLedTint = vec3(0.95, 1.06, 1.18);
+reflectedLight.directDiffuse += diffuseColor.rgb * causticRGB * causticLedTint * (focusMod * causticMask * uCausticMaxAdd * 1.25);`,
     )
   }
   const cacheKeySuffix = skinned ? CAUSTIC_SKINNED_CACHE_KEY_SUFFIX : CAUSTIC_CACHE_KEY_SUFFIX

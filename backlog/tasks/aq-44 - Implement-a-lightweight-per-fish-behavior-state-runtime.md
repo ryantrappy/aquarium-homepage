@@ -1,11 +1,11 @@
 ---
 id: AQ-44
 title: Implement a lightweight per-fish behavior state runtime
-status: To Do
+status: Done
 assignee:
   - '@Luna'
 created_date: '2026-11-03T12:38:00Z'
-updated_date: '2026-11-12 05:50'
+updated_date: '2026-11-13 00:14'
 labels: []
 dependencies:
   - AQ-12
@@ -37,15 +37,15 @@ The 15 species profiles describe possible behaviors, but the app also needs a sm
 - [x] #1 Each fish instance owns its state, target anchor, timer, and deterministic variation separately from immutable stable-ID species profiles in AQ-35.
 - [x] #2 The shared lightweight state machine supports only profile-enabled states and explicit transitions such as travel, hold, forage, display, flee, and recover; unsupported behaviors are omitted, and state animation remains separate from mesh deformation or locomotion rendering.
 - [x] #3 State timers and transitions use elapsed simulation time, remain stable across frame-rate changes and long frames, suspend while paused or page-hidden, and resume without a time jump or synchronized fish reset.
-- [ ] #4 Event hooks distinguish a single fish activation from explicit group/environment disturbance; AQ-13 can trigger only the activated fish, opens its service immediately, and does not cause screen-wide panic.
-- [ ] #5 Navigation state requests compatible typed anchors through AQ-34 and handles missing or obstructed targets without snapping through solid geometry.
+- [x] #4 Event hooks distinguish a single fish activation from explicit group/environment disturbance; AQ-13 can trigger only the activated fish, opens its service immediately, and does not cause screen-wide panic.
+- [x] #5 Navigation state requests compatible typed anchors through AQ-34 and handles missing or obstructed targets without snapping through solid geometry.
 - [x] #6 The implementation stays a small finite-state runtime and does not add a heavyweight external behavior-tree framework.
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Root agent reviews the completed work before the task is marked Done.
-- [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
+- [x] #1 Root agent reviews the completed work before the task is marked Done.
+- [x] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -176,3 +176,9 @@ Root core review round 2 accepted request generations and scoped opportunity hoo
 
 ---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Root accepted current integrated runtime2026-11-12. Prior staged-only notes are superseded: motion.ts creates/advances per-instance FSM state, dispatches individual activation separately from explicit grouping disturbance, and resolves generation-scoped compatible habitat requests through safe mesh/AABB routing. Aquarium activation selects one service fish; native anchors retain immediate new-tab navigation without awaiting animation. Root read current integration and reviewed the Luna audit. Four focused behavior/navigation/motion/component suites pass101 tests; current typecheck and14script checks pass. Tests cover wrong-instance activation isolation, stale same-anchor generations, absent/blocked anchors, fail-closed geometry safety, independent timers and native-link interaction. This completes the shared state runtime; species art, ecological behavior richness and final aquarium realism remain their own tasks.
+<!-- SECTION:FINAL_SUMMARY:END -->

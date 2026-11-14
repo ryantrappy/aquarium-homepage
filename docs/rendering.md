@@ -4,11 +4,11 @@
 Category: Architecture / Rendering
 Status: Active
 Authority: Active Architectural Specification
-Backlog: AQ-5, AQ-38, AQ-12, AQ-34, AQ-13
+Backlog: AQ-5, AQ-38, AQ-12, AQ-34, AQ-13, AQ-70.2, AQ-103
 Owner: @root
-Updated: 2026-11-05
+Updated: 2026-11-12
 Upstream: docs/requirements.md, docs/design-principles.md
-Downstream: src/rendering/scene/aquarium.ts, src/components/AquariumScene.tsx, src/rendering/proof/*
+Downstream: src/rendering/scene/aquarium.ts, src/rendering/scene/water-surface.ts, src/rendering/scene/water-surface.test.ts, src/components/AquariumScene.tsx, src/rendering/proof/*
 -->
 
 > [!NOTE]
@@ -16,8 +16,8 @@ Downstream: src/rendering/scene/aquarium.ts, src/components/AquariumScene.tsx, s
 > - **Category**: 3D Architecture & Rendering Engine Baseline
 > - **Status**: Active Technical Baseline
 > - **Authority**: Active Specification
-> - **Backlog Reference**: `AQ-5`, `AQ-38`, `AQ-12`
-> - **Summary**: Three.js engine selection, scene lifecycle, bounded rAF clock, alpha-aware raycasting/picking, and baseline test evidence.
+> - **Backlog Reference**: `AQ-5`, `AQ-38`, `AQ-12`, `AQ-103`
+> - **Summary**: Three.js scene lifecycle, bounded animation clock, alpha-aware picking, and the bounded underwater surface interface baseline.
 
 Three.js is selected for the first main-scene integration. The application now has the technical baseline described below. The separate `engine-study.html` fixture compares Three.js, Babylon.js and PlayCanvas with the same two animated fish and reef LOD; that fixture reports targets without opening services. Its results and limitations remain separate from main-page evidence.
 
@@ -38,6 +38,14 @@ The former alpha-picking failure—an empty-water corner opening Jellyfin—is r
 Main links retain native actions and signal only the selected instance; label/keyboard activation refreshes occlusion, and body targets recheck the actual pointer point. A 60-rAF-sample main-page observation on the desktop in-app browser measured median **33.3 ms**, p95 **35.0 ms**, maximum **35.4 ms**. These are desktop-host frame intervals, not GPU timings, physical-phone measurements or full-roster performance evidence.
 
 This is a functional technical baseline, not completed realism or all acceptance criteria. The reef remains a coarse/dead scan with baked shading and limited source coverage; the two fish retain approximate fins/materials, and thirteen roster species lack rigged assets. Production-quality fish, a mature living reef, validated interactions, optics, full-roster performance and final accessibility remain open work. Development/review is local-first; the user handles deployment after approved source is pushed.
+
+## Underwater water-surface interface (AQ-103)
+
+`aquarium.ts` owns the shared scene clock and lifecycle for `createWaterSurface` in [`water-surface.ts`](../src/rendering/scene/water-surface.ts). The surface stays horizontal at configured `surfaceY`; its geometry and shader front/rear/side bounds come from [`glassEnclosureLayout`](../src/rendering/scene/glass-enclosure.ts) and are updated with the enclosure on a responsive layout change.
+
+The vertex height uses the canonical `SURFACE_WAVE_GLSL` field, while the fragment shader combines its analytic slope with smooth, distance-filtered capillary slopes. The underside normal shades a softened Snell-window/TIR transition centered near the water-to-air critical-angle cosine; fixture transmission is bounded to a tank footprint, and coral bounce is faint and restricted to grazing rear/mid-water reflection. This is a visually grounded approximation, not ray-traced refraction or a reconstructed coral reflection.
+
+Dense cellular highlights and high-frequency stripe patterns are intentionally absent. Alpha fades into the backdrop's top color at the rear and inside the side walls; a thin silver-cyan meniscus is placed just inside the front-glass plane. `water-surface.test.ts` covers desktop/narrow geometry, responsive bounds, shader structure, shared time updates, non-interactive raycasting, and resource disposal. Browser appearance still requires visual review at 402×874 and 1440×900.
 
 ## Open the study
 
@@ -180,3 +188,23 @@ desktop host) with its caveats.
 - **Tiered Vertical Swimming Depth Zones (`AQ-99`)**: `src/rendering/scene/fish-spawn.ts` defines `TIERED_VERTICAL_DEPTH_ZONES`, `classifySpeciesVerticalTier`, and `evaluateTieredVerticalDepthRange` grouping species into `surface` schoolers (`blue-green-chromis`, `lyretail-anthias`), `mid-water` cruisers (`blue-tang`, `yellow-tang`, `desjardins-sailfin-tang`, `copperband-butterflyfish`, `flame-angelfish`, `mccoskers-flasher-wrasse`, `six-line-wrasse`, `banggai-cardinalfish`, `ocellaris-clownfish`), and `benthic` perchers (`tailspot-blenny`, `yellow-watchman-goby`, `mandarin-dragonet`, `firefish`, `royal-gramma`).
 - **Click-to-Focus Camera Dolly & Fish Inspect Card (`AQ-100`)**: `src/rendering/scene/camera-zoom.ts` (`zoomStateForFishPosition`, `trackFocusedFishCameraState`), `src/rendering/scene/aquarium.ts` (`focusServiceFish`, `getFocusedServiceId`), and `src/components/AquariumScene.tsx` (`.fish-inspect-card`) smoothly dolly and track a selected service fish (snapping immediately under `prefers-reduced-motion` or pause) and reset to the full-tank panorama via the Reset view button, `Escape`, or open-water click.
 
+
+## Deterministic inspection captures (AQ-70.2)
+
+The development build accepts `?lookdev=1&seed=2026&time=1.25&labels=off`. Start it from the repository with an exact source revision:
+
+```sh
+VITE_GIT_COMMIT="$(git rev-parse HEAD)" npm run dev -- --host 127.0.0.1 --port 5214 --strictPort
+```
+
+The main-world `window.__AQUARIUM_LOOKDEV__` bridge exists only for a valid development opt-in. `ready()` waits for saved configuration, current navigation generation, all current asset loads and a frozen render. The complete roster is staged deterministically after those inputs settle. Normal aquarium reconciliation continues preserving existing fish state.
+
+The bridge provides `state()`, `renderFrozen()`, `setPreset(name)`, `setSubject(serviceId)`, and `setTime(seconds)`. Presets are `full-scene`, `fish-macro`, `coral-macro`, and `rock-sand-contact`. Select a configured service ID for the fish macro. Reef macros use the central island in portrait and the left island in landscape. Changing preset, subject, time, configuration or layout resets timing windows.
+
+Root captures through CUA CDP at 1440×900 or 402×874 CSS pixels, DPR1. After `ready()`, allow45 animation-frame callbacks for settled DOM/timing samples, call `renderFrozen()`, and capture via `Page.captureScreenshot` with `format: 'png'`, `fromSurface: true`, `captureBeyondViewport: false`, and no clip. Save the returned snapshot as the image's JSON sidecar; verify PNG signature, IHDR dimensions, source revision and asset readiness.
+
+Statistics distinguish RAF presentation intervals, complete CPU render calls, and explicit frozen-render CPU calls. They are not GPU timers. Renderer counts aggregate depth, shadow, main and shaft passes rather than counting unique geometry. Resource Timing reports encoded response bytes and transfer bytes separately; cached bodies, restricted timing and zero sizes must not be mistaken for complete network-download or GPU-memory measurements.
+
+Capture sidecars also include copied `inhabitants` positions and allowed world-height ranges. The [AQ-87 distribution review](asset-evidence/aq87/distribution-20261112/review.json) uses them to verify staged ecological bands and depth spread; these point snapshots do not certify animated-body clearance.
+
+The [committed before baseline](asset-evidence/aq70-2/baseline-before/review.json) records source0e958a0, four presets at both required viewports and two full-reload runs per view. All eight pairs are byte-identical with zero tolerance. Each of16 PNGs has a sidecar. This fixed High inspection mode disables adaptive quality, so its frame timings do not certify normal-runtime budgets. The baseline also does not accept final fish, coral, rock or composition art.

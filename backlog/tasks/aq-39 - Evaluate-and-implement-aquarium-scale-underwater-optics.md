@@ -4,8 +4,8 @@ title: Evaluate and implement aquarium-scale underwater optics
 status: To Do
 assignee:
   - '@Luna'
-created_date: '2026-11-03 12:33'
-updated_date: '2026-11-12 05:37'
+created_date: 2026-11-03 12:33
+updated_date: '2026-11-13T06:06:00Z'
 labels: []
 dependencies:
   - AQ-5
@@ -17,11 +17,12 @@ references:
   - src/rendering/scene/aquarium.ts
   - src/rendering/scene/underwater-optics.ts
   - src/rendering/scene/coral-material.ts
-  - 'https://pubmed.ncbi.nlm.nih.gov/18264420/'
-  - 'https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0002680'
-  - 'https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0128697'
+  - https://pubmed.ncbi.nlm.nih.gov/18264420/
+  - https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0002680
+  - https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0128697
   - >-
     https://research.engr.oregonstate.edu/parrish/index-refraction-seawater-and-freshwater-function-wavelength-and-temperature
+  - AQ-103
 documentation:
   - docs/modular-coral-and-live-rock-spec.md
   - docs/open-source-asset-and-motion-research.md
@@ -72,6 +73,8 @@ Per `docs/open-source-asset-and-motion-research.md` §6.2:
   - Fish textures remain vivid and un-veiled across the swimming volume.
   - Coral tips and basal crevices show clean depth separation without bloom/halo artifacts.
   - Frame times remain smooth with zero console errors or WebGL warnings.
+
+2026-11-12 AQ-80 decision update: retain the §1.3 omission of heavy front-pane reflections, screen-space distortion, and chromatic aberration. Clarify that this does not prohibit an optically clear physical enclosure, edge/grazing Fresnel highlight, or faint diagonal sheen. AQ-102 may add only those restrained front cues plus faint genuine mirrored outer-reef/sand content on side panes; no full-frame blur/refraction/color veil or scene-blocking glare. Glass raycasts stay disabled and glass/caustic motion follows the existing pause/reduced-motion/page-hidden clock. This update supersedes the 2026-11-08 conflict note's unresolved go/no-go; AQ-80 records GO and AQ-102 owns implementation.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -86,6 +89,8 @@ Per `docs/open-source-asset-and-motion-research.md` §6.2:
 2026-11-08 (backlog mapping, PR 10) — glass-pane conflict note: AQ-39 §1.3 omits heavy front-pane reflections (they degrade fish readability and violate AQ-14.6 AC #3). Tracker item #13 proposes a glass pane, which would introduce front-pane reflections and therefore conflicts with this omission. Before implementing heavy front-pane reflections or a glass pane, resolve the conflict explicitly: either keep the AQ-39 omission and defer/reject the glass pane, or update AQ-39 to specify the intended reflection behaviour. Do not implement both the omission and the glass pane silently. This note changes no implementation scope.
 
 2026-11-08 audit: PR #7 merged DEFAULT_AQUARIUM_OPTICS_CONFIG and evaluateDepthTintedColor in src/rendering/scene/underwater-optics.ts (9 passing tests in underwater-optics.test.ts) and wired Beer-Lambert depth-tinted water column (#082d50), fog (18..36), and LED intensities into src/rendering/scene/aquarium.ts. Moved to In Progress (ready-for-review / gemini approved) awaiting Root 2-viewport visual sign-off (AC #3).
+
+2026-11-12 AQ-80 conflict resolved GO with restrained enclosure cues; heavy front-pane reflections remain prohibited. Searched docs and Backlog references for a canonical standalone tracker item #13 file and found none; no such tracker record was edited or inferred. The decision is recorded here and in AQ-80; AQ-102 carries implementation.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
@@ -93,13 +98,37 @@ Per `docs/open-source-asset-and-motion-research.md` §6.2:
 <!-- COMMENTS:BEGIN -->
 author: @Luna
 created: 2026-11-04T02:32:00Z
+
 ---
+
 Research doc updated with source-bounded optics notes: Pope & Fry is pure-water absorption, coral FP spectra vary, and the ~48° critical angle applies at a water-air interface. Earlier tank RGB/PAR and fixed fluorescence claims are marked unverified or removed; no rendering values are claimed as measured.
+
 ---
 
 author: @root
 created: 2026-11-12 05:37
+
 ---
+
 Root review 2026-11-11: Returned to To Do. AC3 remains unverified: current two-viewport active/paused/reduced-motion visual and performance evidence is incomplete. Live review is exploratory only: browser zoom prevented exact CSS viewport dimensions, so it cannot close this criterion.
+
+---
+
+author: @Junie
+created: 2026-11-13 05:41
+
+---
+
+2026-11-12 user direction update: AQ-103 replaces only the earlier §1.3 surface-interface recommendation to use a subtle plane at y=+2.72. The surface must instead be level at configured surfaceY, bounded by the current enclosure, and use the softened Snell-window/TIR, rear fade, and front meniscus described in AQ-103. AQ-39’s broader attenuation, fluorescence, and glass-optics scope remains unchanged.
+
+---
+
+author: @Luna
+created: 2026-11-13T06:06:00Z
+
+---
+
+AQ-103 supersedes only this task’s water-surface-interface proposal: the surface stays horizontal at configured optics.surfaceY, matches glassEnclosureLayout, uses continuous shared-wave facets with softened Snell-window/TIR, bounded fixture transmission, restrained rear/mid coral bounce, rear fade, and a front meniscus. Do not treat this focused work as completion of AQ-39’s broader attenuation, coral fluorescence, side-glass optics, or visual/performance gates.
+
 ---
 <!-- COMMENTS:END -->

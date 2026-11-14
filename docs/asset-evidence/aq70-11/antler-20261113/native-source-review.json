@@ -1,0 +1,59 @@
+{
+  "reviewer": "Root",
+  "sourceCommit": "f4d4f24",
+  "audit": "Read-only separate background Blender audit of saved native source; no live user document edits",
+  "files": {
+    "src/rendering/assets/splat-fish/blend/reef-acropora-antler.blend": {
+      "bytes": 12803354,
+      "sha256": "984a6b2e5f5960c57b3b85c0fb576572fbeadf62773e0185aead803b750e459b"
+    },
+    "src/rendering/assets/splat-fish/overrides/reef-acropora-antler.glb": {
+      "bytes": 2068348,
+      "sha256": "fa8549a41253c7d2d26fc5ec49396de2d837021c3346364b7655ea733c54ea76"
+    },
+    "src/rendering/assets/corals/custom-colonies/reef-acropora-antler.glb": {
+      "bytes": 2069268,
+      "sha256": "8a0ed7c40e012d48eabef55e37833cc5616c06ff50914cf2d963ea2e22443844"
+    },
+    "src/rendering/modeling/build_reef_acropora_antler.py": {
+      "bytes": 18210,
+      "sha256": "fe248796bb4e81273ac00a6f2e494555d8b816cb3cbf02aa57148c77017e8502"
+    }
+  },
+  "highSource": {
+    "vertices": 128207,
+    "triangles": 245319,
+    "hidden": true,
+    "valid": true,
+    "coralliteCups": 1235
+  },
+  "runtimeMesh": {
+    "vertices": 14474,
+    "triangles": 28099,
+    "visible": true,
+    "selected": true,
+    "valid": true,
+    "growthTips": 32,
+    "coralliteCups": 124
+  },
+  "packedImages": {
+    "tissue": [
+      512,
+      512
+    ],
+    "normal": [
+      512,
+      512
+    ],
+    "roughness": [
+      512,
+      512
+    ]
+  },
+  "contactAO": "Separate disk PNG sampled into raw COLOR_0 alpha; no active fourth native image",
+  "limits": [
+    "Not taxonomic or specimen-scale certification",
+    "No closed-manifold or self-intersection certificate",
+    "All-archetype variants, physical scene calibration, animated fish clearance and measured performance remain open"
+  ]
+}

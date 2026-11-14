@@ -1,0 +1,19 @@
+{
+  "task": "AQ-70.2",
+  "sourceCommit": "0e958a0786906eff1469853a36db5894069a3b30",
+  "date": "2026-11-12",
+  "productionBuild": "Passed; bridge/parser/preset symbols absent from output bundles",
+  "nativeVerification": {
+    "url": "http://127.0.0.1:5212/?lookdev=1&seed=2026&time=1.25&labels=off",
+    "viewport": [1440, 900],
+    "dpr": 1,
+    "bridgeType": "undefined",
+    "serviceLinks": 8,
+    "pauseResume": "Pause became Resume while paused and returned to Pause after resuming",
+    "services": "Modal opened with all eight shortcuts and closed",
+    "settings": "Settings opened with eight saved services and closed without changing configuration"
+  },
+  "screenshot": "production-controls.png",
+  "gatingTests": "lookdev.test.ts and aquarium-lifecycle.test.ts cover DEV gating, production defaults, pause/reduced motion and readiness",
+  "scope": "Production query inertness and controls; no performance or final art acceptance"
+}

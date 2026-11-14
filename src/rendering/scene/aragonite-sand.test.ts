@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import * as THREE from 'three'
 import { describe, expect, it } from 'vitest'
 import {
@@ -5,6 +6,7 @@ import {
   createAragoniteSandPbrTextures,
   evaluateAragoniteSandElevation,
   evaluateRockBaseContactFactor,
+  getRockFootprintsForViewport,
 } from './aragonite-sand'
 
 function expandShaderIncludes(source: string, depth = 0): string {
@@ -16,19 +18,23 @@ function expandShaderIncludes(source: string, depth = 0): string {
   })
 }
 
-function compileSandShader(bed: ReturnType<typeof createAragoniteSandBed>) {
+function compileMaterialShader(material: THREE.MeshStandardMaterial) {
   const shader = {
     uniforms: {} as Record<string, { value: unknown }>,
     vertexShader: THREE.ShaderLib.standard.vertexShader,
     fragmentShader: THREE.ShaderLib.standard.fragmentShader,
   }
 
-  bed.sandMesh.material.onBeforeCompile(
+  material.onBeforeCompile(
     shader as unknown as THREE.WebGLProgramParametersWithUniforms,
     {} as THREE.WebGLRenderer,
   )
 
   return shader
+}
+
+function compileSandShader(bed: ReturnType<typeof createAragoniteSandBed>) {
+  return compileMaterialShader(bed.sandMesh.material)
 }
 
 describe('photoreal aragonite sand bed (AQ-70.12)', () => {
@@ -102,6 +108,48 @@ describe('photoreal aragonite sand bed (AQ-70.12)', () => {
     expect(expandedFragment).toContain('texture2D(roughnessMap, uvPrimary)')
     expect(expandedFragment).toContain('texture2D(roughnessMap, uvSecondary)')
     expect(expandedFragment).toContain('normalize(mix(sandNormalPrimary, sandNormalSecondary, sandMacroBlend))')
+    expect(shader.fragmentShader).toContain('float troughMask = (1.0 - smoothstep(0.24, 0.56, rippleWave)) * 0.12')
+    expect(shader.fragmentShader).toContain('smoothstep(-5.2, -0.4, vSandWorldPos.z)')
+    expect(shader.fragmentShader).toContain('vec3 frontSandTint = vec3(0.96, 0.95, 0.92)')
+    expect(shader.fragmentShader).toContain('float dRippleDx = 0.34 * cos(phase1) * 2.45')
+    expect(shader.fragmentShader).toContain('float dRippleDz = 0.34 * cos(phase1)')
+    expect(shader.fragmentShader).toContain('normal = normalize(normal + vec3(-dRippleDx * rippleStrength')
+    expect(shader.fragmentShader).toContain('floor(vSandWorldPos.xz * 220.0 + viewDir.xz * 6.0)')
+    expect(shader.fragmentShader).toContain('step(0.975, sparkleSignal)')
+    expect(shader.fragmentShader).toContain('roughnessFactor = mix(roughnessFactor, 0.08, sparkleGlint)')
+
+    bed.dispose()
+  })
+
+  it('uses a warm, stratified front-glass cross-section', () => {
+    const bed = createAragoniteSandBed({ textureSize: 64, narrow: false })
+    bed.frontEdgeMesh.material.map = null
+    const shader = compileMaterialShader(bed.frontEdgeMesh.material)
+    const threeWebglProgram = readFileSync(
+      new URL('../../../node_modules/three/src/renderers/webgl/WebGLProgram.js', import.meta.url),
+      'utf8',
+    )
+
+    // In the installed Three version, uv is always in the WebGLProgram
+    // attribute prefix while vUv itself is conditional on USE_UV. The edge
+    // shader therefore passes the always-present attribute through its own
+    // varying instead of depending on the optional standard varying.
+    expect(bed.frontEdgeMesh.material.map).toBeNull()
+    const uvAttributeIndex = threeWebglProgram.indexOf("'attribute vec2 uv;'")
+    expect(uvAttributeIndex).toBeGreaterThan(0)
+    expect(threeWebglProgram.slice(uvAttributeIndex - 240, uvAttributeIndex)).not.toContain('#ifdef USE_UV')
+    expect(THREE.ShaderChunk.uv_pars_vertex).toContain('#if defined( USE_UV ) || defined( USE_ANISOTROPY )')
+    expect(THREE.ShaderChunk.uv_pars_vertex).toContain('varying vec2 vUv;')
+    expect(shader.vertexShader).toContain('varying vec2 vFrontEdgeUv;')
+    expect(shader.vertexShader).toContain('vFrontEdgeUv = uv;')
+    expect(shader.fragmentShader).toContain('varying vec2 vFrontEdgeUv;')
+    expect(shader.fragmentShader).not.toContain('vUv.')
+    expect(shader.fragmentShader).toContain('smoothstep(0.80, 0.84, vFrontEdgeUv.y)')
+    expect(shader.fragmentShader).toContain('vec3 oxygenatedCrustColor = vec3(0.5647, 0.4910, 0.3712)')
+    expect(shader.fragmentShader).toContain('vec3 compactedBedColor = vec3(0.1529, 0.1301, 0.0976)')
+    expect(shader.fragmentShader).toContain('vec3 deepBedColor = vec3(0.0194, 0.0222, 0.0369)')
+    expect(shader.fragmentShader).toContain('sin(vFrontEdgeUv.y * 115.0 + sin(vFrontEdgeUv.x * 8.0) * 1.5)')
+    expect(shader.fragmentShader).toContain('strataNoise * middleLayerMask')
 
     bed.dispose()
   })
@@ -141,12 +189,15 @@ describe('photoreal aragonite sand bed (AQ-70.12)', () => {
 
     // Contact factor darkens tightly at rock footprints and stays 1.0 in open foreground sand
     expect(evaluateRockBaseContactFactor(0, 1.5, false)).toBe(1.0)
-    expect(evaluateRockBaseContactFactor(-2.35, -1.35, false)).toBeCloseTo(0.45, 2)
-    expect(evaluateRockBaseContactFactor(2.65, -1.20, false)).toBeCloseTo(0.48, 2)
-    expect(evaluateRockBaseContactFactor(-0.15, -1.35, true)).toBeCloseTo(0.45, 2)
+    const desktopFootprints = getRockFootprintsForViewport(false)
+    const phoneFootprints = getRockFootprintsForViewport(true)
+    expect(evaluateRockBaseContactFactor(desktopFootprints[0].x, desktopFootprints[0].z, false)).toBeCloseTo(0.45, 2)
+    expect(evaluateRockBaseContactFactor(desktopFootprints[1].x, desktopFootprints[1].z, false)).toBeCloseTo(0.48, 2)
+    expect(evaluateRockBaseContactFactor(phoneFootprints[0].x, phoneFootprints[0].z, true)).toBeCloseTo(0.45, 2)
     // The wider fade (0.55..1.55) extends the grounding ring beyond the rock edge: at r 1.45 the
     // factor is still darkened, where the old 1.30 fade had already returned to 1.0.
-    expect(evaluateRockBaseContactFactor(-2.35 + 1.45 * 1.85 * 0.92, -1.35, false)).toBeLessThan(1.0)
+    const leftDesktop = desktopFootprints[0]
+    expect(evaluateRockBaseContactFactor(leftDesktop.x + 1.45 * leftDesktop.radiusX * 0.92, leftDesktop.z, false)).toBeLessThan(1.0)
 
     bed.dispose()
   })
@@ -172,8 +223,9 @@ describe('photoreal aragonite sand bed (AQ-70.12)', () => {
     expect(rearOpen).toBeGreaterThan(frontOpen + 0.15)
 
     // Talus berm near left rock perimeter is higher than adjacent open sand at the same Z depth
-    const atRockPerimeter = evaluateAragoniteSandElevation(-2.35 + 1.35, -1.35, false)
-    const atCenterChannel = evaluateAragoniteSandElevation(0.15, -1.35, false)
+    const [leftFootprint, rightFootprint] = getRockFootprintsForViewport(false)
+    const atRockPerimeter = evaluateAragoniteSandElevation(leftFootprint.x + 0.75 * leftFootprint.radiusX, leftFootprint.z, false)
+    const atCenterChannel = evaluateAragoniteSandElevation((leftFootprint.x + rightFootprint.x) / 2, -1.35, false)
     expect(atRockPerimeter).toBeGreaterThan(atCenterChannel)
 
     // Every vertex on the sand bed stays strictly below habitat.bounds.min.y = -2.25
@@ -189,10 +241,28 @@ describe('photoreal aragonite sand bed (AQ-70.12)', () => {
   it('scatters instanced rubble, shells, and coralline chips plus a front-glass sand edge with raycasting disabled (AC #3)', () => {
     const bed = createAragoniteSandBed({ textureSize: 64, narrow: false })
 
-    expect(bed.rubbleInstances.count).toBe(48)
-    expect(bed.shellInstances.count).toBe(36)
-    expect(bed.corallineInstances.count).toBe(28)
+    expect(bed.rubbleInstances.count).toBe(96)
+    expect(bed.shellInstances.count).toBe(64)
+    expect(bed.corallineInstances.count).toBe(48)
     expect(bed.frontEdgeMesh.geometry.getAttribute('position').count).toBeGreaterThan(100)
+
+    const instanceXScales = (mesh: THREE.InstancedMesh) => {
+      const matrix = new THREE.Matrix4()
+      const position = new THREE.Vector3()
+      const rotation = new THREE.Quaternion()
+      const scale = new THREE.Vector3()
+      return Array.from({ length: mesh.count }, (_, index) => {
+        mesh.getMatrixAt(index, matrix)
+        matrix.decompose(position, rotation, scale)
+        return scale.x
+      })
+    }
+    for (const mesh of [bed.rubbleInstances, bed.shellInstances, bed.corallineInstances]) {
+      const scales = instanceXScales(mesh)
+      expect(scales.filter(scale => scale <= 0.003).length).toBeGreaterThan(scales.length * 0.8)
+      expect(Math.max(...scales)).toBeLessThanOrEqual(0.01)
+    }
+    expect(instanceXScales(bed.rubbleInstances).some(scale => scale > 0.005)).toBe(true)
 
     // Raycast against the group only hits sandMesh if tested directly; scatter & front edge never intercept fish clicks
     const raycaster = new THREE.Raycaster(

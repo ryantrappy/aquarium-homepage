@@ -1,14 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import { PerspectiveCamera, Vector3 } from 'three'
 import { isWaterSegmentSafe, type AxisAlignedBox, type Vec3 } from '../../simulation/habitat-navigation'
+import { REEF_FISH } from '../../lib/fish'
 import { getSpeciesBehaviorProfile } from '../../lib/fish-behavior'
 import { EXAMPLE_SERVICES } from '../../lib/services'
 import { EMPTY_FISH_EXTENSIONS } from '../../simulation/fish-extensions'
-import { fishClearanceRadius, fishRenderLength } from './fish-scale'
+import { fishBodyRadiusM, fishClearanceRadius, fishRenderLength } from './fish-scale'
 import { projectFishLinkBounds } from './fish-link-projection'
 import { createSwimmingFish, stepSwimmingFish } from './motion'
-import { canRunFishSceneLoop, classifySpeciesVerticalTier, evaluateTieredVerticalDepthRange, findSafeFishHeading, findSafeFishSpawn, fishSceneStatus, fishSpawnPreference, isSafeFishPosition, FISH_SPAWN_DEPTH_PLANES, FISH_SPAWN_DEPTH_PLANE_JITTER, TIERED_VERTICAL_DEPTH_ZONES, type OccupiedFishSpawn } from './fish-spawn'
+import { canRunFishSceneLoop, classifySpeciesVerticalTier, evaluateTieredVerticalDepthRange, findSafeFishHeading, findSafeFishSpawn, fishSceneStatus, fishSpawnPreference, fishSpawnSlotsForServices, isSafeFishPosition, FISH_SPAWN_DEPTH_PLANES, FISH_SPAWN_DEPTH_PLANE_JITTER, TIERED_VERTICAL_DEPTH_ZONES, type OccupiedFishSpawn } from './fish-spawn'
 import { instantiateModularReefHabitat } from './reef-assembly'
+import { reefPlacementsForViewport } from './reef-layout'
 
 function waterBounds(width: number, height: number): AxisAlignedBox {
   const halfWidth = Math.min(5, (9 - 2.8) * Math.tan(21 * Math.PI / 180) * (width / height) * .96)
@@ -16,13 +18,15 @@ function waterBounds(width: number, height: number): AxisAlignedBox {
 }
 
 function obstaclesFor(narrow: boolean) {
-  const placements = narrow
-    ? [{ island: 'left' as const, position: { x: -.15, y: -2.70, z: -1.35 }, scale: 3.4, yaw: .06 }]
-    : [
-      { island: 'left' as const, position: { x: -2.35, y: -2.70, z: -1.35 }, scale: 4.5, yaw: .08 },
-      { island: 'right' as const, position: { x: 2.65, y: -2.70, z: -1.20 }, scale: 4.3, yaw: -.10 },
-    ]
-  return placements.flatMap(({ island, position, scale, yaw }, index) => instantiateModularReefHabitat(island, scale, position, `reef-${index}`, yaw).obstacles)
+  return reefPlacementsForViewport(narrow).flatMap((placement, index) =>
+    instantiateModularReefHabitat(
+      placement.islandKind,
+      placement.uniformScale,
+      placement.position,
+      `reef-${index}`,
+      placement.yaw,
+    ).obstacles,
+  )
 }
 
 function oldTwoRowFrontPlane(index: number, narrow: boolean, bounds: AxisAlignedBox): Vec3 {
@@ -39,17 +43,20 @@ function spread(points: readonly Vec3[], axis: keyof Vec3) {
 function planStarters(width: number, height: number, stratified = true) {
   const bounds = waterBounds(width, height), narrow = width < 600, obstacles = obstaclesFor(narrow)
   const occupied: OccupiedFishSpawn[] = []
-  const horizontalOrder = [...EXAMPLE_SERVICES].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
+  const slots = fishSpawnSlotsForServices(EXAMPLE_SERVICES)
   const placements = EXAMPLE_SERVICES.map(service => {
     const clearance = fishClearanceRadius(service.fishId)
-    const preference = fishSpawnPreference(service.id, service.fishId, bounds, clearance, stratified ? { index: horizontalOrder.indexOf(service), count: horizontalOrder.length } : undefined)
+    const bodyRadiusM = fishBodyRadiusM(service.fishId)
+    const preference = fishSpawnPreference(service.id, service.fishId, bounds, clearance, stratified ? slots.get(service.id) : undefined)
     expect(preference, service.fishId).toBeDefined()
-    const position = findSafeFishSpawn(preference!.position, bounds, obstacles, clearance, occupied)
+    const verticalRange = evaluateTieredVerticalDepthRange(service.fishId, bounds, clearance)
+    expect(verticalRange, service.fishId).toBeDefined()
+    const position = findSafeFishSpawn(preference!.position, bounds, obstacles, clearance, occupied, undefined, bodyRadiusM, verticalRange!.worldYRange)
     expect(position, service.fishId).toBeDefined()
     const yaw = findSafeFishHeading(position!, preference!.yaw, bounds, obstacles, clearance)
     expect(yaw, service.fishId).toBeDefined()
-    occupied.push({ position: position!, clearance })
-    return { service, clearance, preference: preference!, position: position!, yaw: yaw! }
+    occupied.push({ position: position!, clearance, bodyRadiusM })
+    return { service, clearance, bodyRadiusM, verticalRange: verticalRange!, preference: preference!, position: position!, yaw: yaw! }
   })
   return { bounds, obstacles, placements }
 }
@@ -89,7 +96,8 @@ describe('safe aquarium fish spawning', () => {
     for (let i = 0; i < placements.length; i++) for (let j = i + 1; j < placements.length; j++) {
       const a = placements[i], b = placements[j]
       const distance = Math.hypot(a.position.x - b.position.x, a.position.y - b.position.y, a.position.z - b.position.z)
-      expect(distance, `${a.service.id}/${b.service.id} should start clear when a safe candidate exists`).toBeGreaterThanOrEqual(a.clearance + b.clearance)
+      expect(distance, `${a.service.id}/${b.service.id} should respect body-radius separation when a safe candidate exists`)
+        .toBeGreaterThanOrEqual(a.bodyRadiusM + b.bodyRadiusM + 0.06)
     }
 
     const previous = EXAMPLE_SERVICES.map((_, index) => oldTwoRowFrontPlane(index, Number(width) < 600, bounds))
@@ -121,16 +129,39 @@ describe('safe aquarium fish spawning', () => {
     expect(Math.max(...pixels)).toBeLessThan(Number(width))
   })
 
-  it('keeps identity-ranked horizontal slots stable on reorder and rejects invalid slots', () => {
+  it('assigns order-independent horizontal identity slots and independent ecological height strata', () => {
     const bounds = waterBounds(1440, 900), clearance = .3
-    const ordered = [...EXAMPLE_SERVICES].sort((a, b) => a.id < b.id ? -1 : 1)
-    const preferences = (services: typeof EXAMPLE_SERVICES) => services.map(service => ({
-      id: service.id,
-      preference: fishSpawnPreference(service.id, service.fishId, bounds, clearance, { index: ordered.indexOf(service), count: ordered.length }),
-    })).sort((a, b) => a.id < b.id ? -1 : 1)
-    expect(preferences([...EXAMPLE_SERVICES].reverse())).toEqual(preferences(EXAMPLE_SERVICES))
+    const slots = fishSpawnSlotsForServices(EXAMPLE_SERVICES)
+    const reversedSlots = fishSpawnSlotsForServices([...EXAMPLE_SERVICES].reverse())
+    expect([...slots]).toEqual([...reversedSlots])
+
+    const horizontalOrder = [...EXAMPLE_SERVICES].sort((a, b) => a.id.localeCompare(b.id))
+    const verticalOrder = [...EXAMPLE_SERVICES].sort((a, b) => {
+      const aDepth = getSpeciesBehaviorProfile(a.fishId)!.depthRange
+      const bDepth = getSpeciesBehaviorProfile(b.fishId)!.depthRange
+      return (aDepth[0] + aDepth[1]) / 2 - (bDepth[0] + bDepth[1]) / 2 || a.id.localeCompare(b.id)
+    })
+    horizontalOrder.forEach((service, index) => {
+      expect(slots.get(service.id)).toEqual({ index, count: EXAMPLE_SERVICES.length, heightIndex: verticalOrder.findIndex(item => item.id === service.id) })
+    })
+    expect(horizontalOrder.map(service => service.id)).not.toEqual(verticalOrder.map(service => service.id))
+
+    for (const service of EXAMPLE_SERVICES) {
+      const slot = slots.get(service.id)!
+      const preference = fishSpawnPreference(service.id, service.fishId, bounds, fishClearanceRadius(service.fishId), slot)!
+      const range = evaluateTieredVerticalDepthRange(service.fishId, bounds, fishClearanceRadius(service.fishId))!
+      const normalizedDepth = (bounds.max.y - preference.position.y) / (bounds.max.y - bounds.min.y)
+      expect(slot.index).toBe(horizontalOrder.findIndex(item => item.id === service.id))
+      expect(slot.heightIndex).toBe(verticalOrder.findIndex(item => item.id === service.id))
+      expect(normalizedDepth).toBeGreaterThanOrEqual(range.normalizedDepthRange[0] - 1e-12)
+      expect(normalizedDepth).toBeLessThanOrEqual(range.normalizedDepthRange[1] + 1e-12)
+    }
+
     expect(fishSpawnPreference('invalid', 'yellow-tang', bounds, clearance, { index: 1, count: 1 })).toBeUndefined()
     expect(fishSpawnPreference('invalid', 'yellow-tang', bounds, clearance, { index: 0, count: 0 })).toBeUndefined()
+    expect(fishSpawnPreference('invalid', 'yellow-tang', bounds, clearance, { index: 0, count: 2, heightIndex: -1 })).toBeUndefined()
+    expect(fishSpawnPreference('invalid', 'yellow-tang', bounds, clearance, { index: 0, count: 2, heightIndex: 2 })).toBeUndefined()
+    expect(fishSpawnPreference('invalid', 'yellow-tang', bounds, clearance, { index: 0, count: 2, heightIndex: 0.5 })).toBeUndefined()
   })
 
   it('keeps edge-ranked slot targets finite and inside clearance-safe bounds for small and large cohorts', () => {
@@ -222,6 +253,74 @@ describe('safe aquarium fish spawning', () => {
     expect(position).toBeDefined()
     expect(isSafeFishPosition(position!, .77, bounds, [])).toBe(true)
     expect(Math.hypot(position!.x, position!.y, position!.z)).toBeGreaterThan(0)
+  })
+
+  it('keeps a blocked low preferred spawn inside its safe height band while searching another depth plane', () => {
+    const bounds: AxisAlignedBox = { min: { x: -2, y: -2, z: -2 }, max: { x: 2, y: 2, z: 2 } }
+    const preferred = { x: 0, y: -1.5, z: 0 }
+    const band = [-1.7, -1.3] as const
+    const obstacles = [{ id: 'low-center-rock', bounds: { min: { x: -0.6, y: -2, z: -0.6 }, max: { x: 0.6, y: -1.3, z: 0.6 } } }]
+    // Model the extra mesh query accepting only the same X lane. Without a Y
+    // bound, the nearest safe point escapes upward; with the band it must use
+    // a different front/depth position inside the intended low water layer.
+    const sameLane = (candidate: Vec3) => Math.abs(candidate.x) < 1e-9
+    const unconstrained = findSafeFishSpawn(preferred, bounds, obstacles, 0.1, [], sameLane)
+    const constrained = findSafeFishSpawn(preferred, bounds, obstacles, 0.1, [], sameLane, undefined, band)
+
+    expect(unconstrained).toBeDefined()
+    expect(unconstrained!.y).toBeGreaterThan(band[1])
+    expect(constrained).toBeDefined()
+    expect(constrained!.x).toBe(preferred.x)
+    expect(constrained!.y).toBeGreaterThanOrEqual(band[0])
+    expect(constrained!.y).toBeLessThanOrEqual(band[1])
+    expect(constrained!.z).not.toBe(preferred.z)
+    expect(isSafeFishPosition(constrained!, 0.1, bounds, obstacles)).toBe(true)
+  })
+
+  it('preserves preferred height before forward distance when constrained, while omitted range keeps nearest-point ranking', () => {
+    const bounds: AxisAlignedBox = { min: { x: -2, y: -2, z: -2 }, max: { x: 2, y: 2, z: 2 } }
+    const preferred = { x: 0, y: -0.45, z: 0 }
+    const obstacles = [{ id: 'preferred-point-rock', bounds: { min: { x: -0.3, y: -0.55, z: -0.3 }, max: { x: 0.3, y: -0.35, z: 0.3 } } }]
+    const band = [-0.6, -0.3] as const
+    const near = (actual: number, expected: number) => Math.abs(actual - expected) < 1e-9
+    const onlyTwoAlternatives = (candidate: Vec3) =>
+      near(candidate.x, 0) && ((near(candidate.y, 0) && near(candidate.z, 0))
+        || (near(candidate.y, preferred.y) && near(candidate.z, 0.95)))
+
+    const legacyNearest = findSafeFishSpawn(preferred, bounds, obstacles, 0.1, [], onlyTwoAlternatives)
+    const constrained = findSafeFishSpawn(preferred, bounds, obstacles, 0.1, [], onlyTwoAlternatives, undefined, band)
+
+    expect(legacyNearest).toEqual({ x: 0, y: 0, z: 0 })
+    expect(constrained!.x).toBeCloseTo(0)
+    expect(constrained!.y).toBeCloseTo(preferred.y)
+    expect(constrained!.z).toBeCloseTo(0.95)
+    expect(isSafeFishPosition(legacyNearest!, 0.1, bounds, obstacles)).toBe(true)
+    expect(isSafeFishPosition(constrained!, 0.1, bounds, obstacles)).toBe(true)
+  })
+
+  it('fails closed when a height band has no clearance-safe fit or is malformed', () => {
+    const bounds: AxisAlignedBox = { min: { x: -2, y: -2, z: -2 }, max: { x: 2, y: 2, z: 2 } }
+    const preferred = { x: 0, y: -1.2, z: 0 }
+    const bandBlock = [{ id: 'whole-band-rock', bounds: { min: { x: -2, y: -1.6, z: -2 }, max: { x: 2, y: -0.9, z: 2 } } }]
+
+    expect(findSafeFishSpawn(preferred, bounds, [], 0.1, [], undefined, undefined, [4, 5])).toBeUndefined()
+    expect(findSafeFishSpawn(preferred, bounds, bandBlock, 0.1, [], undefined, undefined, [-1.5, -1])).toBeUndefined()
+    for (const invalid of [
+      [] as unknown as readonly [number, number],
+      [0] as unknown as readonly [number, number],
+      [0, 1, 2] as unknown as readonly [number, number],
+      [Number.NaN, 1] as const,
+      [0, Number.POSITIVE_INFINITY] as const,
+      [1, -1] as const,
+    ]) {
+      expect(findSafeFishSpawn(preferred, bounds, [], 0.1, [], undefined, undefined, invalid)).toBeUndefined()
+    }
+  })
+
+  it('leaves omitted height bounds unchanged for an already safe preferred spawn', () => {
+    const bounds: AxisAlignedBox = { min: { x: -2, y: -2, z: -2 }, max: { x: 2, y: 2, z: 2 } }
+    const preferred = { x: 0.2, y: 0.4, z: -0.7 }
+    expect(findSafeFishSpawn(preferred, bounds, [], 0.5)).toEqual(preferred)
   })
 
   it('spaces spawns by body radius when both sides supply one, instead of the legacy clearance sum (PR #28 follow-up)', () => {
@@ -334,6 +433,25 @@ describe('safe aquarium fish spawning', () => {
     // Surface schoolers sit higher in the water column than benthic perchers
     expect(chromisZone.worldYRange[1]).toBeGreaterThan(gobyZone.worldYRange[1])
     expect(tangZone.worldYRange[1]).toBeGreaterThan(gobyZone.worldYRange[0])
+  })
+
+  it.each([['phone 402x874', 402, 874], ['laptop 1440x900', 1440, 900]])('stages every catalog species inside its ecological vertical interval at %s', (_label, width, height) => {
+    const bounds = waterBounds(Number(width), Number(height))
+    const columnHeight = bounds.max.y - bounds.min.y
+    expect(REEF_FISH.length).toBeGreaterThanOrEqual(15)
+
+    for (const fish of REEF_FISH) {
+      const clearance = fishClearanceRadius(fish.id)
+      const ecologicalRange = evaluateTieredVerticalDepthRange(fish.id, bounds, clearance)
+      const preference = fishSpawnPreference(fish.id, fish.id, bounds, clearance)
+      expect(ecologicalRange, fish.id).toBeDefined()
+      expect(preference, fish.id).toBeDefined()
+      expect(preference!.position.y).toBeGreaterThanOrEqual(ecologicalRange!.worldYRange[0] - 1e-12)
+      expect(preference!.position.y).toBeLessThanOrEqual(ecologicalRange!.worldYRange[1] + 1e-12)
+      const normalizedDepth = (bounds.max.y - preference!.position.y) / columnHeight
+      expect(normalizedDepth, fish.id).toBeGreaterThanOrEqual(ecologicalRange!.normalizedDepthRange[0] - 1e-12)
+      expect(normalizedDepth, fish.id).toBeLessThanOrEqual(ecologicalRange!.normalizedDepthRange[1] + 1e-12)
+    }
   })
 })
 

@@ -7,22 +7,38 @@ import type { SwimmingFish } from './motion'
 import type { FishClipPlayer } from './fish-animation'
 import { refreshFishLink } from './fish-inhabitants'
 import { createAquarium, type AquariumController, type SceneStatus } from './aquarium'
+import { ENVIRONMENT_MAP_INTENSITY } from './environment-map'
+import { CENTER_ARCH_MOUNTS } from './reef-arch'
 import type { FishExtensionConfig, FishExtensionSnapshot } from '../../simulation/fish-extensions'
 
 const state = vi.hoisted(() => ({
-  renderer: undefined as undefined | { scene?: import('three').Scene; loop: ((time: number) => void) | null },
+  renderer: undefined as undefined | { scene?: import('three').Scene; loop: ((time: number) => void) | null; pixelRatio: number; info: { autoReset: boolean; render: { calls: number; triangles: number; points: number; lines: number }; memory: { geometries: number; textures: number }; reset(): void } },
   created: [] as SwimmingFish[], players: [] as FishClipPlayer[], sources: [] as import('three').Group[],
   textures: [] as { texture: import('three').Texture; load?: () => void; error?: (error: unknown) => void }[],
+  deferFishLoads: false, failFishLoads: false, pendingFishLoadReleases: [] as Array<() => void>, resizeCallback: undefined as undefined | (() => void),
+  deferMeshNavigation: false, pendingMeshNavigationReleases: [] as Array<() => void>, meshNavigationResult: undefined as unknown,
+  reefFallbackIslandIds: [] as string[], reefNavigationIslandIds: [] as string[][],
+  reefNavigationCoralSockets: [] as string[][],
+  reefAssemblyCalls: [] as Array<{ reefName: string; mounts: readonly unknown[]; options: unknown }>,
+  coralFallbackCalls: [] as Array<{ islandId: string; sockets: string[]; status: string; obstacleIds: string[] }>,
+  rockFallbackUnavailable: false,
+  rockFallbackObstacles: undefined as undefined | import('../../simulation/habitat-navigation').SolidObstacleVolume[],
+  mountedCoralBindings: [] as Array<{ socketName: string; coralAssetId: string; root: import('three').Group; materialControllers: never[] }>,
+  archMountedCoralBindings: undefined as undefined | import('./reef-assembly').AssembledCoralBinding[],
+  fakeEnvironmentMap: undefined as undefined | { texture: import('three').Texture; dispose: () => void },
+  standardFishMaterials: false,
   blockedSpawn: false, throwCreateForId: '', beforeCreateFailure: undefined as (() => void) | undefined,
+  forceLabelExposure: false,
 }))
 vi.mock('three', async importOriginal => {
   const real = await importOriginal<typeof import('three')>()
   class Renderer {
-    shadowMap = { enabled: false, type: 0 }; scene?: THREE.Scene; loop: ((time: number) => void) | null = null
+    shadowMap = { enabled: false, type: 0 }; scene?: THREE.Scene; loop: ((time: number) => void) | null = null; pixelRatio = 1
+    info = { autoReset: true, render: { calls: 0, triangles: 0, points: 0, lines: 0 }, memory: { geometries: 0, textures: 0 }, reset() { this.render = { calls: 0, triangles: 0, points: 0, lines: 0 } } }
     constructor() { state.renderer = this }
-    setPixelRatio() {} setSize() {} dispose() {} forceContextLoss() {}
+    setPixelRatio(value: number) { this.pixelRatio = value } getPixelRatio() { return this.pixelRatio } setSize() {} dispose() {} forceContextLoss() {}
     setAnimationLoop(loop: ((time: number) => void) | null) { this.loop = loop }
-    render(scene: THREE.Scene, camera: THREE.Camera) { this.scene = scene; camera.updateMatrixWorld(true) }
+    render(scene: THREE.Scene, camera: THREE.Camera) { this.scene = scene; camera.updateMatrixWorld(true); if (this.info.autoReset) this.info.reset(); this.info.render.calls++; this.info.render.triangles += 12; this.info.memory.geometries = scene.children.length; this.info.memory.textures = 3 }
   }
   return { ...real, WebGLRenderer: Renderer }
 })
@@ -31,26 +47,121 @@ vi.mock('three/addons/loaders/GLTFLoader.js', async () => {
   return { GLTFLoader: class {
     async loadAsync(url: string) {
       const root = new T.Group()
+      if (url.includes('reef-center-arch.glb')) {
+        const addRock = (name: string, size: [number, number, number], position: [number, number, number]) => {
+          const mesh = new T.Mesh(new T.BoxGeometry(...size), new T.MeshStandardMaterial())
+          mesh.name = name
+          mesh.position.set(...position)
+          mesh.userData.reefPrimitive = { role: 'rock' }
+          root.add(mesh)
+        }
+        addRock('arch-leg-left', [0.35, 1.8, 0.5], [-0.8, -0.1, 0])
+        addRock('arch-leg-right', [0.35, 1.8, 0.5], [0.8, -0.1, 0])
+        addRock('arch-cap', [1.95, 0.35, 0.5], [0, 0.925, 0])
+        return { scene: root, animations: [] }
+      }
       if (url.includes('left-rock') || url.includes('right-rock') || url === 'coral') return { scene: root, animations: [] }
-      const bone = new T.Bone(); bone.name = 'spine_0'; root.add(bone)
+      if (state.failFishLoads && url.includes('.glb')) throw new Error('Fixture fish asset failure')
+      if (state.deferFishLoads && url.includes('.glb')) await new Promise<void>(resolve => state.pendingFishLoadReleases.push(resolve))
+      const turningRig = url.includes('splat-fish/blue-tang.glb')
+      const spine: InstanceType<typeof T.Bone>[] = []
+      for (let index = 0; index < (turningRig ? 6 : 1); index++) {
+        const bone = new T.Bone(); bone.name = `spine_${index}`
+        if (index > 0) spine[index - 1]!.add(bone)
+        else root.add(bone)
+        spine.push(bone)
+      }
+      const pectoralLeft = new T.Bone(), pectoralRight = new T.Bone()
+      if (turningRig) {
+        pectoralLeft.name = 'pectoral_L'; pectoralRight.name = 'pectoral_R'
+        root.add(pectoralLeft, pectoralRight)
+      }
       const geometry = new T.BufferGeometry()
       geometry.setAttribute('position', new T.Float32BufferAttribute([-.2, 0, 0, .2, 0, 0, 0, .2, 0], 3))
       geometry.setAttribute('skinIndex', new T.Uint16BufferAttribute(new Array(12).fill(0), 4))
       geometry.setAttribute('skinWeight', new T.Float32BufferAttribute([1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0], 4)); geometry.setIndex([0, 1, 2])
-      const mesh = new T.SkinnedMesh(geometry, new T.MeshBasicMaterial({ side: T.DoubleSide })); root.add(mesh)
-      root.updateMatrixWorld(true); mesh.bind(new T.Skeleton([bone]))
+      const material = state.standardFishMaterials
+        ? new T.MeshStandardMaterial({ side: T.DoubleSide, roughness: 0.5 })
+        : new T.MeshBasicMaterial({ side: T.DoubleSide })
+      const mesh = new T.SkinnedMesh(geometry, material); root.add(mesh)
+      const bones = turningRig ? [...spine, pectoralLeft, pectoralRight] : spine
+      root.updateMatrixWorld(true); mesh.bind(new T.Skeleton(bones))
       const end = new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 0, 1), .7)
-      const clip = new T.AnimationClip('fixture-swim', 1, [new T.QuaternionKeyframeTrack('spine_0.quaternion', [0, 1], [0, 0, 0, 1, ...end.toArray()])])
+      const tracks = [new T.QuaternionKeyframeTrack('spine_0.quaternion', [0, 1], [0, 0, 0, 1, ...end.toArray()])]
+      if (turningRig) {
+        const tailEnd = new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 0, 1), .24)
+        const finEnd = new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 0, 1), .36)
+        tracks.push(
+          new T.QuaternionKeyframeTrack('spine_5.quaternion', [0, 1], [0, 0, 0, 1, ...tailEnd.toArray()]),
+          new T.QuaternionKeyframeTrack('pectoral_L.quaternion', [0, 1], [0, 0, 0, 1, ...finEnd.toArray()]),
+          new T.QuaternionKeyframeTrack('pectoral_R.quaternion', [0, 1], [0, 0, 0, 1, ...finEnd.toArray()]),
+        )
+      }
+      const clip = new T.AnimationClip('fixture-swim', 1, tracks)
       state.sources.push(root)
       return { scene: root, animations: [clip] }
     }
   } }
 })
-vi.mock('./reef-assembly', () => ({
-  LIVE_ROCK_ISLAND_URLS: { left: 'left-rock', right: 'right-rock' }, MODULAR_CORAL_ASSET_URLS: { fixture: 'coral' },
-  DEFAULT_LEFT_ISLAND_MOUNTS: [], DEFAULT_RIGHT_ISLAND_MOUNTS: [],
-  assembleCoralsOnRockSockets: () => ({ update() {} }), instantiateModularReefHabitat: () => ({ obstacles: [], anchors: [] }),
-}))
+vi.mock('./reef-assembly', async importOriginal => {
+  const real = await importOriginal<typeof import('./reef-assembly')>()
+  return {
+    ...real,
+    LIVE_ROCK_ISLAND_URLS: { left: 'left-rock', right: 'right-rock' }, MODULAR_CORAL_ASSET_URLS: { fixture: 'coral' },
+    DEFAULT_LEFT_ISLAND_MOUNTS: [], DEFAULT_RIGHT_ISLAND_MOUNTS: [],
+    assembleCoralsOnRockSockets: (...args: Parameters<typeof real.assembleCoralsOnRockSockets>) => {
+      const [reef, , mounts, options] = args
+      const mountedCorals = reef.name === 'reef-center-arch' && state.archMountedCoralBindings !== undefined
+        ? state.archMountedCoralBindings
+        : state.mountedCoralBindings
+      state.reefAssemblyCalls.push({ reefName: reef.name, mounts, options })
+      return { update() {}, mountedCorals }
+    },
+    instantiateModularReefHabitat: () => ({ obstacles: [], anchors: [] }),
+  }
+})
+vi.mock('./reef-mesh-navigation', async importOriginal => {
+  const real = await importOriginal<typeof import('./reef-mesh-navigation')>()
+  return {
+    ...real,
+    createRockFallbackObstacles: (reef: Parameters<typeof real.createRockFallbackObstacles>[0], islandId: string) => {
+      state.reefFallbackIslandIds.push(islandId)
+      if (state.rockFallbackUnavailable) return { status: 'unavailable' as const, reason: 'fixture-rock-geometry-unavailable' }
+      if (state.rockFallbackObstacles !== undefined) {
+        return { status: 'ready' as const, obstacles: state.rockFallbackObstacles.map(obstacle => ({ ...obstacle, id: `${obstacle.id}-${islandId}` })) }
+      }
+      if (islandId === 'reef-center-arch') return real.createRockFallbackObstacles(reef, islandId)
+      return { status: 'ready' as const, obstacles: [] }
+    },
+    createReefMeshNavigation: (...args: Parameters<typeof real.createReefMeshNavigation>) => {
+      state.reefNavigationIslandIds.push(args[0].map(island => island.islandId))
+      state.reefNavigationCoralSockets.push(args[0].flatMap(island => island.mountedCorals.map(coral => coral.socketName)))
+      return state.deferMeshNavigation
+        ? new Promise<Awaited<ReturnType<typeof real.createReefMeshNavigation>>>(resolve => {
+            state.pendingMeshNavigationReleases.push(() => resolve(state.meshNavigationResult as Awaited<ReturnType<typeof real.createReefMeshNavigation>>))
+          })
+        : real.createReefMeshNavigation(...args)
+    },
+    createMountedCoralFallbackObstacles: (...args: Parameters<typeof real.createMountedCoralFallbackObstacles>) => {
+      const result = real.createMountedCoralFallbackObstacles(...args)
+      state.coralFallbackCalls.push({
+        islandId: args[1],
+        sockets: args[0].map(coral => coral.socketName),
+        status: result.status,
+        obstacleIds: result.status === 'ready' ? result.obstacles.map(obstacle => obstacle.id) : [],
+      })
+      return result
+    },
+  }
+})
+vi.mock('./environment-map', async importOriginal => {
+  const real = await importOriginal<typeof import('./environment-map')>()
+  return {
+    ...real,
+    createAquariumEnvironmentMap: (...args: Parameters<typeof real.createAquariumEnvironmentMap>) =>
+      state.fakeEnvironmentMap ?? real.createAquariumEnvironmentMap(...args),
+  }
+})
 vi.mock('./motion', async importOriginal => {
   const real = await importOriginal<typeof import('./motion')>()
   return { ...real, createSwimmingFish: (...args: Parameters<typeof real.createSwimmingFish>) => {
@@ -75,6 +186,11 @@ vi.mock('./fish-spawn', async importOriginal => {
     findSafeFishSpawn: (...args: Parameters<typeof real.findSafeFishSpawn>) => state.blockedSpawn ? undefined : real.findSafeFishSpawn(...args),
   }
 })
+vi.mock('./fish-link-focus', async importOriginal => {
+  const real = await importOriginal<typeof import('./fish-link-focus')>()
+  return { ...real, applyFishLinkVisibility: (...args: Parameters<typeof real.applyFishLinkVisibility>) =>
+    real.applyFishLinkVisibility(args[0], state.forceLabelExposure || args[1], args[2]) }
+})
 vi.mock('../../lib/fish', async importOriginal => {
   const real = await importOriginal<typeof import('../../lib/fish')>()
   return { ...real, getFishById: (id: string) => id === 'artwork-fixture' ? { ...real.REEF_FISH[0], id } : real.getFishById(id) }
@@ -82,6 +198,7 @@ vi.mock('../../lib/fish', async importOriginal => {
 
 const service = (id: string, fishId = 'ocellaris-clownfish'): ServiceConfig => ({ id, fishId, name: id, url: `https://${id}.example.test`, isExample: false })
 let controller: AquariumController, host: HTMLDivElement, overlay: HTMLDivElement, status: ReturnType<typeof vi.fn<(value: SceneStatus) => void>>
+let documentHidden = false
 function anchors(services: ServiceConfig[]) {
   const old = new Map([...overlay.querySelectorAll<HTMLAnchorElement>('a')].map(a => [a.dataset.serviceId!, a]))
   const next = services.map(s => {
@@ -114,20 +231,666 @@ function spriteAlphaAt(texture: THREE.DataTexture, fx: number, fy: number): numb
 }
 
 beforeEach(() => {
+  documentHidden = false
   state.created = []; state.players = []; state.sources = []; state.textures = []; state.blockedSpawn = false; state.throwCreateForId = ''; state.beforeCreateFailure = undefined
+  state.deferFishLoads = false; state.failFishLoads = false; state.pendingFishLoadReleases = []; state.resizeCallback = undefined
+  state.deferMeshNavigation = false; state.pendingMeshNavigationReleases = []; state.meshNavigationResult = undefined
+  state.reefFallbackIslandIds = []; state.reefNavigationIslandIds = []
+  state.reefNavigationCoralSockets = []; state.reefAssemblyCalls = []; state.coralFallbackCalls = []
+  state.rockFallbackUnavailable = false
+  state.rockFallbackObstacles = undefined
+  state.mountedCoralBindings = []
+  state.archMountedCoralBindings = undefined
+  state.fakeEnvironmentMap = undefined
+  state.standardFishMaterials = false
+  state.forceLabelExposure = false
   vi.stubGlobal('devicePixelRatio', 1)
-  vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} })
-  vi.spyOn(document, 'hidden', 'get').mockReturnValue(false)
+  vi.stubGlobal('ResizeObserver', class { constructor(callback: () => void) { state.resizeCallback = callback } observe() {} disconnect() {} })
+  vi.spyOn(document, 'hidden', 'get').mockImplementation(() => documentHidden)
   vi.spyOn(THREE.TextureLoader.prototype, 'load').mockImplementation((_url, _loaded, _progress, error) => {
     const texture = new THREE.Texture(document.createElement('img')); vi.spyOn(texture, 'dispose'); state.textures.push({ texture, load: () => _loaded?.(texture), error }); return texture
   })
   vi.spyOn(console, 'warn').mockImplementation(() => {}); vi.spyOn(console, 'error').mockImplementation(() => {})
-  host = document.createElement('div'); Object.defineProperties(host, { clientWidth: { value: 1440 }, clientHeight: { value: 900 } })
+  host = document.createElement('div'); Object.defineProperties(host, { clientWidth: { configurable: true, value: 1440 }, clientHeight: { configurable: true, value: 900 } })
   host.innerHTML = '<canvas></canvas><div></div>'; overlay = host.querySelector('div')!; document.body.append(host); status = vi.fn()
 })
-afterEach(() => { controller?.dispose(); host.remove(); vi.restoreAllMocks(); vi.unstubAllGlobals() })
+afterEach(() => { controller?.dispose(); delete window.__AQUARIUM_LOOKDEV__; window.history.replaceState({}, '', '/'); host.remove(); vi.restoreAllMocks(); vi.unstubAllGlobals() })
 
 describe('actual aquarium controller inhabitant lifecycle without WebGL', () => {
+  it('applies the declared environment intensity to every material in the actual sand group', async () => {
+    await start([service('sand-ibl-check')])
+    const sandGroup = state.renderer!.scene!.getObjectByName('AragoniteSandGroup')
+    expect(sandGroup).toBeDefined()
+    const standardMaterials: THREE.MeshStandardMaterial[] = []
+    sandGroup!.traverse(object => {
+      if (!(object instanceof THREE.Mesh)) return
+      const materials = Array.isArray(object.material) ? object.material : [object.material]
+      for (const material of materials) {
+        if (material instanceof THREE.MeshStandardMaterial) standardMaterials.push(material)
+      }
+    })
+    expect(standardMaterials).toHaveLength(5)
+    expect(standardMaterials.every(material => material.envMapIntensity === ENVIRONMENT_MAP_INTENSITY.sand)).toBe(true)
+  })
+
+  it('wires one shared environment texture to PBR scene roles and disposes it only through its owner', async () => {
+    const sharedTexture = new THREE.Texture()
+    const sharedTextureDispose = vi.spyOn(sharedTexture, 'dispose')
+    const environmentOwnerDispose = vi.fn(() => sharedTexture.dispose())
+    state.fakeEnvironmentMap = { texture: sharedTexture, dispose: environmentOwnerDispose }
+    state.standardFishMaterials = true
+    const services = [service('ibl-clown'), service('ibl-tang', 'yellow-tang')]
+    await start(services)
+
+    const scene = state.renderer!.scene!
+    expect(scene.environment).toBe(sharedTexture)
+
+    const sandGroup = scene.getObjectByName('AragoniteSandGroup')!
+    const sandMaterials: THREE.MeshStandardMaterial[] = []
+    sandGroup.traverse(object => {
+      if (!(object instanceof THREE.Mesh)) return
+      for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
+        if (material instanceof THREE.MeshStandardMaterial) sandMaterials.push(material)
+      }
+    })
+    expect(sandMaterials).toHaveLength(5)
+    expect(sandMaterials.every(material => material.envMap === sharedTexture)).toBe(true)
+    expect(sandMaterials.every(material => material.envMapIntensity === ENVIRONMENT_MAP_INTENSITY.sand)).toBe(true)
+
+    const fishMaterials = services.flatMap(service => {
+      const materials: THREE.MeshStandardMaterial[] = []
+      rootFor(service.id).traverse(object => {
+        if (!(object instanceof THREE.Mesh)) return
+        for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
+          if (material instanceof THREE.MeshStandardMaterial) materials.push(material)
+        }
+      })
+      return materials
+    })
+    expect(fishMaterials).toHaveLength(2)
+    expect(fishMaterials.every(material => material.envMap === sharedTexture)).toBe(true)
+    expect(fishMaterials.every(material => material.envMapIntensity === ENVIRONMENT_MAP_INTENSITY.fish)).toBe(true)
+
+    const backdrop = scene.children.find(object => object instanceof THREE.Mesh && object.position.z === -5.5) as THREE.Mesh
+    const backdropMaterial = backdrop.material as THREE.MeshStandardMaterial
+    expect(backdropMaterial.envMap).toBe(sharedTexture)
+    expect(backdropMaterial.envMapIntensity).toBe(ENVIRONMENT_MAP_INTENSITY.backdrop)
+
+    update([services[1]!])
+    expect(sharedTextureDispose).not.toHaveBeenCalled()
+
+    controller.dispose()
+    expect(environmentOwnerDispose).toHaveBeenCalledOnce()
+    expect(sharedTextureDispose).toHaveBeenCalledOnce()
+  })
+
+  it('registers the center arch in desktop collision setup and omits it from the narrow scene', async () => {
+    const coralRoot = new THREE.Group()
+    const coralGeometry = new THREE.SphereGeometry(0.16, 8, 6)
+    coralGeometry.computeBoundingSphere()
+    coralRoot.add(new THREE.Mesh(coralGeometry, new THREE.MeshBasicMaterial()))
+    state.archMountedCoralBindings = [{
+      socketName: CENTER_ARCH_MOUNTS[0]!.socketName,
+      coralAssetId: CENTER_ARCH_MOUNTS[0]!.coralAssetId,
+      root: coralRoot,
+      materialControllers: [],
+    }]
+    await start([service('center-arch-link')])
+    expect(state.renderer!.scene!.getObjectByName('reef-center-arch')).toBeDefined()
+    expect(state.reefFallbackIslandIds).toContain('reef-center-arch')
+    expect(state.reefNavigationIslandIds.at(-1)).toContain('reef-center-arch')
+    const archAssembly = state.reefAssemblyCalls.find(call => call.reefName === 'reef-center-arch')!
+    expect(archAssembly.mounts).toEqual(CENTER_ARCH_MOUNTS)
+    expect(archAssembly.options).toMatchObject({ preserveAuthoredRock: true, includeScatter: false })
+    expect(state.coralFallbackCalls).toContainEqual({
+      islandId: 'reef-center-arch',
+      sockets: [CENTER_ARCH_MOUNTS[0]!.socketName],
+      status: 'ready',
+      obstacleIds: ['reef-center-arch-coral-0'],
+    })
+    expect(state.reefNavigationCoralSockets.at(-1)).toContain(CENTER_ARCH_MOUNTS[0]!.socketName)
+
+    Object.defineProperty(host, 'clientWidth', { configurable: true, value: 402 })
+    state.resizeCallback?.()
+
+    expect(state.renderer!.scene!.getObjectByName('reef-center-arch')).toBeUndefined()
+    expect(state.reefFallbackIslandIds.slice(state.reefFallbackIslandIds.indexOf('reef-center-arch') + 1)).not.toContain('reef-center-arch')
+    expect(state.reefNavigationIslandIds.at(-1)).not.toContain('reef-center-arch')
+    expect(state.reefNavigationCoralSockets.at(-1)).not.toContain(CENTER_ARCH_MOUNTS[0]!.socketName)
+  })
+
+  it('fails closed if an arch-mounted coral has no measurable fallback bounds after resize', async () => {
+    window.history.replaceState({}, '', '/?lookdev=1&seed=94')
+    const services = [service('arch-coral-link')]
+    await start(services)
+    const bridge = window.__AQUARIUM_LOOKDEV__!
+    await bridge.ready()
+
+    Object.defineProperty(host, 'clientWidth', { configurable: true, value: 402 })
+    state.resizeCallback?.()
+    await vi.waitFor(() => expect(status).toHaveBeenLastCalledWith('ready'))
+
+    const malformedRoot = new THREE.Group()
+    const missingSphereGeometry = new THREE.BufferGeometry()
+    missingSphereGeometry.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 1, 0, 0, 0, 1, 0], 3))
+    malformedRoot.add(new THREE.Mesh(missingSphereGeometry, new THREE.MeshBasicMaterial()))
+    state.archMountedCoralBindings = [{
+      socketName: CENTER_ARCH_MOUNTS[0]!.socketName,
+      coralAssetId: CENTER_ARCH_MOUNTS[0]!.coralAssetId,
+      root: malformedRoot,
+      materialControllers: [],
+    }]
+    const createdBeforeFailure = state.created.length
+    Object.defineProperty(host, 'clientWidth', { configurable: true, value: 1440 })
+    state.resizeCallback?.()
+
+    await vi.waitFor(() => expect(status).toHaveBeenLastCalledWith('failed'))
+    expect(state.coralFallbackCalls.at(-1)).toMatchObject({
+      islandId: 'reef-center-arch',
+      status: 'unavailable',
+    })
+    expect(state.renderer!.loop).toBeNull()
+    expect(state.created).toHaveLength(createdBeforeFailure)
+    expect(overlay.querySelectorAll('a')).toHaveLength(1)
+    expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(services[0]!.url + '/')
+    expect(bridge.state().ready).toBe(false)
+    expect(bridge.state().failure).toMatch(/Arch coral bounds unavailable/i)
+    await expect(bridge.ready()).rejects.toThrow(/Arch coral bounds unavailable/i)
+
+    const updated = [service('arch-coral-link-updated', 'yellow-tang')]
+    anchors(updated)
+    controller.update(updated, false)
+    Object.defineProperty(host, 'clientWidth', { configurable: true, value: 402 })
+    state.resizeCallback?.()
+    expect(status).toHaveBeenLastCalledWith('failed')
+    expect(state.renderer!.loop).toBeNull()
+    expect(state.created).toHaveLength(createdBeforeFailure)
+    expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(updated[0]!.url + '/')
+    expect(bridge.state().ready).toBe(false)
+  })
+
+  it('holds capture readiness until the application finishes loading saved configuration', async () => {
+    window.history.replaceState({}, '', '/?lookdev=1')
+    const services = [service('config-pending')]
+    anchors(services)
+    controller = createAquarium(host.querySelector('canvas')!, overlay, services, false, status, undefined, undefined, undefined, false)
+    await vi.waitFor(() => expect(status).toHaveBeenLastCalledWith('ready'))
+    const bridge = window.__AQUARIUM_LOOKDEV__!
+    let resolved = false
+    const ready = bridge.ready().then(snapshot => { resolved = true; return snapshot })
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(resolved).toBe(false)
+    expect(bridge.state().ready).toBe(false)
+    controller.update(services, false, true)
+    expect((await ready).ready).toBe(true)
+    const samples = bridge.state().inhabitants
+    expect(samples.filter(sample => !sample.schoolmate).map(sample => sample.id).sort()).toEqual(services.map(service => service.id).sort())
+    for (const sample of samples) {
+      const live = state.created.slice().reverse().find(fish => fish.id === sample.id)!
+      expect(sample.position).toEqual(live.position)
+      expect(sample.position).not.toBe(live.position)
+      expect(sample.heightRange).not.toBeNull()
+      expect(sample.position.y).toBeGreaterThanOrEqual(sample.heightRange![0])
+      expect(sample.position.y).toBeLessThanOrEqual(sample.heightRange![1])
+    }
+  })
+
+  it('fails closed when rock fallback geometry is unavailable and keeps service links available', async () => {
+    window.history.replaceState({}, '', '/?lookdev=1&seed=103')
+    state.rockFallbackUnavailable = true
+    const services = [service('visible-service')]
+    anchors(services)
+    controller = createAquarium(host.querySelector('canvas')!, overlay, services, false, status)
+
+    await vi.waitFor(() => expect(status).toHaveBeenLastCalledWith('failed'))
+    expect(state.renderer!.loop).toBeNull()
+    expect(state.created).toHaveLength(0)
+    expect(overlay.querySelectorAll('a')).toHaveLength(1)
+    expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(services[0]!.url + '/')
+    expect(window.__AQUARIUM_LOOKDEV__!.state()).toMatchObject({ ready: false, failure: expect.stringContaining('fixture-rock-geometry-unavailable') })
+    await expect(window.__AQUARIUM_LOOKDEV__!.ready()).rejects.toThrow(/fixture-rock-geometry-unavailable/)
+
+    const updated = [service('updated-service', 'yellow-tang')]
+    anchors(updated)
+    controller.update(updated, false)
+    Object.defineProperty(host, 'clientWidth', { configurable: true, value: 402 })
+    state.resizeCallback?.()
+
+    expect(status).toHaveBeenLastCalledWith('failed')
+    expect(state.renderer!.loop).toBeNull()
+    expect(state.created).toHaveLength(0)
+    expect(overlay.querySelectorAll('a')).toHaveLength(1)
+    expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(updated[0]!.url + '/')
+    expect(window.__AQUARIUM_LOOKDEV__!.state()).toMatchObject({ ready: false, failure: expect.stringContaining('fixture-rock-geometry-unavailable') })
+  })
+
+  it('passes ready fallback rock bounds into real fish spawn safety checks', async () => {
+    state.rockFallbackObstacles = [{
+      id: 'whole-water-column',
+      bounds: {
+        min: { x: -100, y: -100, z: -100 },
+        max: { x: 100, y: 100, z: 100 },
+      },
+    }]
+    const services = [service('blocked-by-rock')]
+    anchors(services)
+    controller = createAquarium(host.querySelector('canvas')!, overlay, services, false, status)
+
+    await vi.waitFor(() => expect(status).toHaveBeenLastCalledWith('failed'))
+    expect(state.renderer!.loop).toBeNull()
+    expect(state.created).toHaveLength(0)
+    expect(overlay.querySelectorAll('a')).toHaveLength(1)
+    expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(services[0]!.url + '/')
+  })
+
+  it('fails closed on resize when a mounted coral has a nonfinite origin', async () => {
+    window.history.replaceState({}, '', '/?lookdev=1&seed=82')
+    const services = [service('coral-origin-service')]
+    await start(services)
+    const bridge = window.__AQUARIUM_LOOKDEV__!
+    await bridge.ready()
+    const createdBeforeInvalidOrigin = state.created.length
+
+    const invalidRoot = new THREE.Group()
+    invalidRoot.position.set(Number.NaN, 0, 0)
+    state.mountedCoralBindings = [{
+      socketName: 'socket_fixture_bad_origin',
+      coralAssetId: 'fixture',
+      root: invalidRoot,
+      materialControllers: [],
+    }]
+    Object.defineProperty(host, 'clientWidth', { configurable: true, value: 402 })
+    state.resizeCallback?.()
+
+    await vi.waitFor(() => expect(status).toHaveBeenLastCalledWith('failed'))
+    expect(state.renderer!.loop).toBeNull()
+    expect(state.created).toHaveLength(createdBeforeInvalidOrigin)
+    expect(overlay.querySelectorAll('a')).toHaveLength(1)
+    expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(services[0]!.url + '/')
+    expect(bridge.state().ready).toBe(false)
+    expect(bridge.state().failure).toBeTruthy()
+    await expect(bridge.ready()).rejects.toThrow(/socket_fixture_bad_origin|finite|origin/i)
+
+    const updated = [service('still-linked', 'yellow-tang')]
+    anchors(updated)
+    controller.update(updated, false)
+    Object.defineProperty(host, 'clientWidth', { configurable: true, value: 1440 })
+    state.resizeCallback?.()
+
+    expect(status).toHaveBeenLastCalledWith('failed')
+    expect(state.renderer!.loop).toBeNull()
+    expect(state.created).toHaveLength(createdBeforeInvalidOrigin)
+    expect(overlay.querySelectorAll('a')).toHaveLength(1)
+    expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(updated[0]!.url + '/')
+    expect(bridge.state().ready).toBe(false)
+    expect(bridge.state().failure).toBeTruthy()
+  })
+
+  it('stages the same final look-dev roster whether saved services arrive early or late', async () => {
+    window.history.replaceState({}, '', '/?lookdev=1&seed=61')
+    const final = [service('early-a'), service('early-b', 'yellow-tang'), service('late-c', 'royal-gramma')]
+    const poses = () => final.map(service => ({
+      id: service.id,
+      position: { ...state.created.slice().reverse().find(fish => fish.id === service.id)!.position },
+    }))
+    await start(final.slice(0, 2))
+    await window.__AQUARIUM_LOOKDEV__!.ready()
+    update(final)
+    await window.__AQUARIUM_LOOKDEV__!.ready()
+    const lateArrival = poses()
+
+    controller.dispose()
+    state.created = []
+    status.mockClear()
+    await start(final)
+    await window.__AQUARIUM_LOOKDEV__!.ready()
+    expect(poses()).toEqual(lateArrival)
+  })
+
+  it.each([[1440, 900], [402, 874]])('keeps final roster spawns in their ecological bands across the %ix%i water column', async (width, height) => {
+    Object.defineProperty(host, 'clientWidth', { configurable: true, value: width })
+    Object.defineProperty(host, 'clientHeight', { configurable: true, value: height })
+    window.history.replaceState({}, '', '/?lookdev=1&seed=2026')
+    await start([
+      service('a-gramma', 'royal-gramma'), service('b-yellow', 'yellow-tang'),
+      service('c-blue', 'blue-tang'), service('d-clown'),
+      service('e-cardinal', 'banggai-cardinalfish'), service('f-wrasse', 'mccoskers-flasher-wrasse'),
+      service('g-butterfly', 'copperband-butterflyfish'), service('h-anthias', 'lyretail-anthias'),
+    ])
+    const snapshot = await window.__AQUARIUM_LOOKDEV__!.ready()
+    const leaders = snapshot.inhabitants.filter(fish => !fish.schoolmate)
+    expect(leaders).toHaveLength(8)
+    for (const fish of snapshot.inhabitants) {
+      expect(fish.heightRange).not.toBeNull()
+      expect(fish.position.y).toBeGreaterThanOrEqual(fish.heightRange![0] - 1e-9)
+      expect(fish.position.y).toBeLessThanOrEqual(fish.heightRange![1] + 1e-9)
+    }
+    const heights = leaders.map(fish => fish.position.y)
+    expect(Math.max(...heights) - Math.min(...heights)).toBeGreaterThan(2.5)
+    expect(leaders.find(fish => fish.speciesId === 'royal-gramma')!.position.y).toBeLessThan(-0.75)
+    expect(new Set(leaders.map(fish => fish.position.z.toFixed(1))).size).toBeGreaterThanOrEqual(2)
+  })
+
+  it('loads a later visible species while an off-screen species stays queued', async () => {
+    const idleCallbacks: IdleRequestCallback[] = []
+    vi.stubGlobal('requestIdleCallback', (callback: IdleRequestCallback) => {
+      idleCallbacks.push(callback)
+      return idleCallbacks.length
+    })
+    const services = [
+      service('clown'), service('tang', 'yellow-tang'), service('gramma', 'royal-gramma'),
+      service('offscreen', 'mandarin-dragonet'), service('visible', 'lyretail-anthias'),
+    ]
+    await start(services)
+    const offscreen = state.created.find(fish => fish.id === 'offscreen')!
+    offscreen.position = { ...offscreen.position, x: 100 }
+    controller.update(services, true)
+    for (const callback of idleCallbacks.splice(0)) callback({ didTimeout: false, timeRemaining: () => 10 })
+    await vi.waitFor(() => expect(state.sources).toHaveLength(4))
+    await vi.waitFor(() => expect(state.players).toHaveLength(state.created.length - 1))
+    let offscreenHasModel = false
+    rootFor('offscreen').traverse(node => { if (node instanceof THREE.SkinnedMesh) offscreenHasModel = true })
+    expect(offscreenHasModel).toBe(false)
+  })
+
+  it('samples a distant fish less often without halving its animation clock', async () => {
+    const services = [service('far')]
+    await start(services)
+    const fish = state.created[0]!
+    fish.position = { ...fish.position, z: -3.5 }
+    controller.update(services, true) // Publish the far pose and evaluate LOD while stopped.
+    controller.update(services, false)
+    const player = state.players[0]!, originalAdvance = player.advance
+    const sampledSeconds: number[] = []
+    vi.spyOn(player, 'advance').mockImplementation(delta => {
+      const rate = (.55 + Math.min(1.7, fish.speed * 2.2)) * fish.animationPlaybackRate
+      sampledSeconds.push(delta / rate)
+      originalAdvance(delta)
+    })
+    state.renderer!.loop?.(0)
+    state.renderer!.loop?.(100)
+    expect(sampledSeconds).toHaveLength(3)
+    for (const delta of sampledSeconds) expect(delta).toBeCloseTo(2 / 60)
+    expect(sampledSeconds.reduce((sum, delta) => sum + delta, 0)).toBeCloseTo(0.1)
+  })
+
+  it('freezes fish motion, swim clips and turn poses under a live reduced-motion toggle without catch-up', async () => {
+    let reducedMotion = false
+    vi.stubGlobal('matchMedia', () => ({
+      get matches() { return reducedMotion },
+      addEventListener() {},
+      removeEventListener() {},
+    }))
+    const services = [service('tang', 'blue-tang')]
+    await start(services)
+    await vi.waitFor(() => expect(state.players).toHaveLength(1))
+
+    const fish = state.created[0]!
+    const player = state.players[0]!
+    const root = rootFor('tang')
+    const mesh = meshFor('tang')
+    const bones = new Map(mesh.skeleton.bones.map(bone => [bone.name, bone]))
+    expect(bones.has('spine_5')).toBe(true)
+    expect(bones.has('pectoral_L')).toBe(true)
+    expect(bones.has('pectoral_R')).toBe(true)
+
+    // Force a large heading change in the actual controller fixture so the
+    // resumed pose contains both a swim clip and a turn-rig overlay.
+    const origin = { ...fish.position }
+    fish.yaw = 0
+    fish.speed = 0.4
+    fish.route = [origin, { x: origin.x - 1.5, y: origin.y, z: origin.z }]
+    fish.waypoint = 1
+    fish.targetWait = 0
+    fish.routeGeneration = fish.behavior.navigationGeneration
+    state.renderer!.loop?.(0)
+    state.renderer!.loop?.(100)
+    expect(fish.position).not.toEqual(origin)
+    expect(Math.abs(fish.turnKinematics.turnCurvature)).toBeGreaterThan(0)
+    const turnPose = bones.get('spine_5')!.quaternion.clone()
+    const finPose = bones.get('pectoral_L')!.quaternion.clone()
+    expect(turnPose.angleTo(new THREE.Quaternion())).toBeGreaterThan(0.01)
+    expect(finPose.angleTo(new THREE.Quaternion())).toBeGreaterThan(0.01)
+
+    const movingPose = {
+      position: { ...fish.position },
+      yaw: fish.yaw,
+      pitch: fish.pitch,
+      bank: fish.bank,
+      speed: fish.speed,
+      turnKinematics: { ...fish.turnKinematics },
+      spine: bones.get('spine_5')!.quaternion.toArray(),
+      leftPectoral: bones.get('pectoral_L')!.quaternion.toArray(),
+      rightPectoral: bones.get('pectoral_R')!.quaternion.toArray(),
+    }
+    const originalAdvance = player.advance
+    const advanceSpy = vi.spyOn(player, 'advance').mockImplementation(delta => originalAdvance(delta))
+
+    reducedMotion = true
+    state.renderer!.loop?.(300)
+    state.renderer!.loop?.(800)
+    expect({
+      position: fish.position,
+      yaw: fish.yaw,
+      pitch: fish.pitch,
+      bank: fish.bank,
+      speed: fish.speed,
+      turnKinematics: fish.turnKinematics,
+      spine: bones.get('spine_5')!.quaternion.toArray(),
+      leftPectoral: bones.get('pectoral_L')!.quaternion.toArray(),
+      rightPectoral: bones.get('pectoral_R')!.quaternion.toArray(),
+    }).toEqual(movingPose)
+    expect(advanceSpy).not.toHaveBeenCalled()
+
+    reducedMotion = false
+    state.renderer!.loop?.(800)
+    expect(fish.position).toEqual(movingPose.position)
+    expect(advanceSpy).not.toHaveBeenCalled()
+    state.renderer!.loop?.(850)
+    expect(fish.position).not.toEqual(movingPose.position)
+    expect(advanceSpy).toHaveBeenCalledTimes(3)
+    expect(rootFor('tang')).toBe(root)
+  })
+
+  it('drives the actual water-surface clock through active, paused, reduced-motion, and hidden states', async () => {
+    let reducedMotion = false
+    vi.stubGlobal('matchMedia', () => ({
+      get matches() { return reducedMotion },
+      addEventListener() {},
+      removeEventListener() {},
+    }))
+    const services = [service('surface-clock')]
+    await start(services)
+
+    const surface = state.renderer!.scene!.getObjectByName('AquariumWaterSurface') as THREE.Mesh
+    const surfaceMaterial = surface.material as THREE.ShaderMaterial
+    const surfaceTime = () => surfaceMaterial.uniforms.uTime.value as number
+    expect(surface).toBeInstanceOf(THREE.Mesh)
+    expect(surfaceTime()).toBe(0)
+
+    state.renderer!.loop?.(0)
+    state.renderer!.loop?.(100)
+    const activeTime = surfaceTime()
+    expect(activeTime).toBeGreaterThan(0)
+
+    // Hidden scenes stop drawing, so the last visible surface phase is held.
+    documentHidden = true
+    document.dispatchEvent(new Event('visibilitychange'))
+    expect(state.renderer!.loop).toBeNull()
+    expect(surfaceTime()).toBe(activeTime)
+    documentHidden = false
+    document.dispatchEvent(new Event('visibilitychange'))
+    state.renderer!.loop?.(5000) // First frame resets the suspended clock.
+    expect(surfaceTime()).toBe(activeTime)
+    state.renderer!.loop?.(5050)
+    expect(surfaceTime()).toBeGreaterThan(activeTime)
+    expect(surfaceTime()).toBeLessThan(activeTime + 0.1)
+
+    const beforePauseTime = surfaceTime()
+    controller.update(services, true)
+    expect(surfaceTime()).toBe(0)
+    controller.update(services, false)
+    state.renderer!.loop?.(5100) // Resume without consuming the paused wall-clock gap.
+    expect(surfaceTime()).toBe(0)
+    state.renderer!.loop?.(5150)
+    expect(surfaceTime()).toBeCloseTo(beforePauseTime + 0.05)
+
+    reducedMotion = true
+    state.renderer!.loop?.(5200)
+    state.renderer!.loop?.(5250)
+    expect(surfaceTime()).toBe(0)
+    reducedMotion = false
+    state.renderer!.loop?.(5250)
+    expect(surfaceTime()).toBe(0)
+    state.renderer!.loop?.(5300)
+    expect(surfaceTime()).toBeCloseTo(beforePauseTime + 0.1)
+  })
+
+  it('upgrades every schoolmate when its shared lazy-loaded species arrives', async () => {
+    window.history.replaceState({}, '', '/?lookdev=1&seed=23')
+    await start([
+      service('clown'), service('tang', 'yellow-tang'),
+      service('gramma', 'royal-gramma'), service('school', 'blue-green-chromis'),
+    ])
+    await vi.waitFor(() => expect(state.sources).toHaveLength(4))
+    expect(state.created.length).toBeGreaterThan(4)
+    await vi.waitFor(() => expect(state.players).toHaveLength(state.created.length))
+    expect((await window.__AQUARIUM_LOOKDEV__!.ready()).unresolvedFishIds).toEqual([])
+  })
+
+  it('freezes a DEV look-dev scene at the configured seed/time and resets stats after preset, subject, and time changes', async () => {
+    window.history.replaceState({}, '', '/?lookdev=1&seed=43&time=7.25&preset=fish-macro&subject=capture&labels=off')
+    await start([service('capture')])
+    const bridge = window.__AQUARIUM_LOOKDEV__!
+    const ready = await bridge.ready()
+    expect(ready.ready).toBe(true)
+    expect(ready.seed).toBe(43)
+    expect(ready.timeSeconds).toBe(7.25)
+    expect(ready.preset).toBe('fish-macro')
+    expect(ready.viewport).toMatchObject({ width: 1440, height: 900, devicePixelRatio: 1 })
+    expect(ready.renderer.render.calls).toBeGreaterThan(0)
+    expect(overlay.querySelector('.fish-name')?.getAttribute('style')).toContain('visibility: hidden')
+    // Exercise the normal exposure writer for a visible fish, rather than
+    // relying on the mock triangle's raycast visibility in this fixture.
+    state.forceLabelExposure = true
+    bridge.renderFrozen()
+    expect(overlay.querySelector('a')?.dataset.occluded).toBe('false')
+    expect(overlay.querySelector('.fish-name')?.getAttribute('style')).toContain('visibility: hidden')
+
+    const fish = state.created.slice().reverse().find(fish => fish.id === 'capture')!
+    const startPosition = { ...fish.position }
+    const startBone = meshFor('capture').skeleton.bones[0]!.quaternion.clone()
+    expect(fish.yaw).toBeCloseTo(Math.PI / 2)
+    advance()
+    expect(fish.position).toEqual(startPosition)
+    expect(fish.yaw).toBeCloseTo(Math.PI / 2)
+
+    expect(bridge.setTime(0.6)).toBe(true)
+    expect(bridge.state().ready).toBe(true)
+    expect(bridge.state().timing.rafInterval).toBeNull()
+    expect(meshFor('capture').skeleton.bones[0]!.quaternion.angleTo(startBone)).toBeGreaterThan(0.01)
+    const fishMacro = controller.getCameraZoom()
+    expect(bridge.setPreset('coral-macro').preset).toBe('coral-macro')
+    expect(controller.getCameraZoom().targetX).not.toBe(fishMacro.targetX)
+    expect(bridge.state().timing.rafInterval).toBeNull()
+    expect(bridge.setSubject('missing')).toBe(false)
+    expect(bridge.setSubject(undefined)).toBe(true)
+    expect(bridge.state().timing.rafInterval).toBeNull()
+    expect(bridge.setPreset('rock-sand-contact').preset).toBe('rock-sand-contact')
+    expect(bridge.setTime(Number.NaN)).toBe(false)
+    Object.defineProperty(host, 'clientWidth', { configurable: true, value: 402 })
+    Object.defineProperty(host, 'clientHeight', { configurable: true, value: 874 })
+    state.resizeCallback?.()
+    expect(bridge.state().viewport).toMatchObject({ width: 402, height: 874, devicePixelRatio: 1 })
+    await bridge.ready()
+    expect(bridge.state().ready).toBe(true)
+    expect(bridge.state().timing.rafInterval).toBeNull()
+    const frozen = bridge.renderFrozen()
+    expect(frozen.timing.frozenPoseRenderCall?.sampleCount).toBe(1)
+
+    const canvas = host.querySelector('canvas')!
+    canvas.dispatchEvent(new Event('webglcontextlost', { cancelable: true }))
+    expect(bridge.state().ready).toBe(false)
+    expect(state.renderer!.loop).toBeNull()
+    const restoredReady = bridge.ready()
+    canvas.dispatchEvent(new Event('webglcontextrestored'))
+    expect((await restoredReady).ready).toBe(true)
+  })
+
+  it('does not resolve look-dev readiness until queued fish assets finish and are integrated', async () => {
+    state.deferFishLoads = true
+    window.history.replaceState({}, '', '/?lookdev=1&seed=11')
+    anchors([service('pending')])
+    controller = createAquarium(host.querySelector('canvas')!, overlay, [service('pending')], false, status)
+    const bridge = window.__AQUARIUM_LOOKDEV__!
+    const readyPromise = bridge.ready()
+    await vi.waitFor(() => expect(state.pendingFishLoadReleases.length).toBeGreaterThan(0))
+    expect(bridge.state().ready).toBe(false)
+    expect(bridge.state().pendingAssetCount).toBeGreaterThan(0)
+    for (const release of state.pendingFishLoadReleases.splice(0)) release()
+    await vi.waitFor(() => expect(status).toHaveBeenLastCalledWith('ready'))
+    expect((await readyPromise).ready).toBe(true)
+    expect(bridge.state().pendingAssetCount).toBe(0)
+    expect(bridge.state().unresolvedFishIds).toEqual([])
+  })
+
+  it('waits for current mesh navigation before resolving readiness and freezes the post-relocation pose', async () => {
+    state.deferMeshNavigation = true
+    window.history.replaceState({}, '', '/?lookdev=1&seed=17')
+    await start([service('nav-pending')])
+    const bridge = window.__AQUARIUM_LOOKDEV__!
+    const initial = { ...state.created[0]!.position }
+    let readyResolved = false
+    const readyPromise = bridge.ready().then(snapshot => { readyResolved = true; return snapshot })
+    await vi.waitFor(() => expect(state.pendingMeshNavigationReleases).toHaveLength(1))
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(readyResolved).toBe(false)
+    expect(bridge.state().ready).toBe(false)
+
+    const blockedInitialPoint = (point: { x: number; y: number; z: number }) =>
+      point.x === initial.x && point.y === initial.y && point.z === initial.z
+    state.meshNavigationResult = {
+      status: 'ready',
+      meshNavigation: {
+        units: 'meter', spacingM: 0.5,
+        budget: { maxLatticeNodes: 4096, maxExpandedNodes: 4096, maxCollisionQueries: 50000, maxNodeVisits: 250000, maxTriangleTests: 2000000 },
+        movementBudget: { maxNodeVisits: 4096, maxTriangleTests: 8192 },
+        queryCapsule: (start: { x: number; y: number; z: number }) => ({
+          status: blockedInitialPoint(start) ? 'blocked' : 'clear',
+          work: { nodeVisits: 0, triangleTests: 0 },
+        }),
+      },
+      diagnostics: { islands: [], buildMs: 0 },
+    } satisfies import('./reef-mesh-navigation').ReefMeshNavigationResult
+    state.pendingMeshNavigationReleases.shift()?.()
+    const snapshot = await readyPromise
+    expect(snapshot.ready).toBe(true)
+    const settledFish = state.created.slice().reverse().find(fish => fish.id === 'nav-pending')!
+    const settledPose = { ...settledFish.position }
+    expect(settledPose).not.toEqual(initial)
+    expect(bridge.state().ready).toBe(true)
+    advance()
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(settledFish.position).toEqual(settledPose)
+  })
+
+  it('blocks on a failed current thumbnail texture and clears that failure when its inhabitant retires', async () => {
+    state.failFishLoads = true
+    window.history.replaceState({}, '', '/?lookdev=1')
+    await start([service('texture-failure')])
+    const bridge = window.__AQUARIUM_LOOKDEV__!
+    await vi.waitFor(() => expect(state.textures.length).toBeGreaterThan(0))
+    const texture = state.textures[0]!
+    expect(bridge.state().ready).toBe(false)
+    const waiting = bridge.ready()
+    texture.error?.(new Error('Fixture texture failure'))
+    await expect(waiting).rejects.toThrow(/thumbnail texture failed/i)
+    expect(bridge.state().failedAssets.some(key => key.startsWith('thumbnail:'))).toBe(true)
+    update([])
+    await vi.waitFor(() => expect(bridge.state().ready).toBe(true))
+    expect(bridge.state().failedAssets.some(key => key.startsWith('thumbnail:'))).toBe(false)
+  })
+
   it('preserves live roots, motion, routes and clip phase through name/URL edits and reorder', async () => {
     await start()
     const initialPosition = { ...state.created[0].position }, initialQuaternion = meshFor('first').skeleton.bones[0].quaternion.toArray()
