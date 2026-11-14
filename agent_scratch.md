@@ -20,7 +20,7 @@
 - Source604c8aa preserves reviewed concurrent school/fore-reef changes and fixes blocked preferred-school flank fallback after8tries. Valid schoolCenter tests fail before/pass after in AABB and actual mesh modes; budgets/clearance unchanged.
 - Mixed8species/11fish60s regression100%all-sector occupancy in both modes, zero unsafe segments, all moving/exact replay. Controlled two-box fixtures and legacy units, not full-reef/articulated-body certification.
 - Full865tests/73files with2workers, typecheck16scripts/build pass. Exact native1440x900/402x874DPR1 ready11inhabitants/no failedassets/no captured warnings-errors. Normal bridge absent; movement7of8/8of8 and Pause0of8transformchanges over12rAF. Resume/phoneSettings/eight-entryServices work and fit. Evidence docs/asset-evidence/aq104/current-604c8aa/README.md.
-- Queue132:63Done/69open. Source604c8aa pushed; task completion/evidence commit follows and must be pushed immediately toPR48. User aq104-laptop-check.png/phone-check.png remain untracked and preserved. No configuration saves/serviceopens/deployments.
+- Queue132:63Done/69open. Source604c8aa and completion1224ebb pushed toPR48. User aq104-laptop-check.png/phone-check.png remain untracked and preserved. No configuration saves/serviceopens/deployments.
 
 ### 2026-11-14 — Pending primary visual and behavior work
 *Root resume review2026-11-14: pending; prior audit direction retained.*
@@ -29,17 +29,14 @@
 - AQ105 natural clownfish/anemone hosting now in Backlog; read criteria/source before changes. Earlier Luna audits identified AQ73/41 not ready despite checkedACs; do not close from metadata alone.
 - Prior subagent usage caps do not block useful Root work; avoid repeated retries absent reset/statechange.
 
-### 2026-11-14 — Current local process
-*Root review2026-11-14: current; older process IDs superseded.*
-- Original review at604c8aa before completioncommit, runtime clean. Root-owned proof /tmp/aquarium-aq87-proof-8b2d7cc detached604c8aa, only Viteinfrastructureallowlistdirty.
-- Owneddev5215PID130 verified cwd/command; disposable /tmp/aquarium-aq104-root-config/reef-config.json withlocalhostURLs. Preserve user3000/5210; original5214/5212 stale. Verify ownership before stopping.
-- CUAChrome3 finaltabclosed/metricsreset. ExactPNG fromSurface true/captureBeyondViewport false/no clip; signatures/IHDR verified. Main-worldbridge via CDP; goto clears metrics, reapply and verify before accepting size-specific probes. No liveBlender/model or originalconfiguration writes.
+### 2026-11-14 — AQ105 source and native review
+*Root resume review2026-11-14: all earlier entries inspected; bounded handoffs actioned, full task/native correction acceptance pending. This supersedes earlier source/process notes.*
+-7842bd6 technical hosting handoff and docs-only6a2e3ea are pushed. All875tests/75files now pass with1worker for the loader-margin correction, plus54focusedchecks/typecheck16scripts/build. Earlier2worker3sockettimeouts retained alongside isolated6pass; deadlines/assertions unchanged.
+- Laptop complete normal cycle corrects short-probe stall suspicion:500steps over29.48–37.80s show same-host idle/swim bobbing. Phone after resize has blocked/coral-envelope atactualhost. Loader-faithful fixture reproduces3failures; correction reads assembly's actual shader maxMargin, independent of imported sphere slack. Unknown-margingeometry keeps spherefallback; rock/otherfish/budgets retained.
+- Four-file correction adopted after destination/model/proof hash checks; pins/logs docs/asset-evidence/aq105/loader-margin-fix/. Raw784nativecycle/controls/PNGs under native-7842bd6/. AllAQ105ACunchecked/InProgress until final exact correction native review. No model/Blender/config edits. Broader art/scale/animated-body/runtime budgets remain open.
 
-### 2026-11-14 — AQ105 reviewed technical handoff
-*Root review2026-11-14: bounded technical work actioned; native acceptance and full task remain pending. This supersedes earlier source/process details.*
-- Nine-file source snapshot adopted only after original concurrent/proof/destination hash checks. Actual mounted crown target, clownfish-only soft access, conservative measured neighbor bounds with full shader margin, continuous local loops/turns and safe full-chord/home fallback. Models/Blender/sourceassets/config unchanged.
-- Incoming motion/spawn patch/pins retained in docs/asset-evidence/aq105/. Forced side/front-only policies failed existing distribution gates, so retain reviewed seeded sides/depth mixture; preserve new spawnpriority and transactional anchorpreemption. Two real-mesh/AABB counterexamples fail before/pass after. No thresholds weakened.
--115focused and full872tests/75files, typecheck16scripts/build pass. Complete left mounted assembly at both current layouts passes60s approach/hosting/bobbing/segment checks for actualclownfishID. Broader body/art/performance remainopen. AQ105allACunchecked/InProgress; AQ104Done. Queue63Done/69open.
-- This source/evidence handoff must be committed/pushed toPR48 with runningcontents. Before native review, snapshot own proof changes and checkout new shared commit, restart owned5215 withcorrectVITEpin; priorPID130metadata604stale. Preserve user3000/5210 and two untrackedPNGs. No deploy/merge.
-
-*Root resume re-review2026-11-14: all entries inspected. Standing policies current; AQ104 completion/source7842bd6 handoff actioned; broad reef art and AQ105 phone hosting pending. Latest native full-cycle trace accepts laptop bobbing and contradicts the earlier short-sample stall suspicion. Phone after resize has a blocked host point; GLTFLoader-bound reproduction and measured-margin correction are isolated under review. Prior source/process IDs above are superseded; exact current checkpoint follows at the next milestone.*
+### 2026-11-14 — Current delivery and local process
+*Root review2026-11-14: current; all prior source IDs/PIDs superseded where this entry differs.*
+- Shared draftPR48 https://github.com/ryantrappy/aquarium-homepage/pull/48. Commit/push the reviewed correction milestone and maintain runningcontents; no deploy/merge. Queue63Done/69open, CI/FPS-display excluded.
+- Proof /tmp/aquarium-aq87-proof-8b2d7cc at7842bd6 plus reviewed4files and Viteallowlist. Original contains adopted4files plus scoped evidence/notes before this commit; preserve any later edits. Before native proof snapshot own proof edits, checkout newsharedcommit, restart owneddev5215PID15138 after verifying cwd/command; its7842VITEpin is stale for newcode. Disposable localhost config /tmp/aquarium-aq104-root-config/reef-config.json. Preserve user3000/5210; old5214/5212 stale.
+- CUAChrome4 is current after Chrome3disconnected. Recovery closed only owned5215tab/group via nativeChrome UI, kept savedgroup and usertabs. No ownedreviewtab remains; oldhandles Debuggerunattached, usefreshownedtab. Temporarydebuggerstate ended withclosedtab. ExactPNG CDP/no clip/DPR1; goto resets metrics. No Blender/live-source/configuration saves.

@@ -31,7 +31,7 @@ import type {
 } from '../../simulation/mesh-navigation'
 import type { SolidObstacleVolume } from '../../simulation/habitat-navigation'
 import type { MeshNavigationConfig } from './motion'
-import type { AssembledCoralBinding } from './reef-assembly'
+import { measuredCoralShaderMargin, type AssembledCoralBinding } from './reef-assembly'
 
 /** Lattice spacing for mesh route planning (m). The fixed water bounds give
  * ~17 x 11 x 16 = ~3,000 nodes, inside the planner's 4,096-node budget. */
@@ -290,24 +290,21 @@ function coralMeshBoxes(mountedCorals: readonly AssembledCoralBinding[], tight =
       )
       if (!Number.isFinite(worldScale) || worldScale <= 0) return
       const bounds = new THREE.Box3(), vertex = new THREE.Vector3()
-      if (!tight) {
+      const margin = measuredCoralShaderMargin(node.geometry)
+      if (!tight || margin === undefined) {
         const center = sphere.center.clone().applyMatrix4(node.matrixWorld)
         bounds.setFromCenterAndSize(center, new THREE.Vector3().setScalar(2 * sphere.radius * worldScale))
       } else {
-        let restRadius = 0
         for (let i = 0; i < position.count; i++) {
           vertex.fromBufferAttribute(position, i)
           if (![vertex.x, vertex.y, vertex.z].every(Number.isFinite)) return
-          restRadius = Math.max(restRadius, vertex.distanceTo(sphere.center))
           vertex.applyMatrix4(node.matrixWorld)
           if (![vertex.x, vertex.y, vertex.z].every(Number.isFinite)) return
           bounds.expandByPoint(vertex)
         }
-        // Assembly expands this same sphere by a proven upper bound on shader
-        // displacement. Keep that entire margin around the actual vertex box;
-        // a sphere-shaped box otherwise fills the neighboring host's empty water.
-        const margin = sphere.radius - restRadius
-        if (margin < -1e-6) return
+        // Importers may provide oversized base spheres. Only assembly's actual
+        // displacement margin belongs around this tight world vertex box.
+        if (!Number.isFinite(margin) || margin < 0) return
         const padding = new THREE.Vector3(Math.hypot(e[0], e[4], e[8]), Math.hypot(e[1], e[5], e[9]), Math.hypot(e[2], e[6], e[10]))
           .multiplyScalar(Math.max(0, margin) + 1e-6)
         if (![padding.x, padding.y, padding.z].every(Number.isFinite)) return

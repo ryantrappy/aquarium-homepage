@@ -195,6 +195,12 @@ function measureCoralShaderMargin(
   return margin + CORAL_BOUNDS_NUMERIC_PAD_M * numericScale
 }
 
+/** The shader margin measured by assembly, independent of importer sphere slack. */
+export function measuredCoralShaderMargin(geometry: THREE.BufferGeometry): number | undefined {
+  const state = coralGeometryBoundStates.get(geometry)
+  return state && !state.invalid ? state.maxMargin : undefined
+}
+
 /**
  * Extends a shared coral geometry sphere for every vertex position the shader
  * can reach within the assembly contract: immutable POSITION/COLOR_0 data, a

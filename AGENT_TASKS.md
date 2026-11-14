@@ -13,6 +13,17 @@ Downstream: Current implementation and review work
 
 Root verified this checkpoint against the current checkout. The goal remains active and incomplete: finish the backlog and make the living aquarium resemble the supplied reference. Passing functional tests does not accept final art.
 
+## Latest Root checkpoint — 2026-11-14 loader-faithful hosting correction
+
+This section supersedes earlier source/process details. AQ105 remains In Progress; all four criteria are unchecked pending native verification of this correction. Full goal active/incomplete.
+
+- The7842bd6 laptop short-probe stall suspicion was superseded by500normal live steps over29.48–37.80active seconds: same right-host idle/swim bobbing/peeks span0.3253X/0.06722Y/0.1676Zlegacyunits. Phone after resize genuinely fails: actual in-water host point returns blocked/coral-envelope. Raw traces, exact PNGs and controls in docs/asset-evidence/aq105/native-7842bd6/.
+- Root reproduced phone failure by matching installed GLTFLoader.computeBounds. Its base sphere encloses the accessor box; subtracting raw vertex radius misclassified importer slack as shader displacement. The new loader-faithful fixture fails3cases before the fix. Correction reads assembly's measured maxMargin directly; geometry without a measurement retains conservative sphere bounds. Matrix-row padding, rigid rock, generic queries and budgets remain. No model/Blender/asset edits.
+- Current four-file correction matches docs/asset-evidence/aq105/loader-margin-fix/source-pins.json and was adopted only after destination baseline and all asset hash checks.54focused checks and all875tests/75files pass; typecheck16scripts/build pass. Full suite uses1worker: a2worker run had three existing30000ms socket-report timeouts plus cleanup timeout; unchanged isolated6tests pass. All logs retained; no deadlines/assertions weakened, no runtime-budget claim.
+- Concurrent docs-only6a2e3ea is preserved/pushed. This verified source/evidence milestone must be pushed to shared draft PR48 and its running list, then native review must pin the new commit. Source before this correction is7842bd6. No criteria/Done from technical checks alone.
+- Proof /tmp/aquarium-aq87-proof-8b2d7cc at7842bd6 plus four reviewed files and Vite infrastructure allowlist. Owneddev5215PID15138 still has7842metadata; verify ownership, snapshot proof changes, checkout shared correction and restart with accurate VITEpin before native acceptance. Preserve user3000/5210, old5214/5212 remain stale.
+- CUAChrome3 disconnected; fresh Chrome4 documentation read. All owned review tabs closed. Recovery used native Chrome UI to close only the known5215review group; saved group retained, no permanent group deletion, user tabs preserved. Use Chrome4 with a fresh owned tab for the next phase; stale old handles reported Debugger unattached. All temporary debug state ended with the closed tab. No deployment/merge/original configuration save. Queue still63Done/69open; primary reef art and full envelopes remain open.
+
 ## Latest Root checkpoint — 2026-11-14 AQ105 technical handoff
 
 This section supersedes older source/process details. The full goal remains active/incomplete; AQ105 remains In Progress with all acceptance criteria unchecked until native review.

@@ -1,0 +1,14 @@
+{
+  "state": {
+    "result": {
+      "type": "string",
+      "value": "{\"position\":{\"x\":4.254653784434372,\"y\":1.0410596856343273,\"z\":-0.31933598718911094},\"time\":40.54999999999898,\"state\":\"swim\",\"target\":\"hostAnemone\",\"route\":[],\"waypoint\":2,\"wait\":0.21666666666666667,\"meshReady\":true,\"focus\":null,\"hosts\":[{\"id\":\"reef-0-anchor-socket_anemone_crevice_01-hostAnemone\",\"position\":{\"x\":-2.174412223805576,\"y\":1.0617774028130522,\"z\":-0.5206533936660002},\"distance\":6.432250590599065,\"inside\":true,\"sweep\":\"blocked\"},{\"id\":\"reef-1-anchor-socket_lps_mid_05-hostAnemone\",\"position\":{\"x\":4.254653784434372,\"y\":1.0410596856343273,\"z\":-0.31933598718911094},\"distance\":0,\"inside\":true,\"sweep\":\"clear\"}]}"
+    }
+  },
+  "offset": {
+    "result": {
+      "type": "string",
+      "value": "{\"time\":114.91666666666143,\"offset\":{\"x\":0.2351243370617712,\"y\":0.031861196721413194,\"z\":0.14501294074129756},\"scales\":[{\"s\":1,\"water\":true,\"query\":{\"status\":\"clear\",\"reason\":\"all-static-meshes-clear\",\"work\":{\"nodeVisits\":29,\"triangleTests\":0}}},{\"s\":0.5,\"water\":true,\"query\":{\"status\":\"clear\",\"reason\":\"all-static-meshes-clear\",\"work\":{\"nodeVisits\":29,\"triangleTests\":0}}},{\"s\":0.25,\"water\":true,\"query\":{\"status\":\"clear\",\"reason\":\"all-static-meshes-clear\",\"work\":{\"nodeVisits\":29,\"triangleTests\":0}}},{\"s\":0.125,\"water\":true,\"query\":{\"status\":\"clear\",\"reason\":\"all-static-meshes-clear\",\"work\":{\"nodeVisits\":29,\"triangleTests\":0}}},{\"s\":0.0625,\"water\":true,\"query\":{\"status\":\"clear\",\"reason\":\"all-static-meshes-clear\",\"work\":{\"nodeVisits\":29,\"triangleTests\":0}}}]}"
+    }
+  }
+}

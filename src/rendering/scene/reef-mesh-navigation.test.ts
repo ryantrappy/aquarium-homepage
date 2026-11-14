@@ -9,7 +9,7 @@ import {
   MESH_NAVIGATION_MOVEMENT_BUDGET,
   segmentIntersectsInflatedBox,
 } from './reef-mesh-navigation'
-import { DEFAULT_LEFT_ISLAND_MOUNTS, MODULAR_CORAL_ASSET_URLS, instantiateModularReefHabitat, LIVE_ROCK_ISLAND_URLS } from './reef-assembly'
+import { DEFAULT_LEFT_ISLAND_MOUNTS, MODULAR_CORAL_ASSET_URLS, assembleCoralsOnRockSockets, measuredCoralShaderMargin, instantiateModularReefHabitat, LIVE_ROCK_ISLAND_URLS } from './reef-assembly'
 import { reefPlacementsForViewport } from './reef-layout'
 
 type P = { x: number; y: number; z: number }
@@ -98,7 +98,7 @@ describe('createReefMeshNavigation (synthetic reef)', () => {
     expect(result.meshNavigation.queryCapsuleForSpecies!['yellow-tang']).toBeUndefined()
   })
 
-  it('keeps every transformed coral vertex plus its full shader margin inside the resident exclusion', async () => {
+  it('retains conservative imported spheres when no assembly shader-margin measurement exists', async () => {
     const reef = new THREE.Group(); reef.add(boxRock(1))
     const geometry = new THREE.BoxGeometry(2, .12, .15)
     geometry.computeBoundingSphere(); geometry.boundingSphere!.radius += .05
@@ -114,6 +114,34 @@ describe('createReefMeshNavigation (synthetic reef)', () => {
       expect(resident(point,point,.001,budget)).toMatchObject({status:'blocked',reason:'coral-envelope'})
     }
     const emptyWater=new THREE.Vector3(4,.9,0).applyMatrix4(root.matrixWorld)
+    expect(result.meshNavigation.queryCapsule!(emptyWater,emptyWater,.01,budget).status).toBe('blocked')
+    expect(resident(emptyWater,emptyWater,.01,budget).status).toBe('blocked')
+  })
+
+  it('preserves the measured shader margin under shear without treating importer sphere slack as motion', async () => {
+    const reef = new THREE.Group(); reef.add(boxRock(1))
+    const socket = new THREE.Object3D(); socket.name='socket_lps_mid_01';socket.position.x=4;reef.add(socket)
+    const geometry=new THREE.BoxGeometry(.2,.1,.2);geometry.translate(0,.5,0)
+    const colors=new Float32Array(geometry.getAttribute('position').count*4)
+    for(let i=0;i<colors.length;i+=4){colors[i]=1;colors[i+3]=1}
+    geometry.setAttribute('color',new THREE.BufferAttribute(colors,4));geometry.computeBoundingSphere()
+    geometry.boundingSphere!.radius+=10 // A valid, deliberately loose imported sphere.
+    const mesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial());mesh.name='test_soft'
+    mesh.rotation.set(.2,.3,.1);mesh.scale.set(1,.7,1.4);mesh.userData.reefPrimitive={id:'test_soft',role:'coral-soft'}
+    const template=new THREE.Group();template.add(mesh)
+    const assembly=assembleCoralsOnRockSockets(reef,new Map([['coral-test',template]]),[{socketName:socket.name,coralAssetId:'coral-test',archetype:'tentaculate-lps',scale:1,yawRad:0}],{includeScatter:false})
+    const root=assembly.mountedCorals[0].root;root.scale.set(1.4,.7,1.1);root.rotation.z=.2
+    const result=await createReefMeshNavigation([{reef,islandId:'reef',mountedCorals:assembly.mountedCorals}])
+    expect(result.status).toBe('ready');if(result.status!=='ready')return
+    const resident=result.meshNavigation.queryCapsuleForSpecies!['ocellaris-clownfish'],budget={...MESH_NAVIGATION_MOVEMENT_BUDGET}
+    const actual=root.getObjectByName('test_soft')!,margin=measuredCoralShaderMargin(geometry)!
+    expect(margin).toBeGreaterThan(0);expect(margin).toBeLessThan(.1)
+    const positions=geometry.getAttribute('position'),point=new THREE.Vector3()
+    for(let i=0;i<positions.count;i++)for(const axis of ['x','y','z'] as const)for(const sign of [-1,1]){
+      point.fromBufferAttribute(positions,i);point[axis]+=margin*sign;point.applyMatrix4(actual.matrixWorld)
+      expect(resident(point,point,.001,budget)).toMatchObject({status:'blocked',reason:'coral-envelope'})
+    }
+    const emptyWater=new THREE.Vector3(0,2,0).applyMatrix4(root.matrixWorld)
     expect(result.meshNavigation.queryCapsule!(emptyWater,emptyWater,.01,budget).status).toBe('blocked')
     expect(resident(emptyWater,emptyWater,.01,budget).status).toBe('clear')
   })

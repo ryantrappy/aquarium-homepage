@@ -1,0 +1,58 @@
+
+> test
+> vitest run src/rendering/scene/anemone-host.test.ts --maxWorkers=2
+
+
+ RUN  v5.1.0 /private/tmp/aquarium-aq87-proof-8b2d7cc
+
+ ❯ src/rendering/scene/anemone-host.test.ts (5 tests | 3 failed) 12515ms
+   × keeps actual mounted crown hosting safe in the current layout (narrow=false, island=left) 2733ms
+   × keeps actual mounted crown hosting safe in the current layout (narrow=true, island=left) 2673ms
+   × keeps the phone host available after sharing templates with both laptop reefs 3244ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/rendering/scene/anemone-host.test.ts > keeps actual mounted crown hosting safe in the current layout (narrow=false, island=left)
+ FAIL  src/rendering/scene/anemone-host.test.ts > keeps actual mounted crown hosting safe in the current layout (narrow=true, island=left)
+AssertionError: expected 'blocked' to be 'clear' // Object.is equality
+
+Expected: "clear"
+Received: "blocked"
+
+ ❯ src/rendering/scene/anemone-host.test.ts:73:102
+     71|   expect(resident).toBeTypeOf('function')
+     72|   expect(config.queryCapsule!(host.position, host.position, .04, { ...…
+     73|   expect(resident(host.position, host.position, .04, { ...MESH_NAVIGAT…
+       |                                                                                                      ^
+     74|   const aspect = narrow ? 402 / 874 : 1440 / 900, halfWidth = overview…
+     75|   const bounds = { min: { x: -halfWidth, y: -2.25, z: -4.6 }, max: { x…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/rendering/scene/anemone-host.test.ts > keeps the phone host available after sharing templates with both laptop reefs
+AssertionError: {"narrow":false,"host":{"id":"reef-0-anchor-socket_anemone_crevice_01-hostAnemone","anchor":"hostAnemone","compatibleSpecies":["ocellaris-clownfish"],"position":{"x":-2.174412223805576,"y":1.0617774028130522,"z":-0.5206533936660002},"softHomeRadius":0.35}}: expected { status: 'blocked', …(2) } to match object { status: 'clear' }
+(4 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "status": "clear",
++   "status": "blocked",
+  }
+
+ ❯ src/rendering/scene/anemone-host.test.ts:116:143
+    114|     expect(navigation.status).toBe('ready');if(navigation.status!=='re…
+    115|     const query=navigation.meshNavigation.queryCapsuleForSpecies!['oce…
+    116|     for(const host of hosts)expect(query(host.position,host.position,.…
+       |                                                                                                                                               ^
+    117|   }
+    118| },15000)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 2 passed (5)
+   Start at  01:22:41
+   Duration  17.23s (tests 84%, import 10%, transform 6%, worker 1%)

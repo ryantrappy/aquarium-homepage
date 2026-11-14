@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-14 05:06'
-updated_date: '2026-11-14 07:08'
+updated_date: '2026-11-14 14:19'
 labels: []
 dependencies: []
 documentation:
@@ -49,6 +49,12 @@ Isolated current-candidate progress: actual runtime left foundation plus all mou
 Combined review correction: keep original reviewed identity-seeded school flanks and mostly-front depth mixture, because forced anthias-right plus front-only targets caused9.63percent left utilization; restoring only seeded sides still left16.76percent right. Retain incoming fore-reef spawn priority and transactional blocked-anchor preemption. Two new AABB/real-mesh crossing regressions fail on earlier snapshot dc8fbac and pass after preemption changes. All115focused checks pass with no weakened gates. Full incoming patch/pins/failures preserved under docs/asset-evidence/aq105; reviewed-source-pins supersedes initial candidate pins. Current full suite is running before adoption; native acceptance remains pending.
 
 Root verified combined technical handoff: all872tests/75files with2workers, typecheck16scripts and productionbuild pass. Every original concurrent file still matched its captured hash; other destination files were unchanged/absent before copying the reviewed9-file source snapshot. No overwritten later work. Models/user screenshots preserved. Durable reviewed-source-pins and full logs under docs/asset-evidence/aq105/. Native current-source hosting/articulation/control review follows; all criteria remain unchecked and task In Progress.
+
+Native cycle review correction at7842bd6: initial12rAF endpoints caught a hold phase; a500step settled laptop trace from29.48to37.80active seconds shows same-host idle/swim motion spans0.3253X/0.06722Y/0.1676Zlegacyunits, so the laptop stall suspicion is superseded. Phone after resize remains genuinely blocked: repeated resident point queries at the actual in-water host return blocked/coral-envelope. Source root cause reproduced by matching installed Three GLTFLoader.computeBounds: its base sphere uses the accessor-box diagonal, while the first fixture recomputed a tighter vertex sphere. Subtracting raw max-vertex radius therefore misclassified importer slack as shader displacement. Updated loader-faithful fixture fails3cases before correction. New isolated fix reads the actual maxMargin measured by assembly, with conservative historical sphere fallback when no measurement exists;54focused host/mesh/assembly checks pass, including sheared transforms, preserved full margin and oversized importer-sphere regression. Typecheck/full suite/build running after correcting an inferred-array fixture type. All task criteria remain unchecked pending final current-source native verification. Chrome3 disconnected; Chrome4 recovered; only owned review group/tab closed through native UI without deleting its saved group. Other user tabs preserved.
+
+Loader-margin correction full run with2workers:872pass/3socket-report-freshness cases hit pre-existing30000ms limits; one10000ms cleanup hook also times out. Their unchanged isolated file passes all6tests with1worker in54.36s. Typecheck16scripts passes. Running the entire875test suite with1worker, retaining all existing deadlines/assertions, before productionbuild/adoption. Both raw timeout and isolated-pass logs are preserved; this is not a runtime performance-budget claim. Concurrent docs-only6a2e3ea is present/pushed and preserved; application source still7842bd6 until reviewed adoption.
+
+Root loader-margin handoff verified: all875tests/75files pass with1worker; typecheck including16scripts and productionbuild pass. No deadlines/assertions changed; initial2worker timeouts and isolated6test pass retained. Four original destination files still match7842bd6 and all pinned coral assets unchanged before adoption; copied bytes match loader-margin-fix/source-pins. The corrected fixture mirrors actual GLTFLoader accessor-box spheres and includes left/right current layouts, shared-template laptop-to-phone rebuild, no lost authored cycle and unknown-margin conservative fallback. All criteria remain unchecked until native exact-correction verification. Concurrent6a2e3ea docs preserved.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

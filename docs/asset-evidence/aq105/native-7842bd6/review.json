@@ -1,0 +1,1759 @@
+{
+  "sourceCommit": "7842bd6a8eabfde05f7b0550c7a9ee193a9aece8",
+  "laptopMotion": {
+    "after": {
+      "bridgePresent": false,
+      "dpr": 1,
+      "height": 900,
+      "links": [
+        {
+          "id": "starter-komodo",
+          "name": "Open Komodo in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 314.6175537109375,
+            "height": 133.078125,
+            "left": 93.57658386230467,
+            "right": 289.77972412109375,
+            "top": 181.5394287109375,
+            "width": 196.20314025878903,
+            "x": 93.57658386230467,
+            "y": 181.5394287109375
+          },
+          "transform": "translate3d(93.5766px, 181.539px, 0px)"
+        },
+        {
+          "id": "starter-watchmybirds",
+          "name": "Open WatchMyBirds in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 301.11663818359375,
+            "height": 62.83595275878906,
+            "left": 1318.6571044921875,
+            "right": 1400.9383544921875,
+            "top": 238.2806854248047,
+            "width": 82.28125,
+            "x": 1318.6571044921875,
+            "y": 238.2806854248047
+          },
+          "transform": "translate3d(1318.66px, 238.281px, 0px)"
+        },
+        {
+          "id": "05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+          "name": "Open Paperless in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 410.8637390136719,
+            "height": 44,
+            "left": 808.35546875,
+            "right": 859.94921875,
+            "top": 366.8637390136719,
+            "width": 51.59375,
+            "x": 808.35546875,
+            "y": 366.8637390136719
+          },
+          "transform": "translate3d(808.355px, 366.864px, 0px)"
+        },
+        {
+          "id": "example-home-assistant",
+          "name": "Open Home Assistant in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 364.3245544433594,
+            "height": 52.828125,
+            "left": 1220.4794921875,
+            "right": 1289.9091796875,
+            "top": 311.4964294433594,
+            "width": 69.4296875,
+            "x": 1220.4794921875,
+            "y": 311.4964294433594
+          },
+          "transform": "translate3d(1220.48px, 311.496px, 0px)"
+        },
+        {
+          "id": "starter-ombi",
+          "name": "Open Ombi in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 284.41739654541016,
+            "height": 186.8046875,
+            "left": 1213.1514892578125,
+            "right": 1488.5733642578125,
+            "top": 97.61270904541016,
+            "width": 275.421875,
+            "x": 1213.1514892578125,
+            "y": 97.61270904541016
+          },
+          "transform": "translate3d(1213.15px, 97.6127px, 0px)"
+        },
+        {
+          "id": "e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+          "name": "Open radarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 488.8173522949219,
+            "height": 138.40625,
+            "left": 401.325927734375,
+            "right": 605.388427734375,
+            "top": 350.4111022949219,
+            "width": 204.0625,
+            "x": 401.325927734375,
+            "y": 350.4111022949219
+          },
+          "transform": "translate3d(401.326px, 350.411px, 0px)"
+        },
+        {
+          "id": "060212ad-1343-4890-a57f-c4c60ca162d8",
+          "name": "Open Sonarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 501.5068054199219,
+            "height": 64.4375,
+            "left": 1038.1007080078125,
+            "right": 1122.4835205078125,
+            "top": 437.0693054199219,
+            "width": 84.3828125,
+            "x": 1038.1007080078125,
+            "y": 437.0693054199219
+          },
+          "transform": "translate3d(1038.1px, 437.069px, 0px)"
+        },
+        {
+          "id": "92394d96-38ec-4738-a61e-064af46849a5",
+          "name": "Open Basketball in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 457.7006530761719,
+            "height": 64.4375,
+            "left": 270.15325927734375,
+            "right": 354.53607177734375,
+            "top": 393.2631530761719,
+            "width": 84.3828125,
+            "x": 270.15325927734375,
+            "y": 393.2631530761719
+          },
+          "transform": "translate3d(270.153px, 393.263px, 0px)"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered",
+      "width": 1440
+    },
+    "before": {
+      "bridgePresent": false,
+      "dpr": 1,
+      "height": 900,
+      "links": [
+        {
+          "id": "starter-komodo",
+          "name": "Open Komodo in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 334.47430419921875,
+            "height": 130.828125,
+            "left": 126.54771423339844,
+            "right": 319.4383544921875,
+            "top": 203.64617919921875,
+            "width": 192.89064025878903,
+            "x": 126.54771423339844,
+            "y": 203.64617919921875
+          },
+          "transform": "translate3d(126.548px, 203.646px, 0px)"
+        },
+        {
+          "id": "starter-watchmybirds",
+          "name": "Open WatchMyBirds in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 301.11663818359375,
+            "height": 62.83595275878906,
+            "left": 1318.6571044921875,
+            "right": 1400.9383544921875,
+            "top": 238.2806854248047,
+            "width": 82.28125,
+            "x": 1318.6571044921875,
+            "y": 238.2806854248047
+          },
+          "transform": "translate3d(1318.66px, 238.281px, 0px)"
+        },
+        {
+          "id": "05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+          "name": "Open Paperless in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 409.296630859375,
+            "height": 44,
+            "left": 781.3351440429688,
+            "right": 833.2257690429688,
+            "top": 365.296630859375,
+            "width": 51.890625,
+            "x": 781.3351440429688,
+            "y": 365.296630859375
+          },
+          "transform": "translate3d(781.335px, 365.297px, 0px)"
+        },
+        {
+          "id": "example-home-assistant",
+          "name": "Open Home Assistant in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 364.3245544433594,
+            "height": 52.828125,
+            "left": 1220.4794921875,
+            "right": 1289.9091796875,
+            "top": 311.4964294433594,
+            "width": 69.4296875,
+            "x": 1220.4794921875,
+            "y": 311.4964294433594
+          },
+          "transform": "translate3d(1220.48px, 311.496px, 0px)"
+        },
+        {
+          "id": "starter-ombi",
+          "name": "Open Ombi in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 284.41739654541016,
+            "height": 186.8046875,
+            "left": 1213.1514892578125,
+            "right": 1488.5733642578125,
+            "top": 97.61270904541016,
+            "width": 275.421875,
+            "x": 1213.1514892578125,
+            "y": 97.61270904541016
+          },
+          "transform": "translate3d(1213.15px, 97.6127px, 0px)"
+        },
+        {
+          "id": "e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+          "name": "Open radarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 564.4151611328125,
+            "height": 136.91409301757812,
+            "left": 369.7804260253906,
+            "right": 571.6397705078125,
+            "top": 427.5010681152344,
+            "width": 201.85934448242188,
+            "x": 369.7804260253906,
+            "y": 427.5010681152344
+          },
+          "transform": "translate3d(369.78px, 427.501px, 0px)"
+        },
+        {
+          "id": "060212ad-1343-4890-a57f-c4c60ca162d8",
+          "name": "Open Sonarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 581.7203979492188,
+            "height": 67.4140625,
+            "left": 1147.236083984375,
+            "right": 1235.525146484375,
+            "top": 514.3063354492188,
+            "width": 88.2890625,
+            "x": 1147.236083984375,
+            "y": 514.3063354492188
+          },
+          "transform": "translate3d(1147.24px, 514.306px, 0px)"
+        },
+        {
+          "id": "92394d96-38ec-4738-a61e-064af46849a5",
+          "name": "Open Basketball in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 462.6343078613281,
+            "height": 63.796875,
+            "left": 271.3162841796875,
+            "right": 354.8631591796875,
+            "top": 398.8374328613281,
+            "width": 83.546875,
+            "x": 271.3162841796875,
+            "y": 398.8374328613281
+          },
+          "transform": "translate3d(271.316px, 398.837px, 0px)"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered",
+      "width": 1440
+    },
+    "elapsedMs": 1257.100000023842,
+    "frames": 12
+  },
+  "laptopHosting": {
+    "after": {
+      "bridgePresent": false,
+      "dpr": 1,
+      "height": 900,
+      "links": [
+        {
+          "id": "starter-komodo",
+          "name": "Open Komodo in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 532.8088989257812,
+            "height": 132.2109375,
+            "left": 294.7762145996094,
+            "right": 489.7059020996094,
+            "top": 400.5979614257813,
+            "width": 194.9296875,
+            "x": 294.7762145996094,
+            "y": 400.5979614257813
+          },
+          "transform": "translate3d(294.776px, 400.598px, 0px)"
+        },
+        {
+          "id": "starter-watchmybirds",
+          "name": "Open WatchMyBirds in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 301.11663818359375,
+            "height": 62.83595275878906,
+            "left": 1318.6571044921875,
+            "right": 1400.9383544921875,
+            "top": 238.2806854248047,
+            "width": 82.28125,
+            "x": 1318.6571044921875,
+            "y": 238.2806854248047
+          },
+          "transform": "translate3d(1318.66px, 238.281px, 0px)"
+        },
+        {
+          "id": "05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+          "name": "Open Paperless in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 347.2937927246094,
+            "height": 46.875,
+            "left": 778.4285888671875,
+            "right": 839.8114013671875,
+            "top": 300.4187927246094,
+            "width": 61.3828125,
+            "x": 778.4285888671875,
+            "y": 300.4187927246094
+          },
+          "transform": "translate3d(778.429px, 300.419px, 0px)"
+        },
+        {
+          "id": "example-home-assistant",
+          "name": "Open Home Assistant in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 364.3245544433594,
+            "height": 52.828125,
+            "left": 1220.4794921875,
+            "right": 1289.9091796875,
+            "top": 311.4964294433594,
+            "width": 69.4296875,
+            "x": 1220.4794921875,
+            "y": 311.4964294433594
+          },
+          "transform": "translate3d(1220.48px, 311.496px, 0px)"
+        },
+        {
+          "id": "starter-ombi",
+          "name": "Open Ombi in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 284.41739654541016,
+            "height": 186.8046875,
+            "left": 1213.1514892578125,
+            "right": 1488.5733642578125,
+            "top": 97.61270904541016,
+            "width": 275.421875,
+            "x": 1213.1514892578125,
+            "y": 97.61270904541016
+          },
+          "transform": "translate3d(1213.15px, 97.6127px, 0px)"
+        },
+        {
+          "id": "e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+          "name": "Open radarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 374.4200439453125,
+            "height": 84.2890625,
+            "left": 694.8471069335938,
+            "right": 819.1205444335938,
+            "top": 290.1309814453125,
+            "width": 124.2734375,
+            "x": 694.8471069335938,
+            "y": 290.1309814453125
+          },
+          "transform": "translate3d(694.847px, 290.131px, 0px)"
+        },
+        {
+          "id": "060212ad-1343-4890-a57f-c4c60ca162d8",
+          "name": "Open Sonarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 440.750732421875,
+            "height": 71.1328125,
+            "left": 1116.29638671875,
+            "right": 1209.44482421875,
+            "top": 369.617919921875,
+            "width": 93.1484375,
+            "x": 1116.29638671875,
+            "y": 369.617919921875
+          },
+          "transform": "translate3d(1116.3px, 369.618px, 0px)"
+        },
+        {
+          "id": "92394d96-38ec-4738-a61e-064af46849a5",
+          "name": "Open Basketball in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 384.1198425292969,
+            "height": 74.265625,
+            "left": 317.2064514160156,
+            "right": 414.4642639160156,
+            "top": 309.8542175292969,
+            "width": 97.2578125,
+            "x": 317.2064514160156,
+            "y": 309.8542175292969
+          },
+          "transform": "translate3d(317.206px, 309.854px, 0px)"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered",
+      "width": 1440
+    },
+    "before": {
+      "bridgePresent": false,
+      "dpr": 1,
+      "height": 900,
+      "links": [
+        {
+          "id": "starter-komodo",
+          "name": "Open Komodo in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 536.1160278320312,
+            "height": 125.890625,
+            "left": 221.1666717529297,
+            "right": 406.7760620117187,
+            "top": 410.2254028320313,
+            "width": 185.60939025878903,
+            "x": 221.1666717529297,
+            "y": 410.2254028320313
+          },
+          "transform": "translate3d(221.167px, 410.225px, 0px)"
+        },
+        {
+          "id": "starter-watchmybirds",
+          "name": "Open WatchMyBirds in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 301.11663818359375,
+            "height": 62.83595275878906,
+            "left": 1318.6571044921875,
+            "right": 1400.9383544921875,
+            "top": 238.2806854248047,
+            "width": 82.28125,
+            "x": 1318.6571044921875,
+            "y": 238.2806854248047
+          },
+          "transform": "translate3d(1318.66px, 238.281px, 0px)"
+        },
+        {
+          "id": "05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+          "name": "Open Paperless in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 350.9845886230469,
+            "height": 45.3828125,
+            "left": 776.3772583007812,
+            "right": 835.8069458007812,
+            "top": 305.6017761230469,
+            "width": 59.4296875,
+            "x": 776.3772583007812,
+            "y": 305.6017761230469
+          },
+          "transform": "translate3d(776.377px, 305.602px, 0px)"
+        },
+        {
+          "id": "example-home-assistant",
+          "name": "Open Home Assistant in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 364.3245544433594,
+            "height": 52.828125,
+            "left": 1220.4794921875,
+            "right": 1289.9091796875,
+            "top": 311.4964294433594,
+            "width": 69.4296875,
+            "x": 1220.4794921875,
+            "y": 311.4964294433594
+          },
+          "transform": "translate3d(1220.48px, 311.496px, 0px)"
+        },
+        {
+          "id": "starter-ombi",
+          "name": "Open Ombi in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 284.41739654541016,
+            "height": 186.8046875,
+            "left": 1213.1514892578125,
+            "right": 1488.5733642578125,
+            "top": 97.61270904541016,
+            "width": 275.421875,
+            "x": 1213.1514892578125,
+            "y": 97.61270904541016
+          },
+          "transform": "translate3d(1213.15px, 97.6127px, 0px)"
+        },
+        {
+          "id": "e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+          "name": "Open radarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 378.8858947753906,
+            "height": 80.8984375,
+            "left": 693.00244140625,
+            "right": 812.28369140625,
+            "top": 297.9874572753906,
+            "width": 119.28125,
+            "x": 693.00244140625,
+            "y": 297.9874572753906
+          },
+          "transform": "translate3d(693.002px, 297.987px, 0px)"
+        },
+        {
+          "id": "060212ad-1343-4890-a57f-c4c60ca162d8",
+          "name": "Open Sonarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 457.0367736816406,
+            "height": 71.4453125,
+            "left": 1042.89404296875,
+            "right": 1136.45654296875,
+            "top": 385.5914611816406,
+            "width": 93.5625,
+            "x": 1042.89404296875,
+            "y": 385.5914611816406
+          },
+          "transform": "translate3d(1042.89px, 385.591px, 0px)"
+        },
+        {
+          "id": "92394d96-38ec-4738-a61e-064af46849a5",
+          "name": "Open Basketball in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 383.563720703125,
+            "height": 76.875,
+            "left": 312.99139404296875,
+            "right": 413.6632690429687,
+            "top": 306.688720703125,
+            "width": 100.671875,
+            "x": 312.99139404296875,
+            "y": 306.688720703125
+          },
+          "transform": "translate3d(312.991px, 306.689px, 0px)"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered",
+      "width": 1440
+    },
+    "elapsedMs": 1254,
+    "frames": 12
+  },
+  "laptopPause": {
+    "after": {
+      "bridgePresent": false,
+      "dpr": 1,
+      "height": 900,
+      "links": [
+        {
+          "id": "starter-komodo",
+          "name": "Open Komodo in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 529.0660400390625,
+            "height": 136.8671875,
+            "left": 372.9543762207031,
+            "right": 574.743408203125,
+            "top": 392.1988525390625,
+            "width": 201.78903198242188,
+            "x": 372.9543762207031,
+            "y": 392.1988525390625
+          },
+          "transform": "translate3d(372.954px, 392.199px, 0px)"
+        },
+        {
+          "id": "starter-watchmybirds",
+          "name": "Open WatchMyBirds in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 301.11663818359375,
+            "height": 62.83595275878906,
+            "left": 1318.6571044921875,
+            "right": 1400.9383544921875,
+            "top": 238.2806854248047,
+            "width": 82.28125,
+            "x": 1318.6571044921875,
+            "y": 238.2806854248047
+          },
+          "transform": "translate3d(1318.66px, 238.281px, 0px)"
+        },
+        {
+          "id": "05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+          "name": "Open Paperless in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 356.2608642578125,
+            "height": 48.40625,
+            "left": 780.4286499023438,
+            "right": 843.8270874023438,
+            "top": 307.8546142578125,
+            "width": 63.3984375,
+            "x": 780.4286499023438,
+            "y": 307.8546142578125
+          },
+          "transform": "translate3d(780.429px, 307.855px, 0px)"
+        },
+        {
+          "id": "example-home-assistant",
+          "name": "Open Home Assistant in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 364.54351806640625,
+            "height": 53.4140625,
+            "left": 1221.876708984375,
+            "right": 1292.072021484375,
+            "top": 311.12945556640625,
+            "width": 70.1953125,
+            "x": 1221.876708984375,
+            "y": 311.12945556640625
+          },
+          "transform": "translate3d(1221.88px, 311.129px, 0px)"
+        },
+        {
+          "id": "starter-ombi",
+          "name": "Open Ombi in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 284.41739654541016,
+            "height": 186.8046875,
+            "left": 1213.1514892578125,
+            "right": 1488.5733642578125,
+            "top": 97.61270904541016,
+            "width": 275.421875,
+            "x": 1213.1514892578125,
+            "y": 97.61270904541016
+          },
+          "transform": "translate3d(1213.15px, 97.6127px, 0px)"
+        },
+        {
+          "id": "e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+          "name": "Open radarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 370.98541259765625,
+            "height": 87.5859375,
+            "left": 694.8121948242188,
+            "right": 823.9450073242188,
+            "top": 283.39947509765625,
+            "width": 129.1328125,
+            "x": 694.8121948242188,
+            "y": 283.39947509765625
+          },
+          "transform": "translate3d(694.812px, 283.399px, 0px)"
+        },
+        {
+          "id": "060212ad-1343-4890-a57f-c4c60ca162d8",
+          "name": "Open Sonarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 439.9847717285156,
+            "height": 69.0390625,
+            "left": 1182.1904296875,
+            "right": 1272.6044921875,
+            "top": 370.9457092285156,
+            "width": 90.4140625,
+            "x": 1182.1904296875,
+            "y": 370.9457092285156
+          },
+          "transform": "translate3d(1182.19px, 370.946px, 0px)"
+        },
+        {
+          "id": "92394d96-38ec-4738-a61e-064af46849a5",
+          "name": "Open Basketball in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 384.687255859375,
+            "height": 70.765625,
+            "left": 303.5767517089844,
+            "right": 396.2408142089844,
+            "top": 313.921630859375,
+            "width": 92.6640625,
+            "x": 303.5767517089844,
+            "y": 313.921630859375
+          },
+          "transform": "translate3d(303.577px, 313.922px, 0px)"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered is-paused",
+      "width": 1440
+    },
+    "before": {
+      "bridgePresent": false,
+      "dpr": 1,
+      "height": 900,
+      "links": [
+        {
+          "id": "starter-komodo",
+          "name": "Open Komodo in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 529.0660400390625,
+            "height": 136.8671875,
+            "left": 372.9543762207031,
+            "right": 574.743408203125,
+            "top": 392.1988525390625,
+            "width": 201.78903198242188,
+            "x": 372.9543762207031,
+            "y": 392.1988525390625
+          },
+          "transform": "translate3d(372.954px, 392.199px, 0px)"
+        },
+        {
+          "id": "starter-watchmybirds",
+          "name": "Open WatchMyBirds in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 301.11663818359375,
+            "height": 62.83595275878906,
+            "left": 1318.6571044921875,
+            "right": 1400.9383544921875,
+            "top": 238.2806854248047,
+            "width": 82.28125,
+            "x": 1318.6571044921875,
+            "y": 238.2806854248047
+          },
+          "transform": "translate3d(1318.66px, 238.281px, 0px)"
+        },
+        {
+          "id": "05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+          "name": "Open Paperless in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 356.2608642578125,
+            "height": 48.40625,
+            "left": 780.4286499023438,
+            "right": 843.8270874023438,
+            "top": 307.8546142578125,
+            "width": 63.3984375,
+            "x": 780.4286499023438,
+            "y": 307.8546142578125
+          },
+          "transform": "translate3d(780.429px, 307.855px, 0px)"
+        },
+        {
+          "id": "example-home-assistant",
+          "name": "Open Home Assistant in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 364.54351806640625,
+            "height": 53.4140625,
+            "left": 1221.876708984375,
+            "right": 1292.072021484375,
+            "top": 311.12945556640625,
+            "width": 70.1953125,
+            "x": 1221.876708984375,
+            "y": 311.12945556640625
+          },
+          "transform": "translate3d(1221.88px, 311.129px, 0px)"
+        },
+        {
+          "id": "starter-ombi",
+          "name": "Open Ombi in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 284.41739654541016,
+            "height": 186.8046875,
+            "left": 1213.1514892578125,
+            "right": 1488.5733642578125,
+            "top": 97.61270904541016,
+            "width": 275.421875,
+            "x": 1213.1514892578125,
+            "y": 97.61270904541016
+          },
+          "transform": "translate3d(1213.15px, 97.6127px, 0px)"
+        },
+        {
+          "id": "e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+          "name": "Open radarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 370.98541259765625,
+            "height": 87.5859375,
+            "left": 694.8121948242188,
+            "right": 823.9450073242188,
+            "top": 283.39947509765625,
+            "width": 129.1328125,
+            "x": 694.8121948242188,
+            "y": 283.39947509765625
+          },
+          "transform": "translate3d(694.812px, 283.399px, 0px)"
+        },
+        {
+          "id": "060212ad-1343-4890-a57f-c4c60ca162d8",
+          "name": "Open Sonarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 439.9847717285156,
+            "height": 69.0390625,
+            "left": 1182.1904296875,
+            "right": 1272.6044921875,
+            "top": 370.9457092285156,
+            "width": 90.4140625,
+            "x": 1182.1904296875,
+            "y": 370.9457092285156
+          },
+          "transform": "translate3d(1182.19px, 370.946px, 0px)"
+        },
+        {
+          "id": "92394d96-38ec-4738-a61e-064af46849a5",
+          "name": "Open Basketball in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 384.687255859375,
+            "height": 70.765625,
+            "left": 303.5767517089844,
+            "right": 396.2408142089844,
+            "top": 313.921630859375,
+            "width": 92.6640625,
+            "x": 303.5767517089844,
+            "y": 313.921630859375
+          },
+          "transform": "translate3d(303.577px, 313.922px, 0px)"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered is-paused",
+      "width": 1440
+    },
+    "elapsedMs": 531.6000000238419,
+    "frames": 12
+  },
+  "phoneMotion": {
+    "after": {
+      "bridgePresent": false,
+      "dpr": 1,
+      "height": 874,
+      "links": [
+        {
+          "id": "starter-komodo",
+          "name": "Open Komodo in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 435.5001831054687,
+            "height": 131.6171875,
+            "left": 164.894287109375,
+            "right": 358.948974609375,
+            "top": 303.88299560546875,
+            "width": 194.0546875,
+            "x": 164.894287109375,
+            "y": 303.88299560546875
+          },
+          "transform": "translate3d(164.894px, 303.883px, 0px)"
+        },
+        {
+          "id": "starter-watchmybirds",
+          "name": "Open WatchMyBirds in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 287.0470886230469,
+            "height": 61.078125,
+            "left": 274.8634338378906,
+            "right": 354.8478088378906,
+            "top": 225.96896362304688,
+            "width": 79.984375,
+            "x": 274.8634338378906,
+            "y": 225.96896362304688
+          },
+          "transform": "translate3d(274.863px, 225.969px, 0px)"
+        },
+        {
+          "id": "05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+          "name": "Open Paperless in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 692.3741455078125,
+            "height": 60.984375,
+            "left": 45.49726104736328,
+            "right": 125.35663604736328,
+            "top": 631.3897705078125,
+            "width": 79.859375,
+            "x": 45.49726104736328,
+            "y": 631.3897705078125
+          },
+          "transform": "translate3d(45.4973px, 631.39px, 0px)"
+        },
+        {
+          "id": "example-home-assistant",
+          "name": "Open Home Assistant in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 241.7077484130859,
+            "height": 57.5390625,
+            "left": 180.85096740722656,
+            "right": 256.4759521484375,
+            "top": 184.1686859130859,
+            "width": 75.62498474121094,
+            "x": 180.85096740722656,
+            "y": 184.1686859130859
+          },
+          "transform": "translate3d(180.851px, 184.169px, 0px)"
+        },
+        {
+          "id": "starter-ombi",
+          "name": "Open Ombi in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 384.1417236328125,
+            "height": 166.75782775878906,
+            "left": 148.41851806640625,
+            "right": 394.27789306640625,
+            "top": 217.38389587402344,
+            "width": 245.859375,
+            "x": 148.41851806640625,
+            "y": 217.38389587402344
+          },
+          "transform": "translate3d(148.419px, 217.384px, 0px)"
+        },
+        {
+          "id": "e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+          "name": "Open radarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 658.9210815429688,
+            "height": 110.90625,
+            "left": 103.50453186035156,
+            "right": 267.0279541015625,
+            "top": 548.0148315429688,
+            "width": 163.52342224121094,
+            "x": 103.50453186035156,
+            "y": 548.0148315429688
+          },
+          "transform": "translate3d(103.505px, 548.015px, 0px)"
+        },
+        {
+          "id": "060212ad-1343-4890-a57f-c4c60ca162d8",
+          "name": "Open Sonarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 558.7467041015625,
+            "height": 71.17190551757812,
+            "left": 58.21277618408203,
+            "right": 151.4158935546875,
+            "top": 487.5747985839844,
+            "width": 93.20311737060548,
+            "x": 58.21277618408203,
+            "y": 487.5747985839844
+          },
+          "transform": "translate3d(58.2128px, 487.575px, 0px)"
+        },
+        {
+          "id": "92394d96-38ec-4738-a61e-064af46849a5",
+          "name": "Open Basketball in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 424.5559997558594,
+            "height": 57.765625,
+            "left": 90.33126068115234,
+            "right": 165.97970581054688,
+            "top": 366.7903747558594,
+            "width": 75.64844512939453,
+            "x": 90.33126068115234,
+            "y": 366.7903747558594
+          },
+          "transform": "translate3d(90.3313px, 366.79px, 0px)"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered",
+      "width": 402
+    },
+    "before": {
+      "bridgePresent": false,
+      "dpr": 1,
+      "height": 874,
+      "links": [
+        {
+          "id": "starter-komodo",
+          "name": "Open Komodo in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 528.8802490234375,
+            "height": 136.96878051757812,
+            "left": 374.8683166503906,
+            "right": 576.8057861328125,
+            "top": 391.9114685058594,
+            "width": 201.93746948242188,
+            "x": 374.8683166503906,
+            "y": 391.9114685058594
+          },
+          "transform": "translate3d(374.868px, 391.911px, 0px)"
+        },
+        {
+          "id": "starter-watchmybirds",
+          "name": "Open WatchMyBirds in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 301.11663818359375,
+            "height": 62.83595275878906,
+            "left": 1318.6571044921875,
+            "right": 1400.9383544921875,
+            "top": 238.2806854248047,
+            "width": 82.28125,
+            "x": 1318.6571044921875,
+            "y": 238.2806854248047
+          },
+          "transform": "translate3d(1318.66px, 238.281px, 0px)"
+        },
+        {
+          "id": "05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+          "name": "Open Paperless in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 357.0045471191406,
+            "height": 48.484375,
+            "left": 780.5225219726562,
+            "right": 844.0147094726562,
+            "top": 308.5201721191406,
+            "width": 63.4921875,
+            "x": 780.5225219726562,
+            "y": 308.5201721191406
+          },
+          "transform": "translate3d(780.523px, 308.52px, 0px)"
+        },
+        {
+          "id": "example-home-assistant",
+          "name": "Open Home Assistant in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 364.1205139160156,
+            "height": 53.484375,
+            "left": 1223.6123046875,
+            "right": 1293.9013671875,
+            "top": 310.6361389160156,
+            "width": 70.2890625,
+            "x": 1223.6123046875,
+            "y": 310.6361389160156
+          },
+          "transform": "translate3d(1223.61px, 310.636px, 0px)"
+        },
+        {
+          "id": "starter-ombi",
+          "name": "Open Ombi in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 284.41739654541016,
+            "height": 186.8046875,
+            "left": 1213.1514892578125,
+            "right": 1488.5733642578125,
+            "top": 97.61270904541016,
+            "width": 275.421875,
+            "x": 1213.1514892578125,
+            "y": 97.61270904541016
+          },
+          "transform": "translate3d(1213.15px, 97.6127px, 0px)"
+        },
+        {
+          "id": "e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+          "name": "Open radarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 370.8210144042969,
+            "height": 87.7578125,
+            "left": 694.7935180664062,
+            "right": 824.1763305664062,
+            "top": 283.0632019042969,
+            "width": 129.3828125,
+            "x": 694.7935180664062,
+            "y": 283.0632019042969
+          },
+          "transform": "translate3d(694.794px, 283.063px, 0px)"
+        },
+        {
+          "id": "060212ad-1343-4890-a57f-c4c60ca162d8",
+          "name": "Open Sonarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 442.6002502441406,
+            "height": 68.7734375,
+            "left": 1181.6544189453125,
+            "right": 1271.7169189453125,
+            "top": 373.8268127441406,
+            "width": 90.0625,
+            "x": 1181.6544189453125,
+            "y": 373.8268127441406
+          },
+          "transform": "translate3d(1181.65px, 373.827px, 0px)"
+        },
+        {
+          "id": "92394d96-38ec-4738-a61e-064af46849a5",
+          "name": "Open Basketball in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 384.7051086425781,
+            "height": 70.640625,
+            "left": 303.0306701660156,
+            "right": 395.5384826660156,
+            "top": 314.0644836425781,
+            "width": 92.5078125,
+            "x": 303.0306701660156,
+            "y": 314.0644836425781
+          },
+          "transform": "translate3d(303.031px, 314.064px, 0px)"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered",
+      "width": 402
+    },
+    "elapsedMs": 1359.5999999642372,
+    "frames": 12
+  },
+  "phonePause": {
+    "after": {
+      "bridgePresent": false,
+      "dpr": 1,
+      "height": 874,
+      "links": [
+        {
+          "id": "starter-komodo",
+          "name": "Open Komodo in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 370.4402160644531,
+            "height": 115.7421875,
+            "left": 166.2299346923828,
+            "right": 336.88616943359375,
+            "top": 254.69802856445312,
+            "width": 170.65623474121094,
+            "x": 166.2299346923828,
+            "y": 254.69802856445312
+          },
+          "transform": "translate3d(166.23px, 254.698px, 0px)"
+        },
+        {
+          "id": "starter-watchmybirds",
+          "name": "Open WatchMyBirds in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 319.38665771484375,
+            "height": 62.8515625,
+            "left": 255.3612365722656,
+            "right": 337.6659240722656,
+            "top": 256.53509521484375,
+            "width": 82.3046875,
+            "x": 255.3612365722656,
+            "y": 256.53509521484375
+          },
+          "transform": "translate3d(255.361px, 256.535px, 0px)"
+        },
+        {
+          "id": "05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+          "name": "Open Paperless in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 623.8041381835938,
+            "height": 65.703125,
+            "left": 43.3892707824707,
+            "right": 129.4283332824707,
+            "top": 558.1010131835938,
+            "width": 86.0390625,
+            "x": 43.3892707824707,
+            "y": 558.1010131835938
+          },
+          "transform": "translate3d(43.3893px, 558.101px, 0px)"
+        },
+        {
+          "id": "example-home-assistant",
+          "name": "Open Home Assistant in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 258.060302734375,
+            "height": 61.87498474121094,
+            "left": 165.2967071533203,
+            "right": 246.6248321533203,
+            "top": 196.1853179931641,
+            "width": 81.328125,
+            "x": 165.2967071533203,
+            "y": 196.1853179931641
+          },
+          "transform": "translate3d(165.297px, 196.185px, 0px)"
+        },
+        {
+          "id": "starter-ombi",
+          "name": "Open Ombi in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 341.13580322265625,
+            "height": 151.890625,
+            "left": 142.15867614746094,
+            "right": 366.09619140625,
+            "top": 189.24517822265625,
+            "width": 223.93751525878903,
+            "x": 142.15867614746094,
+            "y": 189.24517822265625
+          },
+          "transform": "translate3d(142.159px, 189.245px, 0px)"
+        },
+        {
+          "id": "e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+          "name": "Open radarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 513.05029296875,
+            "height": 115.28909301757812,
+            "left": 167.27523803710938,
+            "right": 337.2518005371094,
+            "top": 397.7611999511719,
+            "width": 169.9765625,
+            "x": 167.27523803710938,
+            "y": 397.7611999511719
+          },
+          "transform": "translate3d(167.275px, 397.761px, 0px)"
+        },
+        {
+          "id": "060212ad-1343-4890-a57f-c4c60ca162d8",
+          "name": "Open Sonarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 435.0839538574219,
+            "height": 64.8046875,
+            "left": 90.78145599365234,
+            "right": 175.64865112304688,
+            "top": 370.2792663574219,
+            "width": 84.86719512939453,
+            "x": 90.78145599365234,
+            "y": 370.2792663574219
+          },
+          "transform": "translate3d(90.7815px, 370.279px, 0px)"
+        },
+        {
+          "id": "92394d96-38ec-4738-a61e-064af46849a5",
+          "name": "Open Basketball in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 423.3417663574219,
+            "height": 66.734375,
+            "left": 83.78710174560547,
+            "right": 171.169921875,
+            "top": 356.6073913574219,
+            "width": 87.38282012939453,
+            "x": 83.78710174560547,
+            "y": 356.6073913574219
+          },
+          "transform": "translate3d(83.7871px, 356.607px, 0px)"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered is-paused",
+      "width": 402
+    },
+    "before": {
+      "bridgePresent": false,
+      "dpr": 1,
+      "height": 874,
+      "links": [
+        {
+          "id": "starter-komodo",
+          "name": "Open Komodo in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 370.4402160644531,
+            "height": 115.7421875,
+            "left": 166.2299346923828,
+            "right": 336.88616943359375,
+            "top": 254.69802856445312,
+            "width": 170.65623474121094,
+            "x": 166.2299346923828,
+            "y": 254.69802856445312
+          },
+          "transform": "translate3d(166.23px, 254.698px, 0px)"
+        },
+        {
+          "id": "starter-watchmybirds",
+          "name": "Open WatchMyBirds in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 319.38665771484375,
+            "height": 62.8515625,
+            "left": 255.3612365722656,
+            "right": 337.6659240722656,
+            "top": 256.53509521484375,
+            "width": 82.3046875,
+            "x": 255.3612365722656,
+            "y": 256.53509521484375
+          },
+          "transform": "translate3d(255.361px, 256.535px, 0px)"
+        },
+        {
+          "id": "05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+          "name": "Open Paperless in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 623.8041381835938,
+            "height": 65.703125,
+            "left": 43.3892707824707,
+            "right": 129.4283332824707,
+            "top": 558.1010131835938,
+            "width": 86.0390625,
+            "x": 43.3892707824707,
+            "y": 558.1010131835938
+          },
+          "transform": "translate3d(43.3893px, 558.101px, 0px)"
+        },
+        {
+          "id": "example-home-assistant",
+          "name": "Open Home Assistant in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 258.060302734375,
+            "height": 61.87498474121094,
+            "left": 165.2967071533203,
+            "right": 246.6248321533203,
+            "top": 196.1853179931641,
+            "width": 81.328125,
+            "x": 165.2967071533203,
+            "y": 196.1853179931641
+          },
+          "transform": "translate3d(165.297px, 196.185px, 0px)"
+        },
+        {
+          "id": "starter-ombi",
+          "name": "Open Ombi in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 341.13580322265625,
+            "height": 151.890625,
+            "left": 142.15867614746094,
+            "right": 366.09619140625,
+            "top": 189.24517822265625,
+            "width": 223.93751525878903,
+            "x": 142.15867614746094,
+            "y": 189.24517822265625
+          },
+          "transform": "translate3d(142.159px, 189.245px, 0px)"
+        },
+        {
+          "id": "e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+          "name": "Open radarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 513.05029296875,
+            "height": 115.28909301757812,
+            "left": 167.27523803710938,
+            "right": 337.2518005371094,
+            "top": 397.7611999511719,
+            "width": 169.9765625,
+            "x": 167.27523803710938,
+            "y": 397.7611999511719
+          },
+          "transform": "translate3d(167.275px, 397.761px, 0px)"
+        },
+        {
+          "id": "060212ad-1343-4890-a57f-c4c60ca162d8",
+          "name": "Open Sonarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 435.0839538574219,
+            "height": 64.8046875,
+            "left": 90.78145599365234,
+            "right": 175.64865112304688,
+            "top": 370.2792663574219,
+            "width": 84.86719512939453,
+            "x": 90.78145599365234,
+            "y": 370.2792663574219
+          },
+          "transform": "translate3d(90.7815px, 370.279px, 0px)"
+        },
+        {
+          "id": "92394d96-38ec-4738-a61e-064af46849a5",
+          "name": "Open Basketball in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 423.3417663574219,
+            "height": 66.734375,
+            "left": 83.78710174560547,
+            "right": 171.169921875,
+            "top": 356.6073913574219,
+            "width": 87.38282012939453,
+            "x": 83.78710174560547,
+            "y": 356.6073913574219
+          },
+          "transform": "translate3d(83.7871px, 356.607px, 0px)"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered is-paused",
+      "width": 402
+    },
+    "elapsedMs": 228.5999999642372,
+    "frames": 12
+  },
+  "phoneReduced": {
+    "after": {
+      "bridgePresent": false,
+      "dpr": 1,
+      "height": 874,
+      "links": [
+        {
+          "id": "starter-komodo",
+          "name": "Open Komodo in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 371.0413818359375,
+            "height": 115.85154724121094,
+            "left": 166.19082641601562,
+            "right": 336.9955139160156,
+            "top": 255.18983459472656,
+            "width": 170.8046875,
+            "x": 166.19082641601562,
+            "y": 255.18983459472656
+          },
+          "transform": "translate3d(166.191px, 255.19px, 0px)"
+        },
+        {
+          "id": "starter-watchmybirds",
+          "name": "Open WatchMyBirds in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 319.9790344238281,
+            "height": 62.890625,
+            "left": 255.0910491943359,
+            "right": 337.450439453125,
+            "top": 257.0884094238281,
+            "width": 82.35939025878906,
+            "x": 255.0910491943359,
+            "y": 257.0884094238281
+          },
+          "transform": "translate3d(255.091px, 257.088px, 0px)"
+        },
+        {
+          "id": "05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+          "name": "Open Paperless in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 623.241455078125,
+            "height": 65.75,
+            "left": 43.41463851928711,
+            "right": 129.5162010192871,
+            "top": 557.491455078125,
+            "width": 86.1015625,
+            "x": 43.41463851928711,
+            "y": 557.491455078125
+          },
+          "transform": "translate3d(43.4146px, 557.491px, 0px)"
+        },
+        {
+          "id": "example-home-assistant",
+          "name": "Open Home Assistant in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 258.407470703125,
+            "height": 62.03907775878906,
+            "left": 166.1412811279297,
+            "right": 247.6803436279297,
+            "top": 196.3683929443359,
+            "width": 81.5390625,
+            "x": 166.1412811279297,
+            "y": 196.3683929443359
+          },
+          "transform": "translate3d(166.141px, 196.368px, 0px)"
+        },
+        {
+          "id": "starter-ombi",
+          "name": "Open Ombi in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 332.30126953125,
+            "height": 152.44529724121094,
+            "left": 139.98057556152344,
+            "right": 364.7384033203125,
+            "top": 179.85597229003906,
+            "width": 224.75782775878903,
+            "x": 139.98057556152344,
+            "y": 179.85597229003906
+          },
+          "transform": "translate3d(139.981px, 179.856px, 0px)"
+        },
+        {
+          "id": "e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+          "name": "Open radarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 513.3739624023438,
+            "height": 115.328125,
+            "left": 167.29815673828125,
+            "right": 337.32940673828125,
+            "top": 398.04583740234375,
+            "width": 170.03125,
+            "x": 167.29815673828125,
+            "y": 398.04583740234375
+          },
+          "transform": "translate3d(167.298px, 398.046px, 0px)"
+        },
+        {
+          "id": "060212ad-1343-4890-a57f-c4c60ca162d8",
+          "name": "Open Sonarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 434.77777099609375,
+            "height": 64.8203125,
+            "left": 90.41568756103516,
+            "right": 175.30630493164062,
+            "top": 369.95745849609375,
+            "width": 84.89061737060547,
+            "x": 90.41568756103516,
+            "y": 369.95745849609375
+          },
+          "transform": "translate3d(90.4157px, 369.957px, 0px)"
+        },
+        {
+          "id": "92394d96-38ec-4738-a61e-064af46849a5",
+          "name": "Open Basketball in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 423.7312927246094,
+            "height": 66.9296875,
+            "left": 83.88964080810547,
+            "right": 171.5380859375,
+            "top": 356.8016052246094,
+            "width": 87.64844512939453,
+            "x": 83.88964080810547,
+            "y": 356.8016052246094
+          },
+          "transform": "translate3d(83.8896px, 356.802px, 0px)"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered is-paused",
+      "width": 402
+    },
+    "before": {
+      "bridgePresent": false,
+      "dpr": 1,
+      "height": 874,
+      "links": [
+        {
+          "id": "starter-komodo",
+          "name": "Open Komodo in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 371.0413818359375,
+            "height": 115.85154724121094,
+            "left": 166.19082641601562,
+            "right": 336.9955139160156,
+            "top": 255.18983459472656,
+            "width": 170.8046875,
+            "x": 166.19082641601562,
+            "y": 255.18983459472656
+          },
+          "transform": "translate3d(166.191px, 255.19px, 0px)"
+        },
+        {
+          "id": "starter-watchmybirds",
+          "name": "Open WatchMyBirds in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 319.9790344238281,
+            "height": 62.890625,
+            "left": 255.0910491943359,
+            "right": 337.450439453125,
+            "top": 257.0884094238281,
+            "width": 82.35939025878906,
+            "x": 255.0910491943359,
+            "y": 257.0884094238281
+          },
+          "transform": "translate3d(255.091px, 257.088px, 0px)"
+        },
+        {
+          "id": "05880da0-3cdd-4c1c-8a7a-a92758c73da2",
+          "name": "Open Paperless in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 623.241455078125,
+            "height": 65.75,
+            "left": 43.41463851928711,
+            "right": 129.5162010192871,
+            "top": 557.491455078125,
+            "width": 86.1015625,
+            "x": 43.41463851928711,
+            "y": 557.491455078125
+          },
+          "transform": "translate3d(43.4146px, 557.491px, 0px)"
+        },
+        {
+          "id": "example-home-assistant",
+          "name": "Open Home Assistant in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 258.407470703125,
+            "height": 62.03907775878906,
+            "left": 166.1412811279297,
+            "right": 247.6803436279297,
+            "top": 196.3683929443359,
+            "width": 81.5390625,
+            "x": 166.1412811279297,
+            "y": 196.3683929443359
+          },
+          "transform": "translate3d(166.141px, 196.368px, 0px)"
+        },
+        {
+          "id": "starter-ombi",
+          "name": "Open Ombi in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 332.30126953125,
+            "height": 152.44529724121094,
+            "left": 139.98057556152344,
+            "right": 364.7384033203125,
+            "top": 179.85597229003906,
+            "width": 224.75782775878903,
+            "x": 139.98057556152344,
+            "y": 179.85597229003906
+          },
+          "transform": "translate3d(139.981px, 179.856px, 0px)"
+        },
+        {
+          "id": "e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a",
+          "name": "Open radarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 513.3739624023438,
+            "height": 115.328125,
+            "left": 167.29815673828125,
+            "right": 337.32940673828125,
+            "top": 398.04583740234375,
+            "width": 170.03125,
+            "x": 167.29815673828125,
+            "y": 398.04583740234375
+          },
+          "transform": "translate3d(167.298px, 398.046px, 0px)"
+        },
+        {
+          "id": "060212ad-1343-4890-a57f-c4c60ca162d8",
+          "name": "Open Sonarr in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 434.77777099609375,
+            "height": 64.8203125,
+            "left": 90.41568756103516,
+            "right": 175.30630493164062,
+            "top": 369.95745849609375,
+            "width": 84.89061737060547,
+            "x": 90.41568756103516,
+            "y": 369.95745849609375
+          },
+          "transform": "translate3d(90.4157px, 369.957px, 0px)"
+        },
+        {
+          "id": "92394d96-38ec-4738-a61e-064af46849a5",
+          "name": "Open Basketball in a new tab",
+          "occluded": "false",
+          "rect": {
+            "bottom": 423.7312927246094,
+            "height": 66.9296875,
+            "left": 83.88964080810547,
+            "right": 171.5380859375,
+            "top": 356.8016052246094,
+            "width": 87.64844512939453,
+            "x": 83.88964080810547,
+            "y": 356.8016052246094
+          },
+          "transform": "translate3d(83.8896px, 356.802px, 0px)"
+        }
+      ],
+      "scene": "aquarium-scene aquarium-three is-rendered",
+      "width": 402
+    },
+    "elapsedMs": 284.7000000476837,
+    "frames": 12
+  },
+  "phoneServices": {
+    "links": [
+      {
+        "name": "KomodoYellow tang↗",
+        "rel": "noreferrer",
+        "target": "_blank",
+        "url": "http://127.0.0.1:5215/review-service/starter-komodo"
+      },
+      {
+        "name": "WatchMyBirdsBanggai cardinalfish↗",
+        "rel": "noreferrer",
+        "target": "_blank",
+        "url": "http://127.0.0.1:5215/review-service/starter-watchmybirds"
+      },
+      {
+        "name": "PaperlessRoyal gramma↗",
+        "rel": "noreferrer",
+        "target": "_blank",
+        "url": "http://127.0.0.1:5215/review-service/05880da0-3cdd-4c1c-8a7a-a92758c73da2"
+      },
+      {
+        "name": "Home AssistantOcellaris clownfish↗",
+        "rel": "noreferrer",
+        "target": "_blank",
+        "url": "http://127.0.0.1:5215/review-service/example-home-assistant"
+      },
+      {
+        "name": "OmbiBlue tang↗",
+        "rel": "noreferrer",
+        "target": "_blank",
+        "url": "http://127.0.0.1:5215/review-service/starter-ombi"
+      },
+      {
+        "name": "radarrCopperband butterflyfish↗",
+        "rel": "noreferrer",
+        "target": "_blank",
+        "url": "http://127.0.0.1:5215/review-service/e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a"
+      },
+      {
+        "name": "SonarrMcCosker’s flasher wrasse↗",
+        "rel": "noreferrer",
+        "target": "_blank",
+        "url": "http://127.0.0.1:5215/review-service/060212ad-1343-4890-a57f-c4c60ca162d8"
+      },
+      {
+        "name": "BasketballLyretail anthias↗",
+        "rel": "noreferrer",
+        "target": "_blank",
+        "url": "http://127.0.0.1:5215/review-service/92394d96-38ec-4738-a61e-064af46849a5"
+      }
+    ],
+    "rect": {
+      "bottom": 792.5,
+      "height": 711,
+      "left": 11,
+      "right": 391,
+      "top": 81.5,
+      "width": 380,
+      "x": 11,
+      "y": 81.5
+    }
+  },
+  "phoneSettings": {
+    "rect": {
+      "bottom": 860,
+      "height": 846,
+      "left": 14,
+      "right": 388,
+      "top": 14,
+      "width": 374,
+      "x": 14,
+      "y": 14
+    },
+    "services": [
+      "Komodo",
+      "WatchMyBirds",
+      "Paperless",
+      "Home Assistant",
+      "Ombi",
+      "radarr",
+      "Sonarr",
+      "Basketball"
+    ]
+  },
+  "console": [],
+  "findings": [
+    "Laptop normal-mode clownfish remains at the right anemone position over repeated observations; no hosting bobbing accepted. Full right-formation regression required. Phone observation is resize/approach and controls only, not settled hosting acceptance."
+  ]
+}
