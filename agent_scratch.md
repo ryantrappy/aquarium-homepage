@@ -34,3 +34,10 @@
 - Original review at604c8aa before completioncommit, runtime clean. Root-owned proof /tmp/aquarium-aq87-proof-8b2d7cc detached604c8aa, only Viteinfrastructureallowlistdirty.
 - Owneddev5215PID130 verified cwd/command; disposable /tmp/aquarium-aq104-root-config/reef-config.json withlocalhostURLs. Preserve user3000/5210; original5214/5212 stale. Verify ownership before stopping.
 - CUAChrome3 finaltabclosed/metricsreset. ExactPNG fromSurface true/captureBeyondViewport false/no clip; signatures/IHDR verified. Main-worldbridge via CDP; goto clears metrics, reapply and verify before accepting size-specific probes. No liveBlender/model or originalconfiguration writes.
+
+### 2026-11-14 — AQ105 reviewed technical handoff
+*Root review2026-11-14: bounded technical work actioned; native acceptance and full task remain pending. This supersedes earlier source/process details.*
+- Nine-file source snapshot adopted only after original concurrent/proof/destination hash checks. Actual mounted crown target, clownfish-only soft access, conservative measured neighbor bounds with full shader margin, continuous local loops/turns and safe full-chord/home fallback. Models/Blender/sourceassets/config unchanged.
+- Incoming motion/spawn patch/pins retained in docs/asset-evidence/aq105/. Forced side/front-only policies failed existing distribution gates, so retain reviewed seeded sides/depth mixture; preserve new spawnpriority and transactional anchorpreemption. Two real-mesh/AABB counterexamples fail before/pass after. No thresholds weakened.
+-115focused and full872tests/75files, typecheck16scripts/build pass. Complete left mounted assembly at both current layouts passes60s approach/hosting/bobbing/segment checks for actualclownfishID. Broader body/art/performance remainopen. AQ105allACunchecked/InProgress; AQ104Done. Queue63Done/69open.
+- This source/evidence handoff must be committed/pushed toPR48 with runningcontents. Before native review, snapshot own proof changes and checkout new shared commit, restart owned5215 withcorrectVITEpin; priorPID130metadata604stale. Preserve user3000/5210 and two untrackedPNGs. No deploy/merge.

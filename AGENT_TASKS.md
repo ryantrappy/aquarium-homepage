@@ -13,6 +13,16 @@ Downstream: Current implementation and review work
 
 Root verified this checkpoint against the current checkout. The goal remains active and incomplete: finish the backlog and make the living aquarium resemble the supplied reference. Passing functional tests does not accept final art.
 
+## Latest Root checkpoint — 2026-11-14 AQ105 technical handoff
+
+This section supersedes older source/process details. The full goal remains active/incomplete; AQ105 remains In Progress with all acceptance criteria unchecked until native review.
+
+- Current milestone contains nine hash-reviewed source files for actual mounted-anemone hosting. Host points derive from transformed tentacle-crown vertices; only clownfish gets soft anemone access, while exact rock, unrelated coral and budgets remain. Resident neighbor boxes use measured vertices plus the full shader margin transformed with matrix-row bounds (safe under shear); generic/fallback queries retain historical sphere boxes. Continuous local interaction/turning and safe full-chord/home fallback avoid stationary contact. No model/Blender/source-asset edits.
+- A complete incoming motion/spawn patch is preserved under docs/asset-evidence/aq105/. Forced anthias-right/front-only policies caused existing distribution failures (left9.63%; restoring only seeded sides left right16.76%), so final source keeps reviewed seeded sides/mostly-front depth mixture. Fore-reef spawn priority and transactional blocked-anchor route preservation are retained. New AABB/real-mesh crossing counterexamples fail before/pass after; existing thresholds unchanged.
+- Current combined snapshot passes115focusedtests and all872tests/75files, typecheck16scripts and productionbuild. Two-layout60s real left-assembly tests include every mounted template, depth-frustum water bounds and the actual clownfish service ID, with safe approach, residence after30seconds and bobbing. Excludes other inhabitants/right reef/central arch/full animated body certification. Source hashes/raw failures/validation logs in docs/asset-evidence/aq105/README.md.
+- Root hash-checked original concurrent files and every other destination before adopting the reviewed snapshot. User aq104 screenshots remain untracked. Original service configuration/assets untouched. Task104 remains Done for its reviewed scope, with follow-up route review recorded; no other task closed. Queue132:63Done/69open (51ToDo/18InProgress). CI/FPS-display lanes excluded.
+- Shared draft PR48 remains the delivery target; this verified handoff commit must be pushed and added to its running contents. Native review must restart owned5215 with the new commit pin before claiming current evidence. Proof /tmp/aquarium-aq87-proof-8b2d7cc currently at private dc8fbac plus reviewed combined changes; Vite fsallowlist infrastructure dirty. Prior dev5215PID130 has stale604 metadata. Verify ownership, preserve user3000/5210 and other tabs. No deployment/merge/configuration save.
+
 ## Latest Root checkpoint — 2026-11-14 AQ104 complete
 
 This section supersedes older source, status and process details below. The full goal remains active and incomplete.

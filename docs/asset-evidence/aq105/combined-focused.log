@@ -1,0 +1,16 @@
+
+> test
+> vitest run src/rendering/scene/motion.test.ts src/rendering/scene/aq104-distribution.test.ts src/rendering/scene/aq104-fallback.test.ts src/rendering/scene/aq104-anchor-preempt.test.ts src/rendering/scene/anemone-host.test.ts src/rendering/scene/reef-mesh-navigation.test.ts src/rendering/scene/fish-spawn.test.ts --maxWorkers=2
+
+
+ RUN  v5.1.0 /private/tmp/aquarium-aq87-proof-8b2d7cc
+
+
+ Test Files  7 passed (7)
+      Tests  115 passed (115)
+   Start at  00:49:11
+   Duration  11.62s (tests 95%, import 4%, transform 1%)
+
+    Isolate  7 workers spawned · ~285ms startup each (spawn + environment, per file)
+             at least ~712ms faster with isolate: false — reuses workers across files instead of one per file
+

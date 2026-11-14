@@ -78,6 +78,46 @@ describe('createReefMeshNavigation (synthetic reef)', () => {
     expect(query({ x: Number.NaN, y: 0, z: 0 }, p(0, 0, 0), MESH_NAVIGATION_COLLISION_RADIUS_M, budget).status).toBe('indeterminate')
   })
 
+  it('allows only resident clownfish into tagged soft anemone tissue, retaining rigid and budget checks', async () => {
+    const reef = new THREE.Group(); reef.add(boxRock(1))
+    const host = boxCoral(p(2, 0, 0)), other = boxCoral(p(4, 0, 0))
+    host.children[0].userData.reefPrimitive = { id: 'anemone_tentacle_crown', role: 'coral-soft' }
+    reef.add(host, other)
+    const result = await createReefMeshNavigation([{ reef, islandId: 'reef', mountedCorals: [
+      { socketName: 'socket_anemone_crevice_01', coralAssetId: 'coral-anemone-bta', root: host, materialControllers: [] },
+      { socketName: 'socket_sps_crest_01', coralAssetId: 'coral-other', root: other, materialControllers: [] },
+    ] }])
+    expect(result.status).toBe('ready'); if (result.status !== 'ready') return
+    const generic = result.meshNavigation.queryCapsule!, resident = result.meshNavigation.queryCapsuleForSpecies!['ocellaris-clownfish']
+    const budget = { ...MESH_NAVIGATION_MOVEMENT_BUDGET }
+    expect(generic(p(2, 0, 0), p(2, 0, 0), .04, budget).status).toBe('blocked')
+    expect(resident(p(2, 0, 0), p(2, 0, 0), .04, budget).status).toBe('clear')
+    expect(resident(p(-2, 0, 0), p(2, 0, 0), .04, budget).status).toBe('blocked')
+    expect(resident(p(4, 0, 0), p(4, 0, 0), .04, budget)).toMatchObject({status:'blocked',reason:'coral-envelope'})
+    expect(resident(p(2, 0, 0), p(2, 0, 0), .04, {maxNodeVisits:0,maxTriangleTests:0}).status).toBe('indeterminate')
+    expect(result.meshNavigation.queryCapsuleForSpecies!['yellow-tang']).toBeUndefined()
+  })
+
+  it('keeps every transformed coral vertex plus its full shader margin inside the resident exclusion', async () => {
+    const reef = new THREE.Group(); reef.add(boxRock(1))
+    const geometry = new THREE.BoxGeometry(2, .12, .15)
+    geometry.computeBoundingSphere(); geometry.boundingSphere!.radius += .05
+    const mesh = new THREE.Mesh(geometry); mesh.position.set(4, 0, 0)
+    mesh.scale.set(1, .7, 1.4); mesh.rotation.set(.2, .3, .1)
+    const root = new THREE.Group(); root.scale.set(1.4, .7, 1.1); root.rotation.z = .2; root.add(mesh); reef.add(root)
+    const result = await createReefMeshNavigation([{ reef, islandId:'reef', mountedCorals:[{socketName:'socket_other_01',coralAssetId:'coral-other',root,materialControllers:[]}] }])
+    expect(result.status).toBe('ready'); if(result.status!=='ready')return
+    const resident=result.meshNavigation.queryCapsuleForSpecies!['ocellaris-clownfish'], budget={...MESH_NAVIGATION_MOVEMENT_BUDGET}
+    const positions=geometry.getAttribute('position'), point=new THREE.Vector3()
+    for(let i=0;i<positions.count;i++)for(const axis of ['x','y','z'] as const)for(const sign of [-1,1]){
+      point.fromBufferAttribute(positions,i); point[axis]+=.05*sign; point.applyMatrix4(mesh.matrixWorld)
+      expect(resident(point,point,.001,budget)).toMatchObject({status:'blocked',reason:'coral-envelope'})
+    }
+    const emptyWater=new THREE.Vector3(4,.9,0).applyMatrix4(root.matrixWorld)
+    expect(result.meshNavigation.queryCapsule!(emptyWater,emptyWater,.01,budget).status).toBe('blocked')
+    expect(resident(emptyWater,emptyWater,.01,budget).status).toBe('clear')
+  })
+
   it('fails closed on an open rock surface', async () => {
     const reef = new THREE.Group()
     const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1))

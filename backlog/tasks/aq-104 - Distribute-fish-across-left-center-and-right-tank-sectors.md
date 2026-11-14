@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@Luna'
 created_date: '2026-11-14 04:01'
-updated_date: '2026-11-14 06:19'
+updated_date: '2026-11-14 06:50'
 labels:
   - behavior
   - rendering
@@ -67,6 +67,8 @@ Root verified handoff complete for exactf084source plus new mixed-roster fixture
 2026-11-14 Root reviewed and adopted the preserved school-station/fore-reef refinements after snapshot validation. Found and corrected a blocked-preferred-flank regression: after8preferred tries schools may use the other safe sectors, with identical clearance and planner work caps. Valid schoolCenter requests plus a blocked station reproduce failure in BOTH AABB and real mesh-query modes on the uncorrected candidate and pass with the correction; fixture is typechecked. Current mixed-roster temporal runs occupy all3sectors100percent in both modes, with zero unsafe segments, finite positions, active movement and exact replay. Full865tests/73files with2workers, typecheck16scripts and productionbuild pass. Original source stayed byte-identical to the reviewed isolated snapshot until adoption; models/config remain untouched. Native current-source acceptance and final AC checks follow this verified handoff.
 
 Final Root review 2026-11-14 accepts all five criteria at source604c8aa2a894865aeb1d22345da91d54540ac2dd. Durable criterion-by-criterion evidence: docs/asset-evidence/aq104/current-604c8aa/README.md, raw temporal/native sidecars, source hashes, valid-anchor failure/pass logs and full865tests/73files, typecheck16scripts/build logs. Native exact1440x900 and402x874 DPR1: ready11inhabitants/no failedassets/no captured warning-error logs; normal mode bridge absent, motion observed7of8/8of8 service transforms over12frames, Pause holds all8in bothviews. Resume and phone Settings/complete8-entry Services modal exercised with dialogs inside viewport. Controlled temporal fixture has100percent all-sector occupancy in both modes with zero unsafe segments, movement and exact replay; paths are legacyunits. No weaker clearance/spacing/planner caps; no performance/art/full-body claim. Source model files and concurrent screenshots preserved. No deployment/configuration saves.
+
+2026-11-14 follow-up Root review under AQ105 preserves this task distribution gates while integrating concurrent route/spawn work. New blocked-existing-anchor crossing regressions demonstrate failure before/pass after transactional preemption in both AABB and actual mesh modes. Unreviewed forced school-side/front-only sampling policies fail existing distribution gates and are not adopted unchanged; incoming patch is preserved in docs/asset-evidence/aq105. Corrected combined snapshot115focused checks pass; full/native review pending before source handoff. AQ104 prior exact604c8aa acceptance remains documented separately.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

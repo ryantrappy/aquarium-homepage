@@ -114,6 +114,11 @@ export type MeshNavigationConfig = {
   budget: MeshNavigationBudget
   movementBudget: MeshNavigationWorkBudget
   queryCapsule?: CapsuleClearanceQuery
+  /** Species-scoped soft tissue access; rigid geometry remains in every query. */
+  queryCapsuleForSpecies?: Readonly<Record<string, CapsuleClearanceQuery>>
+}
+export function meshQueryForSpecies(config: MeshNavigationConfig, speciesId: string): CapsuleClearanceQuery | undefined {
+  return config.queryCapsuleForSpecies?.[speciesId] ?? config.queryCapsule
 }
 export type WaterHabitat = { bounds: AxisAlignedBox; maxAbsXAtDepth?: MaxAbsXAtDepth; obstacles: SolidObstacleVolume[]; anchors: HabitatAnchorLocation[]; meshNavigation?: MeshNavigationConfig }
 export type SwimmingFish = {
@@ -217,21 +222,25 @@ function applyAnchorInteraction(fish: SwimmingFish, habitat: WaterHabitat, dt: n
     speciesId: fish.speciesId,
     location,
     state: fish.behavior.state,
-    elapsedSeconds: fish.behavior.stateElapsedSeconds,
+    elapsedSeconds: targetAnchor === 'hostAnemone' ? fish.simulationSeconds ?? 0 : fish.behavior.stateElapsedSeconds,
+    softHomeRadius: location.softHomeRadius,
     paused: false,
     reducedMotion,
   })
   if (!offset) return
   const clearance = anchorApproachClearanceM(fish)
-  const target = resolveSafeAnchorInteractionTarget({
+  let target = resolveSafeAnchorInteractionTarget({
     currentPosition: fish.position,
     location,
     offset,
     waterBounds: habitat.bounds,
-    obstacles: habitat.obstacles,
+    obstacles: habitat.meshNavigation === undefined ? habitat.obstacles : [],
     fishClearanceRadius: fish.clearance,
     interactionClearanceRadius: clearance,
   })
+  if (target && habitat.meshNavigation !== undefined && movementSafety(fish, habitat, target, clearance) !== 'clear') {
+    target = movementSafety(fish, habitat, location.position, clearance) === 'clear' ? { ...location.position } : undefined
+  }
   if (!target) return
   const profile = getSpeciesBehaviorProfile(fish.speciesId)!
   const cruise = fish.behavior.variation.cruiseSpeedTankWidthsPerSecond * (habitat.bounds.max.x - habitat.bounds.min.x)
@@ -245,7 +254,20 @@ function applyAnchorInteraction(fish: SwimmingFish, habitat: WaterHabitat, dt: n
       y: fish.position.y + (dy / dist) * step,
       z: fish.position.z + (dz / dist) * step,
     }
-    if (movementSafety(fish, habitat, candidate, clearance) === 'clear') fish.position = candidate
+    if (movementSafety(fish, habitat, candidate, clearance) === 'clear') {
+      fish.position = candidate
+      if (targetAnchor === 'hostAnemone' && !reducedMotion) {
+        // Fin-hover station keeping has small body turns even at low travel speed.
+        const phase = fish.behavior.variation.phaseOffsetRadians
+        const side = phase < Math.PI ? 1 : -1
+        const heading = side * Math.PI / 2 + .3 * Math.sin((fish.simulationSeconds ?? 0) * .6 + phase)
+        const delta = Math.atan2(Math.sin(heading - fish.yaw), Math.cos(heading - fish.yaw))
+        const turn = clamp(delta, -fish.behavior.variation.turnDegreesPerSecond * Math.PI / 180 * dt,
+          fish.behavior.variation.turnDegreesPerSecond * Math.PI / 180 * dt)
+        fish.yaw += turn
+        fish.turnKinematics = stepFishTurnKinematics(fish.turnKinematics, turn, dt, step / dt, 0, delta)
+      }
+    }
   }
   fish.pitch += (offset.pitchOffsetRad - fish.pitch) * Math.min(1, dt * 2)
   if (offset.yawLockToEntrance) {
@@ -425,7 +447,7 @@ function validMeshNavigation(fish: SwimmingFish, habitat: WaterHabitat): habitat
   const config = habitat.meshNavigation
   const budgetKeys: readonly (keyof MeshNavigationBudget)[] = ['maxLatticeNodes', 'maxExpandedNodes', 'maxCollisionQueries', 'maxNodeVisits', 'maxTriangleTests']
   const finiteBounds = [habitat.bounds.min.x, habitat.bounds.min.y, habitat.bounds.min.z, habitat.bounds.max.x, habitat.bounds.max.y, habitat.bounds.max.z].every(Number.isFinite)
-  return Boolean(config && config.units === 'meter' && typeof config.queryCapsule === 'function'
+  return Boolean(config && config.units === 'meter' && typeof config.queryCapsule === 'function' && typeof meshQueryForSpecies(config, fish.speciesId) === 'function'
     && Number.isFinite(config.spacingM) && config.spacingM > 0
     && Number.isFinite(fish.collisionRadiusM) && fish.collisionRadiusM! >= 0
     && config.budget && typeof config.budget === 'object'
@@ -591,12 +613,13 @@ function planMesh(fish: SwimmingFish, habitat: WaterHabitat) {
     for (const candidate of candidates) {
       if (!budgetAvailable(planBudget)) { failure = 'unavailable'; break }
       const result = findMeshRoute({ start: fish.position, target: candidate.position, waterBounds: habitat.bounds,
-        fishClearanceRadius: radiusM, spacingM: mesh.spacingM, queryCapsule: mesh.queryCapsule!, budget: planBudget.remaining,
+        fishClearanceRadius: radiusM, spacingM: mesh.spacingM, queryCapsule: meshQueryForSpecies(mesh, fish.speciesId)!, budget: planBudget.remaining,
         maxAbsXAtDepth: habitat.maxAbsXAtDepth, lateralClearanceRadius })
       const withinBudget = spendPlanBudget(planBudget, result.work)
       if (!withinBudget) { failure = 'unavailable'; break }
       if (result.status === 'route') {
         fish.routeGeneration = request.generation
+        fish.targetWait = 0
         installMeshRoute(fish, result.path, request.anchor)
         return
       }
@@ -604,8 +627,10 @@ function planMesh(fish: SwimmingFish, habitat: WaterHabitat) {
       if (result.status === 'work-limit' && result.reason.startsWith('lattice-')) break
     }
     fish.routeGeneration = request.generation
-    fish.navigationAnchor = undefined
     fish.behavior = reportNavigationOutcome(fish.behavior, request.generation, request.anchor, failure)
+    if (!fish.navigationAnchor && fish.route.length > 0 && fish.waypoint < fish.route.length) return
+    fish.route = []
+    fish.navigationAnchor = undefined
   }
 
   // AQ-82 AC #4 (mesh mode): same hold-at-anchor rule as the AABB planner —
@@ -644,7 +669,7 @@ function planMesh(fish: SwimmingFish, habitat: WaterHabitat) {
     )
     if (!target) continue
     const result = findMeshRoute({ start: fish.position, target, waterBounds: habitat.bounds,
-      fishClearanceRadius: r, spacingM: mesh.spacingM, queryCapsule: mesh.queryCapsule!, budget: planBudget.remaining,
+      fishClearanceRadius: r, spacingM: mesh.spacingM, queryCapsule: meshQueryForSpecies(mesh, fish.speciesId)!, budget: planBudget.remaining,
       maxAbsXAtDepth: habitat.maxAbsXAtDepth, lateralClearanceRadius })
     const withinBudget = spendPlanBudget(planBudget, result.work)
     if (!withinBudget) break
@@ -654,6 +679,17 @@ function planMesh(fish: SwimmingFish, habitat: WaterHabitat) {
   fish.targetWait = .7
 }
 function plan(fish: SwimmingFish, habitat: WaterHabitat) {
+  const hostRequest = getNavigationRequest(fish.behavior)
+  const host = fish.speciesId === 'ocellaris-clownfish' && hostRequest?.anchor === 'hostAnemone'
+    ? nearestCompatibleAnchor(fish, habitat, 'hostAnemone') : undefined
+  if (host && fish.startleSeconds <= 0
+    && movementSafety(fish, habitat, host.position, anchorApproachClearanceM(fish)) === 'clear') {
+    fish.routeGeneration = hostRequest!.generation
+    fish.navigationAnchor = undefined
+    fish.route = []
+    fish.targetWait = ANCHOR_HOLD_REFRESH_SECONDS
+    return
+  }
   if (habitat.meshNavigation !== undefined) { planMesh(fish, habitat); return }
   const request = getNavigationRequest(fish.behavior)
   if (request && fish.routeGeneration !== request.generation && fish.startleSeconds <= 0) {
@@ -663,8 +699,11 @@ function plan(fish: SwimmingFish, habitat: WaterHabitat) {
     const approachClearance = anchorApproachClearanceM(fish)
     const result = resolveHabitatRoute({ request, start: fish.position, waterBounds: habitat.bounds, obstacles: habitat.obstacles, anchorLocations: habitat.anchors, fishClearanceRadius: approachClearance, maxAbsXAtDepth: habitat.maxAbsXAtDepth, lateralClearanceRadius: lateralClearanceForFish(fish, habitat, approachClearance) })
     fish.routeGeneration = request.generation
-    if (result.status === 'route') { fish.route = result.path; fish.waypoint = 1; fish.navigationAnchor = request.anchor; return }
+    if (result.status === 'route') { fish.targetWait = 0; fish.route = result.path; fish.waypoint = 1; fish.navigationAnchor = request.anchor; return }
     fish.behavior = reportNavigationOutcome(fish.behavior, request.generation, request.anchor, result.status)
+    if (!fish.navigationAnchor && fish.route.length > 0 && fish.waypoint < fish.route.length) return
+    fish.route = []
+    fish.navigationAnchor = undefined
   }
   // AQ-82 AC #4: a fish that has already arrived at its state's anchor stays
   // there — holding, with the interaction pose applied per substep — instead
@@ -714,7 +753,7 @@ function movementSafety(fish: SwimmingFish, habitat: WaterHabitat, target: Vec3,
   const start = { ...fish.position }, end = { ...target }, radiusM = fish.collisionRadiusM!
   // The mesh oracle checks rock geometry; the glass boundary remains a separate constraint.
   if (!insideMeshWater(fish, habitat, start) || !insideMeshWater(fish, habitat, end)) return 'blocked'
-  const query = habitat.meshNavigation.queryCapsule
+  const query = meshQueryForSpecies(habitat.meshNavigation, fish.speciesId)
   const queryBudget = { ...habitat.meshNavigation.movementBudget }
   try {
     const result = query!({ ...start }, { ...end }, radiusM, { ...queryBudget })
@@ -929,15 +968,19 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   }
   const request = getNavigationRequest(fish.behavior)
   const urgentTransition = fish.behavior.state === 'retreat' || fish.behavior.state === 'burst'
-  if (fish.startleSeconds <= 0 && fish.behavior.navigationGeneration !== fish.routeGeneration && (
-    urgentTransition || (request && hasCompatibleAnchor(fish, habitat, request.anchor))
-  )) {
+  const pendingAnchorPreempt = Boolean(
+    fish.startleSeconds <= 0
+    && fish.behavior.navigationGeneration !== fish.routeGeneration
+    && request
+    && hasCompatibleAnchor(fish, habitat, request.anchor),
+  )
+  if (fish.startleSeconds <= 0 && fish.behavior.navigationGeneration !== fish.routeGeneration && urgentTransition) {
     if (fish.route.length > 0) fish.targetWait = 0
     fish.route = []
     fish.navigationAnchor = undefined
     if (!request) fish.routeGeneration = fish.behavior.navigationGeneration
   }
-  if ((!fish.route.length || fish.waypoint >= fish.route.length) && fish.targetWait <= 0) plan(fish, habitat)
+  if (((!fish.route.length || fish.waypoint >= fish.route.length) && fish.targetWait <= 0) || pendingAnchorPreempt) plan(fish, habitat)
   const rawTarget = fish.route[fish.waypoint]
   if (!rawTarget) {
     fish.speed *= Math.exp(-dt * 1.8)
@@ -1042,7 +1085,11 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   fish.turnKinematics = stepFishTurnKinematics(fish.turnKinematics, turn + schoolTurn, dt, fish.speed, fish.startleSeconds, delta)
   const targetBank = clamp(-fish.turnKinematics.smoothedYawRate * 0.12, -0.18, 0.18)
   fish.bank += (targetBank - fish.bank) * Math.min(1, dt * 5.5)
-  const multiplier = profile.states[fish.behavior.state]?.speedMultiplier ?? 1
+  let multiplier = profile.states[fish.behavior.state]?.speedMultiplier ?? 1
+  // Idle describes hovering at home, not crawling across open water to it.
+  if (fish.speciesId === 'ocellaris-clownfish' && fish.navigationAnchor === 'hostAnemone' && rawRemaining > .35) {
+    multiplier = Math.max(multiplier, profile.states.swim?.speedMultiplier ?? 1)
+  }
   // AQ-84: a lagging outer fish accelerates forward along its heading toward
   // the schoolmates' cruise speed (blended 25%, capped at +20% of its own
   // cruise) instead of being dragged sideways to catch up.

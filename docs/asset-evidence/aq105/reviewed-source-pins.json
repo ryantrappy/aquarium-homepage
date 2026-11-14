@@ -1,0 +1,11 @@
+{
+  "src/rendering/scene/anemone-host.ts": "193d8abd158ebe42eec5d18eb77bade1423e64497970626d323010db72530d8f",
+  "src/rendering/scene/anemone-host.test.ts": "da02000bcf62dce7bd3a89e0caafc5c9f1f8f90ec64ca640f8b9312c6cbdb70c",
+  "src/rendering/scene/aquarium.ts": "302e27ecb139c0f0fd984c0a9e520d1440275ea233210e87c27fe692edb127ef",
+  "src/rendering/scene/motion.ts": "c8c54b9ef80904709b967cb9861a6c7732ab5a682202d89bd0ff23a11a2cc526",
+  "src/rendering/scene/reef-mesh-navigation.ts": "505ab63c95d8dac5b30856f623acd905e96ec6a56086cb8fe8ecd3150eb7eda5",
+  "src/rendering/scene/reef-mesh-navigation.test.ts": "926e2f4f87d4b6769d3bd46a74f9096afa52b0e3ef67424b837919798887e2e2",
+  "src/simulation/habitat-navigation.ts": "2e60affbcf5a298fc5f0bfce1c5949adc332fb7127333bfddd620a1e38e03008",
+  "src/rendering/scene/fish-spawn.ts": "7026d60d2766bb9e06e54a709fb358e1ff851f7a2bd9e2dad4e7b32db75c40b4",
+  "src/rendering/scene/aq104-anchor-preempt.test.ts": "489606881dcc92b1df600eb68e542b055fcbeb067be909fe647d6fce8c71cb11"
+}

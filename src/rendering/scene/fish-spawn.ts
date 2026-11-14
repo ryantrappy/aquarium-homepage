@@ -394,15 +394,15 @@ export function findSafeFishSpawn(
     if (safeHeightRange) {
       const heightDifference = Math.abs(a.y - clamped.y) - Math.abs(b.y - clamped.y)
       if (heightDifference) return heightDifference
-      const lateralBand = (candidate: Vec3) => Math.floor(Math.abs(candidate.x - clamped.x) / 0.5)
-      const lateralDifference = lateralBand(a) - lateralBand(b)
-      if (lateralDifference) return lateralDifference
       if (obstacles.length > 0) {
-        const rearWallCutoffZ = waterBounds.min.z + (waterBounds.max.z - waterBounds.min.z) * 0.24
+        const rearWallCutoffZ = waterBounds.min.z + (waterBounds.max.z - waterBounds.min.z) * 0.52
         const aRear = a.z < rearWallCutoffZ ? 1 : 0
         const bRear = b.z < rearWallCutoffZ ? 1 : 0
         if (aRear !== bRear) return aRear - bRear
       }
+      const lateralBand = (candidate: Vec3) => Math.floor(Math.abs(candidate.x - clamped.x) / 0.5)
+      const lateralDifference = lateralBand(a) - lateralBand(b)
+      if (lateralDifference) return lateralDifference
     }
     return targetDistance(a) - targetDistance(b) || a.x - b.x || a.y - b.y || a.z - b.z
   })

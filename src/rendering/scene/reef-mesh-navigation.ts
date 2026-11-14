@@ -11,7 +11,9 @@
 // assembleCoralsOnRockSockets already extends by the measured shader sway
 // margin (see measureCoralShaderMargin in reef-assembly.ts). A capsule query
 // is blocked when it enters a coral box, and otherwise delegates to the rock
-// mesh query. Indeterminate is never mapped to clear.
+// mesh query. Only a resident clownfish may overlap explicitly tagged soft
+// anemone tissue; its query still checks all rock and unrelated coral boxes.
+// Indeterminate is never mapped to clear.
 //
 // All-or-nothing per habitat: if any island's rock collider fails the gate,
 // or any coral mesh lacks a bounding sphere, no meshNavigation is returned
@@ -98,7 +100,7 @@ export type ReefMeshNavigationResult =
   | { status: 'unavailable'; reason: string; diagnostics: ReefMeshNavigationDiagnostics }
 
 type Vec3 = { x: number; y: number; z: number }
-type Box = { min: Vec3; max: Vec3 }
+type Box = { min: Vec3; max: Vec3; softAnemone?: boolean }
 
 export type RockFallbackObstaclesResult =
   | { status: 'ready'; obstacles: SolidObstacleVolume[] }
@@ -261,15 +263,13 @@ export function createRockFallbackObstacles(
 }
 
 /**
- * One world-space AABB per mounted coral mesh, from the geometry bounding
- * sphere. The sphere is the one assembleCoralsOnRockSockets extends by the
- * measured shader sway margin, so the box already covers sway; the radius is
- * scaled by the mesh's largest world-scale axis (mounts are uniform, rigid
- * skeletons are not — the max axis is the conservative choice).
+ * Historical sphere boxes remain the default. The resident query uses actual
+ * transformed vertices plus the complete assembly-measured displacement margin.
+ * Matrix row lengths bound each displacement axis even under sheared ancestors.
  * Returns undefined when any coral mesh lacks a usable bounding sphere, so
  * the caller fails closed instead of shipping un-bounded coral.
  */
-function coralMeshBoxes(mountedCorals: readonly AssembledCoralBinding[]): Box[] | undefined {
+function coralMeshBoxes(mountedCorals: readonly AssembledCoralBinding[], tight = false): Box[] | undefined {
   const boxes: Box[] = []
   let meshCount = 0
   for (const mounted of mountedCorals) {
@@ -282,7 +282,6 @@ function coralMeshBoxes(mountedCorals: readonly AssembledCoralBinding[]): Box[] 
       if (!sphere
         || !Number.isFinite(sphere.center.x) || !Number.isFinite(sphere.center.y) || !Number.isFinite(sphere.center.z)
         || !Number.isFinite(sphere.radius) || sphere.radius < 0) return
-      const center = sphere.center.clone().applyMatrix4(node.matrixWorld)
       const e = node.matrixWorld.elements
       const worldScale = Math.max(
         Math.hypot(e[0], e[1], e[2]),
@@ -290,10 +289,37 @@ function coralMeshBoxes(mountedCorals: readonly AssembledCoralBinding[]): Box[] 
         Math.hypot(e[8], e[9], e[10]),
       )
       if (!Number.isFinite(worldScale) || worldScale <= 0) return
-      const radius = sphere.radius * worldScale
+      const bounds = new THREE.Box3(), vertex = new THREE.Vector3()
+      if (!tight) {
+        const center = sphere.center.clone().applyMatrix4(node.matrixWorld)
+        bounds.setFromCenterAndSize(center, new THREE.Vector3().setScalar(2 * sphere.radius * worldScale))
+      } else {
+        let restRadius = 0
+        for (let i = 0; i < position.count; i++) {
+          vertex.fromBufferAttribute(position, i)
+          if (![vertex.x, vertex.y, vertex.z].every(Number.isFinite)) return
+          restRadius = Math.max(restRadius, vertex.distanceTo(sphere.center))
+          vertex.applyMatrix4(node.matrixWorld)
+          if (![vertex.x, vertex.y, vertex.z].every(Number.isFinite)) return
+          bounds.expandByPoint(vertex)
+        }
+        // Assembly expands this same sphere by a proven upper bound on shader
+        // displacement. Keep that entire margin around the actual vertex box;
+        // a sphere-shaped box otherwise fills the neighboring host's empty water.
+        const margin = sphere.radius - restRadius
+        if (margin < -1e-6) return
+        const padding = new THREE.Vector3(Math.hypot(e[0], e[4], e[8]), Math.hypot(e[1], e[5], e[9]), Math.hypot(e[2], e[6], e[10]))
+          .multiplyScalar(Math.max(0, margin) + 1e-6)
+        if (![padding.x, padding.y, padding.z].every(Number.isFinite)) return
+        bounds.min.sub(padding); bounds.max.add(padding)
+      }
+      const primitive = node.userData.reefPrimitive ?? node.parent?.userData.reefPrimitive
+      const softAnemone = mounted.coralAssetId === 'coral-anemone-bta' && primitive?.role === 'coral-soft'
+        && ['anemone_column_disc', 'anemone_tentacle_crown'].includes(primitive.id)
       boxes.push({
-        min: { x: center.x - radius, y: center.y - radius, z: center.z - radius },
-        max: { x: center.x + radius, y: center.y + radius, z: center.z + radius },
+        ...(softAnemone ? { softAnemone: true } : {}),
+        min: { x: bounds.min.x, y: bounds.min.y, z: bounds.min.z },
+        max: { x: bounds.max.x, y: bounds.max.y, z: bounds.max.z },
       })
     })
   }
@@ -385,6 +411,7 @@ export async function createReefMeshNavigation(
 
   const colliders: MeshCollider[] = []
   const coralBoxes: Box[] = []
+  const residentCoralBoxes: Box[] = []
   for (const island of islands) {
     const triangles = extractRockTriangles(island.reef)
     if (!triangles) {
@@ -423,7 +450,8 @@ export async function createReefMeshNavigation(
       return finish({ status: 'unavailable', reason: `rock-collider-unavailable:${island.islandId}:${built.reason}`, diagnostics })
     }
     const boxes = coralMeshBoxes(island.mountedCorals)
-    if (!boxes) {
+    const residentBoxes = coralMeshBoxes(island.mountedCorals, true)
+    if (!boxes || !residentBoxes) {
       diagnostics.islands.push({
         islandId: island.islandId,
         rockTriangles: built.diagnostics.triangles,
@@ -462,15 +490,17 @@ export async function createReefMeshNavigation(
     })
     colliders.push(built.collider)
     coralBoxes.push(...boxes)
+    residentCoralBoxes.push(...residentBoxes)
   }
 
   const meshQuery = createMeshClearanceQuery(colliders)
-  const queryCapsule: CapsuleClearanceQuery = (start, end, radiusM, remainingWork) => {
+  const queryForResident = (resident: boolean): CapsuleClearanceQuery => (start, end, radiusM, remainingWork) => {
     const noWork = { nodeVisits: 0, triangleTests: 0 }
     if (!finiteVec3(start) || !finiteVec3(end) || !Number.isFinite(radiusM) || radiusM < 0 || !validWorkBudget(remainingWork)) {
       return { status: 'indeterminate', reason: 'invalid-capsule-query', work: noWork }
     }
-    for (const box of coralBoxes) {
+    for (const box of resident ? residentCoralBoxes : coralBoxes) {
+      if (resident && box.softAnemone) continue
       if (segmentIntersectsInflatedBox(start, end, box, radiusM)) {
         return { status: 'blocked', reason: 'coral-envelope', work: noWork }
       }
@@ -485,7 +515,8 @@ export async function createReefMeshNavigation(
       spacingM: MESH_NAVIGATION_SPACING_M,
       budget: { ...MESH_NAVIGATION_PLANNER_BUDGET },
       movementBudget: { ...MESH_NAVIGATION_MOVEMENT_BUDGET },
-      queryCapsule,
+      queryCapsule: queryForResident(false),
+      queryCapsuleForSpecies: { 'ocellaris-clownfish': queryForResident(true) },
     },
     diagnostics,
   })

@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { mountedAnemoneHosts } from './anemone-host'
 import { GLTFLoader, type GLTF } from 'three/addons/loaders/GLTFLoader.js'
 import { clone } from 'three/addons/utils/SkeletonUtils.js'
 import type { ServiceConfig } from '../../lib/services'
@@ -42,7 +43,7 @@ import { createGlassEnclosure, glassEnclosureLayout } from './glass-enclosure'
 import { createWaterSurface } from './water-surface'
 import { estimateCaptionRect, labelLiftPx, resolveLabelDeconflicts } from './fish-label-layout'
 import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
-import { createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
+import { meshQueryForSpecies, createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
 import { createReefMeshNavigation, createRockFallbackObstacles, createMountedCoralFallbackObstacles, MESH_NAVIGATION_COLLISION_RADIUS_M, type ReefMeshIslandInput } from './reef-mesh-navigation'
 import { applyFishTurningRigOverlay, bindFishTurningRig, evaluateSpriteTurnScaleX, type FishTurningRig } from './fish-turning'
 import { SPRITE_PLANE_WIDTH, fishBodyRadiusM, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale } from './fish-scale'
@@ -786,7 +787,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         return false
       }
       return (
-        habitat.meshNavigation.queryCapsule(p, p, r, {
+        meshQueryForSpecies(habitat.meshNavigation, item.service.fishId)!(p, p, r, {
           ...habitat.meshNavigation.movementBudget,
         }).status === 'clear'
       )
@@ -900,7 +901,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         return
       }
       let result: ReturnType<typeof instantiateModularReefHabitat>
+      let hostAnchors: ReturnType<typeof mountedAnemoneHosts>
       try {
+        hostAnchors = mountedAnemoneHosts(assembled.mountedCorals, `reef-${i}`)
         const mountedOrigins = snapshotMountedCoralOrigins(assembled.mountedCorals)
         result = instantiateModularReefHabitat(islandKind, uniformScale, position, `reef-${i}`, yaw, mounts, habitat.bounds, mountedOrigins)
       } catch (error) {
@@ -910,7 +913,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       // Keep the calcified coral bases; historical hand-authored rock bands
       // are replaced by bounds of the same current meshes used for rendering.
       habitat.obstacles.push(...fallback.obstacles, ...result.obstacles.filter(obstacle => obstacle.id.startsWith(`reef-${i}-coral-base-`)))
-      habitat.anchors.push(...result.anchors)
+      habitat.anchors.push(...result.anchors.filter(anchor => anchor.anchor !== 'hostAnemone'), ...hostAnchors)
       reef.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) })
       meshIslands.push({ reef, islandId: `reef-${i}`, mountedCorals: assembled.mountedCorals })
     }

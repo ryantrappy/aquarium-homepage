@@ -15,6 +15,8 @@ export type HabitatAnchorLocation = {
   id: string
   anchor: HabitatAnchor
   position: Vec3
+  /** Authored interaction radius derived from a mounted soft host, when supplied. */
+  softHomeRadius?: number
   compatibleSpecies?: readonly SpeciesBehaviorId[]
 }
 
