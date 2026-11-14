@@ -50,6 +50,8 @@ Use [the modular authoring specification](modular-coral-and-live-rock-spec.md) w
 
 ## Responsive verification scope
 
+**User update2026-11-14:** stop phone checks and assume phone behavior. Going forward, perform native visual verification only at1440×900 CSS pixels; do not repeat phone captures or a device matrix unless the user asks again. Earlier phone evidence remains historical evidence, not an assumption converted into a new verification claim. This supersedes the earlier two-viewport testing requirement below.
+
 Verify responsive behavior at two CSS viewports only: **402×874** as an iPhone 18 Pro proxy and **1440×900** as a normal laptop viewport. The iPhone proxy is inferred from Apple's [1206×2622 native display resolution](https://www.apple.com/iphone-18-pro/specs/) divided by a 3× pixel ratio; it is a CSS viewport estimate, not an Apple-published CSS dimension. Do not expand this into a broad phone, tablet, or device matrix unless requested. Older viewport measurements and review comments remain historical records; do not repeat those checks.
 
 The planned supported reef roster contains 15 species and is documented in the [reef fish roster target](reef-fish-roster.md). This is a planning target, not a claim that all 15 species or licensed visual assets are currently implemented in the app.

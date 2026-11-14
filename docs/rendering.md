@@ -43,7 +43,7 @@ This is a functional technical baseline, not completed realism or all acceptance
 
 Native fish links retain their independently projected44px minimum targets. Captions use actual DOM dimensions and the current posed mesh's screen rectangle, including morphs, bone/turn pose and a CPU counterpart of live shader flex. They start immediately below the fish, or beside it at frame edges. The bounded near-first layout tests all foreign service/ambient bodies and visible captions; when no attached clear placement fits, it hides caption ink only. ARIA names, native link actions, focus/occlusion policy and Services access remain available. The caption itself brightens on hover/focus; its redundant rendered tooltip is suppressed to prevent an unchecked second label.
 
-[Source review and cost diagnostics](asset-evidence/aq89/source-review-20261114/README.md) separate full-vertex CPU observations from frame budgets and native acceptance. AQ-89 remains open until exact two-size Root review.
+[Source review and cost diagnostics](asset-evidence/aq89/source-review-20261114/README.md) separate full-vertex CPU observations from frame budgets. [Root native acceptance](asset-evidence/aq89/native-e0def59/README.md) completes AQ-89 at e0def59. Subsequent user direction stops further phone checks; visual verification now uses the laptop view only.
 
 ## Underwater water-surface interface (AQ-103)
 

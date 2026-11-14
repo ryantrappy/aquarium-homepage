@@ -4,7 +4,7 @@
 ### 2026-11-14 — Standing user policy
 *Root resume review2026-11-14: all earlier scratch entries inspected/consolidated; current policy, not blanket completion.*
 - Complete every open Backlog task using agents and Root review with objective evidence. Scoped commits and pushes to shared rolling draftPR48 https://github.com/ryantrappy/aquarium-homepage/pull/48 with running contents. Full goal active/incomplete; never deploy/merge. User deploys to trappserv.er.
-- Preserve Gemini/user assets and concurrent work; no blanket staging/reset/clean. Goal docs/more-realistic-reef-guide.png, tall reef mass retained. Only402x874/1440x900DPR1. CI/FPS-display lanes excluded. All supplied splat references/derivatives owned/shareable per user; rights blocker resolved.
+- Preserve Gemini/user assets and concurrent work; no blanket staging/reset/clean. Goal docs/more-realistic-reef-guide.png, tall reef mass retained. Latestuseroverride: laptop1440x900only; nofurtherphonechecks. CI/FPS-display lanes excluded. All supplied splat references/derivatives owned/shareable per user; rights blocker resolved.
 - Root reserves Blender single actor. Preserve live user work. Any future edit requires packed native save, override export, --learn-guide sync and every specified source/runtime/inspection/manifest commit. No model/Blender edits in AQ104/105 review.
 
 ### 2026-11-14 — Saved reef and pending primary visual work
@@ -30,3 +30,11 @@
 - AQ76 healthy60Hz recovery threshold17.5ms is distinct from unchanged16.7target/19slowEMA/22p95; cooldown/window/exclusions retained. First combined901pass/1stalebudget13msfailure fixed transparently; final902tests75files,42focusedpolicychecks/typecheck16scripts/build pass. Fulltask/performancegatesremainopen.
 - Current13file source snapshot hashmatchesoriginal/proof; taskscoped76and89commits/pushes follow to sharedPR48/updaterunninglist. Audits a09ae53(79)/b3fdf38(70.13) pushed, tasksopen. Queue64Done/68open, CI/FPSdisplayexcluded. PreserveGemini/concurrentassets; noModel/Blender/config edits.
 - Proof /tmp/aquarium-aq87-proof-8b2d7cc detached4df19de+13reviewedfiles+Viteallowlist. Owneddev5215PID46280stillstale4dfVITEpin; verifyownership/snapshotownfiles/checkoutsharedmilestone/restartaccurately before nativeproof. Disposablelocalhostconfigunchanged; preserveuser3000/5210. Priorreviewtabsclosed,Chrome4retained; no currentownedreviewtab.
+
+### 2026-11-14 — Latest user steering
+*Root resume review2026-11-14: actioned policy; all earlier entries inspected, water correction pending.*
+- Stop phone checks; assume phone behavior per explicit user instruction, superseding prior two-viewport verification policy. Use1440x900 laptop only going forward. Do not claim new phone evidence.
+- User says water surface regressed versus realistic reference; AQ103 is current priority. Preserve Gemini/concurrent assets, local reviewed commits/sharedPR48 pushes, never deploy.
+- AQ89 native observations retained in /tmp/aq89-native-e0def59/review.json and fourPNGs; ownedtab1298078142 already closed by interrupted-turn cleanup. Native records include transient viewport resets, preserved rather than silently accepted. Task89 stillopen pending durable Root finalization; do not lose this work.
+
+- AQ89 Rootfinalreview actioned: all5AC/2DoD Done at e0def59, evidence docs/asset-evidence/aq89/native-e0def59/README.md. Source902tests/typecheck/build pass; historicalnativechecks acceptedbeforephone-stop instruction. Queue65Done/67open; completioncommit/push now. AQ103waterdiagnosis remainsactivepriority.
