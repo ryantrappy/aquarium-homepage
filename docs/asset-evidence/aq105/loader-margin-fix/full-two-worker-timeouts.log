@@ -1,0 +1,75 @@
+
+> test
+> vitest run --maxWorkers=2
+
+
+ RUN  v5.1.0 /private/tmp/aquarium-aq87-proof-8b2d7cc
+
+ ❯ src/rendering/assets/socket-report-freshness.test.ts (6 tests | 3 failed) 155724ms
+   ❯ socket report freshness (6)
+     × accepts independently generated reports with different documented report paths and leaves inputs unchanged 34218ms
+     × exits nonzero when a docs report has a stale source hash 33962ms
+     × exits nonzero when packaged measured results change despite a matching source hash 41366ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/rendering/assets/socket-report-freshness.test.ts > socket report freshness > accepts independently generated reports with different documented report paths and leaves inputs unchanged
+Error: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/rendering/assets/socket-report-freshness.test.ts:50:3
+     48|
+     49| describe('socket report freshness', () => {
+     50|   it('accepts independently generated reports with different documente…
+       |   ^
+     51|     const root = await fixture()
+     52|     const path = join(root, 'src/rendering/assets/corals/live-rock-isl…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/rendering/assets/socket-report-freshness.test.ts > socket report freshness > exits nonzero when a docs report has a stale source hash
+Error: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/rendering/assets/socket-report-freshness.test.ts:64:3
+     62|   }, 30_000)
+     63|
+     64|   it('exits nonzero when a docs report has a stale source hash', async…
+       |   ^
+     65|     const root = await fixture()
+     66|     await changeReport(root, 'docs/asset-evidence/aq52-left-socket-rep…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/rendering/assets/socket-report-freshness.test.ts > socket report freshness > exits nonzero when packaged measured results change despite a matching source hash
+Error: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/rendering/assets/socket-report-freshness.test.ts:73:3
+     71|   }, 30_000)
+     72|
+     73|   it('exits nonzero when packaged measured results change despite a ma…
+       |   ^
+     74|     const root = await fixture()
+     75|     await changeReport(root, 'src/rendering/assets/corals/live-rock-is…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/rendering/assets/socket-report-freshness.test.ts > socket report freshness > exits nonzero when packaged measured results change despite a matching source hash
+Error: Hook timed out in 10000ms.
+If this is a long-running hook, pass a timeout value as the last argument or configure it globally with "hookTimeout".
+ ❯ src/rendering/assets/socket-report-freshness.test.ts:45:1
+     43| }
+     44|
+     45| afterEach(async () => {
+       | ^
+     46|   await Promise.all(temporaryRoots.splice(0).map(root => rm(root, { re…
+     47| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed | 74 passed (75)
+      Tests  3 failed | 872 passed (875)
+   Start at  08:11:01
+   Duration  184.31s (tests 92%, import 5%, environment 3%, transform 1%)
+
+    Isolate  75 workers spawned · ~741ms startup each (spawn + environment, per file)
+             at least ~27.05s faster with isolate: false — reuses workers across files instead of one per file

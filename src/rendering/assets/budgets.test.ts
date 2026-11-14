@@ -363,13 +363,19 @@ describe('live manifest budgets (AQ-70.3 AC #2)', () => {
 })
 
 describe('frame-time budget matches the runtime tier mechanism (AQ-70.3 AC #3)', () => {
-  it('the adaptive-quality thresholds sit inside the documented budget', () => {
+  it('matches runtime thresholds and keeps 60 Hz recovery distinct from the frame target', () => {
     // The controller in runtime-quality.ts is the mechanism; the budget
-    // records its thresholds so a drift in either place fails here.
+    // metadata mirrors its policy while preserving a separate performance
+    // target. A vsync-capped 60 Hz RAF stream is a reachable recovery signal,
+    // not evidence that rendering meets the target or has spare GPU headroom.
     expect(ADAPTIVE_STEP_DOWN_P95_MS).toBe(FRAME_TIME_BUDGET.p95MaxMs)
     expect(ADAPTIVE_STEP_DOWN_EMA_MS).toBe(FRAME_TIME_BUDGET.stepDownEmaMs)
     expect(ADAPTIVE_STEP_UP_EMA_MS).toBe(FRAME_TIME_BUDGET.stepUpEmaMs)
+    expect(FRAME_TIME_BUDGET.targetMs).toBe(16.7)
+    expect(FRAME_TIME_BUDGET.p95MaxMs).toBe(22)
+    expect(FRAME_TIME_BUDGET.stepDownEmaMs).toBe(19)
     expect(FRAME_TIME_BUDGET.stepDownEmaMs).toBeGreaterThan(FRAME_TIME_BUDGET.targetMs)
-    expect(FRAME_TIME_BUDGET.targetMs).toBeGreaterThan(FRAME_TIME_BUDGET.stepUpEmaMs)
+    expect(FRAME_TIME_BUDGET.stepUpEmaMs).toBeGreaterThan(1000 / 60)
+    expect(FRAME_TIME_BUDGET.stepUpEmaMs).toBeLessThan(FRAME_TIME_BUDGET.stepDownEmaMs)
   })
 })

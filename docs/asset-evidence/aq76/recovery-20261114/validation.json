@@ -1,0 +1,23 @@
+{
+  "tests": 902,
+  "testFiles": 75,
+  "workers": 1,
+  "typecheck": "pass including16script checks",
+  "build": "pass",
+  "scope": "Combined13file source snapshot: AQ89 label integration and AQ76 recovery policy. Not native acceptance or a performance budget pass.",
+  "sourceSha256": {
+    "src/rendering/scene/aquarium.ts": "3b36c30846888b26e2944b4a5f83fe09c1dbdf8ed49bd777a1dc37fd0c380a44",
+    "src/rendering/scene/aquarium-lifecycle.test.ts": "39be67ffcd61719b24199cc82531f8aea3f4aaf4f7221d46b3e0488ab0730be6",
+    "src/rendering/scene/fish-flex-material.ts": "1a3bb98a37b64460b91484210462dcb2a6bcc21256d9f95796b12467f7c5dd6b",
+    "src/rendering/scene/fish-flex-material.test.ts": "65173ef3436239e28d44b9f1996a20c9da710e149be306a4a377710862d03d98",
+    "src/rendering/scene/fish-label-layout.ts": "0aedeaeda8753eb30dbfc096e21a0ebcfd29699d6d5aa4736b5f5ac78c6f43c6",
+    "src/rendering/scene/fish-label-layout.test.ts": "d52a1366aeefd2453d07b02c58aa1e3cadd1a88fd94646e2e5ac62d51693d9d1",
+    "src/rendering/scene/fish-link-projection.ts": "6efe45506034e05ea4d0b9d989aa48d5b5bf4b7d136ef269646bc8e0430226ea",
+    "src/rendering/scene/fish-link-projection.test.ts": "f47e473d9c09b244683d5820506177bdf0132d91cad9c4cb5085c289fbb651fe",
+    "src/rendering/scene/runtime-quality.ts": "745823837f3e02150723c5e92884c677e2486fdd5c0871b6c63ac46a574992e0",
+    "src/rendering/scene/runtime-quality.test.ts": "9c5b5d70a2d1b20d410479677892850ffe1530b0552270aea4d0925d85a39c9f",
+    "src/styles/aquarium.css": "2cbe70c08bb796d87eb39f2adcbdf43a5e7a2d8b48670df52904e08952c02634",
+    "src/rendering/assets/budgets.ts": "bc13089a1772e79e5f09ecc7ca0ecda07b27b94e2b942ab4c0e6fe16f99dda8e",
+    "src/rendering/assets/budgets.test.ts": "51bfdd99fca00ef91faa0cf0398fec31b329e4a0c3cb5ec1383f680fa2a924ab"
+  }
+}

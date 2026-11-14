@@ -1,0 +1,124 @@
+{
+  "sourceCommit": "604c8aa2a894865aeb1d22345da91d54540ac2dd",
+  "reviewer": "Root",
+  "date": "2026-11-14",
+  "images": [
+    {
+      "file": "laptop.png",
+      "size": [
+        1440,
+        900
+      ],
+      "sha256": "b7177fd7e727f199035319767469c1df6529bcedb875711cb316476ef8a125ed"
+    },
+    {
+      "file": "phone.png",
+      "size": [
+        402,
+        874
+      ],
+      "sha256": "1d3b11cf695d409dd5247c2ce13f7a5754935dd1a31d1b41b66e92c2f312af92"
+    }
+  ],
+  "temporal": [
+    {
+      "mode": "aabb",
+      "complete": 1,
+      "shares": [
+        0.40998217468805703,
+        0.2638146167557932,
+        0.32620320855614976
+      ],
+      "longestGap": 0,
+      "unsafe": 0,
+      "minPathLegacyWorldUnits": 3.6613671881013037
+    },
+    {
+      "mode": "mesh",
+      "complete": 1,
+      "shares": [
+        0.38324420677361853,
+        0.26559714795008915,
+        0.3511586452762923
+      ],
+      "longestGap": 0,
+      "unsafe": 0,
+      "minPathLegacyWorldUnits": 3.5523620037772727
+    }
+  ],
+  "native": {
+    "laptop": {
+      "viewport": {
+        "devicePixelRatio": 1,
+        "height": 900,
+        "width": 1440
+      },
+      "ready": true,
+      "commit": "604c8aa2a894865aeb1d22345da91d54540ac2dd",
+      "failedAssets": [],
+      "inhabitants": 11
+    },
+    "phone": {
+      "viewport": {
+        "devicePixelRatio": 1,
+        "height": 874,
+        "width": 402
+      },
+      "ready": true,
+      "commit": "604c8aa2a894865aeb1d22345da91d54540ac2dd",
+      "failedAssets": [],
+      "inhabitants": 11
+    }
+  },
+  "motion": {
+    "normalLaptopMotion": {
+      "viewport": [
+        1440,
+        900,
+        1
+      ],
+      "bridgePresent": false,
+      "frames": 12,
+      "elapsedMs": 1191.2000000476835,
+      "links": 8,
+      "changedTransforms": 7
+    },
+    "normalLaptopPause": {
+      "viewport": [
+        1440,
+        900,
+        1
+      ],
+      "bridgePresent": false,
+      "frames": 12,
+      "elapsedMs": 420.10000002384186,
+      "links": 8,
+      "changedTransforms": 0
+    },
+    "normalPhoneMotion": {
+      "viewport": [
+        402,
+        874,
+        1
+      ],
+      "bridgePresent": false,
+      "frames": 12,
+      "elapsedMs": 683.1000000238419,
+      "links": 8,
+      "changedTransforms": 8
+    },
+    "normalPhonePause": {
+      "viewport": [
+        402,
+        874,
+        1
+      ],
+      "bridgePresent": false,
+      "frames": 12,
+      "elapsedMs": 226.39999997615817,
+      "links": 8,
+      "changedTransforms": 0
+    }
+  },
+  "consoleWarningsErrors": 0
+}

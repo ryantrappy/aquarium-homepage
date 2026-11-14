@@ -157,15 +157,43 @@ describe('3D habitat navigation core', () => {
     expect(wrongStateTarget.status).toBe('unavailable')
   })
 
-  it('chooses the shortest reachable supplied location of the requested anchor kind', () => {
-    const farther: HabitatAnchorLocation = { id: 'z-host', anchor: 'hostAnemone', position: { x: 9, y: 9, z: 9 } }
-    const nearer: HabitatAnchorLocation = { id: 'a-host', anchor: 'hostAnemone', position: { x: 3, y: 5, z: 5 } }
+  it('chooses the shortest reachable anchor within the selected reef flank', () => {
+    const farther: HabitatAnchorLocation = { id: 'z-host', anchor: 'hostAnemone', position: { x: 9, y: 5, z: 5 } }
+    const nearer: HabitatAnchorLocation = { id: 'a-host', anchor: 'hostAnemone', position: { x: 7, y: 5, z: 5 } }
     const result = resolveHabitatRoute({
       request: request(), start, waterBounds: bounds, obstacles: [], anchorLocations: [farther, nearer], fishClearanceRadius: 0,
     })
 
     expect(result.status).toBe('route')
     if (result.status === 'route') expect(result.locationId).toBe('a-host')
+  })
+
+  it('balances equidistant anchors across reef flanks by fish and request generation', () => {
+    const anchors: HabitatAnchorLocation[] = [
+      { id: 'left-host', anchor: 'hostAnemone', position: { x: 2, y: 5, z: 5 } },
+      { id: 'right-host', anchor: 'hostAnemone', position: { x: 8, y: 5, z: 5 } },
+    ]
+    const select = (instanceId: string, generation: number) => {
+      const result = resolveHabitatRoute({
+        request: { ...request(), instanceId, generation },
+        start: { x: 5, y: 5, z: 5 },
+        waterBounds: bounds,
+        obstacles: [],
+        anchorLocations: anchors,
+        fishClearanceRadius: 0,
+      })
+      expect(result.status).toBe('route')
+      return result.status === 'route' ? result.locationId : undefined
+    }
+    const firstSelections = Array.from({ length: 32 }, (_, index) => select(`balanced-fish-${index}`, 0))
+    const repeatedSelections = Array.from({ length: 32 }, (_, index) => select(`balanced-fish-${index}`, 0))
+    const leftCount = firstSelections.filter(id => id === 'left-host').length
+    const rightCount = firstSelections.filter(id => id === 'right-host').length
+
+    expect(firstSelections).toEqual(repeatedSelections)
+    expect(leftCount).toBeGreaterThanOrEqual(12)
+    expect(rightCount).toBeGreaterThanOrEqual(12)
+    expect(select('generation-rotation', 0)).not.toBe(select('generation-rotation', 1))
   })
 
   it('carries request generations through routes and ignores a stale same-instance completion', () => {

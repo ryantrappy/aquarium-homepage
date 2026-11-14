@@ -1,11 +1,13 @@
 ---
 id: AQ-89
-title: Anchor service labels tight to their fish and keep labels from overlapping other fish
-status: To Do
+title: >-
+  Anchor service labels tight to their fish and keep labels from overlapping
+  other fish
+status: In Progress
 assignee:
-  - '@Luna'
+  - '@root'
 created_date: '2026-11-08'
-updated_date: '2026-11-08'
+updated_date: '2026-11-14 15:45'
 labels:
   - accessibility
   - photorealism
@@ -23,6 +25,7 @@ references:
   - AQ-70.14
 documentation:
   - docs/rendering.md
+  - docs/asset-evidence/aq89/source-review-20261114/README.md
 priority: '2'
 type: feature
 ordinal: 96000
@@ -49,15 +52,28 @@ Service labels sit tucked directly under their fish with no floating gap, and ne
 - [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
 
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Root2026-11-14: reproduce current solver overlap/bottom-edge failures; delegate pure label-layout correction and meaningful counterexamples to Luna, while Root integrates actual rendered fish bounds and measured caption size. Include ambient schoolmate bodies as obstacles, keep native44px link targets/ARIA names and Services access, and hide only captions when no attached safe placement exists (explicitly allowed by AC2). Retain occlusion/focus behavior and verify both target views, moving labels, Pause/reduced, keyboard/touch/service activation before Root acceptance. Existing runtime/style/behavior dependencies stay tracked; do not accept those broad art tasks from this bounded label fix.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Current cbf6567 read-only subagent audit:67focused tests pass but solver deliberately returns fadedfalse after unresolvable overlap; a direct near/far-body counterexample still overlaps. Lone bottom-edge caption can extend to903px in874px viewport. Ambient schoolmates omitted because placements iterate only service fish. Existing tests encode never-fade behavior contrary to AC2, so revise that expectation with explicit native-link preservation rather than claim completion from tests alone.
+
+2026-11-14 bounded helper handoff by link_interaction. Root explicitly selected and retained this stronger inherited review model for the demanding collision-layout algorithm under the AGENTS allowance; this records the task DoD2 model-routing exception, without checking DoD or AC boxes. Edited only fish-label-layout.ts and fish-label-layout.test.ts. Solver accepts an optional third readonly {id,body}[] array for ambient/foreign bodies; supplied caption dimensions are honored and dx/dy are relative to that caption origin. Legacy two-argument calls and estimateCaptionRect remain supported, with optional measured width/height. At most32 attached candidates: tight supplied below-body anchor/horizontal escapes, immediate side candidates only at frame edges; no84px downward detachment. Stable near-first/id tie ordering; visible results are checked against every foreign body and earlier visible caption and must fit the viewport. No safe attached placement yields faded:true for caption-only suppression; native hitboxes/ARIA/URLs are outside this helper and unchanged by this lane. Invalid geometry/metrics fail closed, including finite offset-cancellation cases. Existing tests that required visible unresolved overlap were replaced with criterion-based tests.27 helper tests pass: both target viewport clusters/edges/ambient/multiple blockers, actual measurements/offset origin, deterministic ties and seeded mixed-size invariants. Same tests against preserved old helper fail24/pass3, confirming regression sensitivity. Source snapshots, before/after JSON reports and handoff.json under /tmp/aq89-helper-20261114. Before report SHA ea1ad406b8ebf396fd8b5e39b8c1edf22affab981890339a93e491cd82dbef36; after de27ee6f63ed49e6ca04e86a4f340d91f8424d70184f6339dbe3d9b0cb6e1fa4. Helper SHA 0aedeaeda8753eb30dbfc096e21a0ebcfd29699d6d5aa4736b5f5ac78c6f43c6; test SHA d52a1366aeefd2453d07b02c58aa1e3cadd1a88fd94646e2e5ac62d51693d9d1. Typecheck including16script checks and scoped diff-check pass. Root-owned measured-caption and schoolmate-caption lifecycle cases both pass after an explicit frozen render refreshes newly mocked dimensions; no Root test/source was edited by this agent. This verifies only the helper subset; actual posed/GPU-flex body projection, DOM measurement/CSS integration, full-suite/accessibility/native two-size art acceptance remain Root work. No Blender/models/UI, stage/commit/push or AC/status changes by implementing agent.
+
+Root verified source handoff:27helpertests pass/oldhelperfails24; posed projection includes current skin/morph/turn and live flex, measured DOM captions and all service/ambient body obstacles, preserving separate44px links/ARIA. Matrix/shader/buffer optimizations retain every vertex and reduce same53878vertex11fish Nodefixture projection p50from26.5/27.6to7.2/9.3ms; not browser/mobile/GPU/wholeframe budgets. No exact source commit is claimed yet: combined13file snapshot pins match original/proof;902tests75files,170focused8files/typecheck16scripts/build pass after separately reviewed AQ76budgetmetadata correction. All5AC/2DoD remain unchecked pending exact native two-size review. No models/Blender/assets/originalconfig changed; only scoped reviewed source/evidence milestone follows.
+<!-- SECTION:NOTES:END -->
+
 ## Comments
 
 <!-- COMMENTS:BEGIN -->
-author: @Muse
-created: 2026-11-10
+author: @root
+created: 2026-11-14 15:16
 ---
-2026-11-10 fix for the PR #37 post-merge visual-check label findings (mobile 402x874; report ~/workspace/visual-checks-2026-11-09-pr37/VISUAL-CHECK-REPORT.md). No acceptance criteria ticked and nothing marked Done — Root review still required (AC #5).
-- Diagnosis: (i) WatchMyBirds + Paperless pills stacked with only the 2px clearance, reading as one overlapping blob, and the layout estimated caption width from the link-box width while the rendered pill is text-wide (~96px for "WatchMyBirds" on a 44px box), so side-by-side pills could overlap with the layout believing them clear. (ii) The Paperless pill vanished in one bubble frame: its caption needed a down-shift past the 84px detachment cap (cascade through the banggai body + caption), and the old fallback faded it — a few pixels of fish drift flips it visible/invisible frame to frame. (iii) Blue tang + yellow tang showed no pills in mobile zoom although the links exist in the DOM: two causes — the same fade (huge bodies in zoom need shifts past the cap) and the occlusion test, which required every raycast sample to resolve to the fish itself while schoolmate meshes (sailfin, no serviceId) and other fish count as occluders.
-- Fix (`src/rendering/scene/fish-label-layout.ts`): clearance 2px → 8px; caption width estimated from the service name when known; captions are never faded — a caption that cannot shift down within its budget slides sideways past the obstacle while staying over its own fish's column, and if even that cannot keep it attached it stays visible at its anchored position. (`src/rendering/scene/fish-link-focus.ts`, `src/rendering/scene/aquarium.ts`): a label sample counts as exposed when the foremost hit is any fish — itself, another service fish, or an ambient schoolmate (tracked in `ambientMeshes` in `rebuildHitMeshes`); reef/sand foremost still hides the label, so a fish genuinely behind rock stays unlabelled. Click picking still uses `nearest()` separately and is unchanged. Trade-off, stated plainly: a fish entirely behind another fish now shows its label at its true projected position instead of losing it, and a caption that cannot clear may graze another fish's body while staying visible.
-- Regression tests (all written to fail on the pre-fix code first): `fish-label-layout.test.ts` — stacked pills stay visible and non-overlapping in a 402x874 viewport, a pill stays visible and in the same place across a 4px frame-to-frame drift, side-by-side pills with names wider than their fish separate, a caption slides sideways instead of fading past the cap, text-based width estimation; `fish-link-focus.test.ts` — label exposure for self / other service fish / ambient fish / reef / no hit.
-- Verification on main tip 517c363: `npm run typecheck` passes, `npm run build` passes, full suite 639/639 (60 files; baseline 629 + 10 new). PR opened off main (see PR body for the number/link). Visual check at 1440x900 and 402x874 still needed after merge — this fix is verified by unit tests only, not by a live render.
+Root reviewed helper handoff0aedeaed/testd52a1366: bounded32candidate near-first solver validates every visible caption against all foreign service/ambient bodies and earlier captions, returns offsets from measured caption origin, recovers beside bodies at frame edges and hides only caption when no attached clear result exists. This directly resolves the old deliberately overlapping fallback; explicit AC2 permits hide. No threshold/body/nav/ARIA relaxation. Root integration projects current posed vertices plus live shader-flex counterpart, measures actual DOM caption size, preserves separate44px native anchors, and suppresses redundant tooltip bypass. Remaining review: current real-loader CPU cost, full isolated validation and exact two-size native visual/access/control evidence. AllAC/DoD remain unchecked until final Root audit.
+---
 <!-- COMMENTS:END -->

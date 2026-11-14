@@ -9,6 +9,8 @@ import { refreshFishLink } from './fish-inhabitants'
 import { createAquarium, type AquariumController, type SceneStatus } from './aquarium'
 import { ENVIRONMENT_MAP_INTENSITY } from './environment-map'
 import { CENTER_ARCH_MOUNTS } from './reef-arch'
+import { projectFishBodyBounds } from './fish-link-projection'
+import * as labelLayout from './fish-label-layout'
 import type { FishExtensionConfig, FishExtensionSnapshot } from '../../simulation/fish-extensions'
 
 const state = vi.hoisted(() => ({
@@ -257,6 +259,43 @@ beforeEach(() => {
 afterEach(() => { controller?.dispose(); delete window.__AQUARIUM_LOOKDEV__; window.history.replaceState({}, '', '/'); host.remove(); vi.restoreAllMocks(); vi.unstubAllGlobals() })
 
 describe('actual aquarium controller inhabitant lifecycle without WebGL', () => {
+  it('anchors a measured caption to the posed mesh while retaining its separate44px native target', async () => {
+    window.history.replaceState({}, '', '/?lookdev=1&seed=31')
+    state.forceLabelExposure = true
+    const services = [service('caption')]
+    await start(services)
+    const anchor = overlay.querySelector<HTMLAnchorElement>('a')!, caption = anchor.querySelector<HTMLElement>('.fish-name')!
+    Object.defineProperties(caption, { offsetWidth: { value: 140 }, offsetHeight: { value: 27 } })
+    const motion = state.created.find(item => item.id === 'caption')!
+    Object.assign(motion.position, { x: 0, y: .5, z: 1 })
+    controller.update(services, true)
+    window.__AQUARIUM_LOOKDEV__!.renderFrozen()
+    const zoom = controller.getCameraZoom(), camera = new THREE.PerspectiveCamera(42, 1440 / 900, .1, 60)
+    camera.position.set(zoom.targetX, zoom.targetY, zoom.targetZ + zoom.distance)
+    camera.lookAt(zoom.targetX, zoom.targetY, zoom.targetZ); camera.updateMatrixWorld(true)
+    const body = projectFishBodyBounds(rootFor('caption'), camera, 1440, 900, new THREE.Vector3())!
+    const [nativeX, nativeY] = anchor.style.transform.match(/-?\d+(?:\.\d+)?(?=px)/g)!.map(Number)
+    expect(parseFloat(anchor.style.width)).toBeGreaterThanOrEqual(44)
+    expect(parseFloat(anchor.style.height)).toBeGreaterThanOrEqual(44)
+    expect(parseFloat(anchor.style.getPropertyValue('--fish-label-y')) + nativeY).toBeCloseTo(body.y + body.height + 1)
+    expect(parseFloat(anchor.style.getPropertyValue('--fish-label-x')) + nativeX).toBeCloseTo(body.x + body.width / 2 - 70)
+    expect(anchor.classList.contains('fish-label-deconflicted')).toBe(false)
+    expect(anchor.getAttribute('aria-label')).toBe('Open caption in a new tab')
+  })
+
+  it('includes noninteractive schoolmate bodies in caption conflict checks', async () => {
+    const layout = vi.spyOn(labelLayout, 'resolveLabelDeconflicts')
+    await start([service('school-caption', 'blue-green-chromis')])
+    await vi.waitFor(() => expect(state.players.length).toBe(state.created.length))
+    advance()
+    const extraBodies = layout.mock.calls.at(-1)?.[2]!
+    const mateIds = state.created.filter(item => item.id !== 'school-caption').map(item => item.id)
+    expect(mateIds.length).toBeGreaterThan(0)
+    expect(extraBodies.filter(item => mateIds.includes(item.id)).map(item => item.id).sort()).toEqual(mateIds.sort())
+    expect(extraBodies.some(item => item.id === 'school-caption')).toBe(true)
+    expect(overlay.querySelectorAll('a[data-service-id]')).toHaveLength(1)
+  })
+
   it('applies the declared environment intensity to every material in the actual sand group', async () => {
     await start([service('sand-ibl-check')])
     const sandGroup = state.renderer!.scene!.getObjectByName('AragoniteSandGroup')

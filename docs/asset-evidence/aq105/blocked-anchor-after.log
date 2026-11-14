@@ -1,0 +1,13 @@
+
+> test
+> vitest run src/rendering/scene/aq104-anchor-preempt.test.ts --maxWorkers=2
+
+
+ RUN  v5.1.0 /private/tmp/aquarium-aq87-proof-8b2d7cc
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  00:48:42
+   Duration  454ms (import 70%, transform 24%, tests 5%, worker 2%)
+

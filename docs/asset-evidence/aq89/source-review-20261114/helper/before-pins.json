@@ -1,0 +1,7 @@
+{
+  "head": "cbf6567d9488b2c5b87bdc94c1e67c8546903683",
+  "files": {
+    "src/rendering/scene/fish-label-layout.ts": "085aeae5a2c7bbcad12f29267feda51424fd932b58230ebc51f4456ebbf0ee17",
+    "src/rendering/scene/fish-label-layout.test.ts": "47856ebc07a1c6184612da638bd254cd7088c26eae7e064394594dad22f47ebe"
+  }
+}

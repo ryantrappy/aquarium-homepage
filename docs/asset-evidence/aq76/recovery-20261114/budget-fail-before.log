@@ -1,0 +1,37 @@
+
+> test
+> vitest run src/rendering/scene/runtime-quality.test.ts src/rendering/assets/budgets.test.ts
+
+
+ RUN  v5.1.0 /Users/ryantrapp/Desktop/Code/aquarium-homepage
+
+ ❯ src/rendering/assets/budgets.test.ts (14 tests | 1 failed) 136ms
+   ❯ frame-time budget matches the runtime tier mechanism (AQ-70.3 AC #3) (1)
+     × the adaptive-quality thresholds sit inside the documented budget 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/rendering/assets/budgets.test.ts > frame-time budget matches the runtime tier mechanism (AQ-70.3 AC #3) > the adaptive-quality thresholds sit inside the documented budget
+AssertionError: expected 17.5 to be 13 // Object.is equality
+
+- Expected
++ Received
+
+- 13
++ 17.5
+
+ ❯ src/rendering/assets/budgets.test.ts:371:37
+    369|     expect(ADAPTIVE_STEP_DOWN_P95_MS).toBe(FRAME_TIME_BUDGET.p95MaxMs)
+    370|     expect(ADAPTIVE_STEP_DOWN_EMA_MS).toBe(FRAME_TIME_BUDGET.stepDownE…
+    371|     expect(ADAPTIVE_STEP_UP_EMA_MS).toBe(FRAME_TIME_BUDGET.stepUpEmaMs)
+       |                                     ^
+    372|     expect(FRAME_TIME_BUDGET.stepDownEmaMs).toBeGreaterThan(FRAME_TIME…
+    373|     expect(FRAME_TIME_BUDGET.targetMs).toBeGreaterThan(FRAME_TIME_BUDG…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 41 passed (42)
+   Start at  09:35:35
+   Duration  515ms (tests 66%, import 19%, transform 9%, worker 6%)

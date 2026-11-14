@@ -1,0 +1,6 @@
+{
+  "result": {
+    "type": "string",
+    "value": "{\"time\":16.75000000000033,\"position\":{\"x\":3.7879998971130533,\"y\":1.5824179873564173,\"z\":-0.010792492575514331},\"dt\":0.016666666666666666,\"reducedMotion\":false,\"startle\":0,\"anchor\":{\"id\":\"reef-1-anchor-socket_lps_mid_05-hostAnemone\",\"anchor\":\"hostAnemone\",\"compatibleSpecies\":[\"ocellaris-clownfish\"],\"position\":{\"x\":4.254653784434372,\"y\":1.0410596856343273,\"z\":-0.31933598718911094},\"softHomeRadius\":0.35},\"offset\":{\"category\":\"host-anemone-symbiosis\",\"anchor\":\"hostAnemone\",\"speciesId\":\"ocellaris-clownfish\",\"positionOffset\":{\"x\":-0.2440663275457222,\"y\":0.027381884237113616,\"z\":-0.09590547634606082},\"pitchOffsetRad\":0.05476376847422723,\"yawLockToEntrance\":false,\"reverseRetreat\":false,\"softTentacleOverlapAllowed\":true,\"softHomeRadius\":0.35},\"r\":0.102,\"target\":{\"x\":4.01058745688865,\"y\":1.068441569871441,\"z\":-0.4152414635351718},\"bounds\":{\"min\":{\"x\":-5.2,\"y\":-2.25,\"z\":-4.6},\"max\":{\"x\":5.2,\"y\":2.8,\"z\":2.8}},\"pointResult\":\"blocked\"}"
+  }
+}

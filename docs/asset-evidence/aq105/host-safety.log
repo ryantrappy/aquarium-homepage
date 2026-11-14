@@ -1,0 +1,13 @@
+
+> test
+> vitest run src/rendering/scene/anemone-host.test.ts src/rendering/scene/reef-mesh-navigation.test.ts --maxWorkers=2
+
+
+ RUN  v5.1.0 /private/tmp/aquarium-aq87-proof-8b2d7cc
+
+
+ Test Files  2 passed (2)
+      Tests  24 passed (24)
+   Start at  00:42:49
+   Duration  7.35s (tests 97%, import 2%, transform 1%)
+

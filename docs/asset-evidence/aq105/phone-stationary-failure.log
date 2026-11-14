@@ -1,0 +1,30 @@
+
+> test
+> vitest run src/rendering/scene/anemone-host.test.ts src/rendering/scene/reef-mesh-navigation.test.ts --maxWorkers=2
+
+
+ RUN  v5.1.0 /private/tmp/aquarium-aq87-proof-8b2d7cc
+
+ ❯ src/rendering/scene/anemone-host.test.ts (3 tests | 1 failed) 3566ms
+   × keeps actual mounted crown hosting safe in the current layout (narrow=true) 991ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/rendering/scene/anemone-host.test.ts > keeps actual mounted crown hosting safe in the current layout (narrow=true)
+AssertionError: expected 0 to be greater than 0.015
+ ❯ src/rendering/scene/anemone-host.test.ts:83:77
+     81|   }
+     82|   expect(path).toBeGreaterThan(.3)
+     83|   expect(Math.max(...samples.map(p=>p.y))-Math.min(...samples.map(p=>p…
+       |                                                                             ^
+     84|   const paused = { ...fish.position }; stepSwimmingFish(fish, habitat,…
+     85| }, 15000)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 22 passed (23)
+   Start at  00:38:22
+   Duration  8.92s (tests 97%, import 2%, transform 1%)
+

@@ -53,11 +53,49 @@ export type FishFlexBinding = Readonly<{
   update(values: FishFlexValues, dtSeconds: number, reducedMotion: boolean): void
   /** Sets a deterministic absolute scene time while preserving the base phase. */
   seek(timeSeconds: number): void
+  /** Prepare the current post-skinning shader displacement once per mesh/frame
+   * for caption projection. Unbound meshes need no deformation callback. */
+  vertexDeformerFor(mesh: THREE.Mesh): ((position: THREE.Vector3) => void) | undefined
   /** Disposes the cloned materials and restores the originals. */
   dispose(): void
 }>
 
 const FLEX_PROGRAM_CACHE_KEY = 'fish-flex-v1'
+
+/** CPU counterpart of FLEX_VERTEX_DISPLACEMENT. Preparing once per mesh keeps
+ * uniform reads and the frame-constant respiratory trig out of the vertex loop.
+ * This is screen geometry, not a navigation/body-envelope proof. */
+function prepareFishFlexVertex(u: FishFlexUniforms): ((position: THREE.Vector3) => void) | undefined {
+  const enabled = u.uFlexEnabled.value
+  if (!enabled) return undefined
+  const smooth = THREE.MathUtils.smoothstep
+  const snout = u.uFlexSnoutZ.value, length = u.uFlexBodyLength.value, halfHeight = u.uFlexBodyHalfHeight.value
+  const tail = u.uFlexTailAmplitude.value, envelopeA = u.uFlexEnvelopeA.value, envelopeP = u.uFlexEnvelopeP.value
+  const waveNumber = u.uFlexWaveNumber.value, finAmplitude = u.uFlexFinRippleAmp.value
+  const resp = 2 * Math.PI * u.uFlexFrequencyHz.value * u.uFlexTime.value - u.uFlexPhase.value
+  const gillPulse = u.uFlexGillAmplitude.value * (.5 - .5 * Math.cos(resp - 1.57079632679))
+  const mouthPulse = u.uFlexMouthAmplitude.value * (.5 - .5 * Math.cos(resp))
+  return position => {
+    const s = THREE.MathUtils.clamp((snout - position.z) / length, 0, 1)
+    const env = tail * (envelopeA + (1 - envelopeA) * Math.pow(s, envelopeP))
+    const phase = waveNumber * s - resp
+    const yNorm = position.y / halfHeight
+    // These are exact zero regions of the shader masks, not vertex sampling.
+    const fin = finAmplitude && Math.abs(yNorm) > .55
+      ? finAmplitude * smooth(Math.abs(yNorm), .55, .95) * Math.sin(phase - 1.57079632679) : 0
+    const gill = gillPulse && s > .14 && s < .29 && Math.abs(yNorm + .10) < .52
+      ? (position.x >= 0 ? 1 : -1) * gillPulse * smooth(s, .14, .20) * (1 - smooth(s, .23, .29)) * (1 - smooth(Math.abs(yNorm + .10), .20, .52)) : 0
+    const mouth = mouthPulse && s < .075 && yNorm > -.48 && yNorm < .02
+      ? mouthPulse * (1 - smooth(s, .015, .075)) * smooth(yNorm, -.48, -.06) * (1 - smooth(yNorm, -.03, .02)) : 0
+    position.x += ((env ? env * Math.sin(phase) : 0) + fin + gill) * enabled
+    position.y -= mouth * enabled
+    position.z -= mouth * .35 * enabled
+  }
+}
+
+export function evaluateFishFlexVertex(position: THREE.Vector3, uniforms: FishFlexUniforms): void {
+  prepareFishFlexVertex(uniforms)?.(position)
+}
 
 const FLEX_VERTEX_PRELUDE = `
 uniform float uFlexTime;
@@ -209,6 +247,7 @@ export function bindFishFlexToModel(
     records.push({ mesh, originalMaterial, clonedMaterial: cloned })
   }
   if (records.length === 0) return undefined
+  const boundMeshes = new Set<THREE.Mesh>(records.map(record => record.mesh))
 
   const TWO_PI = Math.PI * 2
   let flexTimeSeconds = 0
@@ -267,6 +306,9 @@ export function bindFishFlexToModel(
       currentFinAmp = uniforms.uFlexFinRippleAmp.value
       currentGillAmp = uniforms.uFlexGillAmplitude.value
       currentMouthAmp = uniforms.uFlexMouthAmplitude.value
+    },
+    vertexDeformerFor(mesh: THREE.Mesh): ((position: THREE.Vector3) => void) | undefined {
+      return !disposed && boundMeshes.has(mesh) ? prepareFishFlexVertex(uniforms) : undefined
     },
     dispose(): void {
       if (disposed) return
