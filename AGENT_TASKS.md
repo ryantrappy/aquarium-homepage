@@ -4,7 +4,7 @@
 Category: Governance / Checkpoint
 Status: Active
 Authority: Binding Checkpoint; Backlog controls acceptance
-Backlog: AQ-44, AQ-49, AQ-54, AQ-59, AQ-70.2, AQ-70.13, AQ-74, AQ-86
+Backlog: AQ-44, AQ-49, AQ-54, AQ-59, AQ-70.2, AQ-70.13, AQ-74, AQ-86, AQ-104
 Owner: @root
 Updated: 2026-11-13
 Upstream: AGENTS.md, agent_scratch.md, docs/requirements.md
@@ -12,6 +12,19 @@ Downstream: Current implementation and review work
 -->
 
 Root verified this checkpoint against the current checkout. The goal remains active and incomplete: finish the backlog and make the living aquarium resemble the supplied reference. Passing functional tests does not accept final art.
+
+## Latest Root checkpoint — 2026-11-13 sustained-distribution review
+
+This section supersedes older process, PR and count details. The full goal remains active and incomplete.
+
+- Shared rolling draft PR48: https://github.com/ryantrappy/aquarium-homepage/pull/48, branch `review`. PR47 was externally merged. Root pushed852e9f3 (byte-identical goal-image alias), b4efd35 (AQ104 temporal regression/evidence), and785a572 (validation-log whitespace). No deployment or merge by Root.
+- AQ104 exactf0844cf gets a mixed eight-species/eleven-inhabitant60-second regression, using default behavior and anthias schooling. Controlled two-box AABB and actual bounded mesh-query fixtures retain all three sectors in100%/98.04% of settled one-second samples, with no unsafe segments and deterministic replay. All fish accumulate movement; values are legacy scene units, not physical calibration. Reports/tests/fixtures: docs/asset-evidence/aq104/. This is not full assembled-reef or animated-envelope clearance.
+- Exactf084 app plus the new regression passes861tests/72files with `npm test -- --maxWorkers=2`, typecheck including16script checks, and production build. Initial default72-worker run had only two existing5000ms packaging timeouts; no pre-existing deadlines/assertions changed. Both logs are retained.
+- Exactf084 native DPR1 captures at1440x900 and402x874 are ready with11inhabitants/no failed assets/no captured warnings-errors. Phone has8named unoccluded links and all8Services entries. Ombi's conservative phone proxy rectangle extends0.618CSSpx beyond the right edge; do not claim every proxy rectangle is fully contained. These are frozen staging captures, not proof of sustained normal motion. No service URLs were opened; disposable config uses localhost URLs.
+- Original checkout currently contains concurrent uncommitted `motion.ts`, `fish-spawn.ts`, and `motion.test.ts` refinements plus the pre-existing two `aq104-*-check.png` files. Root did not edit or stage those sources. AQ104 stays In Progress with unchecked criteria until the current candidate is reviewed; do not infer Done from old-source tests. Snapshot source hashes must be rechecked before adopting or committing it.
+- The goal reference is actually tracked as `docs/more_realistic_reef_guide.png`;852e9f3 adds the hyphenated path required by AGENTS/reference docs with identical bytes and preserves the original. Root viewed the guide. No image/model/Blender edits were made.
+- Subagents supplied bounded overview-frustum/source and primary-reef audits before hitting usage limits. The source frustum math matches the straight overview camera at both supported aspects; no full body certificate follows. Next major visual work remains a supported left-front mid-face coral terrace belt while preserving80% reef height. Current left/right have12/11 sockets, all used; old canonical support reports do not certify new sites on the current runtime exports. Route required model/site work through measured, source-pinned support and the current modeling tasks. No competing model agent or live Blender edit.
+- Proof `/tmp/aquarium-aq87-proof-8b2d7cc` is detachedf0844cf, with infrastructure Vite allowlist plus Root regression/fixture additions. Owned dev5215 PID83388 serves that source with `/tmp/aquarium-aq104-root-config/reef-config.json`; verify process/cwd before stopping. Original user config remains untouched. Completed browser tab closed and viewport reset. Preserve user3000/5210 and live Blender. CI/FPS lanes remain explicitly excluded. Current queue:62Done,52ToDo,18InProgress; no task closed in this review.
 
 ## Latest Root checkpoint — 2026-11-13 eighty-percent mass and flowing torch
 
