@@ -3,7 +3,8 @@ import { BoxGeometry } from 'three'
 import { MAX_PITCH_RAD_LEGACY, MAX_PITCH_RAD_METRIC, MAX_PITCH_RATE_RAD_PER_SEC_METRIC, anchorApproachClearanceM, createSwimmingFish, distance, disturbSchool, evaluateSwimSpeedSynchronizedFlexRate, generateCatmullRomSwimCurve, smoothWaterRouteWithCatmullRom, startleFish, stepSwimmingFish, stepSwimmingSchool, type WaterHabitat } from './motion'
 import { instantiateModularReefHabitat } from './reef-assembly'
 import { fishBodyRadiusM, fishClearanceRadius } from './fish-scale'
-import { findSafeFishSpawn } from './fish-spawn'
+import { evaluateTieredVerticalDepthRange, findSafeFishSpawn, fishSpawnPreference, fishSpawnSlotsForServices } from './fish-spawn'
+import { resolveSchoolPopulation, schoolmateSpawnOffset } from './school-population'
 import { EXAMPLE_SERVICES } from '../../lib/services'
 import { findWaterRoute, isWaterSegmentSafe, preferredLateralSide, resolveHabitatRoute } from '../../simulation/habitat-navigation'
 import { buildMeshCollider } from '../../simulation/mesh-collision'
@@ -1213,5 +1214,133 @@ describe('socket-derived anchor interactions (AQ-82)', () => {
     }
     expect(minSpeedAroundCorner).toBeGreaterThan(0.55)
     expect(fish.waypoint).toBeGreaterThanOrEqual(2)
+  })
+})
+
+describe('flank school stations and whole-tank distribution (AQ-104)', () => {
+  const reefBounds = { min: { x: -5.2, y: -2.25, z: -4.6 }, max: { x: 5.2, y: 2.8, z: 2.8 } }
+  const tallLaptopReefObstacles = [
+    { id: 'left-tall-island', bounds: { min: { x: -4.4, y: -2.25, z: -2.98 }, max: { x: -0.5, y: 1.8, z: 0.25 } } },
+    { id: 'right-tall-island', bounds: { min: { x: 0.5, y: -2.25, z: -2.9 }, max: { x: 4.7, y: 2.4, z: 0.25 } } },
+  ]
+  const laptopReefHabitat = (): WaterHabitat => ({
+    bounds: reefBounds,
+    maxAbsXAtDepth: z => overviewHalfWidthAtDepth(1440 / 900, z),
+    obstacles: tallLaptopReefObstacles,
+    anchors: [],
+  })
+
+  it('keeps schooling anthias and chromis groups on fore-reef tank flanks instead of collapsing into x ≈ 0', () => {
+    const water = laptopReefHabitat()
+    for (const [leadId, speciesId, count] of [
+      ['anthias-lead', 'lyretail-anthias', 4],
+      ['chromis-lead', 'blue-green-chromis', 6],
+    ] as const) {
+      const clearance = fishClearanceRadius(speciesId)
+      const lead = createSwimmingFish(leadId, speciesId, { x: 0, y: 0.6, z: 1.8 }, clearance)
+      const school = [lead]
+      for (let index = 1; index < count; index++) {
+        const mateId = `${leadId}::schoolmate-${index}`
+        const offset = schoolmateSpawnOffset(mateId, speciesId, 10.4, index - 1, count - 1)
+        const pos = findSafeFishSpawn(
+          { x: lead.position.x + offset.x, y: lead.position.y + offset.y, z: lead.position.z + offset.z },
+          water.bounds,
+          water.obstacles,
+          clearance,
+          school.map(member => ({ position: member.position, clearance: member.clearance, bodyRadiusM: fishBodyRadiusM(member.speciesId) })),
+          undefined,
+          fishBodyRadiusM(speciesId),
+          undefined,
+          water.maxAbsXAtDepth,
+        )!
+        school.push(createSwimmingFish(mateId, speciesId, pos, clearance))
+      }
+
+      for (let frame = 0; frame < 60 * 30; frame++) {
+        stepSwimmingSchool(school, water, 1 / 30)
+      }
+
+      const meanX = school.reduce((sum, member) => sum + member.position.x, 0) / school.length
+      const meanZ = school.reduce((sum, member) => sum + member.position.z, 0) / school.length
+      const maxSpreadX = Math.max(...school.map(member => Math.abs(member.position.x - meanX)))
+      expect(Math.abs(meanX), `${speciesId} school should hold a flank station`).toBeGreaterThan(1.2)
+      expect(meanZ, `${speciesId} school should stay in visible fore-reef water`).toBeGreaterThan(-0.3)
+      expect(maxSpreadX, `${speciesId} schoolmates should remain cohesive`).toBeLessThan(2.5)
+    }
+  })
+
+  it('spreads the 8-service reef cohort across left, center, and right sectors over 60 seconds', () => {
+    const services = [
+      { id: 'starter-komodo', name: 'Komodo', url: 'https://komodo.local', fishId: 'yellow-tang', isExample: false },
+      { id: 'starter-watchmybirds', name: 'WatchMyBirds', url: 'https://birds.local', fishId: 'banggai-cardinalfish', isExample: false },
+      { id: '05880da0-3cdd-4c1c-8a7a-a92758c73da2', name: 'Paperless', url: 'https://paperless.local', fishId: 'royal-gramma', isExample: false },
+      { id: 'example-home-assistant', name: 'Home Assistant', url: 'https://ha.local', fishId: 'ocellaris-clownfish', isExample: false },
+      { id: 'starter-ombi', name: 'Ombi', url: 'https://ombi.local', fishId: 'blue-tang', isExample: false },
+      { id: 'e8a97b2b-a7fd-4d05-8ce9-be3cdbfbe12a', name: 'radarr', url: 'https://radarr.local', fishId: 'copperband-butterflyfish', isExample: false },
+      { id: '060212ad-1343-4890-a57f-c4c60ca162d8', name: 'Sonarr', url: 'https://sonarr.local', fishId: 'mccoskers-flasher-wrasse', isExample: false },
+      { id: '92394d96-38ec-4738-a61e-064af46849a5', name: 'Basketball', url: 'https://bball.local', fishId: 'lyretail-anthias', isExample: false },
+    ]
+    const water = laptopReefHabitat()
+    const slots = fishSpawnSlotsForServices(services)
+    const cohort: ReturnType<typeof createSwimmingFish>[] = []
+    const occupied: Array<{ position: { x: number; y: number; z: number }; clearance: number; bodyRadiusM: number }> = []
+    const leadSpawnByService = new Map<string, { x: number; y: number; z: number }>()
+
+    for (const service of services) {
+      const clearance = fishClearanceRadius(service.fishId)
+      const bodyRadiusM = fishBodyRadiusM(service.fishId)
+      const pref = fishSpawnPreference(service.id, service.fishId, water.bounds, clearance, slots.get(service.id), water.maxAbsXAtDepth)!
+      const safeHeightRange = evaluateTieredVerticalDepthRange(service.fishId, water.bounds, clearance)?.worldYRange
+      const spawn = findSafeFishSpawn(pref.position, water.bounds, water.obstacles, clearance, occupied, undefined, bodyRadiusM, safeHeightRange, water.maxAbsXAtDepth)!
+      expect(spawn, `${service.name} should get a safe spawn`).toBeDefined()
+      leadSpawnByService.set(service.id, spawn)
+      occupied.push({ position: spawn, clearance, bodyRadiusM })
+      cohort.push(createSwimmingFish(service.id, service.fishId, spawn, clearance))
+    }
+
+    const schoolmates = resolveSchoolPopulation(services)
+    const matesPerService = new Map<string, number>()
+    for (const mate of schoolmates) matesPerService.set(mate.serviceId, (matesPerService.get(mate.serviceId) ?? 0) + 1)
+    for (const mate of schoolmates) {
+      const clearance = fishClearanceRadius(mate.speciesId)
+      const bodyRadiusM = fishBodyRadiusM(mate.speciesId)
+      const leadSpawn = leadSpawnByService.get(mate.serviceId)!
+      const offset = schoolmateSpawnOffset(mate.id, mate.speciesId, reefBounds.max.x - reefBounds.min.x, mate.index - 1, matesPerService.get(mate.serviceId) ?? 1)
+      const spawn = findSafeFishSpawn(
+        { x: leadSpawn.x + offset.x, y: leadSpawn.y + offset.y, z: leadSpawn.z + offset.z },
+        water.bounds,
+        water.obstacles,
+        clearance,
+        occupied,
+        undefined,
+        bodyRadiusM,
+        undefined,
+        water.maxAbsXAtDepth,
+      )!
+      occupied.push({ position: spawn, clearance, bodyRadiusM })
+      cohort.push(createSwimmingFish(mate.id, mate.speciesId, spawn, clearance))
+    }
+    expect(cohort).toHaveLength(11)
+
+    let leftSamples = 0
+    let centerSamples = 0
+    let rightSamples = 0
+    for (let frame = 0; frame < 60 * 30; frame++) {
+      stepSwimmingSchool(cohort, water, 1 / 30)
+      if (frame % 30 === 29) {
+        for (const swimmer of cohort) {
+          if (swimmer.position.x < -1.5) leftSamples++
+          else if (swimmer.position.x > 1.5) rightSamples++
+          else centerSamples++
+        }
+      }
+    }
+
+    const totalSamples = leftSamples + centerSamples + rightSamples
+    expect(leftSamples / totalSamples).toBeGreaterThan(0.2)
+    expect(rightSamples / totalSamples).toBeGreaterThan(0.2)
+    expect(centerSamples / totalSamples).toBeLessThan(0.45)
+    expect(cohort.some(swimmer => swimmer.position.x < -1.5)).toBe(true)
+    expect(cohort.some(swimmer => swimmer.position.x > 1.5)).toBe(true)
   })
 })

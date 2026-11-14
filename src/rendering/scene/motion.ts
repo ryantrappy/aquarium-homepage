@@ -125,6 +125,8 @@ export type SwimmingFish = {
   turnKinematics: FishTurnKinematics
   /** Explicit world-meter query radius; legacy `clearance` is not metric. */
   collisionRadiusM?: number
+  /** Cumulative active simulation time in seconds for synchronized school station shifts. */
+  simulationSeconds?: number
 }
 export type SwimmingFishCollisionOptions = { collisionRadiusM?: number; initialYaw?: number }
 export const distance = (a: Vec3, b: Vec3) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z)
@@ -255,10 +257,65 @@ function applyAnchorInteraction(fish: SwimmingFish, habitat: WaterHabitat, dt: n
 function random(fish: SwimmingFish) { fish.random = (Math.imul(fish.random, 1664525) + 1013904223) >>> 0; return fish.random / 4294967296 }
 type LateralSector = -1 | 0 | 1
 const IDLE_LOCAL_RADIUS_M = 1.1
+const SCHOOL_STATION_EPOCH_SECONDS = 25
+
+function leadServiceId(fishId: string): string {
+  const separator = fishId.indexOf('::schoolmate-')
+  return separator >= 0 ? fishId.slice(0, separator) : fishId
+}
+
+function defaultHomeAnchorSeed(fish: SwimmingFish): number {
+  if (isGroupSchoolingSpecies(fish.speciesId)) {
+    // All conspecific schooling peers steer toward each other in Boids, so sharing
+    // one species-wide home station prevents members from pulling against each
+    // other into the center gap while keeping distinct schooling species on
+    // balanced sides.
+    return seedForId(fish.speciesId)
+  }
+  return seedForId(leadServiceId(fish.id))
+}
+
+function schoolStationState(fish: SwimmingFish): {
+  seed: number
+  side: LateralSector
+  xFraction: number
+  yFraction: number
+  zFraction: number
+} {
+  const simulationSeconds = fish.simulationSeconds ?? 0
+  const epoch = Math.max(0, Math.floor(simulationSeconds / SCHOOL_STATION_EPOCH_SECONDS))
+  const flankEpoch = Math.max(0, Math.floor(simulationSeconds / 90))
+  const baseSeed = defaultHomeAnchorSeed(fish)
+  const seed = (baseSeed ^ Math.imul(epoch, 0x9e3779b1)) >>> 0
+  const initialSideBit = baseSeed & 1
+  const shiftBit = flankEpoch === 0 ? 0 : (Math.imul(flankEpoch, 0x85ebca6b) ^ (baseSeed >>> 16)) & 1
+  const side: LateralSector = (initialSideBit ^ shiftBit) === 0 ? -1 : 1
+  const unit1 = ((seed >>> 8) & 0xff) / 255
+  const unit2 = ((seed >>> 16) & 0xff) / 255
+  const unit3 = ((seed >>> 24) & 0xff) / 255
+  // Keep a school's default station anchored on a tank flank (left or right)
+  // rather than the middle open gap, and well forward of the reef islands'
+  // collision envelope (z <= 0.25 + clearance).
+  const xFraction = side === -1 ? 0.10 + unit1 * 0.16 : 0.74 + unit1 * 0.16
+  const yFraction = 0.25 + unit2 * 0.5
+  const zFraction = 0.78 + unit3 * 0.16
+  return { seed, side, xFraction, yFraction, zFraction }
+}
+
+function solitaryHomeSector(fish: SwimmingFish): LateralSector {
+  const unit = (Math.imul(defaultHomeAnchorSeed(fish), 0x85ebca6b) >>> 0) / 4294967296
+  return unit < 0.28 ? -1 : unit < 0.60 ? 0 : 1
+}
 
 function chooseLateralSector(fish: SwimmingFish, habitat: WaterHabitat): LateralSector {
+  if (isGroupSchoolingSpecies(fish.speciesId)) {
+    return schoolStationState(fish).side
+  }
+  const homeSector = solitaryHomeSector(fish)
+  const leftCutoff = homeSector === -1 ? 0.46 : homeSector === 1 ? 0.34 : 0.38
+  const centerCutoff = homeSector === -1 ? 0.66 : homeSector === 1 ? 0.54 : 0.62
   const draw = random(fish)
-  let sector: LateralSector = draw < .4 ? -1 : draw < .6 ? 0 : 1
+  let sector: LateralSector = draw < leftCutoff ? -1 : draw < centerCutoff ? 0 : 1
   const centerX = (habitat.bounds.min.x + habitat.bounds.max.x) * .5
   const sideThreshold = (habitat.bounds.max.x - habitat.bounds.min.x) * .08
   const currentSide: LateralSector = fish.position.x < centerX - sideThreshold ? -1 : fish.position.x > centerX + sideThreshold ? 1 : 0
@@ -290,12 +347,54 @@ function sampleFreeWaterTarget(
   localLoiter: boolean,
 ): Vec3 | undefined {
   const { min, max } = habitat.bounds
-  const depth = depthRange[0] + random(fish) * (depthRange[1] - depthRange[0])
-  const y = clamp(max.y - depth * (max.y - min.y), min.y + clearance, max.y - clearance)
-  const z = min.z + clearance + random(fish) * (max.z - min.z - 2 * clearance)
+  const isSchool = isGroupSchoolingSpecies(fish.speciesId)
+  const preferForeReefZ = isSchool || habitat.obstacles.length > 0 || (max.z - min.z) > 3.5
+  const zSpan = max.z - min.z - 2 * clearance
+  if (zSpan < 0) return undefined
+
+  let y: number
+  let z: number
+  if (isSchool) {
+    const station = schoolStationState(fish)
+    const bandSpan = depthRange[1] - depthRange[0]
+    const bandCenter = depthRange[0] + (0.3 + 0.4 * station.yFraction) * bandSpan
+    const jitter = (random(fish) - 0.5) * Math.min(0.18, bandSpan * 0.6)
+    const depth = clamp(bandCenter + jitter, depthRange[0], depthRange[1])
+    y = clamp(max.y - depth * (max.y - min.y), min.y + clearance, max.y - clearance)
+    const zFraction = clamp(station.zFraction + (random(fish) - 0.5) * 0.12, 0.75, 0.96)
+    z = min.z + clearance + zFraction * zSpan
+  } else {
+    const depth = depthRange[0] + random(fish) * (depthRange[1] - depthRange[0])
+    y = clamp(max.y - depth * (max.y - min.y), min.y + clearance, max.y - clearance)
+    const zDraw = random(fish)
+    const zFraction = preferForeReefZ
+      ? zDraw < 0.25
+        ? 0.14 + zDraw * 1.1
+        : 0.68 + (zDraw - 0.25) * 0.36
+      : zDraw
+    z = min.z + clearance + zFraction * zSpan
+  }
+
   const safeRange = safeLateralRange(habitat, z, lateralClearanceForFish(fish, habitat, clearance))
   if (!safeRange) return undefined
   let [xMin, xMax] = safeRange
+
+  if (isSchool) {
+    const station = schoolStationState(fish)
+    const width = xMax - xMin
+    const sectorCenterFraction = sector === -1 ? 0.19 : sector === 0 ? 0.5 : 0.81
+    const baseFraction = sector === station.side ? station.xFraction : sectorCenterFraction
+    const schoolAnchorX = xMin + width * baseFraction
+    const halfSpread = localLoiter ? Math.min(0.45, width * 0.08) : Math.min(0.7, width * 0.12)
+    const memberBias = fish.behavior.variation.homeOffsetTankWidths * width * 0.4
+      * Math.cos(fish.behavior.variation.phaseOffsetRadians)
+    const centerX = clamp(schoolAnchorX + memberBias, xMin, xMax)
+    const minWindow = Math.max(xMin, centerX - halfSpread)
+    const maxWindow = Math.min(xMax, centerX + halfSpread)
+    if (minWindow > maxWindow) return undefined
+    return { x: minWindow + random(fish) * (maxWindow - minWindow), y, z }
+  }
+
   if (localLoiter) {
     xMin = Math.max(xMin, fish.position.x - IDLE_LOCAL_RADIUS_M)
     xMax = Math.min(xMax, fish.position.x + IDLE_LOCAL_RADIUS_M)
@@ -303,10 +402,8 @@ function sampleFreeWaterTarget(
     const width = xMax - xMin
     const lower = sector === -1 ? 0 : sector === 0 ? 1 / 3 : 2 / 3
     const upper = sector === -1 ? 1 / 3 : sector === 0 ? 2 / 3 : 1
-    const sectorMin = xMin + width * lower
-    const sectorMax = xMin + width * upper
-    xMin = sectorMin
-    xMax = sectorMax
+    xMin = xMin + width * lower
+    xMax = xMin + width * (upper - lower)
   }
   if (xMin > xMax) return undefined
   return { x: xMin + random(fish) * (xMax - xMin), y, z }
@@ -382,6 +479,7 @@ export function createSwimmingFish(id: string, speciesId: string, position: Vec3
     route: [], waypoint: 1, random: seedForId(id), startleSeconds: 0, routeGeneration: -1, targetWait: 0,
     extensions: createFishExtensionRuntime(extensions, initialSnapshot), animationPlaybackRate: 1,
     collisionRadiusM: collision.collisionRadiusM,
+    simulationSeconds: 0,
     turnKinematics: {
       yawRateRadPerSec: 0,
       smoothedYawRate: 0,
@@ -426,6 +524,50 @@ function insideMeshWater(fish: SwimmingFish, habitat: WaterHabitat, point: Vec3)
   const radiusM = fish.collisionRadiusM!
   return isWithinDepthAwareWaterBounds(point, habitat.bounds, radiusM, habitat.maxAbsXAtDepth, lateralClearanceForFish(fish, habitat, radiusM))
 }
+function selectFreeWaterAttemptTarget(
+  fish: SwimmingFish,
+  habitat: WaterHabitat,
+  clearance: number,
+  lateralClearance: number,
+  depthRange: readonly [number, number],
+  sector: LateralSector,
+  fallbackSectors: readonly LateralSector[],
+  localLoiter: boolean,
+  minTargetDistance: number,
+  attempt: number,
+): Vec3 | undefined {
+  const { min, max } = habitat.bounds
+  const isSchool = isGroupSchoolingSpecies(fish.speciesId)
+  // Prefer the station, but let a blocked school use another safe sector.
+  const targetSector = attempt < 8
+    ? sector
+    : fallbackSectors[(attempt - 8) % fallbackSectors.length]!
+  const effectiveLoiter = localLoiter && !(isSchool && attempt >= 6)
+  let target: Vec3 | undefined
+  if (fish.startleSeconds > 0) {
+    const evasiveYaw = fish.yaw + (attempt % 2 ? -1 : 1) * (.7 + random(fish) * .4)
+    const z = clamp(fish.position.z + Math.cos(evasiveYaw) * 1.4, min.z + clearance, max.z - clearance)
+    const safeRange = safeLateralRange(habitat, z, lateralClearance)
+    if (safeRange) target = {
+      x: clamp(fish.position.x + Math.sin(evasiveYaw) * 1.4, safeRange[0], safeRange[1]),
+      y: clamp(fish.position.y + .15, min.y + clearance, max.y - clearance),
+      z,
+    }
+  } else {
+    target = sampleFreeWaterTarget(fish, habitat, clearance, depthRange, targetSector, effectiveLoiter)
+  }
+  if (!target || distance(fish.position, target) < minTargetDistance) return undefined
+  const forwardCheckAttempts = isSchool ? 2 : 6
+  if (fish.startleSeconds <= 0 && attempt < forwardCheckAttempts && fish.speed > 0.05) {
+    const toDx = target.x - fish.position.x
+    const toDz = target.z - fish.position.z
+    const toHoriz = Math.hypot(toDx, toDz)
+    const forwardDot = toHoriz > 1e-6 ? (toDx * Math.sin(fish.yaw) + toDz * Math.cos(fish.yaw)) / toHoriz : 1
+    if (forwardDot < 0.25) return undefined
+  }
+  return target
+}
+
 function planMesh(fish: SwimmingFish, habitat: WaterHabitat) {
   const mesh = habitat.meshNavigation!
   const request = getNavigationRequest(fish.behavior)
@@ -483,31 +625,24 @@ function planMesh(fish: SwimmingFish, habitat: WaterHabitat) {
   const sector = chooseLateralSector(fish, habitat)
   const fallbackSectors = ([-1, 0, 1] as const).filter(candidate => candidate !== sector)
   const localLoiter = fish.behavior.state === 'idle' && (!fish.behavior.targetAnchor || !hasCompatibleAnchor(fish, habitat, fish.behavior.targetAnchor))
+  const minTargetDistance = isGroupSchoolingSpecies(fish.speciesId)
+    ? Math.min(0.35, Math.max(0.18, (max.x - min.x) * 0.08))
+    : 0.7
   for (let attempt = 0; attempt < 12; attempt++) {
     if (!budgetAvailable(planBudget)) break
-    const targetSector = attempt < 8 ? sector : fallbackSectors[(attempt - 8) % fallbackSectors.length]!
-    let target: Vec3 | undefined
-    if (fish.startleSeconds > 0) {
-      const evasiveYaw = fish.yaw + (attempt % 2 ? -1 : 1) * (.7 + random(fish) * .4)
-      const z = clamp(fish.position.z + Math.cos(evasiveYaw) * 1.4, min.z + r, max.z - r)
-      const safeRange = safeLateralRange(habitat, z, lateralClearanceRadius)
-      if (safeRange) target = {
-        x: clamp(fish.position.x + Math.sin(evasiveYaw) * 1.4, safeRange[0], safeRange[1]),
-        y: clamp(fish.position.y + .15, min.y + r, max.y - r),
-        z,
-      }
-    } else {
-      target = sampleFreeWaterTarget(fish, habitat, r, depthRange, targetSector, localLoiter)
-    }
+    const target = selectFreeWaterAttemptTarget(
+      fish,
+      habitat,
+      r,
+      lateralClearanceRadius,
+      depthRange,
+      sector,
+      fallbackSectors,
+      localLoiter,
+      minTargetDistance,
+      attempt,
+    )
     if (!target) continue
-    if (distance(fish.position, target) < .7) continue
-    if (fish.startleSeconds <= 0 && attempt < 6 && fish.speed > 0.05) {
-      const toDx = target.x - fish.position.x
-      const toDz = target.z - fish.position.z
-      const toHoriz = Math.hypot(toDx, toDz)
-      const forwardDot = toHoriz > 1e-6 ? (toDx * Math.sin(fish.yaw) + toDz * Math.cos(fish.yaw)) / toHoriz : 1
-      if (forwardDot < 0.25) continue
-    }
     const result = findMeshRoute({ start: fish.position, target, waterBounds: habitat.bounds,
       fishClearanceRadius: r, spacingM: mesh.spacingM, queryCapsule: mesh.queryCapsule!, budget: planBudget.remaining,
       maxAbsXAtDepth: habitat.maxAbsXAtDepth, lateralClearanceRadius })
@@ -548,30 +683,23 @@ function plan(fish: SwimmingFish, habitat: WaterHabitat) {
   const sector = chooseLateralSector(fish, habitat)
   const fallbackSectors = ([-1, 0, 1] as const).filter(candidate => candidate !== sector)
   const localLoiter = fish.behavior.state === 'idle' && (!fish.behavior.targetAnchor || !hasCompatibleAnchor(fish, habitat, fish.behavior.targetAnchor))
+  const minTargetDistance = isGroupSchoolingSpecies(fish.speciesId)
+    ? Math.min(0.35, Math.max(0.18, (max.x - min.x) * 0.08))
+    : 0.7
   for (let attempt = 0; attempt < 12; attempt++) {
-    const targetSector = attempt < 8 ? sector : fallbackSectors[(attempt - 8) % fallbackSectors.length]!
-    let target: Vec3 | undefined
-    if (fish.startleSeconds > 0) {
-      const evasiveYaw = fish.yaw + (attempt % 2 ? -1 : 1) * (.7 + random(fish) * .4)
-      const z = clamp(fish.position.z + Math.cos(evasiveYaw) * 1.4, min.z + r, max.z - r)
-      const safeRange = safeLateralRange(habitat, z, r)
-      if (safeRange) target = {
-        x: clamp(fish.position.x + Math.sin(evasiveYaw) * 1.4, safeRange[0], safeRange[1]),
-        y: clamp(fish.position.y + .15, min.y + r, max.y - r),
-        z,
-      }
-    } else {
-      target = sampleFreeWaterTarget(fish, habitat, r, depthRange, targetSector, localLoiter)
-    }
+    const target = selectFreeWaterAttemptTarget(
+      fish,
+      habitat,
+      r,
+      r,
+      depthRange,
+      sector,
+      fallbackSectors,
+      localLoiter,
+      minTargetDistance,
+      attempt,
+    )
     if (!target) continue
-    if (distance(fish.position, target) < .7) continue
-    if (fish.startleSeconds <= 0 && attempt < 6 && fish.speed > 0.05) {
-      const toDx = target.x - fish.position.x
-      const toDz = target.z - fish.position.z
-      const toHoriz = Math.hypot(toDx, toDz)
-      const forwardDot = toHoriz > 1e-6 ? (toDx * Math.sin(fish.yaw) + toDz * Math.cos(fish.yaw)) / toHoriz : 1
-      if (forwardDot < 0.25) continue
-    }
     // AQ-82: a fish leaving an anchor zone it nestled into routes out with
     // the same body-radius clearance it arrived with (escape rule); open
     // water keeps the legacy envelope.
@@ -767,6 +895,7 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
     if (fish.navigationAnchor) fish.behavior = reportNavigationOutcome(fish.behavior, fish.routeGeneration, fish.navigationAnchor, 'blocked')
     fish.route = []; fish.speed = 0; fish.targetWait = .7; fish.navigationAnchor = undefined
   }
+  fish.simulationSeconds = (fish.simulationSeconds ?? 0) + dt
   fish.behavior = advanceFishBehavior(fish.behavior, dt)
   const profile = getSpeciesBehaviorProfile(fish.speciesId)!
   // AQ-82 AC #3: while en route to an anchor, holding at one, or escaping
@@ -783,13 +912,15 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   const schoolDelta = Math.atan2(Math.sin(schoolHeading - fish.yaw), Math.cos(schoolHeading - fish.yaw))
   const baseTurnRateRad = (fish.behavior.variation.turnDegreesPerSecond * Math.PI) / 180
   const minTurnRadiusM = Math.max(0.14, fishBodyRadiusM(fish.speciesId) * 4.5)
+  const hasActiveRoute = fish.route.length > 0 && fish.waypoint < fish.route.length
+  const schoolTurnShare = hasActiveRoute ? 0.42 : 1
   const schoolMaxTurn = computeMaxBiomechanicalYawRate(
     fish.speed,
     baseTurnRateRad,
     minTurnRadiusM,
     fish.startleSeconds,
     schoolDelta,
-  ) * dt
+  ) * dt * schoolTurnShare
   const schoolTurn = clamp(schoolDelta, -schoolMaxTurn, schoolMaxTurn)
   fish.yaw += schoolTurn
   fish.startleSeconds = Math.max(0, fish.startleSeconds - dt); fish.targetWait -= dt
@@ -798,8 +929,9 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   }
   const request = getNavigationRequest(fish.behavior)
   const urgentTransition = fish.behavior.state === 'retreat' || fish.behavior.state === 'burst'
-  if (fish.startleSeconds <= 0 && fish.behavior.navigationGeneration !== fish.routeGeneration
-    && (urgentTransition || (request && hasCompatibleAnchor(fish, habitat, request.anchor)))) {
+  if (fish.startleSeconds <= 0 && fish.behavior.navigationGeneration !== fish.routeGeneration && (
+    urgentTransition || (request && hasCompatibleAnchor(fish, habitat, request.anchor))
+  )) {
     if (fish.route.length > 0) fish.targetWait = 0
     fish.route = []
     fish.navigationAnchor = undefined

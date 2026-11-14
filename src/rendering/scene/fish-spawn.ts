@@ -388,10 +388,21 @@ export function findSafeFishSpawn(
     }
     // Preserve intended swimming height when searching around a reef.
     // Prefer moving forward/back at that height over escaping above the
-    // canopy merely because that is the shorter Euclidean displacement.
+    // canopy merely because that is the shorter Euclidean displacement, and
+    // prefer remaining in the assigned lateral lane in visible fore-reef water
+    // over jumping across the tank or hiding behind the rear rock wall.
     if (safeHeightRange) {
       const heightDifference = Math.abs(a.y - clamped.y) - Math.abs(b.y - clamped.y)
       if (heightDifference) return heightDifference
+      const lateralBand = (candidate: Vec3) => Math.floor(Math.abs(candidate.x - clamped.x) / 0.5)
+      const lateralDifference = lateralBand(a) - lateralBand(b)
+      if (lateralDifference) return lateralDifference
+      if (obstacles.length > 0) {
+        const rearWallCutoffZ = waterBounds.min.z + (waterBounds.max.z - waterBounds.min.z) * 0.24
+        const aRear = a.z < rearWallCutoffZ ? 1 : 0
+        const bRear = b.z < rearWallCutoffZ ? 1 : 0
+        if (aRear !== bRear) return aRear - bRear
+      }
     }
     return targetDistance(a) - targetDistance(b) || a.x - b.x || a.y - b.y || a.z - b.z
   })

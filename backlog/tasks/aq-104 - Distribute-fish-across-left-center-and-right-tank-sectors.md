@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-14 04:01'
-updated_date: '2026-11-14 05:48'
+updated_date: '2026-11-14 06:08'
 labels:
   - behavior
   - rendering
@@ -47,6 +47,8 @@ At 1440×900, the configured 11-fish tank was simulated for 60 seconds: despite 
 5. Add route, spawn, mesh-budget, anchor-balance, and 60-second distribution regressions; run focused tests, npm test, typecheck/build, and verify at 1440×900 and 402×874.
 
 2026-11-13 Root review: preserve f0844cf implementation while strengthening AC1 evidence. Run a 60-second time-series with the configured eight-species/eleven-inhabitant mix and default species states, including anthias schooling, in both AABB and bounded real mesh-query reef fixtures. Record per-second occupancy after a 10-second settling interval, movement, depth-frustum safety and deterministic replay. Define sustained occupancy before inspecting results: all three sectors occupied in at least80percent of post-settle samples; left/right each at least20percent aggregate fish-time, center at least10percent; no more than3consecutive samples missing an outer sector. Keep exact native staged captures separate from moving-fixture evidence and retain existing collision/spacing budgets/tests. Any failure remains Root feedback on this task, not a relaxed threshold.
+
+Root current-candidate review: snapshot the three preserved motion/spawn/test files into the isolated proof worktree with per-file SHA256 pins; do not edit the originals. Review school-station/fore-reef changes and run existing focused plus mixed temporal regressions, typecheck/full build, and fresh two-size native checks. Verify original hashes remain equal before scoped adoption/commit. If they change, preserve all later changes and keep acceptance pending rather than claiming the snapshot current.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -59,6 +61,8 @@ Unit correction to the preceding Root note: the minimum accumulated path was3.96
 Root exact-f084 full validation: npm test -- --maxWorkers=2 passes all861tests across72files; typecheck passes, including16tracked script syntax checks. The earlier default-concurrency run had only two pre-existing5000ms packaging timeouts; no deadlines/assertions were changed. The new mixed-roster test repeats each AABB/mesh simulation and asserts identical results, sustained sector shares, actual movement, finite coordinates and unchanged collision safety. Source-pinned frozen staging is separate from this controlled temporal fixture. Production build is running; current original-checkout concurrent motion/spawn/test edits still need their own source review before full task acceptance.
 
 Root verified handoff complete for exactf084source plus new mixed-roster fixture: all861tests/72files pass with2workers; typecheck16scripts and productionbuild pass. Durable reports, full validation logs and true exact-size staged PNGs are in docs/asset-evidence/aq104/. New assertions reject stationary-staging false positives and verify deterministic repeated60s runs. This preserves currentconcurrent motion/spawn/test source changes without accepting them; AQ104 stays In Progress and ACs are not checked from old-source evidence alone.
+
+2026-11-14 Root reviewed and adopted the preserved school-station/fore-reef refinements after snapshot validation. Found and corrected a blocked-preferred-flank regression: after8preferred tries schools may use the other safe sectors, with identical clearance and planner work caps. Valid schoolCenter requests plus a blocked station reproduce failure in BOTH AABB and real mesh-query modes on the uncorrected candidate and pass with the correction; fixture is typechecked. Current mixed-roster temporal runs occupy all3sectors100percent in both modes, with zero unsafe segments, finite positions, active movement and exact replay. Full865tests/73files with2workers, typecheck16scripts and productionbuild pass. Original source stayed byte-identical to the reviewed isolated snapshot until adoption; models/config remain untouched. Native current-source acceptance and final AC checks follow this verified handoff.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
@@ -68,5 +72,11 @@ author: root
 created: 2026-11-14 05:36
 ---
 Root native staged review of exactf0844cf at both requiredDPR1sizes is captured under /tmp/aq104-root-native/: both ready,11inhabitants,no failedassets; phone all8namedlinks available and completeServicesmodal. This is frozen staging evidence, NOT sustainedmovement proof. Root is strengthening mixed-species temporal evidence in an isolated f084 worktree. Original checkout now has concurrent edits to motion.ts/fish-spawn.ts not made by this review; they are preserved and not included in exactf084claims. Initial exploratory mixed fixture omitted the explicit mesh probe radius, making mesh fish stationary; that fixture error is corrected before conclusions, with accumulated movement now recorded. No ACs/Done yet.
+---
+
+author: root
+created: 2026-11-14 05:59
+---
+Root current-candidate review found a concrete AC3 regression at motion SHA12b819d9: selectFreeWaterAttemptTarget keeps EVERY schooling retry on the preferred flank via (isSchool || attempt<8). If that flank is blocked, a safe opposite side is never tried and both AABB and mesh fish get no route. New two-mode real-collider counterexample fails both cases; existing115focused checks pass, so this was not covered. Source originals are preserved. Root will test a minimal fallback-sector correction in the isolated snapshot, with no clearance/budget relaxation, before applying it to the unchanged original candidate. Evidence /tmp/aq104-candidate-fallback.log.
 ---
 <!-- COMMENTS:END -->
