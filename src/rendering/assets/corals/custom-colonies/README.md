@@ -37,7 +37,7 @@ node scripts/sync-blender-override.mjs --coral reef-acropora-antler --learn-guid
 Save packed native in `splat-fish/blend/reef-acropora-antler.blend`, export raw
 `splat-fish/overrides/reef-acropora-antler.glb`, sync/install, verify actual scene
 use, and commit native/export/package/reports/generator together. The installer
-is for original rigid colonies only; imported assets need their own exact-license
+is for original colonies only; imported assets need their own exact-license
 and derivative-provenance workflow. Coral mode dispatches before fish side effects
 and rejects mixed flags. Fish discovery skips the reserved `reef-` namespace.
 
@@ -78,3 +78,45 @@ prove compatibility, not visual review of the new right colony there. Dedicated
 runtime macros for this colony at both sizes and full rubric acceptance remain
 open. Root's bounded pre-promotion art gate is recorded in
 `docs/asset-evidence/aq70-11/corymbose-20261113/trial/approval.json`.
+
+## Flowing torch tissue and skeleton
+
+`reef-euphyllia-flowing-torch` is an original five-head colony with165curved,
+rounded-tip tentacles and rigid fluted calyces. It replaces the main left torch
+at `socket_lps_mid_01`; supplied canonical torch geometry remains preserved.
+Packed native, raw export, generator, six PNG maps and installed package use the
+same reserved persistence paths. The installed GLB is1,462,704bytes/27,870triangles.
+Native source contains six packed images: three512px tissue maps and three256px
+skeleton maps. Chosen0.177m height is comparison framing, not specimen calibration.
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_euphyllia_flowing_torch.py
+node scripts/sync-blender-override.mjs --coral reef-euphyllia-flowing-torch --learn-guide
+```
+
+The installer now also accepts one static canonical mesh with two explicitly
+identified primitive/material roles: one coral-soft crown and one coral-rigid
+skeleton. Each has independent finite POSITION/NORMAL/UV/COLOR_0 buffers and
+measured bounds. Soft R has pinned zero bases and positive arc flexibility;
+rigid R remains zero. IDs are unique valid identifiers, not a species whitelist.
+Unknown roles, duplicate IDs, missing metadata, invalid masks, transforms,
+opacity and emission fail before output writes. Single rigid packages retain
+their previous bytes. GLTFLoader retains role declarations on materials; binding
+copies them onto generated meshes and honors those explicit roles before name
+heuristics. Actual-loader assembly tests verify physical tissue and rigid shape.
+
+Tissue retains transmission0.12/IOR1.36/coat0.12 and authored maps. The skeleton
+has its own opaque mineral palette with zero fluorescence. Baked mode uses raw G
+for restrained fluorescence; raw A is analytic contact shading, never opacity.
+A native diagnostic found nine nonfinite opaque HDR pixels contaminating coarse
+transmission mips. Baked tissue keeps stock bicubic refraction whenever finite;
+only invalid samples fall back to the nearest finite lower mip. Transmission is
+not disabled and unrelated materials keep their previous shading. An attempted
+global output guard was rejected and removed. This is robust sampling, not a
+claim that all underlying legacy HDR singularities or rendering budgets are fixed.
+
+Root reviewed neutral and native views before default promotion. The taller reef
+uses undistorted colonies seated at root-space socket poses; this torch removes
+its old outward stand-off offsets and preserves its authored skeleton transform.
+Full tissue/rubric accuracy, all-archetype variants, comprehensive contact/support,
+self-intersection, metric scale and animated fish clearance remain open.

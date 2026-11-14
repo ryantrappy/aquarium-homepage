@@ -23,6 +23,8 @@ export type ModularCoralMountEntry = {
   offsetM?: readonly [number, number, number]
   paletteOverride?: CoralPaletteOverride
   scatterPaletteOverride?: CoralPaletteOverride
+  rigidPaletteOverride?: CoralPaletteOverride
+  preserveSkeletonShape?: boolean
   columnPaletteOverride?: CoralPaletteOverride
 }
 
@@ -103,6 +105,7 @@ export const LIVE_ROCK_ISLAND_URLS: Readonly<Record<'left' | 'right', string>> =
 })
 
 export const MODULAR_CORAL_ASSET_URLS: Readonly<Record<string, string>> = Object.freeze({
+  'reef-euphyllia-flowing-torch': new URL('../assets/corals/custom-colonies/reef-euphyllia-flowing-torch.glb', import.meta.url).href,
   'reef-acropora-corymbose': new URL('../assets/corals/custom-colonies/reef-acropora-corymbose.glb', import.meta.url).href,
   'reef-acropora-antler': new URL('../assets/corals/custom-colonies/reef-acropora-antler.glb', import.meta.url).href,
   'coral-acropora-staghorn': new URL('../assets/corals/coral-acropora-staghorn.glb', import.meta.url).href,
@@ -415,7 +418,7 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
     coralAssetId: 'reef-acropora-antler',
     archetype: 'branching-sps',
     yawRad: 0.20,
-    scale: 2.35,
+    scale: 1.10,
     tiltXRad: 0.04,
     tiltZRad: 0.06,
     offsetM: [0.0, -0.008, 0.0],
@@ -431,7 +434,7 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
     coralAssetId: 'coral-acropora-table',
     archetype: 'branching-sps',
     yawRad: -0.20,
-    scale: 1.65,
+    scale: 1.30,
     tiltXRad: 0.05,
     tiltZRad: -0.04,
     offsetM: [0.0, -0.008, 0.0],
@@ -442,7 +445,7 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
     coralAssetId: 'coral-acropora-staghorn',
     archetype: 'branching-sps',
     yawRad: 1.20,
-    scale: 1.55,
+    scale: 1.20,
     tiltXRad: 0.04,
     tiltZRad: -0.08,
     offsetM: [0.0, -0.008, 0.0],
@@ -474,14 +477,17 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
   // 3. Lower-Left & Mid Ledges: Lush Neon-Green/Gold Euphyllia Torch & Hammer + Fiery Acanthastrea
   {
     socketName: 'socket_lps_mid_01',
-    coralAssetId: 'coral-euphyllia-torch',
+    coralAssetId: 'reef-euphyllia-flowing-torch',
     archetype: 'tentaculate-lps',
     yawRad: 0.20,
     scale: 1.28,
     tiltXRad: 0.16,
     tiltZRad: 0.08,
-    offsetM: [-0.03, -0.008, 0.03],
-    paletteOverride: PALETTE_EUPHYLLIA_GREEN_GOLD_TORCH,
+    offsetM: [0.0, -0.008, 0.0],
+    paletteOverride: { surfaceMode: 'baked-pbr', baseColor: '#90a75a', tipColor: '#e7e0b2', creviceColor: '#3c4630', regradeStrength: 0.35, roughness: 1, fluorescenceStrength: 0.07 },
+    rigidPaletteOverride: { surfaceMode: 'baked-pbr', baseColor: '#b4aa91', tipColor: '#d4cbb6', creviceColor: '#4d4539', regradeStrength: 0.15, roughness: 1, fluorescenceStrength: 0 },
+    preserveSkeletonShape: true,
+    scatterPaletteOverride: PALETTE_EUPHYLLIA_GREEN_GOLD_TORCH,
   },
   {
     socketName: 'socket_lps_mid_02',
@@ -560,7 +566,7 @@ export const DEFAULT_RIGHT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
     coralAssetId: 'coral-acropora-table',
     archetype: 'branching-sps',
     yawRad: 0.20,
-    scale: 2.05,
+    scale: 1.45,
     tiltXRad: 0.04,
     tiltZRad: 0.04,
     offsetM: [0.0, -0.008, 0.0],
@@ -571,7 +577,7 @@ export const DEFAULT_RIGHT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
     coralAssetId: 'reef-acropora-corymbose',
     archetype: 'branching-sps',
     yawRad: -0.50,
-    scale: 2.15,
+    scale: 1.40,
     tiltXRad: 0.04,
     tiltZRad: -0.06,
     offsetM: [0.0, -0.008, 0.0],
@@ -587,7 +593,7 @@ export const DEFAULT_RIGHT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
     coralAssetId: 'coral-acropora-staghorn',
     archetype: 'branching-sps',
     yawRad: 0.80,
-    scale: 1.70,
+    scale: 1.40,
     tiltXRad: 0.04,
     tiltZRad: 0.06,
     offsetM: [0.0, -0.008, 0.0],
@@ -913,20 +919,28 @@ function bindCoralInstanceMaterials(
   options: { paused?: boolean; reducedMotion?: boolean; actinicLevel?: number } | undefined,
   materialControllers: Array<ReturnType<typeof applyCoralRawMaskMaterial>>,
   geometryBindings: CoralMaterialBoundBinding[],
+  rigidPaletteOverride?: CoralPaletteOverride,
+  preserveSkeletonShape = false,
 ) {
   instance.traverse(child => {
     if (!(child instanceof THREE.Mesh)) return
     child.castShadow = true
     child.receiveShadow = true
-    const reefPrimitive = child.userData?.reefPrimitive ?? child.parent?.userData?.reefPrimitive
-    const isSkeleton = child.name.toLowerCase().includes('skeleton')
-    if (isSkeleton) {
+    const sourceMaterial = Array.isArray(child.material) ? child.material[0] : child.material
+    const materialPrimitive = sourceMaterial?.userData?.reefPrimitive
+    // GLTFLoader retains these declarations on each material, not on the
+    // generated child meshes of a multi-primitive glTF mesh.
+    const reefPrimitive = child.userData?.reefPrimitive ?? materialPrimitive ?? child.parent?.userData?.reefPrimitive
+    if (materialPrimitive && !child.userData.reefPrimitive) child.userData.reefPrimitive = { ...materialPrimitive }
+    const isSkeleton = child.name.toLowerCase().includes('skeleton') || (reefPrimitive?.id ?? '').toLowerCase().includes('skeleton')
+    if (isSkeleton && !preserveSkeletonShape) {
       // Sink rigid Euphyllia stalks into the rock pocket so the lush tentacle crown sits naturally on the reef
       child.position.y -= 0.032
       child.scale.set(0.62, 0.48, 0.62)
     }
-    const role: CoralPrimitiveRole =
-      reefPrimitive?.role === 'coral-soft' || child.name.includes('crown') || child.name.includes('anemone') || child.name.includes('zoanthid') || child.name.includes('brain')
+    const role: CoralPrimitiveRole = reefPrimitive?.role === 'coral-soft' || reefPrimitive?.role === 'coral-rigid'
+      ? reefPrimitive.role
+      : child.name.includes('crown') || child.name.includes('anemone') || child.name.includes('zoanthid') || child.name.includes('brain')
         ? 'coral-soft'
         : 'coral-rigid'
 
@@ -938,7 +952,7 @@ function bindCoralInstanceMaterials(
     const isAnemoneTentacles = childNameLower.includes('anemone_tentacle_crown') || primIdLower === 'anemone_tentacle_crown'
     const effectivePalette = isAnemoneColumn
       ? (columnPaletteOverride ?? PALETTE_ANEMONE_COLUMN_TERRACOTTA)
-      : paletteOverride
+      : role === 'coral-rigid' ? (rigidPaletteOverride ?? paletteOverride) : paletteOverride
     const anemoneMode = isAnemoneColumn ? 'column' : isAnemoneTentacles ? 'tentacles' : undefined
 
     const clonedMaterials = (Array.isArray(child.material) ? child.material : [child.material]).map(mat => {
@@ -1296,6 +1310,21 @@ function buildInstancedCoralScatters(
   return instancedMeshes
 }
 
+/** Raise the foundation only; child sockets inherit the same transform. */
+function raiseFoundation(rockRoot: THREE.Object3D, heightScale: number) {
+  if (!Number.isFinite(heightScale) || heightScale <= 0) throw new Error('Invalid foundation height scale')
+  if (heightScale === 1) return
+  const rocks: THREE.Mesh[] = []
+  rockRoot.traverse(node => {
+    if (node instanceof THREE.Mesh && (node.userData?.reefPrimitive?.role === 'rock' || node.parent?.userData?.reefPrimitive?.role === 'rock' || node.name.toLowerCase().includes('live_rock'))) rocks.push(node)
+  })
+  if (!rocks.length || rocks.some(node => node.parent !== rockRoot)) throw new Error('Foundation rise requires direct rock mesh children')
+  for (const rock of rocks) {
+    rock.position.y *= heightScale
+    rock.scale.y *= heightScale
+  }
+}
+
 /**
  * Mounts modular coral templates onto named `socket_*` nodes of a live-rock island scene graph,
  * applies the 3D coralline/aragonite shader (`applyLiveRockMaterial`) to the rock foundation,
@@ -1311,6 +1340,7 @@ export function assembleCoralsOnRockSockets(
     reducedMotion?: boolean
     actinicLevel?: number
     preserveAuthoredRock?: boolean
+    foundationHeightScale?: number
     includeScatter?: boolean
   },
 ): {
@@ -1318,6 +1348,7 @@ export function assembleCoralsOnRockSockets(
   instancedMeshes: THREE.InstancedMesh[]
   update(timeSeconds: number, paused?: boolean, reducedMotion?: boolean): void
 } {
+  raiseFoundation(rockRoot, options?.foundationHeightScale ?? 1)
   let hasRockGeometry = false
   const preserveAuthoredRock = options?.preserveAuthoredRock === true
   rockRoot.traverse(node => {
@@ -1341,9 +1372,20 @@ export function assembleCoralsOnRockSockets(
   }
 
   const socketNodes = new Map<string, THREE.Object3D>()
+  rockRoot.updateMatrixWorld(true)
+  const rootInverse = rockRoot.matrixWorld.clone().invert()
   rockRoot.traverse(node => {
     if (/^socket_[a-z_]+_\d{2}$/.test(node.name)) {
-      socketNodes.set(node.name, node)
+      // Exported sockets are children of the foundation mesh. Resolve their
+      // real root-space pose after the rise, then mount undistorted colonies.
+      const transform = new THREE.Matrix4().multiplyMatrices(rootInverse, node.matrixWorld)
+      const anchor = new THREE.Object3D(); anchor.name = node.name
+      transform.decompose(anchor.position, anchor.quaternion, anchor.scale)
+      const up = new THREE.Vector3(0, 1, 0)
+      const originalNormal = up.clone().applyQuaternion(anchor.quaternion)
+      const normal = up.clone().applyMatrix3(new THREE.Matrix3().getNormalMatrix(transform)).normalize()
+      anchor.quaternion.premultiply(new THREE.Quaternion().setFromUnitVectors(originalNormal, normal))
+      socketNodes.set(node.name, anchor)
     }
   })
 
@@ -1397,6 +1439,8 @@ export function assembleCoralsOnRockSockets(
       options,
       materialControllers,
       geometryBindings,
+      mount.rigidPaletteOverride,
+      mount.preserveSkeletonShape,
     )
 
     // Attach lush companion reef-garden sub-colonies when mounting onto the live aquarium rock

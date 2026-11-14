@@ -358,6 +358,25 @@ vCoralViewDir = normalize(-mvPosition.xyz);
 
   if (isDepthPass) return
 
+  if (bakedSurface) {
+    // Rare nonfinite pixels in the opaque HDR pass can contaminate coarse
+    // transmission mips. Keep bicubic refraction when finite; otherwise use
+    // the nearest finite lower level, preserving transmission and roughness.
+    const transmission = THREE.ShaderChunk.transmission_pars_fragment.replace(
+      'return textureBicubic( transmissionSamplerMap, fragCoord.xy, lod );',
+      `vec4 sampled = textureBicubic(transmissionSamplerMap, fragCoord.xy, lod);
+      if (!any(isnan(sampled)) && !any(isinf(sampled))) return sampled;
+      float fallbackLod = max(0.0, floor(lod));
+      for (int level = 0; level < 16; level++) {
+        sampled = textureLod(transmissionSamplerMap, fragCoord.xy, fallbackLod);
+        if (!any(isnan(sampled)) && !any(isinf(sampled))) return sampled;
+        fallbackLod = max(0.0, fallbackLod - 1.0);
+      }
+      return vec4(0.0, 0.0, 0.0, 1.0);`,
+    )
+    shader.fragmentShader = shader.fragmentShader.replace('#include <transmission_pars_fragment>', transmission)
+  }
+
   shader.fragmentShader =
     `
 uniform float uTime;
@@ -769,7 +788,7 @@ export function applyCoralRawMaskMaterial(
     uAnemoneMode: { value: options.anemoneMode === 'tentacles' ? 2 : options.anemoneMode === 'column' ? 1 : 0 },
   }
 
-  const cacheKey = `coral-raw-masks-v1:${options.role}${bakedSurface ? ':baked-pbr' : ''}`
+  const cacheKey = `coral-raw-masks-v1:${options.role}${bakedSurface ? ':baked-pbr:finite-transmission-v1' : ''}`
   material.customProgramCacheKey = () => cacheKey
   material.onBeforeCompile = shader => {
     injectCoralRawMaskShader(shader, uniforms, false, bakedSurface)

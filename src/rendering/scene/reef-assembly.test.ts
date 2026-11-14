@@ -67,6 +67,35 @@ function buildRockFixtureFromRuntimeGlb(): THREE.Group {
   return root
 }
 
+function buildFoundationFixture(nestedRock = false) {
+  const reefRoot = new THREE.Group()
+  reefRoot.position.set(0.4, -0.3, 0.2)
+  reefRoot.rotation.y = 0.21
+  reefRoot.scale.setScalar(1.7)
+
+  const rockMesh = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.3), new THREE.MeshStandardMaterial())
+  rockMesh.name = 'Live_Rock_Island'
+  rockMesh.userData = { reefPrimitive: { id: 'live_rock', role: 'rock' } }
+  rockMesh.position.set(0.02, 0.05, -0.04)
+  rockMesh.scale.set(0.9, 1.2, 1.1)
+
+  const socket = new THREE.Object3D()
+  socket.name = 'socket_lps_mid_01'
+  socket.position.set(0.1, 0.18, -0.07)
+  socket.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), 0.15)
+  rockMesh.add(socket)
+
+  if (nestedRock) {
+    const wrapper = new THREE.Group()
+    wrapper.name = 'invalid_rock_wrapper'
+    wrapper.add(rockMesh)
+    reefRoot.add(wrapper)
+  } else {
+    reefRoot.add(rockMesh)
+  }
+  return { reefRoot, rockMesh, socket }
+}
+
 function buildMockCoralTemplates(): Map<string, THREE.Object3D> {
   const templates = new Map<string, THREE.Object3D>()
   const coralSpecs: Array<[string, Array<[string, 'coral-soft' | 'coral-rigid']>]> = [
@@ -77,6 +106,7 @@ function buildMockCoralTemplates(): Map<string, THREE.Object3D> {
     ['coral-acropora-staghorn', [['acropora_staghorn_colony', 'coral-rigid']]],
     ['reef-acropora-antler', [['reef_acropora_antler', 'coral-rigid']]],
     ['reef-acropora-corymbose', [['reef_acropora_corymbose', 'coral-rigid']]],
+    ['reef-euphyllia-flowing-torch', [['flowing_torch_crown', 'coral-soft'], ['flowing_torch_skeleton', 'coral-rigid']]],
     ['coral-montipora-plate', [['montipora_plate_colony', 'coral-rigid']]],
     ['coral-brain-diploria', [['diploria_brain_colony', 'coral-soft']]],
     ['coral-zoanthid-mat', [['zoanthid_button_cluster', 'coral-soft']]],
@@ -92,6 +122,14 @@ function buildMockCoralTemplates(): Map<string, THREE.Object3D> {
       )
       mesh.name = primId
       mesh.userData = { reefPrimitive: { id: primId, role } }
+      if (id === 'reef-euphyllia-flowing-torch' && primId === 'flowing_torch_crown') {
+        mesh.position.set(0.014, 0.062, -0.023)
+        mesh.scale.set(1.12, 0.94, 1.08)
+      }
+      if (id === 'reef-euphyllia-flowing-torch' && primId === 'flowing_torch_skeleton') {
+        mesh.position.set(0.011, 0.028, -0.017)
+        mesh.scale.set(0.8, 1.1, 0.9)
+      }
       group.add(mesh)
     }
     templates.set(id, group)
@@ -155,6 +193,115 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     for (const ctrl of softControllers) {
       expect(ctrl.uniforms.uMotionScale.value).toBe(1)
     }
+  })
+
+  it('raises only a nested rock foundation and mounts undistorted coral at the once-offset root-space socket pose', () => {
+    const mount = {
+      socketName: 'socket_lps_mid_01',
+      coralAssetId: 'coral-euphyllia-torch',
+      archetype: 'tentaculate-lps' as const,
+      yawRad: 0.25,
+      scale: 1.35,
+      offsetM: [0.03, 0.04, -0.02] as const,
+      preserveSkeletonShape: true,
+    }
+    const templates = buildMockCoralTemplates()
+    const template = templates.get(mount.coralAssetId)!
+    const templateCrown = template.getObjectByName('euphyllia_polyp_crown') as THREE.Mesh
+    const templateSkeleton = template.getObjectByName('euphyllia_skeleton') as THREE.Mesh
+    setMaskGeometry(templateCrown, [[0, 0, 0], [0.1, 0.1, 0], [0, 0.2, 0.1]], [[0, 0, 0, 0.5], [1, 1, 0.4, 1], [0.5, 0, 0.8, 0.7]])
+    setMaskGeometry(templateSkeleton, [[0, 0, 0], [0.04, 0.1, 0], [0, 0.1, 0.04]], [[0, 0, 0, 0.3], [0, 0, 0.4, 0.7], [0, 0, 0.8, 1]])
+    templateSkeleton.position.set(0.01, 0.025, -0.015)
+    templateSkeleton.scale.set(0.8, 1.1, 0.9)
+    const templateTransform = {
+      crownPosition: templateCrown.position.toArray(),
+      crownScale: templateCrown.scale.toArray(),
+      skeletonPosition: templateSkeleton.position.toArray(),
+      skeletonScale: templateSkeleton.scale.toArray(),
+      crownVertices: templateCrown.geometry.getAttribute('position').array.slice(),
+      skeletonVertices: templateSkeleton.geometry.getAttribute('position').array.slice(),
+    }
+
+    const unitFixture = buildFoundationFixture()
+    const unitRockScale = unitFixture.rockMesh.scale.toArray()
+    const unitRockPosition = unitFixture.rockMesh.position.toArray()
+    const unitRockVertices = unitFixture.rockMesh.geometry.getAttribute('position').array.slice()
+    const unitAssembly = assembleCoralsOnRockSockets(unitFixture.reefRoot, templates, [mount], {
+      foundationHeightScale: 1,
+      includeScatter: false,
+    })
+    unitFixture.reefRoot.updateMatrixWorld(true)
+    const unitSocketRootPosition = unitFixture.reefRoot.worldToLocal(unitFixture.socket.getWorldPosition(new THREE.Vector3()))
+    const unitBinding = unitAssembly.mountedCorals[0]!
+    const unitExpectedPosition = unitSocketRootPosition.clone().add(new THREE.Vector3(...mount.offsetM))
+    expect(unitFixture.rockMesh.scale.toArray()).toEqual(unitRockScale)
+    expect(unitFixture.rockMesh.position.toArray()).toEqual(unitRockPosition)
+    expect(unitBinding.root.position.toArray()).toEqual(unitExpectedPosition.toArray())
+    expect(unitBinding.root.scale.toArray()).toEqual([mount.scale, mount.scale, mount.scale])
+
+    const raisedFixture = buildFoundationFixture()
+    const raisedRockPosition = raisedFixture.rockMesh.position.toArray()
+    const raisedRockScale = raisedFixture.rockMesh.scale.toArray()
+    const raisedRockVertices = raisedFixture.rockMesh.geometry.getAttribute('position').array.slice()
+    const raisedAssembly = assembleCoralsOnRockSockets(raisedFixture.reefRoot, templates, [mount], {
+      foundationHeightScale: 2,
+      includeScatter: false,
+    })
+    raisedFixture.reefRoot.updateMatrixWorld(true)
+    const socketWorldPosition = raisedFixture.socket.getWorldPosition(new THREE.Vector3())
+    const socketRootPosition = raisedFixture.reefRoot.worldToLocal(socketWorldPosition.clone())
+    const raisedBinding = raisedAssembly.mountedCorals[0]!
+    const expectedRootPosition = socketRootPosition.clone().add(new THREE.Vector3(...mount.offsetM))
+    const raisedCrown = raisedBinding.root.getObjectByName('euphyllia_polyp_crown') as THREE.Mesh
+    const raisedSkeleton = raisedBinding.root.getObjectByName('euphyllia_skeleton') as THREE.Mesh
+
+    expect(raisedFixture.rockMesh.scale.toArray()).toEqual([raisedRockScale[0], raisedRockScale[1] * 2, raisedRockScale[2]])
+    expect(raisedFixture.rockMesh.position.toArray()).toEqual([raisedRockPosition[0], raisedRockPosition[1] * 2, raisedRockPosition[2]])
+    expect(raisedFixture.rockMesh.geometry.getAttribute('position').array).toEqual(raisedRockVertices)
+    expect(raisedBinding.root.position.toArray()).toEqual(expectedRootPosition.toArray())
+    expect(raisedBinding.root.position.distanceTo(socketRootPosition.clone().add(new THREE.Vector3(...mount.offsetM).multiplyScalar(2)))).toBeGreaterThan(0)
+    expect(raisedBinding.root.scale.toArray()).toEqual([mount.scale, mount.scale, mount.scale])
+    expect(raisedCrown.scale.toArray()).toEqual([1, 1, 1])
+    expect(raisedSkeleton.position.toArray()).toEqual(templateTransform.skeletonPosition)
+    expect(raisedSkeleton.scale.toArray()).toEqual(templateTransform.skeletonScale)
+    expect(templateCrown.position.toArray()).toEqual(templateTransform.crownPosition)
+    expect(templateCrown.scale.toArray()).toEqual(templateTransform.crownScale)
+    expect(templateSkeleton.position.toArray()).toEqual(templateTransform.skeletonPosition)
+    expect(templateSkeleton.scale.toArray()).toEqual(templateTransform.skeletonScale)
+    expect(templateCrown.geometry.getAttribute('position').array).toEqual(templateTransform.crownVertices)
+    expect(templateSkeleton.geometry.getAttribute('position').array).toEqual(templateTransform.skeletonVertices)
+    expect(unitBinding.root.position.toArray()).toEqual(unitExpectedPosition.toArray())
+    expect(unitBinding.root.scale.toArray()).toEqual([mount.scale, mount.scale, mount.scale])
+    expect(unitFixture.rockMesh.geometry.getAttribute('position').array).toEqual(unitRockVertices)
+  })
+
+  it.each([
+    { name: 'invalid scale', nestedRock: false, heightScale: 0 },
+    { name: 'nested rock outside reef root', nestedRock: true, heightScale: 2 },
+  ])('rejects $name before mutating the rock or socket', ({ nestedRock, heightScale }) => {
+    const fixture = buildFoundationFixture(nestedRock)
+    const templates = buildMockCoralTemplates()
+    const mount = {
+      socketName: 'socket_lps_mid_01',
+      coralAssetId: 'coral-euphyllia-torch',
+      archetype: 'tentaculate-lps' as const,
+      yawRad: 0,
+      scale: 1,
+    }
+    const material = fixture.rockMesh.material
+    const position = fixture.rockMesh.position.toArray()
+    const scale = fixture.rockMesh.scale.toArray()
+    const vertices = fixture.rockMesh.geometry.getAttribute('position').array.slice()
+    const socketPosition = fixture.socket.position.toArray()
+    const socketQuaternion = fixture.socket.quaternion.toArray()
+
+    expect(() => assembleCoralsOnRockSockets(fixture.reefRoot, templates, [mount], { foundationHeightScale: heightScale })).toThrow()
+    expect(fixture.rockMesh.material).toBe(material)
+    expect(fixture.rockMesh.position.toArray()).toEqual(position)
+    expect(fixture.rockMesh.scale.toArray()).toEqual(scale)
+    expect(fixture.rockMesh.geometry.getAttribute('position').array).toEqual(vertices)
+    expect(fixture.socket.position.toArray()).toEqual(socketPosition)
+    expect(fixture.socket.quaternion.toArray()).toEqual(socketQuaternion)
   })
 
   it('preserves an authored rock while mounting requested coral and updating its controller clock', () => {
@@ -259,6 +406,91 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     expect(primaryBinding.material.customProgramCacheKey()).toContain(':baked-pbr')
     expect(scatterMaterial.customProgramCacheKey()).not.toContain(':baked-pbr')
     expect(scatterUniforms.uPaletteBase.value.getHexString()).toBe('d85c84')
+  })
+
+  it('binds the flowing torch crown and skeleton by explicit role and preserves only the new colony shape', () => {
+    const id = 'reef-euphyllia-flowing-torch'
+    const registeredUrl = MODULAR_CORAL_ASSET_URLS[id]
+    expect(registeredUrl).toBeDefined()
+    expect(new URL(registeredUrl!).pathname).toContain('/custom-colonies/reef-euphyllia-flowing-torch.glb')
+
+    const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(entry => entry.socketName === 'socket_lps_mid_01')
+    expect(mount).toMatchObject({
+      coralAssetId: id,
+      archetype: 'tentaculate-lps',
+      preserveSkeletonShape: true,
+      paletteOverride: { surfaceMode: 'baked-pbr' },
+      rigidPaletteOverride: { fluorescenceStrength: 0 },
+    })
+    expect(mount?.rigidPaletteOverride?.baseColor).toBeDefined()
+    expect(mount?.rigidPaletteOverride?.baseColor).not.toBe(mount?.paletteOverride?.baseColor)
+
+    const templates = buildMockCoralTemplates()
+    const template = templates.get(id)!
+    const templateSkeleton = template.getObjectByName('flowing_torch_skeleton') as THREE.Mesh
+    const expectedSkeletonPosition = templateSkeleton.position.toArray()
+    const expectedSkeletonScale = templateSkeleton.scale.toArray()
+    const rockRoot = buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json')
+    const assembly = assembleCoralsOnRockSockets(rockRoot, templates, DEFAULT_LEFT_ISLAND_MOUNTS)
+    const primary = assembly.mountedCorals.find(mounted => mounted.socketName === 'socket_lps_mid_01')!
+    const crown = primary.root.getObjectByName('flowing_torch_crown') as THREE.Mesh
+    const skeleton = primary.root.getObjectByName('flowing_torch_skeleton') as THREE.Mesh
+    const crownMaterial = crown.material as THREE.MeshStandardMaterial
+    const skeletonMaterial = skeleton.material as THREE.MeshStandardMaterial
+    const crownUniforms = crownMaterial.userData.coralRawMasks.uniforms
+    const skeletonUniforms = skeletonMaterial.userData.coralRawMasks.uniforms
+
+    expect(primary.coralAssetId).toBe(id)
+    expect(crownMaterial.customProgramCacheKey()).toContain(':coral-soft:baked-pbr')
+    expect(skeletonMaterial.customProgramCacheKey()).toContain(':coral-rigid')
+    expect(crownUniforms.uRoleIsSoft.value).toBe(1)
+    expect(skeletonUniforms.uRoleIsSoft.value).toBe(0)
+    expect(crownUniforms.uPaletteBase.value.getHexString()).toBe(new THREE.Color(mount!.paletteOverride!.baseColor).getHexString())
+    expect(skeletonUniforms.uPaletteBase.value.getHexString()).toBe(new THREE.Color(mount!.rigidPaletteOverride!.baseColor).getHexString())
+    expect(skeletonUniforms.uFluorescenceStrength.value).toBe(0)
+    expect(skeleton.position.toArray()).toEqual(expectedSkeletonPosition)
+    expect(skeleton.scale.toArray()).toEqual(expectedSkeletonScale)
+
+    const scatter = assembly.instancedMeshes.find(mesh => mesh.name.startsWith('instanced_coral-zoanthid-mat_'))!
+    const scatterMaterial = scatter.material as THREE.MeshStandardMaterial
+    const scatterUniforms = scatterMaterial.userData.coralRawMasks.uniforms
+    expect(scatterMaterial.customProgramCacheKey()).not.toContain(':baked-pbr')
+    expect(scatterUniforms.uPaletteBase.value.getHexString()).toBe('5c46c8')
+
+    const legacyMount = {
+      socketName: 'socket_lps_mid_02',
+      coralAssetId: 'coral-euphyllia-hammer',
+      archetype: 'tentaculate-lps' as const,
+      yawRad: 0,
+      scale: 1,
+    }
+    const legacyAssembly = assembleCoralsOnRockSockets(
+      buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json'),
+      templates,
+      [legacyMount],
+      { includeScatter: false },
+    )
+    const legacySkeleton = legacyAssembly.mountedCorals[0]!.root.getObjectByName('euphyllia_hammer_skeleton') as THREE.Mesh
+    expect(legacySkeleton.position.y).toBeCloseTo(-0.032, 6)
+    expect(legacySkeleton.scale.toArray()).toEqual([0.62, 0.48, 0.62])
+
+    const roleTemplate = new THREE.Group()
+    const misleadingRigid = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshStandardMaterial({ vertexColors: true }))
+    misleadingRigid.name = 'misleading_crown_name'
+    misleadingRigid.userData = { reefPrimitive: { id: 'explicit_rigid_role', role: 'coral-rigid' } }
+    roleTemplate.add(misleadingRigid)
+    const roleTemplates = new Map(templates)
+    roleTemplates.set('coral-role-precedence-fixture', roleTemplate)
+    const roleAssembly = assembleCoralsOnRockSockets(
+      buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json'),
+      roleTemplates,
+      [{ ...legacyMount, coralAssetId: 'coral-role-precedence-fixture' }],
+      { includeScatter: false },
+    )
+    const roleMesh = roleAssembly.mountedCorals[0]!.root.getObjectByName('misleading_crown_name') as THREE.Mesh
+    const roleMaterial = roleMesh.material as THREE.MeshStandardMaterial
+    expect(roleMaterial.userData.coralRawMasks.uniforms.uRoleIsSoft.value).toBe(0)
+    expect(roleMaterial.customProgramCacheKey()).toContain(':coral-rigid')
   })
 
   it('forwards the fixture actinic level to every mounted coral material, defaulting to 1 (AQ-70.6 AC #3)', () => {

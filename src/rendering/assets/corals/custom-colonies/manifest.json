@@ -40,6 +40,26 @@
         0.21796300646383315,
         0.1956302523612976
       ]
+    },
+    {
+      "id": "reef-euphyllia-flowing-torch",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-euphyllia-flowing-torch.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-euphyllia-flowing-torch-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-euphyllia-flowing-torch.blend",
+      "nativeSha256": "b708f830b1d5983470f9262f950de468fadf9de5fdd346af5267db22185d486d",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-euphyllia-flowing-torch.glb",
+      "overrideSha256": "b75e75c27217eca5b9c55def325e1ffcc2c5f78f53cb8a2f6bb7160991e9f025",
+      "generatorPath": "src/rendering/modeling/build_reef_euphyllia_flowing_torch.py",
+      "generatorSha256": "9b7e73fbc698c69c02fc08b8fecb1a87f211d2b34a486e06e48bfa90a58b293d",
+      "sha256": "26df54fed418b5b645d2b89840b429642bae7763dc9e2d40bd0002e541f62504",
+      "bytes": 1462704,
+      "triangles": 27870,
+      "dimensionsM": [
+        0.22957362234592438,
+        0.1770000010728836,
+        0.2094828113913536
+      ]
     }
   ]
 }

@@ -9,7 +9,7 @@ import {
   MESH_NAVIGATION_MOVEMENT_BUDGET,
   segmentIntersectsInflatedBox,
 } from './reef-mesh-navigation'
-import { DEFAULT_LEFT_ISLAND_MOUNTS, instantiateModularReefHabitat, LIVE_ROCK_ISLAND_URLS } from './reef-assembly'
+import { DEFAULT_LEFT_ISLAND_MOUNTS, MODULAR_CORAL_ASSET_URLS, instantiateModularReefHabitat, LIVE_ROCK_ISLAND_URLS } from './reef-assembly'
 import { reefPlacementsForViewport } from './reef-layout'
 
 type P = { x: number; y: number; z: number }
@@ -482,13 +482,15 @@ describe('createReefMeshNavigation (real rock GLB)', () => {
     rock.userData.reefPrimitive = { role: 'rock' }
     reef.add(rock)
 
-    // Mount the hammer coral at socket_lps_mid_01, the way
+    // Mount the flowing torch at socket_lps_mid_01, the way
     // assembleCoralsOnRockSockets does, so the ledge-left-apron anchor sits
     // inside its envelope (measured 0.075 m from the actual tentacles).
     const sockets = glbSocketMatrices(leftBytes)
     const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find((m) => m.socketName === 'socket_lps_mid_01')!
     const coralRoot = new THREE.Group()
-    const coral = meshFromTriangles(glbTriangles(readFileSync(new URL(`../assets/corals/${mount.coralAssetId}.glb`, import.meta.url))))
+    const coralUrl = MODULAR_CORAL_ASSET_URLS[mount.coralAssetId]
+    if (!coralUrl) throw new Error(`No runtime coral URL registered for ${mount.coralAssetId}.`)
+    const coral = meshFromTriangles(glbTriangles(readFileSync(new URL(coralUrl))))
     coralRoot.add(coral)
     coralRoot.applyMatrix4(mountMatrix(sockets.get(mount.socketName)!, mount))
     reef.add(coralRoot)

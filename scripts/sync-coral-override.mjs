@@ -1,4 +1,4 @@
-/** Isolated original rigid-colony installer; canonical catalogs stay untouched. */
+/** Isolated original coral-colony installer; canonical catalogs stay untouched. */
 import fs from 'node:fs'
 import path from 'node:path'
 import { createHash } from 'node:crypto'
@@ -53,32 +53,48 @@ export function syncCoralOverride(repoRoot, id) {
     || doc.extensionsRequired?.length || doc.buffers?.length !== 1 || doc.buffers[0].uri || doc.images?.some(image => image.uri)) throw new Error('Require one static embedded colony mesh')
   const root = doc.nodes[roots[0]], mesh = doc.meshes[root?.mesh]
   const identity = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
-  if (!mesh || mesh.primitives?.length !== 1 || root.children?.length || root.weights || root.skin !== undefined || root.extensions || mesh.weights
+  if (!mesh || ![1, 2].includes(mesh.primitives?.length) || root.children?.length || root.weights || root.skin !== undefined || root.extensions || mesh.weights
     || (root.matrix ?? identity).some((value, i) => value !== identity[i]) || root.translation?.some(value => value !== 0)
     || root.scale?.some(value => value !== 1) || root.rotation?.some((value, i) => value !== [0, 0, 0, 1][i])) throw new Error('Apply canonical colony root transforms')
-  const primitive = mesh.primitives[0]
-  if ((primitive.mode ?? 4) !== 4 || primitive.targets || primitive.extensions) throw new Error('Require ordinary static triangles')
-  const positions = accessor(doc, bin, primitive.attributes?.POSITION, 'VEC3', 3, [5126])
-  const normals = accessor(doc, bin, primitive.attributes?.NORMAL, 'VEC3', 3, [5126])
-  const uv = accessor(doc, bin, primitive.attributes?.TEXCOORD_0, 'VEC2', 2, [5126])
-  const masks = accessor(doc, bin, primitive.attributes?.COLOR_0, 'VEC4', 4, [5121, 5123, 5126])
-  if ([normals, uv, masks].some(data => data.item.count !== positions.item.count)) throw new Error('Attribute counts differ')
-  if (masks.values.some((value, i) => value < 0 || value > 1 || i % 4 === 0 && value !== 0)) throw new Error('Rigid coral requires bounded raw RGBA and pinned R=0')
-  const indices = primitive.indices === undefined ? undefined : accessor(doc, bin, primitive.indices, 'SCALAR', 1, [5121, 5123, 5125])
-  const count = indices?.item.count ?? positions.item.count
-  if (count % 3 || indices?.item.normalized || indices?.values.some(value => !Number.isInteger(value) || value < 0 || value >= positions.item.count)) throw new Error('Invalid triangle index stream')
-  const min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity]
-  for (let i = 0; i < positions.values.length; i++) { const axis = i % 3; min[axis] = Math.min(min[axis], positions.values[i]); max[axis] = Math.max(max[axis], positions.values[i]) }
+  const dual = mesh.primitives.length === 2
+  const parts = mesh.primitives.map(primitive => {
+    if ((primitive.mode ?? 4) !== 4 || primitive.targets || primitive.extensions) throw new Error('Require ordinary static triangles')
+    const positions = accessor(doc, bin, primitive.attributes?.POSITION, 'VEC3', 3, [5126])
+    const normals = accessor(doc, bin, primitive.attributes?.NORMAL, 'VEC3', 3, [5126])
+    const uv = accessor(doc, bin, primitive.attributes?.TEXCOORD_0, 'VEC2', 2, [5126])
+    const masks = accessor(doc, bin, primitive.attributes?.COLOR_0, 'VEC4', 4, [5121, 5123, 5126])
+    if ([normals, uv, masks].some(data => data.item.count !== positions.item.count)) throw new Error('Attribute counts differ')
+    if (masks.values.some(value => value < 0 || value > 1)) throw new Error('Coral requires bounded raw RGBA')
+    const material = doc.materials?.[primitive.material]
+    if (!material || material.alphaMode && material.alphaMode !== 'OPAQUE' || material.emissiveTexture || material.emissiveFactor?.some(value => value !== 0)) throw new Error('Require opaque non-emissive tissue; fluorescence uses raw G at runtime')
+    const declared = material.extras?.reefPrimitive
+    if (dual && (!declared || !/^[a-z][a-z0-9_-]*$/.test(declared.id ?? '') || !['coral-soft', 'coral-rigid'].includes(declared.role) || declared.maskSchema !== 'coral-raw-masks-v1')) throw new Error('Dual colony materials require explicit valid primitive roles and mask schema')
+    // Preserve the historical one-primitive rigid package byte-for-byte.
+    const role = dual ? { id: declared.id, role: declared.role, maskSchema: declared.maskSchema }
+      : { id: id.replaceAll('-', '_'), role: 'coral-rigid', maskSchema: 'coral-raw-masks-v1' }
+    const flex = masks.values.filter((_, i) => i % 4 === 0)
+    if (role.role === 'coral-rigid' && flex.some(value => value !== 0)) throw new Error('Rigid coral requires bounded raw RGBA and pinned R=0')
+    if (role.role === 'coral-soft' && (!flex.some(value => value === 0) || !flex.some(value => value > 0))) throw new Error('Soft coral requires pinned R=0 bases and positive flexibility')
+    const indices = primitive.indices === undefined ? undefined : accessor(doc, bin, primitive.indices, 'SCALAR', 1, [5121, 5123, 5125])
+    const count = indices?.item.count ?? positions.item.count
+    if (count % 3 || indices?.item.normalized || indices?.values.some(value => !Number.isInteger(value) || value < 0 || value >= positions.item.count)) throw new Error('Invalid triangle index stream')
+    const min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity]
+    for (let i = 0; i < positions.values.length; i++) { const axis = i % 3; min[axis] = Math.min(min[axis], positions.values[i]); max[axis] = Math.max(max[axis], positions.values[i]) }
+    primitive.extras = { ...primitive.extras, reefPrimitive: role }
+    return { role, count, boundsM: { min, max }, vertexCount: positions.item.count, maskValues: masks.values }
+  })
+  if (dual && (new Set(parts.map(part => part.role.id)).size !== 2 || new Set(parts.map(part => part.role.role)).size !== 2)) throw new Error('Dual colony requires unique IDs and one soft crown plus one rigid skeleton')
+  const min = [0, 1, 2].map(axis => Math.min(...parts.map(part => part.boundsM.min[axis])))
+  const max = [0, 1, 2].map(axis => Math.max(...parts.map(part => part.boundsM.max[axis])))
   const boundsM = { min, max }, dimensionsM = max.map((value, i) => value - min[i])
-  const material = doc.materials?.[primitive.material]
-  if (!material || material.alphaMode && material.alphaMode !== 'OPAQUE' || material.emissiveTexture || material.emissiveFactor?.some(value => value !== 0)) throw new Error('Require opaque non-emissive tissue; fluorescence uses raw G at runtime')
+  const count = parts.reduce((sum, part) => sum + part.count, 0)
   const metadata = { schema: 'reef-asset-v1', id, kind: 'coral', units: 'meter', upAxis: '+Y', origin: 'local', dimensionsM, maskSchema: 'coral-raw-masks-v1',
-    provenance: { license: 'original', creator: 'Aquarium project', sourceSha256: sha(raw), recipe: `Blender background --python ${generatorPath}; node scripts/sync-blender-override.mjs --coral ${id} --learn-guide`, attribution: 'Original custom branching colony with baked surface maps and raw rigidity/tip/phase/contact-AO masks; no imported visual assets.' } }
-  const role = { id: id.replaceAll('-', '_'), role: 'coral-rigid', maskSchema: 'coral-raw-masks-v1' }
-  root.extras = { ...root.extras, reefAsset: metadata, reefPrimitive: role }
-  primitive.extras = { ...primitive.extras, reefPrimitive: role }
+    provenance: { license: 'original', creator: 'Aquarium project', sourceSha256: sha(raw), recipe: `Blender background --python ${generatorPath}; node scripts/sync-blender-override.mjs --coral ${id} --learn-guide`, attribution: dual ? 'Original custom soft-tissue crown and rigid skeleton with procedural PBR maps and raw flex/tip/phase/contact-AO masks; no imported visual assets.' : 'Original custom branching colony with baked surface maps and raw rigidity/tip/phase/contact-AO masks; no imported visual assets.' } }
+  root.extras = { ...root.extras, reefAsset: metadata }
+  if (!dual) root.extras.reefPrimitive = parts[0].role
+  else delete root.extras.reefPrimitive
   const inspection = { extras: { reefAsset: metadata }, rootTransform: { translation: [0, 0, 0], rotation: [0, 0, 0, 1], scale: [1, 1, 1] }, boundsM,
-    primitives: [{ ...role, vertexCount: positions.item.count, boundsM, material: { vertexColors: false, vertexAlpha: false, aoSource: 'coral-mask-a' }, color0: { itemSize: 4, values: masks.values } }], sockets: [], collisionParts: [] }
+    primitives: parts.map(part => ({ ...part.role, vertexCount: part.vertexCount, boundsM: part.boundsM, material: { vertexColors: false, vertexAlpha: false, aoSource: 'coral-mask-a' }, color0: { itemSize: 4, values: part.maskValues } })), sockets: [], collisionParts: [] }
   const validation = validateAssetContract(inspection)
   if (!validation.valid) throw new Error(JSON.stringify(validation.issues))
   const packaged = buildGlb(doc, bin), manifestPath = path.join(repoRoot, dir, 'manifest.json')
@@ -90,6 +106,6 @@ export function syncCoralOverride(repoRoot, id) {
   fs.writeFileSync(path.join(repoRoot, entry.path), packaged)
   fs.writeFileSync(path.join(repoRoot, entry.inspection), JSON.stringify(inspection, null, 2) + '\n')
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n')
-  console.log(`Synced rigid colony ${id}: ${entry.triangles} triangles, ${entry.bytes} bytes; canonical catalogs untouched`)
+  console.log(`Synced coral colony ${id}: ${entry.triangles} triangles, ${entry.bytes} bytes; canonical catalogs untouched`)
   return entry
 }

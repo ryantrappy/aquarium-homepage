@@ -163,3 +163,15 @@ uses the model. All canonical/supplied models and antler source remain preserved
 Root reviewed the matched neutral render and isolated laptop scene before
 promotion. The chosen comparison height and morphology do not certify taxonomy,
 physical scale, all-archetype realism, runtime budgets or animated clearance.
+
+## Original flowing torch colony — AQ-70.11
+
+`custom-colonies/reef-euphyllia-flowing-torch.glb` is original project geometry
+and procedural PBR tissue/skeleton imagery ($0; no external visual asset).
+`build_reef_euphyllia_flowing_torch.py` creates the packed native under
+`splat-fish/blend/` and raw override under `splat-fish/overrides/`; the separate
+registry pins native/export/generator/package hashes. The main left LPS-mid01
+uses it. Explicit soft crown and rigid skeleton roles preserve raw coral masks,
+restrained transmission and separate skeleton appearance. Root accepted a bounded
+neutral/native morphology step before promotion; full physical scale, tissue
+rubric, variant, support and rendering-budget requirements remain open.

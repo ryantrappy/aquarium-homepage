@@ -1,0 +1,31 @@
+{
+  "reviewer": "Root",
+  "recordedAt": "2026-11-14T00:54:05.194306+00:00",
+  "decision": "Accept bounded original flowing-torch morphology and PBR integration for left LPS-mid01 before default promotion",
+  "packageSha256": "26df54fed418b5b645d2b89840b429642bae7763dc9e2d40bd0002e541f62504",
+  "nativeSha256": "b708f830b1d5983470f9262f950de468fadf9de5fdd346af5267db22185d486d",
+  "generatorSha256": "9b7e73fbc698c69c02fc08b8fecb1a87f211d2b34a486e06e48bfa90a58b293d",
+  "reviewSource": "Dirty proof based on c52b969, also containing new 80%-height composition; trial snapshots identify base only",
+  "proofRuntimeSha256": {
+    "src/rendering/scene/reef-assembly.ts": "f9d4511147866f5a03ccd4a2186f34a4df4f41d42a643aa34d519f7c1b4ffb97",
+    "src/rendering/scene/reef-layout.ts": "1d0f005a75f513810eeda83108306a5cb82dc57726bc29edf429f5fa43c70179",
+    "src/rendering/scene/aquarium.ts": "ff0a499d05937cfed4bcc9d51230aca62724653386ce4fc7be72d150afe56e35",
+    "src/rendering/scene/coral-material.ts": "bfd5989c4e010b3928aa1c43a5375b06fb6f7ed11ae885c03533fa91049b07a8"
+  },
+  "reviewed": [
+    "Neutral clay and textured source comparisons",
+    "Native laptop full view and phone full view with taller foundations",
+    "Source0.177m chosen comparison height; actual165tentacles/5heads and rigid calyces"
+  ],
+  "rejected": [
+    "Initial pointed grass-like tips",
+    "Black physical transmission from nonfinite coarse HDR mips",
+    "Global finite-radiance guard that changed the rest of the scene (removed)"
+  ],
+  "limits": [
+    "All archetypes/two variants/physical scale/tissue rubric/runtime budgets and animated clearance remain open",
+    "Phone clips part of this left-side colony; no whole-colony runtime macro at both sizes",
+    "PBR transmission retains stock bicubic when finite, falling back through nearest finite lower mip levels only for nonfinite samples",
+    "No comprehensive coral support/calyx self-intersection certification"
+  ]
+}

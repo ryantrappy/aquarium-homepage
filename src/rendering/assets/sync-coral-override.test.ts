@@ -82,6 +82,89 @@ function makeGlb(mutate?: MutateFixture): Buffer {
   return Buffer.concat([header, paddedJson, binaryHeader, binary])
 }
 
+function makeDualPrimitiveGlb(mutate?: MutateFixture): Buffer {
+  const views: Array<{ buffer: number; byteOffset: number; byteLength: number }> = []
+  const accessors: Array<{ bufferView: number; componentType: number; count: number; type: string; normalized?: boolean }> = []
+  const chunks: Buffer[] = []
+  let byteOffset = 0
+  const offsets: number[] = []
+  const addAccessor = (values: Buffer, componentType: number, count: number, type: string, normalized = false) => {
+    const componentBytes = componentType === 5123 ? 2 : componentType === 5121 ? 1 : 4
+    const padding = (componentBytes - (byteOffset % componentBytes)) % componentBytes
+    if (padding) { chunks.push(Buffer.alloc(padding)); byteOffset += padding }
+    const index = accessors.length
+    offsets.push(byteOffset)
+    views.push({ buffer: 0, byteOffset, byteLength: values.length })
+    accessors.push({ bufferView: views.length - 1, componentType, count, type, ...(normalized ? { normalized: true } : {}) })
+    chunks.push(values)
+    byteOffset += values.length
+    return index
+  }
+  const floats = (values: number[]) => {
+    const bytes = Buffer.alloc(values.length * 4)
+    values.forEach((value, index) => bytes.writeFloatLE(value, index * 4))
+    return bytes
+  }
+  const addPrimitive = (positionsData: number[], colors: number[]) => {
+    const positions = addAccessor(floats(positionsData), 5126, 3, 'VEC3')
+    const normals = addAccessor(floats([0, 0, 1, 0, 0, 1, 0, 0, 1]), 5126, 3, 'VEC3')
+    const uv = addAccessor(floats([0, 0, 1, 0, 0.5, 1]), 5126, 3, 'VEC2')
+    const masks = addAccessor(Buffer.from(colors), 5121, 3, 'VEC4', true)
+    const indices = addAccessor(Buffer.from([0, 0, 1, 0, 2, 0]), 5123, 3, 'SCALAR')
+    return { attributes: { POSITION: positions, NORMAL: normals, TEXCOORD_0: uv, COLOR_0: masks }, indices }
+  }
+
+  const softPrimitive = addPrimitive(
+    [-0.25, 0, 0, 0.35, 0.75, 0.1, 0.15, -0.2, 0.45],
+    [0, 0, 255, 255, 255, 255, 0, 170, 128, 128, 128, 220],
+  )
+  const rigidPrimitive = addPrimitive(
+    [-0.1, 0.1, 0.2, 0.1, 0.3, 0.1, 0, 0.2, -0.1],
+    [0, 0, 255, 255, 0, 128, 64, 255, 0, 255, 128, 190],
+  )
+  const binary = Buffer.concat([...chunks, Buffer.alloc((4 - byteOffset % 4) % 4)])
+  const document: any = {
+    asset: { version: '2.0', generator: 'sync-coral dual-role test fixture' },
+    scene: 0,
+    scenes: [{ nodes: [0] }],
+    nodes: [{ mesh: 0 }],
+    meshes: [{ primitives: [
+      { ...softPrimitive, material: 0 },
+      { ...rigidPrimitive, material: 1 },
+    ] }],
+    materials: [
+      {
+        pbrMetallicRoughness: { baseColorFactor: [0.8, 0.65, 0.58, 1], metallicFactor: 0, roughnessFactor: 0.78 },
+        emissiveFactor: [0, 0, 0],
+        extras: { reefPrimitive: { id: 'torch_crown', role: 'coral-soft', maskSchema: 'coral-raw-masks-v1' } },
+      },
+      {
+        pbrMetallicRoughness: { baseColorFactor: [0.45, 0.38, 0.3, 1], metallicFactor: 0, roughnessFactor: 0.9 },
+        emissiveFactor: [0, 0, 0],
+        extras: { reefPrimitive: { id: 'torch_skeleton', role: 'coral-rigid', maskSchema: 'coral-raw-masks-v1' } },
+      },
+    ],
+    buffers: [{ byteLength: binary.length }],
+    bufferViews: views,
+    accessors,
+  }
+  mutate?.(document, binary, offsets)
+  const json = Buffer.from(JSON.stringify(document), 'utf8')
+  const paddedJson = Buffer.alloc(Math.ceil(json.length / 4) * 4, 0x20)
+  json.copy(paddedJson)
+  const total = 12 + 8 + paddedJson.length + 8 + binary.length
+  const header = Buffer.alloc(20)
+  header.writeUInt32LE(0x46546c67, 0)
+  header.writeUInt32LE(2, 4)
+  header.writeUInt32LE(total, 8)
+  header.writeUInt32LE(paddedJson.length, 12)
+  header.writeUInt32LE(0x4e4f534a, 16)
+  const binaryHeader = Buffer.alloc(8)
+  binaryHeader.writeUInt32LE(binary.length, 0)
+  binaryHeader.writeUInt32LE(0x004e4942, 4)
+  return Buffer.concat([header, paddedJson, binaryHeader, binary])
+}
+
 function fixtureSnapshot(root: string) {
   return fishWorkflowPaths.map(relative => {
     const file = path.join(root, relative)
@@ -90,7 +173,7 @@ function fixtureSnapshot(root: string) {
   })
 }
 
-function makeFixture(mutate?: MutateFixture) {
+function makeFixture(mutate?: MutateFixture, overrideBytes = makeGlb(mutate)) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'coral-override-sync-'))
   const nativePath = path.join(root, sourceRoot, 'blend', `${id}.blend`)
   const overridePath = path.join(root, sourceRoot, 'overrides', `${id}.glb`)
@@ -100,7 +183,7 @@ function makeFixture(mutate?: MutateFixture) {
   fs.mkdirSync(path.dirname(generatorPath), { recursive: true })
   // Header-only Blender marker and generator text are synthetic test fixtures, not native model inputs.
   fs.writeFileSync(nativePath, Buffer.from('BLENDERtest-only-fixture'))
-  fs.writeFileSync(overridePath, makeGlb(mutate))
+  fs.writeFileSync(overridePath, overrideBytes)
   fs.writeFileSync(generatorPath, '# synthetic test generator fixture\n')
   for (const relative of fishWorkflowPaths) {
     const source = path.join(repoRoot, relative)
@@ -114,6 +197,18 @@ function makeFixture(mutate?: MutateFixture) {
 
 function hash(bytes: Buffer) {
   return createHash('sha256').update(bytes).digest('hex')
+}
+
+function glbJson(bytes: Buffer) {
+  const jsonLength = bytes.readUInt32LE(12)
+  return JSON.parse(bytes.toString('utf8', 20, 20 + jsonLength))
+}
+
+function glbBinary(bytes: Buffer) {
+  const jsonLength = bytes.readUInt32LE(12)
+  const binaryHeaderOffset = 20 + jsonLength
+  const binaryLength = bytes.readUInt32LE(binaryHeaderOffset)
+  return bytes.subarray(binaryHeaderOffset + 8, binaryHeaderOffset + 8 + binaryLength)
 }
 
 describe('coral sync CLI argument parser', () => {
@@ -188,6 +283,7 @@ describe('isolated coral override sync', () => {
         material: { vertexColors: false, vertexAlpha: false, aoSource: 'coral-mask-a' },
         color0: { itemSize: 4, values: [0, 64 / 255, 128 / 255, 1, 0, 128 / 255, 64 / 255, 1, 0, 1, 180 / 255, 1] },
       })
+      expect(glbBinary(packaged)).toEqual(glbBinary(raw))
       expect(inspection.boundsM.min[0]).toBeCloseTo(-0.25, 6)
       expect(inspection.boundsM.min[1]).toBeCloseTo(-0.2, 6)
       expect(inspection.boundsM.min[2]).toBe(0)
@@ -201,6 +297,95 @@ describe('isolated coral override sync', () => {
       expect(syncCoralOverride(root, id)).toEqual(entry)
       expect(fs.readFileSync(manifestPath)).toEqual(manifestBeforeRepeat)
       expect(fs.readFileSync(outputPath)).toEqual(packagedBeforeRepeat)
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true })
+    }
+  })
+
+  it('packages a two-primitive torch crown and rigid skeleton with distinct roles, combined bounds, and idempotent provenance', () => {
+    const canonicalBefore = fixtureSnapshot(repoRoot)
+    const { root, overridePath } = makeFixture(undefined, makeDualPrimitiveGlb())
+    try {
+      const before = fixtureSnapshot(root)
+      const entry = syncCoralOverride(root, id)
+      const outputPath = path.join(root, entry.path)
+      const inspectionPath = path.join(root, entry.inspection)
+      const manifestPath = path.join(root, 'src/rendering/assets/corals/custom-colonies/manifest.json')
+      const packaged = fs.readFileSync(outputPath)
+      const raw = fs.readFileSync(overridePath)
+      const inspection = JSON.parse(fs.readFileSync(inspectionPath, 'utf8'))
+      const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+      const json = glbJson(packaged)
+      const rawJson = glbJson(raw)
+
+      expect(entry).toMatchObject({
+        id,
+        kind: 'coral',
+        overrideSha256: hash(raw),
+        sha256: hash(packaged),
+        bytes: packaged.length,
+        triangles: 2,
+      })
+      expect(entry.dimensionsM[0]).toBeCloseTo(0.6, 6)
+      expect(entry.dimensionsM[1]).toBeCloseTo(0.95, 6)
+      expect(entry.dimensionsM[2]).toBeCloseTo(0.55, 6)
+      expect(manifest).toMatchObject({ schema: 'custom-coral-colonies-v1', assets: [entry] })
+      expect(inspection.primitives).toHaveLength(2)
+      expect(inspection.primitives.map((primitive: any) => primitive.vertexCount)).toEqual([3, 3])
+      expect(inspection.primitives.map((primitive: any) => [primitive.id, primitive.role])).toEqual([
+        ['torch_crown', 'coral-soft'],
+        ['torch_skeleton', 'coral-rigid'],
+      ])
+      expect(inspection.primitives[0].color0.values).toEqual([
+        0, 0, 1, 1,
+        1, 1, 0, 170 / 255,
+        128 / 255, 128 / 255, 128 / 255, 220 / 255,
+      ])
+      expect(inspection.primitives[1].color0.values.filter((_: number, index: number) => index % 4 === 0)).toEqual([0, 0, 0])
+      const softColorAccessor = rawJson.meshes[0].primitives[0].attributes.COLOR_0
+      const rigidColorAccessor = rawJson.meshes[0].primitives[1].attributes.COLOR_0
+      expect(softColorAccessor).not.toBe(rigidColorAccessor)
+      expect(rawJson.accessors[softColorAccessor].count).toBe(3)
+      expect(rawJson.accessors[rigidColorAccessor].count).toBe(3)
+      expect(inspection.boundsM.min[0]).toBeCloseTo(-0.25, 6)
+      expect(inspection.boundsM.min[1]).toBeCloseTo(-0.2, 6)
+      expect(inspection.boundsM.min[2]).toBeCloseTo(-0.1, 6)
+      expect(inspection.boundsM.max[0]).toBeCloseTo(0.35, 6)
+      expect(inspection.boundsM.max[1]).toBeCloseTo(0.75, 6)
+      expect(inspection.boundsM.max[2]).toBeCloseTo(0.45, 6)
+      expect(json.meshes[0].primitives).toHaveLength(2)
+      expect(json.materials.map((material: any) => material.extras.reefPrimitive)).toEqual([
+        { id: 'torch_crown', role: 'coral-soft', maskSchema: 'coral-raw-masks-v1' },
+        { id: 'torch_skeleton', role: 'coral-rigid', maskSchema: 'coral-raw-masks-v1' },
+      ])
+      expect(json.materials.every((material: any) => (!material.alphaMode || material.alphaMode === 'OPAQUE')
+        && !material.emissiveTexture && (!material.emissiveFactor || material.emissiveFactor.every((value: number) => value === 0)))).toBe(true)
+      expect(glbBinary(packaged)).toEqual(glbBinary(raw))
+      expect(fixtureSnapshot(root)).toEqual(before)
+      expect(fixtureSnapshot(repoRoot)).toEqual(canonicalBefore)
+
+      const manifestBeforeRepeat = fs.readFileSync(manifestPath)
+      const packagedBeforeRepeat = fs.readFileSync(outputPath)
+      expect(syncCoralOverride(root, id)).toEqual(entry)
+      expect(fs.readFileSync(manifestPath)).toEqual(manifestBeforeRepeat)
+      expect(fs.readFileSync(outputPath)).toEqual(packagedBeforeRepeat)
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true })
+    }
+  })
+
+  it('accepts arbitrary unique primitive IDs when the material roles and mask schema are valid', () => {
+    const { root } = makeFixture(undefined, makeDualPrimitiveGlb((doc) => {
+      doc.materials[0].extras.reefPrimitive.id = 'flowing_torch_tissue'
+      doc.materials[1].extras.reefPrimitive.id = 'flowing_torch_base'
+    }))
+    try {
+      const entry = syncCoralOverride(root, id)
+      const inspection = JSON.parse(fs.readFileSync(path.join(root, entry.inspection), 'utf8'))
+      expect(inspection.primitives.map((primitive: any) => [primitive.id, primitive.role])).toEqual([
+        ['flowing_torch_tissue', 'coral-soft'],
+        ['flowing_torch_base', 'coral-rigid'],
+      ])
     } finally {
       fs.rmSync(root, { recursive: true, force: true })
     }
@@ -227,11 +412,84 @@ describe('isolated coral override sync', () => {
       name: 'emissive tissue material',
       mutate: (doc: any) => { doc.materials[0].emissiveFactor = [0.1, 0, 0] },
     },
-  ])('rejects $name before writing package output', ({ mutate }) => {
-    const { root } = makeFixture(mutate)
+    {
+      name: 'missing per-material primitive metadata',
+      fixture: 'dual',
+      mutate: (doc: any) => { delete doc.materials[0].extras.reefPrimitive },
+    },
+    {
+      name: 'missing primitive ID',
+      fixture: 'dual',
+      mutate: (doc: any) => { delete doc.materials[0].extras.reefPrimitive.id },
+    },
+    {
+      name: 'invalid-format primitive ID',
+      fixture: 'dual',
+      mutate: (doc: any) => { doc.materials[0].extras.reefPrimitive.id = 'Torch Crown' },
+    },
+    {
+      name: 'unknown primitive role',
+      fixture: 'dual',
+      mutate: (doc: any) => { doc.materials[0].extras.reefPrimitive.role = 'coral-flexible' },
+    },
+    {
+      name: 'duplicate primitive IDs',
+      fixture: 'dual',
+      mutate: (doc: any) => { doc.materials[1].extras.reefPrimitive.id = 'torch_crown' },
+    },
+    {
+      name: 'two soft roles instead of one soft and one rigid role',
+      fixture: 'dual',
+      mutate: (doc: any) => { doc.materials[1].extras.reefPrimitive.role = 'coral-soft' },
+    },
+    {
+      name: 'more than two primitives',
+      fixture: 'dual',
+      mutate: (doc: any) => { doc.meshes[0].primitives.push({ ...doc.meshes[0].primitives[1], attributes: { ...doc.meshes[0].primitives[1].attributes } }) },
+    },
+    {
+      name: 'nonzero rigid-flex R',
+      fixture: 'dual',
+      mutate: (_doc: any, binary: Buffer, offsets: number[]) => binary.writeUInt8(1, offsets[8]!),
+    },
+    {
+      name: 'soft crown with all-zero R',
+      fixture: 'dual',
+      mutate: (_doc: any, binary: Buffer, offsets: number[]) => {
+        for (const vertex of [0, 1, 2]) binary.writeUInt8(0, offsets[3]! + vertex * 4)
+      },
+    },
+    {
+      name: 'soft crown without a pinned R=0 base',
+      fixture: 'dual',
+      mutate: (_doc: any, binary: Buffer, offsets: number[]) => {
+        for (const vertex of [0, 1, 2]) binary.writeUInt8(1, offsets[3]! + vertex * 4)
+      },
+    },
+    {
+      name: 'nonfinite dual-primitive attribute',
+      fixture: 'dual',
+      mutate: (_doc: any, binary: Buffer, offsets: number[]) => binary.writeFloatLE(Number.NaN, offsets[5]! + 4),
+    },
+    {
+      name: 'nonopaque dual-primitive material',
+      fixture: 'dual',
+      mutate: (doc: any) => { doc.materials[1].alphaMode = 'BLEND' },
+    },
+    {
+      name: 'emission on both dual-primitive materials',
+      fixture: 'dual',
+      mutate: (doc: any) => { for (const material of doc.materials) material.emissiveFactor = [0.1, 0, 0] },
+    },
+  ])('rejects $name before writing package output', ({ mutate, fixture }) => {
+    const { root } = fixture === 'dual'
+      ? makeFixture(undefined, makeDualPrimitiveGlb(mutate))
+      : makeFixture(mutate)
     try {
+      const before = fixtureSnapshot(root)
       expect(() => syncCoralOverride(root, id)).toThrow()
       expect(fs.existsSync(path.join(root, 'src/rendering/assets/corals/custom-colonies'))).toBe(false)
+      expect(fixtureSnapshot(root)).toEqual(before)
     } finally {
       fs.rmSync(root, { recursive: true, force: true })
     }

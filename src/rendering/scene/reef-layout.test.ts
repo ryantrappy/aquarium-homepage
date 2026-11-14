@@ -46,4 +46,30 @@ describe('shared reef layout', () => {
       }
     }
   })
+
+  it('assigns vertical-only foundation raises without changing horizontal footprint scaling', () => {
+    expect(reefPlacementsForViewport(false).map(placement => [placement.islandKind, placement.foundationHeightScale])).toEqual([
+      ['left', 2.0],
+      ['right', 3.1],
+    ])
+    expect(reefPlacementsForViewport(true).map(placement => [placement.islandKind, placement.foundationHeightScale])).toEqual([
+      ['left', 2.8],
+    ])
+
+    for (const narrow of [false, true]) {
+      const placements = reefPlacementsForViewport(narrow)
+      const footprints = reefContactFootprints(narrow)
+      for (const [index, placement] of placements.entries()) {
+        const footprint = footprints[index]!
+        const localX = placement.islandKind === 'left' ? 1.85 / 4.5 : 1.75 / 4.3
+        const localZ = placement.islandKind === 'left' ? 1.15 / 4.5 : 1.1 / 4.3
+        const cos = Math.cos(placement.yaw)
+        const sin = Math.sin(placement.yaw)
+        expect(footprint.x).toBe(placement.position.x)
+        expect(footprint.z).toBe(placement.position.z)
+        expect(footprint.radiusX).toBeCloseTo(Math.hypot(localX * cos, localZ * sin) * placement.uniformScale, 12)
+        expect(footprint.radiusZ).toBeCloseTo(Math.hypot(localX * sin, localZ * cos) * placement.uniformScale, 12)
+      }
+    }
+  })
 })

@@ -853,9 +853,10 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     bubbleGeometry.setDrawRange(0, bubbleEmitters.length * bubblesPerStream)
     const meshIslands: ReefMeshIslandInput[] = []
     for (const [i, placement] of placements.entries()) {
-      const { islandKind, rockScene, mounts, position, uniformScale, yaw } = placement
+      const { islandKind, rockScene, mounts, position, uniformScale, foundationHeightScale, yaw } = placement
       const reef = rockScene.clone(true)
       const assembled = assembleCoralsOnRockSockets(reef, coralTemplates, mounts, {
+        foundationHeightScale,
         paused: paused || document.hidden,
         reducedMotion,
         // AQ-70.6 AC #3: coral fluorescence scales with the fixture's
@@ -1256,7 +1257,13 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       const species = getFishById(service.fishId)!
       const clearance = fishClearanceRadius(service.fishId)
       const preference = fishSpawnPreference(spawnOrderKey(service.id), service.fishId, habitat.bounds, clearance, horizontalSlots.get(service.id))
-      const position = preference && findSafeFishSpawn(preference.position, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(service.fishId), evaluateTieredVerticalDepthRange(service.fishId, habitat.bounds, clearance)?.worldYRange)
+      // The tall portrait reef fills the rear water column. Start the two
+      // broad cruisers in front water, still subject to every clearance test.
+      const foregroundCruiser = width < 600 && (service.fishId === 'blue-tang' || service.fishId === 'yellow-tang')
+      const preferredPosition = preference && foregroundCruiser
+        ? { ...preference.position, z: habitat.bounds.max.z - clearance - (service.fishId === 'blue-tang' ? 0.65 : 0.25) }
+        : preference?.position
+      const position = preference && preferredPosition && findSafeFishSpawn(preferredPosition, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(service.fishId), evaluateTieredVerticalDepthRange(service.fishId, habitat.bounds, clearance)?.worldYRange)
       if (!position || !preference) {
         // Keep existing instances intact during the truthful full-native fallback.
         // A later fitting configuration can reuse their exact poses and clocks.

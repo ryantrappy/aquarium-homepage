@@ -1,0 +1,82 @@
+{
+  "native": "/Users/ryantrapp/Desktop/Code/aquarium-homepage/src/rendering/assets/splat-fish/blend/reef-euphyllia-flowing-torch.blend",
+  "objects": [
+    {
+      "name": "Reef_Euphyllia_Flowing_Torch",
+      "vertices": 14462,
+      "triangles": 27870,
+      "valid": true,
+      "dimensions": [
+        0.22957362234592438,
+        0.2094828188419342,
+        0.1770000010728836
+      ],
+      "roles": [
+        {
+          "id": "flowing_torch_crown",
+          "role": "coral-soft",
+          "maskSchema": "coral-raw-masks-v1"
+        },
+        {
+          "id": "flowing_torch_skeleton",
+          "role": "coral-rigid",
+          "maskSchema": "coral-raw-masks-v1"
+        }
+      ],
+      "transmission": [
+        0.11999999731779099,
+        0.0
+      ]
+    }
+  ],
+  "images": [
+    {
+      "name": "reef-euphyllia-flowing-torch-skeleton-albedo",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true
+    },
+    {
+      "name": "reef-euphyllia-flowing-torch-skeleton-normal",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true
+    },
+    {
+      "name": "reef-euphyllia-flowing-torch-skeleton-roughness",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true
+    },
+    {
+      "name": "reef-euphyllia-flowing-torch-tissue-albedo",
+      "size": [
+        512,
+        512
+      ],
+      "packed": true
+    },
+    {
+      "name": "reef-euphyllia-flowing-torch-tissue-normal",
+      "size": [
+        512,
+        512
+      ],
+      "packed": true
+    },
+    {
+      "name": "reef-euphyllia-flowing-torch-tissue-roughness",
+      "size": [
+        512,
+        512
+      ],
+      "packed": true
+    }
+  ]
+}
