@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-14 05:06'
-updated_date: '2026-11-14 06:52'
+updated_date: '2026-11-14 07:08'
 labels: []
 dependencies: []
 documentation:
@@ -58,5 +58,11 @@ author: @root
 created: 2026-11-14 06:47
 ---
 Root combined-source review found new distribution regressions in concurrent motion/spawn snapshot (motion SHA3bbd26d3, spawn7026d60d), which remains preserved in the original checkout. Applying it cleanly to verified hosting snapshot dc8fbac makes two existing tests fail: AQ104 mixed temporal left share9.63percent against20percent minimum, and existing eight-service whole-tank left share19.70percent against20percent.111otherfocused checks pass. No assertion threshold will be relaxed; current-source acceptance/adoption stays pending while Root isolates the side/fore-reef policy interaction. Raw log /tmp/aq105-combined-focused.log.
+---
+
+author: @root
+created: 2026-11-14 07:08
+---
+Root exact7842bd6 native review keeps AQ105 open: laptop clownfish was position-stationary in two normal-mode12rAF samples while five other service transforms moved. Pause holds all8in both views; phone reduced-motion holds all8, normal phone8move; Services/Settings both8entries fit, captured warnings/errors0. Actual live VM diagnosis (read-only locals with temporary debugger pause, removed/resumed/disabled after capture) shows no focus/startle/reduced-motion cause, valid right host, and a blocked full interaction chord during approach. Later sampled offsets can be clear; an independently loaded right reef fixture passes. Therefore no root-cause claim or native hosting acceptance yet. Extend regression to full-cycle/actual combined scene and resolve intermittent stationarity; retain all ACs unchecked. Raw native and debugger records: docs/asset-evidence/aq105/native-7842bd6/.
 ---
 <!-- COMMENTS:END -->
