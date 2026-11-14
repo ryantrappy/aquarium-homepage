@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, mkdir, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -118,6 +118,45 @@ describe('CPU temperature source', () => {
     expect(await store.read('../../etc/passwd')).toMatchObject({
       status: 'unavailable',
       sensorId: 'unsupported',
+    })
+  })
+
+  it('discovers sensors from direct /sys/class/hwmon symlinked entries and falls back across candidate roots with deduplication', async () => {
+    const classHwmonRoot = await mkdtemp(join(tmpdir(), 'reef-cpu-class-hwmon-'))
+    const targetRoot = await mkdtemp(join(tmpdir(), 'reef-cpu-target-hwmon-'))
+    const primaryRoot = await mkdtemp(join(tmpdir(), 'reef-cpu-primary-hwmon-'))
+    roots.push(classHwmonRoot, targetRoot, primaryRoot)
+
+    await mkdir(join(targetRoot, 'hwmon5'), { recursive: true })
+    await writeFile(join(targetRoot, 'hwmon5', 'name'), 'k10temp\n')
+    await writeFile(join(targetRoot, 'hwmon5', 'temp1_label'), 'Tctl\n')
+    await writeFile(join(targetRoot, 'hwmon5', 'temp1_input'), '49500\n')
+    await symlink(join(targetRoot, 'hwmon5'), join(classHwmonRoot, 'hwmon5'))
+
+    // Primary root lacks Package id 0 / Tctl, secondary classHwmonRoot provides Tctl,
+    // and duplicate Tctl in third root does not win or duplicate.
+    const dupRoot = await mkdtemp(join(tmpdir(), 'reef-cpu-dup-hwmon-'))
+    roots.push(dupRoot)
+    await mkdir(join(dupRoot, 'hwmon', 'hwmon1'), { recursive: true })
+    await writeFile(join(dupRoot, 'hwmon', 'hwmon1', 'name'), 'k10temp\n')
+    await writeFile(join(dupRoot, 'hwmon', 'hwmon1', 'temp1_label'), 'Tctl\n')
+    await writeFile(join(dupRoot, 'hwmon', 'hwmon1', 'temp1_input'), '88000\n')
+
+    const store = createCpuTemperatureStore({
+      rootPath: [join(primaryRoot, 'missing'), classHwmonRoot, dupRoot],
+      now: () => 1_800_000_000_000,
+    })
+
+    expect(await store.getSensors()).toEqual([
+      { id: 'k10temp.0:tctl', chip: 'k10temp', label: 'Tctl', unit: '°C' },
+    ])
+    expect(await store.read('k10temp.0:tctl')).toMatchObject({
+      status: 'fresh',
+      sensorId: 'k10temp.0:tctl',
+      chip: 'k10temp',
+      label: 'Tctl',
+      value: 49.5,
+      unit: '°C',
     })
   })
 })

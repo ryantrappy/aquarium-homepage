@@ -1,17 +1,31 @@
 ---
 id: AQ-15
 title: Add a real CPU-temperature heater indicator
-status: To Do
+status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-03T04:25:00Z'
-updated_date: '2026-11-12 05:50'
+updated_date: '2026-11-14 21:50'
 labels: []
 dependencies: []
 references:
   - docs/design.md
 documentation:
   - docs/requirements.md
+modified_files:
+  - src/server/cpu-temperature.ts
+  - src/server/cpu-temperature.test.ts
+  - src/routes/api/telemetry/cpu-temperature.ts
+  - src/routes/api/telemetry/-cpu-temperature.test.ts
+  - src/lib/thermometer-settings.ts
+  - src/lib/thermometer-settings.test.ts
+  - src/components/AquariumThermometer.tsx
+  - src/components/ServiceManager.tsx
+  - src/components/ServiceManager.test.tsx
+  - src/components/AquariumScene.tsx
+  - src/components/AquariumScene.test.tsx
+  - src/routes/index.tsx
+  - src/styles/aquarium.css
 priority: '36'
 type: feature
 ordinal: 131000
@@ -25,33 +39,35 @@ Add a small heater thermometer as aquarium equipment that displays a real CPU te
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The heater thermometer displays an actual CPU temperature and unit from the selected server or sensor.
-- [ ] #2 The user can select or configure the server or temperature sensor represented by the thermometer.
-- [ ] #3 The thermometer is visually embedded as aquarium equipment and does not become a conventional dashboard card or overlay.
-- [ ] #4 Unavailable and stale source data are identified clearly; no simulated or fabricated healthy-looking temperature is shown.
-- [ ] #5 Reading telemetry does not modify server or sensor configuration.
+- [x] #1 The heater thermometer displays an actual CPU temperature and unit from the selected server or sensor.
+- [x] #2 The user can select or configure the server or temperature sensor represented by the thermometer.
+- [x] #3 The thermometer is visually embedded as aquarium equipment and does not become a conventional dashboard card or overlay.
+- [x] #4 Unavailable and stale source data are identified clearly; no simulated or fabricated healthy-looking temperature is shown.
+- [x] #5 Reading telemetry does not modify server or sensor configuration.
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Luna completes the task with high reasoning effort.
+- [x] #1 Luna completes the task with high reasoning effort.
 - [ ] #2 Root agent reviews the completed result before the task is marked Done.
 <!-- DOD:END -->
 
 ## Implementation Plan
 
 <!-- SECTION:PLAN:BEGIN -->
-1. Add a read-only CPU sensor adapter that scans an explicitly mounted hwmon subtree, identifies sensors by chip and label (never by hwmonN), parses millidegrees, and converts to Celsius.
-2. Expose typed GET endpoints for sensor discovery and a selected stable sensor ID; return fresh, stale last-known, or unavailable states with source label, units, observedAt, and age. Inject filesystem root and clock for deterministic tests.
-3. Add tests for source discovery, package/core selection, millidegree conversion, invalid values, unavailable sensors, stale last-known samples, and clock behavior.
-4. Keep UI/thermometer scene integration with AQ-34; no conventional dashboard UI or simulated temperature.
-5. Proposed production bind mount for root review only: host `/sys/devices/platform/coretemp.0` to container `/run/host-sensors/coretemp.0`, read-only. Verify the device path and label at deployment. Do not edit deploy/compose.yaml or mutate the server mount until root approves this exact mount proposal.
+1. Create client-safe telemetry/settings helper src/lib/thermometer-settings.ts and unit tests (placement: front/side/hidden, sensor validation, 7-segment LCD formatting, read-only GET polling).
+2. Create AquariumThermometer.tsx modeled closely after the reference clear-acrylic 7-segment LCD thermometer photo (transparent green-tinted LCD window, 3-digit 7-segment + °C readout, dark gasket seam, brushed horizontal-ridged metal block, top-right acrylic latch step, accessible .sr-only status, honest STALE/UNAVAILABLE states).
+3. Add thermometer and settings styling in src/styles/aquarium.css for 1440x900 and 402x874 (front upper-left glass and angled side-glass perspective), pointer-events: none.
+4. Wire placement (Front glass / Side glass / Hidden) and CPU sensor selector into ServiceManager.tsx, AquariumScene.tsx (mounted hydration gate), and routes/index.tsx (device-local storage + 10s read-only GET polling).
+5. Add component/integration tests, run vitest, typecheck, build, and verify visually at 1440x900 and 402x874.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 Read-only source inventory on trappserv.er (2026-11-03): /sys/class/hwmon exposes acpitz, nvme (temp1_label Composite), and coretemp (Package id 0 and Core 0–5). No exporter is needed for the current host. AQ15 adapter proposal: keep sensor selection as a stable sanitized ID (sysfs device identity plus chip name/label, not hwmonN alone), read temp*_input in millidegrees through a narrowly scoped read-only hwmon mount, return timestamp/unit/source status, and show unavailable/stale state instead of a fabricated value. The app API remains same-origin behind existing Caddy Authelia; no credentials or auth-provider SDK belong in client config. No exporter, package, or host config was changed.
+
+2026-11-14 verification & handoff (branch aq15_thermometer_display_config): Built stick-on crystal acrylic 7-segment LCD thermometer (AquariumThermometer.tsx + styles/aquarium.css) matching the reference housing (green-tinted translucent LCD, 7-segment XX.X°C + ghost segments, top-right clasp step, dark gasket seam, brushed horizontal-ridged metal compartment, pointer-events: none). Added device-local glass placement config (Front glass / Side glass / Hidden radios) and CPU sensor selector in ServiceManager.tsx + SSR-safe mounted gate in AquariumScene.tsx + 10s read-only GET polling in routes/index.tsx and thermometer-settings.ts. Hardened Linux Docker hwmon discovery in src/server/cpu-temperature.ts and cpu-temperature.ts route for /run/host-sensors/coretemp.0, /sys/devices/platform/coretemp.0, and symlinked /sys/class/hwmon entries when REEF_CPU_HWMON_ROOT is unset or empty. Verified after final edit: 6 targeted Vitest suites (88/88 tests pass), sync-reef-override.test.ts (23/23 pass), npm run typecheck (exit 0), npm run build (exit 0), and browser subagent verification at 1440x900 and 402x874 (front/side/hidden placements, sensor switching 28.1°C/27.5°C, authentic stale/unavailable states, 0 console/hydration errors). Ready for Root review.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

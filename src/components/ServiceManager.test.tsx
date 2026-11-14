@@ -197,3 +197,72 @@ describe('ServiceManager FPS counter toggle (AQ-83 AC #1)', () => {
     expect(onToggleFpsCounter).toHaveBeenCalledExactlyOnceWith(false)
   })
 })
+
+describe('ServiceManager aquarium thermometer configuration (AQ-15 AC #1/#2/#4/#5)', () => {
+  function placementRadio(view: HTMLDivElement, value: 'front' | 'side' | 'hidden') {
+    return view.querySelector<HTMLInputElement>(
+      `input[type="radio"][name="thermometer-placement"][value="${value}"]`,
+    )
+  }
+
+  function sensorSelect(view: HTMLDivElement) {
+    return view.querySelector<HTMLSelectElement>('#thermometer-sensor-select')
+  }
+
+  it('exposes front glass, side glass, and hidden placement radios with explicit labels', async () => {
+    const onChangeThermometerPlacement = vi.fn()
+    const view = await renderManager(
+      props({ thermometerPlacement: 'front', onChangeThermometerPlacement }),
+    )
+
+    expect(view.querySelector('[role="status"]')).toBeNull()
+    expect(placementRadio(view, 'front')?.checked).toBe(true)
+    expect(placementRadio(view, 'side')?.checked).toBe(false)
+    expect(placementRadio(view, 'hidden')?.checked).toBe(false)
+
+    const sideRadio = placementRadio(view, 'side')!
+    const sideLabel = view.querySelector<HTMLLabelElement>(`label[for="${sideRadio.id}"]`)
+    expect(sideLabel?.textContent).toContain('Side glass')
+
+    await act(async () => { sideRadio.click() })
+    expect(onChangeThermometerPlacement).toHaveBeenCalledWith('side')
+
+    const hiddenRadio = placementRadio(view, 'hidden')!
+    await act(async () => { hiddenRadio.click() })
+    expect(onChangeThermometerPlacement).toHaveBeenCalledWith('hidden')
+  })
+
+  it('allows selecting among discovered CPU temperature sensors and includes unavailable fallback', async () => {
+    const onChangeThermometerSensorId = vi.fn()
+    const view = await renderManager(
+      props({
+        thermometerSensorId: 'k10temp.0:tctl',
+        thermometerSensors: [
+          { id: 'coretemp.0:package-id-0', chip: 'coretemp', label: 'Package id 0', unit: '°C' },
+        ],
+        thermometerReading: {
+          status: 'unavailable',
+          sensorId: 'k10temp.0:tctl',
+          unit: '°C',
+          message: 'No Linux hwmon CPU temperature sensor was found.',
+        },
+        onChangeThermometerSensorId,
+      }),
+    )
+
+    const select = sensorSelect(view)!
+    expect(view.querySelector(`label[for="${select.id}"]`)?.textContent).toContain('CPU temperature sensor')
+    expect(Array.from(select.options).map((option) => option.value)).toEqual([
+      'k10temp.0:tctl',
+      'coretemp.0:package-id-0',
+    ])
+    expect(select.value).toBe('k10temp.0:tctl')
+    expect(view.querySelector('.thermometer-status-summary')?.textContent).toContain('--.-°C')
+
+    await act(async () => {
+      select.value = 'coretemp.0:package-id-0'
+      select.dispatchEvent(new Event('change', { bubbles: true }))
+    })
+    expect(onChangeThermometerSensorId).toHaveBeenCalledWith('coretemp.0:package-id-0')
+  })
+})
