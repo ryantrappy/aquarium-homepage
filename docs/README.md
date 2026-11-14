@@ -6,7 +6,7 @@ Status: Canonical / Active
 Authority: Binding Single Source of Documentation Truth
 Backlog: AQ-61, AQ-63, AQ-65, AQ-66, AQ-64, AQ-53, AQ-60, AQ-42
 Owner: @documentation
-Updated: 2026-11-12
+Updated: 2026-11-13
 Upstream: AGENTS.md, AGENT_TASKS.md, docs/requirements.md, docs/framework/DOCUMENTATION_FRAMEWORK.md
 Downstream: All repository documentation and active agent workflows
 -->
@@ -105,6 +105,8 @@ Directory of project documentation and verification evidence:
 | [`agent-change-audit.md`](agent-change-audit.md) | **Complete** | Evidentiary | `AQ-57` | Root audit of concurrent agent changes, rejected runtime experiments, and baseline restoration. |
 | [AQ-58 fish player and clip-only review](asset-evidence/aq58/fish-player-review.json) | **Active** | Evidentiary | AQ-58 | Source-pinned clean-pose reset compatibility and conditional supplied clip-only spheres; main-scene collision remains open. |
 | [AQ-71 effective PMREM review](asset-evidence/aq71/sand-ibl-20261113/README.md) | **Active** | Evidentiary | AQ-71 | Explicit shared material bindings and native two-size exposure acceptance; controlled runtime parity open. |
+| [AQ-70.13 eighty-percent reef mass](asset-evidence/aq70-13/fill-80-20261113/README.md) | **Active** | Evidentiary | AQ-70.13 | Much taller foundations, inherited socket poses, actual geometry navigation and native two-size review; broader metric/reference acceptance open. |
+| [AQ-70.11 flowing torch](asset-evidence/aq70-11/flowing-torch-20261113/README.md) | **Active** | Evidentiary | AQ-70.11 | Saved soft-tissue/rigid-skeleton model, material role binding, finite transmission sampling and actual-loader motion proof; full tissue/variant rubric open. |
 | [AQ-70.11 bushy right coral](asset-evidence/aq70-11/corymbose-20261113/README.md) | **Active** | Evidentiary | AQ-70.11 | Original saved branching crown, safe atlas padding and exact two-size compatibility; full rubric/macros/archetypes remain open. |
 | [AQ-70.11 antler coral and taller crest](asset-evidence/aq70-11/antler-20261113/README.md) | **Active** | Evidentiary | AQ-70.11, AQ-70.13 | Saved original branching colony, authored PBR integration and native vertical-fill review; broader archetypes, scale, clearance and art remain open. |
 | [AQ-94 supported arch growth](asset-evidence/aq94/arch-growth-20261113/README.md) | **Active** | Evidentiary | AQ-94 | Four measured native sockets, reused coral growth, authored-rock preservation and conservative coral bounds; final reef art/library open. |

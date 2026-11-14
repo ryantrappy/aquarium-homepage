@@ -50,3 +50,12 @@
 *Root reviewed every retained entry2026-11-13: standing policies current; prior milestones actioned; older source/process checkpoints superseded by latest AGENT_TASKS.md; full art/scale/clearance pending.*
 - c52b969 originalcorymbose savedpacked/exported/synced/used/committed at rightcrest05;112tips/25725runtime triangles,3PBRmaps. Safeatlasfill+EXTEND removedblackgutters; Rootgate beforepromotion. Exact821tests/70files/typecheck16scripts/build andnative2sizesready/11inhabitants/8phonetargets>=44/noerrors. Evidence docs/asset-evidence/aq70-11/corymbose-20261113/. Phone usesleftisland; no newrightmacrobothsizes/artfulltaskacceptance.
 - Proofdetachedc52b969/dev5215pinsit, onlyinfraViteconfigdirty. Finaltabclosed/metricsreset; oldstale1298077987remains. iCloudreadblock recovered with exacthashcopies; no globalsettingschanges. Preserveuser3000/5210/liveBlender; backgroundRootonly/allnewmodelscommitted. Next remainingLPS/softcoralfidelity; CI/FPSexcluded; no deployment.
+
+### 2026-11-13 — Flowing torch resume
+*Root reviewed all retained entries2026-11-13: current policies stand; previous milestones actioned; older process details superseded; full art/scale/clearance pending.*
+- Prior goalturn progress c52b969/b3dd749: saved/synced/used/committed/pushed bushyrightcoral,821tests/nativeproof. Currentcleanreview beforeplan. AQ70.11next originalflowingtorch plus explicitsoft/rigid installer; RootreservesBlender/backgroundonly/liveuserfilepreserved. Existingtorchandsuppliedmodels preserved.
+
+### 2026-11-13 — Eighty-percent reef and torch verified
+*Root reviewed all retained entries2026-11-13: standing policies current; prior milestones actioned; latest80%massrequest actioned; older process checkpoints superseded by AGENT_TASKS.md; full art/scale/support/clearance pending.*
+- f95d68c tallerfoundations (laptopL2/R3.1,phone2.8) +root-spaceinheritedsockets/undistortedcorals. Trialextent82.49%L/77.63%R/81.29%phone; exactnativebothsizesready/11inhabitants/8usablephonetargets/noerrors.845tests/71files/typecheck16scripts/buildpass. Newflowingtorch savedpacked/exported/synced/used/committed,6maps/soft-rigidroles/actualloaderpauseproof. Evidence aq70-13/fill-80-20261113 andaq70-11/flowing-torch-20261113.
+- Proofdetachedf95d68c/dev5215pinsexactsource/onlyViteconfigdirty; verifyownershipbeforestop. Allfinaltabsclosed/metricsreset; oldstale1298077987remains. Preserveuserports3000/5210/liveBlender; Rootbackgroundonly/no deployment. Nextcoralcolonizationofnewmidrockfaces, notlessheight. CI/FPSexcluded, wholeart/metric/clearance stillopen.
