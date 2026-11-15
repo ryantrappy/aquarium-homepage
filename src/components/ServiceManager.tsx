@@ -36,7 +36,7 @@ type ServiceManagerProps = {
   thermometerReading?: CpuTemperatureReading
 }
 
-const blankDraft: ServiceDraft = { name: '', url: '', fishId: REEF_FISH[0].id }
+const blankDraft: ServiceDraft = { name: '', url: 'https://', fishId: REEF_FISH[0].id }
 
 function readableError(error: unknown) {
   if (error instanceof ZodError) {
@@ -237,7 +237,7 @@ export function ServiceManager({
           {notice && <p className="manager-notice" role="status" aria-live="polite">{notice}</p>}
           {formError && <p ref={formErrorRef} className="form-error" role="alert" aria-live="assertive" tabIndex={-1}>{formError}</p>}
           <label>Service name<input ref={nameInput} value={draft.name} onChange={(e) => { setDraft({ ...draft, name: e.target.value }); setFormError('') }} maxLength={80} placeholder="e.g. Home Assistant" required disabled={formDisabled} /></label>
-          <label>Web address<input type="url" value={draft.url} onChange={(e) => { setDraft({ ...draft, url: e.target.value }); setFormError('') }} placeholder="http://trappserv.er:8123" required disabled={formDisabled} /></label>
+          <label>Web address<input type="url" value={draft.url} onChange={(e) => { setDraft({ ...draft, url: e.target.value }); setFormError('') }} placeholder="https://example.com" required disabled={formDisabled} /></label>
           <fieldset className="fish-picker" disabled={formDisabled}>
             <legend>Choose a fish</legend>
             <div className="fish-picker-selected" aria-live="polite">
@@ -331,7 +331,7 @@ export function ServiceManager({
           <button type="button" className="text-action" onClick={() => { try { onExport(); setNotice('Service list downloaded.') } catch (error) { setFormError(readableError(error)); focusFormError() } }} disabled={busy !== null}>Export list</button>
           <button ref={importTriggerRef} type="button" className="text-action" onClick={() => { setShowImport(!showImport); setFormError('') }} disabled={busy !== null}>{showImport ? 'Close import' : 'Import list'}</button>
         </footer>
-        {showImport && <form className="import-form" onSubmit={(event) => { void importList(event) }}><label htmlFor="import-services">Paste a service list (JSON)</label><textarea id="import-services" value={importText} onChange={(e) => setImportText(e.target.value)} rows={5} placeholder='[{"id":"home-assistant","name":"Home Assistant","url":"http://trappserv.er:8123","fishId":"yellow-tang","isExample":false}]' required disabled={busy !== null} /><button type="submit" className="save-button" disabled={busy !== null}>{busy === 'import' ? 'Importing…' : 'Import services'}</button></form>}
+        {showImport && <form className="import-form" onSubmit={(event) => { void importList(event) }}><label htmlFor="import-services">Paste a service list (JSON)</label><textarea id="import-services" value={importText} onChange={(e) => setImportText(e.target.value)} rows={5} placeholder='[{"id":"my-service","name":"My service","url":"https://example.com","fishId":"yellow-tang","isExample":false}]' required disabled={busy !== null} /><button type="submit" className="save-button" disabled={busy !== null}>{busy === 'import' ? 'Importing…' : 'Import services'}</button></form>}
       </section>
     </dialog>
   )

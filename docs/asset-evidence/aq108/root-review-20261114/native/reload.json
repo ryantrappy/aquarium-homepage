@@ -1,0 +1,13 @@
+{
+  "demo": [
+    {
+      "label": "Open Demo shortcut in a new tab",
+      "url": "https://example.com/"
+    }
+  ],
+  "viewport": {
+    "width": 1440,
+    "height": 900,
+    "dpr": 1
+  }
+}

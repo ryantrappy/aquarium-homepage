@@ -96,6 +96,7 @@ describe('ServiceManager fish picker', () => {
     expect(view.querySelector<HTMLInputElement>('input[type="radio"][value="blue-tang"]')?.checked).toBe(true)
     expect(view.querySelector('.fish-picker-selected strong')?.textContent).toBe('Blue tang')
     expect(view.querySelector<HTMLImageElement>('.fish-picker-selected img')?.getAttribute('src')).toBe('/fish/blue-tang.webp')
+    expect(view.querySelector<HTMLInputElement>('input[type="url"]')?.value).toBe('https://home.example.test')
   })
 
   it('keeps the chosen species name when its thumbnail fails instead of showing another fish', async () => {
@@ -142,6 +143,8 @@ describe('ServiceManager async persistence', () => {
     const name = view.querySelector<HTMLInputElement>('input[placeholder="e.g. Home Assistant"]')!
     const url = view.querySelector<HTMLInputElement>('input[type="url"]')!
 
+    expect(url.value).toBe('https://')
+
     await act(async () => {
       changeTextInput(name, 'Media')
       changeTextInput(url, 'https://media.example.test')
@@ -159,9 +162,35 @@ describe('ServiceManager async persistence', () => {
     await act(async () => { resolveSave() })
 
     expect(name.value).toBe('')
-    expect(url.value).toBe('')
+    expect(url.value).toBe('https://')
     expect(view.querySelector<HTMLInputElement>(`input[type="radio"][value="${REEF_FISH[0].id}"]`)?.checked).toBe(true)
     expect(view.querySelector('[role="status"]')?.textContent).toBe('Service added.')
+  })
+
+  it('preserves an existing service URL when editing and resets to https:// after a successful add', async () => {
+    const onUpdate = vi.fn<(id: string, patch: Partial<ServiceDraft>) => Promise<void>>().mockResolvedValue(undefined)
+    const onAdd = vi.fn<(draft: ServiceDraft) => Promise<void>>().mockResolvedValue(undefined)
+    const view = await renderManager(props({ services: [existingService], onUpdate, onAdd }))
+
+    await act(async () => { view.querySelector<HTMLButtonElement>('button[aria-label="Edit Home Assistant"]')!.click() })
+    const name = view.querySelector<HTMLInputElement>('input[placeholder="e.g. Home Assistant"]')!
+    const url = view.querySelector<HTMLInputElement>('input[type="url"]')!
+    expect(url.value).toBe(existingService.url)
+    await act(async () => { changeTextInput(name, 'Renamed dashboard') })
+    await submitForm(view.querySelector('form.service-form')!)
+
+    expect(onUpdate).toHaveBeenCalledWith(existingService.id, {
+      name: 'Renamed dashboard', url: existingService.url, fishId: existingService.fishId,
+    })
+    expect(url.value).toBe('https://')
+
+    await act(async () => {
+      changeTextInput(name, 'Docs')
+      changeTextInput(url, 'https://www.wikipedia.org')
+    })
+    await submitForm(view.querySelector('form.service-form')!)
+    expect(onAdd).toHaveBeenCalledWith({ name: 'Docs', url: 'https://www.wikipedia.org', fishId: REEF_FISH[0].id })
+    expect(url.value).toBe('https://')
   })
 })
 

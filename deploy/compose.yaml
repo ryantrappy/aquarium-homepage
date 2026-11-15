@@ -17,7 +17,7 @@ services:
       HOST: 0.0.0.0
       PORT: 3000
       REEF_CONFIG_PATH: /var/lib/reef-control/reef-config.json
-      REEF_PUBLIC_ORIGIN: ${REEF_PUBLIC_ORIGIN:-https://aquarium.ryantr.app}
+      REEF_PUBLIC_ORIGIN: ${REEF_PUBLIC_ORIGIN:-http://localhost:3004}
       REEF_CPU_HWMON_ROOT: /run/host-sensors/coretemp.0
     ports:
       - "${REEF_BIND:-127.0.0.1}:${REEF_HOST_PORT:-3004}:3000"

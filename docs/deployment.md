@@ -133,11 +133,13 @@ docker compose --env-file .env -f deploy/compose.yaml up -d --build
 curl -s http://127.0.0.1:3004/api/telemetry/cpu-temperature
 ```
 
+The checked-in Compose defaults are for local review: the app binds to `127.0.0.1:3004`, and the config write-origin guard expects `http://localhost:3004`. If you change the host port or serve the app through a hostname or reverse proxy, set `REEF_PUBLIC_ORIGIN` in your private `.env` to the exact browser origin, including its scheme and any non-default port (for example, `https://aquarium.example.com`). Configuration writes from a different origin are rejected. The live deployment details above document the existing installation and are not changed by these reusable defaults.
+
 See [.env.example](../.env.example) for every variable. Note that relative paths in `.env` (such as `REEF_DATA_DIR`) resolve from the directory of `deploy/compose.yaml`.
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `REEF_PUBLIC_ORIGIN` | Yes, for any non-default hostname | Exact origin browsers use. Config writes from other origins are rejected. |
+| `REEF_PUBLIC_ORIGIN` | Yes, when changing the local default host or port, or using a proxy | Exact origin browsers use. Config writes from other origins are rejected. |
 | `REEF_DATA_DIR` | Recommended | Host directory persisting `reef-config.json`; must be writable by uid 1000. Defaults to `../data`. |
 | `REEF_BIND`, `REEF_HOST_PORT` | No | Published address and port. Defaults `127.0.0.1` and `3004`. |
 | `REEF_CPU_SENSOR_HOST_PATH` | No | Host `coretemp` directory mounted read-only. The container will not start if it does not exist (for example on AMD CPUs or VMs); remove the mount and `REEF_CPU_HWMON_ROOT` there, and the API reports `unavailable`. |

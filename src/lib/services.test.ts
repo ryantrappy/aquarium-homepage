@@ -3,14 +3,14 @@ import { EXAMPLE_SERVICES, exportServices, loadSharedConfig, parseImportedServic
 import { serviceConfigSchema, serviceListSchema, serviceUrlSchema, sharedConfigSchema } from './validation'
 
 describe('service configuration', () => {
-  it('uses the confirmed starter roster', () => {
-    expect(EXAMPLE_SERVICES.every((service) => !service.isExample)).toBe(true)
+  it('uses public showcase services for the starter roster', () => {
+    expect(EXAMPLE_SERVICES.every((service) => service.isExample)).toBe(true)
     expect(EXAMPLE_SERVICES.map(({ name, url, fishId }) => ({ name, url, fishId }))).toEqual([
-      { name: 'Komodo', url: 'https://komodo.ryantr.app', fishId: 'yellow-tang' },
-      { name: 'WatchMyBirds', url: 'https://watchmybirds.ryantr.app', fishId: 'banggai-cardinalfish' },
-      { name: 'Paperless', url: 'https://paperless.ryantr.app', fishId: 'royal-gramma' },
-      { name: 'Home Assistant', url: 'https://ha.ryantr.app', fishId: 'ocellaris-clownfish' },
-      { name: 'Ombi', url: 'https://ombi.ryantr.app', fishId: 'blue-tang' },
+      { name: 'Google', url: 'https://www.google.com', fishId: 'yellow-tang' },
+      { name: 'Wikipedia', url: 'https://www.wikipedia.org', fishId: 'banggai-cardinalfish' },
+      { name: 'GitHub', url: 'https://github.com', fishId: 'royal-gramma' },
+      { name: 'YouTube', url: 'https://www.youtube.com', fishId: 'ocellaris-clownfish' },
+      { name: 'Internet Archive', url: 'https://archive.org', fishId: 'blue-tang' },
     ])
   })
 
@@ -45,6 +45,27 @@ describe('service configuration', () => {
     globalThis.fetch = async () => { throw new TypeError('offline') }
     try {
       await expect(loadSharedConfig()).rejects.toThrow(/draft stays on this screen/)
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+
+  it('loads existing saved services without replacing their URLs with the examples', async () => {
+    const personalConfig = {
+      version: 1 as const,
+      mode: 'reef' as const,
+      services: [{
+        id: 'private-dashboard',
+        name: 'Private dashboard',
+        url: 'http://trappserv.er:8123',
+        fishId: 'ocellaris-clownfish',
+        isExample: false,
+      }],
+    }
+    const originalFetch = globalThis.fetch
+    globalThis.fetch = async () => Response.json({ config: personalConfig, revision: 'saved-revision' })
+    try {
+      await expect(loadSharedConfig()).resolves.toEqual({ config: personalConfig, revision: 'saved-revision' })
     } finally {
       globalThis.fetch = originalFetch
     }

@@ -22,6 +22,17 @@ describe('config write origin guard', () => {
     }), 'https://aquarium.ryantr.app')).toBeUndefined()
   })
 
+  it('allows the exact local Compose default origin and rejects other hosts', () => {
+    expect(validateWriteOrigin(new Request('http://reef-control:3000/api/config', {
+      method: 'PUT',
+      headers: { Origin: 'http://localhost:3004', 'Sec-Fetch-Site': 'same-origin' },
+    }), 'http://localhost:3004')).toBeUndefined()
+    expect(validateWriteOrigin(new Request('http://reef-control:3000/api/config', {
+      method: 'PUT',
+      headers: { Origin: 'https://aquarium.example.com', 'Sec-Fetch-Site': 'same-origin' },
+    }), 'http://localhost:3004')).toMatch(/Cross-origin/)
+  })
+
   it('still rejects an origin that differs from the configured public origin', () => {
     expect(validateWriteOrigin(new Request('http://reef-control:3000/api/config', {
       method: 'PUT',
