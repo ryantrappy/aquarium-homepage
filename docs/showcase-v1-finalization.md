@@ -51,3 +51,5 @@ AQ-108 removes personal internal-network URLs from shipped defaults and uses fam
 ## Current reviewed checkpoint
 
 AQ-108 is Done after Root review at source `393c6c9`, delivered through [rolling draft PR #53](https://github.com/ryantrappy/aquarium-homepage/pull/53). [Evidence](asset-evidence/aq108/root-review-20261114/README.md) records35focused tests, typecheck/build, Compose resolution and laptop fresh/add/edit/reload/reset flows. The remaining19 scoped tasks are still open; the scope-confirmation table above is historical, not a live completion ledger.
+
+Root acceptance 2026-11-15: AQ-15 is Done after authentic hardware/current-source local UI review, 80 focused tests, typecheck and build. Evidence: [AQ-15 Root review](asset-evidence/aq15/root-review-20261114/README.md). AQ-108 and AQ-15 are complete; 18 of the fixed 20 tasks remain open. Existing deployed API behavior is documented separately; no deployment was performed.

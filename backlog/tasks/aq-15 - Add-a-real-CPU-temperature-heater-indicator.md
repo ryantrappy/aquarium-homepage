@@ -1,11 +1,11 @@
 ---
 id: AQ-15
 title: Add a real CPU-temperature heater indicator
-status: In Progress
+status: Done
 assignee:
   - '@Luna'
 created_date: '2026-11-03T04:25:00Z'
-updated_date: '2026-11-15 05:48'
+updated_date: '2026-11-15 13:59'
 labels: []
 dependencies: []
 references:
@@ -49,7 +49,7 @@ Add a small heater thermometer as aquarium equipment that displays a real CPU te
 ## Definition of Done
 <!-- DOD:BEGIN -->
 - [x] #1 Luna completes the task with high reasoning effort.
-- [ ] #2 Root agent reviews the completed result before the task is marked Done.
+- [x] #2 Root agent reviews the completed result before the task is marked Done.
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -114,4 +114,15 @@ created: 2026-11-15 05:48
 ---
 Clarification for Root acceptance: AQ-15 targets locally working current-source behavior. The exact pinned current reader, run against the actual container-visible hardware sysfs, is direct evidence of a fresh authentic selected-sensor value; the separate deployed API mismatch is retained as operational handoff context, not a required deployment gate. Durable evidence and no-write reproduction are now cataloged at `docs/asset-evidence/aq15/root-review-20261114/`. Root visual review remains pending; no AC/DoD/status changes.
 ---
+
+created: 2026-11-15 13:59
+---
+Root final review 2026-11-15 accepts all five criteria: source-pinned reader discovers seven actual coretemp sensors in the existing server container via read-only stdin execution; current local UI consumes authentic package/Core0 values through a test-only GET bridge, renders acrylic LCD front/side, hides equipment, and retains selected Core0/side on reload. Existing source tests cover stale/unavailable/invalid/path safety and GET-only behavior. Root80tests/5suites, typecheck17scripts and productionbuild pass at privatec5c10bc. Native1440x900DPR1, source pins, commands and limits: docs/asset-evidence/aq15/root-review-20261114/. Already-running deployedAPI mismatch remains explicit operational context; no deployment or host/config writes. Other full-suite failures are separately tracked AQ87 and do not weaken this task acceptance.
+---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Completed the read-only aquarium CPU thermometer with real selected sensor readings, acrylic glass-mounted LCD styling, front/side/hidden placement, persistent device-local sensor selection, and honest stale/unavailable states. Root verified actual hardware via the current reader and authentic local UI bridge, all focused checks/typecheck/build, and laptop appearance. Evidence: docs/asset-evidence/aq15/root-review-20261114/. The existing deployed API was not refreshed; user-controlled deployment remains separate.
+<!-- SECTION:FINAL_SUMMARY:END -->

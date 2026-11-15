@@ -1,0 +1,19 @@
+{
+  "privateProof": "c5c10bc",
+  "files": {
+    "root-typecheck.log": "c1ab8eed7a05d0fe5423679ccf08571a30ac8ee8382e0665f9ced0f6f5c9f359",
+    "root-tests.log": "39807700f296651d4a4b6f80ed0027c7398aca90357df2434ed9c3c0a18a8173",
+    "source-pins.json": "6b95c60d9833ab0e9eeb4481ac46af42aaccf6646f9476b05b04cea322e3e64f",
+    "run-current-reader-readonly.sh": "423aa6c912d53ea07fccb0babd7b49f826faf4b61575459f42e743d2966f6d39",
+    "root-build.log": "1c7bcdb00f913a1ed215b67b510fec0c37445ef5b4118269ed3189d7716157d8",
+    "live-review-vite.config.mjs": "bc1a52887c0aacf952067a297d5ea52434cd737d691e357c137e9a1e108b6dff",
+    "README.md": "34ec452146441e5b25c021199a76d2cd942b2f7d00233548f93efd8b55e7e17f",
+    "live-reader-vite-plugin.mjs": "c1a4dbd73339ffbe3dc5ed969f0b6958178542e81037921270436cba1656c5db",
+    "raw-readonly-results.json": "ce5620e2e5a839f858b1def15ab7313c15c0274e901aa7c3cc4fc8fef71a5b1c",
+    "native/hidden.png": "2002660f87cebf9675e4cf42e5e738b13dbd88ab38ff0436689986f339859135",
+    "native/hidden-settings-state.json": "c293fd72b217841303b9feb8f7d64f2448937b76c9dbeb6b1424a8795f596cf7",
+    "native/final-live-state.json": "5247ceaa90bfd51e503deaf1dc6a2df544c2f87f6a65c3e658705edd7ee2ce54",
+    "native/side-live-core0.png": "e6597539942dbf161ebc5291fecac4431fad6a7c566774255e353f1df303e647",
+    "native/front-live-package.png": "50c2074369b443d3293d86bb9487e1be120bdd883738450ff1ac0ce24cbdd501"
+  }
+}
