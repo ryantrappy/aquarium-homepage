@@ -4,6 +4,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { canonicalGlbFingerprint, pngRawScanlines } from './canonical-glb'
 
 const root = path.resolve(import.meta.dirname, '../../..')
 const dir = path.join(root, 'src/rendering/assets/splat-fish')
@@ -30,7 +31,10 @@ describe('chromis contour pipeline', () => {
     expect(result.json.materials).toEqual(base.json.materials)
     const images = (model: ReturnType<typeof parse>) => model.json.images.map((image: { bufferView: number }) => {
       const view = model.json.bufferViews[image.bufferView], start = view.byteOffset ?? 0
-      return digest(model.bin.subarray(start, start + view.byteLength))
+      // Compare texture pixels (inflated raw scanlines), not compressed PNG
+      // bytes: the PNG encoder's deflate output differs between bundled zlib
+      // versions while the pixels are identical.
+      return digest(pngRawScanlines(model.bin.subarray(start, start + view.byteLength)))
     })
     expect(images(result)).toEqual(images(base))
     expect(result.json.skins[0].joints).toEqual(base.json.skins[0].joints)
@@ -82,9 +86,9 @@ describe('chromis contour pipeline', () => {
     const text = execFileSync(process.execPath, ['--experimental-strip-types', 'scripts/refine-chromis-contour.mjs', '--dry-run'], { cwd: root, encoding: 'utf8' })
     const result = JSON.parse(text), glb = parse('blue-green-chromis.glb')
     expect(paths.map(file => digest(fs.readFileSync(path.join(dir, file))))).toEqual(before)
-    expect(result.rawBaseSha256).toBe(digest(parse('sources/blue-green-chromis-contour-base.glb').bytes))
-    expect(result.rawRecipeOutputSha256).toBe('3b59e775e6ad4dcb62974633097d7acbff31bbb8a3a60510305c1615717923b1')
-    expect(result.outputSha256).toBe(digest(glb.bytes))
+    expect(result.baseFingerprint).toBe(canonicalGlbFingerprint(parse('sources/blue-green-chromis-contour-base.glb').bytes))
+    expect(result.recipeOutputFingerprint).toBe('264db1365d24ae090d5891425aa69717e694bb1309ad5eb0e39e7a23d60f8c2a')
+    expect(result.outputFingerprint).toBe(canonicalGlbFingerprint(glb.bytes))
     expect(result.sourceInputs.grid).toEqual([139, 83])
     expect(result.triangles).toBe(24220)
     expect(result.texturesUnchanged).toBe(true)

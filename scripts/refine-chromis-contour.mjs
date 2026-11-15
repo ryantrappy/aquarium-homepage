@@ -4,7 +4,9 @@
  *
  * The immutable base GLB and project-original thumbnail are the inputs. The
  * Rebuild only chromis with the pinned original generator recipe at 139×83.
- * The 84×50 recipe must first reproduce the immutable base byte-for-byte.
+ * The 84×50 recipe must first reproduce the immutable base (same mesh, rig,
+ * materials and texture pixels; embedded PNG compression bytes may differ
+ * between zlib versions, so the comparison is canonical, not byte-for-byte).
  * All-species generator entrypoint is never executed; output stays isolated.
  */
 import crypto from 'node:crypto'
@@ -15,6 +17,7 @@ import os from 'node:os'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { validateAssetContract } from '../src/rendering/assets/contract.ts'
 import { ASSET_CLASS_BUDGETS } from '../src/rendering/assets/budgets.ts'
+import { canonicalGlbFingerprint, pngRawScanlines } from '../src/rendering/assets/canonical-glb.ts'
 
 const scriptPath = fileURLToPath(import.meta.url)
 const repositoryRoot = path.resolve(path.dirname(scriptPath), '..')
@@ -136,7 +139,12 @@ function inspectImageBytes(doc, binary) {
   return doc.images.map(image => {
     const view = doc.bufferViews[image.bufferView], bytes = binary.subarray(view.byteOffset || 0, (view.byteOffset || 0) + view.byteLength)
     if (!bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) throw new Error('Chromis PBR maps must remain embedded PNGs')
-    return { mimeType: image.mimeType, bytes: bytes.length, widthPx: bytes.readUInt32BE(16), heightPx: bytes.readUInt32BE(20), sha256: sha256(bytes) }
+    // Hash the inflated raw scanlines (pixels), not the compressed PNG bytes:
+    // the generator encodes PNGs with zlib.deflateSync at level 9, and
+    // deflate output differs between bundled zlib versions (zlib 1.3 produced
+    // the checked-in base; Node 24.22's zlib 1.3.2.1-motley compresses the
+    // identical pixels to different bytes). Pixel hashes are stable.
+    return { mimeType: image.mimeType, widthPx: bytes.readUInt32BE(16), heightPx: bytes.readUInt32BE(20), sha256: sha256(pngRawScanlines(bytes)) }
   })
 }
 
@@ -220,7 +228,12 @@ export async function main(argv = process.argv.slice(2)) {
   if (actual.glb !== BASE_GLB_SHA256 && !(entry.generator === 'scripts/refine-chromis-contour.mjs' && oldInputs?.baseGlbSha256 === actual.base && oldInputs?.sourceWebpSha256 === actual.source)) throw new Error('Refusing to replace an unrecognized chromis output')
 
   const built = buildSelectedRecipe(root, snapshots.generator.toString('utf8'), actual.generator)
-  if (sha256(built.base) !== BASE_GLB_SHA256 || !built.base.equals(snapshots.base)) throw new Error('Original 84×50 recipe did not reproduce immutable base byte-for-byte')
+  // Compare canonically, not byte-for-byte: the mesh, rig and texture pixels
+  // must reproduce exactly, but the embedded PNG bytes legitimately differ
+  // between zlib versions (see canonicalGlbFingerprint), so a raw byte
+  // comparison would fail on any Node whose bundled zlib differs from the
+  // one that produced the immutable base.
+  if (canonicalGlbFingerprint(built.base) !== canonicalGlbFingerprint(snapshots.base)) throw new Error('Original 84×50 recipe did not reproduce immutable base (mesh, rig, materials and texture pixels must match)')
   const base = parseGlb(snapshots.base), selected = parseGlb(built.selected)
   if (JSON.stringify(inspectImageBytes(base.json, base.binary)) !== JSON.stringify(inspectImageBytes(selected.json, selected.binary))) throw new Error('Original texture payloads changed')
   if (JSON.stringify(base.json.materials) !== JSON.stringify(selected.json.materials)) throw new Error('Original material definitions changed')
@@ -246,7 +259,7 @@ export async function main(argv = process.argv.slice(2)) {
   for (const [key, file] of Object.entries(paths)) if (sha256(fs.readFileSync(file)) !== actual[key]) throw new Error(`${key} changed concurrently; refusing to overwrite`)
   if (sha256(fs.readFileSync(scriptPath)) !== scriptHash) throw new Error('Refinement script changed concurrently')
   if (!args.dryRun) { atomicWrite(paths.glb, finalGlb); atomicWrite(paths.report, Buffer.from(finalReport)); atomicWrite(paths.manifest, Buffer.from(finalManifest)) }
-  console.log(JSON.stringify({ dryRun: args.dryRun, sourceInputs, scriptSha256: scriptHash, rawBaseSha256: sha256(built.base), rawRecipeOutputSha256: sha256(built.selected), outputSha256: sha256(finalGlb), outputBytes: finalGlb.length, triangles: triangleCount, vertices: vertexCount, bounds, texturesUnchanged: true, rigFingerprint: rigFingerprint(selected) }, null, 2))
+  console.log(JSON.stringify({ dryRun: args.dryRun, sourceInputs, scriptSha256: scriptHash, baseFingerprint: canonicalGlbFingerprint(built.base), recipeOutputFingerprint: canonicalGlbFingerprint(built.selected), outputFingerprint: canonicalGlbFingerprint(finalGlb), outputBytes: finalGlb.length, triangles: triangleCount, vertices: vertexCount, bounds, texturesUnchanged: true, rigFingerprint: rigFingerprint(selected) }, null, 2))
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {

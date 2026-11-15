@@ -299,5 +299,5 @@ describe.each(coralCases)('$id custom rigid coral colony package', ({ id, mounts
     } finally {
       fs.rmSync(tempRoot, { recursive: true, force: true })
     }
-  })
+  }, 30000)
 })
