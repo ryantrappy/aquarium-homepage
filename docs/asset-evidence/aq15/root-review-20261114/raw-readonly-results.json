@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "captures": [
+    {
+      "capturedAt": "2026-11-15T05:42:58Z",
+      "host": "trappserv.er",
+      "hostnameOutput": "trappserver",
+      "command": "ssh -oBatchMode=yes -oConnectTimeout=5 trappserv.er 'printf \"capturedAt=\"; date -u +%Y-%m-%dT%H:%M:%SZ; printf \"hostName=\"; hostname; for f in /sys/devices/platform/coretemp.0/hwmon/hwmon2/name /sys/devices/platform/coretemp.0/hwmon/hwmon2/temp1_label /sys/devices/platform/coretemp.0/hwmon/hwmon2/temp1_input; do printf \"%s=\" \"$f\"; cat \"$f\"; done; printf \"api=\"; curl --silent --show-error --max-time 5 http://127.0.0.1:3004/api/telemetry/cpu-temperature; printf \"containerEnvRoot=\"; docker exec aquarium-homepage printenv REEF_CPU_HWMON_ROOT; printf \"containerMounts=\"; docker inspect --format \"{{range .Mounts}}{{println .Destination}}{{end}}\" aquarium-homepage; printf \"containerImage=\"; docker inspect --format \"{{.Image}}\" aquarium-homepage; for f in /sys/devices/platform/coretemp.0/hwmon/hwmon2/name /sys/devices/platform/coretemp.0/hwmon/hwmon2/temp1_label /sys/devices/platform/coretemp.0/hwmon/hwmon2/temp1_input /sys/class/hwmon/hwmon2/name /sys/class/hwmon/hwmon2/temp1_label /sys/class/hwmon/hwmon2/temp1_input; do printf \"container:%s=\" \"$f\"; docker exec aquarium-homepage cat \"$f\"; done'",
+      "hostSensor": {
+        "device": "coretemp",
+        "label": "Package id 0",
+        "rawMilliCelsius": 40000
+      },
+      "container": {
+        "reefCpuHwmonRoot": "",
+        "mountDestinations": ["/var/lib/reef-control"],
+        "imageId": "sha256:c2770329c5b6d7e0c935460f30e205bdf302ee0a577895777f39d0f8d81b5a40"
+      },
+      "containerVisibleSensor": {
+        "device": "coretemp",
+        "label": "Package id 0",
+        "rawMilliCelsius": 40000,
+        "paths": [
+          "/sys/devices/platform/coretemp.0/hwmon/hwmon2",
+          "/sys/class/hwmon/hwmon2"
+        ]
+      },
+      "runningApiResponse": {
+        "sensors": [],
+        "reading": {
+          "status": "unavailable",
+          "sensorId": "coretemp.0:package-id-0",
+          "unit": "°C",
+          "message": "The selected CPU temperature sensor is unavailable."
+        }
+      }
+    },
+    {
+      "capturedAt": "2026-11-15T05:43:08.168Z",
+      "method": "Current local src/server/cpu-temperature.ts transformed in memory by Jiti 2.7.0 and streamed through SSH stdin to the app container Node 24 process",
+      "roots": [
+        "/run/host-sensors/coretemp.0",
+        "/sys/devices/platform/coretemp.0",
+        "/sys/class/hwmon"
+      ],
+      "sensors": [
+        {"id":"coretemp.0:core-0","chip":"coretemp","label":"Core 0","unit":"°C"},
+        {"id":"coretemp.0:core-1","chip":"coretemp","label":"Core 1","unit":"°C"},
+        {"id":"coretemp.0:core-2","chip":"coretemp","label":"Core 2","unit":"°C"},
+        {"id":"coretemp.0:core-3","chip":"coretemp","label":"Core 3","unit":"°C"},
+        {"id":"coretemp.0:core-4","chip":"coretemp","label":"Core 4","unit":"°C"},
+        {"id":"coretemp.0:core-5","chip":"coretemp","label":"Core 5","unit":"°C"},
+        {"id":"coretemp.0:package-id-0","chip":"coretemp","label":"Package id 0","unit":"°C"}
+      ],
+      "reading": {
+        "status": "fresh",
+        "sensorId": "coretemp.0:package-id-0",
+        "chip": "coretemp",
+        "label": "Package id 0",
+        "value": 49,
+        "unit": "°C",
+        "observedAt": "2026-11-15T05:43:08.168Z",
+        "ageMs": 0
+      }
+    },
+    {
+      "capturedAt": "2026-11-15T05:45:25.703Z",
+      "command": "bash docs/asset-evidence/aq15/root-review-20261114/run-current-reader-readonly.sh",
+      "result": {
+        "sensorCount": 7,
+        "selectedReading": {
+          "status": "fresh",
+          "sensorId": "coretemp.0:package-id-0",
+          "chip": "coretemp",
+          "label": "Package id 0",
+          "value": 53,
+          "unit": "°C",
+          "observedAt": "2026-11-15T05:45:25.703Z",
+          "ageMs": 0
+        }
+      }
+    }
+  ],
+  "interpretation": "The 40°C host/container sample and the 49°C direct-reader sample were taken 10 seconds apart and reflect changing live telemetry. The API request and direct-reader invocation are separate processes: only the direct-reader invocation is pinned to the current source in source-pins.json."
+}

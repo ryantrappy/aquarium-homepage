@@ -260,3 +260,8 @@ test fix: update the caps in `budgets.ts`, the tables in this document,
 and the rationale for the change in the same PR. If a new asset cannot
 fit a cap, the PR either shrinks the asset or raises the cap with a
 measured justification — it must not silently edit the test to pass.
+
+
+## AQ-103 static surface radiance allocation (2026-11-14)
+
+The surface adds one 128×128×6 RGBA8 cube with a full mip chain: 524,280 color bytes (about 512 KiB), plus implementation-dependent depth/renderbuffer storage and driver overhead. It captures six faces at initialization or an enclosure-layout revision, with no per-frame recapture; existing shadows are frozen and reused during capture. The water itself remains a single surface draw. This scoped allocation calculation is not a measurement of total GPU memory or a full-scene frame-budget pass. Failure retains the analytic fallback and releases any allocated target. Source: `src/rendering/scene/water-radiance-probe.ts`; lifecycle and failure coverage: its adjacent tests plus `aquarium-lifecycle.test.ts`.

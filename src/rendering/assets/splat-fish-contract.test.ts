@@ -24,10 +24,13 @@ describe('self-contained procedural 3D reef fish assets (src/rendering/assets/sp
     expect(manifest.contractSchema).toBe('reef-asset-v1')
     expect(manifest.assets).toHaveLength(13)
 
-    const generatorBytes = fs.readFileSync(path.join(REPO_ROOT, 'scripts/build-splat-fish-glbs.mjs'))
-    const expectedGeneratorSha = crypto.createHash('sha256').update(generatorBytes).digest('hex')
-
     for (const entry of manifest.assets) {
+      const expectedGenerator = entry.id === 'fish-blue-green-chromis'
+        ? 'scripts/refine-chromis-contour.mjs'
+        : 'scripts/build-splat-fish-glbs.mjs'
+      expect(entry.generator, entry.id).toBe(expectedGenerator)
+      const generatorBytes = fs.readFileSync(path.join(REPO_ROOT, expectedGenerator))
+      const expectedGeneratorSha = crypto.createHash('sha256').update(generatorBytes).digest('hex')
       expect(entry.generatorSha256, entry.id).toBe(expectedGeneratorSha)
 
       const glbPath = path.join(REPO_ROOT, entry.path)

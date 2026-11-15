@@ -120,6 +120,25 @@ describe('static reef water radiance probe', () => {
     warn.mockRestore()
   })
 
+  it('falls back and releases its allocation when renderer state cannot be read', () => {
+    const state = fakeRenderer()
+    state.renderer.getActiveCubeFace = () => { throw new Error('Renderer state unavailable') }
+    const excluded = new THREE.Group()
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const dispose = vi.spyOn(THREE.WebGLCubeRenderTarget.prototype, 'dispose')
+
+    expect(captureWaterRadianceProbe(state.renderer, new THREE.Scene(), [excluded])).toBeNull()
+    expect(cubeUpdate).not.toHaveBeenCalled()
+    expect(dispose).toHaveBeenCalledOnce()
+    expect(excluded.visible).toBe(true)
+    expect(state.renderer.xr.enabled).toBe(true)
+    expect(state.renderer.shadowMap.autoUpdate).toBe(true)
+    expect(state.renderer.info.render).toEqual(state.render)
+    expect(warn).toHaveBeenCalledOnce()
+    dispose.mockRestore()
+    warn.mockRestore()
+  })
+
   it('captures once per layout revision, disposes replaced targets, and cannot recapture after disposal', () => {
     const state = fakeRenderer()
     const scene = new THREE.Scene()

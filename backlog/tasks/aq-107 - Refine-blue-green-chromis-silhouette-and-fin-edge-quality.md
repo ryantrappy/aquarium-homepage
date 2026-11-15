@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-14 21:01'
-updated_date: '2026-11-14 21:12'
+updated_date: '2026-11-15 05:42'
 labels:
   - modeling
   - rendering
@@ -38,6 +38,8 @@ User screenshot dated 2026-11-14 14:58 shows visibly stepped edges on the blue-g
 Inspect runtime mapping, embedded GLB geometry/texture/filtering and supplied screenshot first; obtain independent subagent diagnosis. Select a targeted renderer/asset correction from evidence, preserving all concurrent work and coordinating model ownership before editing native assets. Laptop-only visual verification per user.
 
 Root-approved contour implementation: preserve byte-identical c53ea07f base GLB under sources/blue-green-chromis-contour-base.glb with source/generator/manifest hash guards. Add standalone chromis-only refinement command reconstructing the existing alpha/SDF field; subdivide only incidence-2 outer silhouette edges and their two incident triangles with max1.5px edge at350px plus bounded chord error. Preserve winding, UV, normalized skin weights, rig, animation and texture bytes; regenerate normals and measured accessors/bounds. Validate actual output topology/contract/budgets before atomic writes of chromis runtime GLB, inspection and only its manifest row. Add allowlisted per-entry generator/provenance support and meaningful deterministic/no-write/topology/preserved-buffer/manifest-invariance checks. No shared all-species regeneration, no Blender edits, no other supplied asset changes. Root must verify exact laptop normal/close-up before/after and relevant runtime behavior before acceptance/commit/push.
+
+Root-reviewed implementation adjustment: the baseline includes folded projected faces and shared internal fin chords, so local per-edge triangle subdivision failed safe. Use the single SDF contour with front/back connected-domain remeshing, retaining original POSITION/UV/JOINTS/WEIGHTS prefixes and detached-component triangles, with side-specific subpixel midpoint thickness only for internal shared chords. Recompute normals/connectivity, validate closed manifold incidence, encoded Float32 winding/area, contour limits and budgets. Root acceptance still requires exact normal/close native visual comparison and runtime integration evidence.
 <!-- SECTION:PLAN:END -->
 
 ## Comments
@@ -47,5 +49,17 @@ author: @root
 created: 2026-11-14 21:05
 ---
 Root policy clarification: the existing chromis has no Blender source or override; it is generated from the owned WebP. The original task-created AC4 overstated the project rule. AGENTS mandates packed native persistence for edits performed in Blender and explicitly permits supporting-pipeline changes for functionality. A reproducible, chromis-only contour pipeline refinement preserving Gemini art can be reviewed without creating or editing a live Blender model. No acceptance yet: the coarse-grid spacing is consistent with the screenshot but exact exported contour error and before/after native evidence still need verification.
+---
+
+author: root
+created: 2026-11-15 05:38
+---
+Root code review in progress: require no-write dry-run when immutable base is missing, explicit per-species generator allowlist, and final provenance-encoded byte-budget check. Returned to implementing agent for correction; no criteria accepted yet.
+---
+
+author: root
+created: 2026-11-15 05:42
+---
+Root native visual rejection 2026-11-14: candidate GLB e6eccd0c16ebdb3fcfb5e7d788f3bae5f57607cbd84954175fc4fa58a8190bef passes topology/contour tests but isolated GLTFLoader comparison shows severe shredded triangular texture/shading across body and fins at normal and 350px close sizes; base and peer remain smooth. Native evidence /tmp/aq107-root-native/comparison-profile.jpg, fixture /tmp/aq107-native-compare-QKH5YW. No AC accepted or completion commit. Returned to agent to diagnose UV/material/normal continuity and preserve original visual mapping; geometry metrics alone are insufficient. Integration also found exact swim extent changed 0.44845%; measured scale constant was corrected and existing 7 scale tests pass, subject to final accepted asset bounds.
 ---
 <!-- COMMENTS:END -->

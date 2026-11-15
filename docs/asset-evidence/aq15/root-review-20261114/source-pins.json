@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-15T05:41:59Z",
+  "repositoryCommit": "d118dca71972c0c6426521a5bf3453a5e332c6e1",
+  "repositoryBranch": "v1-finalization",
+  "sourceTreeStatus": "AQ-15 source files were clean at capture; unrelated concurrent worktree changes were not included",
+  "transformer": {
+    "package": "jiti",
+    "version": "2.7.0",
+    "method": "createJiti(import.meta.url).transform({ source, filename, ts: true, async: false })"
+  },
+  "filesSha256": {
+    "deploy/compose.yaml": "8c767bb3f5e2f0173520d29e6784c7ae1f0adfc5b333792289251de617b848cf",
+    "src/server/cpu-temperature.ts": "059702b3abc1a818f1680fdfe460bc4826ee10ba502ff67ab67dfb1853fc90f1",
+    "src/server/cpu-temperature.test.ts": "f4ce252aca1a25f48f4c888d028b4a43ad4070c4db61ff728feb076fefecd0fa",
+    "src/routes/api/telemetry/cpu-temperature.ts": "d007de22c4e3dabfad9b2684b757cfdd072c70e818592669e1ac2c35643d6220",
+    "src/routes/api/telemetry/-cpu-temperature.test.ts": "3dd3bdcb52b6dafe0cd6531f8339907cb6581f24ebc3a9dba5a4ca453382355b",
+    "src/lib/thermometer-settings.ts": "2cd5bb3582d6f1750ea3a452d64b8b6bcd56773feb7f27bdb22120e563d6aec1",
+    "src/lib/thermometer-settings.test.ts": "e47653a9a0bfbed4d06d2c1a4d0f4fc63c09709b69a7b9a837dcd1e1e496438c",
+    "src/components/AquariumThermometer.tsx": "526eb19166a7957e37404207513afc7e65a3d4010a226114a462b7a074d0f51b",
+    "src/components/ServiceManager.tsx": "30a13fb3c1800492fea84e15ace47160b16c04eb7d152e45fec4ed03f2791387",
+    "src/components/ServiceManager.test.tsx": "c5404afaeab3e87e6ef54b45c1cb0dee4eaf74ba42f0faa33e821595feda6769",
+    "src/components/AquariumScene.tsx": "a5fca5ddbd07cd99f4101661366c4b6e7f8e2604be896a5d1a9b8e95c8870ddc",
+    "src/components/AquariumScene.test.tsx": "ba477583b12f0ac5567f0e3e0cef5a615bf1527aeff2de9f00562a78b9598533",
+    "src/routes/index.tsx": "8e1af9193bd6f9dd3f93c287c38cde9719edeb3b69d01c1ace50f115989c8359",
+    "src/styles/aquarium.css": "108aef291a239ef0ffe2adab07cc1545b33c75a46bda4e8d0859c02834d24d26"
+  }
+}

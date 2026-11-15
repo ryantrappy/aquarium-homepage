@@ -463,6 +463,12 @@ describe('safe aquarium fish spawning', () => {
     // bounded grid search may nudge a fish off its plane, but the school
     // must not collapse back onto one plane.
     const zs = placements.map(item => item.position.z)
+    const cardinal = placements.find(item => item.service.fishId === 'banggai-cardinalfish')!
+    console.log('AQ87 planes', width, FISH_SPAWN_DEPTH_PLANES.map(fraction => {
+      const z = bounds.min.z + cardinal.clearance + (bounds.max.z - cardinal.clearance - (bounds.min.z + cardinal.clearance)) * fraction
+      const candidate = { ...cardinal.preference.position, z }
+      return { z, safe: isSafeFishPosition(candidate, cardinal.clearance, bounds, obstacles, maxAbsXAtDepth(width, height)), candidate }
+    }))
     expect(Math.max(...zs) - Math.min(...zs)).toBeGreaterThan(1.5)
   })
 

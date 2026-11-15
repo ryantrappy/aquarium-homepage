@@ -19,6 +19,8 @@ Downstream: All repository documentation and active agent workflows
 
 ---
 
+[AQ-107 rejected remesh evidence](asset-evidence/aq107/rejected-remesh-20261114/README.md) records the native visual failure of the first connected-domain refinement; AQ-107 remains open.
+
 ## 1. Quick Topic & Subsystem Lookup
 
 Find the authoritative documents for your task area:
@@ -36,7 +38,7 @@ Find the authoritative documents for your task area:
 | **Modular Corals & Rock Sockets**| [`modular-coral-and-live-rock-spec.md`](modular-coral-and-live-rock-spec.md)| [`socket-verification.md`](socket-verification.md) | [`asset-evidence/aq52-left-socket-report.json`](asset-evidence/aq52-left-socket-report.json), [AQ-53 mask runtime proof](asset-evidence/aq53/review.json), [AQ-42 displaced bounds](asset-evidence/aq42/displacement-bounds-review.json) |
 | **2D Thumbnails & Cutouts** | [`fish-assets.md`](fish-assets.md) | [`fish-art-provenance.json`](fish-art-provenance.json) | `public/fish-art-provenance.json`  [AQ-66 thumbnail proof](asset-evidence/aq66/review.json) |
 | **Homelab Services & Links** | [`service-mapping-review.md`](service-mapping-review.md) | [`requirements.md`](requirements.md) | Backlog `AQ-8` / `AQ-56` |
-| **Read-Only Telemetry (Hardware)**| [`network-traffic-source.md`](network-traffic-source.md) | Server endpoints (`src/routes/api/telemetry/`) | `src/server/disk-capacity-math.test.ts` |
+| **Read-Only Telemetry (Hardware)**| [`network-traffic-source.md`](network-traffic-source.md) | Server endpoints (`src/routes/api/telemetry/`) | `src/server/disk-capacity-math.test.ts`, [AQ-15 live CPU reader review](asset-evidence/aq15/root-review-20261114/README.md) |
 | **Ambient Motion & Lighting** | [`rendering.md`](rendering.md) | [`requirements.md`](requirements.md) | [AQ-14.2/AQ-70.6 Root visual review](asset-evidence/aq14-2/root-visual-review.json) |
 | **Accessibility & Controls** | [`accessibility-audit.md`](accessibility-audit.md) | [`design-principles.md`](design-principles.md) | Backlog `AQ-6` / `AQ-50`, [AQ-89 final caption review](asset-evidence/aq89/native-e0def59/README.md), [AQ-63 interaction proof](asset-evidence/aq63/review.json), [AQ-70.14 caption/access proof](asset-evidence/aq70-14/review.json) |
 | **Deployment & Production** | [`deployment.md`](deployment.md) | [`deployment-2.md`](archive/deployment-2.md) *(Historical)* | Docker / Node 24 on `trappserv.er` |
@@ -85,6 +87,7 @@ Directory of project documentation and verification evidence:
 | Document | Status | Authority | Backlog | Scope / Purpose |
 |---|---|---|---|---|
 | [AQ-108 public-defaults Root review](asset-evidence/aq108/root-review-20261114/README.md) | **Complete** | Evidentiary | `AQ-108` | Public defaults/reset, HTTPS input lifecycle, saved-config preservation,35focused tests/typecheck/build and laptop-only browser evidence. |
+| [AQ-15 real CPU thermometer Root source review](asset-evidence/aq15/root-review-20261114/README.md) | **Active** | Evidentiary | `AQ-15` | Current source reader discovers seven live coretemp sensors through the app container's sysfs; the currently running API still reports unavailable, so Root visual review remains open. |
 | [AQ-107 chromis contour diagnosis](asset-evidence/aq107/diagnosis-20261114/README.md) | **Active** | Evidentiary | `AQ-107` | Actual exported contour/SDF metrics independently reproduced; model refinement and laptop visual acceptance pending. |
 | [Rejected surface-curvature trial](asset-evidence/aq103/rejected-curvature-20261114/README.md) | **Historical** | Evidentiary | `AQ-103` | Laptop-only rejected oval-highlight trial; incorrect initial numeric sampler explicitly excluded; surface correction remains open. |
 | [AQ-105 mounted-anemone hosting](asset-evidence/aq105/README.md), [final Root review](asset-evidence/aq105/final-4df19de/README.md) | **Active** | Evidentiary | `AQ-105` | Accepted mounted hosting, species-scoped soft access,875tests and exact two-size native pose/link/control evidence at4df19de; broader art/body/budget gates remain open. |
