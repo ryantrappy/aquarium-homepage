@@ -364,6 +364,24 @@ describe('coral-raw-masks-v1 material and shader adapter (AQ-53 / AQ-42)', () =>
     expect(rigid.uniforms.uPaletteRegrade.value).toBe(CORAL_DEFAULT_REGRADE)
   })
 
+  it('disables imported emissive textures and factors before applying mask-driven fluorescence', () => {
+    const sourceEmissiveMap = new THREE.Texture()
+    const material = new THREE.MeshStandardMaterial({
+      emissive: new THREE.Color(0.45, 0.45, 0.45),
+      emissiveMap: sourceEmissiveMap,
+      emissiveIntensity: 0.45,
+    })
+
+    const binding = applyCoralRawMaskMaterial(material, { role: 'coral-soft' })
+
+    expect(binding.material.emissiveMap).toBeNull()
+    expect(binding.material.emissive.r).toBe(0)
+    expect(binding.material.emissive.g).toBe(0)
+    expect(binding.material.emissive.b).toBe(0)
+    expect(binding.material.emissiveIntensity).toBe(0)
+    expect(binding.uniforms.uFluorescenceStrength.value).toBeGreaterThan(0)
+  })
+
   it('injects the AQ-88 saturation boost, pale-tip pull, and highlight ceiling into the tissue shader', () => {
     const material = new THREE.MeshStandardMaterial()
     const binding = applyCoralRawMaskMaterial(material, { role: 'coral-soft' })

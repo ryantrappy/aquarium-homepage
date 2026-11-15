@@ -751,6 +751,10 @@ export function applyCoralRawMaskMaterial(
   const reducedMotion = Boolean(options.reducedMotion)
   const roleIsSoft = options.role === 'coral-soft' ? 1 : 0
 
+  material.emissiveMap = null
+  material.emissive.setRGB(0, 0, 0)
+  material.emissiveIntensity = 0
+
   // Prevent Three.js from treating COLOR_0 as display RGB or vertex opacity.
   material.vertexColors = false
   material.transparent = false
