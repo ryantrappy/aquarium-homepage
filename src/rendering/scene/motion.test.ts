@@ -60,6 +60,33 @@ describe('rendered fish travel adapter', () => {
     expect(moray.startleSeconds).toBe(0)
   })
 
+  it('keeps startle free-water route targets inside the species depth band', () => {
+    const openWater: WaterHabitat = {
+      bounds: { min: { x: -5.2, y: -2.25, z: -4.6 }, max: { x: 5.2, y: 2.8, z: 2.8 } },
+      obstacles: [], anchors: [],
+    }
+    const clearance = .2
+    const range = evaluateTieredVerticalDepthRange('yellow-tang', openWater.bounds, clearance)!
+    const fish = createSwimmingFish('startle-depth-band', 'yellow-tang', {
+      x: -3, y: range.worldYRange[1] - .01, z: 0,
+    }, clearance)
+    fish.behavior = {
+      ...fish.behavior,
+      state: 'swim',
+      stateElapsedSeconds: 0,
+      stateDurationSeconds: 100,
+      targetAnchor: undefined,
+    }
+    fish.routeGeneration = fish.behavior.navigationGeneration
+    fish.startleSeconds = .25
+    fish.targetWait = 0
+
+    stepSwimmingFish(fish, openWater, 1 / 60)
+
+    expect(fish.route.length).toBeGreaterThan(1)
+    expect(fish.route.at(-1)!.y).toBeLessThanOrEqual(range.worldYRange[1])
+  })
+
   it('keeps an active route when a swim transition requests an unavailable habitat anchor', () => {
     const fish = createSwimmingFish('missing-anchor-route', 'royal-gramma', { x: -3.8, y: 0, z: 0 }, .2)
     fish.behavior = {

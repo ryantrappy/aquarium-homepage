@@ -579,9 +579,12 @@ function selectFreeWaterAttemptTarget(
     const evasiveYaw = fish.yaw + (attempt % 2 ? -1 : 1) * (.7 + random(fish) * .4)
     const z = clamp(fish.position.z + Math.cos(evasiveYaw) * 1.4, min.z + clearance, max.z - clearance)
     const safeRange = safeLateralRange(habitat, z, lateralClearance)
+    const height = max.y - min.y
+    const minY = clamp(max.y - depthRange[1] * height, min.y + clearance, max.y - clearance)
+    const maxY = clamp(max.y - depthRange[0] * height, min.y + clearance, max.y - clearance)
     if (safeRange) target = {
       x: clamp(fish.position.x + Math.sin(evasiveYaw) * 1.4, safeRange[0], safeRange[1]),
-      y: clamp(fish.position.y + .15, min.y + clearance, max.y - clearance),
+      y: clamp(fish.position.y + .15, minY, maxY),
       z,
     }
   } else {
