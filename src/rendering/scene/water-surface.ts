@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { glassEnclosureLayout } from './glass-enclosure'
 import { SURFACE_WAVE_GLSL } from './surface-waves'
+import { SUN_DIRECTION } from './underwater-optics'
 
 const WATER_SURFACE_WIDTH_SEGMENTS = 96
 const WATER_SURFACE_DEPTH_SEGMENTS = 48
@@ -12,6 +13,9 @@ type WaterSurfaceLayout = ReturnType<typeof glassEnclosureLayout>
 
 type WaterSurfaceUniforms = {
   uTime: { value: number }
+  uRadianceProbe: { value: THREE.CubeTexture | null }
+  uUseRadianceProbe: { value: number }
+  uKeyLightDirection: { value: THREE.Vector3 }
   uFrontZ: { value: number }
   uBackZ: { value: number }
   uHalfWidth: { value: number }
@@ -69,6 +73,9 @@ function geometryFor(layout: WaterSurfaceLayout): THREE.PlaneGeometry {
 export function createWaterSurface(initialLayout: WaterSurfaceLayout) {
   const uniforms: WaterSurfaceUniforms = {
     uTime: { value: 0 },
+    uRadianceProbe: { value: null },
+    uUseRadianceProbe: { value: 0 },
+    uKeyLightDirection: { value: new THREE.Vector3(SUN_DIRECTION.x, SUN_DIRECTION.y, SUN_DIRECTION.z) },
     uFrontZ: { value: initialLayout.frontZ },
     uBackZ: { value: initialLayout.backZ },
     uHalfWidth: { value: initialLayout.halfWidth },
@@ -95,6 +102,9 @@ export function createWaterSurface(initialLayout: WaterSurfaceLayout) {
       }`,
     fragmentShader: `
       uniform float uTime;
+      uniform samplerCube uRadianceProbe;
+      uniform float uUseRadianceProbe;
+      uniform vec3 uKeyLightDirection;
       uniform float uFrontZ;
       uniform float uBackZ;
       uniform float uHalfWidth;
@@ -109,18 +119,19 @@ export function createWaterSurface(initialLayout: WaterSurfaceLayout) {
         const float k2 = 18.4800, w2 = 13.4670;
         const float k3 = 25.1327, w3 = 15.7070;
         const float k4 = 33.0694, w4 = 18.0140;
+        vec2 microfacetCoord = vec2(p.x * 0.32, p.y);
         float macroHeight = surfaceWaveHeight(p, t);
         vec2 macroGradient = surfaceWaveSlope(p, t);
         float warp1 = 10.0, warp2 = -14.0, warp3 = 18.0, warp4 = -22.0;
-        float phase1 = dot(p, vec2(1.0, 0.0)) * k1 - w1 * t + 0.4 + warp1 * macroHeight;
-        float phase2 = dot(p, vec2(0.6, 0.8)) * k2 - w2 * t + 2.0 + warp2 * macroHeight;
-        float phase3 = dot(p, vec2(-0.8, 0.6)) * k3 - w3 * t + 4.1 + warp3 * macroHeight;
-        float phase4 = dot(p, vec2(0.0, 1.0)) * k4 - w4 * t + 5.2 + warp4 * macroHeight;
+        float phase1 = dot(microfacetCoord, vec2(1.0, 0.0)) * k1 - w1 * t + 0.4 + warp1 * macroHeight;
+        float phase2 = dot(microfacetCoord, vec2(0.6, 0.8)) * k2 - w2 * t + 2.0 + warp2 * macroHeight;
+        float phase3 = dot(microfacetCoord, vec2(-0.8, 0.6)) * k3 - w3 * t + 4.1 + warp3 * macroHeight;
+        float phase4 = dot(microfacetCoord, vec2(0.0, 1.0)) * k4 - w4 * t + 5.2 + warp4 * macroHeight;
         // These are the analytic gradients of the warped height phases, so
         // each microfacet remains an integrable height-field normal.
-        vec2 phaseGradient1 = k1 * vec2(1.0, 0.0) + warp1 * macroGradient;
-        vec2 phaseGradient2 = k2 * vec2(0.6, 0.8) + warp2 * macroGradient;
-        vec2 phaseGradient3 = k3 * vec2(-0.8, 0.6) + warp3 * macroGradient;
+        vec2 phaseGradient1 = k1 * vec2(0.32, 0.0) + warp1 * macroGradient;
+        vec2 phaseGradient2 = k2 * vec2(0.6 * 0.32, 0.8) + warp2 * macroGradient;
+        vec2 phaseGradient3 = k3 * vec2(-0.8 * 0.32, 0.6) + warp3 * macroGradient;
         vec2 phaseGradient4 = k4 * vec2(0.0, 1.0) + warp4 * macroGradient;
         float fade1 = 1.0 - smoothstep(1.0, 2.4, fwidth(phase1));
         float fade2 = 1.0 - smoothstep(1.0, 2.4, fwidth(phase2));
@@ -173,10 +184,6 @@ export function createWaterSurface(initialLayout: WaterSurfaceLayout) {
         vec3 reflectedRay = normalize(reflect(-V, N));
         float proxyTravel = min(${TIR_RADIANCE_PROXY_DEPTH.toFixed(3)} / max(-reflectedRay.y, 0.2), ${TIR_RADIANCE_PROXY_MAX_TRAVEL.toFixed(3)});
         vec2 proxyPoint = p + reflectedRay.xz * proxyTravel;
-        vec3 deepWaterMirror = vec3(0.005, 0.024, 0.068);
-        vec3 midCyanMirror = vec3(0.016, 0.088, 0.210);
-        float waveLuminance = clamp(0.5 + totalSlope.y * 1.8 + totalSlope.x * 0.9, 0.0, 1.0);
-        vec3 tirBase = mix(deepWaterMirror, midCyanMirror, waveLuminance);
         float proxyHalfWidth = uHalfWidth + ${TIR_RADIANCE_PROXY_MAX_TRAVEL.toFixed(3)};
         float lateral = clamp((proxyPoint.x + proxyHalfWidth) / (2.0 * proxyHalfWidth), 0.0, 1.0);
         vec3 deepRow = lateralRadianceRow(vec3(0.008, 0.028, 0.075), vec3(0.008, 0.032, 0.090), vec3(0.012, 0.033, 0.045), lateral);
@@ -187,12 +194,18 @@ export function createWaterSurface(initialLayout: WaterSurfaceLayout) {
         vec3 proxyRadiance = depth01 < 0.5
           ? mix(deepRow, midRow, smoothstep(0.0, 0.5, depth01))
           : mix(midRow, brightRow, smoothstep(0.5, 1.0, depth01));
-        tirBase = mix(tirBase, proxyRadiance, 0.78);
+        vec3 analyticTirRadiance = mix(vec3(0.005, 0.024, 0.068), proxyRadiance, 0.94);
+        // reflectedRay and CubeCamera faces share world axes. Render-target
+        // cube samples are linear radiance; colorspace_fragment encodes once.
+        vec3 capturedTirRadiance = textureCube(uRadianceProbe, reflectedRay).rgb;
+        vec3 tirBase = mix(analyticTirRadiance, capturedTirRadiance, uUseRadianceProbe);
 
         // Trace the view ray back through the interface only when water-to-air
         // refraction is valid. Compare it to the actual key and rear-panel
         // directions; do not paint fixture light into total-internal-reflection.
-        vec3 keyRay = normalize(vec3(1.2, 6.8, 4.6) - vSurfaceWorldPos);
+        // Direction toward the actual directional key source; the rear panel
+        // below remains a separate finite fixture proxy.
+        vec3 keyRay = normalize(uKeyLightDirection);
         vec3 rearPanelRay = normalize(vec3(0.0, 5.0, -4.0) - vSurfaceWorldPos);
         float keyAlignment = max(dot(safeTransmittedRay, keyRay), 0.0) * refractionValid;
         float rearPanelAlignment = max(dot(safeTransmittedRay, rearPanelRay), 0.0) * refractionValid;
@@ -239,6 +252,12 @@ export function createWaterSurface(initialLayout: WaterSurfaceLayout) {
     uniforms,
     updateTime(timeSeconds: number) {
       uniforms.uTime.value = Number.isFinite(timeSeconds) ? timeSeconds : 0
+    },
+    /** Borrows a linear scene-capture cube texture; ownership remains with its caller. */
+    setRadianceProbe(texture: THREE.CubeTexture | null) {
+      if (disposed) return
+      uniforms.uRadianceProbe.value = texture
+      uniforms.uUseRadianceProbe.value = texture === null ? 0 : 1
     },
     setLayout(layout: WaterSurfaceLayout) {
       if (disposed) return

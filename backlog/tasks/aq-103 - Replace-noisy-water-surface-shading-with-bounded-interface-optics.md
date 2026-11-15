@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-13 05:41'
-updated_date: '2026-11-14 20:47'
+updated_date: '2026-11-14 21:03'
 labels:
   - rendering
   - optics
@@ -53,6 +53,8 @@ Visible-surface diagnostic and bounded TIR candidate: use only the supplied 1440
 Root revised iteration 2026-11-14 supersedes the rejected curvature-radiance plan: evaluate phase-coherent height-gradient capillary normals with screen-footprint filtering and physically consistent refracted fixture direction; retain camera, enclosure, canonical waves, clock and existing .53/.76 transition. Record roughness and finite corrected sweep before native preview. Do not increase slope merely to force transmission; a naturally closed window is valid. If contrast remains inadequate, report the reflection-radiance limitation for Root review before expanding scope. No new AC/Done or shared source commit without Root laptop-only visual review. The old sampler is superseded because its view vector omitted x and reversed the Z-slope sign.
 
 Root-approved replacement trial: remove the rejected curvature-maxima lobe; add modest phase-coherent height-gradient microfacet normals filtered by actual screen-space phase footprint; preserve camera, enclosure, canonical wave field, shared clock and .53/.76 Snell threshold; compute TIR radiance from a bounded reflected-view ray projected into a low-frequency bilinear reef-color proxy (explicitly not actual mesh hits); compute fixture transmission only from a valid water-to-air refracted ray; add CPU analytic tests for reflect/refract orientation, critical angle and projection bounds. Verify corrected legacy-unit sample sweep, focused surface/lifecycle tests and typecheck, then hand the shader hash to Root for laptop-only native review. Do not accept AC2/3 or Done.
+
+Root expands radiance-source iteration after two rejected native proxy trials: capture a 128-square cubemap of the actual static reef once after assembled geometry is ready, refresh only when habitat layout changes, and borrow that cube in the water shader via setRadianceProbe. Exclude fish, water, recursive glass reflectors and transient overlays; preserve all renderer/visibility/shadow state in success/error paths; release targets on replacement/disposal and fall back honestly if unavailable. No per-frame extra pass, no asset/model changes. Actual scene content is required to move beyond a smooth analytic palette. One center probe has known parallax and frozen-static-radiance limits; startup cost and added texture allocation need objective evidence. Root laptop visual acceptance still required; no new criteria or Done yet.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -108,5 +110,11 @@ author: @navigation_recovery
 created: 2026-11-14 20:47
 ---
 Root 2026-11-14 selects the ray-driven analytic reflected-radiance trial proposed by quality_recovery. No new reflection pass/texture, no geometry/camera/canonical-wave/clock changes, no curvature maxima or periodic spot pattern. Current visible overview samples remain TIR; natural transmission is optional and must not be forced by slope amplitude. Surface tones are an analytic palette proxy, not actual coral ray intersections. Phone checks remain stopped.
+---
+
+author: @root
+created: 2026-11-14 21:03
+---
+Root laptop native review ce884aea/private1cd8612 rendered successfully at1440x900DPR1 after fixing a shader-template-comment parse error from first snapshot886ae9e/private dd79845. Capture /tmp/aq103-ray-review-20261114/native/ray-laptop-1cd8612.png remains too regular: rounded blue scallop/chip pattern with soft contrast, not goal thin broken reflected ripples/color. No AC2/3/Done accepted.66focused tests/typecheck16scripts pass but do not prove visual acceptance. Phase-warp derivative trial now exists and a one-time actual-static-reef cube radiance source is being integrated; no new shader sharedcommit/push yet. Owned native tab closed and metricoverride cleared; proof1cd8612/session78196 still serves rejected ray-palette trial. Initial console dynamic-import errors retained historically, not claimed clean.
 ---
 <!-- COMMENTS:END -->

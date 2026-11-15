@@ -41,6 +41,7 @@ import { reefPlacementsForViewport } from './reef-layout'
 import { CENTER_ARCH_URL, CENTER_ARCH_MOUNTS, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
 import { createGlassEnclosure, glassEnclosureLayout } from './glass-enclosure'
 import { createWaterSurface } from './water-surface'
+import { WaterRadianceProbeManager } from './water-radiance-probe'
 import { estimateCaptionRect, resolveLabelDeconflicts, type LabelRect } from './fish-label-layout'
 import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
 import { meshQueryForSpecies, createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
@@ -520,6 +521,20 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     excludeFromReflections: () => [waterSurface, shaftPlane, hazePlane, foregroundParticles, backgroundParticles, bubbles, ...fish.map(item => item.root), ...schoolmates.map(item => item.root)],
   })
   scene.add(glassEnclosure.group)
+  const waterRadianceProbe = new WaterRadianceProbeManager(renderer, scene, () => [
+    waterSurface,
+    ...fish.map(item => item.root),
+    ...schoolmates.map(item => item.root),
+    glassEnclosure.group,
+    shaftPlane,
+    hazePlane,
+    foregroundParticles,
+    backgroundParticles,
+    bubbles,
+  ])
+  function captureWaterRadianceForHabitatLayout() {
+    waterSurfaceController.setRadianceProbe(waterRadianceProbe.captureForLayout(narrow ? 'narrow' : 'wide'))
+  }
   let glassLayoutNarrow: boolean | undefined
   let habitat: WaterHabitat = {
     bounds: { min: { x: -4, y: -2.25, z: -4.6 }, max: { x: 4, y: 2.8, z: 2.8 } },
@@ -1735,8 +1750,10 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     // AQ-73: the sand bed follows the single-/dual-island layout with the
     // habitat; setLayout is a no-op when the layout already matches.
     if (newNarrow !== narrow) sandBed.setLayout(newNarrow)
-    if (loaded && (narrow !== newNarrow || (spawnUnavailable && sizeChanged) || [...fish, ...schoolmates].some(item => !isSafeCurrentInhabitantPosition(item)))) {
+    const habitatLayoutChanged = narrow !== newNarrow
+    if (loaded && (habitatLayoutChanged || (spawnUnavailable && sizeChanged) || [...fish, ...schoolmates].some(item => !isSafeCurrentInhabitantPosition(item)))) {
       narrow = newNarrow; rebuildHabitat(); rebuildSucceeded = rebuildFish()
+      if (habitatLayoutChanged) captureWaterRadianceForHabitatLayout()
       if (rebuildSucceeded !== undefined) status(fishSceneStatus(!rebuildSucceeded))
     }
     if (recoveringFromUnavailableSpawn && rebuildSucceeded === true) syncLoop()
@@ -2015,6 +2032,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     phase0Ids.forEach((id, i) => { const model = restModels[coralIds.length + i]; if (model) modelBases.set(id, model) })
     loaded = true; narrow = width < 600; rebuildHabitat()
     const initialSpawnSucceeded = rebuildFish() === true
+    captureWaterRadianceForHabitatLayout()
     status(fishSceneStatus(!initialSpawnSucceeded))
     syncLoop()
     enqueueLazyFishLoads(configuredFishIds)
@@ -2088,7 +2106,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       glassEnclosure.dispose()
       if (centerArchPlacement) { disposeCenterArchMaterials(centerArchPlacement); centerArchPlacement = undefined }
       if (import.meta.env.DEV && lookDevBridge && window.__AQUARIUM_LOOKDEV__ === lookDevBridge) delete window.__AQUARIUM_LOOKDEV__
-      removeFish(); loadedAssets.forEach(model => disposeTree(model.scene, environmentMap?.texture)); loadedAssets.clear(); sandBed.dispose(); rear.geometry.dispose(); rear.material.dispose(); hazePlane.geometry.dispose(); hazeMaterial.dispose(); shaftPlane.geometry.dispose(); shaftMaterial.dispose(); waterSurfaceController.dispose(); shaftPass?.dispose(); shaftPass = null; foregroundParticleGeometry.dispose(); foregroundParticleMaterial.dispose(); backgroundParticleGeometry.dispose(); backgroundParticleMaterial.dispose(); bubbleGeometry.dispose(); bubbleMaterial.dispose(); caustics.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
+      removeFish(); waterRadianceProbe.dispose(); loadedAssets.forEach(model => disposeTree(model.scene, environmentMap?.texture)); loadedAssets.clear(); sandBed.dispose(); rear.geometry.dispose(); rear.material.dispose(); hazePlane.geometry.dispose(); hazeMaterial.dispose(); shaftPlane.geometry.dispose(); shaftMaterial.dispose(); waterSurfaceController.dispose(); shaftPass?.dispose(); shaftPass = null; foregroundParticleGeometry.dispose(); foregroundParticleMaterial.dispose(); backgroundParticleGeometry.dispose(); backgroundParticleMaterial.dispose(); bubbleGeometry.dispose(); bubbleMaterial.dispose(); caustics.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
     },
   }
 }

@@ -9,6 +9,7 @@ import {
 } from './water-surface'
 import { glassEnclosureLayout } from './glass-enclosure'
 import { SURFACE_WAVE_GLSL } from './surface-waves'
+import { SUN_DIRECTION } from './underwater-optics'
 
 describe('underwater water-surface interface', () => {
   it.each([false, true])('matches the glass bounds and stays level (narrow: %s)', narrow => {
@@ -69,9 +70,11 @@ describe('underwater water-surface interface', () => {
     expect(material.fragmentShader).toContain('surfaceWaveSlope(p, uTime) * 2.6')
     expect(material.fragmentShader).toContain('vec2 screenFilteredMicrofacetSlope(vec2 p, float t)')
     expect(material.fragmentShader).toContain('fwidth(phase1)')
+    expect(material.fragmentShader).toContain('vec2 microfacetCoord = vec2(p.x * 0.32, p.y)')
     expect(material.fragmentShader).toContain('float macroHeight = surfaceWaveHeight(p, t)')
     expect(material.fragmentShader).toContain('vec2 macroGradient = surfaceWaveSlope(p, t)')
-    expect(material.fragmentShader).toContain('k1 * vec2(1.0, 0.0) + warp1 * macroGradient')
+    expect(material.fragmentShader).toContain('k1 * vec2(0.32, 0.0) + warp1 * macroGradient')
+    expect(material.fragmentShader).toContain('k2 * vec2(0.6 * 0.32, 0.8) + warp2 * macroGradient')
     expect(material.fragmentShader).toContain('0.0035 * cos(phase1) * phaseGradient1')
     expect(material.fragmentShader).toContain('vec3(totalSlope.x, -1.0, totalSlope.y)')
     expect(material.fragmentShader).toContain('refract(-V, N,')
@@ -79,6 +82,21 @@ describe('underwater water-surface interface', () => {
     expect(material.fragmentShader).toContain('transmittedRay / max(transmittedRayLength, 0.0001)')
     expect(material.fragmentShader).toContain('reflect(-V, N)')
     expect(material.fragmentShader).toContain('lateralRadianceRow')
+    expect(material.fragmentShader).toContain('textureCube(uRadianceProbe, reflectedRay)')
+    expect(material.fragmentShader).toContain('mix(analyticTirRadiance, capturedTirRadiance, uUseRadianceProbe)')
+    expect(material.fragmentShader).toContain('uniform samplerCube uRadianceProbe;')
+    expect(material.fragmentShader).toContain('uniform float uUseRadianceProbe;')
+    expect(material.fragmentShader).toContain('uniform vec3 uKeyLightDirection;')
+    expect(material.fragmentShader).toContain('vec3 keyRay = normalize(uKeyLightDirection)')
+    expect(material.vertexShader).not.toContain('uniform samplerCube uRadianceProbe;')
+    expect(material.vertexShader).not.toContain('uniform float uUseRadianceProbe;')
+    expect(material.vertexShader).not.toContain('uniform vec3 uKeyLightDirection;')
+    expect(material.fragmentShader).not.toContain('vec3(1.2, 6.8, 4.6) - vSurfaceWorldPos')
+    expect(surface.uniforms.uKeyLightDirection.value.toArray()).toEqual([
+      SUN_DIRECTION.x,
+      SUN_DIRECTION.y,
+      SUN_DIRECTION.z,
+    ])
     expect(material.fragmentShader).toContain('smoothstep(0.53, 0.76, NoV')
     expect(material.fragmentShader).not.toContain('coralZoneZ * tirFactor')
     expect(material.fragmentShader).toContain('smoothstep(uBackZ, uBackZ + 1.95, p.y)')
@@ -92,6 +110,26 @@ describe('underwater water-surface interface', () => {
     expect(material.fragmentShader).toContain('mix(center, right, smoothstep(0.5, 1.0, x01))')
 
     surface.dispose()
+  })
+
+  it('borrows an optional radiance cube and leaves its lifecycle to the caller', () => {
+    const surface = createWaterSurface(glassEnclosureLayout(false, 4.4))
+    const texture = new THREE.CubeTexture()
+    const textureDisposal = vi.fn()
+    texture.addEventListener('dispose', textureDisposal)
+
+    expect(surface.uniforms.uRadianceProbe.value).toBeNull()
+    expect(surface.uniforms.uUseRadianceProbe.value).toBe(0)
+    surface.setRadianceProbe(texture)
+    expect(surface.uniforms.uRadianceProbe.value).toBe(texture)
+    expect(surface.uniforms.uUseRadianceProbe.value).toBe(1)
+    surface.setRadianceProbe(null)
+    expect(surface.uniforms.uUseRadianceProbe.value).toBe(0)
+    surface.dispose()
+
+    expect(textureDisposal).not.toHaveBeenCalled()
+    texture.dispose()
+    expect(textureDisposal).toHaveBeenCalledOnce()
   })
 
   it('matches water-to-air GLSL refraction at normal incidence and around the critical angle', () => {

@@ -1,0 +1,7 @@
+{
+  "src/rendering/assets/splat-fish/sources/blue-green-chromis-contour-base.glb": "c53ea07f3e6f96d254546cbb54f418106b268dcc00ea96c2aed14796e1b855de",
+  "public/fish/blue-green-chromis.webp": "1990dc99a1424e4cda5cccbd7508dbe4959718b5d5dcc0939b4e8b5401cb3049",
+  "scripts/build-splat-fish-glbs.mjs": "7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd",
+  "docs/asset-evidence/aq107/diagnosis-20261114/audit-contour.mjs": "5e43c74c6cfb66434d510c488699ad798144f1a060c05f72fe5533f80aba0bf1",
+  "docs/asset-evidence/aq107/diagnosis-20261114/user-chromis.png": "b7a87a51e61c0f8c628416dbf236e7068570855d306cb2fbf79808e498d82fc1"
+}
