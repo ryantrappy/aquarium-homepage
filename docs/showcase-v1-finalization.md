@@ -55,3 +55,7 @@ AQ-108 is Done after Root review at source `393c6c9`, delivered through [rolling
 Root acceptance 2026-11-15: AQ-15 is Done after authentic hardware/current-source local UI review, 80 focused tests, typecheck and build. Evidence: [AQ-15 Root review](asset-evidence/aq15/root-review-20261114/README.md). AQ-108 and AQ-15 are complete; 18 of the fixed 20 tasks remain open. Existing deployed API behavior is documented separately; no deployment was performed.
 
 Root acceptance 2026-11-15: AQ-107 is Done after native before/after/pose comparisons, exact runtime picking/asset readiness and 89 integration checks/typecheck/build. [Evidence](asset-evidence/aq107/root-review-20261115/README.md). AQ-108, AQ-15 and AQ-107 are complete; 17 of the fixed 20 tasks remain open.
+
+## Request-specific execution override — 2026-11-15
+
+The latest user request clarifies that “complete the whole backlog” means complete only the tasks already marked In Progress at request start, with no To Do tasks started and no new tasks created. The fixed execution set is AQ-58, AQ-59, AQ-71, AQ-82, AQ-86, AQ-87, AQ-88, AQ-76, AQ-106, AQ-70.1, AQ-70.6, AQ-70.11, AQ-70.12, AQ-70.13, AQ-94, AQ-101, AQ-102, and AQ-103. This request-specific instruction supersedes the earlier fixed showcase execution scope for this work only; it does not change task acceptance criteria, release history, Root review requirements, the 1440×900-only visual policy, or the prohibition on deployment.

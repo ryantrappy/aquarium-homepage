@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-08 00:30'
-updated_date: '2026-11-13 14:50'
+updated_date: '2026-11-15 15:52'
 labels:
   - photorealism
   - rendering
@@ -72,6 +72,8 @@ Root reviewed Luna sand-intensity integration: actual sand group now receives de
 Root native diagnostic atdf6227e: laptop/phone foreground ROI statistics were exactly unchanged from6be5dcc baseline despite sand.envMapIntensity changing1.0->0.2. Installed Three r187 WebGLRenderer.js2747 explicitly substitutes scene.environmentIntensity while material.envMap isnull; WebGLMaterials refresh uses material.envMapIntensity only for an explicitmap. Root/Luna now explicitly bind the one shared PMREMtexture to all PBRroles and markchanged bindings forrefresh; numeric intensities remain unchanged. Generic asset disposal skips only that borrowed texture by identity; scene/render-target owner releasesonce. Real controller regression supplies actualshared map to sand/twofish/backdrop and asserts removal/teardowndoesnotdisposeitthroughmodels.45focusedtests/typecheck14scripts pass; final native review follows. No newenvironmentasset or perframePMREM work.
 
 Root native review at69cad24 accepts AC3 two-size exposure. Shared explicit PMREM now effective; fish0.55/reef0.35/sand0.2/backdrop0.65 with existing ACES0.80/LED rig. Evidence docs/asset-evidence/aq71/sand-ibl-20261113/: ready/no failures at1440x900/402x874DPR1, zero final reload console warnings. Fixed foreground encoded mean luminance laptop0.875452->0.718763 and phone0.883600->0.741830, preserves caustic detail. Initial property-only df6227e PNGs byte-identical to6be5dcc diagnostic explains Three override. Exact69cad24 all758tests/66files,45focused/typecheck14scripts/productionbuild pass. Borrowed sharedtexture disposal covered by realcontroller regression. AC4 controlled runtime parity remains open; no FPSdisplay work. No model changes/deployment.
+
+2026-11-15 active-only verification: the existing 2026-11-13 Root laptop/phone review records current exposure acceptance for AC3; focused environment-map and aquarium-lifecycle suites pass 53/53, including shared-material lifecycle and both required viewports. No controlled frame-rate parity evidence exists; frozen captures/incidental timing are explicitly insufficient, and this session has no browser/GPU measurement interface. Keep AC4 and Root DoD open; no implementation or scene values changed.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

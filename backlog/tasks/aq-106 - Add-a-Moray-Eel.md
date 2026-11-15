@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@junie'
 created_date: '2026-11-14 20:52'
-updated_date: '2026-11-15 14:56'
+updated_date: '2026-11-15 15:45'
 labels:
   - gemini-research
   - modeling
@@ -250,6 +250,10 @@ Root review remains required before Done. No Blender edits, deployment, or visua
 2026-11-15 final status refresh: `git diff --check` is clean. Current untracked concurrent evidence is `docs/asset-evidence/aq76/current-inventory-20261115/` and `docs/asset-evidence/aq103/root-review-20261115/`; the earlier AQ-87 directory is no longer listed. Preserve both current directories and mixed staged/unstaged AQ-87 spawn files; none are AQ-106-owned.
 
 2026-11-15 handoff correction: final `git diff --cached --name-status` is empty; `fish-spawn.ts` and `fish-spawn.test.ts` are unstaged AQ-106 changes, not mixed staged work. Current concurrent modified paths are AQ-70.12/water-surface; untracked evidence is AQ-76 and AQ-103 only. Preserve those paths and do not stage them for AQ-106.
+
+2026-11-15 request scope clarification: user limited this execution to tasks already In Progress at request start; do not start To Do tasks or create new tasks. The fixed 18-task set and override are recorded in AGENT_TASKS.md, docs/showcase-v1-finalization.md, and agent_scratch.md. AQ-106 remains In Progress: AC 1–8 remain verified from prior evidence; AC 9 and Root review are pending. No new visual acceptance is claimed.
+
+2026-11-15 follow-up: checked the repository for Playwright/Puppeteer and found no usable browser runner or browser interface in this session. Per AC 9 and the existing plan, the 1440×900 visual verification and Root art/provenance/model review remain pending; no browser acceptance is claimed.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

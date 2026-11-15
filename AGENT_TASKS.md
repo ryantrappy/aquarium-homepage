@@ -11,7 +11,11 @@ Upstream: AGENTS.md, agent_scratch.md, docs/requirements.md
 Downstream: Current implementation and review work
 -->
 
-Root verified prior Root-checkpoint facts against the current checkout. The showcase remains incomplete: finish the fixed 20-task scope and make the living aquarium resemble the supplied reference. Other user-directed Backlog work remains separately tracked; the Junie handoff below awaits Root verification, and passing functional tests does not accept final art.
+Root verified prior Root-checkpoint facts against the current checkout. The latest user request (2026-11-15) limits this execution to the 18 tasks that were already In Progress at request start; do not start To Do tasks or create new tasks. This request-specific boundary supersedes the older fixed-showcase execution scope below without changing the historical release record or Backlog acceptance criteria. The Junie handoff below awaits Root verification, and passing functional tests does not accept final art.
+
+## Current user-requested execution scope — 2026-11-15
+
+The user clarified that “complete the whole backlog” means complete only tasks already marked In Progress, and “do not start anything new” excludes To Do tasks and newly created tasks. The 18-task execution set at clarification is AQ-58, AQ-59, AQ-71, AQ-82, AQ-86, AQ-87, AQ-88, AQ-76, AQ-106, AQ-70.1, AQ-70.6, AQ-70.11, AQ-70.12, AQ-70.13, AQ-94, AQ-101, AQ-102, and AQ-103. Root review remains required; no acceptance criteria may be weakened to close a task. Preserve user/concurrent work, verify visually only at 1440×900, and do not deploy.
 
 ## Junie implementation handoff — AQ-106 (2026-11-15; Root verification pending)
 

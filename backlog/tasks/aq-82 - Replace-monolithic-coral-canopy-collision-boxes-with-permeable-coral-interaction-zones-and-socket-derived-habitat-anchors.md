@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-08T20:07:00Z'
-updated_date: '2026-11-13 14:10'
+updated_date: '2026-11-15 15:54'
 labels:
   - behavior
   - navigation
@@ -71,4 +71,6 @@ Root current-source audit: runtime habitat still uses SOCKET_ANCHOR_POSITIONS_M 
 Luna bounded implementation/Root integration: snapshotMountedCoralOrigins copies/freezes actual mounted-root local positions including mount offsets; explicit habitat input rejects duplicate/nonfinite/missing mount origins and never falls back to canonical coordinates. Canonical omitted-input callers remain supported with unchanged tuple table. Calcified bases iterate actual supplied SPSmounts, including new crest names. Main aquarium supplies real binding origins and fails reef setup safely on invalid geometry, including resize; native service links remain available. Root review75focusedtests/4files and typecheck14scripts pass. Actual runtimeGLB-based fixture proves moved crest03anchors/bases follow renderer; both current scaled/yawed view layouts compared against Threeworld positions; offsets used once/copy isolation tested. This is a verified source-alignment handoff; full coral permeability/visible nesting, measured ledges, animated clearance and final art remain open. No model/asset/Blender changes. Final native integration evidence follows.
 
 Root final exact-source6be5dcc handoff: all755tests/66files,75focusedtests/4files, typecheck14scripts and productionbuild pass. Native1440x900/402x874DPR1 ready snapshots/PNGs under docs/asset-evidence/aq82/current-origins-20261113/ retain11inhabitants and8phone native targets>=44px, allwithinviewport; recovered phone browser log has zero captured warnings/errors. Laptop capture preceded browser-session disconnect; recovered phone capture uses sameexact6be5dcc source. Input socket delta audit is explicitly not sampled runtime anchor poses. Main map alignment/offset/transform/failure behavior reviewed, but fullAC2includes measuredislandfeatures andAC3/4/5requirevisiblepermeability/nesting/animatedclearance, which remainopen. Existing front stand-off/lifts/clamps retained. No model/Blender edits or asset promotion by Root.
+
+2026-11-15 active-only verification: confirmed existing Root/Luna mounted-origin implementation is present and wired from actual AssembledCoralBinding.root.position into instantiateModularReefHabitat; explicit runtime origin maps reject missing/duplicate/nonfinite entries and do not fall back to canonical reports. Focused reef-assembly, reef-mesh-navigation, habitat-anchor-interactions, motion, and aquarium-lifecycle suites pass 158/158, covering runtime GLB offset propagation, base bounds, typed anchors, compatibility, motion, safe positions and both requested viewport fixtures. Existing Root evidence is source-pinned to 6be5dcc; it still leaves full coral permeability/nesting, measured island features, animated clearance, visual acceptance and AC5 service-link/picking gates open. No implementation or model changes made; keep Root review and all open criteria pending.
 <!-- SECTION:NOTES:END -->

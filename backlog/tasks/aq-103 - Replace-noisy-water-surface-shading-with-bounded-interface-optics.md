@@ -3,9 +3,9 @@ id: AQ-103
 title: Replace noisy water-surface shading with bounded interface optics
 status: In Progress
 assignee:
-  - '@root'
+  - '@junie'
 created_date: '2026-11-13 05:41'
-updated_date: '2026-11-14 21:03'
+updated_date: '2026-11-15 16:01'
 labels:
   - rendering
   - optics
@@ -55,6 +55,10 @@ Root revised iteration 2026-11-14 supersedes the rejected curvature-radiance pla
 Root-approved replacement trial: remove the rejected curvature-maxima lobe; add modest phase-coherent height-gradient microfacet normals filtered by actual screen-space phase footprint; preserve camera, enclosure, canonical wave field, shared clock and .53/.76 Snell threshold; compute TIR radiance from a bounded reflected-view ray projected into a low-frequency bilinear reef-color proxy (explicitly not actual mesh hits); compute fixture transmission only from a valid water-to-air refracted ray; add CPU analytic tests for reflect/refract orientation, critical angle and projection bounds. Verify corrected legacy-unit sample sweep, focused surface/lifecycle tests and typecheck, then hand the shader hash to Root for laptop-only native review. Do not accept AC2/3 or Done.
 
 Root expands radiance-source iteration after two rejected native proxy trials: capture a 128-square cubemap of the actual static reef once after assembled geometry is ready, refresh only when habitat layout changes, and borrow that cube in the water shader via setRadianceProbe. Exclude fish, water, recursive glass reflectors and transient overlays; preserve all renderer/visibility/shadow state in success/error paths; release targets on replacement/disposal and fall back honestly if unavailable. No per-frame extra pass, no asset/model changes. Actual scene content is required to move beyond a smooth analytic palette. One center probe has known parallax and frozen-static-radiance limits; startup cost and added texture allocation need objective evidence. Root laptop visual acceptance still required; no new criteria or Done yet.
+
+2026-11-15 focused correction: generated fragment shader inspection found the front meniscus alpha is added after and outside `frontClip`; its Gaussian is nonzero at `uFrontZ`, so the bright line reaches the enclosure boundary. Add a shader regression for front-boundary attenuation, multiply meniscus color/alpha by the existing front clip, and run the focused water-surface suite. Keep AC 2/3 and Done pending visual evidence, since no usable browser is available.
+
+Next iteration: share the existing enclosure frontClip with both the front-meniscus color tint and alpha contribution; add source-contract assertions for the front boundary, then verify the red/green water-surface regression.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -77,6 +81,12 @@ Root exact-sourcea5e64a2 native1440x900/402x874DPR1 evidence under docs/asset-ev
 Root2026-11-13 checkpoint: native final-sourcea5e64a2 evidence and later combinedd862bf9 source both load at the two exacttargetviewports without captured warnings/errors. Combined source passes748tests/66files/typecheck14scripts/build. Previous Junie/headless warnings remain historical environment observations, not present in Root native captures. OpenAC2/3 remain unchanged; no Done claim.
 
 Latest user steering: discontinue phone checks and assume phone behavior; prioritize re-review of water surface versus realistic example. Current source e0def59 surface still a5e64a2 shader: recent changes were label/recovery only, so visual regression may be framing/contrast relative to reference rather than a recent shader diff. Root is verifying before selecting correction; no root-cause claim yet.
+
+2026-11-15 current-source review: the cubemap radiance probe is already integrated through `WaterRadianceProbeManager`; macro/capillary shading, side fade, and meniscus are present. Concrete AC 3 gap found: meniscus emission bypasses frontClip and is nonzero at the front plane. Scope is limited to clipping it inside the existing boundary; do not claim visual acceptance without laptop review.
+
+2026-11-15 focused implementation evidence: added the frontClip meniscus regression, verified it failed against the pre-fix shader, then updated both meniscus tint and alpha to use clippedFrontMeniscus. Water-surface/wave/glass-enclosure/aquarium-lifecycle suites pass 72/72; radiance-probe suite passes 4/4; typecheck plus 17 script syntax checks pass; production build succeeds with the existing >500 kB aquarium chunk warning; git diff --check passes. No browser visual review was possible, so AC 2/3 and Root visual acceptance remain open; task stays In Progress.
+
+2026-11-15 Junie iteration: added assertions requiring the meniscus color and alpha to use clippedFrontMeniscus = frontMeniscus * frontClip, with frontClip reaching zero at uFrontZ. Against the original shader expressions, 8/9 water-surface tests passed and the new shader contract test failed; after applying the shared clip to tint and alpha, all 9/9 water-surface tests pass. `npm run typecheck` (including 17 script syntax checks), `npm run build`, and `git diff --check` pass; build reports the existing >500 kB aquarium chunk advisory. No browser visual review was available; AC #2/#3 remain open and no criteria were checked.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
