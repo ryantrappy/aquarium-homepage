@@ -1,0 +1,31 @@
+{
+  "point": [
+    777,
+    379
+  ],
+  "cursor": 39,
+  "events": [
+    {
+      "sequence": 39,
+      "source": {
+        "tabId": 10
+      },
+      "method": "Page.windowOpen",
+      "params": {
+        "url": "https://www.google.com/",
+        "userGesture": true,
+        "windowFeatures": [
+          "menubar",
+          "toolbar",
+          "status",
+          "scrollbars",
+          "resizable",
+          "noopener"
+        ],
+        "windowName": "_blank"
+      }
+    }
+  ],
+  "hasMore": false,
+  "truncated": false
+}

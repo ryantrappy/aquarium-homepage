@@ -4,9 +4,9 @@
 Category: Governance / Hub
 Status: Canonical / Active
 Authority: Binding Single Source of Documentation Truth
-Backlog: AQ-61, AQ-63, AQ-65, AQ-66, AQ-64, AQ-53, AQ-60, AQ-42
+Backlog: AQ-61, AQ-63, AQ-65, AQ-66, AQ-64, AQ-53, AQ-60, AQ-42, AQ-106
 Owner: @documentation
-Updated: 2026-11-14
+Updated: 2026-11-15
 Upstream: AGENTS.md, AGENT_TASKS.md, docs/requirements.md, docs/framework/DOCUMENTATION_FRAMEWORK.md
 Downstream: All repository documentation and active agent workflows
 -->
@@ -19,13 +19,19 @@ Downstream: All repository documentation and active agent workflows
 
 ---
 
+[AQ-87 front-water fallback review](asset-evidence/aq87/front-cutoff-20261115/README.md) records the bounded default-spawn repair and remaining full-roster gates.
+
+[AQ-107 Root refinement acceptance](asset-evidence/aq107/root-review-20261115/README.md) records the accepted original-recipe contour refinement, native comparisons, actual runtime picking and source-pinned checks.
+
+[AQ-107 rejected remesh evidence](asset-evidence/aq107/rejected-remesh-20261114/README.md) records the native visual failure of the first connected-domain refinement; AQ-107 remains open.
+
 ## 1. Quick Topic & Subsystem Lookup
 
 Find the authoritative documents for your task area:
 
 | Subsystem / Topic | Primary Canonical Spec | Supporting Plans & Research | Validation & Evidence |
 |---|---|---|---|
-| **Primary Requirements & Scope** | [`requirements.md`](requirements.md) | [`design-principles.md`](design-principles.md) | [`agent-change-audit.md`](agent-change-audit.md) |
+| **Primary Requirements & Scope** | [`requirements.md`](requirements.md), [showcase v1 scope](showcase-v1-finalization.md) | [`design-principles.md`](design-principles.md) | [`agent-change-audit.md`](agent-change-audit.md) |
 | **3D Rendering & Scene** | [`rendering.md`](rendering.md), [performance budgets](photorealism-budgets.md) | [`rendering-research-history.md`](rendering-research-history.md) | [`asset-pipeline-proof.md`](asset-pipeline-proof.md), [candidate donor provenance](asset-evidence/aq12/splat-candidate-provenance.json), [AQ-59 runtime material review](asset-evidence/aq59/runtime-20261112/review.json), [AQ-76 native runtime comparison](asset-evidence/aq76/native-20261112/review.json), [AQ-76 recovery policy](asset-evidence/aq76/recovery-20261114/README.md), [repeatable look-dev baseline](asset-evidence/aq70-2/baseline-before/review.json), [AQ-70.12 sand functional proof](asset-evidence/aq70-12/functional-review.json) |
 | **Fish Motion & Biomechanics** | [`fish-turning-and-maneuvering-plan.md`](fish-turning-and-maneuvering-plan.md) | [`sketchfab-motion-review.md`](sketchfab-motion-review.md), [`mesh2motion-review.md`](mesh2motion-review.md) | [`asset-evidence/fish-rig-inventory.md`](asset-evidence/fish-rig-inventory.md)  [AQ-58 reset proof](asset-evidence/aq58/fish-player-review.json) |
 | **Fish Behavior & AI Runtime** | [`behavior-runtime-contract.md`](behavior-runtime-contract.md) | [`fish-behavior-design.md`](fish-behavior-design.md), [`reef-fish-roster.md`](reef-fish-roster.md) | [AQ-41 controller CPU samples](asset-evidence/aq41/current-controller-benchmark.json), `src/simulation/behavior-runtime.test.ts`, [AQ-105 mounted hosting](asset-evidence/aq105/README.md), [final two-size review](asset-evidence/aq105/final-4df19de/README.md)  [AQ-64 state preservation](asset-evidence/aq64/review.json) |
@@ -36,7 +42,7 @@ Find the authoritative documents for your task area:
 | **Modular Corals & Rock Sockets**| [`modular-coral-and-live-rock-spec.md`](modular-coral-and-live-rock-spec.md)| [`socket-verification.md`](socket-verification.md) | [`asset-evidence/aq52-left-socket-report.json`](asset-evidence/aq52-left-socket-report.json), [AQ-53 mask runtime proof](asset-evidence/aq53/review.json), [AQ-42 displaced bounds](asset-evidence/aq42/displacement-bounds-review.json) |
 | **2D Thumbnails & Cutouts** | [`fish-assets.md`](fish-assets.md) | [`fish-art-provenance.json`](fish-art-provenance.json) | `public/fish-art-provenance.json`  [AQ-66 thumbnail proof](asset-evidence/aq66/review.json) |
 | **Homelab Services & Links** | [`service-mapping-review.md`](service-mapping-review.md) | [`requirements.md`](requirements.md) | Backlog `AQ-8` / `AQ-56` |
-| **Read-Only Telemetry (Hardware)**| [`network-traffic-source.md`](network-traffic-source.md) | Server endpoints (`src/routes/api/telemetry/`) | `src/server/disk-capacity-math.test.ts` |
+| **Read-Only Telemetry (Hardware)**| [`network-traffic-source.md`](network-traffic-source.md) | Server endpoints (`src/routes/api/telemetry/`) | `src/server/disk-capacity-math.test.ts`, [AQ-15 live CPU reader review](asset-evidence/aq15/root-review-20261114/README.md) |
 | **Ambient Motion & Lighting** | [`rendering.md`](rendering.md) | [`requirements.md`](requirements.md) | [AQ-14.2/AQ-70.6 Root visual review](asset-evidence/aq14-2/root-visual-review.json) |
 | **Accessibility & Controls** | [`accessibility-audit.md`](accessibility-audit.md) | [`design-principles.md`](design-principles.md) | Backlog `AQ-6` / `AQ-50`, [AQ-89 final caption review](asset-evidence/aq89/native-e0def59/README.md), [AQ-63 interaction proof](asset-evidence/aq63/review.json), [AQ-70.14 caption/access proof](asset-evidence/aq70-14/review.json) |
 | **Deployment & Production** | [`deployment.md`](deployment.md) | [`deployment-2.md`](archive/deployment-2.md) *(Historical)* | Docker / Node 24 on `trappserv.er` |
@@ -51,8 +57,9 @@ Directory of project documentation and verification evidence:
 ### Tier 1: Core Governance & Active Checkpoints (Binding)
 | Document | Status | Authority | Scope / Purpose |
 |---|---|---|---|
+| [Showcase v1 finalization](showcase-v1-finalization.md) | **Active** | Binding user scope; Backlog acceptance | Fixed 20-task showcase scope: 19 existing In Progress tasks plus AQ-108; Root review and rolling PR delivery. |
 | [`requirements.md`](requirements.md) | **Canonical** | Binding | Core product vision: photorealistic reef tank, realistic swimming, homelab links, dual viewports. |
-| [`design-principles.md`](design-principles.md) | **Canonical** | Binding | Aesthetic guidelines: aquarium first, unobtrusive UI, $0 CC0/CC-BY 4.0 asset budget, no live health claims. |
+| [`design-principles.md`](design-principles.md) | **Canonical** | Binding | Aquarium-first aesthetic, unobtrusive UI, $0 asset policy, and the scoped AQ-106 cave resident. |
 | [`framework/DOCUMENTATION_FRAMEWORK.md`](framework/DOCUMENTATION_FRAMEWORK.md) | **Canonical** | Binding | Mandatory documentation specification, authority hierarchy, header schema, and agent protocols. |
 | [`framework/TEMPLATE.md`](framework/TEMPLATE.md) | **Active** | Operational | Drop-in template for creating new compliant agent documentation. |
 
@@ -62,13 +69,13 @@ Directory of project documentation and verification evidence:
 | Document | Status | Authority | Backlog | Scope / Purpose |
 |---|---|---|---|---|
 | [`asset-contract.md`](asset-contract.md) | **Canonical** | Binding | `AQ-40` | Canonical coordinate convention (+Y up, +Z forward, fish head -X), meter scale, `COLOR_0` raw linear masks. |
-| [Performance and delivery budgets](photorealism-budgets.md) | **Active** | Binding | `AQ-70.3`, `AQ-76` | Frame/asset/scene caps and distinct quality-recovery observation policy; historical totals are dated measurements. |
+| [Performance and delivery budgets](photorealism-budgets.md) | **Active** | Binding | `AQ-70.3`, `AQ-76`, `AQ-106` | Frame/asset/scene caps, a hash-scoped supplied-moray PNG exception, and distinct quality-recovery policy; historical totals are dated measurements. |
 | [`modular-coral-and-live-rock-spec.md`](modular-coral-and-live-rock-spec.md) | **Canonical** | Binding | `AQ-14.3`, `AQ-42` | Technical specification for 8 modular coral archetypes and 2 live-rock foundations (left cave, right shelf). |
 | [`behavior-runtime-contract.md`](behavior-runtime-contract.md) | **Canonical** | Binding | `AQ-44` | Engine-independent behavior state machine (swim, hover, dart, feed, rest, school, avoid, burst). |
 | [`habitat-navigation-core-contract.md`](habitat-navigation-core-contract.md) | **Canonical** | Binding | `AQ-45` | Navigation contracts: spatial zones (open water, crevice, cave, substrate), waypoint steering, boundary clamps. |
-| [`fish-scale-reference.md`](fish-scale-reference.md) | **Canonical** | Binding | `AQ-60` | Adult biological lengths and render scales for all 16 roster species (parsed by `fish-scale.test.ts`). |
-| [`fish-behavior-design.md`](fish-behavior-design.md) | **Canonical** | Binding | `AQ-35` | Biological behavior profiles, swimming speed ranges, schooling affinities, and depth bounds for all species. |
-| [`reef-fish-roster.md`](reef-fish-roster.md) | **Canonical** | Binding | `AQ-35` | Biological taxonomic index of all 15 supported species, morphological archetypes, and color briefs. |
+| [`fish-scale-reference.md`](fish-scale-reference.md) | **Canonical** | Binding | `AQ-60`, `AQ-106` | Biological references and render targets for 16 standard reef fish plus the AQ-106 partial moray service species (parsed by `fish-scale.test.ts`). |
+| [`fish-behavior-design.md`](fish-behavior-design.md) | **Canonical** | Binding | `AQ-35`, `AQ-106` | Standard species behavior profiles plus the constrained fixed-cave moray service exception. |
+| [`reef-fish-roster.md`](reef-fish-roster.md) | **Canonical** | Binding | `AQ-35`, `AQ-106` | Biological index of the 16 standard reef-fish targets plus the AQ-106 fixed-cave moray service extension. |
 
 ---
 
@@ -83,6 +90,8 @@ Directory of project documentation and verification evidence:
 ### Tier 4: Audits & Verification Evidence (Evidentiary)
 | Document | Status | Authority | Backlog | Scope / Purpose |
 |---|---|---|---|---|
+| [AQ-108 public-defaults Root review](asset-evidence/aq108/root-review-20261114/README.md) | **Complete** | Evidentiary | `AQ-108` | Public defaults/reset, HTTPS input lifecycle, saved-config preservation,35focused tests/typecheck/build and laptop-only browser evidence. |
+| [AQ-15 real CPU thermometer Root source review](asset-evidence/aq15/root-review-20261114/README.md) | **Active** | Evidentiary | `AQ-15` | Current source reader discovers seven live coretemp sensors through the app container's sysfs; the currently running API still reports unavailable, so Root visual review remains open. |
 | [AQ-107 chromis contour diagnosis](asset-evidence/aq107/diagnosis-20261114/README.md) | **Active** | Evidentiary | `AQ-107` | Actual exported contour/SDF metrics independently reproduced; model refinement and laptop visual acceptance pending. |
 | [Rejected surface-curvature trial](asset-evidence/aq103/rejected-curvature-20261114/README.md) | **Historical** | Evidentiary | `AQ-103` | Laptop-only rejected oval-highlight trial; incorrect initial numeric sampler explicitly excluded; surface correction remains open. |
 | [AQ-105 mounted-anemone hosting](asset-evidence/aq105/README.md), [final Root review](asset-evidence/aq105/final-4df19de/README.md) | **Active** | Evidentiary | `AQ-105` | Accepted mounted hosting, species-scoped soft access,875tests and exact two-size native pose/link/control evidence at4df19de; broader art/body/budget gates remain open. |
@@ -129,7 +138,7 @@ Directory of project documentation and verification evidence:
 | [`accessibility-audit.md`](accessibility-audit.md) | **Active** | Evidentiary | `AQ-6`, `AQ-50` | WCAG / keyboard navigation audit, focus trapping, reduced motion behavior, dual viewport checks. |
 | [`service-mapping-review.md`](service-mapping-review.md) | **Complete** | Evidentiary | `AQ-8`, `AQ-56` | Verified starter homelab roster: Komodo, WatchMyBirds, Paperless, Home Assistant, Ombi. |
 | [`asset-pipeline-proof.md`](asset-pipeline-proof.md) | **Active** | Evidentiary | `AQ-40` | Material baking, export validation, and technical pipeline proof records. |
-| [`fish-assets.md`](fish-assets.md) | **Active** | Evidentiary | `AQ-40` | Static 2D thumbnail provenance and recognition cutout assets inventory. |
+| [`fish-assets.md`](fish-assets.md) | **Active** | Evidentiary | `AQ-40`, `AQ-106` | Thumbnail provenance, recognition art, and the separately recorded picker-only moray image. |
 | [`fish-art-provenance.json`](fish-art-provenance.json) | **Canonical** | Fixture | `AQ-40` | Machine-readable SHA-256 hashes and provenance records for 2D cutout art. |
 | [`asset-evidence/fish-rig-inventory.md`](asset-evidence/fish-rig-inventory.md) | **Active** | Evidentiary | `AQ-49.1` | Exact bone names and rotation channel inventory for 8 candidate fish rigs (174 total channels). |
 | [`asset-evidence/fish-rig-inventory.json`](asset-evidence/fish-rig-inventory.json) | **Canonical** | Fixture | `AQ-49.1` | Machine-readable JSON inventory of rig tracks and joint hierarchies. |

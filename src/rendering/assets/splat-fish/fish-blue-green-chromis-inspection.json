@@ -9,14 +9,14 @@
       "origin": "local",
       "dimensionsM": [
         0.282292,
-        0.91924,
+        0.920147,
         2
       ],
       "provenance": {
         "license": "original",
         "creator": "Aquarium project",
-        "sourceSha256": "7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd",
-        "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+        "sourceSha256": "c052ac5186af259bb4461c55eca1b4b96172c87180001829a71f731cf72b7e40",
+        "recipe": "node scripts/refine-chromis-contour.mjs; baseGlbSha256=c53ea07f3e6f96d254546cbb54f418106b268dcc00ea96c2aed14796e1b855de; sourceWebpSha256=1990dc99a1424e4cda5cccbd7508dbe4959718b5d5dcc0939b4e8b5401cb3049; sharedGeneratorSha256=7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd; learnedGuideSha256=84bcdf285815122091c578e897db43a7e1b585d3bcf474349529f5fc1ece143e; grid=139x83",
         "attribution": "Original photorealistic 3D rigged and animated fish asset (Chromis viridis (Blue-Green Chromis)) reconstructed from project-original public/fish/blue-green-chromis.webp with embedded PBR textures."
       }
     }
@@ -42,12 +42,12 @@
   "boundsM": {
     "min": [
       -0.141146,
-      -0.455444,
+      -0.455925,
       -1
     ],
     "max": [
       0.141146,
-      0.463796,
+      0.464222,
       1
     ]
   },
@@ -55,16 +55,16 @@
     {
       "id": "blue_green_chromis_body",
       "role": "fish",
-      "vertexCount": 4793,
+      "vertexCount": 12175,
       "boundsM": {
         "min": [
           -0.141146,
-          -0.455444,
+          -0.455925,
           -1
         ],
         "max": [
           0.141146,
-          0.463796,
+          0.464222,
           1
         ]
       },

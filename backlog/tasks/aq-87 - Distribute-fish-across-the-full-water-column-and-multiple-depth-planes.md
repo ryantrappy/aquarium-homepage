@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-08'
-updated_date: '2026-11-13 05:31'
+updated_date: '2026-11-15 15:59'
 labels:
   - behavior
   - photorealism
@@ -56,6 +56,8 @@ Stop fish clustering in the top half of the tank on a single depth plane by enfo
 Root distribution iteration: preserve each species existing declared vertical band during safety fallback/mesh relocation rather than searching the entire water height when a preferred reef position is blocked. Extend bounded spawn search with an optional safe world-height interval and constrain current service/schoolmate/relocation callers using the existing ecological range helper. Do not reduce collision clearances, reset retained fish after unrelated settings edits, change school/startle/pause contracts or invent habitat targets. Reproduce blocked lower-band fallback in tests and verify actual-controller spawns plus native exact-size captures. Inspect cruise targets/anchor-state exceptions separately; do not claim the whole distribution task accepted from spawn changes alone.
 
 Native diagnostic showed a second cause: height strata reused horizontal ID order, placing a gramma whose ID sorted first at the very top of its own band. Root now assigns independent heightIndex by ecological depth preference, preserving stable horizontal identity lanes and input-order independence. A constrained search also prioritizes keeping intended Y over a shorter upward escape, while preserving collision/crowding checks. Both cruise planners share the same range helper; explicit anchor-state/startle behavior is preserved and remains an acceptance consideration. DEV capture sidecars gain copied inhabitant positions and allowedY bands for objective review.
+
+Next iteration: clamp the free-water startle target Y to the same clearance-safe species depth band as cruise, while preserving horizontal escape and startle FSM behavior. Reproduce at the upper band edge, then run fish-spawn and motion suites.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -64,4 +66,23 @@ Native diagnostic showed a second cause: height strata reused horizontal ID orde
 Root reviewed two-size native trial: independent ecological height order plus height-preserving safe search restores low foreground fish (gramma aroundY-1.51, butterfly aroundY-1.10) while clown/cardinal remain upper water and tangs span farther depth. DEV snapshots now copy positions/allowedY for objective checks. Root accepts the visible spread for current eight-service roster, but not full-task completion: explicit anchor/startle state targets may leave general cruise bands, clown profile currently ends at normalizedDepth0.48, and exact animated-body solid-clearance gates remain with AQ58/AQ60. Do not infer AC1/AC3 from point-safe snapshots.130focused spawn/scale/controller/motion/schooling/runtime tests and typecheck14scripts pass. Existing spawn test fixtures now consume actual shared reef placements and physical-spacing arguments instead of obsolete hardcoded layout values.
 
 Root exact-source review at 8b2d7cc: docs/asset-evidence/aq87/distribution-20261112/ contains native 1440x900 and 402x874 PNGs, ready sidecars and phone target bounds. All eleven inhabitants remain within declared staging bands; eight service fish span Y3.35655 and visibly multiple depth planes. Eight phone targets exceed44px. Root accepts this saved-roster distribution against the taller reef reference direction. Isolated full732tests/65files, typecheck14scripts and production build pass; prior behavior regression scope retained. AC2/4/5 accepted. AC1/3 remain explicitly open: clown profile is upper-half and anchor/startle targets are separate; animated-body/solid clearance is not proven by point snapshots. Initial proof-server403 infrastructure errors were corrected before final ready captures; no clean-console certification is claimed.
+
+2026-11-15 Junie iteration: found the non-school startle branch in selectFreeWaterAttemptTarget used fish.position.y + 0.15 clamped only to tank bounds. Added a regression that failed with target y=1.829 above the allowed y=1.689, then constrained the vertical escape coordinate to the existing clearance-safe depthRange. Horizontal evasive direction and startle behavior remain unchanged. After the fix, motion.test.ts and fish-spawn.test.ts pass 90/90. No acceptance criteria changed or checked; all-species route coverage, AC3 all-depth animated clearance/occlusion/labels, and Root review remain open.
+
+Additional validation for this iteration: `npm run typecheck` passed, syntax-checking 17 scripts; `npm run build` passed with the existing >500 kB aquarium chunk advisory. `git diff --check` passed. The implementation is handed off for Root review; keep the task In Progress because AC #1 is not complete across all species/routes and AC #3 visual/clearance/label evidence is still open.
 <!-- SECTION:NOTES:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @root
+created: 2026-11-15 14:42
+---
+Root partial review 2026-11-15: accepted the fresh public-default native view at 1440x900 CSS pixels, DPR 1, with reduced motion emulated before app navigation and no look-dev seed prefix. After settled reload, all five default fish bodies and captions remained visible with aria-hidden=false. Capture/state: docs/asset-evidence/aq87/front-cutoff-20261115/accepted-native-1440x900.jpg and accepted-native-state.json. Pinned planner comparison records five-starter Z span 0.7898077073 to 2.2418077073 scene units; this unit-planner measurement is separate from the native visual review. Focused fish-spawn suite 31/31 and Root combined full suite 934/934 across 78 files pass. AQ-87 AC #1 remains open for full-species depth bands and route targets; AC #3 remains open for all-depth animated-body clearance, reef occlusion, and labels/hit targets. No AC newly checked; task remains In Progress.
+---
+
+created: 2026-11-15 14:46
+---
+Root reviewed partial milestone2026-11-15: addfront-watercutoff Zcandidate without changing visibilityranking, biologicheight, clearance, spacing, mesh-query orfrustumfilters. PlannerdefaultfiveZspan0.7898to2.2418; Rootnative1440x900DPR1freshdefaults (reducedmotionbeforeappnavigation, noloodevseedprefix) showsall5bodies/captions andunhiddenlinks. Root30focusedtests/934full78files passprivatef03b551. Combined31caseauditandseparateAQ104concurrenttimeout retained transparently; notAQ106acceptance. Removedpartialdebugconsoleexternallycommitted273583c. Evidence docs/asset-evidence/aq87/front-cutoff-20261115/. No newAC checked; fullspeciesbands andall-depthanimatedclearance remainopen. ConcurrentAQ106hunks excluded fromselectedindex/sourcecommit.
+---
+<!-- COMMENTS:END -->

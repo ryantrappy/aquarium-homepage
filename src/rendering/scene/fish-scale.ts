@@ -1,9 +1,9 @@
 // True relative fish sizing (AQ-60).
 //
-// Every rendered fish derives its nose-to-tail length from one global
-// tank-units-per-inch constant and the species' adult total length in
-// docs/fish-scale-reference.md. The test suite parses that table and re-measures
-// the runtime GLBs, so neither the sizes nor the measured extents may drift.
+// Every rendered fish derives its visible nose-to-tail length from one global
+// tank-units-per-inch constant and its render target in docs/fish-scale-reference.md.
+// For the partial moray model that target is the forebody only; its biological
+// total-length reference is recorded separately below.
 
 /** World units (three.js scene units) per real-world inch of fish length. */
 export const TANK_UNITS_PER_INCH = .16
@@ -26,7 +26,22 @@ export const FISH_RENDER_LENGTH_INCHES: Readonly<Record<string, number>> = Objec
   'flame-angelfish': 3.75,
   'copperband-butterflyfish': 6.5,
   'desjardins-sailfin-tang': 12,
+  'snowflake-moray-eel': 9,
 })
+
+/** Project-selected total biological reference, separate from the partial rendered forebody. */
+export const FISH_BIOLOGICAL_REFERENCE_LENGTH_INCHES: Readonly<Record<string, number>> = Object.freeze({
+  'snowflake-moray-eel': 24,
+})
+
+/** Measured bind-space bounds for the supplied partial moray forebody GLB. */
+export const SNOWFLAKE_MORAY_FOREBODY_BOUNDS = Object.freeze({
+  min: Object.freeze({ x: -0.1151658296585083, y: -0.1228799968957901, z: 0 }),
+  max: Object.freeze({ x: 0.10846620053052902, y: 0.21449047327041626, z: 2.0055999755859375 }),
+})
+
+/** Rest-space joint position from the supplied probe → body_mid → neck → head chain. */
+export const SNOWFLAKE_MORAY_HEAD_BONE_BIND_POSITION = Object.freeze({ x: 0, y: 0, z: 1.56 })
 
 /**
  * Nose-to-tail extent of each runtime GLB along its swim axis (bind-space +Z of
@@ -50,6 +65,7 @@ export const MODEL_SWIM_AXIS_LENGTH: Readonly<Record<string, number>> = Object.f
   'flame-angelfish': 2, // src/rendering/assets/splat-fish/flame-angelfish.glb, z -1 … 1
   'copperband-butterflyfish': 2, // src/rendering/assets/splat-fish/copperband-butterflyfish.glb, z -1 … 1
   'desjardins-sailfin-tang': 1.985423, // src/rendering/assets/fish/download_testing_copies/zebrasoma_desjardinii-copy.glb, z -0.999266 … 0.986158
+  'snowflake-moray-eel': 2.0055999756, // src/rendering/assets/fish/snowflake-moray-eel.glb; cut rear to head, no tail
 })
 
 /** Fallback artwork plane width in world units before species scaling. */

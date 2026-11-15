@@ -1,10 +1,11 @@
 ---
 id: AQ-106
 title: Add a Moray Eel
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@junie'
 created_date: '2026-11-14 20:52'
-updated_date: '2026-11-14 22:25'
+updated_date: '2026-11-15 15:45'
 labels:
   - gemini-research
   - modeling
@@ -28,9 +29,73 @@ references:
   - src/rendering/scene/fish-link-projection.ts
   - src/rendering/scene/aquarium.ts
   - src/components/AquariumScene.tsx
+  - src/rendering/scene/moray-residence.ts
+  - src/rendering/scene/moray-residence.test.ts
+  - src/rendering/scene/motion.ts
+  - src/components/ServiceManager.tsx
+  - src/lib/validation.ts
+  - src/rendering/assets/budgets.test.ts
+  - docs/reef-fish-roster.md
+  - docs/fish-art-provenance.json
+  - docs/asset-pipeline-proof.md
+  - docs/requirements.md
+  - docs/aq45-interaction-architecture.md
 documentation:
   - docs/fish-scale-reference.md
   - docs/photorealism-budgets.md
+  - docs/reef-fish-roster.md
+  - docs/fish-behavior-design.md
+  - docs/requirements.md
+  - docs/design-principles.md
+  - docs/aq45-interaction-architecture.md
+  - docs/asset-pipeline-proof.md
+  - docs/fish-assets.md
+  - docs/fish-art-provenance.json
+  - docs/README.md
+modified_files:
+  - agent_scratch.md
+  - AGENT_TASKS.md
+  - docs/README.md
+  - docs/aq45-interaction-architecture.md
+  - docs/asset-pipeline-proof.md
+  - docs/design-principles.md
+  - docs/fish-art-provenance.json
+  - docs/fish-assets.md
+  - docs/fish-behavior-design.md
+  - docs/fish-scale-reference.md
+  - docs/photorealism-budgets.md
+  - docs/reef-fish-roster.md
+  - docs/requirements.md
+  - src/components/ServiceManager.test.tsx
+  - src/components/ServiceManager.tsx
+  - src/lib/fish-behavior-motion.integration.test.ts
+  - src/lib/fish-behavior.test.ts
+  - src/lib/fish-behavior.ts
+  - src/lib/fish.test.ts
+  - src/lib/fish.ts
+  - src/lib/services.test.ts
+  - src/lib/validation.ts
+  - src/rendering/assets/budgets.test.ts
+  - src/rendering/assets/budgets.ts
+  - src/rendering/assets/fish/manifest.json
+  - src/rendering/scene/aquarium-lifecycle.test.ts
+  - src/rendering/scene/aquarium.ts
+  - src/rendering/scene/camera-zoom.test.ts
+  - src/rendering/scene/camera-zoom.ts
+  - src/rendering/scene/fish-body-flex.test.ts
+  - src/rendering/scene/fish-scale.test.ts
+  - src/rendering/scene/fish-scale.ts
+  - src/rendering/scene/fish-spawn.test.ts
+  - src/rendering/scene/fish-spawn.ts
+  - src/rendering/scene/moray-residence.test.ts
+  - src/rendering/scene/moray-residence.ts
+  - src/rendering/scene/motion.test.ts
+  - src/rendering/scene/motion.ts
+  - src/rendering/scene/reef-mesh-navigation.test.ts
+  - src/rendering/scene/schooling-navigation.ts
+  - src/rendering/scene/species-locomotion-extensions.test.ts
+  - src/rendering/scene/species-locomotion-extensions.ts
+  - src/styles/aquarium.css
 priority: '17'
 type: enhancement
 ordinal: 143000
@@ -39,28 +104,41 @@ ordinal: 143000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Add a snowflake moray eel (*Echidna nebulosa*) as a 17th roster species. It lives in a rock crevice permanently: only the head and forebody protrude, and only that front portion is modeled and rendered. Daytime state is head-out residence with gentle sway and mouth ventilation; it never free-swims. Builds on AQ-46 (Done, Root-reviewed 2026-11-03), which researched moray and garden eel options and deferred the green moray until a suitable elongated body and reef crevice could be represented well. Species and cave-dwelling scope were decided by Ryan 2026-11-14 (recorded in Comments below); service mapping, asset, and crevice location are still open. Research behind this task is in Implementation Notes below.
+Add the supplied snowflake moray eel (*Echidna nebulosa*) as a selectable 17th roster species and service fish. It must remain permanently in the bottom-right coral cave; the supplied model is intentionally partial, with only its head and forebody represented. Preserve the existing user-modified GLB byte-for-byte and integrate it without Blender/model edits. The cave location, service role, and current asset are now decided by the user; no free-swimming or alternate-cave fallback is permitted.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Crevice anchor on the left island with measured coordinates: one `rockCrevice` anchor derived from measured mouth coordinates of the left island's pass-through cave (`src/rendering/scene/reef-assembly.ts` documents the cave exists but has no measured mouth coordinates). The center arch and right island are excluded: the arch only mounts at width >= 600 (`src/rendering/scene/aquarium.ts:920`) and the phone viewport mounts only the left island (`src/rendering/scene/reef-layout.ts` PHONE_REEF). The anchor must not be derived from coral sockets — `contract.ts` restricts `socket_*` nodes to role `coral-mount` and all 12 left / 11 right sockets are coral mounts.
-- [ ] #2 Behavior profile fits the existing schema: the moray profile passes `validateSpeciesBehaviorProfiles` — `idle` (head-out sway/ventilation at `rockCrevice`) + `swim` (slow local head probe at `rockCrevice`), mirroring the ocellaris-clownfish host-associated pattern (`sheltered-reef` mode, `crevice-inspection` gait) with the standard idle/swim transitions. No new `habitatMode` and no schema relaxation unless the mirror proves unworkable, in which case the relaxation is an explicit, Root-approved decision. Roster/test counts updated 16 → 17 (`src/lib/fish.test.ts`, `src/lib/fish-behavior.test.ts`); runtime handling of a near-stationary `swim` state confirmed in `src/simulation/behavior-runtime.ts`.
-- [ ] #3 Partial-body scale rule: `fish-scale.ts` gains an explicit modeled/visible-length field (or partial-body scale rule) alongside the 24 in adult reference length. `FISH_RENDER_LENGTH_INCHES` holds 24 (species length); the GLB's modeled forebody (~8–10 in) renders true-scale with no 2.5–3x stretch (`fishModelScale` scales by the full length today). `MODEL_SWIM_AXIS_LENGTH` equals the measured GLB extent, `fish-scale.test.ts` passes, and `projectFishLinkBounds` / `updateVisibility` use the visible length for the link hitbox.
-- [ ] #4 Label, occlusion, and click handling for a crevice fish: the label anchors to the visible head and does not sit over rock (rock-aware placement in `resolveLabelDeconflicts` or equivalent — it currently checks only fish bodies and captions). `updateVisibility` sample points / root placement account for the protruding head so the label is not hidden by the rock cavity (`ray.far = distToFish - 0.05` against `reefMeshes`). Click handling confirmed: the `.fish-name` caption carries the click, or a crevice/head collider allowance is added if `serviceAt` raycast against surrounding rock proves insufficient.
-- [ ] #5 FishBase verification: `docs/fish-scale-reference.md` gains the moray row with the direct FishBase link `https://www.fishbase.se/summary/Echidna-nebulosa` — max 100.0 cm TL, common 50.0 cm TL, directly retrieved 2026-11-14. No third-party source is substituted for the FishBase max column (per the doc's own rule; its fallback is FishBase's own indexed summary content).
-- [ ] #6 KTX2 loader prerequisite: `KTX2Loader` + the Basis Universal transcoder are wired into `aquarium.ts` (under `public/basis/`) before any KTX2 moray GLB lands. The moray GLB ships KTX2 textures per the budgets rule (`budgets.ts`: non-grandfathered assets must be `image/ktx2`).
-- [ ] #7 Manifest and budgets: the moray is owned by the hero-fish manifest (`src/rendering/assets/fish/manifest.json`) — recommended; the splat-fish rig contract (8 joints / 8 rotation channels / 3 PBR textures) does not apply to a Blender-modeled partial eel. `budgets.ts`, the `budgets.test.ts` roster-shape assertions (hero-fish 6 → 7), and `docs/photorealism-budgets.md` are re-derived; scene totals are re-measured at implementation (GPU headroom ~218/512 MiB after PR #52 raised the cap).
-- [ ] #8 Service decision before modeling: service link vs ambiance vs display-only decided (AQ-75 / AQ-93). AQ-93 explicitly excludes hero species and requires Root design approval before implementation, so a display-only or ambiance moray needs an AQ-93 amendment or a service link — it is not available as-is.
-- [ ] #9 Visual verification at 1440×900 and 402×874 plus Root art acceptance on the AQ-79 pattern. Mouth ventilation is never encoded as aggression.
+- [x] #1 The eel is anchored only at a measured mouth transform for the bottom-right cave. Its placement derives from actual reef geometry/layout transforms, not coral sockets; when that cave is absent or invalid, do not relocate the eel elsewhere, while configured service access remains available.
+- [x] #2 The snow-moray profile passes validateSpeciesBehaviorProfiles and remains cave-bound in every state, transition, and runtime path. Reuse the supplied authored crevice animation where available; do not apply free-swimming, turning, or route-search overlays. Ventilation is not aggression.
+- [x] #3 Model scale distinguishes the 24-inch biological reference from the supplied partial mesh. Measure its actual forebody extent and use that visible length for model scale, link bounds, labels, and clearance; do not reshape or rescale the supplied asset to fake a full eel.
+- [x] #4 The service label and click target track the visible head, remain visible outside rock occlusion, and open the configured service; missing cave/model/loading/configuration must not remove native Services access.
+- [x] #5 docs/fish-scale-reference.md records the direct FishBase page https://www.fishbase.se/summary/Echidna-nebulosa and the cited max/common lengths, with the modeled visible length documented separately.
+- [x] #6 Load the supplied GLB with its actual texture format. Document and validate the supplied PNG texture exception to the KTX2 budget rule; do not claim it is KTX2 or alter the asset. A separate derivative is acceptable only if independently validated and provenance-preserving.
+- [x] #7 The hero-fish manifest, budget validation, roster assertions, and docs/photorealism-budgets.md include the supplied moray and are re-derived from the actual asset and current scene totals; retain a clear, scoped exception for the supplied texture format.
+- [x] #8 The moray is available in the service fish selector. Selecting it creates only the cave resident; multiple services must not create free-swimming duplicates.
+- [ ] #9 Verify at 1440×900 only in accordance with the latest user direction. Root art review remains required before completion; do not run phone/device-matrix checks.
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
 - [ ] #1 Root agent reviews the completed work before the task is marked Done.
-- [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
+- [x] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 - [ ] #3 Model promotion follows the AQ-79 per-species Root-review routing (no automatic swap; Root reviews the model before it goes live).
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+### Current user direction (2026-11-15)
+- Preserve the existing snowflake-moray GLB, PNG maps, picker image, and live-rock/coral assets byte-for-byte; no Blender or model edits.
+- Add `snowflake-moray-eel` to the service fish catalog as a single-assignment species. Reject duplicate services in validation and fail closed in renderer reconciliation if invalid duplicate input arrives.
+- Place the supplied partial forebody only in the measured bottom-right cave of the right island. Never use left-cave or open-water spawn/search fallbacks. If model, right collider, or exposed-head clearance is unavailable, omit the eel visual while preserving native service links.
+- Keep the 24-inch biological reference separate from the 9-inch rendered forebody. Use the authored `crevice_idle` clip only; skip generic swim, startle, turning, and body-flex overlays. Project service label/focus/picking from the animated head bone. The rear remains cave-embedded; collision validation covers only the exposed head-to-probe segment and does not claim whole-body clearance.
+- Record the actual runtime asset, bounds, animation tracks, thumbnail, hashes, PNG texture format, and a single exact-hash budget exception. Do not convert textures or treat the exception as license approval; creator/source provenance remains a Root review item.
+- Verify profile/catalog/schema, fixed motion, actual right-rock/zoanthid/sand/head-ray geometry, failure and duplicate-service fallbacks, scale, budget, and service-link behavior. Update the cataloged docs and current-scene handoff.
+- Leave the task In Progress until Root reviews the local 1440×900 result, provenance, dependencies, and final acceptance. No 402×874 browser review or deployment.
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 
@@ -147,6 +225,35 @@ Verified 2026-11-14 via the Sketchfab API (license, downloadable flag, face coun
 - Asset path: Blender modeling (recommended) — no usable licensed asset found.
 - Manifest target: hero-fish manifest (recommended, not decided).
 
+2026-11-15 user override: right-side bottom cave only; moray must be selectable as a service. Supplied model currently exists at src/rendering/assets/fish/snowflake-moray-eel.glb and is already modified in the worktree; preserve the exact bytes (baseline SHA-256 810e641d69159d4b97db42cc48e7392e1861381777984721368ed5d18a450d5d). Current plan supersedes old left-cave, unresolved-service, KTX2-only, and phone-check assumptions. AQ-60, AQ-70.3, AQ-74, and AQ-82 remain blocking dependencies; do not remove them or claim full task readiness.
+
+2026-11-15 implementation baseline: the supplied eel GLB still matches the recorded SHA-256 810e641d69159d4b97db42cc48e7392e1861381777984721368ed5d18a450d5d; it is 1,294,560 B, 6,712 triangles, a 2.0055999756-unit +Z forebody, one 7.5417 s crevice_idle clip, and three PNG maps (512², 1024², 256²; estimated decoded GPU texture memory 7,340,032 B). Direct triangle rays against the runtime reef-full-model-right.glb locate the lower-right recess at source-local x≈0.36,y≈0.08: first interior surface z≈0.026 versus adjacent rim x≈0.28,y≈0.08,z≈0.1922; use a fixed mouth plane near z=0.19 and validate it against the current geometry before spawning. The laptop placement transform maps that head point to about world (4.80,-1.46,-0.075); no Blender/model edits. AQ-60, AQ-70.3, AQ-74, and AQ-82 remain blocking dependencies; Root visual review stays pending.
+
+Current user decisions override the earlier research draft’s open-decision list for this implementation: the snowflake moray is a selectable service species, must be resident only in the measured bottom-right cave of the right island, and must never fall back to open-water route search or generic swim/turning overlays. The 24-inch figure is a biological reference, not a render size; the supplied partial forebody is measured/rendered at 9 inches. Preserve the supplied GLB byte-for-byte and its PNG maps (explicit scoped budget exception); do not edit Blender models. Verify laptop-only at 1440×900 if tooling permits; Root visual review and AQ-60/AQ-70.3/AQ-74/AQ-82 dependency gates remain pending. Earlier left-cave, asset-sourcing, service-role, and 24-inch render recommendations are historical.
+
+2026-11-15 Junie implementation checkpoint: the pre-existing snowflake-moray GLB remains unchanged (SHA-256 810e641d69159d4b97db42cc48e7392e1861381777984721368ed5d18a450d5d; 1,294,560 bytes; 6,712 triangles; crevice_idle; three PNG maps). The measured right-runtime cave/head-ray fixture and one-service schema/picker integration are being implemented. Dependencies and Root review remain open; this is not completion evidence.
+
+2026-11-15 Junie implementation handoff: AC 1–8 verified; AC 9 remains pending 1440×900 browser/Root visual review. The supplied GLB remained byte-for-byte untouched in this session (SHA-256 810e641d69159d4b97db42cc48e7392e1861381777984721368ed5d18a450d5d, 1,294,560 B, 6,712 triangles); author/external-source license evidence remains unrecorded, so Root asset/provenance approval is pending. The fixed cave pose is derived from the runtime right-island transform and passes the exposed head-to-probe capsule, mounted-zoanthid, sand-margin, and default-camera ray tests; the embedded rear remains occluded by design. Only the exposed head/probe segment is clearance-checked; the complete partial forebody is not claimed to be collision-free outside the cave.
+
+Verification: `npm run typecheck` passed; targeted AQ-106 tests passed (18 selected tests); `npm run build -- --outDir .tmp-aq106-build --emptyOutDir` passed, with the existing >500 kB aquarium chunk warning (Nitro also generated `.output`). Full `npx vitest run --maxWorkers=2`: 950/952 passed. The two failures are AQ-87 starter-depth assertions for the unchanged five default services at 402×874 and 1440×900 (measured Z spread 0.7898 vs required >1.5); no assertions were weakened.
+
+Root review remains required before Done. No Blender edits, deployment, or visual browser review were performed. Existing unrelated changes to AQ-70.12, water-surface files, and the pre-modified moray GLB are not included in this task file list.
+
+2026-11-15 Junie final verification (clarifies prior aggregate): `npm run typecheck` passes; all 17 script checks pass; production build succeeds with the existing >500 kB aquarium chunk warning. Focused AQ-106 suites pass 218 tests across 14 files, including actual right-rock/zoanthid/sand head-ray, lifecycle head focus, model/collider/duplicate-service fail-closed paths, model bounds/clip/hash, selector, and budget exception. Full Vitest passes 951/953; only the two AQ-87 starter depth-plane assertions fail at 402×874 and 1440×900 (spread 0.7898077 vs >1.5) using the unchanged default five services; no assertion was weakened. The supplied moray GLB/PNG maps remain byte-identical to the pre-existing working-tree asset (SHA-256 `810e641d69159d4b97db42cc48e7392e1861381777984721368ed5d18a450d5d`). AC 1–8 verified at source/test level; AC 9 and DoD 1/3 await Root visual/provenance/model review, open dependencies remain, and the task stays In Progress. No browser review, deployment, Blender edit, or commit; Root must verify AGENT_TASKS.md before commit.
+
+2026-11-15 local smoke: `npm run dev -- --host 127.0.0.1 --port 4175 --strictPort` started successfully. `GET /` returned HTTP 200 (6,346 B); the supplied moray GLB returned HTTP 200 (`model/gltf-binary`, 1,294,560 B), and picker WebP returned HTTP 200 (`image/webp`, 11,530 B). Existing preview on port 4173 was left untouched. This is not the required 1440×900 browser/Root visual review.
+
+2026-11-15 final re-verification: `npm test -- --maxWorkers=1` passes all 954 tests across 79 files (exit 0); the earlier parallel AQ-87 starter-depth failures did not reproduce. The dedicated AQ-106 suites still pass 218/218 across 14 files. `npm run typecheck` passes with 17 script checks; final `npm run build` succeeds with the existing >500 kB aquarium chunk warning. Local Vite smoke on `127.0.0.1:4175` returned HTTP 200 for `/`, the moray GLB (1,294,560 B), and picker WebP (11,530 B); existing preview 4173 was untouched. No 1440×900 browser review, Root visual/provenance/model review, deployment, Blender edit, or commit; AC 9 and DoD 1/3 remain open.
+
+2026-11-15 worktree ownership check: `src/rendering/scene/fish-spawn.ts` and `fish-spawn.test.ts` have mixed staged/un-staged changes. The staged AQ-87 depth-candidate work and untracked `docs/asset-evidence/aq76/current-inventory-20261115/` / `docs/asset-evidence/aq87/front-cutoff-20261115/` are concurrent and were not edited by AQ-106; AQ-106 adds only crevice-resident rejection and the missing local `obstacles` test binding in those shared files. Preserve the staged/untracked work and do not blanket-stage. `AGENT_TASKS.md` now marks the handoff Root-unverified; do not commit until Root verifies facts and visual/provenance gates.
+
+2026-11-15 final status refresh: `git diff --check` is clean. Current untracked concurrent evidence is `docs/asset-evidence/aq76/current-inventory-20261115/` and `docs/asset-evidence/aq103/root-review-20261115/`; the earlier AQ-87 directory is no longer listed. Preserve both current directories and mixed staged/unstaged AQ-87 spawn files; none are AQ-106-owned.
+
+2026-11-15 handoff correction: final `git diff --cached --name-status` is empty; `fish-spawn.ts` and `fish-spawn.test.ts` are unstaged AQ-106 changes, not mixed staged work. Current concurrent modified paths are AQ-70.12/water-surface; untracked evidence is AQ-76 and AQ-103 only. Preserve those paths and do not stage them for AQ-106.
+
+2026-11-15 request scope clarification: user limited this execution to tasks already In Progress at request start; do not start To Do tasks or create new tasks. The fixed 18-task set and override are recorded in AGENT_TASKS.md, docs/showcase-v1-finalization.md, and agent_scratch.md. AQ-106 remains In Progress: AC 1–8 remain verified from prior evidence; AC 9 and Root review are pending. No new visual acceptance is claimed.
+
+2026-11-15 follow-up: checked the repository for Playwright/Puppeteer and found no usable browser runner or browser interface in this session. Per AC 9 and the existing plan, the 1440×900 visual verification and Root art/provenance/model review remain pending; no browser acceptance is claimed.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
@@ -157,9 +264,21 @@ created: 2026-11-14 15:31
 ---
 Species: snowflake moray, *Echidna nebulosa* (Ryan, 2026-11-14). Replaces AQ-46's green-moray candidate; see Implementation Notes §1 for the scale reasoning. FishBase maximum 100.0 cm TL, common length 50.0 cm TL, verified directly from https://www.fishbase.se/summary/Echidna-nebulosa on 2026-11-14.
 ---
+
 author: Ryan
 created: 2026-11-14 15:33
 ---
 Cave-dwelling assumption (Ryan, 2026-11-14): the eel lives and stays in the cave all the time. Only the front portion (head + forebody) needs to be rendered/modeled, and motion stays limited in scope: head sway, mouth ventilation, slow head probe in/out. No free-swimming, no exploratory swim, no anguilliform traveling wave in open water. This removes the swimming-eel navigation and clearance problem entirely and shrinks the modeling, animation, and budget scope.
+---
+
+author: @junie
+created: 2026-11-15 06:11
+---
+2026-11-15 implementation direction: the current user request and approved implementation plan supersede the older left-cave and unresolved-service assumptions. The supplied partial GLB is user-owned and remains byte-for-byte unchanged; no Blender/model edits are planned. This work proceeds on the explicitly requested integration scope while preserving open dependency gates and Root review.
+---
+
+created: 2026-11-15 14:16
+---
+Junie verified AC 1–8 and the AQ-106-specific lifecycle, asset, scale, budget, and cave geometry checks. Please review the fixed exposed-head/cave placement and provenance before checking AC 9 or marking Done; the two AQ-87 starter-depth failures are documented in implementation notes.
 ---
 <!-- COMMENTS:END -->

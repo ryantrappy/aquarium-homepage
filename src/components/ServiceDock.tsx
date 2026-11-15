@@ -17,7 +17,7 @@ export function ServiceDock({ services }: ServiceDockProps) {
   }, [query, services])
 
   return (
-    <nav className="service-dock" aria-label="Homelab services">
+    <nav className="service-dock" aria-label="Services">
       <label className="search-field">
         <SearchIcon className="search-icon" />
         <span className="sr-only">Search services</span>
@@ -37,7 +37,7 @@ export function ServiceDock({ services }: ServiceDockProps) {
           })}
         </ul>
       ) : <p className="empty-search">No services match “{query}”. Try another name.</p>}
-      <p className="dock-footnote">Links open on <span>trappserv.er</span> or wherever you point them.</p>
+      <p className="dock-footnote">Links open in a new tab.</p>
     </nav>
   )
 }

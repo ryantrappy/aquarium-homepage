@@ -1,0 +1,40 @@
+{
+  "glb": "src/rendering/assets/splat-fish/blue-green-chromis.glb",
+  "source": "public/fish/blue-green-chromis.webp",
+  "fishWidthPx": 350,
+  "sourceDimensions": [
+    600,
+    300
+  ],
+  "sourceAlphaBounds": [
+    10,
+    20,
+    585,
+    287
+  ],
+  "meshVertexCount": 12175,
+  "indexCount": 72660,
+  "boundaryPlanarVertexCount": 613,
+  "boundaryEdgeCount": 592,
+  "edgeProjectedPx": {
+    "p50": 2.002623803126247,
+    "p90": 2.4782715550733054,
+    "p95": 2.77993760513372,
+    "max": 7.317136198258943
+  },
+  "smoothedSdfAtExportedContourVerticesSourcePixels": {
+    "maxAbs": 0.018125658839096837
+  },
+  "smoothedSdfAlongExportedStraightEdgesSourcePixels": {
+    "p50Abs": 0.018645085505246815,
+    "p90Abs": 0.10542038540262633,
+    "p95Abs": 0.1751246151430803,
+    "maxAbs": 1.0104003620592232,
+    "sampleCount": 1776
+  },
+  "smoothedSdfAlongEdgesProjectedPixels": {
+    "p95Abs": 0.10215602550013018,
+    "maxAbs": 0.5894002112012136
+  },
+  "hashGlb": "ca69aa9d99b62afc930b9724af2f5714431513a56bd7536df2166bdc9802519f"
+}

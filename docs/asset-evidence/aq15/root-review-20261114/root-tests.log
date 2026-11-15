@@ -1,0 +1,11 @@
+
+ RUN  v5.1.0 /private/tmp/aquarium-showcase-v1-proof-7c08b43
+
+
+ Test Files  5 passed (5)
+      Tests  80 passed (80)
+   Start at  07:56:18
+   Duration  6.99s (environment 41%, tests 38%, import 17%, transform 3%, worker 1%)
+
+    Isolate  5 workers spawned · ~802ms startup each (spawn + environment, per file)
+             at least ~3.21s faster with isolate: false — reuses workers across files instead of one per file

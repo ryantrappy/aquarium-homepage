@@ -9,8 +9,11 @@ import {
   MESH_NAVIGATION_MOVEMENT_BUDGET,
   segmentIntersectsInflatedBox,
 } from './reef-mesh-navigation'
-import { DEFAULT_LEFT_ISLAND_MOUNTS, MODULAR_CORAL_ASSET_URLS, assembleCoralsOnRockSockets, measuredCoralShaderMargin, instantiateModularReefHabitat, LIVE_ROCK_ISLAND_URLS } from './reef-assembly'
+import { DEFAULT_LEFT_ISLAND_MOUNTS, DEFAULT_RIGHT_ISLAND_MOUNTS, MODULAR_CORAL_ASSET_URLS, assembleCoralsOnRockSockets, measuredCoralShaderMargin, instantiateModularReefHabitat, LIVE_ROCK_ISLAND_URLS } from './reef-assembly'
 import { reefPlacementsForViewport } from './reef-layout'
+import { resolveSnowflakeMorayResidence, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M } from './moray-residence'
+import { DEFAULT_CAMERA_ZOOM_STATE } from './camera-zoom'
+import { createAragoniteSandBed, evaluateAragoniteSandElevation } from './aragonite-sand'
 
 type P = { x: number; y: number; z: number }
 const p = (x: number, y: number, z: number): P => ({ x, y, z })
@@ -647,5 +650,65 @@ describe('createReefMeshNavigation (real rock GLB)', () => {
     const result = await createReefMeshNavigation([{ reef, islandId: 'reef-0', mountedCorals: [] }])
     expect(result.status).toBe('ready')
     if (result.status === 'ready') expect(result.diagnostics.islands[0].rockTriangles).toBe(24_572)
+  }, 120_000)
+
+  it('clears the exposed moray head at its fixed right-cave mouth with its mounted zoanthid and sand', async () => {
+    const placement = reefPlacementsForViewport(false).find(item => item.islandKind === 'right')!
+    const rockBytes = readFileSync(new URL(LIVE_ROCK_ISLAND_URLS.right))
+    const reef = new THREE.Group()
+    const rock = meshFromTriangles(glbTriangles(rockBytes))
+    rock.name = 'Live_Rock_Island_Right'
+    rock.scale.y *= placement.foundationHeightScale
+    reef.add(rock)
+
+    const softMat = DEFAULT_RIGHT_ISLAND_MOUNTS.find(mount => mount.socketName === 'socket_soft_mat_02')!
+    const coralUrl = MODULAR_CORAL_ASSET_URLS[softMat.coralAssetId]
+    if (!coralUrl) throw new Error(`No runtime coral URL registered for ${softMat.coralAssetId}.`)
+    const coralRoot = new THREE.Group()
+    coralRoot.add(meshFromTriangles(glbTriangles(readFileSync(new URL(coralUrl)))))
+    coralRoot.applyMatrix4(mountMatrix(glbSocketMatrices(rockBytes).get(softMat.socketName)!, softMat))
+    reef.add(coralRoot)
+    reef.scale.setScalar(placement.uniformScale)
+    reef.position.set(placement.position.x, placement.position.y, placement.position.z)
+    reef.rotation.y = placement.yaw
+
+    const navigation = await createReefMeshNavigation([{ reef, islandId: 'reef-right', mountedCorals: [
+      { socketName: softMat.socketName, coralAssetId: softMat.coralAssetId, root: coralRoot, materialControllers: [] },
+    ] }])
+    expect(navigation.status).toBe('ready')
+    if (navigation.status !== 'ready') return
+
+    const sand = createAragoniteSandBed({ textureSize: 32 })
+    reef.updateMatrixWorld(true)
+    sand.sandMesh.updateMatrixWorld(true)
+    const cameraPosition = new THREE.Vector3(
+      DEFAULT_CAMERA_ZOOM_STATE.targetX,
+      DEFAULT_CAMERA_ZOOM_STATE.targetY,
+      DEFAULT_CAMERA_ZOOM_STATE.targetZ + DEFAULT_CAMERA_ZOOM_STATE.distance,
+    )
+    const residence = resolveSnowflakeMorayResidence([placement])!
+    const fit = navigation.meshNavigation.queryCapsule!(
+      residence.headAxisStart,
+      residence.headAxisEnd,
+      SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M,
+      { ...MESH_NAVIGATION_MOVEMENT_BUDGET },
+    )
+    expect(fit.status).toBe('clear')
+    const startSandY = -2.8 + evaluateAragoniteSandElevation(residence.headAxisStart.x, residence.headAxisStart.z)
+    const endSandY = -2.8 + evaluateAragoniteSandElevation(residence.headAxisEnd.x, residence.headAxisEnd.z)
+    const sandMargin = Math.min(
+      residence.headAxisStart.y - SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M - startSandY,
+      residence.headAxisEnd.y - SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M - endSandY,
+    )
+    expect(sandMargin).toBeGreaterThan(0.13)
+    const head = new THREE.Vector3(residence.headPosition.x, residence.headPosition.y, residence.headPosition.z)
+    const cameraToHead = head.clone().sub(cameraPosition)
+    const headRay = new THREE.Raycaster(cameraPosition, cameraToHead.clone().normalize(), 0, cameraToHead.length() - 0.05)
+    try {
+      expect(headRay.intersectObject(reef, true)).toHaveLength(0)
+      expect(headRay.intersectObject(sand.sandMesh, false)).toHaveLength(0)
+    } finally {
+      sand.dispose()
+    }
   }, 120_000)
 })

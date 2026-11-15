@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AQ103 isolated interface proof · water-only diagnostics</title>
+  <style>
+    :root { color-scheme: dark; font: 14px/1.45 system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #06121c; }
+    #view { display: block; width: 100%; height: 100%; }
+    #panel { position: fixed; z-index: 2; inset: 12px auto auto 12px; width: min(420px, calc(100vw - 24px)); padding: 12px 14px; border: 1px solid #8cb0c477; border-radius: 8px; background: #06121cdd; color: #e8f4fa; box-shadow: 0 5px 24px #0008; }
+    #panel h1 { margin: 0 0 4px; font-size: 15px; }
+    #panel p { margin: 4px 0 9px; color: #bbd0dc; }
+    #controls { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    button { border: 1px solid #7195a8; border-radius: 5px; padding: 5px 8px; color: #effaff; background: #153247; cursor: pointer; }
+    button[aria-pressed="true"] { border-color: #94d8e9; background: #245a6b; }
+    pre { margin: 0; white-space: pre-wrap; color: #cde2ec; font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    #status { color: #a9dcae; }
+    #warning { color: #f3d09b; }
+    #mode-status { margin: 0 0 8px; padding: 6px 8px; border-radius: 5px; background: #173e4b; color: #d4f8ff; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <canvas id="view" aria-label="Isolated water interface proof fixture"></canvas>
+  <aside id="panel">
+    <h1>AQ103 water interface · isolated optics fixture</h1>
+    <p>Uses the production bounded water surface and glass layout. The colored rear panel is a test backdrop, not reef art or a claim about production appearance or physical tank units.</p>
+    <div id="controls">
+      <button data-frame="overview" aria-pressed="true">Overview reference</button>
+      <button data-frame="front-edge" aria-pressed="false">Front meniscus</button>
+      <button data-frame="transmission" aria-pressed="false">Water-only facet check</button>
+      <button data-frame="key-aligned" aria-pressed="false">Water-only key alignment</button>
+      <button id="key-direction" aria-pressed="false">Reverse diagnostic key</button>
+      <button id="clock" aria-pressed="false">Play ripple clock</button>
+    </div>
+    <p id="mode-status">Production glass visible; normal overview framing.</p>
+    <pre id="fixture-state">Importing production water modules…</pre>
+    <pre id="status">shaderReady: waiting for WebGL compile</pre>
+    <pre id="warning">Frame limitations: front-edge and steep-facet views intentionally leave the normal overview camera; this fixture cannot establish overview visibility.</pre>
+  </aside>
+  <script type="module">
+    const [THREE, waterModule, enclosureModule, opticsModule] = await Promise.all([
+      import('three'),
+      import('/src/rendering/scene/water-surface.ts'),
+      import('/src/rendering/scene/glass-enclosure.ts'),
+      import('/src/rendering/scene/underwater-optics.ts'),
+    ])
+    const { createWaterSurface, evaluateWaterToAirRefraction, WATER_TO_AIR_ETA } = waterModule
+    const { glassEnclosureLayout, createGlassEnclosure } = enclosureModule
+    const { SUN_DIRECTION } = opticsModule
+    const canvas = document.querySelector('#view')
+    const stateNode = document.querySelector('#fixture-state')
+    const statusNode = document.querySelector('#status')
+    const modeStatusNode = document.querySelector('#mode-status')
+    const layout = glassEnclosureLayout(false, 4.4)
+    const scene = new THREE.Scene()
+    scene.background = new THREE.Color('#071728')
+    const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 60)
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' })
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5))
+    renderer.outputColorSpace = THREE.SRGBColorSpace
+    renderer.toneMapping = THREE.ACESFilmicToneMapping
+    renderer.toneMappingExposure = 0.8
+    renderer.shadowMap.enabled = false
+    const water = createWaterSurface(layout)
+    scene.add(water.mesh)
+
+    // Flat test-only gradient behind the production surface. Three restrained
+    // color regions give transmitted facets contrast without implying reef art.
+    const backdropMaterial = new THREE.ShaderMaterial({
+      vertexShader: 'varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
+      fragmentShader: `
+        varying vec2 vUv;
+        void main(){
+          vec3 deep=vec3(0.012,0.045,0.105);
+          vec3 lagoon=vec3(0.035,0.22,0.25);
+          vec3 reef=vec3(0.24,0.26,0.10);
+          float band=smoothstep(0.28,0.74,vUv.x);
+          vec3 color=vUv.x<0.48?mix(deep,lagoon,smoothstep(0.0,0.48,vUv.x)):mix(lagoon,reef,band);
+          float lower=smoothstep(0.0,0.6,vUv.y);
+          color=mix(color*0.72,color,lower);
+          gl_FragColor=vec4(color,1.0);
+          #include <tonemapping_fragment>
+          #include <colorspace_fragment>
+        }`,
+      side: THREE.DoubleSide,
+    })
+    const backdrop = new THREE.Mesh(new THREE.PlaneGeometry(layout.halfWidth * 2, layout.surfaceY - layout.bottomY), backdropMaterial)
+    backdrop.position.set(0, (layout.surfaceY + layout.bottomY) * 0.5, layout.backZ + 0.015)
+    scene.add(backdrop)
+
+    // A muted lower plane and thin color swatches act only as depth/contrast references.
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(layout.halfWidth * 2, layout.frontZ - layout.backZ), new THREE.MeshBasicMaterial({ color: '#192a31', side: THREE.DoubleSide }))
+    floor.rotation.x = -Math.PI / 2
+    floor.position.set(0, layout.bottomY, (layout.frontZ + layout.backZ) * 0.5)
+    scene.add(floor)
+    for (const [x, color, width] of [[-3.35, '#237b72', 1.25], [0, '#2d9a91', 1.7], [3.3, '#798337', 1.4]]) {
+      const swatch = new THREE.Mesh(new THREE.PlaneGeometry(width, 1.1), new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide }))
+      swatch.position.set(x, 0.6, layout.backZ + 0.005)
+      scene.add(swatch)
+    }
+    const glass = createGlassEnclosure({ surfaceY: layout.surfaceY })
+    glass.setLayout(false)
+    glass.update(0, 'low') // keep the real production panes; disable costly Reflector passes
+    scene.add(glass.group)
+
+    // Diagnostic-only outline preserves the production water footprint when
+    // the real glass group is deliberately hidden in optical-branch modes.
+    const boundsGeometry = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-layout.halfWidth, layout.surfaceY + 0.008, layout.backZ),
+      new THREE.Vector3(layout.halfWidth, layout.surfaceY + 0.008, layout.backZ),
+      new THREE.Vector3(layout.halfWidth, layout.surfaceY + 0.008, layout.frontZ),
+      new THREE.Vector3(-layout.halfWidth, layout.surfaceY + 0.008, layout.frontZ),
+    ])
+    const boundsOutline = new THREE.LineLoop(boundsGeometry, new THREE.LineBasicMaterial({
+      color: '#9cecff', transparent: true, opacity: 0.88, depthTest: false,
+    }))
+    boundsOutline.name = 'DiagnosticWaterBoundsOutline'
+    boundsOutline.renderOrder = 1001
+    boundsOutline.visible = false
+    scene.add(boundsOutline)
+    const productionGlassNames = []
+    glass.group.traverse(object => {
+      if (object !== glass.group) productionGlassNames.push(object.name || object.type)
+    })
+
+    // Inverse Snell setup: choose the water-side incident ray whose refracted
+    // direction equals the actual production SUN_DIRECTION over a flat surface.
+    const sunDirection = new THREE.Vector3(SUN_DIRECTION.x, SUN_DIRECTION.y, SUN_DIRECTION.z).normalize()
+    const tangentLength = Math.hypot(sunDirection.x, sunDirection.z)
+    const incidentSin = tangentLength / WATER_TO_AIR_ETA
+    const keyAlignedIncident = new THREE.Vector3(
+      sunDirection.x / tangentLength * incidentSin,
+      Math.sqrt(1 - incidentSin * incidentSin),
+      sunDirection.z / tangentLength * incidentSin,
+    ).normalize()
+    const keyAlignedTarget = new THREE.Vector3(0, layout.surfaceY, 0)
+    const keyAlignedCamera = keyAlignedTarget.clone().addScaledVector(keyAlignedIncident, -1)
+    const flatWaterNormal = new THREE.Vector3(0, -1, 0)
+    const predictedKeyRay = evaluateWaterToAirRefraction(keyAlignedIncident, flatWaterNormal)
+    const predictedKeyErrorDegrees = predictedKeyRay
+      ? THREE.MathUtils.radToDeg(Math.acos(THREE.MathUtils.clamp(predictedKeyRay.dot(sunDirection), -1, 1)))
+      : null
+
+    const frames = {
+      overview: {
+        position: new THREE.Vector3(0, 0.15, 9), target: new THREE.Vector3(0, 0.15, 0), fov: 42,
+        note: 'Production overview reference; front meniscus is expected outside this framing.',
+      },
+      'front-edge': {
+        // Target is 0.24 scene units inside frontZ. The old target sat exactly
+        // on frontZ, so round-off could make the strict bounds test report no hit.
+        position: new THREE.Vector3(0, 3.55, 0.95), target: new THREE.Vector3(0, 4.4, 2.60), fov: 30,
+        note: 'Below-water meniscus framing; center ray lands 0.24 units inside the bounded front edge. Presentation-only camera.',
+      },
+      transmission: {
+        // Glass is hidden intentionally to isolate the water shader output.
+        position: new THREE.Vector3(0, 4.0, 2.25), target: new THREE.Vector3(0, 4.4, 2.72), fov: 30,
+        hideGlass: true,
+        note: 'Water-only near-transition diagnostic; production glass hidden, cyan outline marks the production water bounds. Diagnostic view, not production appearance.',
+      },
+      'key-aligned': {
+        position: keyAlignedCamera,
+        target: keyAlignedTarget,
+        fov: 30,
+        hideGlass: true,
+        note: 'Water-only diagnostic: flat-water Snell refraction aims at actual production SUN_DIRECTION; wave facets can alter alignment. Production glass is hidden and bounds are outlined.',
+      },
+    }
+    let activeFrame = 'overview'
+    let keyDirectionReversed = false
+    let playing = false
+    let shaderReady = false
+    let shaderError = ''
+    const t0 = 0
+    let currentTime = t0
+    let clockBaseTime = t0
+    let clockStartTime = 0
+    let animationFrameId = 0
+    let viewportWidth = 0
+    let viewportHeight = 0
+    let viewportDpr = 0
+    water.mesh.material.name = 'aq103-production-water-surface'
+    function setFrame(name) {
+      activeFrame = name
+      const frame = frames[name]
+      const hideGlass = Boolean(frame.hideGlass)
+      glass.group.visible = !hideGlass
+      boundsOutline.visible = hideGlass
+      modeStatusNode.textContent = hideGlass
+        ? `DIAGNOSTIC ONLY · production glass hidden (${productionGlassNames.join(', ')}) · cyan outline shows x±${layout.halfWidth}, z ${layout.backZ}…${layout.frontZ}`
+        : 'Production glass visible; overview and front-meniscus modes retain enclosure panes.'
+      camera.position.copy(frame.position)
+      camera.lookAt(frame.target)
+      camera.fov = frame.fov
+      camera.updateProjectionMatrix()
+      document.querySelectorAll('[data-frame]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.frame === name)))
+      renderAndReport()
+    }
+    function report() {
+      const frame = frames[activeFrame]
+      const raycaster = new THREE.Raycaster()
+      let surfaceSamples = []
+      for (const ndcY of [-0.8, -0.4, 0, 0.4, 0.8]) {
+        raycaster.setFromCamera(new THREE.Vector2(0, ndcY), camera)
+        const ray = raycaster.ray
+        if (ray.direction.y <= 1e-6) continue
+        const distance = (layout.surfaceY - ray.origin.y) / ray.direction.y
+        if (distance <= 0) continue
+        const point = ray.origin.clone().addScaledVector(ray.direction, distance)
+        const inBounds = Math.abs(point.x) <= layout.halfWidth && point.z >= layout.backZ && point.z <= layout.frontZ
+        surfaceSamples.push({ ndc: [0, ndcY], worldPoint: point.toArray().map(value => Number(value.toFixed(4))), rayDirection: ray.direction.toArray(), flatPlaneNoV: Number(ray.direction.y.toFixed(4)), inBounds })
+      }
+      const inBoundsSamples = surfaceSamples.filter(sample => sample.inBounds)
+      const flatNoVRange = inBoundsSamples.length ? [Math.min(...inBoundsSamples.map(sample => sample.flatPlaneNoV)), Math.max(...inBoundsSamples.map(sample => sample.flatPlaneNoV))] : null
+      const centerSample = surfaceSamples.find(sample => sample.ndc[1] === 0 && sample.inBounds)
+      let centerFlatRefraction = null
+      if (centerSample) {
+        const refracted = evaluateWaterToAirRefraction(new THREE.Vector3(...centerSample.rayDirection), flatWaterNormal)
+        const sunAlignment = refracted ? THREE.MathUtils.clamp(refracted.dot(sunDirection), -1, 1) : null
+        centerFlatRefraction = {
+          valid: Boolean(refracted),
+          direction: refracted?.toArray().map(value => Number(value.toFixed(6))) ?? null,
+          actualSunDirection: sunDirection.toArray().map(value => Number(value.toFixed(6))),
+          sunAlignment: sunAlignment === null ? null : Number(sunAlignment.toFixed(6)),
+          angleErrorDegrees: sunAlignment === null ? null : Number(THREE.MathUtils.radToDeg(Math.acos(sunAlignment)).toFixed(4)),
+        }
+      }
+      stateNode.textContent = JSON.stringify({
+        fixture: 'AQ103 isolated interface proof; not production look acceptance',
+        activeFrame,
+        cameraPosition: frame.position.toArray(),
+        cameraTarget: frame.target.toArray(),
+        cameraFovDegrees: frame.fov,
+        viewport: { width: viewportWidth, height: viewportHeight, dpr: viewportDpr },
+        sampledWaterPlaneRays: surfaceSamples,
+        inBoundsRayCount: inBoundsSamples.length,
+        inBoundsFlatPlaneNoVRange: flatNoVRange,
+        shaderTransition: { lowerNoV: 0.53, upperNoV: 0.76, note: 'Facet normals change local NoV; ray-direction NoV is diagnostic only.' },
+        diagnosticKeyDirectionReversed: keyDirectionReversed,
+        effectiveKeyDirection: water.uniforms.uKeyLightDirection.value.toArray(),
+        productionSunDirection: sunDirection.toArray().map(value => Number(value.toFixed(6))),
+        waterToAirEta: WATER_TO_AIR_ETA,
+        centerFlatNormalRefraction: centerFlatRefraction,
+        keyAlignedCameraConstruction: activeFrame === 'key-aligned' ? {
+          incidentDirection: keyAlignedIncident.toArray().map(value => Number(value.toFixed(6))),
+          centerNormalRefractionAngleErrorDegrees: predictedKeyErrorDegrees,
+        } : undefined,
+        productionGlassVisible: glass.group.visible,
+        disabledProductionGlassObjects: glass.group.visible ? [] : [...productionGlassNames],
+        diagnosticBoundsOutline: { visible: boundsOutline.visible, halfWidth: layout.halfWidth, frontZ: layout.frontZ, backZ: layout.backZ },
+        layoutBounds: { halfWidth: layout.halfWidth, frontZ: layout.frontZ, backZ: layout.backZ, bottomY: layout.bottomY, surfaceY: layout.surfaceY },
+        surfaceMesh: water.mesh.name,
+        clock: playing ? `playing at t=${currentTime.toFixed(3)}` : `frozen at t=${currentTime}`,
+        shaderReady,
+        shaderError: shaderError || undefined,
+        frameLimit: frame.note,
+      }, null, 2)
+    }
+    function renderAndReport() {
+      renderer.render(scene, camera)
+      if (shaderError) shaderReady = false
+      const waterProgram = renderer.info.programs?.find(program => program.name === water.mesh.material.name)
+      shaderReady = Boolean(!shaderError && waterProgram && waterProgram.diagnostics?.runnable !== false)
+      statusNode.textContent = shaderError
+        ? `shaderReady: false · ${shaderError}`
+        : `shaderReady: ${shaderReady} · production water program ${waterProgram ? 'present with no reported compile/link failure' : 'not present after render'}`
+      report()
+    }
+    document.querySelectorAll('[data-frame]').forEach(button => button.addEventListener('click', () => setFrame(button.dataset.frame)))
+    document.querySelector('#key-direction').addEventListener('click', event => {
+      keyDirectionReversed = !keyDirectionReversed
+      water.uniforms.uKeyLightDirection.value.copy(sunDirection).multiplyScalar(keyDirectionReversed ? -1 : 1)
+      event.currentTarget.setAttribute('aria-pressed', String(keyDirectionReversed))
+      event.currentTarget.textContent = keyDirectionReversed ? 'Restore production key' : 'Reverse diagnostic key'
+      renderAndReport()
+    })
+    document.querySelector('#clock').addEventListener('click', event => {
+      playing = !playing
+      event.currentTarget.setAttribute('aria-pressed', String(playing))
+      event.currentTarget.textContent = playing ? 'Pause ripple clock' : 'Play ripple clock'
+      if (playing) {
+        clockBaseTime = currentTime
+        clockStartTime = performance.now()
+        if (!animationFrameId) animationFrameId = requestAnimationFrame(tick)
+      } else {
+        if (animationFrameId) cancelAnimationFrame(animationFrameId)
+        animationFrameId = 0
+        renderAndReport()
+      }
+      report()
+    })
+    function resize() {
+      const width = Math.max(1, innerWidth), height = Math.max(1, innerHeight)
+      viewportWidth = width
+      viewportHeight = height
+      viewportDpr = Math.min(devicePixelRatio || 1, 1.5)
+      renderer.setPixelRatio(viewportDpr)
+      renderer.setSize(width, height, false)
+      camera.aspect = width / height
+      camera.updateProjectionMatrix()
+      renderAndReport()
+    }
+    renderer.debug.onShaderError = (_gl, _program, _vertexShader, _fragmentShader) => {
+      shaderError = 'WebGL shader compilation/link error; see browser console.'
+      shaderReady = false
+      statusNode.textContent = `shaderReady: false · ${shaderError}`
+    }
+    const initial = frames[activeFrame]
+    camera.position.copy(initial.position)
+    camera.lookAt(initial.target)
+    camera.fov = initial.fov
+    camera.aspect = innerWidth / Math.max(1, innerHeight)
+    camera.updateProjectionMatrix()
+    renderer.setSize(innerWidth, innerHeight, false)
+    water.updateTime(t0)
+    try {
+      await renderer.compileAsync(scene, camera)
+      // compileAsync + an actual render must both succeed; renderAndReport
+      // confirms the named production water program is present and runnable.
+      renderAndReport()
+    } catch (error) {
+      shaderError = String(error)
+      statusNode.textContent = `shaderReady: false · ${shaderError}`
+    }
+    window.addEventListener('resize', resize)
+    function tick(now) {
+      if (!playing) { animationFrameId = 0; return }
+      currentTime = clockBaseTime + (now - clockStartTime) * 0.001
+      water.updateTime(currentTime)
+      renderer.render(scene, camera)
+      if (shaderError) shaderReady = false
+      const waterProgram = renderer.info.programs?.find(program => program.name === water.mesh.material.name)
+      shaderReady = Boolean(!shaderError && waterProgram && waterProgram.diagnostics?.runnable !== false)
+      statusNode.textContent = shaderError
+        ? `shaderReady: false · ${shaderError}`
+        : `shaderReady: ${shaderReady} · production water program ${waterProgram ? 'present with no reported compile/link failure' : 'not present after render'}`
+      report()
+      animationFrameId = requestAnimationFrame(tick)
+    }
+    resize()
+    report()
+  </script>
+</body>
+</html>

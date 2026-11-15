@@ -23,6 +23,7 @@ export const SPECIES_BEHAVIOR_IDS = [
   'flame-angelfish',
   'copperband-butterflyfish',
   'desjardins-sailfin-tang',
+  'snowflake-moray-eel',
 ] as const
 
 export type SpeciesBehaviorId = typeof SPECIES_BEHAVIOR_IDS[number]
@@ -78,6 +79,7 @@ export type SpeciesBehaviorProfile = {
     | 'open-reef-cruise'
     | 'schooling-over-reef'
     | 'burrow-associated'
+    | 'crevice-resident'
     | 'substrate-foraging'
     | 'near-cover-search'
     | 'midwater-display'
@@ -99,6 +101,7 @@ export type SpeciesBehaviorProfile = {
       | 'loose-group-cruise'
       | 'compact-reef-orbit'
       | 'crevice-inspection'
+      | 'cave-station-keeping'
     speedTankWidthsPerSecond: NumericRange
     turnDegreesPerSecond: NumericRange
     /** The profile identifies a primary gait; higher-effort gait changes are explicit here. */
@@ -163,7 +166,7 @@ const profileSchema = z.object({
   speciesId: z.enum(SPECIES_BEHAVIOR_IDS),
   habitatMode: z.enum([
     'host-associated', 'sheltered-reef', 'open-reef-cruise', 'schooling-over-reef', 'burrow-associated',
-    'substrate-foraging', 'near-cover-search', 'midwater-display',
+    'crevice-resident', 'substrate-foraging', 'near-cover-search', 'midwater-display',
   ]),
   preferredZone: z.enum(['upper-reef', 'midwater', 'reef-edge', 'lower-reef', 'substrate']),
   depthRange: z.tuple([z.number().min(0).max(1), z.number().min(0).max(1)]).refine(([min, max]) => min < max),
@@ -172,7 +175,7 @@ const profileSchema = z.object({
     gait: z.enum([
       'pectoral-cruise', 'body-caudal-undulation', 'fin-hover', 'school-hover', 'sand-burrow-hover',
       'substrate-stop-start', 'near-rock-darts', 'sinuous-cover-search', 'reef-slope-patrol',
-      'loose-group-cruise', 'compact-reef-orbit', 'crevice-inspection',
+      'loose-group-cruise', 'compact-reef-orbit', 'crevice-inspection', 'cave-station-keeping',
     ]),
     speedTankWidthsPerSecond: speedRangeSchema,
     turnDegreesPerSecond: turnRangeSchema,
@@ -483,6 +486,18 @@ const profiles = {
     individuality: { phaseOffsetRadians: [0, Math.PI * 2], homeOffsetTankWidths: [0.03, 0.09] },
     evidence: { kind: 'documented-behavior', summary: 'Algae grazing, paired adult occurrence over reef slopes, and pectoral cruise are documented for this sailfin tang; numeric ranges are visual tuning.', sourceRefs: ['https://www.fishbase.se/summary/Zebrasoma-desjardinii', 'https://en.wikipedia.org/wiki/Zebrasoma_desjardinii'] },
   },
+  'snowflake-moray-eel': {
+    speciesId: 'snowflake-moray-eel', habitatMode: 'crevice-resident', preferredZone: 'lower-reef', depthRange: [0.78, 0.96],
+    anchors: ['rockCrevice'],
+    locomotion: { gait: 'cave-station-keeping', speedTankWidthsPerSecond: [0.002, 0.008], turnDegreesPerSecond: [0.1, 1] },
+    states: {
+      idle: { cue: 'Remain in the authored cave with only the supplied head and jaw motion.', durationSeconds: [5, 12], anchor: 'rockCrevice', speedMultiplier: 0.01 },
+      swim: { cue: 'Probe subtly while the forebody stays rooted inside the same cave.', durationSeconds: [4, 9], anchor: 'rockCrevice', speedMultiplier: 0.02 },
+    },
+    transitions: transitionsFor(),
+    individuality: { phaseOffsetRadians: [0, Math.PI * 2], homeOffsetTankWidths: [0, 0.001] },
+    evidence: { kind: 'habitat-staging-inference', summary: 'FishBase describes a solitary reef moray associated with rocky crevices; permanent residence and ventilation-only movement are staging choices for the supplied partial model, not claims about wild movement.', sourceRefs: ['https://www.fishbase.se/summary/Echidna-nebulosa'] },
+  },
 } as const satisfies Record<SpeciesBehaviorId, SpeciesBehaviorProfile>
 
 export const SPECIES_BEHAVIOR_PROFILES = deepFreeze(profiles)
@@ -507,7 +522,7 @@ export function validateSpeciesBehaviorProfiles(value: unknown = SPECIES_BEHAVIO
   const expected = [...SPECIES_BEHAVIOR_IDS].sort()
   const actual = Object.keys(record).sort()
   if (actual.length !== expected.length || actual.some((id, index) => id !== expected[index])) {
-    errors.push('Profile keys must exactly match the 15 stable species IDs.')
+    errors.push(`Profile keys must exactly match the ${expected.length} stable species IDs.`)
   }
 
   const fullProfiles = new Set<string>()
@@ -539,6 +554,12 @@ export function validateSpeciesBehaviorProfiles(value: unknown = SPECIES_BEHAVIO
     }
     if (profile.habitatMode === 'schooling-over-reef' && !profile.anchors.includes('schoolCenter')) {
       errors.push(`${key}: schooling profile must include a school-center anchor.`)
+    }
+    if (profile.habitatMode === 'crevice-resident' && (
+      profile.anchors.length !== 1 || profile.anchors[0] !== 'rockCrevice'
+      || profile.states.idle.anchor !== 'rockCrevice' || profile.states.swim.anchor !== 'rockCrevice'
+    )) {
+      errors.push(`${key}: crevice-resident profile must keep every state at its single rock-crevice anchor.`)
     }
     if (!profile.states.forage && profile.transitions.some((transition) => transition.from === 'forage' || transition.to === 'forage')) {
       errors.push(`${key}: transitions reference an unsupported forage state.`)

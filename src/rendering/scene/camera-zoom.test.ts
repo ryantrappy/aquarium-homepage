@@ -34,7 +34,7 @@ describe('camera zoom clamping (AQ-62 AC #2)', () => {
   it('clamps the focal target inside the water volume', () => {
     const clamped = clampCameraZoomState(state({ targetX: 9, targetY: -9, targetZ: -9, distance: 2 }))
     expect(clamped.targetX).toBe(3.2)
-    expect(clamped.targetY).toBe(-2.0)
+    expect(clamped.targetY).toBe(-2.6)
     expect(clamped.targetZ).toBe(-2.4)
     expect(clamped.distance).toBeGreaterThanOrEqual(MIN_CAMERA_DISTANCE_M)
   })
@@ -184,5 +184,14 @@ describe('click-to-focus fish camera dolly and tracking (AQ-100 AC #1, #2, #4)',
     // Under prefers-reduced-motion or paused, transitions cut immediately without dolly motion
     expect(trackFocusedFishCameraState(DEFAULT_CAMERA_ZOOM_STATE, fishPos, 1 / 60, { reducedMotion: true })).toEqual(desired)
     expect(trackFocusedFishCameraState(DEFAULT_CAMERA_ZOOM_STATE, fishPos, 1 / 60, { paused: true })).toEqual(desired)
+  })
+
+  it('can focus the supplied moray head below the ordinary reef canopy without crossing the sand', () => {
+    const head = { x: 2.79, y: -2.467, z: -0.15 }
+    const focus = zoomStateForFishPosition(head)
+    expect(focus.targetX).toBeCloseTo(head.x, 5)
+    expect(focus.targetY).toBeCloseTo(head.y, 5)
+    expect(focus.targetY).toBeGreaterThan(-2.8)
+    expect(focus.targetZ + focus.distance).toBeGreaterThanOrEqual(MIN_CAMERA_POSITION_Z_M)
   })
 })

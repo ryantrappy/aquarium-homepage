@@ -2,7 +2,12 @@ import * as THREE from 'three'
 import { describe, expect, it, vi } from 'vitest'
 import {
   createWaterSurface,
+  evaluateTirCoralRadianceWeight,
   evaluateWaterToAirRefraction,
+  TIR_CORAL_GRAZING_NOV_END,
+  TIR_CORAL_GRAZING_NOV_START,
+  TIR_CORAL_REAR_END_OFFSET,
+  TIR_CORAL_REAR_START_OFFSET,
   projectTirRadianceProbe,
   TIR_RADIANCE_PROXY_MAX_TRAVEL,
   WATER_TO_AIR_ETA,
@@ -101,6 +106,10 @@ describe('underwater water-surface interface', () => {
     expect(material.fragmentShader).not.toContain('coralZoneZ * tirFactor')
     expect(material.fragmentShader).toContain('smoothstep(uBackZ, uBackZ + 1.95, p.y)')
     expect(material.fragmentShader).toContain('frontMeniscus')
+    expect(material.fragmentShader).toContain('float frontClip = 1.0 - smoothstep(uFrontZ - 0.02, uFrontZ, p.y)')
+    expect(material.fragmentShader).toContain('float clippedFrontMeniscus = frontMeniscus * frontClip')
+    expect(material.fragmentShader).toContain('clippedFrontMeniscus * 0.72')
+    expect(material.fragmentShader).toContain('clippedFrontMeniscus * 0.85')
     expect(material.fragmentShader).toContain('uHalfWidth')
     expect(material.fragmentShader).not.toContain('ovalRippleLens')
     expect(material.fragmentShader).not.toContain('ribbonWave')
@@ -158,6 +167,35 @@ describe('underwater water-surface interface', () => {
     expect(projected.y).toBeLessThan(layout.backZ)
 
     expect(() => projectTirRadianceProbe(start, new THREE.Vector3(), layout)).toThrow(RangeError)
+  })
+
+  it('limits analytic and captured reef radiance to rear/mid grazing TIR views', () => {
+    const backZ = glassEnclosureLayout(false, 4.4).backZ
+    const rearStart = backZ + TIR_CORAL_REAR_START_OFFSET
+    const rearEnd = backZ + TIR_CORAL_REAR_END_OFFSET
+    const grazingMidpoint = (TIR_CORAL_GRAZING_NOV_START + TIR_CORAL_GRAZING_NOV_END) / 2
+
+    // The overview's visible rear strip remains fully eligible for coral color.
+    expect(evaluateTirCoralRadianceWeight(backZ + 1, 0.3, backZ)).toBeCloseTo(1)
+    expect(evaluateTirCoralRadianceWeight(rearStart, 0.3, backZ)).toBeCloseTo(1)
+
+    // Both masks fade independently and combine multiplicatively at their midpoint.
+    expect(evaluateTirCoralRadianceWeight((rearStart + rearEnd) / 2, 0.3, backZ)).toBeCloseTo(0.5)
+    expect(evaluateTirCoralRadianceWeight(backZ + 1, grazingMidpoint, backZ)).toBeCloseTo(0.5)
+    expect(evaluateTirCoralRadianceWeight((rearStart + rearEnd) / 2, grazingMidpoint, backZ)).toBeCloseTo(0.25)
+
+    // Reef color vanishes at the front edge and above the grazing-angle range.
+    expect(evaluateTirCoralRadianceWeight(rearEnd, 0.3, backZ)).toBe(0)
+    expect(evaluateTirCoralRadianceWeight(backZ + 1, TIR_CORAL_GRAZING_NOV_END, backZ)).toBe(0)
+    expect(evaluateTirCoralRadianceWeight(backZ + 1, 0.9, backZ)).toBe(0)
+    expect(evaluateTirCoralRadianceWeight(Number.NaN, 0.3, backZ)).toBe(0)
+
+    const surface = createWaterSurface(glassEnclosureLayout(false, 4.4))
+    const fragmentShader = (surface.mesh.material as THREE.ShaderMaterial).fragmentShader
+    expect(fragmentShader).toContain('vec3 tirRadianceSource = mix(analyticTirRadiance, capturedTirRadiance, uUseRadianceProbe)')
+    expect(fragmentShader).toContain('float tirCoralWeight = rearMidCoralWeight * grazingCoralWeight')
+    expect(fragmentShader).toContain('vec3 tirBase = mix(vec3(0.005, 0.024, 0.068), tirRadianceSource, tirCoralWeight)')
+    surface.dispose()
   })
 
   it('shares finite time updates and disposes resources exactly once', () => {

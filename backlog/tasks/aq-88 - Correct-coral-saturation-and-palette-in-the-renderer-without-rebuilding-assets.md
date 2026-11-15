@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-08'
-updated_date: '2026-11-13 05:36'
+updated_date: '2026-11-15 16:06'
 labels:
   - modeling
   - photorealism
@@ -34,8 +34,8 @@ Interim, code-only coral colour correction: adjust coral material saturation / g
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 Corals read as saturated healthy tissue (no bleached lavender / white cast) in look-dev captures at 1440x900 and 402x874, judged against the AQ-70.1 rubric
-- [ ] #2 Renderer / material-only change (saturation, palette / roughness overrides, fluorescence mask use); no coral GLB / socket / manifest changes, and all AQ-42 / AQ-42.1 contract tests pass
-- [ ] #3 No blanket emissive; fluorescence stays mask-driven per AQ-70.6 / AQ-39
+- [x] #2 Renderer / material-only change (saturation, palette / roughness overrides, fluorescence mask use); no coral GLB / socket / manifest changes, and all AQ-42 / AQ-42.1 contract tests pass
+- [x] #3 No blanket emissive; fluorescence stays mask-driven per AQ-70.6 / AQ-39
 - [ ] #4 No frame-time regression at either viewport; Root records art acceptance before Done, and the task notes AQ-70.11 remains the full fix
 <!-- AC:END -->
 
@@ -57,4 +57,6 @@ Interim, code-only coral colour correction: adjust coral material saturation / g
 2026-11-13 CPU/GLSL parity correction: evaluateCoralTissueColor used the shared CPU mix helper, which clamps the AQ-88 saturation factor 1.18 to 1.0; GLSL mix extrapolates above 1. Updated only the CPU reference saturation step to use the GLSL arithmetic, leaving runtime shader and palette behavior unchanged. Added an independent hard-coded numeric regression for a high-chroma input, including the 0.92 per-channel upper cap. Verification: coral-material.test.ts 12/12 passed; npm run typecheck (tsc and script syntax check) passed; scoped git diff --check passed. No assets changed. Visual two-viewport/color acceptance and frame-time evidence remain pending Root.
 
 Root reviewed Luna saturation-reference fix: runtime GLSL remains unchanged; CPU helper had clamped1.18 to1, so its old tests understated grading. Explicit extrapolation and independent numeric expected-value regression now match GLSL upper highlight clamp. Luna reports12 focused tests and typecheck14scripts pass; Root reviewing assembly regressions. This is a verified functional handoff only, not AC1/4 art/performance acceptance; AQ70.11 remains the full tissue/polyp art fix.
+
+2026-11-15 review: verified AC #2/#3 only. `npm test -- src/rendering/scene/coral-material.test.ts src/rendering/assets/contract.test.ts src/rendering/assets/manifest-checker.test.ts --maxWorkers=1` passes 28/28; current working tree has no coral asset, socket, or manifest changes. Coral material assertions cover the AQ-88 saturation/pale-tip/highlight grade and confirm fluorescence remains mask-driven with no blanket emissive term. AC #1 and #4 remain open pending 1440x900/402x874 Root look-dev and frame-time evidence; no visual acceptance is claimed.
 <!-- SECTION:NOTES:END -->

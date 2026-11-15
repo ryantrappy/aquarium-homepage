@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-05 03:13'
-updated_date: '2026-11-13 06:18'
+updated_date: '2026-11-15 15:50'
 labels:
   - modeling
   - validation
@@ -108,6 +108,8 @@ Final retirement correction: mixer.stopAllAction restores original bindings, so 
 Root/Luna current-runtime fallback correction: helper scans current assembled rock position buffers and refreshed ancestor/world matrices into uninflated per-mesh bounds, independent of stale cached geometry boxes. Main aquarium replaces historical manual rock bands with these volumes while retaining coral-base obstacles; exact BVH activation/generation handling remains unchanged. Invalid/missing/dynamic geometry fails the scene and capture readiness rather than allowing fish to swim through an incomplete obstacle set; native service anchors remain. Actual-source URL fixtures prove all current exported vertices enclosed at both reef layouts; convex AABBs also enclose their triangles/interior. Nested/nonuniform/ancestor transforms, sculpted positions, stale caches, nonindexed geometry and invalid/skinned/instanced cases covered. Controller regressions prove both unavailable failure and real spawn refusal when a ready obstacle fills water. Historical AC2withdrawn for current-source scope: old canonical hash/probe records remain historical, current measured cave passage/animated envelopes and actual-mesh visual routing acceptance still open. No asset/model/source swaps or Blender edits.
 
 Root final d862bf9 verified handoff: all748tests/66files,52focusedtests/2files, typecheck14scripts and productionbuild pass in isolated exact-source checkout. Native1440x900/402x874DPR1 capture evidence under docs/asset-evidence/aq58/current-fallback-20261113/ is ready with no failed/pending assets and zero captured warnings/errors;11inhabitants staged, all8phone service targets remain>=44px and contained inviewport. This proves current-source fallback integration and retained links, not actual animated-body cave routing. Historical collisionAC2remainsunchecked for current runtime acceptance. No model/asset/Blender edits.
+
+2026-11-15 active-only review: focused collision/socket/asset-contract tests pass 31/31; npm run typecheck and scripts:check pass (17 scripts); node scripts/check-socket-reports.mjs passes (left 12 supported, right 11 supported). Live live-rock-island-left.glb SHA-256 is 2f81f8fc212886aa3eea9a0d316ca0a1f4badccac20044583f8ad4f0bdd9c2ef and right is 7d8cc1ce22d850d199f28652437c6d95d64ab4cc80606cc451c4c58c702558c1; neither matches the historical exact-geometry snapshot in README/fixture (left 2f90be..., right 68337f...). The 2026-11-13 fallback captures different reef-full-model assets and explicitly does not certify cave/animated-fish clearance. Keep all acceptance criteria and collision metadata open; fresh source-pinned collision evidence and Root actual-mesh route/occlusion review are still required. No assets, candidates, reports, or scene metadata changed.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

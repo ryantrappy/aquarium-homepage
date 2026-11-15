@@ -1,0 +1,62 @@
+{
+  "task": "AQ-87",
+  "reviewDate": "2026-11-15",
+  "reviewBase": {
+    "commit": "1f6e1f49e210b7e612c17cefbbedd8b7b4c2548f",
+    "fishSpawnSha256": "7026d60d2766bb9e06e54a709fb358e1ff851f7a2bd9e2dad4e7b32db75c40b4"
+  },
+  "candidate": {
+    "fishSpawnSha256": "a7ffa923fedaa572597c95735b62aa5e1d2e4fa50e6503f0b0e56ba028432e9d",
+    "fishSpawnIndexSha256": "a7ffa923fedaa572597c95735b62aa5e1d2e4fa50e6503f0b0e56ba028432e9d",
+    "fishSpawnTestIndexSha256": "e77f17bc35311810fca903b30b0a9b8204f5c06049250a474b676e8cb8fd9ba6",
+    "fishSpawnWorkingTreeSha256DuringFocusedRun": "1ef912cd0958733ead3e03b5facd6e6762b8c3da5031541992314bf58d4185cf",
+    "fishSpawnTestWorkingTreeSha256DuringFocusedRun": "680d8e841f7de56120c37cd9149efca8942f59aecbf62e9fcdae3aecaa6e41db",
+    "proofPath": "/tmp/aquarium-showcase-v1-proof-7c08b43/src/rendering/scene/fish-spawn.ts",
+    "indexWasRootSelectedForReview": true
+  },
+  "plannerAudit": {
+    "command": "node /tmp/aq87-front-depth-audit-20261115/audit.mjs",
+    "scriptPath": "/tmp/aq87-front-depth-audit-20261115/audit.mjs",
+    "scriptSha256": "01412b7dc6947a3a77c61eef90cb953c56bdf79ed4ba42351670fc12352c2a88",
+    "rawOutput": "planner-audit.json",
+    "viewport": [
+      1440,
+      900
+    ],
+    "defaultServices": [
+      "google",
+      "wikipedia",
+      "github",
+      "youtube",
+      "internet-archive"
+    ],
+    "beforeFishSpawnSha256": "7026d60d2766bb9e06e54a709fb358e1ff851f7a2bd9e2dad4e7b32db75c40b4",
+    "afterFishSpawnSha256": "a7ffa923fedaa572597c95735b62aa5e1d2e4fa50e6503f0b0e56ba028432e9d",
+    "inputHashes": {
+      "src/lib/services.ts": "413fa3eee9ce8878348bdc811a44f77d08629e325c3b35419e39b751d614a9ab",
+      "src/lib/fish-behavior.ts": "ad537ea1ee5c0d97caa369753edd727c51f67cb28a981e1f020064571e228c77",
+      "src/rendering/scene/camera-zoom.ts": "0e03a0ed9e23a97c9e15138d7c0a2fd2e59d2920d8bd8dd258c745bf54eaff51",
+      "src/rendering/scene/fish-scale.ts": "6235ff8971c598618b7b476216fa40b60065702c96e2985c1797612d7a2effcf",
+      "src/rendering/scene/reef-layout.ts": "1d0f005a75f513810eeda83108306a5cb82dc57726bc29edf429f5fa43c70179",
+      "src/rendering/scene/reef-assembly.ts": "a862591cc9a045bb9e2c572a5f1cfdaa9817e88733338f0a72c9b9cffb45a8cd"
+    },
+    "note": "Planner audit pins the AQ-87 helper before/after and its shared geometry inputs. It reports planner XYZ positions, not animated mesh or native world-space positions. The concurrently modified worktree and AQ-106 behavior are not claimed as part of AQ-87 acceptance."
+  },
+  "nativeEvidence": {
+    "review": "Root accepted fresh public defaults at 1440x900 CSS pixels, DPR 1, with reduced-motion emulated before app navigation and no look-dev seed prefix.",
+    "capture": "accepted-native-1440x900.jpg",
+    "captureSha256": "630166bf327d7c5c79ec98517578cb619b4aa1f33a372f675cf2e4dee30af115",
+    "state": "accepted-native-state.json",
+    "stateSha256": "e3180776d35b146df8f6e6bcaaa218999f384736724199fdcdc24faa08010a7d",
+    "capturedAt": "2026-11-15T14:27:28.304Z"
+  },
+  "verification": {
+    "focusedLog": "focused-tests.log",
+    "focusedResult": "30 tests passed in private f03b551 fish-spawn suite",
+    "fullLog": "full-suite.log",
+    "fullResult": "934 tests passed across 78 files in Root's combined proof f03b551",
+    "fullLogSource": "/tmp/showcase-root-full-f03b551.log",
+    "secondaryCombinedFocusedLog": "combined-focused-tests.log",
+    "unacceptedObservation": "unaccepted-concurrent-aq104-timeout.log"
+  }
+}

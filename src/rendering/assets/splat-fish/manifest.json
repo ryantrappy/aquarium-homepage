@@ -232,23 +232,23 @@
       "kind": "fish",
       "rigArchetype": "subcarangiform_schooler",
       "species": "Chromis viridis (Blue-Green Chromis)",
-      "sha256": "c53ea07f3e6f96d254546cbb54f418106b268dcc00ea96c2aed14796e1b855de",
-      "bytes": 769740,
-      "triangles": 9436,
+      "sha256": "ca69aa9d99b62afc930b9724af2f5714431513a56bd7536df2166bdc9802519f",
+      "bytes": 1242656,
+      "triangles": 24220,
       "dimensionsM": [
         0.282292,
-        0.91924,
+        0.920147,
         2
       ],
       "boundsM": {
         "min": [
           -0.141146,
-          -0.455444,
+          -0.455925,
           -1
         ],
         "max": [
           0.141146,
-          0.463796,
+          0.464222,
           1
         ]
       },
@@ -269,14 +269,24 @@
         {
           "id": "blue_green_chromis_body",
           "role": "fish",
-          "vertexCount": 4793
+          "vertexCount": 12175
         }
       ],
-      "generator": "scripts/build-splat-fish-glbs.mjs",
-      "generatorSha256": "7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd",
-      "recipe": "node --experimental-strip-types scripts/build-splat-fish-glbs.mjs",
+      "generator": "scripts/refine-chromis-contour.mjs",
+      "generatorSha256": "c052ac5186af259bb4461c55eca1b4b96172c87180001829a71f731cf72b7e40",
+      "recipe": "node scripts/refine-chromis-contour.mjs; baseGlbSha256=c53ea07f3e6f96d254546cbb54f418106b268dcc00ea96c2aed14796e1b855de; sourceWebpSha256=1990dc99a1424e4cda5cccbd7508dbe4959718b5d5dcc0939b4e8b5401cb3049; sharedGeneratorSha256=7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd; learnedGuideSha256=84bcdf285815122091c578e897db43a7e1b585d3bcf474349529f5fc1ece143e; grid=139x83",
       "contractValidated": true,
-      "status": "candidate-awaiting-root-review"
+      "status": "candidate-awaiting-root-review",
+      "sourceInputs": {
+        "baseGlbSha256": "c53ea07f3e6f96d254546cbb54f418106b268dcc00ea96c2aed14796e1b855de",
+        "sourceWebpSha256": "1990dc99a1424e4cda5cccbd7508dbe4959718b5d5dcc0939b4e8b5401cb3049",
+        "sharedGeneratorSha256": "7e7a41d4ddb47f4d7b596b50880321dbd80c7ae1ae0016880649089047617fdd",
+        "learnedGuideSha256": "84bcdf285815122091c578e897db43a7e1b585d3bcf474349529f5fc1ece143e",
+        "grid": [
+          139,
+          83
+        ]
+      }
     },
     {
       "id": "fish-firefish",

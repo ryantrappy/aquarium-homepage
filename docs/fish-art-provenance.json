@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "purpose": "Provenance for current aquarium fish art. Current thumbnails are alpha-preserving WebP; four high-resolution project-original PNG sources are archived outside public distribution.",
-  "asset_policy": "Project-original imagegen outputs, or exact documented CC0/CC BY 4.0. No third-party image was used as an input for these four generated candidates.",
+  "purpose": "Provenance for current aquarium fish art. Current thumbnails are alpha-preserving WebP; four high-resolution project-original PNG sources are archived outside public distribution. The AQ-106 snowflake-moray picker thumbnail is separately recorded with its unverified source status.",
+  "asset_policy": "Project-original imagegen outputs, or exact documented CC0/CC BY 4.0. No third-party image was used as an input for these four generated candidates. The pre-existing AQ-106 thumbnail has no recorded creator or external-source/license evidence; this entry does not assert third-party license verification.",
   "known_imagegen_webp_canonicals": [
     {
       "species_id": "ocellaris-clownfish",
@@ -424,12 +424,26 @@
       }
     }
   ],
+  "existing_user_supplied_selection_thumbnails": [
+    {
+      "species_id": "snowflake-moray-eel",
+      "path": "public/fish/snowflake-moray-eel.webp",
+      "sha256": "ce89a62dddec48147ac8e722bbf062532d9abcff11411d6659f5f94ee79c6119",
+      "bytes": 11530,
+      "dimensions_px": [600, 400],
+      "history_record": "Existing repository asset, used as the AQ-106 service-picker thumbnail at the user's direction.",
+      "source_or_license": "Creator and external source/license are not recorded; do not infer ImageGen or third-party license verification.",
+      "status": "Picker thumbnail only; never used as an in-tank sprite fallback. Root provenance review remains required.",
+      "alpha_visible_width_fraction": null
+    }
+  ],
   "notes": [
     "For the 11 earlier frozen WebPs, the project docs record generation dates and built-in ImageGen use, but exact prompts and original raw PNG paths are not present in this manifest; do not invent them. The tracked WebPs and hashes identify the delivered canonical files.",
     "The four legacy WebPs were removed only after root approved the v2 static preview replacements; their origin remains unverified and the prior hashes/history are retained for audit.",
     "The four root-approved generated PNG sources are preserved byte-for-byte under docs/asset-evidence/aq66/originals/. Optimized active WebP derivatives are 600 pixels wide, alpha-preserving, and each under 75 KB; the exact derivative hashes, dimensions, and encoder settings are recorded alongside each original.",
     "Every canonical WebP records measured fish-width fraction at alpha > 0.2. Fractions are the horizontal alpha-visible bounding-box width divided by image width, measured from decoded canonical pixels.",
-    "The generated source PNGs remain static preview art, not final photorealistic or animated fish assets."
+    "The generated source PNGs remain static preview art, not final photorealistic or animated fish assets.",
+    "The AQ-106 snowflake-moray thumbnail is a pre-existing supplied asset with no recorded creator or external-source/license evidence; its hash and picker-only use are recorded separately and no alpha-width sprite measurement is asserted."
   ],
   "environment_images": [
     {
@@ -461,5 +475,5 @@
     }
   ],
   "archived_original_png_total_bytes": 6446063,
-  "active_fish_thumbnail_total_bytes": 683768
+  "active_fish_thumbnail_total_bytes": 695298
 }

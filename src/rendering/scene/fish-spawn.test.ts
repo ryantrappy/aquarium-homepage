@@ -357,6 +357,21 @@ describe('safe aquarium fish spawning', () => {
     expect(isSafeFishPosition(constrained!, 0.1, bounds, obstacles)).toBe(true)
   })
 
+  it('rejects the added front-water depth candidate when the depth-specific frustum excludes it', () => {
+    const bounds: AxisAlignedBox = { min: { x: -2, y: -2, z: -2 }, max: { x: 2, y: 2, z: 2 } }
+    const clearance = 0.1
+    const frontWaterCutoff = bounds.min.z + (bounds.max.z - bounds.min.z) * 0.52
+    const preferred = { x: 0.3, y: 0.1, z: -1 }
+    const maxAbsXAtDepth = (z: number) => Math.abs(z - frontWaterCutoff) < 1e-9 ? 0 : 2
+    const obstacles = [{ id: 'reef', bounds: { min: { x: -1, y: -1, z: -1.3 }, max: { x: 1, y: 1, z: -0.7 } } }]
+
+    const position = findSafeFishSpawn(preferred, bounds, obstacles, clearance, [], undefined, undefined, [-0.5, 0.5], maxAbsXAtDepth)
+
+    expect(position).toBeDefined()
+    expect(position!.z).not.toBeCloseTo(frontWaterCutoff, 9)
+    expect(isSafeFishPosition(position!, clearance, bounds, obstacles, maxAbsXAtDepth)).toBe(true)
+  })
+
   it('fails closed when a height band has no clearance-safe fit or is malformed', () => {
     const bounds: AxisAlignedBox = { min: { x: -2, y: -2, z: -2 }, max: { x: 2, y: 2, z: 2 } }
     const preferred = { x: 0, y: -1.2, z: 0 }
@@ -432,7 +447,7 @@ describe('safe aquarium fish spawning', () => {
   })
 
   it.each([['phone 402x874', 402, 874], ['laptop 1440x900', 1440, 900]])('quantizes starter spawns onto distinct depth planes spanning the water column at %s (AQ-87 AC #1/#2)', (_label, width, height) => {
-    const { bounds, placements } = planStarters(Number(width), Number(height))
+    const { bounds, obstacles, placements } = planStarters(Number(width), Number(height))
     const columnHeight = bounds.max.y - bounds.min.y
 
     // Spawn intent sits on one of the AQ-87 depth planes (outer lanes on the
@@ -494,12 +509,24 @@ describe('safe aquarium fish spawning', () => {
     expect(tangZone.worldYRange[1]).toBeGreaterThan(gobyZone.worldYRange[0])
   })
 
-  it.each([['phone 402x874', 402, 874], ['laptop 1440x900', 1440, 900]])('stages every catalog species inside its ecological vertical interval at %s', (_label, width, height) => {
+  it('does not assign a generic open-water spawn or depth tier to the fixed cave resident', () => {
+    const bounds = waterBounds(1440, 900)
+    expect(classifySpeciesVerticalTier('snowflake-moray-eel')).toBeUndefined()
+    expect(evaluateTieredVerticalDepthRange('snowflake-moray-eel', bounds, fishClearanceRadius('snowflake-moray-eel'))).toBeUndefined()
+    expect(fishSpawnPreference('moray-service', 'snowflake-moray-eel', bounds, fishClearanceRadius('snowflake-moray-eel'))).toBeUndefined()
+  })
+
+  it.each([['phone 402x874', 402, 874], ['laptop 1440x900', 1440, 900]])('stages every mobile catalog species inside its ecological vertical interval at %s', (_label, width, height) => {
     const bounds = waterBounds(Number(width), Number(height))
     const columnHeight = bounds.max.y - bounds.min.y
-    expect(REEF_FISH.length).toBeGreaterThanOrEqual(15)
+    expect(REEF_FISH.length).toBe(17)
 
     for (const fish of REEF_FISH) {
+      if (getSpeciesBehaviorProfile(fish.id)?.habitatMode === 'crevice-resident') {
+        expect(evaluateTieredVerticalDepthRange(fish.id, bounds, fishClearanceRadius(fish.id))).toBeUndefined()
+        expect(fishSpawnPreference(fish.id, fish.id, bounds, fishClearanceRadius(fish.id))).toBeUndefined()
+        continue
+      }
       const clearance = fishClearanceRadius(fish.id)
       const ecologicalRange = evaluateTieredVerticalDepthRange(fish.id, bounds, clearance)
       const preference = fishSpawnPreference(fish.id, fish.id, bounds, clearance)

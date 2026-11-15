@@ -29,18 +29,20 @@
  *   and the recovery hysteresis without treating recovery as a budget pass.
  *
  * Compressed delivery (KTX2/Basis Universal) is required for every asset
- * that is not grandfathered. All 29 manifest assets predate this budget
+ * that is not grandfathered, except for one hash-scoped AQ-106 supplied
+ * asset. The 29 assets in the strict contract manifests predate this budget
  * and ship PNG textures, so they are grandfathered by id in
- * `GRANDFATHERED_UNCOMPRESSED_ASSET_IDS`. A new asset id that is not in
- * that set fails the check unless its textures are KTX2 — that is the
- * enforcement: the grandfather list is frozen at this commit and never
- * grows. The proof-candidate fish in `src/rendering/proof/` are not in
+ * `GRANDFATHERED_UNCOMPRESSED_ASSET_IDS`. The AQ-106 runtime-supplied asset
+ * is not in those manifests and must match `SUPPLIED_UNCOMPRESSED_ASSET_EXCEPTIONS`.
+ * A new asset that is neither grandfathered nor the exact supplied hash
+ * fails unless its textures are KTX2 — the grandfather list is frozen at
+ * this commit and never grows. The proof-candidate fish in `src/rendering/proof/` are not in
  * any manifest, so the automated check does not cover them; the doc
  * records the clownfish proof asset (3x 2048 px maps, ~64 MiB GPU) as a
  * measured outlier to be replaced under AQ-79/AQ-70.9, not as a budget.
  */
 
-export type AssetBudgetClass = 'hero-fish' | 'background-fish' | 'coral' | 'rock'
+export type AssetBudgetClass = 'hero-fish' | 'background-fish' | 'supplied-fish' | 'coral' | 'rock'
 
 export interface AssetClassBudget {
   /** Largest single GLB file allowed in the class (bytes). */
@@ -95,6 +97,19 @@ export const ASSET_CLASS_BUDGETS: Readonly<Record<AssetBudgetClass, AssetClassBu
     maxTotalFileBytes: 32.5 * MIB,
     maxTotalTriangles: 325_000,
     maxTotalGpuTextureBytes: 13 * 16 * MIB,
+  }),
+  // One AQ-106 runtime-supplied partial service fish; this separate class
+  // keeps it out of both the six-candidate hero roster and splat-fish totals.
+  'supplied-fish': Object.freeze({
+    maxFileBytes: 2 * MIB,
+    maxTriangles: 25_000,
+    maxTextureDimensionPx: 1024,
+    maxTextureMaps: 4,
+    maxTextureBytes: 768 * 1024,
+    maxGpuTextureBytes: 16 * MIB,
+    maxTotalFileBytes: 2 * MIB,
+    maxTotalTriangles: 25_000,
+    maxTotalGpuTextureBytes: 16 * MIB,
   }),
   // Measured maxima (8 coral colonies): 2,236,728 B, 34,176 tris, 512 px,
   // 7 maps, 388,951 B largest texture, 9.79 MiB GPU.
@@ -206,6 +221,15 @@ export const GRANDFATHERED_UNCOMPRESSED_ASSET_IDS: ReadonlySet<string> = new Set
   'fish-yellow-watchman-goby',
 ])
 
+/** Hash-scoped exception for one pre-existing user-supplied asset; unlike
+ * grandfathering, this does not exempt other assets with the same id. */
+export const SUPPLIED_UNCOMPRESSED_ASSET_EXCEPTIONS: Readonly<Record<string, { sha256: string; reason: string }>> = Object.freeze({
+  'snowflake-moray-eel': Object.freeze({
+    sha256: '810e641d69159d4b97db42cc48e7392e1861381777984721368ed5d18a450d5d',
+    reason: 'AQ-106 preserves the existing partial moray GLB and PNG maps byte-for-byte; it is not converted or added to the grandfathered set.',
+  }),
+})
+
 export interface BudgetTexture {
   mimeType: string
   widthPx: number
@@ -236,6 +260,8 @@ export interface AssetBudgetInput {
   /** Triangle count from the GLB index accessors. */
   triangles: number
   textures: BudgetTexture[]
+  /** Content hash required for the one scoped supplied-asset format exception. */
+  sha256?: string
   /** True only for the ids in GRANDFATHERED_UNCOMPRESSED_ASSET_IDS. */
   grandfathered: boolean
 }
@@ -287,10 +313,17 @@ export function evaluateAssetBudget(input: AssetBudgetInput): BudgetViolation[] 
   if (gpuTotal > budget.maxGpuTextureBytes) {
     fail(`${id}.gpuTextureBytes`, `Estimated GPU texture memory is ${gpuTotal} B, over the ${input.assetClass} budget of ${budget.maxGpuTextureBytes} B`)
   }
-  if (!input.grandfathered && input.textures.length > 0) {
-    const uncompressed = input.textures.filter((texture) => texture.mimeType !== 'image/ktx2')
-    if (uncompressed.length > 0) {
-      fail(`${id}.textures`, `Asset lacks compressed texture delivery (KTX2/Basis): ${uncompressed.length} of ${input.textures.length} textures are not image/ktx2. New photoreal assets must ship KTX2; only the grandfathered ids in GRANDFATHERED_UNCOMPRESSED_ASSET_IDS are exempt.`)
+  const suppliedException = SUPPLIED_UNCOMPRESSED_ASSET_EXCEPTIONS[id]
+  const uncompressedTextures = input.textures.filter((texture) => texture.mimeType !== 'image/ktx2')
+  const hasExactSuppliedException = Boolean(suppliedException && uncompressedTextures.length > 0
+    && input.sha256 === suppliedException.sha256
+    && input.textures.every((texture) => texture.mimeType === 'image/png'))
+  if (suppliedException && uncompressedTextures.length > 0 && !hasExactSuppliedException) {
+    fail(`${id}.sha256`, 'The supplied PNG exception requires the exact recorded asset hash and PNG maps only')
+  }
+  if (!input.grandfathered && !hasExactSuppliedException && input.textures.length > 0) {
+    if (uncompressedTextures.length > 0) {
+      fail(`${id}.textures`, `Asset lacks compressed texture delivery (KTX2/Basis): ${uncompressedTextures.length} of ${input.textures.length} textures are not image/ktx2. New photoreal assets must ship KTX2; only grandfathered ids or the exact AQ-106 supplied hash are exempt.`)
     }
   }
   return violations

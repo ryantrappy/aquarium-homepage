@@ -4,9 +4,9 @@
 Category: Governance / Requirements
 Status: Canonical / Active
 Authority: Binding Product Specification
-Backlog: AQ-1, AQ-2, AQ-14, AQ-103
+Backlog: AQ-1, AQ-2, AQ-14, AQ-103, AQ-106
 Owner: @root
-Updated: 2026-11-12
+Updated: 2026-11-15
 Upstream: AGENTS.md
 Downstream: All technical tasks and specifications
 -->
@@ -21,6 +21,10 @@ Downstream: All technical tasks and specifications
 ## Product goal
 
 The primary goal is a photorealistic, living reef aquarium: realistic fish should fill almost the entire main view and serve as clickable links to configured homelab services. Service navigation and configuration should support that aquarium experience while staying visually unobtrusive.
+
+## Showcase v1 scope
+
+The user confirms all 19 tasks already In Progress plus AQ-108 as the fixed scope for a fun, shareable showcase. [The release scope record](showcase-v1-finalization.md) lists the exact 20 tasks. Other unfinished Backlog work remains open for future versions. This supersedes the previous requirement to finish every open task for this version; it does not weaken scoped acceptance criteria or Root review. AQ-108 uses familiar public example websites and an HTTPS-prefilled Add service field, while preserving existing saved user configuration.
 
 ## Prototype status and success criterion
 
@@ -46,7 +50,7 @@ Use [the modular authoring specification](modular-coral-and-live-rock-spec.md) w
 - Show a small species thumbnail beside every fish option in the service fish selector so names and appearances are easy to match ([AQ-33](../backlog/tasks/aq-33%20-%20Show-species-thumbnails-in-service-fish-selectors.md)).
 - Persist settings simply on the client for the initial version.
 - Make service and settings controls operable by keyboard and respect the system reduced-motion preference in the first-pass prototype.
-- Keep the initial catalogue focused on reef fish; freshwater mode and catalog separation are future work.
+- Keep the standard catalogue focused on reef fish; freshwater mode and catalog separation are future work. AQ-106 explicitly adds the existing partial snowflake moray as one selectable service species, restricted to the bottom-right cave; it is not an ambient fish or a complete-model swimming fallback.
 
 ## Responsive verification scope
 
@@ -54,7 +58,7 @@ Use [the modular authoring specification](modular-coral-and-live-rock-spec.md) w
 
 Verify responsive behavior at two CSS viewports only: **402×874** as an iPhone 18 Pro proxy and **1440×900** as a normal laptop viewport. The iPhone proxy is inferred from Apple's [1206×2622 native display resolution](https://www.apple.com/iphone-18-pro/specs/) divided by a 3× pixel ratio; it is a CSS viewport estimate, not an Apple-published CSS dimension. Do not expand this into a broad phone, tablet, or device matrix unless requested. Older viewport measurements and review comments remain historical records; do not repeat those checks.
 
-The planned supported reef roster contains 15 species and is documented in the [reef fish roster target](reef-fish-roster.md). This is a planning target, not a claim that all 15 species or licensed visual assets are currently implemented in the app.
+The standard supported reef-fish roster contains 16 species and is documented in the [reef fish roster target](reef-fish-roster.md). AQ-106 adds one separate snowflake-moray service extension using the supplied partial model. The standard roster remains a planning target, not a claim that all 16 species or licensed visual assets are implemented in the app.
 
 ## Design direction
 
@@ -66,7 +70,7 @@ The planned supported reef roster contains 15 species and is documented in the [
 - Fish and aquarium life should read as realistic. Future asset work may explore realistic images, 3D, video, or animation, subject to an appropriate asset source and licensing.
 - Build the reef as a true 3D habitat so fish can pass naturally in front of and behind the rock and coral while the scene keeps its sharp, front-on, contained tank composition. Fish should route around solid reef geometry, and labels and click targets must respect visual occlusion.
 - Make reef interaction locations available to behavior systems as typed habitat locations, including applicable crevices/hideouts, perches, host anemones, and foraging surfaces. Compatibility must follow the target species briefs.
-- Give every species in the 15-fish target roster its own stable-ID keyed behavior profile, consumed by a shared engine. Profiles express appropriate movement, depth/zone, habitat interactions, and supported state transitions; individual fish vary independently within their species profile. This is implementation configuration, not a user-facing profile editor.
+- Give every species in the 16-fish standard target roster its own stable-ID keyed behavior profile, consumed by a shared engine. The AQ-106 snowflake moray has a separate fixed-cave profile for its partial supplied model. Profiles express appropriate movement, depth/zone, habitat interactions, and supported state transitions; individual fish vary independently within their species profile. This is implementation configuration, not a user-facing profile editor.
 - Aquarium decor may become link hotspots in a later pass.
 - Deliver the visual direction as an editable design file in OpenPencil, along with a preview that can be opened and reviewed.
 - A later accessibility task performs a thorough audit and polish pass on the keyboard and reduced-motion support already present in the first-pass prototype.
@@ -109,9 +113,9 @@ These are biological and visual references, not permission to reuse their photog
 - **Highest priority:** AQ-5 is the central investigation for choosing the rendering engine, photorealistic fish assets, and animation pipeline before production animation architecture is committed. Its candidate shortlist is [PlayCanvas](https://playcanvas.com/), [Three.js](https://threejs.org/), and [Babylon.js](https://www.babylonjs.com/); the investigating agent chooses the best fit using comparable fish/reef assets and evidence, separating engine capability from asset and rig quality. Consider linked investigations AQ-34 through AQ-38, AQ-12/AQ-13, AQ-14.2, and AQ-18 through AQ-32 together as evidence inputs; they remain separate deliverables and need not all be Done before AQ-5 concludes.
 - **Highest priority:** Build species-aware lifelike swimming and prevent still-sprite translation from being treated as completion (AQ-12).
 - **Highest priority:** Build a true 3D reef with depth occlusion, obstacle-aware fish movement, typed habitat interaction locations, and occlusion-aware labels and click targets ([AQ-34](../backlog/tasks/aq-34%20-%20Build-a-true-3D-reef-scene-with-depth-aware-fish-and-habitat-interactions.md)); this can use the rendering direction selected in AQ-5.
-- **Highest priority:** Define and validate separate typed behavior profiles for all 15 stable species IDs and connect them to a shared engine ([AQ-35](../backlog/tasks/aq-35%20-%20Define-typed-behavior-profiles-for-all-15-reef-fish-species.md)); use the sourced [reef fish roster](reef-fish-roster.md) and its per-species animation tasks as the behavior basis.
+- **Highest priority:** Define and validate separate typed behavior profiles for the 16 standard stable species IDs and connect them to a shared engine ([AQ-35](../backlog/tasks/aq-35%20-%20Define-typed-behavior-profiles-for-all-15-reef-fish-species.md)); use the sourced [reef fish roster](reef-fish-roster.md) and its per-species animation tasks as the behavior basis. AQ-106 separately covers the fixed-cave moray service exception.
 - Use the reviewed [fish behavior design notes](fish-behavior-design.md) alongside the Gemini planning reference. Implement the small per-fish state runtime and event hooks in [AQ-44](../backlog/tasks/aq-44%20-%20Implement-a-lightweight-per-fish-behavior-state-runtime.md), then the reusable species-compatible anchor interactions in [AQ-45](../backlog/tasks/aq-45%20-%20Implement-species-compatible-interactions-with-reef-habitat-anchors.md). Keep per-instance state separate from species profiles and deformation, use only supported anchor/state combinations, and preserve single-fish startle behavior.
-- Optional roster extensions remain research only: [AQ-46](../backlog/tasks/aq-46%20-%20Research-moray-and-garden-eel-options-for-a-future-reef-roster.md) examines distinct moray and garden eel candidates, and [AQ-47](../backlog/tasks/aq-47%20-%20Research-cleaner-wrasse-station-interactions-for-a-future-reef-roster.md) examines cleaner-station behavior. Neither task adds species to the current 15-fish catalog.
+- Other roster extensions remain separate work: [AQ-46](../backlog/tasks/aq-46%20-%20Research-moray-and-garden-eel-options-for-a-future-reef-roster.md) researches distinct moray and garden-eel candidates, while AQ-106 authorizes only the supplied snowflake moray as a selectable fixed-cave service. Garden eel and cleaner-wrasse work remain future; [AQ-47](../backlog/tasks/aq-47%20-%20Research-cleaner-wrasse-station-interactions-for-a-future-reef-roster.md) does not add a species to the current catalog.
 - Review [Sketchfab's Virtual Aquarium ALL Fish Animated](https://sketchfab.com/3d-models/virtual-aquarium-all-fish-animated-8de6bc7d49c64649910a199e7405ecb6) as animation inspiration and map observed takeaways to AQ-5, AQ-12, AQ-13, and AQ-18 through AQ-32 ([AQ-36](../backlog/tasks/aq-36%20-%20Review-the-Sketchfab-animated-aquarium-as-a-fish-motion-reference.md)). Search-indexed page metadata names Adam Prejean (@adamprejean), publication date July 6, 2022, and describes animated swim cycles; the viewer/playback remains unverified until this review is completed. Do not assume its species match the target roster or that its license permits reuse.
 - Investigate [Mesh2Motion](https://mesh2motion.org/) as a possible rigging and animation-transfer workflow ([AQ-37](../backlog/tasks/aq-37%20-%20Investigate-Mesh2Motion-fish-rigs-and-animation-transfer.md)). Verify candidate source and license terms individually; use owned or appropriately licensed samples for import/export proofs, with any production workflow change tracked separately.
 - Evaluate Babylon.js as a candidate rendering engine for the reef habitat and animated fish ([AQ-38](../backlog/tasks/aq-38%20-%20Evaluate-Babylon.js-for-photorealistic-reef-and-animated-fish-rendering.md)). Compare with AQ-5 and the current implementation using controlled assets; engine features alone do not ensure photorealism.

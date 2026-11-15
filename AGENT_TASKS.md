@@ -4,14 +4,41 @@
 Category: Governance / Checkpoint
 Status: Active
 Authority: Binding Checkpoint; Backlog controls acceptance
-Backlog: AQ-44, AQ-49, AQ-54, AQ-59, AQ-70.2, AQ-70.13, AQ-74, AQ-86, AQ-104, AQ-105
+Backlog: AQ-44, AQ-49, AQ-54, AQ-59, AQ-70.2, AQ-70.13, AQ-74, AQ-86, AQ-104, AQ-105, AQ-106
 Owner: @root
-Updated: 2026-11-14
+Updated: 2026-11-15
 Upstream: AGENTS.md, agent_scratch.md, docs/requirements.md
 Downstream: Current implementation and review work
 -->
 
-Root verified this checkpoint against the current checkout. The goal remains active and incomplete: finish the backlog and make the living aquarium resemble the supplied reference. Passing functional tests does not accept final art.
+Root verified prior Root-checkpoint facts against the current checkout. The latest user request (2026-11-15) limits this execution to the 18 tasks that were already In Progress at request start; do not start To Do tasks or create new tasks. This request-specific boundary supersedes the older fixed-showcase execution scope below without changing the historical release record or Backlog acceptance criteria. The Junie handoff below awaits Root verification, and passing functional tests does not accept final art.
+
+## Current user-requested execution scope — 2026-11-15
+
+The user clarified that “complete the whole backlog” means complete only tasks already marked In Progress, and “do not start anything new” excludes To Do tasks and newly created tasks. The 18-task execution set at clarification is AQ-58, AQ-59, AQ-71, AQ-82, AQ-86, AQ-87, AQ-88, AQ-76, AQ-106, AQ-70.1, AQ-70.6, AQ-70.11, AQ-70.12, AQ-70.13, AQ-94, AQ-101, AQ-102, and AQ-103. Root review remains required; no acceptance criteria may be weakened to close a task. Preserve user/concurrent work, verify visually only at 1440×900, and do not deploy.
+
+## Junie implementation handoff — AQ-106 (2026-11-15; Root verification pending)
+
+AQ-106 is a separate user-directed task, not an addition to the fixed 20-task showcase count. Backlog records AC 1–8 and DoD 2 checked; AC 9 and DoD 1/3 remain open for Root visual/model review. The task remains In Progress and must not be marked Done until Root reviews the result.
+
+- The pre-existing supplied snowflake-moray GLB was not edited in this session: SHA-256 `810e641d69159d4b97db42cc48e7392e1861381777984721368ed5d18a450d5d`, 1,294,560 B, 6,712 triangles. Its PNG maps, partial rear-to-head bounds, `crevice_idle` clip, and named head bone are recorded in `src/rendering/assets/fish/manifest.json`; creator/external-source license evidence remains unknown and requires Root provenance review.
+- The eel is catalog-selectable for one service only, fixed to a layout-derived bottom-right right-island cave. The exposed head-to-probe capsule, mounted zoanthid, sand margin, and default-camera ray are covered by `moray-residence.test.ts`, `reef-mesh-navigation.test.ts`, and `aquarium-lifecycle.test.ts`; the embedded rear is intentionally occluded and not claimed collision-free outside the cave. Narrow/missing collider, missing model, and invalid duplicate service inputs fail closed while links remain.
+- `npm run typecheck` passes, including all 17 script checks. The focused AQ-106 suites pass 218 tests across 14 files. The final production build succeeds with the existing >500 kB aquarium-chunk warning; Nitro also writes `.output`. The final full suite passes all 954 tests across 79 files with `--maxWorkers=1`; an earlier parallel run's two AQ-87 depth-spread failures did not reproduce, and no assertion was weakened.
+- Local Vite smoke on `127.0.0.1:4175` returned HTTP 200 for `/`, the moray GLB (1,294,560 B), and picker WebP (11,530 B); existing preview on `4173` was left untouched. This is not a browser or visual review.
+- No 1440×900 browser review, Root visual acceptance, deployment, or commit has occurred. Root must verify this handoff against the checkout and preserve the pre-existing modified moray GLB, concurrent AQ-70.12 files, and water-surface work; they are not owned by this task's file list.
+- Final `git status` shows no staged files. `fish-spawn.ts` and `fish-spawn.test.ts` changes are unstaged and included in AQ-106's file list; concurrent modified AQ-70.12/water-surface files and untracked AQ-76/AQ-103 evidence directories remain outside this task. Do not blanket-stage or claim them for AQ-106.
+
+## Current showcase scope — 2026-11-14
+
+The user explicitly confirms **all 19 tasks already In Progress plus AQ-108** for the shareable showcase; all other unfinished tasks are future-version work. See [the fixed 20-task scope](docs/showcase-v1-finalization.md). This supersedes the older all-open-Backlog goal without weakening any acceptance criterion. Root final review is required for every completion.
+
+The scope-confirmation baseline is merged `7c08b43`; preserve the current `v1-finalization` branch and concurrent work. PR49 and other recent PRs were merged externally. Root did not merge/deploy. Use rolling draft PR53 https://github.com/ryantrappy/aquarium-homepage/pull/53 and maintain its running contents. AQ108 is Done after Root review: source393c6c9,35focused tests/typecheck17scripts/build, Compose resolution and exact laptop fresh/add/edit/reload/reset evidence under docs/asset-evidence/aq108/root-review-20261114/. Existing saved configuration remains intact. The other17 scoped tasks remain open after AQ15/AQ107 final acceptance below; AQ103 has a fallback-initialization correction with73focused checks and pending optical-branch evidence. No more phone checks.
+
+Root acceptance 2026-11-15: AQ15 is Done after actual hardware/current-source local UI review; evidence docs/asset-evidence/aq15/root-review-20261114/. Root80focused tests/typecheck17scripts/build pass. Front/package, side/Core0, hidden and reload selection verified; deployedAPI mismatch remains separate handoff context. Remaining17 of the fixed20 showcase tasks are open (AQ108, AQ15 and AQ107 complete). AQ107 original-recipe139×83 passed native normal/350pxclose/pose comparisons, exact actual-runtime/picking review,89integration checks/typecheck/build; evidence docs/asset-evidence/aq107/root-review-20261115/. External273583c committed mixed source/evidence while Root review was ongoing; preserve it without treating it as task acceptance. Concurrent AQ106 work is separately user-directed and must not be swept into these commits.
+
+Root2026-11-15 AQ87 partial milestone: constrained spawn search includes the existing front-water cutoff, retaining every safety and visibility ranking. Default-five planner Z span0.7898→2.2418, nativefresh1440x900DPR1 fivebodies/linksvisible, 30focused/934fulltests pass in privatef03b551. Evidence docs/asset-evidence/aq87/front-cutoff-20261115/. FullAQ87 speciesbands/animatedbodyclearance remainopen. AQ103 finalmask/nativeoptics review accepted pending scoped completion record.
+
+Earlier water/process/branch notes below are historical. Current checked-in renderer includes the static-reef radiance probe, phase-warped anisotropic water normals and directional key correction. Prior private proof/capture paths remain evidence of particular trials, not proof of current HEAD. Chromis diagnosis is durable, but the committed refinement script has not yet established an accepted refined runtime asset. Do not mistake externally committed partial work for Root acceptance.
 
 ## Current delivery override — 2026-11-14
 

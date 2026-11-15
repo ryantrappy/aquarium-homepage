@@ -20,7 +20,7 @@ afterEach(async () => {
 })
 
 describe('shared config file store', () => {
-  it('uses and persists the approved real starter roster when a fresh checkout has no saved config', async () => {
+  it('uses and persists public example services when no saved config exists', async () => {
     const directory = await mkdtemp(join(tmpdir(), 'reef-config-default-'))
     directories.push(directory)
     const filePath = join(directory, 'settings', 'config.json')
@@ -29,11 +29,11 @@ describe('shared config file store', () => {
     const initial = await store.read()
     expect(initial.config).toMatchObject({ version: 1, mode: 'reef' })
     expect(initial.config.services.map(({ name, url, fishId, isExample }) => ({ name, url, fishId, isExample }))).toEqual([
-      { name: 'Komodo', url: 'https://komodo.ryantr.app', fishId: 'yellow-tang', isExample: false },
-      { name: 'WatchMyBirds', url: 'https://watchmybirds.ryantr.app', fishId: 'banggai-cardinalfish', isExample: false },
-      { name: 'Paperless', url: 'https://paperless.ryantr.app', fishId: 'royal-gramma', isExample: false },
-      { name: 'Home Assistant', url: 'https://ha.ryantr.app', fishId: 'ocellaris-clownfish', isExample: false },
-      { name: 'Ombi', url: 'https://ombi.ryantr.app', fishId: 'blue-tang', isExample: false },
+      { name: 'Google', url: 'https://www.google.com', fishId: 'yellow-tang', isExample: true },
+      { name: 'Wikipedia', url: 'https://www.wikipedia.org', fishId: 'banggai-cardinalfish', isExample: true },
+      { name: 'GitHub', url: 'https://github.com', fishId: 'royal-gramma', isExample: true },
+      { name: 'YouTube', url: 'https://www.youtube.com', fishId: 'ocellaris-clownfish', isExample: true },
+      { name: 'Internet Archive', url: 'https://archive.org', fishId: 'blue-tang', isExample: true },
     ])
 
     const persisted = await store.write(initial.config, initial.revision)

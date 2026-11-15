@@ -1,7 +1,7 @@
 {
   "schema": "modular-fish-manifest-v1",
   "contractSchema": "reef-asset-v1",
-  "note": "Six supplied rigged fish candidates pass the offline contract; anatomy, clip composition and runtime integration require separate Root review.",
+  "note": "Six supplied rigged fish candidates pass the offline contract; anatomy, clip composition and runtime integration require separate Root review. The AQ-106 runtime-supplied partial moray is listed separately and is not contract-validated or a complete fish model.",
   "assets": [
     {
       "id": "fish-ocellaris-clownfish",
@@ -326,6 +326,50 @@
       "recipe": "/Applications/Blender.app/Contents/MacOS/Blender --threads 4 -b --python src/rendering/modeling/build_mandarin_dragonet.py -- /tmp/fish-models/fish-mandarin-dragonet",
       "contractValidated": true,
       "status": "candidate-awaiting-root-review"
+    }
+  ],
+  "runtimeSuppliedAssets": [
+    {
+      "id": "snowflake-moray-eel",
+      "fishSpeciesId": "snowflake-moray-eel",
+      "file": "snowflake-moray-eel.glb",
+      "path": "src/rendering/assets/fish/snowflake-moray-eel.glb",
+      "assetClass": "supplied-fish",
+      "status": "runtime-supplied-partial",
+      "contractValidated": false,
+      "sha256": "810e641d69159d4b97db42cc48e7392e1861381777984721368ed5d18a450d5d",
+      "bytes": 1294560,
+      "triangles": 6712,
+      "modelBounds": {
+        "min": [-0.1151658296585083, -0.1228799968957901, 0],
+        "max": [0.10846620053052902, 0.21449047327041626, 2.0055999755859375]
+      },
+      "biologicalReferenceLengthInches": 24,
+      "renderedForebodyLengthInches": 9,
+      "missingBodyRegions": ["rear body", "tail"],
+      "animationClips": ["crevice_idle"],
+      "animationTracks": ["probe", "body_mid", "neck", "head", "jaw"],
+      "headBoneBindPosition": [0, 0, 1.56],
+      "sceneResidence": {
+        "rightIslandLocalBodyCenterMeters": [-0.04, 0.02, 0.18],
+        "policy": "Fixed in the bottom-right cave; no left-cave or open-water fallback.",
+        "visibleHeadProbeClearanceRadiusMeters": 0.1,
+        "embeddedForebody": "The rear of the supplied partial model remains inside and occluded by the cave; only the exposed head-to-probe segment is clearance-checked. Root visual review is pending."
+      },
+      "textures": [
+        { "name": "snowflake-moray-eel-normal", "mimeType": "image/png", "widthPx": 512, "heightPx": 512, "bytes": 250476 },
+        { "name": "snowflake-moray-eel-base", "mimeType": "image/png", "widthPx": 1024, "heightPx": 1024, "bytes": 745807 },
+        { "name": "snowflake-moray-eel-iris", "mimeType": "image/png", "widthPx": 256, "heightPx": 256, "bytes": 44359 }
+      ],
+      "textureDeliveryException": "AQ-106 preserves the pre-existing supplied PNG maps unchanged; the exception is hash-scoped in budgets.ts and does not extend the grandfathered asset list.",
+      "thumbnail": {
+        "path": "public/fish/snowflake-moray-eel.webp",
+        "sha256": "ce89a62dddec48147ac8e722bbf062532d9abcff11411d6659f5f94ee79c6119",
+        "bytes": 11530,
+        "dimensionsPx": [600, 400],
+        "use": "service-picker thumbnail only; never an in-tank sprite fallback"
+      },
+      "provenanceStatus": "Existing user-supplied project asset; author and external-source/license evidence are not recorded in AQ-106. This entry does not assert third-party license verification."
     }
   ]
 }

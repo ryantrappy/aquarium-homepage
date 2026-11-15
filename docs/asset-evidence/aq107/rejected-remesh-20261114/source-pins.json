@@ -1,0 +1,10 @@
+{
+  "candidateGlbSha256": "e6eccd0c16ebdb3fcfb5e7d788f3bae5f57607cbd84954175fc4fa58a8190bef",
+  "privateProof": "85dbad0",
+  "files": {
+    "comparison-profile.jpg": "094647721ecc5a9aaa112213ff454b5ddef0c80e47b912838e546a5dc0ba8ce6",
+    "index.html": "0050dd892b57905b2d1fe80b335dfa12e874d8945caf0ef7bb8a16915cd4c93c",
+    "fixture.js": "4dcbec0ca12368673a04b62f70601b04ed2300dc94dd7b9747df8035af5fd2d8",
+    "refine-chromis-contour.mjs": "c359f8e736e485ed69c1706441ee488ed619d0504dbef616e1ce0801396b4cb3"
+  }
+}

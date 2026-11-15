@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-08'
-updated_date: '2026-11-13 05:47'
+updated_date: '2026-11-15 15:55'
 labels:
   - optics
   - photorealism
@@ -67,4 +67,6 @@ Root native review of35581ed at both exactDPR1 sizes saved under docs/asset-evid
 Root native trial softens the bright floor/rear-wall cut with substrate-only contact illumination over the final0.95display units, retaining sharp warm foreground grains. Removed the old arbitrary lateral sand vignette. No geometry, fish/navigation, full-frame overlay or blur changes.18sand/caustic tests pass; exact-source final captures and shader-log review follow. This is a functional/art iteration handoff, not full shaft/freeze/performance acceptance.
 
 Root final exact-source219e3da two-size review: native before/after PNGs and ready renderFrozen sidecars under docs/asset-evidence/aq86/rear-seam-20261112/. Harsh bright horizontal cut is now a soft rear-floor contact transition at both1440x900/402x874; Root acceptsAC4. Physical floor/wall boundary remains geometrically present. Laptop clear-channel20x30region max adjacent-row display-luminance jump falls108.25 to28.66 (~73.5percent); no whole-frame/phone numeric claim. After reload zero captured consolewarnings/errors; mapless front-edge shader repairedAQ70.12. Isolated43focused tests/4files, typecheck14scripts, productionbuild pass. Before shadererrors and frozen inspection timings invalidate runtime cost comparison; AC5 and fullshaft/haze/freezegates remain open. No model/Blender edits.
+
+2026-11-15 active-only verification: existing shaft materials/offscreen pass already implement premultiplied ONE/ONE additive compositing and restore renderer state; light-shafts.test.ts plus underwater-optics.test.ts pass 28/28, and the recently run aquarium-lifecycle suite passes 46/46 including full-height haze/shaft planes. AC4 rear-seam softening remains checked with saved 1440x900/402x874 evidence. Existing AQ86 capture sets are source-pinned to older commits (35581ed and 219e3da), so they are not current-source visual acceptance; no browser/GPU frame-time measurement was available. Keep AC1/2/3/5 and Root DoD open; no code or scene values changed.
 <!-- SECTION:NOTES:END -->

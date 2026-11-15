@@ -8,6 +8,22 @@ const WATER_SURFACE_DEPTH_SEGMENTS = 48
 export const WATER_TO_AIR_ETA = 1.3333333
 export const TIR_RADIANCE_PROXY_DEPTH = 0.9
 export const TIR_RADIANCE_PROXY_MAX_TRAVEL = 2.4
+export const TIR_CORAL_REAR_START_OFFSET = 3.8
+export const TIR_CORAL_REAR_END_OFFSET = 5.6
+export const TIR_CORAL_GRAZING_NOV_START = 0.52
+export const TIR_CORAL_GRAZING_NOV_END = 0.76
+
+/** Fraction of analytic/captured reef color used for a TIR reflection. */
+export function evaluateTirCoralRadianceWeight(worldZ: number, noV: number, backZ: number): number {
+  if (![worldZ, noV, backZ].every(Number.isFinite)) return 0
+  const rearMidWeight = 1 - THREE.MathUtils.smoothstep(
+    worldZ,
+    backZ + TIR_CORAL_REAR_START_OFFSET,
+    backZ + TIR_CORAL_REAR_END_OFFSET,
+  )
+  const grazingWeight = 1 - THREE.MathUtils.smoothstep(noV, TIR_CORAL_GRAZING_NOV_START, TIR_CORAL_GRAZING_NOV_END)
+  return rearMidWeight * grazingWeight
+}
 
 type WaterSurfaceLayout = ReturnType<typeof glassEnclosureLayout>
 
@@ -198,7 +214,21 @@ export function createWaterSurface(initialLayout: WaterSurfaceLayout) {
         // reflectedRay and CubeCamera faces share world axes. Render-target
         // cube samples are linear radiance; colorspace_fragment encodes once.
         vec3 capturedTirRadiance = textureCube(uRadianceProbe, reflectedRay).rgb;
-        vec3 tirBase = mix(analyticTirRadiance, capturedTirRadiance, uUseRadianceProbe);
+        vec3 tirRadianceSource = mix(analyticTirRadiance, capturedTirRadiance, uUseRadianceProbe);
+        // Reef-colored reflection is limited to grazing views of rear/mid water.
+        // Outside that region, TIR falls back to deep water. The offsets retain
+        // full weight over the overview's visible rear strip while suppressing
+        // coral color toward the front glass and at near-normal facets.
+        float rearMidCoralWeight = 1.0 - smoothstep(
+          uBackZ + ${TIR_CORAL_REAR_START_OFFSET.toFixed(2)},
+          uBackZ + ${TIR_CORAL_REAR_END_OFFSET.toFixed(2)},
+          p.y);
+        float grazingCoralWeight = 1.0 - smoothstep(
+          ${TIR_CORAL_GRAZING_NOV_START.toFixed(2)},
+          ${TIR_CORAL_GRAZING_NOV_END.toFixed(2)},
+          NoV);
+        float tirCoralWeight = rearMidCoralWeight * grazingCoralWeight;
+        vec3 tirBase = mix(vec3(0.005, 0.024, 0.068), tirRadianceSource, tirCoralWeight);
 
         // Trace the view ray back through the interface only when water-to-air
         // refraction is valid. Compare it to the actual key and rear-panel
@@ -219,19 +249,20 @@ export function createWaterSurface(initialLayout: WaterSurfaceLayout) {
         float troughCrease = 1.0 - smoothstep(0.02, 0.22, abs(totalSlope.y + 0.08));
         col = mix(col, vec3(0.003, 0.015, 0.045), troughCrease * tirFactor * 0.38);
 
-        // Thin silver-cyan meniscus is inside the front-glass plane and within the side bounds.
+        // Keep the meniscus fully inside the front-glass plane and side bounds.
+        float frontClip = 1.0 - smoothstep(uFrontZ - 0.02, uFrontZ, p.y);
         float meniscusSides = 1.0 - smoothstep(uHalfWidth - 0.14, uHalfWidth, abs(p.x));
         float frontMeniscus = exp(-pow((p.y - (uFrontZ - 0.015)) / 0.018, 2.0)) * meniscusSides;
-        col = mix(col, vec3(0.48, 0.80, 0.98), frontMeniscus * 0.72);
+        float clippedFrontMeniscus = frontMeniscus * frontClip;
+        col = mix(col, vec3(0.48, 0.80, 0.98), clippedFrontMeniscus * 0.72);
 
         float rearFade = smoothstep(uBackZ, uBackZ + 1.95, p.y);
-        float frontClip = 1.0 - smoothstep(uFrontZ - 0.02, uFrontZ, p.y);
         float sideFade = 1.0 - smoothstep(uHalfWidth - 0.12, uHalfWidth, abs(p.x));
         // Match the top of aquarium.ts's rear-water backdrop gradient (cTop).
         col = mix(vec3(0.015, 0.056, 0.145), col, rearFade);
 
         float baseAlpha = mix(0.78, 0.52, transmissionWindow);
-        float alpha = clamp(baseAlpha * rearFade * frontClip * sideFade + frontMeniscus * 0.85, 0.0, 0.88);
+        float alpha = clamp(baseAlpha * rearFade * frontClip * sideFade + clippedFrontMeniscus * 0.85, 0.0, 0.88);
         gl_FragColor = vec4(col, alpha);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>

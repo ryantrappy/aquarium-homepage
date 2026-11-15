@@ -1,0 +1,55 @@
+{
+  "notice": "Service added.",
+  "urlField": "https://",
+  "config": {
+    "config": {
+      "version": 1,
+      "mode": "reef",
+      "services": [
+        {
+          "id": "google",
+          "name": "Google",
+          "url": "https://www.google.com",
+          "fishId": "yellow-tang",
+          "isExample": true
+        },
+        {
+          "id": "wikipedia",
+          "name": "Wikipedia",
+          "url": "https://www.wikipedia.org",
+          "fishId": "banggai-cardinalfish",
+          "isExample": true
+        },
+        {
+          "id": "github",
+          "name": "GitHub",
+          "url": "https://github.com",
+          "fishId": "royal-gramma",
+          "isExample": true
+        },
+        {
+          "id": "youtube",
+          "name": "YouTube",
+          "url": "https://www.youtube.com",
+          "fishId": "ocellaris-clownfish",
+          "isExample": true
+        },
+        {
+          "id": "internet-archive",
+          "name": "Internet Archive",
+          "url": "https://archive.org",
+          "fishId": "blue-tang",
+          "isExample": true
+        },
+        {
+          "id": "c815b8ac-8f62-4f1e-9dd6-6d230408dad2",
+          "name": "Demo shortcut",
+          "url": "https://example.com",
+          "fishId": "ocellaris-clownfish",
+          "isExample": false
+        }
+      ]
+    },
+    "revision": "a77298e09ca197c91212ff0e654ec6d4aff1a084006a1c8efb55c1966a8d0525"
+  }
+}

@@ -1,0 +1,78 @@
+- main:
+  - region "Aquarium with clickable service fish":
+    - link "Open Google in a new tab":
+      - /url: https://www.google.com
+      - generic: Google
+      - generic: example
+    - link "Open Wikipedia in a new tab":
+      - /url: https://www.wikipedia.org
+      - generic: Wikipedia
+      - generic: example
+    - link "Open GitHub in a new tab":
+      - /url: https://github.com
+      - generic: GitHub
+      - generic: example
+    - link "Open YouTube in a new tab":
+      - /url: https://www.youtube.com
+      - generic: YouTube
+      - generic: example
+    - link "Open Internet Archive in a new tab":
+      - /url: https://archive.org
+      - generic: Internet Archive
+      - generic: example
+    - region "Aquarium CPU thermometer":
+      - generic: "CPU thermometer: --.-°C, unavailable for Package id 0 (coretemp.0). The selected CPU temperature sensor is unavailable."
+      - generic: Package id 0
+      - generic: UNAVAILABLE
+    - group "Camera zoom":
+      - button "Zoom in":
+        - generic: +
+      - button "Zoom out":
+        - generic: −
+      - button "Reset view to full tank overview" [disabled]: Reset view
+  - group "Aquarium controls":
+    - button "Services" [expanded]:
+      - generic: Services
+    - button "Pause fish movement":
+    - button "Service settings":
+  - dialog "On the reef":
+    - paragraph: Find a shortcut
+    - heading "On the reef" [level=2]
+    - generic: 5 services
+    - button "Manage" [active]
+    - button "Close services":
+    - navigation "Services":
+      - generic: Search services
+      - searchbox "Search services"
+      - list:
+        - link "Google example Yellow tang":
+          - /url: https://www.google.com
+          - text: Google
+          - generic: example
+          - generic: Yellow tang
+          - generic: ↗
+        - link "Wikipedia example Banggai cardinalfish":
+          - /url: https://www.wikipedia.org
+          - text: Wikipedia
+          - generic: example
+          - generic: Banggai cardinalfish
+          - generic: ↗
+        - link "GitHub example Royal gramma":
+          - /url: https://github.com
+          - text: GitHub
+          - generic: example
+          - generic: Royal gramma
+          - generic: ↗
+        - link "YouTube example Ocellaris clownfish":
+          - /url: https://www.youtube.com
+          - text: YouTube
+          - generic: example
+          - generic: Ocellaris clownfish
+          - generic: ↗
+        - link "Internet Archive example Blue tang":
+          - /url: https://archive.org
+          - text: Internet Archive
+          - generic: example
+          - generic: Blue tang
+          - generic: ↗
+      - paragraph: Links open in a new tab.

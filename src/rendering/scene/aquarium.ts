@@ -3,7 +3,7 @@ import { mountedAnemoneHosts } from './anemone-host'
 import { GLTFLoader, type GLTF } from 'three/addons/loaders/GLTFLoader.js'
 import { clone } from 'three/addons/utils/SkeletonUtils.js'
 import type { ServiceConfig } from '../../lib/services'
-import { getFishById } from '../../lib/fish'
+import { getFishById, SNOWFLAKE_MORAY_EEL_ID } from '../../lib/fish'
 import {
   DEFAULT_LEFT_ISLAND_MOUNTS,
   DEFAULT_RIGHT_ISLAND_MOUNTS,
@@ -38,6 +38,7 @@ import { SURFACE_WAVE_GLSL } from './surface-waves'
 import { RaymarchedShaftPass, SHAFT_BEAM_GLSL } from './light-shafts'
 import { createAragoniteSandBed, getRockFootprintsForViewport } from './aragonite-sand'
 import { reefPlacementsForViewport } from './reef-layout'
+import { hasReadyRightIslandCollider, resolveAvailableSnowflakeMorayResidence, resolveSnowflakeMorayResidence, SNOWFLAKE_MORAY_CAVE_COLLISION_RADIUS_M, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M, type MorayResidence } from './moray-residence'
 import { CENTER_ARCH_URL, CENTER_ARCH_MOUNTS, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
 import { createGlassEnclosure, glassEnclosureLayout } from './glass-enclosure'
 import { createWaterSurface } from './water-surface'
@@ -116,11 +117,17 @@ const modelUrls: Record<string, string> = {
   'lyretail-anthias': new URL('../assets/splat-fish/lyretail-anthias.glb', import.meta.url).href,
   'flame-angelfish': new URL('../assets/splat-fish/flame-angelfish.glb', import.meta.url).href,
   'copperband-butterflyfish': new URL('../assets/splat-fish/copperband-butterflyfish.glb', import.meta.url).href,
+  [SNOWFLAKE_MORAY_EEL_ID]: new URL('../assets/fish/snowflake-moray-eel.glb', import.meta.url).href,
 }
 export type SceneStatus = 'loading' | 'ready' | 'failed'
 export type AquariumController = { update(services: ServiceConfig[], paused: boolean, configurationReady?: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void; zoomIn(): boolean; zoomOut(): boolean; zoomToFocalArea(id: FocalAreaId): boolean; resetZoom(): boolean; isZoomed(): boolean; getCameraZoom(): CameraZoomState; focusServiceFish?(id: string): boolean; getFocusedServiceId?(): string | undefined }
 declare global { interface Window { __AQUARIUM_LOOKDEV__?: LookDevBridge } }
-type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; flex?: FishFlexBinding; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean; schoolmate: boolean; lod: FishLod; lodModel?: THREE.Object3D }
+type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; flex?: FishFlexBinding; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean; schoolmate: boolean; lod: FishLod; lodModel?: THREE.Object3D; headBone?: THREE.Bone }
+
+function hasAuthoredSnowflakeMorayModel(model?: GLTF): boolean {
+  return Boolean(model && model.animations.length === 1 && model.animations[0]?.name === 'crevice_idle'
+    && model.scene.getObjectByName('head') instanceof THREE.Bone)
+}
 
 function disposeTree(root: THREE.Object3D, borrowedEnvironment?: THREE.Texture) {
   const geometries = new Set<THREE.BufferGeometry>(), materials = new Set<THREE.Material>(), textures = new Set<THREE.Texture>()
@@ -648,12 +655,13 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   function applyLookDevPresentation() {
     if (!lookDevConfig) return
     for (const item of [...fish, ...schoolmates]) {
-      item.motion.yaw = Math.PI / 2
+      if (item.service.fishId !== SNOWFLAKE_MORAY_EEL_ID) item.motion.yaw = Math.PI / 2
       item.motion.pitch = 0
       item.motion.bank = 0
       item.motion.speed = 0
       item.root.position.set(item.motion.position.x, item.motion.position.y, item.motion.position.z)
       if (item.fallback) item.root.scale.x = 1
+      else if (item.service.fishId === SNOWFLAKE_MORAY_EEL_ID) item.root.rotation.set(0, item.motion.yaw, 0, 'YXZ')
       else item.root.rotation.set(0, Math.PI / 2, 0, 'YXZ')
       item.root.updateMatrix()
       item.root.updateMatrixWorld()
@@ -723,6 +731,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   }
   let meshNavigationGeneration = 0
   let meshNavigationSettledGeneration = 0
+  let readyMeshIslandIds: ReadonlySet<string> = new Set()
   const clock = createFrameClock()
   // Keep animation time per inhabitant across artwork swaps and LOD changes.
   const animationDeltas = new WeakMap<SwimmingFish, ReturnType<typeof createLodAnimationDeltaState>>()
@@ -760,11 +769,17 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   function nearest(x: number, y: number) {
     return nearestHit(x, y)?.object.userData.serviceId as string | undefined
   }
+  function fishLinkPoint(item: Inhabitant): THREE.Vector3 {
+    return item.headBone ? item.headBone.getWorldPosition(new THREE.Vector3()) : item.root.position
+  }
   function updateVisibility(item: Inhabitant) {
     const artworkUnavailable = Boolean(item.artworkUnavailable)
-    let visible = artworkUnavailable && Boolean(projectFishLinkBounds(item.root.position, camera, width, height, fishRenderLength(item.service.fishId), projected))
-    if (!visible && !artworkUnavailable) for (const [localY, localZ] of [[0, 0], [0, .31], [0, -.31], [.13, 0], [-.13, 0]]) {
-      sample.set(item.fallback ? localZ : 0, localY, item.fallback ? 0 : localZ).applyMatrix4(item.root.matrixWorld)
+    const linkPoint = fishLinkPoint(item)
+    let visible = artworkUnavailable && Boolean(projectFishLinkBounds(linkPoint, camera, width, height, fishRenderLength(item.service.fishId), projected))
+    const visibilitySamples = item.headBone ? [[0, 0]] : [[0, 0], [0, .31], [0, -.31], [.13, 0], [-.13, 0]]
+    if (!visible && !artworkUnavailable) for (const [localY, localZ] of visibilitySamples) {
+      if (item.headBone) sample.copy(linkPoint)
+      else sample.set(item.fallback ? localZ! : 0, localY!, item.fallback ? 0 : localZ!).applyMatrix4(item.root.matrixWorld)
       const distToFish = camera.position.distanceTo(sample)
       sample.project(camera)
       if (!Number.isFinite(sample.x) || !Number.isFinite(sample.y) || !Number.isFinite(sample.z) || Math.abs(sample.x) > .96 || Math.abs(sample.y) > .94 || sample.z < -1 || sample.z > 1) continue
@@ -789,6 +804,16 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     return visible
   }
   function isSafeCurrentInhabitantPosition(item: Inhabitant): boolean {
+    if (item.service.fishId === SNOWFLAKE_MORAY_EEL_ID) {
+      const placements = reefPlacementsForViewport(width < 600)
+      if (!hasReadyRightIslandCollider(placements, readyMeshIslandIds)) return false
+      const residence = resolveSnowflakeMorayResidence(placements)
+      const mesh = habitat.meshNavigation
+      if (!residence || !mesh?.queryCapsule) return false
+      const p = item.motion.position
+      if (Math.hypot(p.x - residence.position.x, p.y - residence.position.y, p.z - residence.position.z) > 1e-4) return false
+      return mesh.queryCapsule(residence.headAxisStart, residence.headAxisEnd, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M, { ...mesh.movementBudget }).status === 'clear'
+    }
     if (habitat.meshNavigation?.queryCapsule) {
       const r = MESH_NAVIGATION_COLLISION_RADIUS_M
       const { min, max } = habitat.bounds
@@ -833,6 +858,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       lookDevResetTiming()
     }
     habitat.meshNavigation = undefined
+    readyMeshIslandIds = new Set()
     particleBuffersDirty = true
     if (centerArchPlacement) { disposeCenterArchMaterials(centerArchPlacement); centerArchPlacement = undefined }
     reefs.forEach(reef => { scene.remove(reef) }); reefs.length = 0; hitMeshes.length = 0; reefMeshes.length = 0; fishMeshes.length = 0
@@ -978,6 +1004,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       if (disposed || generation !== meshNavigationGeneration) return
       if (result.status === 'ready') {
         habitat.meshNavigation = result.meshNavigation
+        readyMeshIslandIds = new Set(result.diagnostics.islands.map(island => island.islandId))
         // Relocate any fish or schoolmate that drifted into a coral envelope
         // during the brief AABB window before the async mesh collider resolved.
         const meshCheck = (candidate: SwimmingFish['position']) =>
@@ -988,7 +1015,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
             MESH_NAVIGATION_COLLISION_RADIUS_M,
             { ...result.meshNavigation.movementBudget },
           ).status === 'clear'
-        const allInhabitants = [...fish, ...schoolmates]
+        // Fixed cave residents are validated at their authored residence and
+        // must never enter the generic open-water relocation search.
+        const allInhabitants = [...fish, ...schoolmates].filter(item => item.service.fishId !== SNOWFLAKE_MORAY_EEL_ID)
         const occupiedForRelocation: Array<{ position: SwimmingFish['position']; clearance: number; bodyRadiusM?: number }> = []
         for (const item of allInhabitants) {
           if (isSafeCurrentInhabitantPosition(item)) {
@@ -1017,6 +1046,10 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
           }
         }
         console.info('Mesh navigation ready', result.diagnostics)
+        if (services.some(service => service.fishId === SNOWFLAKE_MORAY_EEL_ID)) {
+          const reconciled = reconcileFish()
+          if (reconciled !== undefined) status(fishSceneStatus(!reconciled))
+        }
       } else {
         console.warn('Mesh navigation unavailable; staying on AABB routing', result.reason, result.diagnostics)
       }
@@ -1062,6 +1095,12 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     // schoolmates must never be pickable, so their meshes stay anonymous.
     if (!item.schoolmate) model.traverse(object => { if (object instanceof THREE.Mesh) object.userData.serviceId = item.service.id })
     item.root.add(model); item.lodModel = model; item.lod = 0
+    const caveResident = item.service.fishId === SNOWFLAKE_MORAY_EEL_ID
+    if (caveResident) {
+      const head = model.getObjectByName('head')
+      if (!(head instanceof THREE.Bone)) throw new Error('The snowflake moray asset is missing its authored head bone.')
+      item.headBone = head
+    }
     // The player restores the clean clip pose before every turning overlay.
     if (base.animations.length === 1) {
       try {
@@ -1070,13 +1109,15 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
           ? (clip.duration > 0 ? lookDevTimeSeconds % clip.duration : 0)
           : (seedForId(item.service.id) % 1500) / 1000
         item.clipPlayer = createFishClipPlayer(model, clip, initialClipTime)
-        item.turningRig = bindFishTurningRig(model, item.service.fishId)
-        try {
-          const flexSeed = lookDevConfig ? `${lookDevConfig.seed}:${item.service.id}` : item.service.id
-          item.flex = bindFishFlexToModel(model, item.service.fishId, seedForId(flexSeed))
-          if (lookDevConfig) item.flex?.seek(lookDevTimeSeconds)
-        } catch (error) {
-          console.warn('Fish body flex unavailable; retaining bone-only animation', item.service.fishId, error)
+        if (!caveResident) {
+          item.turningRig = bindFishTurningRig(model, item.service.fishId)
+          try {
+            const flexSeed = lookDevConfig ? `${lookDevConfig.seed}:${item.service.id}` : item.service.id
+            item.flex = bindFishFlexToModel(model, item.service.fishId, seedForId(flexSeed))
+            if (lookDevConfig) item.flex?.seek(lookDevTimeSeconds)
+          } catch (error) {
+            console.warn('Fish body flex unavailable; retaining bone-only animation', item.service.fishId, error)
+          }
         }
       } catch (error) {
         item.clipPlayer?.dispose(); item.clipPlayer = undefined
@@ -1173,15 +1214,19 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     schoolmates.forEach(item => item.root.traverse(object => { if (object instanceof THREE.Mesh) { fishMeshes.push(object); ambientMeshes.add(object) } }))
     hitMeshes.push(...fishMeshes, ...reefMeshes)
   }
-  type FishSpawn = { species: NonNullable<ReturnType<typeof getFishById>>; clearance: number; position: SwimmingFish['position']; yaw: number }
+  type FishSpawn = { species: NonNullable<ReturnType<typeof getFishById>>; clearance: number; position: SwimmingFish['position']; yaw: number; residence?: MorayResidence }
   function createInhabitant(service: ServiceConfig, spawn: FishSpawn, anchor?: HTMLAnchorElement, schoolmate = false): Inhabitant {
     const { clearance, position, yaw } = spawn
     const root = new THREE.Group(), base = modelBases.get(service.fishId), fallback = !base
+    const caveResident = service.fishId === SNOWFLAKE_MORAY_EEL_ID
+    if (caveResident && (!base || !spawn.residence || !hasAuthoredSnowflakeMorayModel(base))) {
+      throw new Error('The snowflake moray requires its authored GLB and measured right-cave residence.')
+    }
     const motion = createSwimmingFish(service.id, service.fishId, position, clearance, fishExtensions, { initialYaw: yaw, collisionRadiusM: MESH_NAVIGATION_COLLISION_RADIUS_M })
     const item: Inhabitant = { service, root, motion, anchor, visible: false, fallback, releasedFocus: false, schoolmate, lod: 0 }
     try {
       if (base) bindGlbToInhabitant(item, base)
-      else item.artwork = buildSprite(item)
+      else if (!caveResident) item.artwork = buildSprite(item)
       root.position.set(motion.position.x, motion.position.y, motion.position.z)
       // Schoolmates are never pickable (AQ-41 AC #4 / AQ-13): only service
       // fish get a serviceId on their meshes, so picking can never resolve a
@@ -1254,7 +1299,20 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     if (!loaded || disposed || failed) return undefined
     const anchors = new Map(Array.from(overlay.querySelectorAll<HTMLAnchorElement>('a[data-service-id]')).map(anchor => [anchor.dataset.serviceId!, anchor]))
     const current = new Map(fish.map(item => [item.service.id, item]))
-    const nextServices = services.filter(service => getFishById(service.fishId))
+    const configuredServices = services.filter(service => getFishById(service.fishId))
+    const morayServiceCount = configuredServices.filter(service => service.fishId === SNOWFLAKE_MORAY_EEL_ID).length
+    const morayRequested = morayServiceCount > 0
+    const meshNavigation = habitat.meshNavigation
+    const morayPlacements = reefPlacementsForViewport(width < 600)
+    const morayResidence = morayRequested && morayServiceCount === 1 ? resolveAvailableSnowflakeMorayResidence(
+      morayPlacements,
+      hasAuthoredSnowflakeMorayModel(modelBases.get(SNOWFLAKE_MORAY_EEL_ID))
+        && hasReadyRightIslandCollider(morayPlacements, readyMeshIslandIds),
+      meshNavigation?.queryCapsule
+        ? (start, end, radius) => meshNavigation.queryCapsule!(start, end, radius, { ...meshNavigation.movementBudget }).status === 'clear'
+        : undefined,
+    ) : undefined
+    const nextServices = configuredServices.filter(service => service.fishId !== SNOWFLAKE_MORAY_EEL_ID || Boolean(morayResidence))
     const spawnOrderKey = (id: string) => lookDevConfig ? `${lookDevConfig.seed}:${id}` : id
     const horizontalSlots = fishSpawnSlotsForServices(nextServices)
     const spawns = new Map<string, FishSpawn>()
@@ -1283,6 +1341,13 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       if (previous?.service.fishId === service.fishId) continue
       const species = getFishById(service.fishId)!
       const clearance = fishClearanceRadius(service.fishId)
+      if (service.fishId === SNOWFLAKE_MORAY_EEL_ID) {
+        if (!morayResidence) continue
+        const position = { ...morayResidence.position }
+        spawns.set(service.id, { species, clearance, position, yaw: morayResidence.yaw, residence: morayResidence })
+        occupied.push({ position, clearance, bodyRadiusM: SNOWFLAKE_MORAY_CAVE_COLLISION_RADIUS_M })
+        continue
+      }
       const preference = fishSpawnPreference(spawnOrderKey(service.id), service.fishId, habitat.bounds, clearance, horizontalSlots.get(service.id), habitat.maxAbsXAtDepth)
       // The tall portrait reef fills the rear water column. Start the two
       // broad cruisers in front water, still subject to every clearance test.
@@ -1337,7 +1402,8 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     const placedLabels: Array<{ anchor: HTMLAnchorElement; id: string; label: string; bounds: LabelRect; body: LabelRect; caption: LabelRect; depth: number }> = []
     for (const item of fish) {
       const anchor = item.anchor; if (!anchor) continue
-      const bounds = projectFishLinkBounds(item.root.position, camera, width, height, fishRenderLength(item.service.fishId), projected)
+      const linkPoint = fishLinkPoint(item)
+      const bounds = projectFishLinkBounds(linkPoint, camera, width, height, fishRenderLength(item.service.fishId), projected)
       if (!bounds) {
         item.visible = false
         // Preserve AQ-50's focus handoff before hiding an invalid projection.
@@ -1356,14 +1422,14 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       if (anchor.style.width !== widthVal) anchor.style.width = widthVal
       const heightVal = `${bounds.height}px`
       if (anchor.style.height !== heightVal) anchor.style.height = heightVal
-      const zIndexVal = String(Math.round((item.root.position.z + 10) * 100))
+      const zIndexVal = String(Math.round((linkPoint.z + 10) * 100))
       if (anchor.style.zIndex !== zIndexVal) anchor.style.zIndex = zIndexVal
       const body = bodies.get(item) ?? bounds
       const measured = sizes.get(item)!
       const estimate = estimateCaptionRect(body, 0, item.service.name)
       const captionWidth = measured.width || estimate.width, captionHeight = measured.height || estimate.height
       const caption = { x: body.x + (body.width - captionWidth) / 2, y: body.y + body.height + 1, width: captionWidth, height: captionHeight }
-      placedLabels.push({ anchor, id: item.service.id, label: item.service.name, bounds, body, caption, depth: item.root.position.z })
+      placedLabels.push({ anchor, id: item.service.id, label: item.service.name, bounds, body, caption, depth: linkPoint.z })
       // AQ-13: keep the hover tooltip on-screen — flip it below the caption
       // near the top edge and align it inward near the left/right edges.
       const tooltipCenterX = bounds.x + bounds.width / 2
@@ -1419,7 +1485,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     if (focusedServiceId) {
       const focusedItem = fish.find(item => item.service.id === focusedServiceId)
       if (focusedItem) {
-        cameraZoomDesired = zoomStateForFishPosition(focusedItem.motion.position, cameraZoomDesired.distance)
+        cameraZoomDesired = zoomStateForFishPosition(fishLinkPoint(focusedItem), cameraZoomDesired.distance)
       } else {
         focusedServiceId = undefined
       }
@@ -1937,7 +2003,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       return model
     } catch (error) {
       finishLookDevAsset(lookDevKey, true)
-      console.warn('Fish model failed to load; keeping thumbnail fallback', id, error)
+      console.warn(id === SNOWFLAKE_MORAY_EEL_ID
+        ? 'Snowflake moray model failed to load; native service access remains available'
+        : 'Fish model failed to load; keeping thumbnail fallback', id, error)
       return undefined
     }
   }
@@ -1969,7 +2037,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         const matches = inhabitants.filter(item => item.service.fishId === id)
         return modelBases.has(id) || matches.length === 0 || Boolean(lookDevConfig)
           || matches.some(item => {
-            const bounds = projectFishLinkBounds(item.root.position, camera, width, height, fishRenderLength(id), projected)
+            const bounds = projectFishLinkBounds(fishLinkPoint(item), camera, width, height, fishRenderLength(id), projected)
             return bounds && bounds.x < width && bounds.y < height
               && bounds.x + bounds.width > 0 && bounds.y + bounds.height > 0
           })
@@ -1978,7 +2046,8 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       const [id] = lazyQueue.splice(queueIndex, 1)
       const targets = inhabitants.filter(item => item.service.fishId === id && item.fallback)
       if (modelBases.has(id)) { targets.forEach(swapFallbackToGlb); continue }
-      if (targets.length === 0) continue
+      const authoredResidentWithoutSprite = id === SNOWFLAKE_MORAY_EEL_ID && services.some(service => service.fishId === id)
+      if (targets.length === 0 && !authoredResidentWithoutSprite) continue
       lazyActiveLoads++
       void loadFishModel(id).then(model => {
         lazyActiveLoads--
@@ -1987,6 +2056,10 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
           modelBases.set(id, model)
           for (const target of [...fish, ...schoolmates]) {
             if (target.service.fishId === id && target.fallback) swapFallbackToGlb(target)
+          }
+          if (id === SNOWFLAKE_MORAY_EEL_ID) {
+            const reconciled = reconcileFish()
+            if (reconciled !== undefined) status(fishSceneStatus(!reconciled))
           }
           if (!document.hidden) render(0, true)
         }
@@ -2092,7 +2165,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       const item = fish.find(candidate => candidate.service.id === id)
       if (!item) return !isOverviewZoomState(cameraZoomDesired)
       focusedServiceId = id
-      return setCameraZoomDesired(zoomStateForFishPosition(item.motion.position))
+      return setCameraZoomDesired(zoomStateForFishPosition(fishLinkPoint(item)))
     },
     getFocusedServiceId() { return focusedServiceId },
     resetZoom() { focusedServiceId = undefined; return setCameraZoomDesired({ ...DEFAULT_CAMERA_ZOOM_STATE }) },

@@ -1,0 +1,26 @@
+{
+  "defaults": {
+    "origin": "http://localhost:3004",
+    "ports": [
+      {
+        "mode": "ingress",
+        "host_ip": "127.0.0.1",
+        "target": 3000,
+        "published": "3004",
+        "protocol": "tcp"
+      }
+    ]
+  },
+  "overrides": {
+    "origin": "https://showcase.example.com",
+    "ports": [
+      {
+        "mode": "ingress",
+        "host_ip": "127.0.0.1",
+        "target": 3000,
+        "published": "3210",
+        "protocol": "tcp"
+      }
+    ]
+  }
+}

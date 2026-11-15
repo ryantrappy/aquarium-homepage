@@ -1,0 +1,17 @@
+{
+  "base": "7c08b43",
+  "sha256": {
+    "README.md": "827a185846e2c5489a02794684b653742275299239b93f66de423b93d35ec92b",
+    "src/lib/services.ts": "413fa3eee9ce8878348bdc811a44f77d08629e325c3b35419e39b751d614a9ab",
+    "src/lib/services.test.ts": "71f9af84ffc4e550338784b6a3f95d3bb68705f7419adba7c67e9b7af093b75f",
+    "src/components/ServiceManager.tsx": "30a13fb3c1800492fea84e15ace47160b16c04eb7d152e45fec4ed03f2791387",
+    "src/components/ServiceManager.test.tsx": "c5404afaeab3e87e6ef54b45c1cb0dee4eaf74ba42f0faa33e821595feda6769",
+    "src/server/shared-config.test.ts": "c00072a9eaa0fbf0b1fbafdac2f0db19709f8dd56e5ed458025cbca9c6e7bdb6",
+    "src/components/ServiceDock.tsx": "92665538e33b93ff2a86f878d20daa9b464911c62f35bea8b8d7d6fe1916e54f",
+    "deploy/compose.yaml": "8c767bb3f5e2f0173520d29e6784c7ae1f0adfc5b333792289251de617b848cf",
+    "src/routes/api/-config.test.ts": "7f14072f37de03736bfa3dd1f77c84f7fe77d16be4b897d914ed111efa47eedc",
+    "docs/deployment.md": "f821aa9e7e7173cdfc9631d42891d6a04e99ea8e75f5f20ebb61e091f022ea6f"
+  },
+  "note": "shared-config test handoff hash transcription corrected against Root-reviewed actual file",
+  "privateProofCommit": "f5746f3"
+}

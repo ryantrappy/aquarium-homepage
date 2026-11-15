@@ -3,6 +3,8 @@ import * as THREE from 'three'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ServiceConfig } from '../../lib/services'
 import { getFishById } from '../../lib/fish'
+import { reefPlacementsForViewport } from './reef-layout'
+import { resolveSnowflakeMorayResidence } from './moray-residence'
 import type { SwimmingFish } from './motion'
 import type { FishClipPlayer } from './fish-animation'
 import { refreshFishLink } from './fish-inhabitants'
@@ -65,6 +67,29 @@ vi.mock('three/addons/loaders/GLTFLoader.js', async () => {
       if (url.includes('left-rock') || url.includes('right-rock') || url === 'coral') return { scene: root, animations: [] }
       if (state.failFishLoads && url.includes('.glb')) throw new Error('Fixture fish asset failure')
       if (state.deferFishLoads && url.includes('.glb')) await new Promise<void>(resolve => state.pendingFishLoadReleases.push(resolve))
+      if (url.includes('snowflake-moray-eel.glb')) {
+        const probe = new T.Bone(), bodyMid = new T.Bone(), neck = new T.Bone(), head = new T.Bone(), jaw = new T.Bone()
+        probe.name = 'probe'; probe.quaternion.set(0, Math.SQRT1_2, Math.SQRT1_2, 0)
+        bodyMid.name = 'body_mid'; bodyMid.position.y = .45
+        neck.name = 'neck'; neck.position.y = .73
+        head.name = 'head'; head.position.y = .38
+        jaw.name = 'jaw'; jaw.position.set(0, .01, -.025)
+        probe.add(bodyMid); bodyMid.add(neck); neck.add(head); head.add(jaw); root.add(probe)
+        const geometry = new T.BufferGeometry()
+        geometry.setAttribute('position', new T.Float32BufferAttribute([-.1, 0, 0, .1, 0, 0, 0, .1, 0], 3))
+        geometry.setAttribute('skinIndex', new T.Uint16BufferAttribute(new Array(12).fill(0), 4))
+        geometry.setAttribute('skinWeight', new T.Float32BufferAttribute([1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0], 4)); geometry.setIndex([0, 1, 2])
+        const mesh = new T.SkinnedMesh(geometry, new T.MeshBasicMaterial({ side: T.DoubleSide })); root.add(mesh)
+        root.updateMatrixWorld(true); mesh.bind(new T.Skeleton([probe, bodyMid, neck, head, jaw]))
+        const jawOpen = new T.Quaternion().setFromAxisAngle(new T.Vector3(1, 0, 0), .04)
+        const clip = new T.AnimationClip('crevice_idle', 1, [
+          new T.QuaternionKeyframeTrack('head.quaternion', [0, 1], [0, 0, 0, 1, 0, 0, .01, .99995]),
+          new T.QuaternionKeyframeTrack('jaw.quaternion', [0, 1], [0, 0, 0, 1, ...jawOpen.toArray()]),
+          new T.VectorKeyframeTrack('probe.position', [0, 1], [0, 0, 0, 0, .002, 0]),
+        ])
+        state.sources.push(root)
+        return { scene: root, animations: [clip] }
+      }
       const turningRig = url.includes('splat-fish/blue-tang.glb')
       const spine: InstanceType<typeof T.Bone>[] = []
       for (let index = 0; index < (turningRig ? 6 : 1); index++) {
@@ -142,6 +167,8 @@ vi.mock('./reef-mesh-navigation', async importOriginal => {
         ? new Promise<Awaited<ReturnType<typeof real.createReefMeshNavigation>>>(resolve => {
             state.pendingMeshNavigationReleases.push(() => resolve(state.meshNavigationResult as Awaited<ReturnType<typeof real.createReefMeshNavigation>>))
           })
+        : state.meshNavigationResult
+          ? Promise.resolve(state.meshNavigationResult as Awaited<ReturnType<typeof real.createReefMeshNavigation>>)
         : real.createReefMeshNavigation(...args)
     },
     createMountedCoralFallbackObstacles: (...args: Parameters<typeof real.createMountedCoralFallbackObstacles>) => {
@@ -199,6 +226,11 @@ vi.mock('../../lib/fish', async importOriginal => {
 })
 
 const service = (id: string, fishId = 'ocellaris-clownfish'): ServiceConfig => ({ id, fishId, name: id, url: `https://${id}.example.test`, isExample: false })
+const readyMeshNavigation = (islandIds: string[]) => ({
+  status: 'ready',
+  diagnostics: { islands: islandIds.map(islandId => ({ islandId })) },
+  meshNavigation: { movementBudget: {}, queryCapsule: () => ({ status: 'clear' }) },
+})
 let controller: AquariumController, host: HTMLDivElement, overlay: HTMLDivElement, status: ReturnType<typeof vi.fn<(value: SceneStatus) => void>>
 let documentHidden = false
 function anchors(services: ServiceConfig[]) {
@@ -472,6 +504,81 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
       expect(sample.position.y).toBeGreaterThanOrEqual(sample.heightRange![0])
       expect(sample.position.y).toBeLessThanOrEqual(sample.heightRange![1])
     }
+  })
+
+  it('keeps the supplied moray in the right cave and focuses its authored head bone', async () => {
+    state.meshNavigationResult = readyMeshNavigation(['reef-0', 'reef-1'])
+    const services = [service('moray-service', 'snowflake-moray-eel')]
+    await start(services)
+    await vi.waitFor(() => expect(state.created.some(fish => fish.id === 'moray-service')).toBe(true))
+
+    const moray = state.created.find(fish => fish.id === 'moray-service')!
+    const residence = resolveSnowflakeMorayResidence(reefPlacementsForViewport(false))!
+    expect(moray.position).toEqual(residence.position)
+    expect(moray.route).toEqual([])
+    expect(moray.speed).toBe(0)
+    expect(overlay.querySelectorAll('a[data-service-id]')).toHaveLength(1)
+
+    controller.update(services, true)
+    const serviceLink = overlay.querySelector<HTMLAnchorElement>('a[data-service-id="moray-service"]')!
+    expect(serviceLink.href).toBe(`${services[0]!.url}/`)
+    const root = rootFor('moray-service')
+    const head = root.getObjectByName('head') as THREE.Bone
+    expect(head).toBeInstanceOf(THREE.Bone)
+    root.updateMatrixWorld(true)
+    const headPoint = head.getWorldPosition(new THREE.Vector3())
+    expect(controller.focusServiceFish?.('moray-service')).toBe(true)
+    const zoom = controller.getCameraZoom()
+    expect(zoom.targetX).toBeCloseTo(headPoint.x, 5)
+    expect(zoom.targetY).toBeCloseTo(headPoint.y, 5)
+    expect(zoom.targetZ).toBeCloseTo(headPoint.z, 5)
+
+    advance()
+    expect(moray.position).toEqual(residence.position)
+    expect(root.rotation.y).toBeCloseTo(residence.yaw, 6)
+    expect(serviceLink.style.visibility).not.toBe('hidden')
+    expect(serviceLink.dataset.occluded).not.toBe('true')
+    expect(state.players.length).toBeGreaterThan(0)
+  })
+
+  it('keeps the moray service link when the right-cave collider is unavailable', async () => {
+    state.meshNavigationResult = readyMeshNavigation(['reef-0'])
+    const services = [service('moray-without-cave', 'snowflake-moray-eel')]
+    await start(services)
+    await vi.waitFor(() => expect(state.sources.some(source => source.getObjectByName('head'))).toBe(true))
+    await vi.waitFor(() => expect(state.reefNavigationIslandIds.at(-1)).toEqual(['reef-0', 'reef-1', 'reef-center-arch']))
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    expect(state.created.some(fish => fish.id === services[0]!.id)).toBe(false)
+    expect(overlay.querySelectorAll('a[data-service-id]')).toHaveLength(1)
+    expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(services[0]!.url + '/')
+  })
+
+  it('keeps the moray service link when its supplied model fails to load', async () => {
+    state.failFishLoads = true
+    state.meshNavigationResult = readyMeshNavigation(['reef-0', 'reef-1'])
+    const services = [service('moray-without-model', 'snowflake-moray-eel')]
+    await start(services)
+    await vi.waitFor(() => expect(state.reefNavigationIslandIds.at(-1)).toEqual(['reef-0', 'reef-1', 'reef-center-arch']))
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    expect(state.created.some(fish => fish.id === services[0]!.id)).toBe(false)
+    expect(overlay.querySelectorAll('a[data-service-id]')).toHaveLength(1)
+    expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(services[0]!.url + '/')
+  })
+
+  it('fails closed without duplicating a moray when invalid input assigns it to multiple services', async () => {
+    state.meshNavigationResult = readyMeshNavigation(['reef-0', 'reef-1'])
+    const services = [service('duplicate-moray-one', 'snowflake-moray-eel'), service('duplicate-moray-two', 'snowflake-moray-eel')]
+    await start(services)
+    await vi.waitFor(() => expect(state.sources.some(source => source.getObjectByName('head'))).toBe(true))
+    await vi.waitFor(() => expect(state.reefNavigationIslandIds.at(-1)).toEqual(['reef-0', 'reef-1', 'reef-center-arch']))
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    expect(state.created.some(fish => services.some(service => service.id === fish.id))).toBe(false)
+    expect(overlay.querySelectorAll('a[data-service-id]')).toHaveLength(2)
+    expect(Array.from(overlay.querySelectorAll<HTMLAnchorElement>('a[data-service-id]'), anchor => anchor.href))
+      .toEqual(services.map(service => `${service.url}/`))
   })
 
   it('fails closed when rock fallback geometry is unavailable and keeps service links available', async () => {

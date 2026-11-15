@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-12 05:15'
-updated_date: '2026-11-13 00:44'
+updated_date: '2026-11-15 16:07'
 labels:
   - rendering
   - optics
@@ -66,4 +66,6 @@ Root next visual iteration after reviewed PR47: build a separate glass-enclosure
 Root first functional enclosure handoff: new glass-enclosure.ts builds clear front/back/side panes, four corner seams and bottom lip meshes, plus genuine Three Reflector side views sampling the current reef/sand scene. All enclosure meshes have no-op raycast and are excluded from shaft depth capture/reflection recursion. Front sheen is additive and extremely faint; no screen blur/refraction/color veil. Reflection targets256x384/noMSAA; High2Hz per side staggered, Balanced1Hz, Low off. Reflections are disabled while zoomed/tracking or in inspection macros to preserve focus readability and avoid camera-driven full-scene redraws. Cached clocks hold under pause/reduced/hidden; context restoration invalidates caches; exceptions restore target/XR/shadow/visibility and retain clear panes. Nine pass-level tests include real reflected camera callbacks, cache/camera/revision invalidation, stagger, picking suppression and resource cleanup;62 initial combined tests/typecheck14scripts pass. Native initial laptop/phone previews compile without warnings/errors, show seams and faint side content; bottom-lip framing, exact-source final controls/performance/reference review remain open. No models/Blender files changed.
 
 Exact-source native enclosure/taller-colony handoff images at both target viewports are indexed by docs/asset-evidence/aq70-13/taller-20261112/review.json (sourcee5fd2e1). Full722tests/65files and productionbuild pass; no captured shader warnings/errors. Clear seams/panes render and links remain visible; do not mark Done yet: front bottom-lip framing and controlled moving-scene reflection cost/final art still require review.
+
+2026-11-15 active-backlog review: the focused combined runtime-quality, aquarium-lifecycle, and glass-enclosure suites pass 83/83. `glass-enclosure.test.ts` directly verifies enclosure meshes produce no raycast hits and reflection updates reuse the last capture at a frozen scene time; no two-viewport live visual review or direct reduced-motion enclosure integration review was available. No acceptance criteria were checked; retain In Progress pending 1440x900/402x874 Root review of bounds, interior reflections, Fresnel visibility, fish picking, and reduced-motion behavior.
 <!-- SECTION:NOTES:END -->

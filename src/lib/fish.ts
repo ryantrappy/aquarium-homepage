@@ -4,7 +4,11 @@ export type ReefFish = {
   scientificName: string
   habitat: string
   thumbnail: string
+  /** Species with one authored fixed residence can serve only one service. */
+  uniqueService?: boolean
 }
+
+export const SNOWFLAKE_MORAY_EEL_ID = 'snowflake-moray-eel'
 
 export const REEF_FISH: ReefFish[] = [
   {
@@ -118,6 +122,14 @@ export const REEF_FISH: ReefFish[] = [
     scientificName: 'Zebrasoma desjardinii',
     habitat: 'Reef slopes and lagoons of the Indo-Pacific, grazing algae over rock and coral.',
     thumbnail: '/fish/desjardins-sailfin-tang.webp',
+  },
+  {
+    id: SNOWFLAKE_MORAY_EEL_ID,
+    commonName: 'Snowflake moray eel',
+    scientificName: 'Echidna nebulosa',
+    habitat: 'Solitary reef-dweller that shelters among rock and coral crevices.',
+    thumbnail: '/fish/snowflake-moray-eel.webp',
+    uniqueService: true,
   },
 ]
 

@@ -4,42 +4,42 @@ export type ServiceConfig = ReturnType<typeof serviceConfigSchema.parse>
 export type ServiceDraft = ReturnType<typeof serviceDraftSchema.parse>
 export type { SharedConfig }
 
-// User-confirmed starter links. Inclusion does not indicate reachability or health.
+// Public showcase examples. Inclusion does not indicate reachability or health.
 export const EXAMPLE_SERVICES: ServiceConfig[] = [
   {
-    id: 'komodo',
-    name: 'Komodo',
-    url: 'https://komodo.ryantr.app',
+    id: 'google',
+    name: 'Google',
+    url: 'https://www.google.com',
     fishId: 'yellow-tang',
-    isExample: false,
+    isExample: true,
   },
   {
-    id: 'watchmybirds',
-    name: 'WatchMyBirds',
-    url: 'https://watchmybirds.ryantr.app',
+    id: 'wikipedia',
+    name: 'Wikipedia',
+    url: 'https://www.wikipedia.org',
     fishId: 'banggai-cardinalfish',
-    isExample: false,
+    isExample: true,
   },
   {
-    id: 'paperless',
-    name: 'Paperless',
-    url: 'https://paperless.ryantr.app',
+    id: 'github',
+    name: 'GitHub',
+    url: 'https://github.com',
     fishId: 'royal-gramma',
-    isExample: false,
+    isExample: true,
   },
   {
-    id: 'home-assistant',
-    name: 'Home Assistant',
-    url: 'https://ha.ryantr.app',
+    id: 'youtube',
+    name: 'YouTube',
+    url: 'https://www.youtube.com',
     fishId: 'ocellaris-clownfish',
-    isExample: false,
+    isExample: true,
   },
   {
-    id: 'ombi',
-    name: 'Ombi',
-    url: 'https://ombi.ryantr.app',
+    id: 'internet-archive',
+    name: 'Internet Archive',
+    url: 'https://archive.org',
     fishId: 'blue-tang',
-    isExample: false,
+    isExample: true,
   },
 ]
 

@@ -1,0 +1,102 @@
+{
+  "baseline": "d118dca",
+  "unchangedRows": 12,
+  "unchangedFiles": [
+    {
+      "path": "src/rendering/assets/splat-fish/blue-tang.glb",
+      "sha256": "de1aaf4fcbc72b82749190e4047d26a226cd2d987bee8ef06f50849aac36fc9e"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/fish-blue-tang-inspection.json",
+      "sha256": "41a9616b1cf676e054105fe8362f845e2d10285b9e0a798479c5950b16953268"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/royal-gramma.glb",
+      "sha256": "ffb095bfc7f3e836971b0ef70c203e7c2e1301af2133efbbd4609db7f2af4d06"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/fish-royal-gramma-inspection.json",
+      "sha256": "93fd63794d5ab213d129f5dfac6514af05035d7e6a5c9ab88872684d8e490f2d"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/banggai-cardinalfish.glb",
+      "sha256": "2227babc3370b84e18b66f2c81ec15c4ec2f09b68156471c13a90805620807d7"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/fish-banggai-cardinalfish-inspection.json",
+      "sha256": "046cce9e600474e77c6287a5540371ba90df35c290ee7c9f5b675732c54ebd72"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/mandarin-dragonet.glb",
+      "sha256": "bd19565d563ca10131b65c4ed9bd684dda658d4cb123a7d965383328d9f1e9cb"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/fish-mandarin-dragonet-inspection.json",
+      "sha256": "1de32078807c6d6dae3dabb2ee8d047250248713f0fb78645291d8d49daf53d4"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/firefish.glb",
+      "sha256": "3ffd93d5db1b308987c371636ff2f43d39a5359be16a998ba6aa9a7ad153732a"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/fish-firefish-inspection.json",
+      "sha256": "2ea412e5debf6a3fcd9e2a436354c99970fa8378ac811d35cd86ca6e9268b033"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/yellow-watchman-goby.glb",
+      "sha256": "edba60aef7ffc577f6e3196ff7553af510ce422098166b05c2f19cba466b7533"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/fish-yellow-watchman-goby-inspection.json",
+      "sha256": "9f9072d059af9b063326a87a97ce6abe27d344167e56537826945e63cb6603e5"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/tailspot-blenny.glb",
+      "sha256": "c26259de8d03ac186d3a2c00723a5d7b449b9df8f5cf16971a9882e80280151a"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/fish-tailspot-blenny-inspection.json",
+      "sha256": "16c06f73aedb770656bf9d89172761865b94e6eb51831675e431cea078037bc8"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/six-line-wrasse.glb",
+      "sha256": "a23addc928cf6c2a8828108a885f04c4d4ba5aaf97e322669225c0f04dff49f9"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/fish-six-line-wrasse-inspection.json",
+      "sha256": "76aa030b33411fe09d4910e57757333209fce0a99ffbf8d219370c076077f212"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/mccoskers-flasher-wrasse.glb",
+      "sha256": "f0d5afcdf0d007a2978b7a964e457f7b4b1b464e6440801181732cee26ab803b"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/fish-mccoskers-flasher-wrasse-inspection.json",
+      "sha256": "d5dbfa5add76abdcf2dd1d4fb6759a62110e0d792fe460c819a82ddb5032f66e"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/lyretail-anthias.glb",
+      "sha256": "04b7b8cc411c9a29dd7b94c44358a39374032d2896c1e66c7819df65ba0b5007"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/fish-lyretail-anthias-inspection.json",
+      "sha256": "4e3562a85152b9fef18b3cb999d6e42e019b3ae77875a60a854ee039926d5820"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/flame-angelfish.glb",
+      "sha256": "6739db04161fb7fed09e2337a80f23d4c26af352fc9a5180ca94a749e2cd6da9"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/fish-flame-angelfish-inspection.json",
+      "sha256": "d3dd21a071f8249458b5ebab0e4de5bf72af6f859ad4c58a24417771c2aa704c"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/copperband-butterflyfish.glb",
+      "sha256": "66c341c2663574522f523f3a11284a760c06fdee47a183d2af808ae489d50aa0"
+    },
+    {
+      "path": "src/rendering/assets/splat-fish/fish-copperband-butterflyfish-inspection.json",
+      "sha256": "4b8060c9b6d281451cb7dfbc5a71b736c4dd0be8c515555794cdabc83dda4f55"
+    }
+  ]
+}

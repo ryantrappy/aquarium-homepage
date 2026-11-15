@@ -13,7 +13,7 @@ const openHabitat: WaterHabitat = {
 }
 
 describe('species-specific reef locomotion and behavior extensions (AQ-18..AQ-32)', () => {
-  it('registers distinct, bounded locomotion cadences and opportunity triggers for all 16 reef fish species', () => {
+  it('registers bounded locomotion profiles for the full catalog, including the neutral cave resident', () => {
     expect(Object.keys(SPECIES_LOCOMOTION_SIGNATURES).sort()).toEqual([...SPECIES_BEHAVIOR_IDS].sort())
 
     const playbackSamples = new Map<string, number>()
@@ -44,6 +44,25 @@ describe('species-specific reef locomotion and behavior extensions (AQ-18..AQ-32
     expect(playbackSamples.get('blue-green-chromis')!).toBeGreaterThan(
       playbackSamples.get('copperband-butterflyfish')!,
     )
+  })
+
+  it('keeps the snowflake moray stationary with the optional extension config enabled', () => {
+    const position = { x: 2, y: -2, z: -1 }
+    const moray = createSwimmingFish('moray-neutral-extension', 'snowflake-moray-eel', position, .13, SPECIES_LOCOMOTION_EXTENSIONS)
+    const signature = SPECIES_LOCOMOTION_SIGNATURES['snowflake-moray-eel']
+    try {
+      for (let i = 0; i < 300; i++) stepSwimmingFish(moray, openHabitat, 1 / 30)
+      expect(signature.opportunityTrigger).toBeUndefined()
+      expect(signature.pulseAmplitude).toBe(0)
+      expect(signature.gait.tailAmplitudeCruiseBL).toBe(0)
+      expect(signature.gait.tailAmplitudeMaxBL).toBe(0)
+      expect(moray.position).toEqual(position)
+      expect(moray.route).toEqual([])
+      expect(moray.speed).toBe(0)
+      expect(moray.animationPlaybackRate).toBe(1)
+    } finally {
+      moray.extensions.dispose()
+    }
   })
 
   it('freezes playbackRate modulation at 1.0 when stopped/paused and fires species opportunity intents over time', () => {

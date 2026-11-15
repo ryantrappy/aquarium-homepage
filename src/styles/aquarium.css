@@ -118,8 +118,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .managed-details em { color: #a6c8b6; }
 .managed-details small { font-size: 9px; }
 .row-actions { display: flex; gap: 9px; }
-.row-actions button, .delete-confirm button { min-width: 44px; min-height: 44px; padding: 5px 4px; border: 0; color: #b4d4cb; background: transparent; cursor: pointer; font-size: 11px; }
-.row-actions button:hover, .delete-confirm button:hover { color: white; text-decoration: underline; }
+.row-actions button, .row-actions .managed-open, .delete-confirm button { min-width: 44px; min-height: 44px; padding: 5px 4px; border: 0; color: #b4d4cb; background: transparent; cursor: pointer; font-size: 11px; }
+.row-actions .managed-open { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+.row-actions button:hover, .row-actions .managed-open:hover, .delete-confirm button:hover { color: white; text-decoration: underline; }
 .row-actions .remove-action { color: #e5a28c; }
 .row-actions button:disabled { opacity: .45; cursor: not-allowed; }
 .delete-confirm { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: flex-end; gap: 6px; padding: 0 6px; background: #10343a; color: #ebd7c9; font-size: 11px; }
@@ -141,11 +142,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .fish-picker-option { position: relative; min-width: 0; min-height: 51px; display: flex; flex-direction: row !important; align-items: center; gap: 7px !important; padding: 5px 7px; border: 1px solid rgba(199,231,208,.13); border-radius: 6px; color: #dcebe1 !important; background: #102f35; cursor: pointer; }
 .fish-picker-option:hover { border-color: rgba(151,206,177,.42); background: #153a3e; }
 .fish-picker-option.is-selected { border-color: #87bfa4; background: rgba(63,112,88,.28); }
+.fish-picker-option.is-unavailable { opacity: .58; cursor: not-allowed; }
 .fish-picker-option:focus-within { outline: 2px solid #b0e1c4; outline-offset: 2px; }
 .fish-picker-option input[type="radio"] { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
 .fish-picker-option img { width: 48px; height: 38px; flex: 0 0 auto; object-fit: contain; }
 .fish-picker-option strong { overflow: hidden; color: #edf6ee; font-size: 10px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .fish-picker-option em { overflow: hidden; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.fish-picker-option small { color: #e5b6a1; font-size: 8px; line-height: 1.2; }
 .fish-picker:disabled .fish-picker-option { opacity: .5; cursor: not-allowed; }
 .service-form input, .service-form select, .import-form textarea { width: 100%; min-width: 0; height: 44px; padding: 0 10px; border: 1px solid rgba(199,231,208,.17); border-radius: 6px; color: #eaf4ed; background: #102f35; font-size: 12px; }
 .service-form .fish-picker-option input[type="radio"] { position: absolute; width: 1px; height: 1px; margin: 0; padding: 0; border: 0; opacity: 0; }

@@ -47,11 +47,12 @@ export function overviewHalfWidthAtDepth(aspect: number, depthZ: number): number
  */
 export const MIN_CAMERA_POSITION_Z_M = 3.15
 
-/** The focal target must stay inside the water volume and ahead of the rear
- * wall (z = -4.6), with room for the camera in front of the fish volume. */
+/** The focal target must stay inside the water volume, above the sand bed,
+ * and ahead of the rear wall (z = -4.6), with room for the camera in front
+ * of the fish volume. The lower margin includes the AQ-106 cave-head target. */
 export const FOCAL_TARGET_BOUNDS = {
   x: { min: -3.2, max: 3.2 },
-  y: { min: -2.0, max: 1.2 },
+  y: { min: -2.6, max: 1.2 },
   z: { min: -2.4, max: 0.6 },
 }
 
