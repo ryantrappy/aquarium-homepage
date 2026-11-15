@@ -485,6 +485,14 @@ function extensionSnapshot(fish: SwimmingFish): FishExtensionSnapshot {
     position: Object.freeze({ ...fish.position }), yaw: fish.yaw, pitch: fish.pitch, bank: fish.bank, speed: fish.speed,
   })
 }
+function holdCreviceResident(fish: SwimmingFish): boolean {
+  if (getSpeciesBehaviorProfile(fish.speciesId)?.habitatMode !== 'crevice-resident') return false
+  fish.speed = 0
+  fish.route = []
+  fish.startleSeconds = 0
+  fish.targetWait = 0
+  return true
+}
 export function createSwimmingFish(id: string, speciesId: string, position: Vec3, clearance = .42, extensions: FishExtensionConfig = EMPTY_FISH_EXTENSIONS, collision: SwimmingFishCollisionOptions = {}): SwimmingFish {
   const initialYaw = collision.initialYaw ?? Math.PI / 2
   if (!Number.isFinite(initialYaw)) throw new RangeError('Fish initial yaw must be finite.')
@@ -516,6 +524,7 @@ export function createSwimmingFish(id: string, speciesId: string, position: Vec3
   }
 }
 export function startleFish(fish: SwimmingFish, habitat: WaterHabitat) {
+  if (holdCreviceResident(fish)) return
   const candidate = dispatchBehaviorEvent(fish.behavior, { type: 'fish-activation', instanceId: fish.id, trigger: fish.speciesId === 'yellow-tang' ? 'high-effort-cue' : 'threat-cue' })
   // A local evasive acceleration does not invent an absent anemone/refuge or
   // strand the runtime in an anchored retreat which can never report arrival.
@@ -773,6 +782,7 @@ function stepFishExtensions(fish: SwimmingFish, dt: number) {
 }
 
 export function stepSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, elapsed: number, stopped = false, options: { reducedMotion?: boolean } = {}) {
+  if (holdCreviceResident(fish)) return
   if (stopped) return
   for (const dt of simulationSubsteps(elapsed)) {
     integrateSwimmingFish(fish, habitat, dt)
@@ -833,10 +843,10 @@ function schoolingPeer(fish: SwimmingFish): SchoolingPeer {
  * bounded nudge applied only when `movementSafety()` reports `clear` for
  * the resulting segment, and dropped — never forced — otherwise.
  * Cohesion/alignment apply only while the fish's motion intent is `hold` or
- * `travel` (idle/swim); separation applies in every state to every species.
+ * `travel` (idle/swim); separation applies in every state to each moving species.
  * A stopped fish (e.g. keyboard-focused) does not move but still counts as
- * a peer. `stopped` is either one flag for the whole school or one flag per
- * fish.
+ * a peer. Fixed cave residents are excluded from this moving peer set.
+ * `stopped` is either one flag for the whole school or one flag per fish.
  */
 export function stepSwimmingSchool(
   fishes: readonly SwimmingFish[],
@@ -846,13 +856,15 @@ export function stepSwimmingSchool(
   options: SchoolStepOptions = {},
 ) {
   const isStopped = (index: number) => Array.isArray(stopped) ? Boolean(stopped[index]) : stopped
+  const moving = fishes.map((fish, index) => ({ fish, index }))
+    .filter(({ fish }) => !holdCreviceResident(fish))
   for (const dt of simulationSubsteps(elapsed)) {
-    const peers = fishes.map(schoolingPeer)
-    fishes.forEach((fish, index) => {
+    const peers = moving.map(({ fish }) => schoolingPeer(fish))
+    moving.forEach(({ fish, index }, peerIndex) => {
       if (isStopped(index)) return
       const intent = getMotionIntent(fish.behavior.state)
       const steering = evaluateSchoolingSteering({
-        self: peers[index],
+        self: peers[peerIndex],
         peers,
         waterBounds: habitat.bounds,
         obstacles: habitat.obstacles,

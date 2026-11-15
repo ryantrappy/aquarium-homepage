@@ -1,0 +1,2405 @@
+{
+  "sourceCommit": "1f6e1f49e210b7e612c17cefbbedd8b7b4c2548f",
+  "metricDefinitions": {
+    "uniqueSourceTriangles": "Sum of GLB mesh primitive source indices (or POSITION accessor fallback) divided by three per unique file. Does not count repeated runtime instances or multipass draws.",
+    "estimatedEmbeddedTextureGpuBytes": "Embedded PNG/JPEG map dimensions as RGBA8, multiplied by 4/3 for a full mip-chain estimate. Excludes geometry buffers, RTT/depth/shadow/PMREM targets, driver overhead, transient decode and shared-resource details."
+  },
+  "scenarios": {
+    "phase0ThreeConfiguredFish": {
+      "uniqueGlbFileCount": 3,
+      "uniqueSourceFileBytes": 2844528,
+      "uniqueSourceTriangles": 26424,
+      "estimatedEmbeddedTextureGpuBytes": 13981011,
+      "speciesIds": [
+        "yellow-tang",
+        "banggai-cardinalfish",
+        "royal-gramma"
+      ],
+      "uniqueFishGlbFiles": [
+        {
+          "path": "src/rendering/proof/candidate-real-tang.glb",
+          "gitBlob": "0e16c1399c423b1c1c5e8c41f74d47803c55499d",
+          "sha256": "44d28509f62de1eec2a9644fea1a6ce5c79d642997b3487aa0e21d6069f76f5b",
+          "fileBytes": 1316848,
+          "uniqueSourceTriangles": 8716,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 1024,
+              "height": 1024,
+              "encodedBytes": 1011972,
+              "estimatedGpuBytes": 5592405
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 5592405
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/banggai-cardinalfish.glb",
+          "gitBlob": "e0a1698284228c643ae249db586c3b208d248788",
+          "sha256": "2227babc3370b84e18b66f2c81ec15c4ec2f09b68156471c13a90805620807d7",
+          "fileBytes": 676712,
+          "uniqueSourceTriangles": 7164,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 395684,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/royal-gramma.glb",
+          "gitBlob": "09721531c52eb119726e0011aee6e9460215d011",
+          "sha256": "ffb095bfc7f3e836971b0ef70c203e7c2e1301af2133efbbd4609db7f2af4d06",
+          "fileBytes": 850968,
+          "uniqueSourceTriangles": 10544,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 462428,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        }
+      ]
+    },
+    "defaultFiveServices": {
+      "uniqueGlbFileCount": 5,
+      "uniqueSourceFileBytes": 5442740,
+      "uniqueSourceTriangles": 44704,
+      "estimatedEmbeddedTextureGpuBytes": 32855379,
+      "speciesIds": [
+        "yellow-tang",
+        "banggai-cardinalfish",
+        "royal-gramma",
+        "ocellaris-clownfish",
+        "blue-tang"
+      ],
+      "uniqueFishGlbFiles": [
+        {
+          "path": "src/rendering/proof/candidate-real-tang.glb",
+          "gitBlob": "0e16c1399c423b1c1c5e8c41f74d47803c55499d",
+          "sha256": "44d28509f62de1eec2a9644fea1a6ce5c79d642997b3487aa0e21d6069f76f5b",
+          "fileBytes": 1316848,
+          "uniqueSourceTriangles": 8716,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 1024,
+              "height": 1024,
+              "encodedBytes": 1011972,
+              "estimatedGpuBytes": 5592405
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 5592405
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/banggai-cardinalfish.glb",
+          "gitBlob": "e0a1698284228c643ae249db586c3b208d248788",
+          "sha256": "2227babc3370b84e18b66f2c81ec15c4ec2f09b68156471c13a90805620807d7",
+          "fileBytes": 676712,
+          "uniqueSourceTriangles": 7164,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 395684,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/royal-gramma.glb",
+          "gitBlob": "09721531c52eb119726e0011aee6e9460215d011",
+          "sha256": "ffb095bfc7f3e836971b0ef70c203e7c2e1301af2133efbbd4609db7f2af4d06",
+          "fileBytes": 850968,
+          "uniqueSourceTriangles": 10544,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 462428,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/fish/download_testing_copies/clownfish-copy.glb",
+          "gitBlob": "962a02dc162307367f4cf7ea4b85937a21deeeba",
+          "sha256": "be6e9cbd2b5b6a76d5204f3a140ae7538a0115e6a067dcbabd0dfd1a273db7ac",
+          "fileBytes": 1003312,
+          "uniqueSourceTriangles": 5400,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 435988,
+              "estimatedGpuBytes": 3145728
+            },
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 317444,
+              "estimatedGpuBytes": 3145728
+            },
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 33205,
+              "estimatedGpuBytes": 3145728
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 9437184
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/blue-tang.glb",
+          "gitBlob": "a9bdc09ab4d8767eadb6730d1f192f98af610424",
+          "sha256": "de1aaf4fcbc72b82749190e4047d26a226cd2d987bee8ef06f50849aac36fc9e",
+          "fileBytes": 1594900,
+          "uniqueSourceTriangles": 12880,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 570513,
+              "estimatedGpuBytes": 3145728
+            },
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 484935,
+              "estimatedGpuBytes": 3145728
+            },
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 92351,
+              "estimatedGpuBytes": 3145728
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 9437184
+        }
+      ]
+    },
+    "defaultFivePlusChromisService": {
+      "uniqueGlbFileCount": 6,
+      "uniqueSourceFileBytes": 6685396,
+      "uniqueSourceTriangles": 68924,
+      "estimatedEmbeddedTextureGpuBytes": 37049682,
+      "speciesIds": [
+        "yellow-tang",
+        "banggai-cardinalfish",
+        "royal-gramma",
+        "ocellaris-clownfish",
+        "blue-tang",
+        "blue-green-chromis"
+      ],
+      "uniqueFishGlbFiles": [
+        {
+          "path": "src/rendering/proof/candidate-real-tang.glb",
+          "gitBlob": "0e16c1399c423b1c1c5e8c41f74d47803c55499d",
+          "sha256": "44d28509f62de1eec2a9644fea1a6ce5c79d642997b3487aa0e21d6069f76f5b",
+          "fileBytes": 1316848,
+          "uniqueSourceTriangles": 8716,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 1024,
+              "height": 1024,
+              "encodedBytes": 1011972,
+              "estimatedGpuBytes": 5592405
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 5592405
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/banggai-cardinalfish.glb",
+          "gitBlob": "e0a1698284228c643ae249db586c3b208d248788",
+          "sha256": "2227babc3370b84e18b66f2c81ec15c4ec2f09b68156471c13a90805620807d7",
+          "fileBytes": 676712,
+          "uniqueSourceTriangles": 7164,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 395684,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/royal-gramma.glb",
+          "gitBlob": "09721531c52eb119726e0011aee6e9460215d011",
+          "sha256": "ffb095bfc7f3e836971b0ef70c203e7c2e1301af2133efbbd4609db7f2af4d06",
+          "fileBytes": 850968,
+          "uniqueSourceTriangles": 10544,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 462428,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/fish/download_testing_copies/clownfish-copy.glb",
+          "gitBlob": "962a02dc162307367f4cf7ea4b85937a21deeeba",
+          "sha256": "be6e9cbd2b5b6a76d5204f3a140ae7538a0115e6a067dcbabd0dfd1a273db7ac",
+          "fileBytes": 1003312,
+          "uniqueSourceTriangles": 5400,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 435988,
+              "estimatedGpuBytes": 3145728
+            },
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 317444,
+              "estimatedGpuBytes": 3145728
+            },
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 33205,
+              "estimatedGpuBytes": 3145728
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 9437184
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/blue-tang.glb",
+          "gitBlob": "a9bdc09ab4d8767eadb6730d1f192f98af610424",
+          "sha256": "de1aaf4fcbc72b82749190e4047d26a226cd2d987bee8ef06f50849aac36fc9e",
+          "fileBytes": 1594900,
+          "uniqueSourceTriangles": 12880,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 570513,
+              "estimatedGpuBytes": 3145728
+            },
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 484935,
+              "estimatedGpuBytes": 3145728
+            },
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 92351,
+              "estimatedGpuBytes": 3145728
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 9437184
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/blue-green-chromis.glb",
+          "gitBlob": "f62ce4201eb5beed0ae70ebdd473b4b2530c1274",
+          "sha256": "ca69aa9d99b62afc930b9724af2f5714431513a56bd7536df2166bdc9802519f",
+          "fileBytes": 1242656,
+          "uniqueSourceTriangles": 24220,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 416030,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        }
+      ]
+    },
+    "wideStaticReef": {
+      "uniqueGlbFileCount": 11,
+      "uniqueSourceFileBytes": 16976332,
+      "uniqueSourceTriangles": 250552,
+      "estimatedEmbeddedTextureGpuBytes": 70953626,
+      "uniqueReefGlbFiles": [
+        {
+          "path": "src/rendering/assets/corals/live-rock-island-left.glb",
+          "gitBlob": "3378ac6c2f229a12f262c39a761d6a73bd890542",
+          "sha256": "2f81f8fc212886aa3eea9a0d316ca0a1f4badccac20044583f8ad4f0bdd9c2ef",
+          "fileBytes": 1482184,
+          "uniqueSourceTriangles": 24572,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 351576,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 141575,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 215180,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/corals/live-rock-island-right.glb",
+          "gitBlob": "f3a802a3acf709c894edcc7a2946ed2508264112",
+          "sha256": "7d8cc1ce22d850d199f28652437c6d95d64ab4cc80606cc451c4c58c702558c1",
+          "fileBytes": 939092,
+          "uniqueSourceTriangles": 24572,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 256,
+              "height": 256,
+              "encodedBytes": 79328,
+              "estimatedGpuBytes": 349525
+            },
+            {
+              "mime": "image/png",
+              "width": 256,
+              "height": 256,
+              "encodedBytes": 35169,
+              "estimatedGpuBytes": 349525
+            },
+            {
+              "mime": "image/png",
+              "width": 256,
+              "height": 256,
+              "encodedBytes": 51002,
+              "estimatedGpuBytes": 349525
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 1048575
+        },
+        {
+          "path": "src/rendering/assets/corals/coral-euphyllia-torch.glb",
+          "gitBlob": "60c9dc9f48e26deaf8346250381c6ce60d9eaaf0",
+          "sha256": "e267292425df202d816b5f8a93336e2e5255962a87116f9cc8fd680ac260c022",
+          "fileBytes": 2175012,
+          "uniqueSourceTriangles": 26232,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 81414,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 71620,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 160458,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 4544,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 388951,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 234903,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 51495,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 9786707
+        },
+        {
+          "path": "src/rendering/assets/corals/coral-acropora-table.glb",
+          "gitBlob": "19e499cdd7d2646eff5da2774636bed0f190913e",
+          "sha256": "ad4c0f5d74fe4efe06f0faa7d57af4e61d8756952b63a54d6424675c9face10d",
+          "fileBytes": 2236728,
+          "uniqueSourceTriangles": 34176,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 6055,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 253863,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 270435,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 4912,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 5592404
+        },
+        {
+          "path": "src/rendering/assets/corals/coral-acropora-staghorn.glb",
+          "gitBlob": "9b6d01a671e221bbf7acf39710ec96d313c59e81",
+          "sha256": "629781835efee49bea46f109cfdeeef0ba434d94a8dc3bf33d769eb31f99c0ea",
+          "fileBytes": 1582656,
+          "uniqueSourceTriangles": 23648,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 79444,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 84513,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 221848,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 4952,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 5592404
+        },
+        {
+          "path": "src/rendering/assets/corals/coral-montipora-plate.glb",
+          "gitBlob": "b70f85b8a974d1df16e9117c7c77f05f641680eb",
+          "sha256": "87f4e1052e44f29b27b948f9c9f45cae42855c1948fdf8ee519ea7c70ae21252",
+          "fileBytes": 666680,
+          "uniqueSourceTriangles": 4560,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 6250,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 228015,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 238541,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 4872,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 5592404
+        },
+        {
+          "path": "src/rendering/assets/corals/coral-brain-diploria.glb",
+          "gitBlob": "3ec95931b86f6e0314fdf33122040adeab808425",
+          "sha256": "904f471bb1a1094004b04294c4166ff309487f3333cea82e6105bf96ca1f100d",
+          "fileBytes": 1408776,
+          "uniqueSourceTriangles": 12544,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 190922,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 371609,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 364089,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33462,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 5592404
+        },
+        {
+          "path": "src/rendering/assets/corals/coral-anemone-bta.glb",
+          "gitBlob": "a70918104c2b810f64c20d2bf03f71f553ab5c9f",
+          "sha256": "b95f24977cce9c2e2acf723b4720c7c0913dee04e04a8a2cfa6761f5ebc39917",
+          "fileBytes": 2535424,
+          "uniqueSourceTriangles": 38976,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 377387,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 257878,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 148244,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 6294,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 27193,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 136809,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 4635,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 9786707
+        },
+        {
+          "path": "src/rendering/assets/corals/coral-euphyllia-hammer.glb",
+          "gitBlob": "5c1e4a0faae7c8f0e07a917db4b952a3367fad24",
+          "sha256": "6e1974d5f72ec3a898d84f559a5d4397a6002d8534387c47697452d6c2157fc8",
+          "fileBytes": 1741436,
+          "uniqueSourceTriangles": 24112,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 17339,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 70002,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 86313,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 4541,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 318207,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 151415,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 4581,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 9786707
+        },
+        {
+          "path": "src/rendering/assets/corals/coral-zoanthid-mat.glb",
+          "gitBlob": "d17cac7385d967e18cc3a4fdc7ad2bd73e18316c",
+          "sha256": "a60d91258fcf9a64d43a628dbe0f4027a91a1fce73104153d7f3ea424cc2463d",
+          "fileBytes": 874704,
+          "uniqueSourceTriangles": 18600,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 6286,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 88409,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 70031,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 4813,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 5592404
+        },
+        {
+          "path": "src/rendering/assets/corals/custom-rocks/reef-center-arch.glb",
+          "gitBlob": "e5fa3953fee47f9aa50e626f0ec486b039259ae6",
+          "sha256": "863acb1e81ae5552ff27cba747ee302bfddd31d21d8c98fedb48dcb3d65a5d9c",
+          "fileBytes": 1333640,
+          "uniqueSourceTriangles": 18560,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 615893,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/jpeg",
+              "width": 1024,
+              "height": 1024,
+              "encodedBytes": 163461,
+              "estimatedGpuBytes": 5592405
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 137029,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 8388607
+        }
+      ]
+    },
+    "allStandardPotentialFishExcludingOptionalSailfinAndAQ106": {
+      "uniqueGlbFileCount": 15,
+      "uniqueSourceFileBytes": 14299516,
+      "uniqueSourceTriangles": 162316,
+      "estimatedEmbeddedTextureGpuBytes": 74798409,
+      "uniqueFishGlbFiles": [
+        {
+          "path": "src/rendering/assets/splat-fish/blue-tang.glb",
+          "gitBlob": "a9bdc09ab4d8767eadb6730d1f192f98af610424",
+          "sha256": "de1aaf4fcbc72b82749190e4047d26a226cd2d987bee8ef06f50849aac36fc9e",
+          "fileBytes": 1594900,
+          "uniqueSourceTriangles": 12880,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 570513,
+              "estimatedGpuBytes": 3145728
+            },
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 484935,
+              "estimatedGpuBytes": 3145728
+            },
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 92351,
+              "estimatedGpuBytes": 3145728
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 9437184
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/royal-gramma.glb",
+          "gitBlob": "09721531c52eb119726e0011aee6e9460215d011",
+          "sha256": "ffb095bfc7f3e836971b0ef70c203e7c2e1301af2133efbbd4609db7f2af4d06",
+          "fileBytes": 850968,
+          "uniqueSourceTriangles": 10544,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 462428,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/banggai-cardinalfish.glb",
+          "gitBlob": "e0a1698284228c643ae249db586c3b208d248788",
+          "sha256": "2227babc3370b84e18b66f2c81ec15c4ec2f09b68156471c13a90805620807d7",
+          "fileBytes": 676712,
+          "uniqueSourceTriangles": 7164,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 395684,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/mandarin-dragonet.glb",
+          "gitBlob": "8f9e4ef2a0794e35b04cf0e911229092fb9456a5",
+          "sha256": "bd19565d563ca10131b65c4ed9bd684dda658d4cb123a7d965383328d9f1e9cb",
+          "fileBytes": 964312,
+          "uniqueSourceTriangles": 9360,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 613304,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/blue-green-chromis.glb",
+          "gitBlob": "f62ce4201eb5beed0ae70ebdd473b4b2530c1274",
+          "sha256": "ca69aa9d99b62afc930b9724af2f5714431513a56bd7536df2166bdc9802519f",
+          "fileBytes": 1242656,
+          "uniqueSourceTriangles": 24220,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 416030,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/firefish.glb",
+          "gitBlob": "27ec26fb0376b30761861554f3afd1e6c0d5e208",
+          "sha256": "3ffd93d5db1b308987c371636ff2f43d39a5359be16a998ba6aa9a7ad153732a",
+          "fileBytes": 718276,
+          "uniqueSourceTriangles": 8480,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 395359,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/yellow-watchman-goby.glb",
+          "gitBlob": "b1faf8ddad2e0623049728896b0a54d494b9e669",
+          "sha256": "edba60aef7ffc577f6e3196ff7553af510ce422098166b05c2f19cba466b7533",
+          "fileBytes": 838764,
+          "uniqueSourceTriangles": 10472,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 452497,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/tailspot-blenny.glb",
+          "gitBlob": "ce71ece4c3dca4244ca0ec9a9c8e6b9e85c5fedc",
+          "sha256": "c26259de8d03ac186d3a2c00723a5d7b449b9df8f5cf16971a9882e80280151a",
+          "fileBytes": 891584,
+          "uniqueSourceTriangles": 11200,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 481769,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/six-line-wrasse.glb",
+          "gitBlob": "1d3b394843404d96ba49448fde707e6e8b1c103c",
+          "sha256": "a23addc928cf6c2a8828108a885f04c4d4ba5aaf97e322669225c0f04dff49f9",
+          "fileBytes": 872900,
+          "uniqueSourceTriangles": 12184,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 431692,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/mccoskers-flasher-wrasse.glb",
+          "gitBlob": "23064cfdd5ee99887c1fc2b3138208decc374c3e",
+          "sha256": "f0d5afcdf0d007a2978b7a964e457f7b4b1b464e6440801181732cee26ab803b",
+          "fileBytes": 822096,
+          "uniqueSourceTriangles": 9772,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 458696,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/lyretail-anthias.glb",
+          "gitBlob": "8d7f9f3029401b6f63353a73ce8761f92e53d358",
+          "sha256": "04b7b8cc411c9a29dd7b94c44358a39374032d2896c1e66c7819df65ba0b5007",
+          "fileBytes": 708712,
+          "uniqueSourceTriangles": 9800,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 343576,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/flame-angelfish.glb",
+          "gitBlob": "efb335d9cd3240fab99934b55dd4d5ab337bf49c",
+          "sha256": "6739db04161fb7fed09e2337a80f23d4c26af352fc9a5180ca94a749e2cd6da9",
+          "fileBytes": 915348,
+          "uniqueSourceTriangles": 11740,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 488568,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/copperband-butterflyfish.glb",
+          "gitBlob": "df285c008a16af14d9265f8df001957bd35bc051",
+          "sha256": "66c341c2663574522f523f3a11284a760c06fdee47a183d2af808ae489d50aa0",
+          "fileBytes": 882128,
+          "uniqueSourceTriangles": 10384,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 499307,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/proof/candidate-real-tang.glb",
+          "gitBlob": "0e16c1399c423b1c1c5e8c41f74d47803c55499d",
+          "sha256": "44d28509f62de1eec2a9644fea1a6ce5c79d642997b3487aa0e21d6069f76f5b",
+          "fileBytes": 1316848,
+          "uniqueSourceTriangles": 8716,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 1024,
+              "height": 1024,
+              "encodedBytes": 1011972,
+              "estimatedGpuBytes": 5592405
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 5592405
+        },
+        {
+          "path": "src/rendering/assets/fish/download_testing_copies/clownfish-copy.glb",
+          "gitBlob": "962a02dc162307367f4cf7ea4b85937a21deeeba",
+          "sha256": "be6e9cbd2b5b6a76d5204f3a140ae7538a0115e6a067dcbabd0dfd1a273db7ac",
+          "fileBytes": 1003312,
+          "uniqueSourceTriangles": 5400,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 435988,
+              "estimatedGpuBytes": 3145728
+            },
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 317444,
+              "estimatedGpuBytes": 3145728
+            },
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 33205,
+              "estimatedGpuBytes": 3145728
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 9437184
+        }
+      ]
+    },
+    "allStandardPotentialAssetsExcludingOptionalSailfinAndAQ106": {
+      "uniqueGlbFileCount": 26,
+      "uniqueSourceFileBytes": 31275848,
+      "uniqueSourceTriangles": 412868,
+      "estimatedEmbeddedTextureGpuBytes": 145752035,
+      "uniqueFishGlbFiles": [
+        {
+          "path": "src/rendering/assets/splat-fish/blue-tang.glb",
+          "gitBlob": "a9bdc09ab4d8767eadb6730d1f192f98af610424",
+          "sha256": "de1aaf4fcbc72b82749190e4047d26a226cd2d987bee8ef06f50849aac36fc9e",
+          "fileBytes": 1594900,
+          "uniqueSourceTriangles": 12880,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 570513,
+              "estimatedGpuBytes": 3145728
+            },
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 484935,
+              "estimatedGpuBytes": 3145728
+            },
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 92351,
+              "estimatedGpuBytes": 3145728
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 9437184
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/royal-gramma.glb",
+          "gitBlob": "09721531c52eb119726e0011aee6e9460215d011",
+          "sha256": "ffb095bfc7f3e836971b0ef70c203e7c2e1301af2133efbbd4609db7f2af4d06",
+          "fileBytes": 850968,
+          "uniqueSourceTriangles": 10544,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 462428,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/banggai-cardinalfish.glb",
+          "gitBlob": "e0a1698284228c643ae249db586c3b208d248788",
+          "sha256": "2227babc3370b84e18b66f2c81ec15c4ec2f09b68156471c13a90805620807d7",
+          "fileBytes": 676712,
+          "uniqueSourceTriangles": 7164,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 395684,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/mandarin-dragonet.glb",
+          "gitBlob": "8f9e4ef2a0794e35b04cf0e911229092fb9456a5",
+          "sha256": "bd19565d563ca10131b65c4ed9bd684dda658d4cb123a7d965383328d9f1e9cb",
+          "fileBytes": 964312,
+          "uniqueSourceTriangles": 9360,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 613304,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/blue-green-chromis.glb",
+          "gitBlob": "f62ce4201eb5beed0ae70ebdd473b4b2530c1274",
+          "sha256": "ca69aa9d99b62afc930b9724af2f5714431513a56bd7536df2166bdc9802519f",
+          "fileBytes": 1242656,
+          "uniqueSourceTriangles": 24220,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 416030,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/firefish.glb",
+          "gitBlob": "27ec26fb0376b30761861554f3afd1e6c0d5e208",
+          "sha256": "3ffd93d5db1b308987c371636ff2f43d39a5359be16a998ba6aa9a7ad153732a",
+          "fileBytes": 718276,
+          "uniqueSourceTriangles": 8480,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 395359,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/yellow-watchman-goby.glb",
+          "gitBlob": "b1faf8ddad2e0623049728896b0a54d494b9e669",
+          "sha256": "edba60aef7ffc577f6e3196ff7553af510ce422098166b05c2f19cba466b7533",
+          "fileBytes": 838764,
+          "uniqueSourceTriangles": 10472,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 452497,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/tailspot-blenny.glb",
+          "gitBlob": "ce71ece4c3dca4244ca0ec9a9c8e6b9e85c5fedc",
+          "sha256": "c26259de8d03ac186d3a2c00723a5d7b449b9df8f5cf16971a9882e80280151a",
+          "fileBytes": 891584,
+          "uniqueSourceTriangles": 11200,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 481769,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/six-line-wrasse.glb",
+          "gitBlob": "1d3b394843404d96ba49448fde707e6e8b1c103c",
+          "sha256": "a23addc928cf6c2a8828108a885f04c4d4ba5aaf97e322669225c0f04dff49f9",
+          "fileBytes": 872900,
+          "uniqueSourceTriangles": 12184,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 431692,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/mccoskers-flasher-wrasse.glb",
+          "gitBlob": "23064cfdd5ee99887c1fc2b3138208decc374c3e",
+          "sha256": "f0d5afcdf0d007a2978b7a964e457f7b4b1b464e6440801181732cee26ab803b",
+          "fileBytes": 822096,
+          "uniqueSourceTriangles": 9772,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 458696,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/lyretail-anthias.glb",
+          "gitBlob": "8d7f9f3029401b6f63353a73ce8761f92e53d358",
+          "sha256": "04b7b8cc411c9a29dd7b94c44358a39374032d2896c1e66c7819df65ba0b5007",
+          "fileBytes": 708712,
+          "uniqueSourceTriangles": 9800,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 343576,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/flame-angelfish.glb",
+          "gitBlob": "efb335d9cd3240fab99934b55dd4d5ab337bf49c",
+          "sha256": "6739db04161fb7fed09e2337a80f23d4c26af352fc9a5180ca94a749e2cd6da9",
+          "fileBytes": 915348,
+          "uniqueSourceTriangles": 11740,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 488568,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/splat-fish/copperband-butterflyfish.glb",
+          "gitBlob": "df285c008a16af14d9265f8df001957bd35bc051",
+          "sha256": "66c341c2663574522f523f3a11284a760c06fdee47a183d2af808ae489d50aa0",
+          "fileBytes": 882128,
+          "uniqueSourceTriangles": 10384,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 499307,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 1817,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33301,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/proof/candidate-real-tang.glb",
+          "gitBlob": "0e16c1399c423b1c1c5e8c41f74d47803c55499d",
+          "sha256": "44d28509f62de1eec2a9644fea1a6ce5c79d642997b3487aa0e21d6069f76f5b",
+          "fileBytes": 1316848,
+          "uniqueSourceTriangles": 8716,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 1024,
+              "height": 1024,
+              "encodedBytes": 1011972,
+              "estimatedGpuBytes": 5592405
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 5592405
+        },
+        {
+          "path": "src/rendering/assets/fish/download_testing_copies/clownfish-copy.glb",
+          "gitBlob": "962a02dc162307367f4cf7ea4b85937a21deeeba",
+          "sha256": "be6e9cbd2b5b6a76d5204f3a140ae7538a0115e6a067dcbabd0dfd1a273db7ac",
+          "fileBytes": 1003312,
+          "uniqueSourceTriangles": 5400,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 435988,
+              "estimatedGpuBytes": 3145728
+            },
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 317444,
+              "estimatedGpuBytes": 3145728
+            },
+            {
+              "mime": "image/png",
+              "width": 768,
+              "height": 768,
+              "encodedBytes": 33205,
+              "estimatedGpuBytes": 3145728
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 9437184
+        }
+      ],
+      "uniqueReefGlbFiles": [
+        {
+          "path": "src/rendering/assets/corals/live-rock-island-left.glb",
+          "gitBlob": "3378ac6c2f229a12f262c39a761d6a73bd890542",
+          "sha256": "2f81f8fc212886aa3eea9a0d316ca0a1f4badccac20044583f8ad4f0bdd9c2ef",
+          "fileBytes": 1482184,
+          "uniqueSourceTriangles": 24572,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 351576,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 141575,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 215180,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 4194303
+        },
+        {
+          "path": "src/rendering/assets/corals/live-rock-island-right.glb",
+          "gitBlob": "f3a802a3acf709c894edcc7a2946ed2508264112",
+          "sha256": "7d8cc1ce22d850d199f28652437c6d95d64ab4cc80606cc451c4c58c702558c1",
+          "fileBytes": 939092,
+          "uniqueSourceTriangles": 24572,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 256,
+              "height": 256,
+              "encodedBytes": 79328,
+              "estimatedGpuBytes": 349525
+            },
+            {
+              "mime": "image/png",
+              "width": 256,
+              "height": 256,
+              "encodedBytes": 35169,
+              "estimatedGpuBytes": 349525
+            },
+            {
+              "mime": "image/png",
+              "width": 256,
+              "height": 256,
+              "encodedBytes": 51002,
+              "estimatedGpuBytes": 349525
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 1048575
+        },
+        {
+          "path": "src/rendering/assets/corals/coral-euphyllia-torch.glb",
+          "gitBlob": "60c9dc9f48e26deaf8346250381c6ce60d9eaaf0",
+          "sha256": "e267292425df202d816b5f8a93336e2e5255962a87116f9cc8fd680ac260c022",
+          "fileBytes": 2175012,
+          "uniqueSourceTriangles": 26232,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 81414,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 71620,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 160458,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 4544,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 388951,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 234903,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 51495,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 9786707
+        },
+        {
+          "path": "src/rendering/assets/corals/coral-acropora-table.glb",
+          "gitBlob": "19e499cdd7d2646eff5da2774636bed0f190913e",
+          "sha256": "ad4c0f5d74fe4efe06f0faa7d57af4e61d8756952b63a54d6424675c9face10d",
+          "fileBytes": 2236728,
+          "uniqueSourceTriangles": 34176,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 6055,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 253863,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 270435,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 4912,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 5592404
+        },
+        {
+          "path": "src/rendering/assets/corals/coral-acropora-staghorn.glb",
+          "gitBlob": "9b6d01a671e221bbf7acf39710ec96d313c59e81",
+          "sha256": "629781835efee49bea46f109cfdeeef0ba434d94a8dc3bf33d769eb31f99c0ea",
+          "fileBytes": 1582656,
+          "uniqueSourceTriangles": 23648,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 79444,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 84513,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 221848,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 4952,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 5592404
+        },
+        {
+          "path": "src/rendering/assets/corals/coral-montipora-plate.glb",
+          "gitBlob": "b70f85b8a974d1df16e9117c7c77f05f641680eb",
+          "sha256": "87f4e1052e44f29b27b948f9c9f45cae42855c1948fdf8ee519ea7c70ae21252",
+          "fileBytes": 666680,
+          "uniqueSourceTriangles": 4560,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 6250,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 228015,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 238541,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 4872,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 5592404
+        },
+        {
+          "path": "src/rendering/assets/corals/coral-brain-diploria.glb",
+          "gitBlob": "3ec95931b86f6e0314fdf33122040adeab808425",
+          "sha256": "904f471bb1a1094004b04294c4166ff309487f3333cea82e6105bf96ca1f100d",
+          "fileBytes": 1408776,
+          "uniqueSourceTriangles": 12544,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 190922,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 371609,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 364089,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 33462,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 5592404
+        },
+        {
+          "path": "src/rendering/assets/corals/coral-anemone-bta.glb",
+          "gitBlob": "a70918104c2b810f64c20d2bf03f71f553ab5c9f",
+          "sha256": "b95f24977cce9c2e2acf723b4720c7c0913dee04e04a8a2cfa6761f5ebc39917",
+          "fileBytes": 2535424,
+          "uniqueSourceTriangles": 38976,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 377387,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 257878,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 148244,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 6294,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 27193,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 136809,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 4635,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 9786707
+        },
+        {
+          "path": "src/rendering/assets/corals/coral-euphyllia-hammer.glb",
+          "gitBlob": "5c1e4a0faae7c8f0e07a917db4b952a3367fad24",
+          "sha256": "6e1974d5f72ec3a898d84f559a5d4397a6002d8534387c47697452d6c2157fc8",
+          "fileBytes": 1741436,
+          "uniqueSourceTriangles": 24112,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 17339,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 70002,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 86313,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 4541,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 318207,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 151415,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 4581,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 9786707
+        },
+        {
+          "path": "src/rendering/assets/corals/coral-zoanthid-mat.glb",
+          "gitBlob": "d17cac7385d967e18cc3a4fdc7ad2bd73e18316c",
+          "sha256": "a60d91258fcf9a64d43a628dbe0f4027a91a1fce73104153d7f3ea424cc2463d",
+          "fileBytes": 874704,
+          "uniqueSourceTriangles": 18600,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 6286,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 88409,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 70031,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 4813,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 5592404
+        },
+        {
+          "path": "src/rendering/assets/corals/custom-rocks/reef-center-arch.glb",
+          "gitBlob": "e5fa3953fee47f9aa50e626f0ec486b039259ae6",
+          "sha256": "863acb1e81ae5552ff27cba747ee302bfddd31d21d8c98fedb48dcb3d65a5d9c",
+          "fileBytes": 1333640,
+          "uniqueSourceTriangles": 18560,
+          "textures": [
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 615893,
+              "estimatedGpuBytes": 1398101
+            },
+            {
+              "mime": "image/jpeg",
+              "width": 1024,
+              "height": 1024,
+              "encodedBytes": 163461,
+              "estimatedGpuBytes": 5592405
+            },
+            {
+              "mime": "image/png",
+              "width": 512,
+              "height": 512,
+              "encodedBytes": 137029,
+              "estimatedGpuBytes": 1398101
+            }
+          ],
+          "estimatedEmbeddedTextureGpuBytes": 8388607
+        }
+      ]
+    }
+  },
+  "budgetContractComparisonFiles": [
+    {
+      "path": "src/rendering/proof/candidate-real-clown.glb",
+      "gitBlob": "0f253ccfe547d9618b9b9d46562a7981b1783cd4",
+      "sha256": "9beebbfe33e9e4459702e1aba6ad2df6f7309aca854f3bb5d1b88a36ca9444a6",
+      "fileBytes": 5973300,
+      "uniqueSourceTriangles": 1605,
+      "textures": [
+        {
+          "mime": "image/png",
+          "width": 2048,
+          "height": 2048,
+          "encodedBytes": 2022909,
+          "estimatedGpuBytes": 22369621
+        },
+        {
+          "mime": "image/png",
+          "width": 2048,
+          "height": 2048,
+          "encodedBytes": 2971095,
+          "estimatedGpuBytes": 22369621
+        },
+        {
+          "mime": "image/jpeg",
+          "width": 2048,
+          "height": 2048,
+          "encodedBytes": 904260,
+          "estimatedGpuBytes": 22369621
+        }
+      ],
+      "estimatedEmbeddedTextureGpuBytes": 67108863
+    },
+    {
+      "path": "src/rendering/proof/candidate-real-tang.glb",
+      "gitBlob": "0e16c1399c423b1c1c5e8c41f74d47803c55499d",
+      "sha256": "44d28509f62de1eec2a9644fea1a6ce5c79d642997b3487aa0e21d6069f76f5b",
+      "fileBytes": 1316848,
+      "uniqueSourceTriangles": 8716,
+      "textures": [
+        {
+          "mime": "image/png",
+          "width": 1024,
+          "height": 1024,
+          "encodedBytes": 1011972,
+          "estimatedGpuBytes": 5592405
+        }
+      ],
+      "estimatedEmbeddedTextureGpuBytes": 5592405
+    },
+    {
+      "path": "src/rendering/assets/fish/download_testing_copies/clownfish-copy.glb",
+      "gitBlob": "962a02dc162307367f4cf7ea4b85937a21deeeba",
+      "sha256": "be6e9cbd2b5b6a76d5204f3a140ae7538a0115e6a067dcbabd0dfd1a273db7ac",
+      "fileBytes": 1003312,
+      "uniqueSourceTriangles": 5400,
+      "textures": [
+        {
+          "mime": "image/png",
+          "width": 768,
+          "height": 768,
+          "encodedBytes": 435988,
+          "estimatedGpuBytes": 3145728
+        },
+        {
+          "mime": "image/png",
+          "width": 768,
+          "height": 768,
+          "encodedBytes": 317444,
+          "estimatedGpuBytes": 3145728
+        },
+        {
+          "mime": "image/png",
+          "width": 768,
+          "height": 768,
+          "encodedBytes": 33205,
+          "estimatedGpuBytes": 3145728
+        }
+      ],
+      "estimatedEmbeddedTextureGpuBytes": 9437184
+    },
+    {
+      "path": "src/rendering/assets/corals/custom-rocks/reef-center-arch.glb",
+      "gitBlob": "e5fa3953fee47f9aa50e626f0ec486b039259ae6",
+      "sha256": "863acb1e81ae5552ff27cba747ee302bfddd31d21d8c98fedb48dcb3d65a5d9c",
+      "fileBytes": 1333640,
+      "uniqueSourceTriangles": 18560,
+      "textures": [
+        {
+          "mime": "image/png",
+          "width": 512,
+          "height": 512,
+          "encodedBytes": 615893,
+          "estimatedGpuBytes": 1398101
+        },
+        {
+          "mime": "image/jpeg",
+          "width": 1024,
+          "height": 1024,
+          "encodedBytes": 163461,
+          "estimatedGpuBytes": 5592405
+        },
+        {
+          "mime": "image/png",
+          "width": 512,
+          "height": 512,
+          "encodedBytes": 137029,
+          "estimatedGpuBytes": 1398101
+        }
+      ],
+      "estimatedEmbeddedTextureGpuBytes": 8388607
+    }
+  ]
+}

@@ -447,7 +447,7 @@ describe('safe aquarium fish spawning', () => {
   })
 
   it.each([['phone 402x874', 402, 874], ['laptop 1440x900', 1440, 900]])('quantizes starter spawns onto distinct depth planes spanning the water column at %s (AQ-87 AC #1/#2)', (_label, width, height) => {
-    const { bounds, placements } = planStarters(Number(width), Number(height))
+    const { bounds, obstacles, placements } = planStarters(Number(width), Number(height))
     const columnHeight = bounds.max.y - bounds.min.y
 
     // Spawn intent sits on one of the AQ-87 depth planes (outer lanes on the
@@ -509,12 +509,24 @@ describe('safe aquarium fish spawning', () => {
     expect(tangZone.worldYRange[1]).toBeGreaterThan(gobyZone.worldYRange[0])
   })
 
-  it.each([['phone 402x874', 402, 874], ['laptop 1440x900', 1440, 900]])('stages every catalog species inside its ecological vertical interval at %s', (_label, width, height) => {
+  it('does not assign a generic open-water spawn or depth tier to the fixed cave resident', () => {
+    const bounds = waterBounds(1440, 900)
+    expect(classifySpeciesVerticalTier('snowflake-moray-eel')).toBeUndefined()
+    expect(evaluateTieredVerticalDepthRange('snowflake-moray-eel', bounds, fishClearanceRadius('snowflake-moray-eel'))).toBeUndefined()
+    expect(fishSpawnPreference('moray-service', 'snowflake-moray-eel', bounds, fishClearanceRadius('snowflake-moray-eel'))).toBeUndefined()
+  })
+
+  it.each([['phone 402x874', 402, 874], ['laptop 1440x900', 1440, 900]])('stages every mobile catalog species inside its ecological vertical interval at %s', (_label, width, height) => {
     const bounds = waterBounds(Number(width), Number(height))
     const columnHeight = bounds.max.y - bounds.min.y
-    expect(REEF_FISH.length).toBeGreaterThanOrEqual(15)
+    expect(REEF_FISH.length).toBe(17)
 
     for (const fish of REEF_FISH) {
+      if (getSpeciesBehaviorProfile(fish.id)?.habitatMode === 'crevice-resident') {
+        expect(evaluateTieredVerticalDepthRange(fish.id, bounds, fishClearanceRadius(fish.id))).toBeUndefined()
+        expect(fishSpawnPreference(fish.id, fish.id, bounds, fishClearanceRadius(fish.id))).toBeUndefined()
+        continue
+      }
       const clearance = fishClearanceRadius(fish.id)
       const ecologicalRange = evaluateTieredVerticalDepthRange(fish.id, bounds, clearance)
       const preference = fishSpawnPreference(fish.id, fish.id, bounds, clearance)

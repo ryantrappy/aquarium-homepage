@@ -118,8 +118,9 @@ export function evaluateTieredVerticalDepthRange(
   worldYRange: readonly [number, number]
 } | undefined {
   const profile = getSpeciesBehaviorProfile(speciesId)
+  if (!profile || profile.habitatMode === 'crevice-resident') return undefined
   const tier = classifySpeciesVerticalTier(speciesId)
-  if (!profile || !tier) return undefined
+  if (!tier) return undefined
   const zoneSpec = TIERED_VERTICAL_DEPTH_ZONES[tier]
   const minDepth = Math.max(profile.depthRange[0], zoneSpec.normalizedDepthBand[0])
   const maxDepth = Math.min(profile.depthRange[1], zoneSpec.normalizedDepthBand[1])
@@ -219,7 +220,7 @@ export function fishSpawnPreference(
     || horizontalSlot.heightIndex < 0 || horizontalSlot.heightIndex >= horizontalSlot.count)) return undefined
   if (!(waterBounds.min.x < waterBounds.max.x && waterBounds.min.y < waterBounds.max.y && waterBounds.min.z < waterBounds.max.z)) return undefined
   const profile = getSpeciesBehaviorProfile(speciesId)
-  if (!profile) return undefined
+  if (!profile || profile.habitatMode === 'crevice-resident') return undefined
   const ecologicalRange = evaluateTieredVerticalDepthRange(speciesId, waterBounds, clearance)
   if (!ecologicalRange) return undefined
 

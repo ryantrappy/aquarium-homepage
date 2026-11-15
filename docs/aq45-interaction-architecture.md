@@ -4,9 +4,9 @@
 Category: Specification / Behavioral Architecture Design
 Status: Draft for review / Active once accepted
 Authority: Implementation plan for AQ-45 (binding once Root accepts)
-Backlog: AQ-45, AQ-44, AQ-35, AQ-34, AQ-41, AQ-82, AQ-13
+Backlog: AQ-45, AQ-44, AQ-35, AQ-34, AQ-41, AQ-82, AQ-13, AQ-106
 Owner: @behavior_profiles
-Updated: 2026-11-09
+Updated: 2026-11-15
 Upstream: docs/fish-behavior-design.md, docs/behavior-runtime-contract.md,
   docs/reef-fish-roster.md, docs/aquascape-layout.svg, docs/habitat-navigation-core-contract.md
 Downstream: src/simulation/behavior-runtime.ts, src/simulation/behavior-event-bus.ts (new),
@@ -53,8 +53,10 @@ Downstream: src/simulation/behavior-runtime.ts, src/simulation/behavior-event-bu
 
 ## 1. The problem, stated precisely
 
-AQ-45 covers four phases of behavior, across 15 species, each with its
-own habitat anchors, states, and refuge rules:
+AQ-45 covers four phases of behavior for the standard species profiles,
+each with its own habitat anchors, states, and refuge rules. AQ-106's
+partial snowflake moray is a separate fixed-cave service exception and
+does not participate in these free-swimming phases:
 
 - **Phase 1** — hosting, perching, burrows (clownfish ↔ anemone,
   firefish/goby burrows, blenny perch, substrate grazing).
@@ -64,6 +66,11 @@ own habitat anchors, states, and refuge rules:
   paths, wrasse patrol loops, copperband probe pauses).
 - **Phase 4** — display / territory (gramma belly-to-rock, flasher-wrasse
   display runs, clownfish anemone defence).
+
+**AQ-106 scope note (2026-11-15).** The supplied partial snowflake moray
+remains at one bottom-right cave residence and uses only its authored
+`crevice_idle` clip. This does not add a second FSM, generalize cave
+behavior to other species, or change AQ-45's phase acceptance criteria.
 
 Each phase, done naively, adds its own triggers: a proximity check here,
 a timer there, a click handler that also startles a school, a patrol
@@ -124,7 +131,7 @@ file/line references.
 ### 2.3 The design's stance toward the existing code
 
 - **Reuse, don't replace.** The FSM, profiles, navigation adapter, schooling steering, gait system, and extension scaffold are the foundation. The design adds *one* new component (the event bus, §4) and *one* new stage (the pose stage, §5.4), and retires *one* anti-pattern (the inline tang check). Everything else is wiring and data.
-- **No parallel systems.** No second FSM, no second schooling implementation, no second anchor system, no behavior-tree package (AQ-44 AC #6 already forbids the last one, and the roster is fixed at 15 species).
+- **No parallel systems.** No second FSM, no second schooling implementation, no second anchor system, no behavior-tree package (AQ-44 AC #6 already forbids the last one). The standard roster is now 16 species; AQ-106's single fixed-cave service exception does not change the FSM design or justify a parallel behavior system.
 - **AQ-82 is a prerequisite, not a parallel track.** Phases 1–4 all need socket-derived anchors (AQ-82 AC #2) and permeable zones (AQ-82 AC #1/#3); Phase 1 additionally needs the pose stage (AQ-82 AC #4). The phasing in §7 sequences AQ-45 work behind the AQ-82 pieces it depends on, and says so explicitly per phase.
 
 ---

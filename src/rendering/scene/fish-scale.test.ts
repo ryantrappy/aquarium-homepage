@@ -1,9 +1,11 @@
+import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import * as THREE from 'three'
 import { describe, expect, it } from 'vitest'
 import { REEF_FISH as fishData } from '../../lib/fish'
 import {
-  FISH_RENDER_LENGTH_INCHES, MIN_FISH_CLEARANCE, MODEL_SWIM_AXIS_LENGTH, SPRITE_ARTWORK_LENGTH_FRACTION, SPRITE_PLANE_WIDTH, TANK_UNITS_PER_INCH,
+  FISH_BIOLOGICAL_REFERENCE_LENGTH_INCHES, FISH_RENDER_LENGTH_INCHES, MIN_FISH_CLEARANCE, MODEL_SWIM_AXIS_LENGTH, SNOWFLAKE_MORAY_FOREBODY_BOUNDS, SNOWFLAKE_MORAY_HEAD_BONE_BIND_POSITION, SPRITE_ARTWORK_LENGTH_FRACTION, SPRITE_PLANE_WIDTH, TANK_UNITS_PER_INCH,
   fishBodyRadiusM, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale,
 } from './fish-scale'
 
@@ -25,9 +27,17 @@ const runtimeModels: Record<string, string> = {
   'flame-angelfish': 'src/rendering/assets/splat-fish/flame-angelfish.glb',
   'copperband-butterflyfish': 'src/rendering/assets/splat-fish/copperband-butterflyfish.glb',
   'desjardins-sailfin-tang': 'src/rendering/assets/fish/download_testing_copies/zebrasoma_desjardinii-copy.glb',
+  'snowflake-moray-eel': 'src/rendering/assets/fish/snowflake-moray-eel.glb',
 }
 
-type GltfJson = { meshes: { primitives: { attributes: { POSITION: number } }[] }[]; accessors: { min?: number[]; max?: number[] }[]; nodes: { mesh?: number; skin?: number }[] }
+type GltfJson = {
+  meshes: { primitives: { attributes: { POSITION: number } }[] }[]
+  accessors: { min?: number[]; max?: number[] }[]
+  nodes: { mesh?: number; skin?: number; name?: string; translation?: number[]; rotation?: number[]; scale?: number[]; matrix?: number[]; children?: number[] }[]
+  animations?: { name: string; channels: { target: { node: number; path: string } }[] }[]
+  scenes?: { nodes: number[] }[]
+  scene?: number
+}
 function readGlbJson(path: string): GltfJson {
   const bytes = readFileSync(resolve(root, path))
   expect(bytes.readUInt32LE(0)).toBe(0x46546c67) // 'glTF'
@@ -45,6 +55,46 @@ function measureSwimAxis(path: string) {
     })
   })
   return max - min
+}
+function measureSkinnedBounds(path: string) {
+  const json = readGlbJson(path)
+  const min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity]
+  json.nodes.filter(node => node.mesh !== undefined && node.skin !== undefined).forEach(node => {
+    json.meshes[node.mesh!].primitives.forEach(primitive => {
+      const accessor = json.accessors[primitive.attributes.POSITION]
+      for (let axis = 0; axis < 3; axis++) {
+        min[axis] = Math.min(min[axis]!, accessor.min![axis]!)
+        max[axis] = Math.max(max[axis]!, accessor.max![axis]!)
+      }
+    })
+  })
+  return { min, max }
+}
+function nodePositionInScene(gltf: GltfJson, targetName: string): THREE.Vector3 | undefined {
+  const scene = gltf.scenes?.[gltf.scene ?? 0]
+  if (!scene) return undefined
+  const localMatrix = (node: GltfJson['nodes'][number]) => node.matrix
+    ? new THREE.Matrix4().fromArray(node.matrix)
+    : new THREE.Matrix4().compose(
+      new THREE.Vector3(...(node.translation ?? [0, 0, 0]) as [number, number, number]),
+      new THREE.Quaternion().fromArray(node.rotation ?? [0, 0, 0, 1]),
+      new THREE.Vector3(...(node.scale ?? [1, 1, 1]) as [number, number, number]),
+    )
+  const visit = (index: number, parent: THREE.Matrix4): THREE.Vector3 | undefined => {
+    const node = gltf.nodes[index]!
+    const world = parent.clone().multiply(localMatrix(node))
+    if (node.name === targetName) return new THREE.Vector3().setFromMatrixPosition(world)
+    for (const child of node.children ?? []) {
+      const position = visit(child, world)
+      if (position) return position
+    }
+    return undefined
+  }
+  for (const root of scene.nodes) {
+    const position = visit(root, new THREE.Matrix4())
+    if (position) return position
+  }
+  return undefined
 }
 function parseReferenceRows() {
   const doc = readFileSync(resolve(root, 'docs/fish-scale-reference.md'), 'utf8')
@@ -86,6 +136,20 @@ describe('true relative fish sizing', () => {
     expect(FISH_RENDER_LENGTH_INCHES['lyretail-anthias'] * 2.54).toBeLessThanOrEqual(Number(femaleMax![2]))
   })
 
+  it('keeps the moray biological reference separate from its partial modeled forebody', () => {
+    const moray = parseReferenceRows().get('snowflake-moray-eel')!
+    expect(FISH_BIOLOGICAL_REFERENCE_LENGTH_INCHES['snowflake-moray-eel']).toBe(24)
+    expect(FISH_RENDER_LENGTH_INCHES['snowflake-moray-eel']).toBe(9)
+    expect(moray.maximum).toContain('100 cm TL')
+    expect(moray.maximum).toContain('common length 19.7 / 50 cm TL male/unsexed')
+    expect(MODEL_SWIM_AXIS_LENGTH['snowflake-moray-eel'] * fishModelScale('snowflake-moray-eel'))
+      .toBeCloseTo(9 * TANK_UNITS_PER_INCH, 6)
+    expect(measureSkinnedBounds(runtimeModels['snowflake-moray-eel']!)).toEqual({
+      min: [SNOWFLAKE_MORAY_FOREBODY_BOUNDS.min.x, SNOWFLAKE_MORAY_FOREBODY_BOUNDS.min.y, SNOWFLAKE_MORAY_FOREBODY_BOUNDS.min.z],
+      max: [SNOWFLAKE_MORAY_FOREBODY_BOUNDS.max.x, SNOWFLAKE_MORAY_FOREBODY_BOUNDS.max.y, SNOWFLAKE_MORAY_FOREBODY_BOUNDS.max.z],
+    })
+  })
+
   it('uses swim-axis extents re-measured from the runtime GLBs', () => {
     for (const [id, path] of Object.entries(runtimeModels)) expect(MODEL_SWIM_AXIS_LENGTH[id], id).toBeCloseTo(measureSwimAxis(path), 5)
   })
@@ -106,7 +170,8 @@ describe('true relative fish sizing', () => {
   })
 
   it('has a measured alpha-width fraction for every catalog thumbnail', () => {
-    expect(Object.keys(SPRITE_ARTWORK_LENGTH_FRACTION).sort()).toEqual(fishData.map(fish => fish.id).sort())
+    const spriteEligibleFish = fishData.filter(fish => fish.id !== 'snowflake-moray-eel')
+    expect(Object.keys(SPRITE_ARTWORK_LENGTH_FRACTION).sort()).toEqual(spriteEligibleFish.map(fish => fish.id).sort())
     const provenance = JSON.parse(readFileSync(resolve(root, 'docs/fish-art-provenance.json'), 'utf8')) as {
       known_imagegen_webp_canonicals: { species_id: string; alpha_visible_width_fraction: number }[]
       new_generated_png_candidates: { species_id: string; alpha_visible_width_fraction: number }[]
@@ -115,11 +180,40 @@ describe('true relative fish sizing', () => {
       ...provenance.known_imagegen_webp_canonicals,
       ...provenance.new_generated_png_candidates,
     ].map(item => [item.species_id, item.alpha_visible_width_fraction]))
-    for (const fish of fishData) {
+    for (const fish of spriteEligibleFish) {
       expect(SPRITE_ARTWORK_LENGTH_FRACTION[fish.id], fish.id).toBeGreaterThan(0)
       expect(SPRITE_ARTWORK_LENGTH_FRACTION[fish.id], fish.id).toBeLessThanOrEqual(1)
       expect(SPRITE_ARTWORK_LENGTH_FRACTION[fish.id], fish.id).toBe(recordedFractions.get(fish.id))
     }
+  })
+
+  it('keeps the existing moray image as a picker thumbnail, never a swimming sprite fallback', () => {
+    const moray = fishData.find(fish => fish.id === 'snowflake-moray-eel')!
+    expect(moray.thumbnail).toBe('/fish/snowflake-moray-eel.webp')
+    const thumbnail = readFileSync(resolve(root, 'public/fish/snowflake-moray-eel.webp'))
+    const assetManifest = JSON.parse(readFileSync(resolve(root, 'src/rendering/assets/fish/manifest.json'), 'utf8')) as {
+      runtimeSuppliedAssets: { id: string; thumbnail: { path: string; sha256: string; bytes: number; use: string } }[]
+    }
+    const provenance = assetManifest.runtimeSuppliedAssets.find(asset => asset.id === 'snowflake-moray-eel')!.thumbnail
+    expect(thumbnail.byteLength).toBeGreaterThan(0)
+    expect(thumbnail.byteLength).toBe(provenance.bytes)
+    expect(provenance.path).toBe('public/fish/snowflake-moray-eel.webp')
+    expect(createHash('sha256').update(thumbnail).digest('hex')).toBe(provenance.sha256)
+    expect(provenance.use).toContain('never an in-tank sprite fallback')
+    expect(MODEL_SWIM_AXIS_LENGTH['snowflake-moray-eel']).toBeDefined()
+    expect(SPRITE_ARTWORK_LENGTH_FRACTION['snowflake-moray-eel']).toBeUndefined()
+  })
+
+  it('pins the supplied crevice-idle clip and measured head-bone rest position', () => {
+    const gltf = readGlbJson(runtimeModels['snowflake-moray-eel']!)
+    const headPosition = nodePositionInScene(gltf, 'head')!
+    const clip = gltf.animations!.find(animation => animation.name === 'crevice_idle')!
+    const trackedNodes = new Set(clip.channels.map(channel => gltf.nodes[channel.target.node]?.name))
+
+    expect(headPosition.x).toBeCloseTo(SNOWFLAKE_MORAY_HEAD_BONE_BIND_POSITION.x, 6)
+    expect(headPosition.y).toBeCloseTo(SNOWFLAKE_MORAY_HEAD_BONE_BIND_POSITION.y, 6)
+    expect(headPosition.z).toBeCloseTo(SNOWFLAKE_MORAY_HEAD_BONE_BIND_POSITION.z, 6)
+    expect(trackedNodes).toEqual(new Set(['probe', 'body_mid', 'neck', 'head', 'jaw']))
   })
 
   it('keeps collision envelopes covering each body and never below the previous radius', () => {

@@ -8,6 +8,22 @@ const WATER_SURFACE_DEPTH_SEGMENTS = 48
 export const WATER_TO_AIR_ETA = 1.3333333
 export const TIR_RADIANCE_PROXY_DEPTH = 0.9
 export const TIR_RADIANCE_PROXY_MAX_TRAVEL = 2.4
+export const TIR_CORAL_REAR_START_OFFSET = 3.8
+export const TIR_CORAL_REAR_END_OFFSET = 5.6
+export const TIR_CORAL_GRAZING_NOV_START = 0.52
+export const TIR_CORAL_GRAZING_NOV_END = 0.76
+
+/** Fraction of analytic/captured reef color used for a TIR reflection. */
+export function evaluateTirCoralRadianceWeight(worldZ: number, noV: number, backZ: number): number {
+  if (![worldZ, noV, backZ].every(Number.isFinite)) return 0
+  const rearMidWeight = 1 - THREE.MathUtils.smoothstep(
+    worldZ,
+    backZ + TIR_CORAL_REAR_START_OFFSET,
+    backZ + TIR_CORAL_REAR_END_OFFSET,
+  )
+  const grazingWeight = 1 - THREE.MathUtils.smoothstep(noV, TIR_CORAL_GRAZING_NOV_START, TIR_CORAL_GRAZING_NOV_END)
+  return rearMidWeight * grazingWeight
+}
 
 type WaterSurfaceLayout = ReturnType<typeof glassEnclosureLayout>
 
@@ -198,7 +214,21 @@ export function createWaterSurface(initialLayout: WaterSurfaceLayout) {
         // reflectedRay and CubeCamera faces share world axes. Render-target
         // cube samples are linear radiance; colorspace_fragment encodes once.
         vec3 capturedTirRadiance = textureCube(uRadianceProbe, reflectedRay).rgb;
-        vec3 tirBase = mix(analyticTirRadiance, capturedTirRadiance, uUseRadianceProbe);
+        vec3 tirRadianceSource = mix(analyticTirRadiance, capturedTirRadiance, uUseRadianceProbe);
+        // Reef-colored reflection is limited to grazing views of rear/mid water.
+        // Outside that region, TIR falls back to deep water. The offsets retain
+        // full weight over the overview's visible rear strip while suppressing
+        // coral color toward the front glass and at near-normal facets.
+        float rearMidCoralWeight = 1.0 - smoothstep(
+          uBackZ + ${TIR_CORAL_REAR_START_OFFSET.toFixed(2)},
+          uBackZ + ${TIR_CORAL_REAR_END_OFFSET.toFixed(2)},
+          p.y);
+        float grazingCoralWeight = 1.0 - smoothstep(
+          ${TIR_CORAL_GRAZING_NOV_START.toFixed(2)},
+          ${TIR_CORAL_GRAZING_NOV_END.toFixed(2)},
+          NoV);
+        float tirCoralWeight = rearMidCoralWeight * grazingCoralWeight;
+        vec3 tirBase = mix(vec3(0.005, 0.024, 0.068), tirRadianceSource, tirCoralWeight);
 
         // Trace the view ray back through the interface only when water-to-air
         // refraction is valid. Compare it to the actual key and rear-panel

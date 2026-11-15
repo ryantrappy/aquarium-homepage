@@ -4,15 +4,15 @@
 Category: Specification / Budgets
 Status: Active
 Authority: Active Specification
-Backlog: AQ-70.3, AQ-76
+Backlog: AQ-70.3, AQ-76, AQ-106
 Owner: @Luna
-Updated: 2026-11-14
+Updated: 2026-11-15
 Upstream: docs/requirements.md, docs/asset-contract.md, docs/rendering.md
 Downstream: src/rendering/assets/budgets.ts, src/rendering/assets/budgets.test.ts
 -->
 
 > [!NOTE]
-> **Agent Context & Authority** — Active budget policy. The2026-11-14 update corrects reachable quality recovery, while retaining every frame, asset and scene cap. Historical totals below are dated measurements; they do not certify the current rendered scene's performance.
+> **Agent Context & Authority** — Active budget policy. The 2026-11-14 update corrects reachable quality recovery, while retaining every frame, asset and scene cap. AQ-106 adds one separate supplied-fish class with a hash-scoped PNG exception; historical totals below remain dated measurements, not current frame-performance certification.
 
 Photorealism raises texture resolution, geometry density and shading cost.
 These budgets exist so each photoreal task can prove it fits — before the
@@ -20,7 +20,7 @@ renderer and asset upgrades land, not after. The machine-readable form of
 this document is `src/rendering/assets/budgets.ts`; the automated check is
 `src/rendering/assets/budgets.test.ts`, which runs as part of `npm test`
 and fails the suite when any live manifest asset exceeds its class budget
-or a non-grandfathered asset lacks compressed texture delivery.
+or a non-grandfathered asset lacks compressed texture delivery, except for the exact AQ-106 supplied hash.
 
 **Historical measurement scope (2026-11-09).** The recorded totals cover the manifest
 GLBs (6 Blender hero fish, 8 coral colonies, 2 rock islands, 13 splat-fish)
@@ -36,6 +36,7 @@ restated here — see `docs/asset-contract.md`.
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | Hero fish (Blender, 6) | 2 MiB | 25,000 | 1024 px | 4 | 768 KiB | 16 MiB |
 | Background fish (splat, 13) | 2.5 MiB | 25,000 | 1024 px | 4 | 2 MiB | 16 MiB |
+| Supplied service fish (AQ-106, 1) | 2 MiB | 25,000 | 1024 px | 4 | 768 KiB | 16 MiB |
 | Coral colony (8) | 2.5 MiB | 40,000 | 512 px | 8 | 512 KiB | 10 MiB |
 | Rock island (2) | 2.5 MiB | 30,000 | 512 px | 4 | 768 KiB | 5 MiB |
 
@@ -43,6 +44,7 @@ restated here — see `docs/asset-contract.md`.
 | --- | ---: | ---: | ---: |
 | Hero fish | 12 MiB | 150,000 | 96 MiB |
 | Background fish | 32.5 MiB | 325,000 | 208 MiB |
+| Supplied service fish | 2 MiB | 25,000 | 16 MiB |
 | Coral colony | 20 MiB | 320,000 | 80 MiB |
 | Rock island | 5 MiB | 60,000 | 10 MiB |
 
@@ -56,36 +58,55 @@ should bring it in line with its siblings. Texture dimension is the
 binding GPU constraint: a 1024 px RGBA8 map with mipmaps costs ~5.6 MiB,
 so the 16 MiB per-fish GPU cap is exactly three 1024 px maps.
 
+**AQ-106 supplied-fish class.** This does not enlarge or alter the six
+contract-validated hero candidates. The existing snowflake-moray partial
+GLB is 1,294,560 B / 6,712 triangles; its largest PNG map is 745,807 B,
+and the three maps estimate to 7,340,031 B (~7.0 MiB) GPU memory. It fits
+the separate one-asset class. The file's SHA-256 is
+`810e641d69159d4b97db42cc48e7392e1861381777984721368ed5d18a450d5d`.
+
 ## 2. Download budgets
 
 | Budget | Cap | Measured at `c38674f` |
 | --- | ---: | ---: |
 | Phase 0 blocking fish bytes (first paint) | 3.5 MiB | 2,786,052 B |
-| Total runtime fish GLBs (15 species) | 24 MiB | 19,210,848 B |
-| Total scene GLBs (fish + reef) | 40 MiB | 35,287,324 B |
-| Runtime GPU texture memory | 512 MiB | 205,520,866 B (196.0 MiB) |
+| Total runtime fish GLBs (15-species c38674f baseline) | 24 MiB | 19,210,848 B |
+| Total scene GLBs (fish + reef, c38674f baseline) | 40 MiB | 35,287,324 B |
+| Runtime GPU texture memory (c38674f baseline) | 512 MiB | 205,520,866 B (196.0 MiB) |
 
 **Rationale.** Phase 0 is the AQ-76 lazy-load contract: only the first 3
 configured species block first paint (yellow-tang, banggai-cardinalfish,
-royal-gramma in service order). The 24 MiB fish cap holds today with ~25%
-headroom and still fits the 15-species hero end state (AQ-78) at ~1.4 MB
-per fish (~21 MB). The 40 MiB scene cap holds the reef (16.08 MB) plus
-that fish end state. The 512 MiB GPU cap holds the current scene with ~160%
-headroom over the 196.0 MiB measured at the budget commit.
+royal-gramma in service order). The 24 MiB fish and 40 MiB scene caps were
+sized against the 15-species c38674f baseline; the standard roster has since
+grown to 16, and AQ-106 adds one separate supplied resident. The current
+measured run remains under the caps with the supplied-moray scenario below;
+arbitrary custom service ordering can change phase-0 bytes. The 512 MiB GPU
+cap still has substantial headroom over the 196.0 MiB baseline measurement.
+
+**AQ-106 configured-moray scenario (2026-11-15).** Including the supplied
+GLB conservatively in the current scene yields 20,505,408 B total fish
+GLBs, 36,581,884 B total scene GLBs, 212,860,897 B (~203.0 MiB) estimated
+GPU texture memory, and 367,791 static scene triangles. These remain under
+the existing 24 MiB / 40 MiB / 512 MiB caps. Phase 0 still depends on the
+first three configured service species; its combined byte total was not
+re-measured for arbitrary custom service order. This calculation includes
+one moray only; the schema rejects assigning it to multiple services.
 
 **Resolved 2026-11-14 — GPU cap raised 256 → 512 MiB (Ryan's decision).**
-Promoting all 15 species to hero fish at the current 1024 px × 3-map
-texture sizes would cost ~240 MiB of GPU texture memory for fish alone,
-before the ~63 MiB reef — ~303 MiB total, over the old 256 MiB cap. The
+Promoting the 16 standard species to hero fish at the current 1024 px ×
+3-map texture sizes would cost ~256 MiB of GPU texture memory for fish
+alone; adding ~7 MiB for the supplied moray and ~63 MiB for the reef gives
+~326 MiB, over the old 256 MiB cap. The
 tension above offered three options; the third was "raise this cap with a
 measured justification," and this is it: Ryan views the page on newer
 MacBooks, iPhone 18 Pro, and an RTX 3080 PC (10 GB VRAM), all far above
-the old cap. 512 MiB is 2× the old cap, fits the ~303 MiB hero end state
-with ~200 MiB headroom, and still catches runaway texture growth. KTX2
-delivery and 512 px maps remain available levers, not requirements.
+the old cap. 512 MiB is 2× the old cap, fits that standard-plus-moray
+scenario with ~186 MiB headroom, and still catches runaway texture growth.
+KTX2 delivery is required for new or rebuilt assets except the exact
+hash-scoped AQ-106 asset; 512 px maps remain an available lever.
 
 **Addendum 2026-11-09 — Desjardins' sailfin tang (Ryan's sailfin decision).**
-The roster grows from 15 to 16 species. The sailfin is a visual-only
+The standard roster grew from 15 to 16 species. The sailfin is a visual-only
 display fish: it is **not** a configured service species, so it loads
 lazily in the background and Phase 0 is unchanged at 2,786,052 B. Its GLB
 (`download_testing_copies/zebrasoma_desjardinii-copy.glb`, 1,488,244 B,
@@ -140,8 +161,8 @@ cap in this document changes for that work.
 
 ## 4. Texture delivery: compressed textures required for new assets
 
-**Rule.** Every photoreal asset created or rebuilt after this budget must
-ship its textures as KTX2 / Basis Universal (`image/ktx2` in the GLB),
+**Rule.** Every new or rebuilt photoreal asset must ship its textures as
+KTX2 / Basis Universal (`image/ktx2` in the GLB),
 loaded via three.js `KTX2Loader`. Geometry compression (meshopt or Draco,
 e.g. via glTF-Transform) is recommended for the same rebuilds but is not
 yet a enforced requirement — no such tooling exists in the repo today, and
@@ -158,6 +179,15 @@ They are grandfathered by id in `GRANDFATHERED_UNCOMPRESSED_ASSET_IDS`
 `c38674f` and never grows. The automated check fails any asset id that is
 not in that set unless its textures are all KTX2. That is the enforcement:
 a new asset either ships compressed textures or the suite goes red.
+
+**Hash-scoped AQ-106 exception (not grandfathering).** The supplied moray
+is a separate `runtimeSuppliedAssets` entry, not one of those 29 assets or
+the six hero candidates. Its existing three PNG maps remain byte-for-byte
+unchanged. `SUPPLIED_UNCOMPRESSED_ASSET_EXCEPTIONS` permits PNG only when
+the species ID, exact GLB SHA-256 above, and all-PNG texture inventory
+match; changed or unrelated assets still require KTX2. The manifest also
+records that author and external-source/license evidence were not provided
+in AQ-106, so this exception is not a license or Root asset approval.
 
 **Why KTX2 pays.** The same 1024 px map costs ~5.6 MiB of GPU memory as
 RGBA8 and ~1.4 MiB as BC7. The whole current scene's textures are
@@ -180,7 +210,7 @@ verifies against the manifest hashes.
 | Coral colony | 8 | 11,846,320 | 161,672 | 4,621,107 | 54.67 MiB |
 | Rock island | 2 | 4,230,156 | 49,144 | 2,713,577 | 8.00 MiB |
 | Proof fish (not in a manifest) | 2 | 7,290,148 | 10,321 | 6,910,236 | 69.33 MiB |
-| **Scene totals (loaded; hero fish excluded)** | **25** | **35,287,324** | **361,079** | **21,474,266** | **196.0 MiB** |
+| **Scene totals at c38674f (loaded; hero fish excluded)** | **25** | **35,287,324** | **361,079** | **21,474,266** | **196.0 MiB** |
 
 Per-asset maxima: hero fish 1,432,684 B / 17,226 tris; background fish
 2,360,008 B / 19,406 tris (blue-tang, the outlier); coral 2,236,728 B /
@@ -232,11 +262,12 @@ HUD readout is not a capture sidecar and is not recorded here as one.
    texture bytes and GPU memory all fail; uncompressed textures fail for
    non-grandfathered assets and pass for grandfathered ones; KTX2 assets
    pass; invalid measurements fail closed.
-2. **Enforces the live manifests**: it reads the three real manifests,
+2. **Enforces the live manifests**: it reads the three strict contract manifests and the separately recorded AQ-106 runtime-supplied asset,
    parses each GLB (triangle counts from index accessors, texture
    dimensions from PNG IHDR / JPEG SOF / KTX2 headers), and fails when
    any asset or any class total exceeds its budget, or when a
-   non-grandfathered asset lacks KTX2 delivery. It also fails on stale
+   non-grandfathered asset lacks KTX2 delivery outside the exact hash-scoped
+   exception. It also fails on stale
    grandfather entries, so the frozen list cannot silently rot.
 3. **Enforces the scene totals**: Phase 0 fish bytes, total fish GLB
    bytes, total scene GLB bytes and runtime GPU texture memory (including

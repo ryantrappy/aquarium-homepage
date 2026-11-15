@@ -13,6 +13,13 @@ const existingService: ServiceConfig = {
   fishId: 'blue-tang',
   isExample: false,
 }
+const morayService: ServiceConfig = {
+  id: 'existing-moray-service',
+  name: 'Reef monitor',
+  url: 'https://reef.example.test',
+  fishId: 'snowflake-moray-eel',
+  isExample: false,
+}
 
 function props(overrides: Partial<ComponentProps<typeof ServiceManager>> = {}) {
   return {
@@ -97,6 +104,22 @@ describe('ServiceManager fish picker', () => {
     expect(view.querySelector('.fish-picker-selected strong')?.textContent).toBe('Blue tang')
     expect(view.querySelector<HTMLImageElement>('.fish-picker-selected img')?.getAttribute('src')).toBe('/fish/blue-tang.webp')
     expect(view.querySelector<HTMLInputElement>('input[type="url"]')?.value).toBe('https://home.example.test')
+  })
+
+  it('keeps one moray assignment, restores it while editing, and exposes the service link in the modal', async () => {
+    const view = await renderManager(props({ services: [morayService] }))
+    const radio = view.querySelector<HTMLInputElement>('input[type="radio"][value="snowflake-moray-eel"]')!
+    const managedLink = view.querySelector<HTMLAnchorElement>('.managed-open')!
+
+    expect(radio.disabled).toBe(true)
+    expect(radio.closest('label')?.textContent).toContain('Already assigned to another service')
+    expect(managedLink.getAttribute('href')).toBe(morayService.url)
+    expect(managedLink.target).toBe('_blank')
+
+    await act(async () => { view.querySelector<HTMLButtonElement>('button[aria-label="Edit Reef monitor"]')!.click() })
+
+    expect(radio.disabled).toBe(false)
+    expect(radio.checked).toBe(true)
   })
 
   it('keeps the chosen species name when its thumbnail fails instead of showing another fish', async () => {

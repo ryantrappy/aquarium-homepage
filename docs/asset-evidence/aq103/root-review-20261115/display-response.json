@@ -1,0 +1,37 @@
+{
+  "roiCssPixels": [
+    600,
+    150,
+    1200,
+    600
+  ],
+  "interpretation": "Display code values, not physical radiance. Same frozen water-only diagnostic/camera; only diagnostic key direction reversed. UI excluded.",
+  "results": {
+    "key-production.png": {
+      "imageSize": [
+        1440,
+        900
+      ],
+      "samplePixels": 270000,
+      "meanEncodedRgb0To255": [
+        88.08241111111111,
+        110.72002962962964,
+        127.92196666666666
+      ],
+      "meanEncodedLuma0To255": 107.14925178666667
+    },
+    "key-reversed.png": {
+      "imageSize": [
+        1440,
+        900
+      ],
+      "samplePixels": 270000,
+      "meanEncodedRgb0To255": [
+        4.0,
+        11.0,
+        18.0
+      ],
+      "meanEncodedLuma0To255": 10.017199999999999
+    }
+  }
+}

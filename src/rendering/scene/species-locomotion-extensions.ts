@@ -417,6 +417,31 @@ export const SPECIES_LOCOMOTION_SIGNATURES: Readonly<
     opportunityTrigger: 'foraging-opportunity',
     opportunityIntervalSeconds: 7.2,
   },
+  // Total-map placeholder only: the AQ-106 scene path bypasses this gait,
+  // body-flex binding, playback cadence, and behavior-opportunity trigger.
+  'snowflake-moray-eel': {
+    speciesId: 'snowflake-moray-eel',
+    basePlaybackByState: { idle: 1, swim: 1, forage: 1, display: 1, burst: 1, retreat: 1 },
+    pulseAmplitude: 0,
+    pulseFrequencyHz: 1,
+    speedPlaybackGain: 0,
+    gait: {
+      gaitMode: 'subcarangiform',
+      fCruiseHz: 0.1,
+      fMinHz: 0.1,
+      fMaxHz: 0.1,
+      fSpeedGainHz: 0,
+      tailAmplitudeCruiseBL: 0,
+      tailAmplitudeMaxBL: 0,
+      envelopeA: 0,
+      envelopeP: 2,
+      wavelengthBL: 1,
+      gaitTransitionSpeedNorm: 1,
+      gaitTransitionWidthNorm: 0.3,
+      finRippleAmpBL: 0,
+    },
+    opportunityIntervalSeconds: 8,
+  },
 })
 
 function clampPlaybackRate(rate: number): number {
@@ -494,7 +519,8 @@ function buildSpeciesLayer(signature: SpeciesLocomotionSignature): FishExtension
 
 /**
  * Complete opt-in `FishExtensionConfig` providing species-specific locomotion cadence
- * modulation and reef opportunity triggers across all 15 supported reef species (AQ-18..AQ-32).
+ * modulation and reef opportunity triggers across the standard reef species;
+ * the AQ-106 resident has only a zero-amplitude map entry for total coverage.
  */
 export const SPECIES_LOCOMOTION_EXTENSIONS: FishExtensionConfig = Object.freeze({
   species: Object.freeze(

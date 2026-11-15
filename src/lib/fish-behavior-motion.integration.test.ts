@@ -85,11 +85,12 @@ function createTrace(instanceId: string, speciesId: string) {
 }
 
 describe('species profiles consumed by the real swimming adapter', () => {
-  it('covers all stable IDs with timed profile-backed routes and state/speed trajectories', () => {
+  it('covers mobile species with timed profile-backed routes and leaves cave residents fixed', () => {
     const created: SwimmingFish[] = []
     const traces = new Map<string, MotionTrace[]>()
     try {
       for (const speciesId of SPECIES_BEHAVIOR_IDS) {
+        if (getSpeciesBehaviorProfile(speciesId)?.habitatMode === 'crevice-resident') continue
         const result = createTrace(`coverage-${speciesId}`, speciesId)
         created.push(result.fish)
         traces.set(speciesId, result.trace)
@@ -114,7 +115,8 @@ describe('species profiles consumed by the real swimming adapter', () => {
         }
       }
 
-      expect([...traces.keys()].sort()).toEqual([...SPECIES_BEHAVIOR_IDS].sort())
+      expect([...traces.keys()].sort()).toEqual(SPECIES_BEHAVIOR_IDS
+        .filter(speciesId => getSpeciesBehaviorProfile(speciesId)?.habitatMode !== 'crevice-resident').sort())
       const selected = contrastSpecies.map((speciesId) => ({
         speciesId,
         trace: traces.get(speciesId)!,
@@ -128,6 +130,7 @@ describe('species profiles consumed by the real swimming adapter', () => {
       // target depths for contrasting species, without exact-float snapshots.
       console.info('AQ-35_PROFILE_MOTION_TRACE', JSON.stringify({
         coveredSpecies: traces.size,
+        excludedFixedResidents: SPECIES_BEHAVIOR_IDS.filter(speciesId => getSpeciesBehaviorProfile(speciesId)?.habitatMode === 'crevice-resident'),
         safeWaterFixture: true,
         traceClock: 'seconds since the first planning/integration step',
         contrasts: selected.map(({ speciesId, trace }) => ({
@@ -140,6 +143,18 @@ describe('species profiles consumed by the real swimming adapter', () => {
       }))
     } finally {
       for (const fish of created) fish.extensions.dispose()
+    }
+  })
+
+  it('does not create a free-water route for the fixed snowflake moray resident', () => {
+    const fish = createSwimmingFish('fixed-moray-profile', 'snowflake-moray-eel', start, .1)
+    try {
+      for (let i = 0; i < 30; i++) stepSwimmingFish(fish, safeWaterFixture, fixedStepSeconds)
+      expect(fish.route).toEqual([])
+      expect(fish.position).toEqual(start)
+      expect(fish.speed).toBe(0)
+    } finally {
+      fish.extensions.dispose()
     }
   })
 

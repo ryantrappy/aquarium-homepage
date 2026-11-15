@@ -1,0 +1,16 @@
+{
+  "privateRuntimeCommit": "f03b551",
+  "focusedWaterCommit": "de30135",
+  "sourceSha256": {
+    "src/rendering/scene/water-surface.ts": "1e34faf8b2ca1f9a288266bcd02ae74fd944b8ad4f87d0473d40949cb4ecacec",
+    "src/rendering/scene/water-surface.test.ts": "59f9bbb9dea25fa6bd14bba81e500ba9d6f0142eb3f42576f10814a7a4ab3d8a",
+    "src/rendering/scene/water-radiance-probe.ts": "9e4293c4c1824b871de0cdc43001fddcf56e87f806f9dae3b343458069ed404f",
+    "src/rendering/scene/water-radiance-probe.test.ts": "21535f9d1a1975c9f9ac0cf0e0ff1503cf0d02f14ecf0d6307efa12643e6440d",
+    "src/rendering/scene/glass-enclosure.ts": "6ba798f2d7f0e356a039b16440647f77da710dd5e288f09fad646ab8e8ae2c44",
+    "src/rendering/scene/surface-waves.ts": "b67a5469d1286bd4a84c988f7d730742a0f54278cbe9e06ef7490b3899fc3770",
+    "src/rendering/scene/underwater-optics.ts": "2d61b37c6c891b227be9022cdd5d5c85817f829769fa14310c2b8c25c015e7b1"
+  },
+  "privateAquariumSha256": "d7366938856c2729866e88f5a0297bbda96731912ff98360c4edec1e4e6b2463",
+  "goalVisualSha256": "c80debc88a684a7bde0e4c0a6c838a8323431445dae313a8ea226970fa7f58d2",
+  "scope": "Concurrent AQ106 aquarium work excluded from source acceptance; current water modules match private proof byte-for-byte."
+}

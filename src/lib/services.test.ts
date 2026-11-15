@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { SNOWFLAKE_MORAY_EEL_ID } from './fish'
 import { EXAMPLE_SERVICES, exportServices, loadSharedConfig, parseImportedServices, resetSharedConfig } from './services'
 import { serviceConfigSchema, serviceListSchema, serviceUrlSchema, sharedConfigSchema } from './validation'
 
@@ -29,6 +30,14 @@ describe('service configuration', () => {
 
     const duplicated = [{ ...EXAMPLE_SERVICES[0] }, { ...EXAMPLE_SERVICES[0] }]
     expect(() => serviceListSchema.parse(duplicated)).toThrow(/unique/)
+  })
+
+  it('allows the cave-resident moray for one service and rejects duplicate assignments', () => {
+    const first = { ...EXAMPLE_SERVICES[0], id: 'moray-one', fishId: SNOWFLAKE_MORAY_EEL_ID }
+    const second = { ...EXAMPLE_SERVICES[1], id: 'moray-two', fishId: SNOWFLAKE_MORAY_EEL_ID }
+
+    expect(serviceListSchema.safeParse([first]).success).toBe(true)
+    expect(() => serviceListSchema.parse([first, second])).toThrow(/only one service/)
   })
 
   it('imports legacy arrays and shared envelopes and exports the current list', () => {

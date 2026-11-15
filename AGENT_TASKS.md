@@ -4,14 +4,25 @@
 Category: Governance / Checkpoint
 Status: Active
 Authority: Binding Checkpoint; Backlog controls acceptance
-Backlog: AQ-44, AQ-49, AQ-54, AQ-59, AQ-70.2, AQ-70.13, AQ-74, AQ-86, AQ-104, AQ-105
+Backlog: AQ-44, AQ-49, AQ-54, AQ-59, AQ-70.2, AQ-70.13, AQ-74, AQ-86, AQ-104, AQ-105, AQ-106
 Owner: @root
 Updated: 2026-11-15
 Upstream: AGENTS.md, agent_scratch.md, docs/requirements.md
 Downstream: Current implementation and review work
 -->
 
-Root verified this checkpoint against the current checkout. The showcase remains incomplete: finish the fixed 20-task scope below and make the living aquarium resemble the supplied reference. Other unfinished Backlog work is reserved for future versions. Passing functional tests does not accept final art.
+Root verified prior Root-checkpoint facts against the current checkout. The showcase remains incomplete: finish the fixed 20-task scope and make the living aquarium resemble the supplied reference. Other user-directed Backlog work remains separately tracked; the Junie handoff below awaits Root verification, and passing functional tests does not accept final art.
+
+## Junie implementation handoff — AQ-106 (2026-11-15; Root verification pending)
+
+AQ-106 is a separate user-directed task, not an addition to the fixed 20-task showcase count. Backlog records AC 1–8 and DoD 2 checked; AC 9 and DoD 1/3 remain open for Root visual/model review. The task remains In Progress and must not be marked Done until Root reviews the result.
+
+- The pre-existing supplied snowflake-moray GLB was not edited in this session: SHA-256 `810e641d69159d4b97db42cc48e7392e1861381777984721368ed5d18a450d5d`, 1,294,560 B, 6,712 triangles. Its PNG maps, partial rear-to-head bounds, `crevice_idle` clip, and named head bone are recorded in `src/rendering/assets/fish/manifest.json`; creator/external-source license evidence remains unknown and requires Root provenance review.
+- The eel is catalog-selectable for one service only, fixed to a layout-derived bottom-right right-island cave. The exposed head-to-probe capsule, mounted zoanthid, sand margin, and default-camera ray are covered by `moray-residence.test.ts`, `reef-mesh-navigation.test.ts`, and `aquarium-lifecycle.test.ts`; the embedded rear is intentionally occluded and not claimed collision-free outside the cave. Narrow/missing collider, missing model, and invalid duplicate service inputs fail closed while links remain.
+- `npm run typecheck` passes, including all 17 script checks. The focused AQ-106 suites pass 218 tests across 14 files. The final production build succeeds with the existing >500 kB aquarium-chunk warning; Nitro also writes `.output`. The final full suite passes all 954 tests across 79 files with `--maxWorkers=1`; an earlier parallel run's two AQ-87 depth-spread failures did not reproduce, and no assertion was weakened.
+- Local Vite smoke on `127.0.0.1:4175` returned HTTP 200 for `/`, the moray GLB (1,294,560 B), and picker WebP (11,530 B); existing preview on `4173` was left untouched. This is not a browser or visual review.
+- No 1440×900 browser review, Root visual acceptance, deployment, or commit has occurred. Root must verify this handoff against the checkout and preserve the pre-existing modified moray GLB, concurrent AQ-70.12 files, and water-surface work; they are not owned by this task's file list.
+- Final `git status` shows no staged files. `fish-spawn.ts` and `fish-spawn.test.ts` changes are unstaged and included in AQ-106's file list; concurrent modified AQ-70.12/water-surface files and untracked AQ-76/AQ-103 evidence directories remain outside this task. Do not blanket-stage or claim them for AQ-106.
 
 ## Current showcase scope — 2026-11-14
 

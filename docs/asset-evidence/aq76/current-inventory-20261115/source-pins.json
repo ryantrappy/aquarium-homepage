@@ -1,0 +1,83 @@
+{
+  "sourceCommit": "1f6e1f49e210b7e612c17cefbbedd8b7b4c2548f",
+  "projectFiles": {
+    "src/rendering/scene/aquarium.ts": {
+      "gitBlob": "b9796ae729dd2905f174fb5741cb580a94baa8fc",
+      "sha256": "d7366938856c2729866e88f5a0297bbda96731912ff98360c4edec1e4e6b2463"
+    },
+    "src/rendering/scene/environment-map.ts": {
+      "gitBlob": "c83ce771a9cb44e07794b930f4562759cd684310",
+      "sha256": "dd62241adf422e8bc9d0f66469e895248cf0b5cefc95712db546f932c7a80053"
+    },
+    "src/rendering/scene/water-radiance-probe.ts": {
+      "gitBlob": "521dd8af4501ebc2698c22f36faf07a1e93ddab8",
+      "sha256": "9e4293c4c1824b871de0cdc43001fddcf56e87f806f9dae3b343458069ed404f"
+    },
+    "src/rendering/scene/runtime-quality.ts": {
+      "gitBlob": "d7eaf5215f36a1c8f691553f2525911b3fef5d6b",
+      "sha256": "745823837f3e02150723c5e92884c677e2486fdd5c0871b6c63ac46a574992e0"
+    },
+    "src/rendering/scene/lookdev.ts": {
+      "gitBlob": "be4a388674120705a312980a1fc758530fb15e6a",
+      "sha256": "edac4eb80a73ea1772d3a1e747412e305771d0aaa2c8ad56adc895613f1eb05a"
+    },
+    "src/rendering/assets/budgets.ts": {
+      "gitBlob": "1e624e66a0f119552eb073f2a23349798ad85a96",
+      "sha256": "4bf5e511928c965b174d2b22e00db25ed8d4d68308ed0dd55238aec97617e036"
+    },
+    "src/rendering/assets/budgets.test.ts": {
+      "gitBlob": "7f5ac383178b07c88d99741266fa03f153abbfde",
+      "sha256": "51bfdd99fca00ef91faa0cf0398fec31b329e4a0c3cb5ec1383f680fa2a924ab"
+    },
+    "src/rendering/assets/splat-fish/manifest.json": {
+      "gitBlob": "eac089241c0aabe0f63a8a1109419707603a9faa",
+      "sha256": "4b936f3fad179d7a4b9a5d15ef054d3f25f3527d860396c9f67b8342573fbe58"
+    },
+    "src/rendering/assets/corals/manifest.json": {
+      "gitBlob": "bdb919175fd8b586f1f22b6527976331a87b9248",
+      "sha256": "bddd0a5a3b8c2cf2311128d73b6d64fbc56bc5757465a96bbf124ff8d4b6095a"
+    },
+    "src/rendering/assets/fish/download_testing/zebrasoma_desjardinii.glb": {
+      "gitBlob": "707475abdfd4cb35bd63c1c5425b12b56e82575f",
+      "sha256": "2366ba739ef50a18c21021794d6ee5e86483ce65e818b723d9f690a0ac97790a"
+    },
+    "src/rendering/assets/fish/download_testing_copies/zebrasoma_desjardinii-copy.glb": {
+      "gitBlob": "a97bc9eeb8f01b3ffd31ff4baaa5b391f969816d",
+      "sha256": "9873308b1b179af6ee18a2029152b5f3de8886e7f4e17725bc30ed781ac75419"
+    },
+    "docs/rendering.md": {
+      "gitBlob": "75b06d8c0d70bd75f11c658515ff368a9bcf8eda",
+      "sha256": "64100a6ef013308168d0ebd8b57d06ccfd01e879f0291a521dc81fcfb35f6069"
+    },
+    "docs/photorealism-budgets.md": {
+      "gitBlob": "313003bda6d457e75840fb76301b373b33931eb2",
+      "sha256": "e2ba7b826bf2d7da4d98a1d2a933848c3285ecab3b1b8af449a5c5c7a73126d0"
+    },
+    "package-lock.json": {
+      "gitBlob": "ff0299fd0c38e6ccecf88cd1b056abbf38626f14",
+      "sha256": "cadc39a053889cf1a77eebf9b9895c7248197cfdbaa19c6179de8076c1f95435"
+    }
+  },
+  "installedDependency": {
+    "path": "node_modules/three/src/renderers/common/extras/PMREMGenerator.js",
+    "version": "0.187.0",
+    "sha256": "89359213a174785facfd27d40f27d09fea9d16969bdbd555f7f6463ee66621aa",
+    "tracked": false,
+    "packageLockSha256": "cadc39a053889cf1a77eebf9b9895c7248197cfdbaa19c6179de8076c1f95435"
+  },
+  "optionalSailfinProvenance": {
+    "sourcePath": "src/rendering/assets/fish/download_testing/zebrasoma_desjardinii.glb",
+    "sourceGitBlob": "707475abdfd4cb35bd63c1c5425b12b56e82575f",
+    "sourceSha256": "2366ba739ef50a18c21021794d6ee5e86483ce65e818b723d9f690a0ac97790a",
+    "gltfAssetExtras": {
+      "author": "ernielo18 (https://sketchfab.com/ernielo18)",
+      "license": "CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)",
+      "source": "https://sketchfab.com/3d-models/zebrasoma-desjardinii-61ead32801064cf583711dbfcf88af88",
+      "title": "Zebrasoma desjardinii"
+    },
+    "runtimeCopyPath": "src/rendering/assets/fish/download_testing_copies/zebrasoma_desjardinii-copy.glb",
+    "runtimeCopyGitBlob": "a97bc9eeb8f01b3ffd31ff4baaa5b391f969816d",
+    "runtimeCopySha256": "9873308b1b179af6ee18a2029152b5f3de8886e7f4e17725bc30ed781ac75419",
+    "interpretation": "The original source GLB embeds the named attribution and CC-BY-NC-4.0 license. The runtime copy has no equivalent source attribution block; aquarium.ts explicitly identifies it as derived from that original and flags it as restricted. Excluded from standard potential-runtime totals."
+  }
+}

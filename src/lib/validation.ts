@@ -25,11 +25,17 @@ export const serviceConfigSchema = z.object({
 
 export const serviceListSchema = z.array(serviceConfigSchema).superRefine((services, context) => {
   const seen = new Set<string>()
+  const uniqueFishServices = new Set<string>()
   services.forEach((service, index) => {
     if (seen.has(service.id)) {
       context.addIssue({ code: 'custom', path: [index, 'id'], message: 'Service IDs must be unique.' })
     }
     seen.add(service.id)
+    const species = REEF_FISH.find((fish) => fish.id === service.fishId)
+    if (species?.uniqueService && uniqueFishServices.has(species.id)) {
+      context.addIssue({ code: 'custom', path: [index, 'fishId'], message: 'A cave-resident species can be assigned to only one service.' })
+    }
+    if (species?.uniqueService) uniqueFishServices.add(species.id)
   })
 })
 

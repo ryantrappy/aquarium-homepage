@@ -13,6 +13,7 @@ import {
   DOWNLOAD_BUDGETS,
   FRAME_TIME_BUDGET,
   GRANDFATHERED_UNCOMPRESSED_ASSET_IDS,
+  SUPPLIED_UNCOMPRESSED_ASSET_EXCEPTIONS,
   estimateGpuTextureBytes,
   evaluateAssetBudget,
   evaluateSceneBudgets,
@@ -117,6 +118,27 @@ describe('evaluateAssetBudget', () => {
 
   it('passes a non-grandfathered asset whose textures are all KTX2', () => {
     expect(evaluateAssetBudget({ ...base, grandfathered: false, textures: [ktx2Texture(), ktx2Texture()] })).toEqual([])
+  })
+
+  it('scopes the supplied moray PNG exception to its exact GLB hash', () => {
+    const moray = {
+      ...base,
+      id: 'snowflake-moray-eel',
+      assetClass: 'supplied-fish' as const,
+      fileBytes: 1_294_560,
+      triangles: 6_712,
+      sha256: SUPPLIED_UNCOMPRESSED_ASSET_EXCEPTIONS['snowflake-moray-eel']!.sha256,
+      grandfathered: false,
+      textures: [
+        pngTexture({ widthPx: 512, heightPx: 512, bytes: 250_476 }),
+        pngTexture({ widthPx: 1024, heightPx: 1024, bytes: 745_807 }),
+        pngTexture({ widthPx: 256, heightPx: 256, bytes: 44_359 }),
+      ],
+    }
+    expect(evaluateAssetBudget(moray)).toEqual([])
+    expect(evaluateAssetBudget({ ...moray, sha256: '0'.repeat(64) }).map((issue) => issue.path))
+      .toEqual(expect.arrayContaining(['snowflake-moray-eel.sha256', 'snowflake-moray-eel.textures']))
+    expect(evaluateAssetBudget({ ...moray, sha256: '0'.repeat(64), textures: [ktx2Texture()] })).toEqual([])
   })
 
   it('passes a grandfathered asset with uncompressed textures', () => {
@@ -247,7 +269,17 @@ interface LiveAsset {
   fileBytes: number
   triangles: number
   textures: BudgetTexture[]
+  sha256: string
   grandfathered: boolean
+}
+type RuntimeSuppliedAssetManifestEntry = {
+  id: string
+  path: string
+  assetClass: AssetBudgetClass
+  bytes: number
+  sha256: string
+  triangles: number
+  textures: BudgetTexture[]
 }
 
 function loadLiveAssets(): LiveAsset[] {
@@ -262,7 +294,10 @@ function loadLiveAssets(): LiveAsset[] {
   ]
   const assets: LiveAsset[] = []
   for (const spec of specs) {
-    const manifest = JSON.parse(fs.readFileSync(path.join(ASSETS_DIR, spec.manifest), 'utf8'))
+    const manifest = JSON.parse(fs.readFileSync(path.join(ASSETS_DIR, spec.manifest), 'utf8')) as {
+      assets: { id: string; file: string; bytes: number; sha256: string; kind: string }[]
+      runtimeSuppliedAssets?: RuntimeSuppliedAssetManifestEntry[]
+    }
     for (const entry of manifest.assets) {
       const glbPath = path.join(ASSETS_DIR, spec.dir, entry.file)
       const glbBytes = fs.readFileSync(glbPath)
@@ -275,6 +310,26 @@ function loadLiveAssets(): LiveAsset[] {
         fileBytes: glbBytes.length,
         triangles: glbTriangles(doc),
         textures: glbTextures(doc, binary),
+        sha256: sha256Hex(glbBytes),
+        grandfathered: GRANDFATHERED_UNCOMPRESSED_ASSET_IDS.has(entry.id),
+      })
+    }
+    for (const entry of manifest.runtimeSuppliedAssets ?? []) {
+      const glbPath = path.join(REPO_ROOT, entry.path)
+      const glbBytes = fs.readFileSync(glbPath)
+      expect(glbBytes.length, entry.id).toBe(entry.bytes)
+      expect(sha256Hex(glbBytes), entry.id).toBe(entry.sha256)
+      const { doc, binary } = parseGlb(glbBytes)
+      const textures = glbTextures(doc, binary)
+      expect(glbTriangles(doc), `${entry.id} triangles`).toBe(entry.triangles)
+      expect(textures, `${entry.id} embedded PNG inventory`).toEqual(entry.textures.map(({ mimeType, widthPx, heightPx, bytes }) => ({ mimeType, widthPx, heightPx, bytes })))
+      assets.push({
+        id: entry.id,
+        assetClass: entry.assetClass,
+        fileBytes: glbBytes.length,
+        triangles: glbTriangles(doc),
+        textures,
+        sha256: sha256Hex(glbBytes),
         grandfathered: GRANDFATHERED_UNCOMPRESSED_ASSET_IDS.has(entry.id),
       })
     }
@@ -285,10 +340,10 @@ function loadLiveAssets(): LiveAsset[] {
 describe('live manifest budgets (AQ-70.3 AC #2)', () => {
   it('every manifest asset fits its class budget and the compressed-delivery rule', () => {
     const assets = loadLiveAssets()
-    // Roster shape the budgets were sized from: 6 hero fish, 10 reef
-    // assets (8 coral + 2 rock), 13 background fish. A roster change
-    // must re-derive the budgets in docs/photorealism-budgets.md.
+    // Roster shape: 6 contract-validated hero candidates, one scoped
+    // supplied fish, 10 reef assets (8 coral + 2 rock), and 13 background fish.
     expect(assets.filter((a) => a.assetClass === 'hero-fish')).toHaveLength(6)
+    expect(assets.filter((a) => a.assetClass === 'supplied-fish')).toHaveLength(1)
     expect(assets.filter((a) => a.assetClass === 'coral')).toHaveLength(8)
     expect(assets.filter((a) => a.assetClass === 'rock')).toHaveLength(2)
     expect(assets.filter((a) => a.assetClass === 'background-fish')).toHaveLength(13)
@@ -297,7 +352,7 @@ describe('live manifest budgets (AQ-70.3 AC #2)', () => {
     expect(violations).toEqual([])
 
     // Class totals fit too (not just each asset in isolation).
-    for (const assetClass of ['hero-fish', 'background-fish', 'coral', 'rock'] as const) {
+    for (const assetClass of ['hero-fish', 'background-fish', 'supplied-fish', 'coral', 'rock'] as const) {
       const members = assets.filter((a) => a.assetClass === assetClass)
       const budget = ASSET_CLASS_BUDGETS[assetClass]
       const fileTotal = members.reduce((sum, a) => sum + a.fileBytes, 0)
@@ -316,6 +371,10 @@ describe('live manifest budgets (AQ-70.3 AC #2)', () => {
     for (const id of GRANDFATHERED_UNCOMPRESSED_ASSET_IDS) {
       expect(liveIds.has(id), `grandfathered id ${id} is not in any live manifest`).toBe(true)
     }
+    const moray = assets.find((asset) => asset.id === 'snowflake-moray-eel')!
+    expect(moray.grandfathered).toBe(false)
+    expect(moray.sha256).toBe(SUPPLIED_UNCOMPRESSED_ASSET_EXCEPTIONS['snowflake-moray-eel']?.sha256)
+    expect(moray.textures.map((texture) => texture.mimeType)).toEqual(['image/png', 'image/png', 'image/png'])
   })
 
   it('the loaded scene fits the download and GPU totals', () => {
@@ -329,6 +388,9 @@ describe('live manifest budgets (AQ-70.3 AC #2)', () => {
       .filter((a) => a.assetClass === 'background-fish')
       .reduce((sum, a) => sum + a.fileBytes, 0)
     const splatGpu = gpuOf(assets.filter((a) => a.assetClass === 'background-fish'))
+    const suppliedFish = assets.filter((a) => a.assetClass === 'supplied-fish')
+    const suppliedFishBytes = suppliedFish.reduce((sum, a) => sum + a.fileBytes, 0)
+    const suppliedFishGpu = gpuOf(suppliedFish)
     const reefGpu = gpuOf(assets.filter((a) => a.assetClass === 'coral' || a.assetClass === 'rock'))
 
     // The two licensed proof fish are not in any manifest; they load at
@@ -354,9 +416,9 @@ describe('live manifest budgets (AQ-70.3 AC #2)', () => {
 
     const violations = evaluateSceneBudgets({
       phase0FishBytes: phase0,
-      totalFishGlbBytes: splatBytes + proofBytes,
-      totalSceneGlbBytes: splatBytes + proofBytes + reefBytes,
-      runtimeGpuTextureBytes: splatGpu + proofGpu + reefGpu,
+      totalFishGlbBytes: splatBytes + proofBytes + suppliedFishBytes,
+      totalSceneGlbBytes: splatBytes + proofBytes + suppliedFishBytes + reefBytes,
+      runtimeGpuTextureBytes: splatGpu + proofGpu + suppliedFishGpu + reefGpu,
     })
     expect(violations).toEqual([])
   })

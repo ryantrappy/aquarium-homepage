@@ -102,7 +102,7 @@ describe('Lighthill travelling-wave body flex (AQ-12 / AQ-49)', () => {
     expect(idle.tailAmplitudeBL).toBeGreaterThan(0)
   })
 
-  it('maps all 15 species to a gait and leaves balistiform unwired', () => {
+  it('maps the full catalog to finite gaits and leaves the fixed moray neutral', () => {
     expect(Object.keys(SPECIES_LOCOMOTION_SIGNATURES).sort()).toEqual([...SPECIES_BEHAVIOR_IDS].sort())
     for (const speciesId of SPECIES_BEHAVIOR_IDS) {
       const gait = SPECIES_LOCOMOTION_SIGNATURES[speciesId].gait
@@ -117,6 +117,8 @@ describe('Lighthill travelling-wave body flex (AQ-12 / AQ-49)', () => {
       expect(gait.envelopeA).toBeGreaterThanOrEqual(0)
       expect(gait.envelopeA).toBeLessThanOrEqual(1)
     }
+    expect(SPECIES_LOCOMOTION_SIGNATURES['snowflake-moray-eel'].gait.tailAmplitudeCruiseBL).toBe(0)
+    expect(SPECIES_LOCOMOTION_SIGNATURES['snowflake-moray-eel'].gait.tailAmplitudeMaxBL).toBe(0)
     expect(BALISTIFORM_FLEX_GAIT.gaitMode).toBe('balistiform')
     expect(BALISTIFORM_FLEX_GAIT.tailAmplitudeCruiseBL).toBe(0)
     expect(Object.values(SPECIES_LOCOMOTION_SIGNATURES).some(s => s.gait === BALISTIFORM_FLEX_GAIT)).toBe(false)

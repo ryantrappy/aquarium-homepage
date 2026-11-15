@@ -45,6 +45,7 @@ function readableError(error: unknown) {
     const row = typeof issue?.path[0] === 'number' ? `Service ${Number(issue.path[0]) + 1}: ` : ''
     const message = issue?.message
     if (message === 'Service IDs must be unique.') return `${row}Each service needs a unique id.`
+    if (message === 'A cave-resident species can be assigned to only one service.') return `${row}This species has one cave residence and can serve only one service.`
     if (field === 'name') return `${row}Add a service name of 80 characters or fewer.`
     if (field === 'url') return `${row}Enter a complete http:// or https:// address without a username or password.`
     if (field === 'fishId') return `${row}Choose a fish from the catalog.`
@@ -226,7 +227,7 @@ export function ServiceManager({
             return <article className="managed-service" key={service.id}>
               <span className={`managed-fish managed-${service.fishId}`}><img src={fish?.thumbnail} alt="" /></span>
               <div className="managed-details"><strong>{service.name}{service.isExample && <small>example</small>}</strong><span>{service.url}</span><em>{fish?.commonName}</em></div>
-              <div className="row-actions"><button type="button" onClick={() => beginEdit(service)} disabled={formDisabled} aria-label={`Edit ${service.name}`}>Edit</button><button ref={(element) => { if (element) removeButtonRefs.current.set(service.id, element); else removeButtonRefs.current.delete(service.id) }} type="button" className="remove-action" onClick={() => setConfirmDelete(service.id)} disabled={formDisabled} aria-label={`Remove ${service.name}`}>Remove</button></div>
+              <div className="row-actions"><a className="managed-open" href={service.url} target="_blank" rel="noreferrer" aria-label={`Open ${service.name} in a new tab`}>Open</a><button type="button" onClick={() => beginEdit(service)} disabled={formDisabled} aria-label={`Edit ${service.name}`}>Edit</button><button ref={(element) => { if (element) removeButtonRefs.current.set(service.id, element); else removeButtonRefs.current.delete(service.id) }} type="button" className="remove-action" onClick={() => setConfirmDelete(service.id)} disabled={formDisabled} aria-label={`Remove ${service.name}`}>Remove</button></div>
               {confirmDelete === service.id && <div className="delete-confirm"><span>Remove {service.name}?</span><button type="button" onClick={() => { void removeService(service.id) }} disabled={busy !== null}>{busy === 'delete' ? 'Removing…' : 'Remove'}</button><button type="button" onClick={() => { setConfirmDelete(null); scheduleFocus(() => removeButtonRefs.current.get(service.id) ?? null) }} disabled={busy !== null}>Keep</button></div>}
             </article>
           })}
@@ -253,8 +254,10 @@ export function ServiceManager({
               <span><strong>{selectedFish.commonName}</strong><em>{selectedFish.scientificName}</em></span>
             </div>
             <div className="fish-picker-options">
-              {REEF_FISH.map((fish) => <label className={`fish-picker-option${draft.fishId === fish.id ? ' is-selected' : ''}`} key={fish.id}>
-                <input type="radio" name="service-fish" value={fish.id} checked={draft.fishId === fish.id} required onChange={() => { setDraft({ ...draft, fishId: fish.id }); setFormError('') }} />
+              {REEF_FISH.map((fish) => {
+                const assignedElsewhere = Boolean(fish.uniqueService && services.some(service => service.id !== editingId && service.fishId === fish.id))
+                return <label className={`fish-picker-option${draft.fishId === fish.id ? ' is-selected' : ''}${assignedElsewhere ? ' is-unavailable' : ''}`} key={fish.id}>
+                <input type="radio" name="service-fish" value={fish.id} checked={draft.fishId === fish.id} required disabled={assignedElsewhere} onChange={() => { setDraft({ ...draft, fishId: fish.id }); setFormError('') }} />
                 <img
                   src={fish.thumbnail}
                   alt=""
@@ -264,8 +267,8 @@ export function ServiceManager({
                   }}
                   onLoad={(event) => { event.currentTarget.hidden = false }}
                 />
-                <span><strong>{fish.commonName}</strong><em>{fish.scientificName}</em></span>
-              </label>)}
+                <span><strong>{fish.commonName}</strong><em>{fish.scientificName}</em>{assignedElsewhere && <small>Already assigned to another service</small>}</span>
+              </label>})}
             </div>
           </fieldset>
           <div className="form-actions"><button type="button" className="quiet-button" onClick={() => { resetForm(); focusNameInput() }} disabled={busy !== null}>{editingId ? 'Cancel edit' : 'Clear'}</button><button className="save-button" type="submit" disabled={formDisabled}>{busy === 'save' ? 'Saving…' : editingId ? 'Save changes' : 'Add to the reef'}</button></div>

@@ -4,7 +4,7 @@
 Category: Governance / Hub
 Status: Canonical / Active
 Authority: Binding Single Source of Documentation Truth
-Backlog: AQ-61, AQ-63, AQ-65, AQ-66, AQ-64, AQ-53, AQ-60, AQ-42
+Backlog: AQ-61, AQ-63, AQ-65, AQ-66, AQ-64, AQ-53, AQ-60, AQ-42, AQ-106
 Owner: @documentation
 Updated: 2026-11-15
 Upstream: AGENTS.md, AGENT_TASKS.md, docs/requirements.md, docs/framework/DOCUMENTATION_FRAMEWORK.md
@@ -59,7 +59,7 @@ Directory of project documentation and verification evidence:
 |---|---|---|---|
 | [Showcase v1 finalization](showcase-v1-finalization.md) | **Active** | Binding user scope; Backlog acceptance | Fixed 20-task showcase scope: 19 existing In Progress tasks plus AQ-108; Root review and rolling PR delivery. |
 | [`requirements.md`](requirements.md) | **Canonical** | Binding | Core product vision: photorealistic reef tank, realistic swimming, homelab links, dual viewports. |
-| [`design-principles.md`](design-principles.md) | **Canonical** | Binding | Aesthetic guidelines: aquarium first, unobtrusive UI, $0 CC0/CC-BY 4.0 asset budget, no live health claims. |
+| [`design-principles.md`](design-principles.md) | **Canonical** | Binding | Aquarium-first aesthetic, unobtrusive UI, $0 asset policy, and the scoped AQ-106 cave resident. |
 | [`framework/DOCUMENTATION_FRAMEWORK.md`](framework/DOCUMENTATION_FRAMEWORK.md) | **Canonical** | Binding | Mandatory documentation specification, authority hierarchy, header schema, and agent protocols. |
 | [`framework/TEMPLATE.md`](framework/TEMPLATE.md) | **Active** | Operational | Drop-in template for creating new compliant agent documentation. |
 
@@ -69,13 +69,13 @@ Directory of project documentation and verification evidence:
 | Document | Status | Authority | Backlog | Scope / Purpose |
 |---|---|---|---|---|
 | [`asset-contract.md`](asset-contract.md) | **Canonical** | Binding | `AQ-40` | Canonical coordinate convention (+Y up, +Z forward, fish head -X), meter scale, `COLOR_0` raw linear masks. |
-| [Performance and delivery budgets](photorealism-budgets.md) | **Active** | Binding | `AQ-70.3`, `AQ-76` | Frame/asset/scene caps and distinct quality-recovery observation policy; historical totals are dated measurements. |
+| [Performance and delivery budgets](photorealism-budgets.md) | **Active** | Binding | `AQ-70.3`, `AQ-76`, `AQ-106` | Frame/asset/scene caps, a hash-scoped supplied-moray PNG exception, and distinct quality-recovery policy; historical totals are dated measurements. |
 | [`modular-coral-and-live-rock-spec.md`](modular-coral-and-live-rock-spec.md) | **Canonical** | Binding | `AQ-14.3`, `AQ-42` | Technical specification for 8 modular coral archetypes and 2 live-rock foundations (left cave, right shelf). |
 | [`behavior-runtime-contract.md`](behavior-runtime-contract.md) | **Canonical** | Binding | `AQ-44` | Engine-independent behavior state machine (swim, hover, dart, feed, rest, school, avoid, burst). |
 | [`habitat-navigation-core-contract.md`](habitat-navigation-core-contract.md) | **Canonical** | Binding | `AQ-45` | Navigation contracts: spatial zones (open water, crevice, cave, substrate), waypoint steering, boundary clamps. |
-| [`fish-scale-reference.md`](fish-scale-reference.md) | **Canonical** | Binding | `AQ-60` | Adult biological lengths and render scales for all 16 roster species (parsed by `fish-scale.test.ts`). |
-| [`fish-behavior-design.md`](fish-behavior-design.md) | **Canonical** | Binding | `AQ-35` | Biological behavior profiles, swimming speed ranges, schooling affinities, and depth bounds for all species. |
-| [`reef-fish-roster.md`](reef-fish-roster.md) | **Canonical** | Binding | `AQ-35` | Biological taxonomic index of all 15 supported species, morphological archetypes, and color briefs. |
+| [`fish-scale-reference.md`](fish-scale-reference.md) | **Canonical** | Binding | `AQ-60`, `AQ-106` | Biological references and render targets for 16 standard reef fish plus the AQ-106 partial moray service species (parsed by `fish-scale.test.ts`). |
+| [`fish-behavior-design.md`](fish-behavior-design.md) | **Canonical** | Binding | `AQ-35`, `AQ-106` | Standard species behavior profiles plus the constrained fixed-cave moray service exception. |
+| [`reef-fish-roster.md`](reef-fish-roster.md) | **Canonical** | Binding | `AQ-35`, `AQ-106` | Biological index of the 16 standard reef-fish targets plus the AQ-106 fixed-cave moray service extension. |
 
 ---
 
@@ -138,7 +138,7 @@ Directory of project documentation and verification evidence:
 | [`accessibility-audit.md`](accessibility-audit.md) | **Active** | Evidentiary | `AQ-6`, `AQ-50` | WCAG / keyboard navigation audit, focus trapping, reduced motion behavior, dual viewport checks. |
 | [`service-mapping-review.md`](service-mapping-review.md) | **Complete** | Evidentiary | `AQ-8`, `AQ-56` | Verified starter homelab roster: Komodo, WatchMyBirds, Paperless, Home Assistant, Ombi. |
 | [`asset-pipeline-proof.md`](asset-pipeline-proof.md) | **Active** | Evidentiary | `AQ-40` | Material baking, export validation, and technical pipeline proof records. |
-| [`fish-assets.md`](fish-assets.md) | **Active** | Evidentiary | `AQ-40` | Static 2D thumbnail provenance and recognition cutout assets inventory. |
+| [`fish-assets.md`](fish-assets.md) | **Active** | Evidentiary | `AQ-40`, `AQ-106` | Thumbnail provenance, recognition art, and the separately recorded picker-only moray image. |
 | [`fish-art-provenance.json`](fish-art-provenance.json) | **Canonical** | Fixture | `AQ-40` | Machine-readable SHA-256 hashes and provenance records for 2D cutout art. |
 | [`asset-evidence/fish-rig-inventory.md`](asset-evidence/fish-rig-inventory.md) | **Active** | Evidentiary | `AQ-49.1` | Exact bone names and rotation channel inventory for 8 candidate fish rigs (174 total channels). |
 | [`asset-evidence/fish-rig-inventory.json`](asset-evidence/fish-rig-inventory.json) | **Canonical** | Fixture | `AQ-49.1` | Machine-readable JSON inventory of rig tracks and joint hierarchies. |

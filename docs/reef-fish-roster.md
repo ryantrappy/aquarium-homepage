@@ -4,9 +4,9 @@
 Category: Specification / Biological Roster
 Status: Canonical / Active
 Authority: Binding Biological Roster Specification
-Backlog: AQ-35, AQ-18, AQ-19, AQ-20, AQ-21, AQ-22, AQ-23, AQ-24, AQ-25, AQ-26, AQ-27, AQ-28, AQ-29, AQ-30, AQ-31, AQ-32
+Backlog: AQ-35, AQ-18, AQ-19, AQ-20, AQ-21, AQ-22, AQ-23, AQ-24, AQ-25, AQ-26, AQ-27, AQ-28, AQ-29, AQ-30, AQ-31, AQ-32, AQ-106
 Owner: @behavior_profiles
-Updated: 2026-11-05
+Updated: 2026-11-15
 Upstream: docs/requirements.md, docs/fish-behavior-design.md
 Downstream: docs/fish-scale-reference.md, src/lib/fish.ts, src/lib/fish-behavior.ts
 -->
@@ -17,9 +17,9 @@ Downstream: docs/fish-scale-reference.md, src/lib/fish.ts, src/lib/fish-behavior
 > - **Status**: Canonical / Active
 > - **Authority**: Binding Specification
 > - **Backlog Reference**: `AQ-35`
-> - **Summary**: Target 16-species biological catalog, appearance briefs, natural habitat profiles, and species-specific animation inferences.
+> - **Summary**: Standard 16-species reef-fish target plus the AQ-106 snowflake moray service extension, with appearance, habitat, and animation briefs.
 
-This is the supported target roster for the reef aquarium, not a statement that all fish are implemented. The app currently has five catalog entries; the first five IDs below preserve those existing IDs. Treat each species as its own future animation task. Do not consider a still image sliding through the scene to be a finished fish animation.
+The 16 standard reef fish remain the baseline roster; AQ-106 adds the supplied snowflake moray as a selectable service species with a deliberately fixed, partial-model cave presentation. It is not ambient and does not change the standard reef-fish count. Treat each species as its own animation task. Do not consider a still image sliding through the scene to be a finished fish animation.
 
 ## How to use these briefs
 
@@ -43,6 +43,7 @@ The habitat and appearance notes summarize the linked biological references. The
 | `flame-angelfish` | Flame angelfish (*Centropyge loricula*), brilliant orange-red body with black bars and blue-violet edging on rear dorsal / anal fins. [USGS](https://nas.er.usgs.gov/queries/FactSheet.aspx?SpeciesID=2591) | Sheltered coral area on a seaward or lagoonal reef, with nearby rock or coral structure. [USGS](https://nas.er.usgs.gov/queries/FactSheet.aspx?SpeciesID=2591) | Secretive and stays close to shelter; feeds primarily on benthic algae and detritus. [USGS](https://nas.er.usgs.gov/queries/FactSheet.aspx?SpeciesID=2591) | Make compact, confident loops around shelter, with brief surface-grazing pecks and retreats into cover. Give it more continuous movement than the gobies, but keep the orbit tied to a refuge. |
 | `copperband-butterflyfish` | Copperband butterflyfish (*Chelmon rostratus*), silver-white compressed disc, four copper-orange bands edged in black, elongated snout, and dorsal eyespot. [Dallas World Aquarium](https://dwazoo.com/animal/copperband-butterflyfish/) | Rocky shore, sheltered reef, or inner reef, including sandy / silty areas. [Zoo Zürich](https://zoo.ch/en/conservation/animal-and-plant-encyclopedia/copperband-butterflyfish) | Usually solitary or paired and territorial; uses its long snout to take prey from cracks and crevices. [Dallas World Aquarium](https://dwazoo.com/animal/copperband-butterflyfish/) | Animate a deliberate, smooth patrol along reef structure, pauses to angle the snout into holes, then a measured pivot and move to the next crevice. Keep its large pectoral fins and laterally compressed body silhouette readable. |
 | `desjardins-sailfin-tang` | Desjardins' sailfin tang (*Zebrasoma desjardinii*), grey body with bold dark vertical bars edged in orange, pale spots on fins, yellow tail, and a tall sail-like dorsal fin. [FishBase](https://www.fishbase.se/summary/Zebrasoma-desjardinii); [Wikipedia](https://en.wikipedia.org/wiki/Zebrasoma_desjardinii) | Lagoon and seaward reefs, 3–30 m, Indian Ocean and Red Sea. [FishBase](https://www.fishbase.se/summary/Zebrasoma-desjardinii) | Adults usually occur in pairs over reef slopes; juveniles are solitary and shelter among staghorn corals; grazes filamentous algae. [FishBase](https://www.fishbase.se/summary/Zebrasoma-desjardinii) | Animate a broad reef-front cruise like the yellow tang, with a slower tail-beat for its larger size (max 40 cm TL) and graze pauses at the rock face. Added 2026-11-09 (Ryan's sailfin decision) to the roster; auto-spawned as a visual-only display fish until Ryan had it removed the same day — retained as an optional add for a new service, not an ambiance fish. |
+| `snowflake-moray-eel` | Snowflake moray eel (*Echidna nebulosa*); cream body with dark “snowflake” markings. The supplied GLB is a partial rear-to-head forebody with no tail. [FishBase](https://www.fishbase.se/summary/Echidna-nebulosa) | Solitary reef-associated moray sheltering in a rock crevice; AQ-106 stages it only in the measured bottom-right cave of the right island. [FishBase](https://www.fishbase.se/summary/Echidna-nebulosa) | The visible mouth opening is ventilation, not an aggression cue. [Florida Aquarium](https://www.flaquarium.org/explore/habitats/coral-reefs/moray-eel/) | Use only the supplied `crevice_idle` head/jaw/probe animation; keep the modeled rear inside the bottom-right passage and clearance-check only the exposed head-to-probe segment. The cave-only behavior is a current model/composition constraint, not a claim that morays never swim. Root visual acceptance of the embedded rear remains pending. |
 
 ## Future freshwater biome
 

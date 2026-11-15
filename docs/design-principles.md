@@ -4,9 +4,9 @@
 Category: Governance / Design Principles
 Status: Canonical / Active
 Authority: Binding Aesthetic & Architectural Guidance
-Backlog: AQ-14, AQ-14.1, AQ-12
+Backlog: AQ-14, AQ-14.1, AQ-12, AQ-106
 Owner: @root
-Updated: 2026-11-05
+Updated: 2026-11-15
 Upstream: AGENTS.md, docs/requirements.md
 Downstream: All 3D scene, shader, and UI implementations
 -->
@@ -16,7 +16,7 @@ Downstream: All 3D scene, shader, and UI implementations
 > - **Category**: Design Guidance & Visual Principles
 > - **Status**: Canonical / Active
 > - **Authority**: Binding Guidance
-> - **Backlog Reference**: `AQ-14`
+> - **Backlog Reference**: `AQ-14`, `AQ-106`
 > - **Summary**: Architectural principles for realistic tank depth, crisp live rock/coral/sand habitat, living fish motion, unobtrusive controls, and $0 CC0/CC-BY 4.0 asset constraints.
 
 ## Primary goal
@@ -39,7 +39,7 @@ Use [`docs/more-realistic-reef-guide.png`](more-realistic-reef-guide.png) (and i
 - Give species distinct swimming speed, turning, acceleration, and apparent depth. Fish should bank and change orientation as they swim, rather than translate as flat images.
 - Integrate fish with the tank through believable light, color, scale, depth, and occlusion. Review choices against real fish, including the [NOAA Banggai cardinalfish reference](https://www.fisheries.noaa.gov/species/banggai-cardinalfish/resources) and [Monterey Bay Aquarium clownfish reference](https://www.montereybayaquarium.org/animals-the-ocean/animals-a-to-z/clownfish).
 - A still cutout moving across the scene can be a temporary scaffold or reduced-motion fallback, but it does not satisfy the finished lifelike animation goal.
-- Define distinct stable-ID keyed behavior profiles for all 15 target species from the [sourced roster briefs](reef-fish-roster.md), and have a shared engine consume them. Each profile should describe appropriate locomotion, speed and turning, depth/zone preference, compatible habitat interactions, and only the supported idle, swim, forage, and retreat states. Individual fish should vary independently within their species profile; do not give every fish the same hard-coded movement. A user-facing profile editor is not part of this requirement. See [AQ-35](../backlog/tasks/aq-35%20-%20Define-typed-behavior-profiles-for-all-15-reef-fish-species.md).
+- Define distinct stable-ID keyed behavior profiles for all 16 standard species from the [sourced roster briefs](reef-fish-roster.md), and have a shared engine consume them. Each profile should describe appropriate locomotion, speed and turning, depth/zone preference, compatible habitat interactions, and only the supported idle, swim, forage, and retreat states. Individual fish should vary independently within their species profile; do not give every fish the same hard-coded movement. AQ-106 is a separate exception: its existing partial snowflake moray serves one service and remains in the bottom-right cave, using only the supplied `crevice_idle` clip. A user-facing profile editor is not part of this requirement. See [AQ-35](../backlog/tasks/aq-35%20-%20Define-typed-behavior-profiles-for-all-15-reef-fish-species.md) and Backlog `AQ-106`.
 - Use [Sketchfab's Virtual Aquarium ALL Fish Animated](https://sketchfab.com/3d-models/virtual-aquarium-all-fish-animated-8de6bc7d49c64649910a199e7405ecb6) only as an animation inspiration and guide. Attribute the reference, record observed playback separately from page metadata, and do not presume roster equivalence or reuse rights. See [AQ-36](../backlog/tasks/aq-36%20-%20Review-the-Sketchfab-animated-aquarium-as-a-fish-motion-reference.md).
 - Mesh2Motion may be evaluated as a rigging and animation-transfer workflow, not presumed as the chosen approach. Verify the exact source and license for every candidate asset, assess whether body, fin, and caudal articulation suits different fish shapes, and preserve species-specific behavior and independently varied paths. A proof may import and export owned or appropriately licensed samples; consider any production workflow change separately after evidence. See [AQ-37](../backlog/tasks/aq-37%20-%20Investigate-Mesh2Motion-fish-rigs-and-animation-transfer.md).
 - AQ-5 compares [PlayCanvas](https://playcanvas.com/), [Three.js](https://threejs.org/), and [Babylon.js](https://www.babylonjs.com/) as candidate engines; no engine is preselected. The investigator chooses the best fit based on the aquarium requirements and a fair comparison using the same fish and reef assets and comparable rig/animation inputs. Separate engine capability from source asset and rig quality, including limitations of the prior Three.js fish study. Evaluate realistic articulated swimming, reef depth and coral occlusion/interactions, materials and lighting, React/Vite/TanStack Start TypeScript integration, and the two target viewports. See [AQ-5](../backlog/tasks/aq-5%20-%20Select-realistic-fish-assets-and-animation-approach.md) and the Babylon.js candidate review in [AQ-38](../backlog/tasks/aq-38%20-%20Evaluate-Babylon.js-for-photorealistic-reef-and-animated-fish-rendering.md).

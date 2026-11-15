@@ -43,6 +43,23 @@ function meshHabitat(queryCapsule?: CapsuleClearanceQuery, anchors: WaterHabitat
 function collisionQuery() { return createMeshClearanceQuery([overhangCollider()]) }
 
 describe('rendered fish travel adapter', () => {
+  it('keeps the snowflake moray fixed in its crevice across single-fish and school motion', () => {
+    const position = { x: 4, y: -1.7, z: -1 }
+    const moray = createSwimmingFish('moray-resident', 'snowflake-moray-eel', position, .2)
+    moray.behavior = { ...moray.behavior, state: 'swim', targetAnchor: 'rockCrevice' }
+    moray.route = [position, { x: 1, y: 1, z: 1 }]
+    moray.speed = .8
+
+    startleFish(moray, habitat)
+    stepSwimmingFish(moray, habitat, 2)
+    stepSwimmingSchool([moray], habitat, 2)
+
+    expect(moray.position).toEqual(position)
+    expect(moray.route).toEqual([])
+    expect(moray.speed).toBe(0)
+    expect(moray.startleSeconds).toBe(0)
+  })
+
   it('keeps an active route when a swim transition requests an unavailable habitat anchor', () => {
     const fish = createSwimmingFish('missing-anchor-route', 'royal-gramma', { x: -3.8, y: 0, z: 0 }, .2)
     fish.behavior = {
