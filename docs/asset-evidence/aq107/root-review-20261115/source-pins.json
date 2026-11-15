@@ -1,0 +1,9 @@
+{
+  "scripts/refine-chromis-contour.mjs": "c052ac5186af259bb4461c55eca1b4b96172c87180001829a71f731cf72b7e40",
+  "src/rendering/assets/chromis-contour.test.ts": "9ba726750b22e6b6e77d8a677c712c84ec0bc0a280b189ce33d289c34ca569ef",
+  "src/rendering/assets/splat-fish-contract.test.ts": "d0e3fa8369c86a855d60225dc39f0b448c167a1600db451f21ba41cb95a1f9f0",
+  "src/rendering/assets/splat-fish/blue-green-chromis.glb": "ca69aa9d99b62afc930b9724af2f5714431513a56bd7536df2166bdc9802519f",
+  "src/rendering/assets/splat-fish/fish-blue-green-chromis-inspection.json": "15f1d221eb3b212ddbd3c6adb0744497268d263cf14f21d43423df427a28538c",
+  "src/rendering/assets/splat-fish/manifest.json": "4b936f3fad179d7a4b9a5d15ef054d3f25f3527d860396c9f67b8342573fbe58",
+  "src/rendering/scene/fish-scale.ts": "8881425824ed255f2dcd7fe825b07188d7feb2d2198097c014e496d6f58215f5"
+}

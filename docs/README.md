@@ -6,7 +6,7 @@ Status: Canonical / Active
 Authority: Binding Single Source of Documentation Truth
 Backlog: AQ-61, AQ-63, AQ-65, AQ-66, AQ-64, AQ-53, AQ-60, AQ-42
 Owner: @documentation
-Updated: 2026-11-14
+Updated: 2026-11-15
 Upstream: AGENTS.md, AGENT_TASKS.md, docs/requirements.md, docs/framework/DOCUMENTATION_FRAMEWORK.md
 Downstream: All repository documentation and active agent workflows
 -->
@@ -18,6 +18,8 @@ Downstream: All repository documentation and active agent workflows
 > For the mandatory documentation operating standard and contribution protocol, see [`docs/framework/DOCUMENTATION_FRAMEWORK.md`](framework/DOCUMENTATION_FRAMEWORK.md).
 
 ---
+
+[AQ-107 Root refinement acceptance](asset-evidence/aq107/root-review-20261115/README.md) records the accepted original-recipe contour refinement, native comparisons, actual runtime picking and source-pinned checks.
 
 [AQ-107 rejected remesh evidence](asset-evidence/aq107/rejected-remesh-20261114/README.md) records the native visual failure of the first connected-domain refinement; AQ-107 remains open.
 
