@@ -355,3 +355,138 @@ describe('glassmorphic status dot and click-to-focus inspect card (AQ-97 AC #3/#
     expect(container.querySelector('.fish-inspect-card')).toBeNull()
   })
 })
+
+describe('aquarium stick-on LCD thermometer display (AQ-15 AC #1/#2/#3/#4)', () => {
+  function thermometer() {
+    return container.querySelector<HTMLElement>('.aquarium-thermometer')
+  }
+
+  it('defers rendering the thermometer until mount so SSR HTML stays hydration-safe', async () => {
+    const { renderToString } = await import('react-dom/server')
+    const html = renderToString(
+      <AquariumScene
+        services={services}
+        paused={false}
+        thermometerPlacement="front"
+        thermometerReading={{
+          status: 'fresh',
+          sensorId: 'coretemp.0:package-id-0',
+          chip: 'coretemp',
+          label: 'Package id 0',
+          value: 28.1,
+          unit: '°C',
+          observedAt: '2026-11-14T20:00:00.000Z',
+          ageMs: 250,
+        }}
+      />,
+    )
+    expect(html).not.toContain('aquarium-thermometer')
+  })
+
+  it('switches between front glass, side glass, and hidden while rendering live, stale, and unavailable LCD states', async () => {
+    await act(async () => {
+      root.render(
+        <AquariumScene
+          services={services}
+          paused={false}
+          thermometerPlacement="front"
+          thermometerReading={{
+            status: 'fresh',
+            sensorId: 'coretemp.0:package-id-0',
+            chip: 'coretemp',
+            label: 'Package id 0',
+            value: 28.1,
+            unit: '°C',
+            observedAt: '2026-11-14T20:00:00.000Z',
+            ageMs: 250,
+          }}
+        />,
+      )
+    })
+    expect(thermometer()?.dataset.placement).toBe('front')
+    expect(thermometer()?.dataset.status).toBe('fresh')
+    expect(thermometer()?.querySelector('.sr-only')?.textContent).toContain('28.1°C')
+    expect(thermometer()?.querySelector('.thermometer-status-annunciator')).toBeNull()
+    expect(thermometer()?.querySelector('.thermometer-metal-block')).not.toBeNull()
+    expect(thermometer()?.querySelectorAll('.lcd-segment.is-lit')).toHaveLength(19)
+
+    await act(async () => {
+      root.render(
+        <AquariumScene
+          services={services}
+          paused={false}
+          thermometerPlacement="side"
+          thermometerReading={{
+            status: 'stale',
+            sensorId: 'coretemp.0:package-id-0',
+            chip: 'coretemp',
+            label: 'Package id 0',
+            value: 27.5,
+            unit: '°C',
+            observedAt: '2026-11-14T19:57:00.000Z',
+            ageMs: 180_000,
+          }}
+        />,
+      )
+    })
+    expect(thermometer()?.dataset.placement).toBe('side')
+    expect(thermometer()?.dataset.status).toBe('stale')
+    expect(thermometer()?.querySelector('.thermometer-status-annunciator')?.textContent).toBe('STALE · 3m')
+
+    await act(async () => {
+      root.render(
+        <AquariumScene
+          services={services}
+          paused={false}
+          thermometerPlacement="front"
+          thermometerReading={{
+            status: 'unavailable',
+            sensorId: 'coretemp.0:package-id-0',
+            unit: '°C',
+            message: 'Sensor offline',
+          }}
+        />,
+      )
+    })
+    expect(thermometer()?.dataset.status).toBe('unavailable')
+    expect(thermometer()?.querySelector('.thermometer-status-annunciator')?.textContent).toBe('UNAVAILABLE')
+    expect(thermometer()?.querySelector('.sr-only')?.textContent).toContain('--.-°C')
+    expect(thermometer()?.querySelectorAll('.lcd-segment.is-lit')).toHaveLength(8)
+
+    await act(async () => {
+      root.render(
+        <AquariumScene services={services} paused={false} thermometerPlacement="hidden" />,
+      )
+    })
+    expect(thermometer()).toBeNull()
+  })
+
+  it('keeps fish links clickable when the thermometer is displayed on glass', async () => {
+    await act(async () => {
+      root.render(
+        <AquariumScene
+          services={services}
+          paused={false}
+          thermometerPlacement="front"
+          thermometerReading={{
+            status: 'fresh',
+            sensorId: 'coretemp.0:package-id-0',
+            chip: 'coretemp',
+            label: 'Package id 0',
+            value: 28.1,
+            unit: '°C',
+            observedAt: '2026-11-14T20:00:00.000Z',
+            ageMs: 100,
+          }}
+        />,
+      )
+    })
+    mock.serviceAt.mockReturnValue('clown')
+    let event!: MouseEvent
+    await act(async () => {
+      event = pointerClick(anchor('clown'))
+    })
+    expect(event.defaultPrevented).toBe(false)
+    expect(mock.activate).toHaveBeenCalledExactlyOnceWith('clown')
+  })
+})

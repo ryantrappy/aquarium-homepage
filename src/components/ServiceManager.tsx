@@ -4,6 +4,16 @@ import { REEF_FISH, getFishById } from '../lib/fish'
 import type { ServiceConfig, ServiceDraft } from '../lib/services'
 import { CloseIcon } from './Icons'
 import assetCreditsUrl from '../rendering/proof/ASSET_NOTICES.md?url'
+import {
+  DEFAULT_CPU_TEMPERATURE_SENSOR_ID,
+  DEFAULT_THERMOMETER_PLACEMENT,
+  THERMOMETER_PLACEMENT_OPTIONS,
+  buildCpuTemperatureSensorOptions,
+  formatThermometerLcd,
+  type CpuTemperatureReading,
+  type CpuTemperatureSensor,
+  type ThermometerPlacement,
+} from '../lib/thermometer-settings'
 
 type ServiceManagerProps = {
   services: ServiceConfig[]
@@ -18,6 +28,12 @@ type ServiceManagerProps = {
   onReset: () => Promise<void>
   fpsCounterEnabled: boolean
   onToggleFpsCounter: (enabled: boolean) => void
+  thermometerPlacement?: ThermometerPlacement
+  onChangeThermometerPlacement?: (placement: ThermometerPlacement) => void
+  thermometerSensorId?: string
+  onChangeThermometerSensorId?: (sensorId: string) => void
+  thermometerSensors?: readonly CpuTemperatureSensor[]
+  thermometerReading?: CpuTemperatureReading
 }
 
 const blankDraft: ServiceDraft = { name: '', url: '', fishId: REEF_FISH[0].id }
@@ -39,7 +55,26 @@ function readableError(error: unknown) {
   return error instanceof Error ? error.message : 'The service list could not be saved.'
 }
 
-export function ServiceManager({ services, onClose, onAdd, onUpdate, onDelete, onImport, onExport, loadError, onRetryLoad, onReset, fpsCounterEnabled, onToggleFpsCounter }: ServiceManagerProps) {
+export function ServiceManager({
+  services,
+  onClose,
+  onAdd,
+  onUpdate,
+  onDelete,
+  onImport,
+  onExport,
+  loadError,
+  onRetryLoad,
+  onReset,
+  fpsCounterEnabled,
+  onToggleFpsCounter,
+  thermometerPlacement = DEFAULT_THERMOMETER_PLACEMENT,
+  onChangeThermometerPlacement,
+  thermometerSensorId = DEFAULT_CPU_TEMPERATURE_SENSOR_ID,
+  onChangeThermometerSensorId,
+  thermometerSensors = [],
+  thermometerReading,
+}: ServiceManagerProps) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [draft, setDraft] = useState<ServiceDraft>(blankDraft)
   const [formError, setFormError] = useState('')
@@ -235,6 +270,54 @@ export function ServiceManager({ services, onClose, onAdd, onUpdate, onDelete, o
           </fieldset>
           <div className="form-actions"><button type="button" className="quiet-button" onClick={() => { resetForm(); focusNameInput() }} disabled={busy !== null}>{editingId ? 'Cancel edit' : 'Clear'}</button><button className="save-button" type="submit" disabled={formDisabled}>{busy === 'save' ? 'Saving…' : editingId ? 'Save changes' : 'Add to the reef'}</button></div>
         </form>
+        <section className="thermometer-settings" aria-labelledby="thermometer-settings-title">
+          <h3 id="thermometer-settings-title">Aquarium thermometer</h3>
+          <fieldset className="thermometer-settings-fieldset">
+            <legend>Glass placement</legend>
+            <div className="thermometer-placement-grid">
+              {THERMOMETER_PLACEMENT_OPTIONS.map((option) => {
+                const radioId = `thermometer-placement-${option.value}`
+                const selected = thermometerPlacement === option.value
+                return (
+                  <div
+                    key={option.value}
+                    className={`thermometer-placement-option${selected ? ' is-selected' : ''}`}
+                  >
+                    <input
+                      id={radioId}
+                      type="radio"
+                      name="thermometer-placement"
+                      value={option.value}
+                      checked={selected}
+                      onChange={() => onChangeThermometerPlacement?.(option.value)}
+                    />
+                    <label htmlFor={radioId}>
+                      <span>{option.label}</span>
+                      <small>{option.description}</small>
+                    </label>
+                  </div>
+                )
+              })}
+            </div>
+          </fieldset>
+          <div className="thermometer-sensor-field">
+            <label htmlFor="thermometer-sensor-select">CPU temperature sensor</label>
+            <select
+              id="thermometer-sensor-select"
+              value={thermometerSensorId}
+              onChange={(event) => onChangeThermometerSensorId?.(event.target.value)}
+            >
+              {buildCpuTemperatureSensorOptions(thermometerSensors, thermometerSensorId).map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <p className="thermometer-status-summary">
+            {`${thermometerPlacement === 'hidden' ? 'Hidden on tank glass · ' : ''}${formatThermometerLcd(thermometerReading, thermometerSensorId).ariaText} Read-only; saved on this device.`}
+          </p>
+        </section>
         <section className="debug-settings" aria-labelledby="debug-settings-title">
           <h3 id="debug-settings-title">Debug</h3>
           <label className="debug-setting">

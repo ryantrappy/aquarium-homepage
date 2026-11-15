@@ -43,7 +43,7 @@ type LastSuccessfulSample = {
 }
 
 type CpuTemperatureStoreOptions = {
-  rootPath: string
+  rootPath: string | readonly string[]
   now?: () => number
 }
 
@@ -65,44 +65,61 @@ function isSupportedLabel(chip: CpuTemperatureChip, label: string) {
 
 export function createCpuTemperatureStore({ rootPath, now = Date.now }: CpuTemperatureStoreOptions) {
   const lastSamples = new Map<string, LastSuccessfulSample>()
+  const rootPaths = (typeof rootPath === 'string' ? [rootPath] : [...rootPath])
+    .map((candidate) => candidate.trim())
+    .filter(Boolean)
 
   async function discoverSensors(): Promise<DiscoveredSensor[]> {
-    let hwmonEntries
-    try {
-      hwmonEntries = await readdir(join(rootPath, 'hwmon'), { withFileTypes: true })
-    } catch {
-      return []
-    }
-
     const sensors: DiscoveredSensor[] = []
-    for (const entry of hwmonEntries) {
-      if (!entry.isDirectory() || !hwmonDirectory.test(entry.name)) continue
-      const hwmonPath = join(rootPath, 'hwmon', entry.name)
-      let chip: CpuTemperatureChip
-      let files: string[]
+    const seenIds = new Set<string>()
+
+    for (const candidateRoot of rootPaths) {
+      let hwmonBasePath = join(candidateRoot, 'hwmon')
+      let hwmonEntries
       try {
-        const chipName = (await readFile(join(hwmonPath, 'name'), 'utf8')).trim()
-        if (!supportedChips.has(chipName as CpuTemperatureChip)) continue
-        chip = chipName as CpuTemperatureChip
-        files = await readdir(hwmonPath)
+        hwmonEntries = await readdir(hwmonBasePath, { withFileTypes: true })
       } catch {
-        continue
+        hwmonBasePath = candidateRoot
+        try {
+          hwmonEntries = await readdir(hwmonBasePath, { withFileTypes: true })
+        } catch {
+          continue
+        }
       }
 
-      for (const file of files) {
-        const match = temperatureLabelFile.exec(file)
-        if (!match) continue
-        const labelPath = join(hwmonPath, file)
+      for (const entry of hwmonEntries) {
+        if ((!entry.isDirectory() && !entry.isSymbolicLink()) || !hwmonDirectory.test(entry.name)) {
+          continue
+        }
+        const hwmonPath = join(hwmonBasePath, entry.name)
+        let chip: CpuTemperatureChip
+        let files: string[]
         try {
-          const label = (await readFile(labelPath, 'utf8')).trim()
-          if (!isSupportedLabel(chip, label)) continue
-          const id = `${chip}.0:${stableLabelId(label)}`
-          sensors.push({
-            descriptor: { id, chip, label, unit: '°C' },
-            inputPath: join(hwmonPath, `temp${match[1]}_input`),
-          })
+          const chipName = (await readFile(join(hwmonPath, 'name'), 'utf8')).trim()
+          if (!supportedChips.has(chipName as CpuTemperatureChip)) continue
+          chip = chipName as CpuTemperatureChip
+          files = await readdir(hwmonPath)
         } catch {
-          // A disappearing or unreadable sensor should not hide other sensors.
+          continue
+        }
+
+        for (const file of files) {
+          const match = temperatureLabelFile.exec(file)
+          if (!match) continue
+          const labelPath = join(hwmonPath, file)
+          try {
+            const label = (await readFile(labelPath, 'utf8')).trim()
+            if (!isSupportedLabel(chip, label)) continue
+            const id = `${chip}.0:${stableLabelId(label)}`
+            if (seenIds.has(id)) continue
+            seenIds.add(id)
+            sensors.push({
+              descriptor: { id, chip, label, unit: '°C' },
+              inputPath: join(hwmonPath, `temp${match[1]}_input`),
+            })
+          } catch {
+            // A disappearing or unreadable sensor should not hide other sensors.
+          }
         }
       }
     }

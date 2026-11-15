@@ -4,10 +4,35 @@ import { getFishById } from '../lib/fish'
 import { FishFigure } from './FishFigure'
 import type { AquariumController, SceneStatus } from '../rendering/scene/aquarium'
 import { formatFrameRate, type FrameRateSample } from '../rendering/scene/frame-rate'
+import { AquariumThermometer } from './AquariumThermometer'
+import {
+  DEFAULT_CPU_TEMPERATURE_SENSOR_ID,
+  DEFAULT_THERMOMETER_PLACEMENT,
+  type CpuTemperatureReading,
+  type ThermometerPlacement,
+} from '../lib/thermometer-settings'
 
-type AquariumSceneProps = { services: ServiceConfig[]; paused: boolean; configurationReady?: boolean; focusFallbackRef?: RefObject<HTMLElement | null>; fpsCounterEnabled?: boolean }
+type AquariumSceneProps = {
+  services: ServiceConfig[]
+  paused: boolean
+  configurationReady?: boolean
+  focusFallbackRef?: RefObject<HTMLElement | null>
+  fpsCounterEnabled?: boolean
+  thermometerPlacement?: ThermometerPlacement
+  thermometerSensorId?: string
+  thermometerReading?: CpuTemperatureReading
+}
 
-export function AquariumScene({ services, paused, configurationReady = true, focusFallbackRef, fpsCounterEnabled = false }: AquariumSceneProps) {
+export function AquariumScene({
+  services,
+  paused,
+  configurationReady = true,
+  focusFallbackRef,
+  fpsCounterEnabled = false,
+  thermometerPlacement = DEFAULT_THERMOMETER_PLACEMENT,
+  thermometerSensorId = DEFAULT_CPU_TEMPERATURE_SENSOR_ID,
+  thermometerReading,
+}: AquariumSceneProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null), overlayRef = useRef<HTMLDivElement>(null)
   const fpsBadgeRef = useRef<HTMLDivElement>(null)
   const controller = useRef<AquariumController | undefined>(undefined)
@@ -158,6 +183,13 @@ export function AquariumScene({ services, paused, configurationReady = true, foc
         })}
       </div>
       {mounted && fpsCounterEnabled && <div ref={fpsBadgeRef} className="fps-counter-badge" aria-hidden="true">—</div>}
+      {mounted && thermometerPlacement !== 'hidden' && (
+        <AquariumThermometer
+          placement={thermometerPlacement}
+          sensorId={thermometerSensorId}
+          reading={thermometerReading}
+        />
+      )}
       {status === 'ready' && focusedService && focusedSpecies && (
         <aside className="fish-inspect-card" aria-label={`Inspecting ${focusedService.name}`}>
           <div className="fish-inspect-details">

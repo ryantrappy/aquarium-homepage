@@ -30,6 +30,7 @@
 - AQ76 healthy60Hz recovery threshold17.5ms is distinct from unchanged16.7target/19slowEMA/22p95; cooldown/window/exclusions retained. First combined901pass/1stalebudget13msfailure fixed transparently; final902tests75files,42focusedpolicychecks/typecheck16scripts/build pass. Fulltask/performancegatesremainopen.
 - Current13file source snapshot hashmatchesoriginal/proof; taskscoped76and89commits/pushes follow to sharedPR48/updaterunninglist. Audits a09ae53(79)/b3fdf38(70.13) pushed, tasksopen. Queue64Done/68open, CI/FPSdisplayexcluded. PreserveGemini/concurrentassets; noModel/Blender/config edits.
 - Proof /tmp/aquarium-aq87-proof-8b2d7cc detached4df19de+13reviewedfiles+Viteallowlist. Owneddev5215PID46280stillstale4dfVITEpin; verifyownership/snapshotownfiles/checkoutsharedmilestone/restartaccurately before nativeproof. Disposablelocalhostconfigunchanged; preserveuser3000/5210. Priorreviewtabsclosed,Chrome4retained; no currentownedreviewtab.
+- 2026-11-14 (`aq15_thermometer_display_config`): `AQ-15` implemented and verified — crystal acrylic 7-segment LCD thermometer (`Front glass` / `Side glass` / `Hidden`) + CPU sensor config + Linux Docker `hwmon`/symlink discovery; verified via 6 targeted Vitest suites (88/88), `npm run typecheck`, `npm run build`, and browser views at `1440×900` & `402×874`; leaving `AQ-15` `In Progress` for Root review and pushing PR per user request.
 
 ### 2026-11-14 — Latest user steering
 *Root resume review2026-11-14: actioned policy; all earlier entries inspected, water correction pending.*
