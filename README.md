@@ -1,6 +1,10 @@
 # Reef Control
 
-A playful, reef-inspired launcher for services on your home network.
+Have you ever wanted a homepage that is quite difficult and impractical? Do you find clicking links to
+be too easy? Well how about we make those links fish that swim around an aquarium! That is the idea behind this project, not super practical but fun if you are into that.
+
+
+![](docs/example_video.gif)
 
 ## Run locally
 
