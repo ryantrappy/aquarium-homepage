@@ -6,7 +6,7 @@ Status: Canonical / Active
 Authority: Binding Product Specification
 Backlog: AQ-1, AQ-2, AQ-14, AQ-103
 Owner: @root
-Updated: 2026-11-12
+Updated: 2026-11-14
 Upstream: AGENTS.md
 Downstream: All technical tasks and specifications
 -->
@@ -21,6 +21,10 @@ Downstream: All technical tasks and specifications
 ## Product goal
 
 The primary goal is a photorealistic, living reef aquarium: realistic fish should fill almost the entire main view and serve as clickable links to configured homelab services. Service navigation and configuration should support that aquarium experience while staying visually unobtrusive.
+
+## Showcase v1 scope
+
+The user confirms all 19 tasks already In Progress plus AQ-108 as the fixed scope for a fun, shareable showcase. [The release scope record](showcase-v1-finalization.md) lists the exact 20 tasks. Other unfinished Backlog work remains open for future versions. This supersedes the previous requirement to finish every open task for this version; it does not weaken scoped acceptance criteria or Root review. AQ-108 uses familiar public example websites and an HTTPS-prefilled Add service field, while preserving existing saved user configuration.
 
 ## Prototype status and success criterion
 

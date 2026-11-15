@@ -25,7 +25,7 @@ Find the authoritative documents for your task area:
 
 | Subsystem / Topic | Primary Canonical Spec | Supporting Plans & Research | Validation & Evidence |
 |---|---|---|---|
-| **Primary Requirements & Scope** | [`requirements.md`](requirements.md) | [`design-principles.md`](design-principles.md) | [`agent-change-audit.md`](agent-change-audit.md) |
+| **Primary Requirements & Scope** | [`requirements.md`](requirements.md), [showcase v1 scope](showcase-v1-finalization.md) | [`design-principles.md`](design-principles.md) | [`agent-change-audit.md`](agent-change-audit.md) |
 | **3D Rendering & Scene** | [`rendering.md`](rendering.md), [performance budgets](photorealism-budgets.md) | [`rendering-research-history.md`](rendering-research-history.md) | [`asset-pipeline-proof.md`](asset-pipeline-proof.md), [candidate donor provenance](asset-evidence/aq12/splat-candidate-provenance.json), [AQ-59 runtime material review](asset-evidence/aq59/runtime-20261112/review.json), [AQ-76 native runtime comparison](asset-evidence/aq76/native-20261112/review.json), [AQ-76 recovery policy](asset-evidence/aq76/recovery-20261114/README.md), [repeatable look-dev baseline](asset-evidence/aq70-2/baseline-before/review.json), [AQ-70.12 sand functional proof](asset-evidence/aq70-12/functional-review.json) |
 | **Fish Motion & Biomechanics** | [`fish-turning-and-maneuvering-plan.md`](fish-turning-and-maneuvering-plan.md) | [`sketchfab-motion-review.md`](sketchfab-motion-review.md), [`mesh2motion-review.md`](mesh2motion-review.md) | [`asset-evidence/fish-rig-inventory.md`](asset-evidence/fish-rig-inventory.md)  [AQ-58 reset proof](asset-evidence/aq58/fish-player-review.json) |
 | **Fish Behavior & AI Runtime** | [`behavior-runtime-contract.md`](behavior-runtime-contract.md) | [`fish-behavior-design.md`](fish-behavior-design.md), [`reef-fish-roster.md`](reef-fish-roster.md) | [AQ-41 controller CPU samples](asset-evidence/aq41/current-controller-benchmark.json), `src/simulation/behavior-runtime.test.ts`, [AQ-105 mounted hosting](asset-evidence/aq105/README.md), [final two-size review](asset-evidence/aq105/final-4df19de/README.md)  [AQ-64 state preservation](asset-evidence/aq64/review.json) |
@@ -51,6 +51,7 @@ Directory of project documentation and verification evidence:
 ### Tier 1: Core Governance & Active Checkpoints (Binding)
 | Document | Status | Authority | Scope / Purpose |
 |---|---|---|---|
+| [Showcase v1 finalization](showcase-v1-finalization.md) | **Active** | Binding user scope; Backlog acceptance | Fixed 20-task showcase scope: 19 existing In Progress tasks plus AQ-108; Root review and rolling PR delivery. |
 | [`requirements.md`](requirements.md) | **Canonical** | Binding | Core product vision: photorealistic reef tank, realistic swimming, homelab links, dual viewports. |
 | [`design-principles.md`](design-principles.md) | **Canonical** | Binding | Aesthetic guidelines: aquarium first, unobtrusive UI, $0 CC0/CC-BY 4.0 asset budget, no live health claims. |
 | [`framework/DOCUMENTATION_FRAMEWORK.md`](framework/DOCUMENTATION_FRAMEWORK.md) | **Canonical** | Binding | Mandatory documentation specification, authority hierarchy, header schema, and agent protocols. |

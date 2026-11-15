@@ -11,7 +11,15 @@ Upstream: AGENTS.md, agent_scratch.md, docs/requirements.md
 Downstream: Current implementation and review work
 -->
 
-Root verified this checkpoint against the current checkout. The goal remains active and incomplete: finish the backlog and make the living aquarium resemble the supplied reference. Passing functional tests does not accept final art.
+Root verified this checkpoint against the current checkout. The showcase remains incomplete: finish the fixed 20-task scope below and make the living aquarium resemble the supplied reference. Other unfinished Backlog work is reserved for future versions. Passing functional tests does not accept final art.
+
+## Current showcase scope — 2026-11-14
+
+The user explicitly confirms **all 19 tasks already In Progress plus AQ-108** for the shareable showcase; all other unfinished tasks are future-version work. See [the fixed 20-task scope](docs/showcase-v1-finalization.md). This supersedes the older all-open-Backlog goal without weakening any acceptance criterion. Root final review is required for every completion.
+
+The scope-confirmation baseline is merged `7c08b43`; preserve the current `v1-finalization` branch and concurrent work. PR49 and other recent PRs were merged externally. Root did not merge/deploy. No PR is currently open; create a rolling showcase draft PR after the first reviewed completion and keep its running contents current. Public demo defaults/HTTPS prefix (AQ108) are the immediate priority; AQ107 contour pipeline is incomplete and being finished, while AQ15 and the other In Progress tasks need current-state finalization audit. No more phone checks.
+
+Earlier water/process/branch notes below are historical. Current checked-in renderer includes the static-reef radiance probe, phase-warped anisotropic water normals and directional key correction. Prior private proof/capture paths remain evidence of particular trials, not proof of current HEAD. Chromis diagnosis is durable, but the committed refinement script has not yet established an accepted refined runtime asset. Do not mistake externally committed partial work for Root acceptance.
 
 ## Current delivery override — 2026-11-14
 

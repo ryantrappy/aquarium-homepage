@@ -45,3 +45,10 @@
 - AQ103 curvature-highlight trial rejected after laptopnative: regular ovalspots, not reference water. Originalsurface restored; privateproofcb88689/dev5215session85659 stillrejectedtrial. Root also found wrong3Dview-vector math in initialsampler; corrected evidence/revisedplan pending. No acceptedshadercommit/AC change. RejectedPNG durable docs/asset-evidence/aq103/rejected-curvature-20261114/.
 
 - Root resume review 2026-11-14: all current scratch entries inspected. Latest PR49/laptop-only/preserve-assets/no-deploy policies current; AQ89 complete. AQ103 diagnosis checkpoint94c4b95 pushed, corrected finite sampler independently reproduced. Ray-driven shader trial now being implemented by navigation_recovery; pending Root technical/native review. Earlier restored-baseline/private-rejected-proof descriptions remain historical until proof is refreshed.
+
+### 2026-11-14 — Showcase scope confirmed
+*Root startup/resume review: all current scratch entries inspected. Prior merged PR/branch/process descriptions are historical; no phone checks/current policy. AQ15 implementation, water final review and chromis refinement pending; AQ89 remains complete.*
+- User explicitly selects all19 existing In Progress tasks plus AQ108 for this showcase version; all other unfinished work stays open for future versions. Fixed scope docs/showcase-v1-finalization.md. Current branch v1-finalization/HEAD7c08b43, no open PR at inspection; Root did not merge/deploy. New Luna/high agents are implementing108, auditing19finalization and completing107mechanicalpipeline; prior stronger agent quota failures do not block independent Root work.
+
+*AQ108 review 2026-11-14: Standing policies current; saved reef and AQ104/AQ105/AQ89 entries actioned; broader visual work and AQ103 remain pending; review does not imply completion.*
+*AQ107 agent review 2026-11-14: actioned current showcase scope and inspected all standing policies; AQ107 remains pending contour-remesh resolution and Root laptop review. Dry-run detected boundary self-crossing before any runtime/report/manifest writes.*
