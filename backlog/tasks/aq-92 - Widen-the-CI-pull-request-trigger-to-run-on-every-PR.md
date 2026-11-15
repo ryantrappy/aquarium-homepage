@@ -5,12 +5,11 @@ status: Done
 assignee:
   - '@Luna'
 created_date: '2026-11-09'
-updated_date: '2026-11-13 05:13'
+updated_date: '2026-11-14 20:54'
 labels:
   - ci
   - testing
-dependencies:
-  - AQ-90
+dependencies: []
 references:
   - .github/workflows/ci.yml
   - README.md

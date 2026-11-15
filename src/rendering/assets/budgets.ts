@@ -135,9 +135,11 @@ export interface DownloadBudgets {
   /** All GLBs the scene loads (fish + reef). Measured 35,287,324 B. */
   totalSceneGlbMaxBytes: number
   /** Decoded GPU texture memory for everything the scene loads.
-   * Measured 205,520,866 B (196.0 MiB) at the budget commit. Full
-   * 15-hero promotion at 1024 px does NOT fit this cap — see the doc:
-   * it requires KTX2 delivery or 512 px maps. */
+   * Measured 205,520,866 B (196.0 MiB) at the budget commit. Raised
+   * from 256 MiB to 512 MiB on 2026-11-14 by Ryan's decision: the page
+   * is viewed on newer MacBooks, iPhone 18 Pro, and an RTX 3080 PC,
+   * all far above the old cap. Full 15-hero promotion at 1024 px
+   * (~240 MiB fish + ~63 MiB reef, ~303 MiB) now fits this cap. */
   runtimeGpuTextureMaxBytes: number
 }
 
@@ -145,7 +147,7 @@ export const DOWNLOAD_BUDGETS: Readonly<DownloadBudgets> = Object.freeze({
   phase0FishMaxBytes: 3.5 * MIB,
   totalFishGlbMaxBytes: 24 * MIB,
   totalSceneGlbMaxBytes: 40 * MIB,
-  runtimeGpuTextureMaxBytes: 256 * MIB,
+  runtimeGpuTextureMaxBytes: 512 * MIB,
 })
 
 export interface FrameTimeBudget {

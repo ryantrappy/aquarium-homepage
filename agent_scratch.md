@@ -4,7 +4,7 @@
 ### 2026-11-14 — Standing user policy
 *Root resume review2026-11-14: all earlier scratch entries inspected/consolidated; current policy, not blanket completion.*
 - Complete every open Backlog task using agents and Root review with objective evidence. Scoped commits and pushes to shared rolling draftPR48 https://github.com/ryantrappy/aquarium-homepage/pull/48 with running contents. Full goal active/incomplete; never deploy/merge. User deploys to trappserv.er.
-- Preserve Gemini/user assets and concurrent work; no blanket staging/reset/clean. Goal docs/more-realistic-reef-guide.png, tall reef mass retained. Only402x874/1440x900DPR1. CI/FPS-display lanes excluded. All supplied splat references/derivatives owned/shareable per user; rights blocker resolved.
+- Preserve Gemini/user assets and concurrent work; no blanket staging/reset/clean. Goal docs/more-realistic-reef-guide.png, tall reef mass retained. Latestuseroverride: laptop1440x900only; nofurtherphonechecks. CI/FPS-display lanes excluded. All supplied splat references/derivatives owned/shareable per user; rights blocker resolved.
 - Root reserves Blender single actor. Preserve live user work. Any future edit requires packed native save, override export, --learn-guide sync and every specified source/runtime/inspection/manifest commit. No model/Blender edits in AQ104/105 review.
 
 ### 2026-11-14 — Saved reef and pending primary visual work
@@ -31,3 +31,17 @@
 - Current13file source snapshot hashmatchesoriginal/proof; taskscoped76and89commits/pushes follow to sharedPR48/updaterunninglist. Audits a09ae53(79)/b3fdf38(70.13) pushed, tasksopen. Queue64Done/68open, CI/FPSdisplayexcluded. PreserveGemini/concurrentassets; noModel/Blender/config edits.
 - Proof /tmp/aquarium-aq87-proof-8b2d7cc detached4df19de+13reviewedfiles+Viteallowlist. Owneddev5215PID46280stillstale4dfVITEpin; verifyownership/snapshotownfiles/checkoutsharedmilestone/restartaccurately before nativeproof. Disposablelocalhostconfigunchanged; preserveuser3000/5210. Priorreviewtabsclosed,Chrome4retained; no currentownedreviewtab.
 - 2026-11-14 (`aq15_thermometer_display_config`): `AQ-15` implemented and verified — crystal acrylic 7-segment LCD thermometer (`Front glass` / `Side glass` / `Hidden`) + CPU sensor config + Linux Docker `hwmon`/symlink discovery; verified via 6 targeted Vitest suites (88/88), `npm run typecheck`, `npm run build`, and browser views at `1440×900` & `402×874`; leaving `AQ-15` `In Progress` for Root review and pushing PR per user request.
+
+### 2026-11-14 — Latest user steering
+*Root resume review2026-11-14: actioned policy; all earlier entries inspected, water correction pending.*
+- Stop phone checks; assume phone behavior per explicit user instruction, superseding prior two-viewport verification policy. Use1440x900 laptop only going forward. Do not claim new phone evidence.
+- User says water surface regressed versus realistic reference; AQ103 is current priority. Preserve Gemini/concurrent assets, local reviewed commits/sharedPR48 pushes, never deploy.
+- AQ89 native observations retained in /tmp/aq89-native-e0def59/review.json and fourPNGs; ownedtab1298078142 already closed by interrupted-turn cleanup. Native records include transient viewport resets, preserved rather than silently accepted. Task89 stillopen pending durable Root finalization; do not lose this work.
+
+- AQ89 Rootfinalreview actioned: all5AC/2DoD Done at e0def59, evidence docs/asset-evidence/aq89/native-e0def59/README.md. Source902tests/typecheck/build pass; historicalnativechecks acceptedbeforephone-stop instruction. Queue65Done/67open; completioncommit/push now. AQ103waterdiagnosis remainsactivepriority.
+
+- Delivery correction: PR48 externally merged2026-11-14; currentbranchrefinements preserved. AQ89completionbac3d8e is pushed on refinements to new shared draftPR49 https://github.com/ryantrappy/aquarium-homepage/pull/49. UsePR49 for subsequent reviewed milestones/runninglist. Root did not merge/deploy.
+
+- AQ103 curvature-highlight trial rejected after laptopnative: regular ovalspots, not reference water. Originalsurface restored; privateproofcb88689/dev5215session85659 stillrejectedtrial. Root also found wrong3Dview-vector math in initialsampler; corrected evidence/revisedplan pending. No acceptedshadercommit/AC change. RejectedPNG durable docs/asset-evidence/aq103/rejected-curvature-20261114/.
+
+- Root resume review 2026-11-14: all current scratch entries inspected. Latest PR49/laptop-only/preserve-assets/no-deploy policies current; AQ89 complete. AQ103 diagnosis checkpoint94c4b95 pushed, corrected finite sampler independently reproduced. Ray-driven shader trial now being implemented by navigation_recovery; pending Root technical/native review. Earlier restored-baseline/private-rejected-proof descriptions remain historical until proof is refreshed.

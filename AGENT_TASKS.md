@@ -13,6 +13,21 @@ Downstream: Current implementation and review work
 
 Root verified this checkpoint against the current checkout. The goal remains active and incomplete: finish the backlog and make the living aquarium resemble the supplied reference. Passing functional tests does not accept final art.
 
+## Current delivery override — 2026-11-14
+
+PR48 was merged externally during native review. The current branch is `refinements`; preserve it and use shared draftPR49 https://github.com/ryantrappy/aquarium-homepage/pull/49. AQ89completionbac3d8e is committed/pushed there. Earlier PR48/process references below are historical. Root did not merge/deploy. AQ103 water surface is active priority; no more phone checks per user.
+
+## Current water review — 2026-11-14
+
+The first curvature-brightness trial was rejected: native laptop evidence shows repeated oval spots. Original production water source is restored. Private proof `cb88689` and the owned port-5215 server still serve that rejected trial until replaced; do not use them as current-source evidence. The agent is preparing phase-coherent, screen-filtered ripple normals and a refracted fixture ray for Root review, with the existing camera, waves and threshold preserved. The corrected finite continuous-field sampler includes all camera-vector components and sampled displaced height; it still finds no open Snell window in the baseline sample. No new acceptance or shader milestone yet. Rejected evidence is cataloged under `docs/asset-evidence/aq103/rejected-curvature-20261114/`.
+
+## Latest Root checkpoint — user water-surface priority2026-11-14
+
+- User stops phone checks; assume phone behavior, laptop1440x900 only going forward. This supersedes all earlier two-view testing policy. Requirements/scratch record the override.
+- AQ89 Done after Root all5AC/2DoD review at e0def59;902tests/typecheck/build and native evidence docs/asset-evidence/aq89/native-e0def59/README.md. Raw transient/default-viewport observations preserved separately from accepted target evidence. Historical phone checks ended before user stop instruction. Ownedtab1298078142 already closed by interrupted-turn cleanup. Source e0def59 and AQ76partial1e1105e pushed to sharedPR48. Completion evidence/status commit follows immediately.
+- AQ103 current priority: user says water surface regressed versus realistic guide. Current shader unchanged sincea5e64a2; Root/agent auditing frustum, distant slope damping and mostly-closed fixture transmission before correction. Preserve geometry/models/clock; no final art acceptance yet. AQ76 broader budgets remainopen. Queue65Done/67open after AQ89; full goal active/incomplete.
+- Proof detachede0def59, onlyViteallowlistdirty; owneddev5215session42347 pins e0def59/disposablelocalhost config. Preserveuser3000/5210. No deployment/merge/Blender/model/originalconfig changes.
+
 ## Latest Root checkpoint — 2026-11-14 label/recovery source review
 
 This section supersedes older process/source details. Full goal active/incomplete; AQ89 In Progress with all5AC/2DoD unchecked; AQ76 remains open. AQ76 milestone1e1105e is pushed; this scoped commit now carries the reviewed AQ89 source/evidence, followed by exact native review.

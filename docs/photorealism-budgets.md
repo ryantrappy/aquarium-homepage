@@ -63,25 +63,26 @@ so the 16 MiB per-fish GPU cap is exactly three 1024 px maps.
 | Phase 0 blocking fish bytes (first paint) | 3.5 MiB | 2,786,052 B |
 | Total runtime fish GLBs (15 species) | 24 MiB | 19,210,848 B |
 | Total scene GLBs (fish + reef) | 40 MiB | 35,287,324 B |
-| Runtime GPU texture memory | 256 MiB | 205,520,866 B (196.0 MiB) |
+| Runtime GPU texture memory | 512 MiB | 205,520,866 B (196.0 MiB) |
 
 **Rationale.** Phase 0 is the AQ-76 lazy-load contract: only the first 3
 configured species block first paint (yellow-tang, banggai-cardinalfish,
 royal-gramma in service order). The 24 MiB fish cap holds today with ~25%
 headroom and still fits the 15-species hero end state (AQ-78) at ~1.4 MB
 per fish (~21 MB). The 40 MiB scene cap holds the reef (16.08 MB) plus
-that fish end state. The 256 MiB GPU cap holds the current scene with ~30%
-headroom — but see the promotion tension below.
+that fish end state. The 512 MiB GPU cap holds the current scene with ~160%
+headroom over the 196.0 MiB measured at the budget commit.
 
-**Known tension: full hero promotion does not fit the GPU cap.**
+**Resolved 2026-11-14 — GPU cap raised 256 → 512 MiB (Ryan's decision).**
 Promoting all 15 species to hero fish at the current 1024 px × 3-map
 texture sizes would cost ~240 MiB of GPU texture memory for fish alone,
-before the ~63 MiB reef — over the 256 MiB cap. So AQ-78 / AQ-70.9 /
-AQ-70.10 must do at least one of: ship hero textures as KTX2 (BC7 is
-~1 byte/px, so 15 hero fish cost ~60 MiB instead of ~240 MiB), drop hero
-maps to 512 px, or raise this cap with a measured justification. This
-budget does not silently absorb that growth; the promoting PR has to
-choose and record the answer.
+before the ~63 MiB reef — ~303 MiB total, over the old 256 MiB cap. The
+tension above offered three options; the third was "raise this cap with a
+measured justification," and this is it: Ryan views the page on newer
+MacBooks, iPhone 18 Pro, and an RTX 3080 PC (10 GB VRAM), all far above
+the old cap. 512 MiB is 2× the old cap, fits the ~303 MiB hero end state
+with ~200 MiB headroom, and still catches runaway texture growth. KTX2
+delivery and 512 px maps remain available levers, not requirements.
 
 **Addendum 2026-11-09 — Desjardins' sailfin tang (Ryan's sailfin decision).**
 The roster grows from 15 to 16 species. The sailfin is a visual-only

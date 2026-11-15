@@ -1,0 +1,41 @@
+edge incidence counts { '1': 0, '2': 344, '3': 0, '4': 73 }
+{
+  "glb": "src/rendering/assets/splat-fish/sources/blue-green-chromis-contour-base.glb",
+  "source": "public/fish/blue-green-chromis.webp",
+  "fishWidthPx": 350,
+  "sourceDimensions": [
+    600,
+    300
+  ],
+  "sourceAlphaBounds": [
+    10,
+    20,
+    585,
+    287
+  ],
+  "meshVertexCount": 4793,
+  "indexCount": 28308,
+  "boundaryPlanarVertexCount": 355,
+  "boundaryEdgeCount": 344,
+  "edgeProjectedPx": {
+    "p50": 3.328000670216832,
+    "p90": 4.173468118205992,
+    "p95": 4.795187409860586,
+    "max": 11.31660750532294
+  },
+  "smoothedSdfAtExportedContourVerticesSourcePixels": {
+    "maxAbs": 0.026108406462334803
+  },
+  "smoothedSdfAlongExportedStraightEdgesSourcePixels": {
+    "p50Abs": 0.04372551506554276,
+    "p90Abs": 0.2781589524397847,
+    "p95Abs": 0.6881794893130105,
+    "maxAbs": 3.1974158587333266,
+    "sampleCount": 1032
+  },
+  "smoothedSdfAlongEdgesProjectedPixels": {
+    "p95Abs": 0.4014380354325895,
+    "maxAbs": 1.8651592509277737
+  },
+  "hashGlb": "c53ea07f3e6f96d254546cbb54f418106b268dcc00ea96c2aed14796e1b855de"
+}

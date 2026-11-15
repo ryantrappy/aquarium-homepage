@@ -12,7 +12,7 @@ Downstream: src/rendering/scene/aquarium.ts, src/rendering/scene/fish-label-layo
 -->
 
 > [!NOTE]
-> **Agent Context & Authority** — Root reviewed source handoff. AQ-89 remains In Progress with all acceptance/DoD boxes unchecked pending exact two-size native visual/access/control review. No fish/coral/reef model, Blender source, asset map or original configuration changes.
+> **Agent Context & Authority** — Root reviewed source handoff, followed by [final native acceptance](../native-e0def59/README.md) at e0def59. Earlier pending statements below are historical. No fish/coral/reef model, Blender source, asset map or original configuration changes.
 
 ## Behavior and verification
 

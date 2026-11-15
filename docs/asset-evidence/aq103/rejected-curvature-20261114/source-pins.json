@@ -1,0 +1,11 @@
+{
+  "baselineCommit": "a5e64a2",
+  "rootReproducedSweep": true,
+  "sha256": {
+    "src/rendering/scene/water-surface.ts": "8ec36047d94e21a4431dc0ba8b36c7056e420c1b0e464d286f7c109dea78b94f",
+    "src/rendering/scene/surface-waves.ts": "b67a5469d1286bd4a84c988f7d730742a0f54278cbe9e06ef7490b3899fc3770",
+    "docs/asset-evidence/aq103/rejected-curvature-20261114/sample_visible_surface_corrected.py": "bacd8a8766970f629ae20d77892bc2ff4ba0acf558568bae60684d9ffbc1d66a",
+    "docs/asset-evidence/aq103/rejected-curvature-20261114/sample-results-corrected.json": "943c17f6fc671f000a32dd9e9ae40b99c7b87b68d8ab763f0785dbc55ce337ee",
+    "docs/asset-evidence/aq103/rejected-curvature-20261114/laptop.png": "5a93b73f232925cbfaa768991b9914c6365c9ce69d6bdcf073788f6f038315e6"
+  }
+}
