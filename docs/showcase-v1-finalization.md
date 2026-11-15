@@ -47,3 +47,7 @@ Root must inspect current implementation and criterion-specific objective eviden
 Work on the existing `v1-finalization` branch. PR #49 was merged externally; no shared showcase PR was open at scope confirmation. Root will create the next rolling draft PR with the first concrete reviewed completion. Do not merge or deploy; the user handles deployment. Native visual checks use only 1440×900 CSS pixels; no further phone checks.
 
 AQ-108 removes personal internal-network URLs from shipped defaults and uses familiar public demo websites. Existing saved/shared user configuration must remain untouched. The Add service URL field starts and resets with `https://` while preserving existing edit values and validation.
+
+## Current reviewed checkpoint
+
+AQ-108 is Done after Root review at source `393c6c9`, delivered through [rolling draft PR #53](https://github.com/ryantrappy/aquarium-homepage/pull/53). [Evidence](asset-evidence/aq108/root-review-20261114/README.md) records35focused tests, typecheck/build, Compose resolution and laptop fresh/add/edit/reload/reset flows. The remaining19 scoped tasks are still open; the scope-confirmation table above is historical, not a live completion ledger.
