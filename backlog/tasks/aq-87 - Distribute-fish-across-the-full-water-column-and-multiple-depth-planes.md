@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-08'
-updated_date: '2026-11-13 05:31'
+updated_date: '2026-11-15 14:46'
 labels:
   - behavior
   - photorealism
@@ -65,3 +65,18 @@ Root reviewed two-size native trial: independent ecological height order plus he
 
 Root exact-source review at 8b2d7cc: docs/asset-evidence/aq87/distribution-20261112/ contains native 1440x900 and 402x874 PNGs, ready sidecars and phone target bounds. All eleven inhabitants remain within declared staging bands; eight service fish span Y3.35655 and visibly multiple depth planes. Eight phone targets exceed44px. Root accepts this saved-roster distribution against the taller reef reference direction. Isolated full732tests/65files, typecheck14scripts and production build pass; prior behavior regression scope retained. AC2/4/5 accepted. AC1/3 remain explicitly open: clown profile is upper-half and anchor/startle targets are separate; animated-body/solid clearance is not proven by point snapshots. Initial proof-server403 infrastructure errors were corrected before final ready captures; no clean-console certification is claimed.
 <!-- SECTION:NOTES:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: @root
+created: 2026-11-15 14:42
+---
+Root partial review 2026-11-15: accepted the fresh public-default native view at 1440x900 CSS pixels, DPR 1, with reduced motion emulated before app navigation and no look-dev seed prefix. After settled reload, all five default fish bodies and captions remained visible with aria-hidden=false. Capture/state: docs/asset-evidence/aq87/front-cutoff-20261115/accepted-native-1440x900.jpg and accepted-native-state.json. Pinned planner comparison records five-starter Z span 0.7898077073 to 2.2418077073 scene units; this unit-planner measurement is separate from the native visual review. Focused fish-spawn suite 31/31 and Root combined full suite 934/934 across 78 files pass. AQ-87 AC #1 remains open for full-species depth bands and route targets; AC #3 remains open for all-depth animated-body clearance, reef occlusion, and labels/hit targets. No AC newly checked; task remains In Progress.
+---
+
+created: 2026-11-15 14:46
+---
+Root reviewed partial milestone2026-11-15: addfront-watercutoff Zcandidate without changing visibilityranking, biologicheight, clearance, spacing, mesh-query orfrustumfilters. PlannerdefaultfiveZspan0.7898to2.2418; Rootnative1440x900DPR1freshdefaults (reducedmotionbeforeappnavigation, noloodevseedprefix) showsall5bodies/captions andunhiddenlinks. Root30focusedtests/934full78files passprivatef03b551. Combined31caseauditandseparateAQ104concurrenttimeout retained transparently; notAQ106acceptance. Removedpartialdebugconsoleexternallycommitted273583c. Evidence docs/asset-evidence/aq87/front-cutoff-20261115/. No newAC checked; fullspeciesbands andall-depthanimatedclearance remainopen. ConcurrentAQ106hunks excluded fromselectedindex/sourcecommit.
+---
+<!-- COMMENTS:END -->

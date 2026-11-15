@@ -357,6 +357,21 @@ describe('safe aquarium fish spawning', () => {
     expect(isSafeFishPosition(constrained!, 0.1, bounds, obstacles)).toBe(true)
   })
 
+  it('rejects the added front-water depth candidate when the depth-specific frustum excludes it', () => {
+    const bounds: AxisAlignedBox = { min: { x: -2, y: -2, z: -2 }, max: { x: 2, y: 2, z: 2 } }
+    const clearance = 0.1
+    const frontWaterCutoff = bounds.min.z + (bounds.max.z - bounds.min.z) * 0.52
+    const preferred = { x: 0.3, y: 0.1, z: -1 }
+    const maxAbsXAtDepth = (z: number) => Math.abs(z - frontWaterCutoff) < 1e-9 ? 0 : 2
+    const obstacles = [{ id: 'reef', bounds: { min: { x: -1, y: -1, z: -1.3 }, max: { x: 1, y: 1, z: -0.7 } } }]
+
+    const position = findSafeFishSpawn(preferred, bounds, obstacles, clearance, [], undefined, undefined, [-0.5, 0.5], maxAbsXAtDepth)
+
+    expect(position).toBeDefined()
+    expect(position!.z).not.toBeCloseTo(frontWaterCutoff, 9)
+    expect(isSafeFishPosition(position!, clearance, bounds, obstacles, maxAbsXAtDepth)).toBe(true)
+  })
+
   it('fails closed when a height band has no clearance-safe fit or is malformed', () => {
     const bounds: AxisAlignedBox = { min: { x: -2, y: -2, z: -2 }, max: { x: 2, y: 2, z: 2 } }
     const preferred = { x: 0, y: -1.2, z: 0 }
@@ -463,12 +478,6 @@ describe('safe aquarium fish spawning', () => {
     // bounded grid search may nudge a fish off its plane, but the school
     // must not collapse back onto one plane.
     const zs = placements.map(item => item.position.z)
-    const cardinal = placements.find(item => item.service.fishId === 'banggai-cardinalfish')!
-    console.log('AQ87 planes', width, FISH_SPAWN_DEPTH_PLANES.map(fraction => {
-      const z = bounds.min.z + cardinal.clearance + (bounds.max.z - cardinal.clearance - (bounds.min.z + cardinal.clearance)) * fraction
-      const candidate = { ...cardinal.preference.position, z }
-      return { z, safe: isSafeFishPosition(candidate, cardinal.clearance, bounds, obstacles, maxAbsXAtDepth(width, height)), candidate }
-    }))
     expect(Math.max(...zs) - Math.min(...zs)).toBeGreaterThan(1.5)
   })
 

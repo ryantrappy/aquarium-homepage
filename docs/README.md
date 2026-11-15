@@ -19,6 +19,8 @@ Downstream: All repository documentation and active agent workflows
 
 ---
 
+[AQ-87 front-water fallback review](asset-evidence/aq87/front-cutoff-20261115/README.md) records the bounded default-spawn repair and remaining full-roster gates.
+
 [AQ-107 Root refinement acceptance](asset-evidence/aq107/root-review-20261115/README.md) records the accepted original-recipe contour refinement, native comparisons, actual runtime picking and source-pinned checks.
 
 [AQ-107 rejected remesh evidence](asset-evidence/aq107/rejected-remesh-20261114/README.md) records the native visual failure of the first connected-domain refinement; AQ-107 remains open.

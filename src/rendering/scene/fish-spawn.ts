@@ -285,7 +285,8 @@ export function fishSpawnPreference(
 
 /**
  * Find a deterministic safe point close to a preferred spawn. The bounded
- * grid has at most 6^3 candidates and never reduces the fish clearance.
+ * grid has at most 6 × 6 × 7 = 252 candidates and never reduces the fish
+ * clearance. Constrained searches with obstacles add one front-water Z plane.
  */
 export function findSafeFishSpawn(
   preferred: Vec3,
@@ -347,6 +348,14 @@ export function findSafeFishSpawn(
     for (let division = 0; division <= SPAWN_SEARCH_DIVISIONS; division++) {
       const fraction = division / SPAWN_SEARCH_DIVISIONS
       values.push(safeMin[axis] + (safeMax[axis] - safeMin[axis]) * fraction)
+    }
+    // Give a constrained spawn a candidate at the first front-water depth.
+    // The coarse uniform Z grid can otherwise jump from a rear point demoted
+    // for visibility to a much shallower front point, collapsing the cohort
+    // onto one visible plane. This candidate remains subject to every normal
+    // collision and frustum check below.
+    if (axis === 'z' && safeHeightRange && obstacles.length > 0) {
+      values.push(waterBounds.min.z + (waterBounds.max.z - waterBounds.min.z) * 0.52)
     }
     return [...new Set(values)].sort((a, b) => a - b)
   }

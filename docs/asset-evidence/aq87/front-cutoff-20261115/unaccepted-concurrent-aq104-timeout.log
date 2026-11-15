@@ -1,0 +1,25 @@
+
+> test
+> vitest run --run src/rendering/scene/aq104-distribution.test.ts src/rendering/scene/aq104-fallback.test.ts src/rendering/scene/aq104-anchor-preempt.test.ts
+
+
+ RUN  v5.1.0 /Users/ryantrapp/Desktop/Code/aquarium-homepage
+
+ ❯ src/rendering/scene/aq104-distribution.test.ts (1 test | 1 failed) 30396ms
+   × sustains a moving mixed roster across all three sectors with unchanged collision checks 30375ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/rendering/scene/aq104-distribution.test.ts > sustains a moving mixed roster across all three sectors with unchanged collision checks
+Error: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/rendering/scene/aq104-distribution.test.ts:13:1
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 4 passed (5)
+   Start at  08:35:41
+   Duration  33.21s (tests 92%, import 6%, transform 2%)

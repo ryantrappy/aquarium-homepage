@@ -1,0 +1,8 @@
+
+ RUN  v5.1.0 /private/tmp/aquarium-showcase-build-c5c10bc
+
+
+ Test Files  1 passed (1)
+      Tests  30 passed (30)
+   Start at  08:19:11
+   Duration  2.34s (transform 51%, tests 26%, import 22%, worker 1%)

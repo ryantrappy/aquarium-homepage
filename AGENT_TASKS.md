@@ -6,7 +6,7 @@ Status: Active
 Authority: Binding Checkpoint; Backlog controls acceptance
 Backlog: AQ-44, AQ-49, AQ-54, AQ-59, AQ-70.2, AQ-70.13, AQ-74, AQ-86, AQ-104, AQ-105
 Owner: @root
-Updated: 2026-11-14
+Updated: 2026-11-15
 Upstream: AGENTS.md, agent_scratch.md, docs/requirements.md
 Downstream: Current implementation and review work
 -->
@@ -20,6 +20,8 @@ The user explicitly confirms **all 19 tasks already In Progress plus AQ-108** fo
 The scope-confirmation baseline is merged `7c08b43`; preserve the current `v1-finalization` branch and concurrent work. PR49 and other recent PRs were merged externally. Root did not merge/deploy. Use rolling draft PR53 https://github.com/ryantrappy/aquarium-homepage/pull/53 and maintain its running contents. AQ108 is Done after Root review: source393c6c9,35focused tests/typecheck17scripts/build, Compose resolution and exact laptop fresh/add/edit/reload/reset evidence under docs/asset-evidence/aq108/root-review-20261114/. Existing saved configuration remains intact. The other17 scoped tasks remain open after AQ15/AQ107 final acceptance below; AQ103 has a fallback-initialization correction with73focused checks and pending optical-branch evidence. No more phone checks.
 
 Root acceptance 2026-11-15: AQ15 is Done after actual hardware/current-source local UI review; evidence docs/asset-evidence/aq15/root-review-20261114/. Root80focused tests/typecheck17scripts/build pass. Front/package, side/Core0, hidden and reload selection verified; deployedAPI mismatch remains separate handoff context. Remaining17 of the fixed20 showcase tasks are open (AQ108, AQ15 and AQ107 complete). AQ107 original-recipe139×83 passed native normal/350pxclose/pose comparisons, exact actual-runtime/picking review,89integration checks/typecheck/build; evidence docs/asset-evidence/aq107/root-review-20261115/. External273583c committed mixed source/evidence while Root review was ongoing; preserve it without treating it as task acceptance. Concurrent AQ106 work is separately user-directed and must not be swept into these commits.
+
+Root2026-11-15 AQ87 partial milestone: constrained spawn search includes the existing front-water cutoff, retaining every safety and visibility ranking. Default-five planner Z span0.7898→2.2418, nativefresh1440x900DPR1 fivebodies/linksvisible, 30focused/934fulltests pass in privatef03b551. Evidence docs/asset-evidence/aq87/front-cutoff-20261115/. FullAQ87 speciesbands/animatedbodyclearance remainopen. AQ103 finalmask/nativeoptics review accepted pending scoped completion record.
 
 Earlier water/process/branch notes below are historical. Current checked-in renderer includes the static-reef radiance probe, phase-warped anisotropic water normals and directional key correction. Prior private proof/capture paths remain evidence of particular trials, not proof of current HEAD. Chromis diagnosis is durable, but the committed refinement script has not yet established an accepted refined runtime asset. Do not mistake externally committed partial work for Root acceptance.
 
