@@ -249,19 +249,20 @@ export function createWaterSurface(initialLayout: WaterSurfaceLayout) {
         float troughCrease = 1.0 - smoothstep(0.02, 0.22, abs(totalSlope.y + 0.08));
         col = mix(col, vec3(0.003, 0.015, 0.045), troughCrease * tirFactor * 0.38);
 
-        // Thin silver-cyan meniscus is inside the front-glass plane and within the side bounds.
+        // Keep the meniscus fully inside the front-glass plane and side bounds.
+        float frontClip = 1.0 - smoothstep(uFrontZ - 0.02, uFrontZ, p.y);
         float meniscusSides = 1.0 - smoothstep(uHalfWidth - 0.14, uHalfWidth, abs(p.x));
         float frontMeniscus = exp(-pow((p.y - (uFrontZ - 0.015)) / 0.018, 2.0)) * meniscusSides;
-        col = mix(col, vec3(0.48, 0.80, 0.98), frontMeniscus * 0.72);
+        float clippedFrontMeniscus = frontMeniscus * frontClip;
+        col = mix(col, vec3(0.48, 0.80, 0.98), clippedFrontMeniscus * 0.72);
 
         float rearFade = smoothstep(uBackZ, uBackZ + 1.95, p.y);
-        float frontClip = 1.0 - smoothstep(uFrontZ - 0.02, uFrontZ, p.y);
         float sideFade = 1.0 - smoothstep(uHalfWidth - 0.12, uHalfWidth, abs(p.x));
         // Match the top of aquarium.ts's rear-water backdrop gradient (cTop).
         col = mix(vec3(0.015, 0.056, 0.145), col, rearFade);
 
         float baseAlpha = mix(0.78, 0.52, transmissionWindow);
-        float alpha = clamp(baseAlpha * rearFade * frontClip * sideFade + frontMeniscus * 0.85, 0.0, 0.88);
+        float alpha = clamp(baseAlpha * rearFade * frontClip * sideFade + clippedFrontMeniscus * 0.85, 0.0, 0.88);
         gl_FragColor = vec4(col, alpha);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
