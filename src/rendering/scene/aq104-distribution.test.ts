@@ -64,6 +64,9 @@ it('sustains a moving mixed roster across all three sectors with unchanged colli
   expect(Math.min(...result.moved.map(fish => fish.pathLength))).toBeGreaterThan(.1)
   expect(result.rows.every(row => row.positions.every(point => Object.values(point).every(Number.isFinite)))).toBe(true)
  }
- expect(cases[0]).toEqual(cases[2])
- expect(cases[1]).toEqual(cases[3])
-}, 30000)
+  expect(cases[0]).toEqual(cases[2])
+  expect(cases[1]).toEqual(cases[3])
+  // 60s: this simulation takes ~14s standalone and exceeds 30s under
+  // full-suite parallel load on slow machines (1.5-CPU VM); the timeout is
+  // wall-clock headroom, not an assertion about speed.
+}, 60000)
