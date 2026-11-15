@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-08 00:30'
-updated_date: '2026-11-14 15:39'
+updated_date: '2026-11-15 16:05'
 labels:
   - performance
   - rendering
@@ -36,7 +36,7 @@ Coordinate with AQ-70.3 (photoreal asset-delivery and frame-time budgets) to imp
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 Distance-based LOD reduces geometry / texture cost for far fish without visible popping
-- [ ] #2 Off-screen species are lazy-loaded instead of all loading up front
+- [x] #2 Off-screen species are lazy-loaded instead of all loading up front
 - [ ] #3 Adaptive quality lowers pixel ratio / shadows under load and restores them when headroom returns
 - [x] #4 Performance is measured at 1440x900 and 402x874 before and after, with results recorded
 <!-- AC:END -->
@@ -96,6 +96,8 @@ Root review2026-11-12 accepted elapsed-time adaptive windows: evaluate after120 
 2026-11-14 recovery-policy implementation (verified subset only; no AC/DoD/status changes): raised recovery EMA threshold to 17.5 ms, retaining 1.5 ms hysteresis under the unchanged 19 ms step-down EMA; recovery now also requires p95 <= the existing 22 ms slow-frame bound. Comments document the bounded nature of 60 Hz RAF recovery: a vsync-capped stream cannot establish additional GPU headroom, and overload still causes the unchanged step-down. Added regressions for fail-before/fixed steady 60 Hz restoration from Low through Balanced to High, an 18 ms deadband, p95-spiky intervals with recovered EMA, exclusion-reset recovery streaks, and overload after recovery/cooldown. Existing 120-sample/elapsed-window, slow-threshold, sustained-count, and general cooldown tests remain unchanged. Evidence: baseline focused run 24/24 passed; pre-fix regression run 26 passed/2 failed at the expected 60 Hz restoration and exclusion-separated restoration assertions; post-fix `npm test -- src/rendering/scene/runtime-quality.test.ts` passed 28/28; `git diff --check` passed. Logs and source hashes: `/tmp/aq76-recovery-review/`. This validates only the pure policy/helper tests; no native performance claim, aquarium integration review, AQ-76 acceptance check, or task completion.
 
 2026-11-14 Root-reviewed budget metadata iteration (verified subset; no AC/DoD/status changes): synchronized FRAME_TIME_BUDGET.stepUpEmaMs to the 17.5 ms recovery-probe threshold while preserving the independent 16.7 ms frame target and unchanged 19 ms step-down EMA / 22 ms p95 overload gates. Replaced target>recovery assertion with explicit reachable steady-60-Hz RAF bound, recovery<slow hysteresis, and exact target/p95/step-down assertions; runtime constants remain cross-checked against metadata. Existing asset, scene, and performance budget checks are untouched. Focused reproduction before fix: runtime-quality + budgets tests had 41 pass / 1 expected stale-metadata failure. After final assertions: `npm test -- src/rendering/scene/runtime-quality.test.ts src/rendering/assets/budgets.test.ts` passed 42/42; `git diff --check` passed. Fail/pass logs and updated SHA256/Git blob pins (all four policy/runtime-quality files) are in `/tmp/aq76-recovery-review/`. No performance-budget pass is inferred from recovery at 17.5 ms; no AC/Done/task status change.
+
+2026-11-15 active-backlog review: verified AC #2 only. `npm test -- src/rendering/scene/runtime-quality.test.ts src/rendering/scene/aquarium-lifecycle.test.ts src/rendering/scene/glass-enclosure.test.ts --maxWorkers=1` passes 83/83. Aquarium lifecycle tests cover a species staying queued off-screen while a later visible species loads, plus lazy loading beyond the first three configured species. AC #1 remains open: runtime LOD retains full GLBs and only changes animation cadence, so the required geometry/texture reduction is not implemented; no sprite/asset simplification was introduced. AC #3 is not checked: unit tests cover controller thresholds/tier settings, but renderer-level pixel-ratio/shadow transitions and visual quality remain pending Root verification.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
