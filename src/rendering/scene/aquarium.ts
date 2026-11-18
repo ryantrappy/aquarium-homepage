@@ -2028,7 +2028,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     else setTimeout(() => pumpLazyLoads(), 50)
   }
   function pumpLazyLoads() {
-    if (disposed || failed || lazyQueue.length === 0) return
+    if (!loaded || disposed || failed || lazyQueue.length === 0) return
     while (lazyActiveLoads < LAZY_MAX_CONCURRENT_LOADS && lazyQueue.length > 0) {
       const inhabitants = [...fish, ...schoolmates]
       // Keep off-screen species queued, while allowing later visible
@@ -2108,7 +2108,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     captureWaterRadianceForHabitatLayout()
     status(fishSceneStatus(!initialSpawnSucceeded))
     syncLoop()
-    enqueueLazyFishLoads(configuredFishIds)
+    enqueueLazyFishLoads(services.map(service => service.fishId))
     settleLookDevReadiness()
   }
   void initialize().catch(error => {

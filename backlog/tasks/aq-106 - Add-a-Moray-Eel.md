@@ -1,11 +1,11 @@
 ---
 id: AQ-106
 title: Add a Moray Eel
-status: In Progress
+status: Done
 assignee:
   - '@junie'
 created_date: '2026-11-14 20:52'
-updated_date: '2026-11-15 15:45'
+updated_date: '2026-11-18 05:05'
 labels:
   - gemini-research
   - modeling
@@ -117,14 +117,14 @@ Add the supplied snowflake moray eel (*Echidna nebulosa*) as a selectable 17th r
 - [x] #6 Load the supplied GLB with its actual texture format. Document and validate the supplied PNG texture exception to the KTX2 budget rule; do not claim it is KTX2 or alter the asset. A separate derivative is acceptable only if independently validated and provenance-preserving.
 - [x] #7 The hero-fish manifest, budget validation, roster assertions, and docs/photorealism-budgets.md include the supplied moray and are re-derived from the actual asset and current scene totals; retain a clear, scoped exception for the supplied texture format.
 - [x] #8 The moray is available in the service fish selector. Selecting it creates only the cave resident; multiple services must not create free-swimming duplicates.
-- [ ] #9 Verify at 1440×900 only in accordance with the latest user direction. Root art review remains required before completion; do not run phone/device-matrix checks.
+- [x] #9 Verify at 1440×900 only in accordance with the latest user direction. Root art review remains required before completion; do not run phone/device-matrix checks.
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Root agent reviews the completed work before the task is marked Done.
+- [x] #1 Root agent reviews the completed work before the task is marked Done.
 - [x] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
-- [ ] #3 Model promotion follows the AQ-79 per-species Root-review routing (no automatic swap; Root reviews the model before it goes live).
+- [x] #3 Model promotion follows the AQ-79 per-species Root-review routing (no automatic swap; Root reviews the model before it goes live).
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -254,6 +254,8 @@ Root review remains required before Done. No Blender edits, deployment, or visua
 2026-11-15 request scope clarification: user limited this execution to tasks already In Progress at request start; do not start To Do tasks or create new tasks. The fixed 18-task set and override are recorded in AGENT_TASKS.md, docs/showcase-v1-finalization.md, and agent_scratch.md. AQ-106 remains In Progress: AC 1–8 remain verified from prior evidence; AC 9 and Root review are pending. No new visual acceptance is claimed.
 
 2026-11-15 follow-up: checked the repository for Playwright/Puppeteer and found no usable browser runner or browser interface in this session. Per AC 9 and the existing plan, the 1440×900 visual verification and Root art/provenance/model review remain pending; no browser acceptance is claimed.
+
+2026-11-17 Root fix & 1440x900 visual review: moved SNOWFLAKE_MORAY_CAVE_CENTER_LOCAL from x=-0.04 to x=0.02 so the exposed head capsule clears socket_brain_apron_03 across the full 11-coral right-island assembly; guarded pumpLazyLoads() on loaded and enqueued live services at initialize() completion; updated reef-mesh-navigation.test.ts to assemble all 11 DEFAULT_RIGHT_ISLAND_MOUNTS via GLTFLoader + assembleCoralsOnRockSockets. Verified 98/98 targeted tests, typecheck (17 scripts), production build, and live 1440x900 DPR1 browser review (docs/asset-evidence/aq106/root-review-20261117/).
 <!-- SECTION:NOTES:END -->
 
 ## Comments
@@ -282,3 +284,9 @@ created: 2026-11-15 14:16
 Junie verified AC 1–8 and the AQ-106-specific lifecycle, asset, scale, budget, and cave geometry checks. Please review the fixed exposed-head/cave placement and provenance before checking AC 9 or marking Done; the two AQ-87 starter-depth failures are documented in implementation notes.
 ---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Integrated the supplied partial snowflake moray eel (Echidna nebulosa) as a single-service right-cave resident at island-local { x: 0.02, y: 0.02, z: 0.18 }, clearing all 11 mounted right-island corals, rock collider, sand bed, and default camera ray while preserving the supplied GLB and PNG maps byte-for-byte under a hash-scoped budget exception. Verified via unit/integration suites, typecheck, production build, and 1440x900 browser review.
+<!-- SECTION:FINAL_SUMMARY:END -->

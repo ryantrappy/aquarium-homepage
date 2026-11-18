@@ -18,7 +18,7 @@ describe('snowflake moray residence', () => {
     expect(fishRenderLength('snowflake-moray-eel')).toBeCloseTo(9 * TANK_UNITS_PER_INCH, 8)
     expect(residence.position.x).toBeGreaterThan(right.position.x - .25)
     expect(residence.position.x).toBeLessThan(right.position.x + .25)
-    expect(SNOWFLAKE_MORAY_CAVE_CENTER_LOCAL).toEqual({ x: -0.04, y: 0.02, z: 0.18 })
+    expect(SNOWFLAKE_MORAY_CAVE_CENTER_LOCAL).toEqual({ x: 0.02, y: 0.02, z: 0.18 })
     const halfWidth = (SNOWFLAKE_MORAY_FOREBODY_BOUNDS.max.x - SNOWFLAKE_MORAY_FOREBODY_BOUNDS.min.x) / 2
     const halfHeight = (SNOWFLAKE_MORAY_FOREBODY_BOUNDS.max.y - SNOWFLAKE_MORAY_FOREBODY_BOUNDS.min.y) / 2
     expect(SNOWFLAKE_MORAY_CAVE_COLLISION_RADIUS_M).toBeGreaterThanOrEqual(Math.hypot(halfWidth, halfHeight) * fishModelScale('snowflake-moray-eel'))

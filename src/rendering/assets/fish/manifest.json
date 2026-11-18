@@ -351,7 +351,7 @@
       "animationTracks": ["probe", "body_mid", "neck", "head", "jaw"],
       "headBoneBindPosition": [0, 0, 1.56],
       "sceneResidence": {
-        "rightIslandLocalBodyCenterMeters": [-0.04, 0.02, 0.18],
+        "rightIslandLocalBodyCenterMeters": [0.02, 0.02, 0.18],
         "policy": "Fixed in the bottom-right cave; no left-cave or open-water fallback.",
         "visibleHeadProbeClearanceRadiusMeters": 0.1,
         "embeddedForebody": "The rear of the supplied partial model remains inside and occluded by the cave; only the exposed head-to-probe segment is clearance-checked. Root visual review is pending."
