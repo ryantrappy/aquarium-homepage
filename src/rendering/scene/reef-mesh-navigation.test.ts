@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import * as THREE from 'three'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import {
   createMountedCoralFallbackObstacles,
   createRockFallbackObstacles,
@@ -652,29 +653,59 @@ describe('createReefMeshNavigation (real rock GLB)', () => {
     if (result.status === 'ready') expect(result.diagnostics.islands[0].rockTriangles).toBe(24_572)
   }, 120_000)
 
-  it('clears the exposed moray head at its fixed right-cave mouth with its mounted zoanthid and sand', async () => {
-    const placement = reefPlacementsForViewport(false).find(item => item.islandKind === 'right')!
-    const rockBytes = readFileSync(new URL(LIVE_ROCK_ISLAND_URLS.right))
-    const reef = new THREE.Group()
-    const rock = meshFromTriangles(glbTriangles(rockBytes))
-    rock.name = 'Live_Rock_Island_Right'
-    rock.scale.y *= placement.foundationHeightScale
-    reef.add(rock)
+async function loadActualGlb(bytes: Uint8Array) {
+  const originalSelf = (globalThis as { self?: unknown }).self
+  if (typeof originalSelf === 'undefined') {
+    ;(globalThis as { self: typeof globalThis }).self = globalThis
+  }
+  const originalImageLoad = THREE.ImageLoader.prototype.load
+  const originalBitmapLoad = THREE.ImageBitmapLoader.prototype.load
+  THREE.ImageLoader.prototype.load = function (_url, onLoad) {
+    const image = { width: 1, height: 1 } as unknown as HTMLImageElement
+    queueMicrotask(() => onLoad?.(image))
+    return image
+  }
+  THREE.ImageBitmapLoader.prototype.load = function (_url, onLoad) {
+    const bitmap = { width: 1, height: 1, close() {} } as unknown as ImageBitmap
+    queueMicrotask(() => onLoad?.(bitmap))
+    return new THREE.Texture(bitmap as unknown as HTMLImageElement)
+  }
+  try {
+    const buffer = new ArrayBuffer(bytes.byteLength)
+    new Uint8Array(buffer).set(bytes)
+    return await new GLTFLoader().parseAsync(buffer, '')
+  } finally {
+    THREE.ImageLoader.prototype.load = originalImageLoad
+    THREE.ImageBitmapLoader.prototype.load = originalBitmapLoad
+    if (typeof originalSelf === 'undefined') {
+      delete (globalThis as { self?: unknown }).self
+    }
+  }
+}
 
-    const softMat = DEFAULT_RIGHT_ISLAND_MOUNTS.find(mount => mount.socketName === 'socket_soft_mat_02')!
-    const coralUrl = MODULAR_CORAL_ASSET_URLS[softMat.coralAssetId]
-    if (!coralUrl) throw new Error(`No runtime coral URL registered for ${softMat.coralAssetId}.`)
-    const coralRoot = new THREE.Group()
-    coralRoot.add(meshFromTriangles(glbTriangles(readFileSync(new URL(coralUrl)))))
-    coralRoot.applyMatrix4(mountMatrix(glbSocketMatrices(rockBytes).get(softMat.socketName)!, softMat))
-    reef.add(coralRoot)
+  it('clears the exposed moray head at its fixed right-cave mouth across the full assembled right island and sand', async () => {
+    const placement = reefPlacementsForViewport(false).find(item => item.islandKind === 'right')!
+    const rockGltf = await loadActualGlb(readFileSync(new URL(LIVE_ROCK_ISLAND_URLS.right)))
+    const coralTemplates = new Map<string, THREE.Object3D>()
+    for (const mount of DEFAULT_RIGHT_ISLAND_MOUNTS) {
+      if (coralTemplates.has(mount.coralAssetId)) continue
+      const coralUrl = MODULAR_CORAL_ASSET_URLS[mount.coralAssetId]
+      if (!coralUrl) throw new Error(`No runtime coral URL registered for ${mount.coralAssetId}.`)
+      coralTemplates.set(mount.coralAssetId, (await loadActualGlb(readFileSync(new URL(coralUrl)))).scene)
+    }
+
+    const reef = rockGltf.scene.clone(true)
+    const assembled = assembleCoralsOnRockSockets(reef, coralTemplates, DEFAULT_RIGHT_ISLAND_MOUNTS, {
+      foundationHeightScale: placement.foundationHeightScale,
+      paused: false,
+      reducedMotion: false,
+      actinicLevel: 0.5,
+    })
     reef.scale.setScalar(placement.uniformScale)
     reef.position.set(placement.position.x, placement.position.y, placement.position.z)
     reef.rotation.y = placement.yaw
 
-    const navigation = await createReefMeshNavigation([{ reef, islandId: 'reef-right', mountedCorals: [
-      { socketName: softMat.socketName, coralAssetId: softMat.coralAssetId, root: coralRoot, materialControllers: [] },
-    ] }])
+    const navigation = await createReefMeshNavigation([{ reef, islandId: 'reef-right', mountedCorals: assembled.mountedCorals }])
     expect(navigation.status).toBe('ready')
     if (navigation.status !== 'ready') return
 

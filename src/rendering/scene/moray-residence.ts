@@ -3,7 +3,7 @@ import { fishBodyRadiusM, fishModelScale, SNOWFLAKE_MORAY_FOREBODY_BOUNDS, SNOWF
 import type { ReefPlacement } from './reef-layout'
 
 /** Fixed body-center point in the measured right-cave passage; the head reaches its visible mouth. */
-export const SNOWFLAKE_MORAY_CAVE_CENTER_LOCAL = Object.freeze({ x: -0.04, y: 0.02, z: 0.18 })
+export const SNOWFLAKE_MORAY_CAVE_CENTER_LOCAL = Object.freeze({ x: 0.02, y: 0.02, z: 0.18 })
 const morayHalfWidth = (SNOWFLAKE_MORAY_FOREBODY_BOUNDS.max.x - SNOWFLAKE_MORAY_FOREBODY_BOUNDS.min.x) / 2
 const morayHalfHeight = (SNOWFLAKE_MORAY_FOREBODY_BOUNDS.max.y - SNOWFLAKE_MORAY_FOREBODY_BOUNDS.min.y) / 2
 export const SNOWFLAKE_MORAY_CAVE_COLLISION_RADIUS_M = Math.hypot(morayHalfWidth, morayHalfHeight)
