@@ -6,12 +6,18 @@ Status: Active
 Authority: Binding Checkpoint; Backlog controls acceptance
 Backlog: AQ-44, AQ-49, AQ-54, AQ-59, AQ-70.2, AQ-70.13, AQ-74, AQ-86, AQ-104, AQ-105, AQ-106
 Owner: @root
-Updated: 2026-11-17
+Updated: 2026-11-20
 Upstream: AGENTS.md, agent_scratch.md, docs/requirements.md
 Downstream: Current implementation and review work
 -->
 
 Root verified prior Root-checkpoint facts against the current checkout. The latest user request (2026-11-15) limits this execution to the 18 tasks that were already In Progress at request start; do not start To Do tasks or create new tasks. This request-specific boundary supersedes the older fixed-showcase execution scope below without changing the historical release record or Backlog acceptance criteria.
+
+## Coral asset review — 2026-11-20
+
+AQ-70.11 commit `515e586` packages four supplied custom corals with their packed Blender sources, raw exports, generators and runtime manifests. The anchor hammer was scaled to 0.88 and moved 27 mm left and 15 mm back in island-local coordinates to clear the clownfish approach to its host. All five actual-geometry hosting cases pass. The 1440×900 DPR 1 working-tree preview displayed 12 inhabitants with no failed assets or browser warnings or errors. The screenshot includes concurrent sand and glass changes. Further close-up and variant review remains open under AQ-70.11.
+
+AQ-59 records a preliminary review of the procedural porous rock study. The 15,360-triangle export has embedded base color, normal and roughness maps. It has a single rounded mesh and lacks mounting sockets. In-tank scale, support, placement and cave clearance still need review before promotion.
 
 ## Current user-requested execution scope — 2026-11-15
 

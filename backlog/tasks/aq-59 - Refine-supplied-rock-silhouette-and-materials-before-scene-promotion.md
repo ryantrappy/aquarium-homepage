@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-05 03:13'
-updated_date: '2026-11-15 15:51'
+updated_date: '2026-11-20 22:23'
 labels:
   - modeling
 dependencies: []
@@ -80,6 +80,8 @@ Root2026-11-12 removed redundant normal-field evaluations: reuses medCrag/finePo
 Root read-only native/export audit saved docs/asset-evidence/aq59/runtime-source-audit-20261112/: inventories/hashes for all3saved Blender files and4GLBs, copied reproducible read-only script. Runtime reef-full-model-left/right exports differ from canonical live-rock-island files whose manifest/socket reports previously passed; current runtime exports have no embedded maps or canonical manifest records. Saved full scene contains2merged rock meshes, coral previews and sand/scatter, no reusable5-8rock meshes or2048px sharedatlas. Generator seven-piece library is scalar field descriptors, not separate mesh modules. Canonical source files also lack separate module library. AQ94 reopened; actual runtime socket/cave/mount evidence and art remain outstanding. No live Blender changes/save/export were performed; no model files changed. Do not automatically swap canonical sources because geometry/socket transforms differ.
 
 2026-11-15 active-only review: all three art/export acceptance criteria remain unchecked. Existing renderer refinements are recorded in AGENT_TASKS.md (neutral carbonate/less broad coralline; reused height samples for derivative normals), but no measured speedup or exact-export acceptance is claimed. The latest handoff also warns that runtime reef-full-model-left/right differ from canonical live-rock manifest/socket evidence and lack embedded maps; this session has no browser/native review interface for the required current exact-export visual and GPU frame-time checks. Preserve Gemini model ownership; no model, generator, asset, or renderer changes made. Keep task In Progress for current-source/library/render review by Root/Gemini.
+
+2026-11-20 candidate review: public/test-assets/procedural-coral-rock.glb is a single porous rock study with embedded base-color, normal and roughness images (3,496,352 bytes, 15,360 triangles). Its Cycles preview shows distinct carbonate pores and a rounded profile. The export contains one mesh node and no mounting sockets. It is a candidate surface/model reference for the exposed reef faces. Current evidence leaves in-tank scale, grounded support, mount locations, cave clearance and provenance review open.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

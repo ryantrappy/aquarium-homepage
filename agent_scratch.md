@@ -93,3 +93,12 @@
 *Root review 2026-11-17: inspected prior scratch entries (standing policies current, completed tasks actioned, remaining showcase tasks pending); actioned and marked AQ-106 Done.*
 - Fixed two runtime bugs preventing a selected snowflake moray service from appearing in the scene: moved `SNOWFLAKE_MORAY_CAVE_CENTER_LOCAL` (`moray-residence.ts` & `src/rendering/assets/fish/manifest.json`) from `x: -0.04` to `x: 0.02` so the exposed head capsule clears `socket_brain_apron_03` across all 11 mounted right-island corals, and guarded `pumpLazyLoads()` on `!loaded` while enqueuing live `services` at `initialize()` completion in `src/rendering/scene/aquarium.ts`.
 - Strengthened `reef-mesh-navigation.test.ts` to mount all 11 `DEFAULT_RIGHT_ISLAND_MOUNTS` via `GLTFLoader` + `assembleCoralsOnRockSockets`. Verified 98/98 across 5 targeted Vitest suites, `npm run typecheck` (17 scripts), `npm run build`, and live `1440×900` DPR 1 browser review (overview, live `crevice_idle` animation, focus zoom/inspect card, Settings single-service lock, 0 console warnings/errors). Evidence: `docs/asset-evidence/aq106/root-review-20261117/`.
+
+### 2026-11-20 — Blender MCP custom coral asset generation (AQ-70.11)
+*Startup review 2026-11-20: inspected all prior scratch entries (standing local-only, laptop-only, preserve-assets, and Blender packed-save/export/sync/commit rules—current policy; AQ-104, AQ-105, AQ-89, AQ-108, AQ-15, AQ-106—actioned; remaining showcase and art/budget gates including AQ-70.11—pending).*
+- Authoring, rendering/inspecting via Blender MCP, syncing, mounting, and testing four new custom coral colonies for `AQ-70.11`: `reef-euphyllia-anchor-hammer`, `reef-montipora-whorled-plate`, `reef-brain-meandroid-diploria`, and `reef-zoanthid-colonial-mat`.
+
+### 2026-11-20 — New asset review
+*Root reviewed retained handoffs. Local/laptop-only review and asset preservation are current policy. Earlier completed milestones are actioned, and remaining art, provenance and performance gates are pending.*
+- Reviewed four AQ-70.11 colonies. Verified native packed maps and registry hashes, fixed hammer size and offset to restore clownfish hosting, and reviewed the live laptop preview. Full checkout passed 973 tests, typecheck and build. The individual coral acceptance rubric remains open.
+- Reviewed the separate procedural rock study for AQ-59. Its porous surface is promising and its export contains a single model without sockets. Placement, scale, support and cave clearance are pending.
