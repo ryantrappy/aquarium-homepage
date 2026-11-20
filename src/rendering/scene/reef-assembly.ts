@@ -106,6 +106,10 @@ export const LIVE_ROCK_ISLAND_URLS: Readonly<Record<'left' | 'right', string>> =
 
 export const MODULAR_CORAL_ASSET_URLS: Readonly<Record<string, string>> = Object.freeze({
   'reef-euphyllia-flowing-torch': new URL('../assets/corals/custom-colonies/reef-euphyllia-flowing-torch.glb', import.meta.url).href,
+  'reef-euphyllia-anchor-hammer': new URL('../assets/corals/custom-colonies/reef-euphyllia-anchor-hammer.glb', import.meta.url).href,
+  'reef-montipora-whorled-plate': new URL('../assets/corals/custom-colonies/reef-montipora-whorled-plate.glb', import.meta.url).href,
+  'reef-brain-meandroid-diploria': new URL('../assets/corals/custom-colonies/reef-brain-meandroid-diploria.glb', import.meta.url).href,
+  'reef-zoanthid-colonial-mat': new URL('../assets/corals/custom-colonies/reef-zoanthid-colonial-mat.glb', import.meta.url).href,
   'reef-acropora-corymbose': new URL('../assets/corals/custom-colonies/reef-acropora-corymbose.glb', import.meta.url).href,
   'reef-acropora-antler': new URL('../assets/corals/custom-colonies/reef-acropora-antler.glb', import.meta.url).href,
   'coral-acropora-staghorn': new URL('../assets/corals/coral-acropora-staghorn.glb', import.meta.url).href,
@@ -460,14 +464,23 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
   // 2. Mid-Upper Cantilevered Plateau Shelf: Broad Terracotta-Rose Montipora Plate
   {
     socketName: 'socket_plate_ledge_01',
-    coralAssetId: 'coral-montipora-plate',
+    coralAssetId: 'reef-montipora-whorled-plate',
     archetype: 'plating-sps',
     yawRad: 0.10,
     scale: 1.18,
     tiltXRad: 0.04,
     tiltZRad: 0.05,
     offsetM: [-0.03, -0.008, 0.01],
-    paletteOverride: PALETTE_TERRACOTTA_MONTIPORA_PLATE,
+    paletteOverride: {
+      surfaceMode: 'baked-pbr',
+      baseColor: '#c2604e',
+      tipColor: '#f5dcd0',
+      creviceColor: '#4c1e16',
+      regradeStrength: 0.38,
+      roughness: 1,
+      fluorescenceStrength: 0.06,
+    },
+    scatterPaletteOverride: PALETTE_TERRACOTTA_MONTIPORA_PLATE,
   },
   {
     socketName: 'socket_plate_ledge_02',
@@ -508,14 +521,17 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
   },
   {
     socketName: 'socket_lps_mid_03',
-    coralAssetId: 'coral-euphyllia-hammer',
+    coralAssetId: 'reef-euphyllia-anchor-hammer',
     archetype: 'tentaculate-lps',
     yawRad: 0.60,
-    scale: 1.06,
+    scale: 0.88,
     tiltXRad: 0.12,
     tiltZRad: 0.04,
-    offsetM: [0.0, -0.008, 0.0],
-    paletteOverride: PALETTE_EUPHYLLIA_TEAL_HAMMER,
+    offsetM: [-0.027, -0.008, -0.015],
+    paletteOverride: { surfaceMode: 'baked-pbr', baseColor: '#38a87c', tipColor: '#b4f5a8', creviceColor: '#163c2e', regradeStrength: 0.35, roughness: 1, fluorescenceStrength: 0.08 },
+    rigidPaletteOverride: { surfaceMode: 'baked-pbr', baseColor: '#b2a890', tipColor: '#d2c9b4', creviceColor: '#4b4338', regradeStrength: 0.15, roughness: 1, fluorescenceStrength: 0 },
+    preserveSkeletonShape: true,
+    scatterPaletteOverride: PALETTE_EUPHYLLIA_TEAL_HAMMER,
   },
   {
     socketName: 'socket_anemone_crevice_01',
@@ -532,14 +548,15 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
   // 4. Foreground Apron: Emerald Brain Coral, Fiery Orange-Red Acanthastrea & Colonial Zoanthids
   {
     socketName: 'socket_brain_apron_01',
-    coralAssetId: 'coral-brain-diploria',
+    coralAssetId: 'reef-brain-meandroid-diploria',
     archetype: 'mounded-lps',
     yawRad: 0.30,
     scale: 1.08,
     tiltXRad: 0.10,
     tiltZRad: 0.04,
     offsetM: [0.0, -0.008, 0.0],
-    paletteOverride: PALETTE_EUPHYLLIA_TEAL_HAMMER,
+    paletteOverride: { surfaceMode: 'baked-pbr', baseColor: '#587854', tipColor: '#7cf0a8', creviceColor: '#26241e', regradeStrength: 0.36, roughness: 1, fluorescenceStrength: 0.12 },
+    scatterPaletteOverride: PALETTE_EUPHYLLIA_TEAL_HAMMER,
   },
   {
     socketName: 'socket_brain_apron_02',
@@ -554,14 +571,17 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
   },
   {
     socketName: 'socket_soft_mat_01',
-    coralAssetId: 'coral-zoanthid-mat',
+    coralAssetId: 'reef-zoanthid-colonial-mat',
     archetype: 'zoanthid-mat',
     yawRad: 0.20,
     scale: 1.05,
     tiltXRad: 0.10,
     tiltZRad: 0.04,
     offsetM: [0.0, -0.008, 0.0],
-    paletteOverride: PALETTE_ZOANTHID_ORANGE_GREEN,
+    paletteOverride: { surfaceMode: 'baked-pbr', baseColor: '#d45a2a', tipColor: '#7ef564', creviceColor: '#381c18', regradeStrength: 0.34, roughness: 1, fluorescenceStrength: 0.10 },
+    rigidPaletteOverride: { surfaceMode: 'baked-pbr', baseColor: '#6e5864', tipColor: '#96828c', creviceColor: '#2e2229', regradeStrength: 0.20, roughness: 1, fluorescenceStrength: 0 },
+    preserveSkeletonShape: true,
+    scatterPaletteOverride: PALETTE_ZOANTHID_ORANGE_GREEN,
   },
 ] as const
 

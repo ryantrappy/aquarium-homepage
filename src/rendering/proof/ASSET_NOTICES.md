@@ -175,3 +175,19 @@ uses it. Explicit soft crown and rigid skeleton roles preserve raw coral masks,
 restrained transmission and separate skeleton appearance. Root accepted a bounded
 neutral/native morphology step before promotion; full physical scale, tissue
 rubric, variant, support and rendering-budget requirements remain open.
+
+## Additional custom coral colonies (anchor hammer, whorled Montipora, meandroid brain, colonial zoanthid) — AQ-70.11
+
+- `custom-colonies/reef-euphyllia-anchor-hammer.glb` (`28,116` triangles, `1,507,824` bytes),
+  `custom-colonies/reef-montipora-whorled-plate.glb` (`21,950` triangles, `1,744,376` bytes),
+  `custom-colonies/reef-brain-meandroid-diploria.glb` (`24,000` triangles, `2,273,252` bytes),
+  and `custom-colonies/reef-zoanthid-colonial-mat.glb` (`28,452` triangles, `1,851,136` bytes)
+  are original project geometry and procedural/baked PBR maps ($0; no external
+  visual assets).
+- Packed native `.blend` sources, texture PNGs, and raw `.glb` overrides are
+  persisted under `splat-fish/blend/` and `splat-fish/overrides/`, synced into
+  `custom-colonies/manifest.json` with SHA-256 lineage, and mounted on the left
+  island's primary sockets (`socket_lps_mid_03`, `socket_plate_ledge_01`,
+  `socket_brain_apron_01`, `socket_soft_mat_01`). Canonical `corals/` assets
+  remain preserved; full rubric, two-variant, physical scale, and budget
+  acceptance remain open for Root review.
