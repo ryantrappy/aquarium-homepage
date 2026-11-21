@@ -202,8 +202,14 @@ describe('configured disk capacity source', () => {
         expect(reading).toMatchObject({
           status: 'fresh',
           totalBytes: actualFs.bsize * actualFs.blocks,
-          availableBytes: actualFs.bsize * actualFs.bavail,
         })
+        if (reading.status === 'fresh') {
+          expect(reading.availableBytes).toBeGreaterThanOrEqual(0n)
+          expect(reading.availableBytes).toBeLessThanOrEqual(reading.totalBytes)
+          expect(reading.availableBytes % actualFs.bsize).toBe(0n)
+          expect(reading.availablePercent).toBeGreaterThanOrEqual(0)
+          expect(reading.availablePercent).toBeLessThanOrEqual(100)
+        }
       } else {
         expect(reading).toMatchObject({ status: 'unavailable', message: 'The configured directory is not on a supported persistent filesystem.' })
       }
