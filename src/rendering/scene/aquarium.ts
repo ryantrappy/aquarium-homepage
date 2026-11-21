@@ -326,7 +326,7 @@ diffuseColor.rgb = waterCol;
 `,
     )
   }
-  const rear = new THREE.Mesh(new THREE.PlaneGeometry(32, 14), rearMaterial); rear.position.set(0, 0, -5.5); scene.add(rear)
+  const rear = new THREE.Mesh(new THREE.PlaneGeometry(12, 5.4), rearMaterial); rear.position.set(0, -0.1, -5.5); scene.add(rear)
 
   // Restrained aquarium-scale depth haze (AQ-86 AC #1): one translucent
   // plane midway between the fish volume and the rear wall, deepening the
@@ -1808,8 +1808,11 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     habitat.maxAbsXAtDepth = z => Math.min(halfWidth, overviewHalfWidthAtDepth(camera.aspect, z))
     const newNarrow = width < 600
     if (glassLayoutNarrow !== newNarrow) {
+      const enclosureLayout = glassEnclosureLayout(newNarrow, optics.surfaceY)
       glassEnclosure.setLayout(newNarrow)
-      waterSurfaceController.setLayout(glassEnclosureLayout(newNarrow, optics.surfaceY))
+      waterSurfaceController.setLayout(enclosureLayout)
+      rear.scale.set((enclosureLayout.halfWidth * 2) / 12, (enclosureLayout.surfaceY - enclosureLayout.bottomY) / 5.4, 1)
+      rear.position.set(0, (enclosureLayout.surfaceY + enclosureLayout.bottomY) / 2, -5.5)
       glassLayoutNarrow = newNarrow
     }
     const recoveringFromUnavailableSpawn = spawnUnavailable

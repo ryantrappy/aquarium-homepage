@@ -139,6 +139,27 @@ describe('analytic clip-only fish sphere', () => {
     for (let step = 0; step <= 300; step++) for (const p of input.at(step / 300)) expect(p.length()).toBeLessThanOrEqual(certificate.radiusM)
     expect(certificate.numerics.paddingM).toBeGreaterThan(0)
   })
+  it('bounds an elongated body along its local axis through the whole clip', () => {
+    const input = fixture({ rotations: [
+      [quat([0, 1, 0], -.04), quat([0, 1, 0], .05)],
+      [quat([1, 0, 0], -.06), quat([1, 0, 0], .07)],
+    ] })
+    const halfAxisM = .04
+    const result = analyzeFishClipEnvelope(input.bytes, { ...input.options, capsuleHalfAxisM: halfAxisM })
+    expect(result.status).toBe('ready')
+    if (result.status !== 'ready') return
+    const capsule = result.activeEnvelope.capsule!
+    expect(capsule.halfAxisM).toBe(halfAxisM)
+    expect(capsule.radiusM).toBeLessThan(result.activeEnvelope.radiusM)
+    for (let sample = 0; sample <= 80; sample++) {
+      for (const point of input.at(sample / 80)) {
+        const overhang = Math.max(0, Math.abs(point.z) - halfAxisM)
+        expect(Math.hypot(point.x, point.y, overhang)).toBeLessThanOrEqual(capsule.radiusM)
+      }
+    }
+    expect(analyzeFishClipEnvelope(input.bytes, { ...input.options, capsuleHalfAxisM: -1 }).status).toBe('unavailable')
+  })
+
   it('keeps quaternion sign equivalence and explicit adult metric scale', () => {
     const rotations = [[quat([0, 1, 0], -.2), quat([0, 1, 0], .3)], [identity, identity]]
     const a = fixture({ rotations }), b = fixture({ rotations: rotations.map(keys => keys.map(q => q.map(v => -v))) })

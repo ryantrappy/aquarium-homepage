@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-05 03:13'
-updated_date: '2026-11-21 01:54'
+updated_date: '2026-11-21 02:29'
 labels:
   - modeling
   - validation
@@ -84,6 +84,10 @@ Root2026-11-12 current-export fallback correction: derive conservative world-spa
 Test the established left cave probe after applying the live laptop placement, foundation rise, contour sculpt, and full mounted-coral assembly. Record the exact export identity and distinguish the fixed-radius geometry probe from animated fish clearance.
 
 Restore the real-loader runtime validation command for the current model map, including the explicit fixed-moray key and its own clip semantics. Run the current asset set and retain the clip-only scope while preparing posed-body measurements.
+
+Use the existing capsule/BVH query to check a conservative sweep of a finite-length body. Bound the full linear motion of its paired axis endpoints using longitudinal slices and one shared work budget. Prove obvious contact and return indeterminate for unresolved padded bounds. Compare the 0.04 root probe with a fitted starter model pose in the exact raised cave assembly. Keep runtime promotion gated on continuous pose bounds and live hosting evidence.
+
+Extend the existing continuous clip-envelope analyzer with an optional local +Z capsule. Reuse its per-vertex displacement bounds and numerical margin for distance to the axis segment. Verify the new bound against an independent animated fixture and current starter assets. Retain the current source restrictions and do not promote unbounded shader or turn behavior.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes

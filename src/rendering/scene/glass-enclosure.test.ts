@@ -337,4 +337,23 @@ describe('physical glass enclosure', () => {
     warning.mockRestore()
     enclosure.dispose()
   })
+
+  it('layers grazing Fresnel reflections, bottom lip highlight, and diagonal glass sheen on enclosure panes', () => {
+    const enclosure = createGlassEnclosure({ surfaceY: 2.6 })
+    enclosure.setLayout(false)
+
+    const frontPane = namedMeshes(enclosure.group, 'FrontClearGlass')[0]!
+    const frontMaterial = frontPane.material as THREE.ShaderMaterial
+    expect(frontMaterial.fragmentShader).toContain('float grazing = 1.0 - abs(dot(normalize(cameraPosition - vPaneWorld), normalize(vPaneNormal)))')
+    expect(frontMaterial.fragmentShader).toContain('float bottomLip = 1.0 - smoothstep(0.0, 0.014, vPaneUv.y)')
+    expect(frontMaterial.fragmentShader).toContain('float diagonal =')
+
+    for (const wall of reflectionWalls(enclosure.group)) {
+      const material = wall.material as THREE.ShaderMaterial
+      expect(material.fragmentShader).toContain('float grazing = 1.0 - abs(dot(viewDir, normalize(vPaneNormal)))')
+      expect(material.fragmentShader).toContain('float alpha = (0.14 + 0.24 * pow(grazing, 2.2)) * edge')
+    }
+
+    enclosure.dispose()
+  })
 })
