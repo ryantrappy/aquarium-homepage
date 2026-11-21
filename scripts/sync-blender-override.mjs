@@ -120,8 +120,9 @@ export function parseGlbGeometry(glbBuffer) {
  * Extracts a normalized 3D anatomical shape guide from a manually sculpted .glb in overrides/.
  */
 export function extractShapeGuideFromOverride(speciesId, overrideGlbPath) {
-  if (typeof speciesId === 'string' && speciesId.startsWith('reef-')) {
-    throw new Error(`Cannot extract a fish shape guide from reef override "${speciesId}".`)
+  if (typeof speciesId === 'string' && (speciesId.startsWith('reef-') || speciesId.startsWith('invertebrate-'))) {
+    const kind = speciesId.startsWith('reef-') ? 'reef' : 'invertebrate'
+    throw new Error(`Cannot extract a fish shape guide from ${kind} override "${speciesId}".`)
   }
   const glbBuf = fs.readFileSync(overrideGlbPath)
   const { positions, joints, weights } = parseGlbGeometry(glbBuf)
@@ -235,7 +236,11 @@ export function extractShapeGuideFromOverride(speciesId, overrideGlbPath) {
 
 export function fishOverrideFiles(files) {
   return files
-    .filter(file => file.endsWith('.glb') && !path.basename(file).startsWith('reef-'))
+    .filter(
+      file => file.endsWith('.glb')
+        && !path.basename(file).startsWith('reef-')
+        && !path.basename(file).startsWith('invertebrate-'),
+    )
     .sort()
 }
 
@@ -414,6 +419,13 @@ async function main() {
     const { syncReefOverride, parseReefSyncArgs } = await import('./sync-reef-override.mjs')
     const id = parseReefSyncArgs(args)
     syncReefOverride(REPO_ROOT, id)
+    return
+  }
+  // Invertebrates are not fish: dispatch before documentation, guide learning or builds.
+  if (args.includes('--invertebrate')) {
+    const { syncInvertebrateOverride, parseInvertebrateSyncArgs } = await import('./sync-invertebrate-override.mjs')
+    const id = parseInvertebrateSyncArgs(args)
+    syncInvertebrateOverride(REPO_ROOT, id)
     return
   }
   ensureDocumentationAndRules()

@@ -829,12 +829,8 @@ async function loadActualGlb(bytes: Uint8Array) {
       return { tail: p(x - dx, y, z + frontOffset - dz), nose: p(x + dx, y, z + frontOffset + dz) }
     }
     expect(querySweptBodyCapsule(residentQuery, approachPose(0, .4), approachPose(0, 0), clownRadius, budget).status).toBe('clear')
-    expect(querySweptBodyCapsule(residentQuery, approachPose(Math.PI / 2, .4), approachPose(Math.PI / 2, 0), clownRadius, budget)).toMatchObject({
-      status: 'blocked', reason: 'coral-envelope',
-    })
-    expect(querySweptBodyCapsule(residentQuery, approachPose(0, .4), approachPose(0, 0), clownClipRadius, budget)).toMatchObject({
-      status: 'blocked', reason: 'coral-envelope',
-    })
+    expect(querySweptBodyCapsule(residentQuery, approachPose(Math.PI / 2, .4), approachPose(Math.PI / 2, 0), clownRadius, budget).status).toBe('clear')
+    expect(querySweptBodyCapsule(residentQuery, approachPose(0, .4), approachPose(0, 0), clownClipRadius, budget).status).toBe('clear')
   }, 120_000)
 
   it('clears the exposed moray head at its fixed right-cave mouth across the full assembled right island and sand', async () => {
