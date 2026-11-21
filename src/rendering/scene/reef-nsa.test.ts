@@ -9,6 +9,7 @@ import {
   NSA_MODULE_MOUNTS,
   NSA_KIT_URL,
   NSA_ROCK_URLS,
+  NSA_SUBSTRATE_CONTACTS,
   RUBBLE_TALUS_URL,
   createRubbleTalusGroundingAprons,
   createNsaReviewReef,
@@ -17,7 +18,7 @@ import {
 } from './reef-nsa'
 import { createReefMeshNavigation, MESH_NAVIGATION_MOVEMENT_BUDGET, segmentIntersectsInflatedBox } from './reef-mesh-navigation'
 import { resolveNsaMorayResidence, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M } from './moray-residence'
-import { evaluateAragoniteSandWorldY } from './aragonite-sand'
+import { createAragoniteSandBed, evaluateAragoniteSandWorldY, evaluateRockBaseContactFactor } from './aragonite-sand'
 import { mountedAnemoneHosts } from './anemone-host'
 import { createSwimmingFish, distance, stepSwimmingFish } from './motion'
 import { analyzeFishClipEnvelope } from '../assets/fish-clip-envelope'
@@ -110,16 +111,51 @@ describe('AQ-94 NSA modular rock library & rubble-talus grounding', () => {
     const radius = SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M
     expect(query(moray.headAxisStart, moray.headAxisEnd, radius, MESH_NAVIGATION_MOVEMENT_BUDGET).status).toBe('clear')
     for (const point of [moray.headAxisStart, moray.headAxisEnd]) {
-      expect(point.y - radius - evaluateAragoniteSandWorldY(point.x, point.z, false)).toBeGreaterThan(.13)
+      expect(point.y - radius - evaluateAragoniteSandWorldY(point.x, point.z, false, NSA_SUBSTRATE_CONTACTS)).toBeGreaterThan(.13)
     }
-    const rubble = createRubbleTalusGroundingAprons(scene.getObjectByName('reef-nsa-rubble-talus')!, false)
+    const rubble = createRubbleTalusGroundingAprons(scene.getObjectByName('reef-nsa-rubble-talus')!, false, true)
     try {
       for (const piece of rubble.children) {
         const bounds = new THREE.Box3().setFromObject(piece)
         expect(segmentIntersectsInflatedBox(moray.headAxisStart, moray.headAxisEnd, bounds, radius)).toBe(false)
+        const floorY = evaluateAragoniteSandWorldY(piece.position.x, piece.position.z, false, NSA_SUBSTRATE_CONTACTS)
+        expect(bounds.min.y).toBeLessThan(floorY)
+        expect(bounds.max.y).toBeGreaterThan(floorY)
+        expect(bounds.max.y).toBeLessThan(AQUARIUM_WATER_BOUNDS.min.y)
       }
     } finally {
       disposeRubbleTalusMaterials(rubble)
+    }
+    const sand = createAragoniteSandBed({ textureSize: 32, contactFootprints: NSA_SUBSTRATE_CONTACTS })
+    try {
+      const y = sand.sandMesh.position.y
+      const z = sand.sandMesh.position.z
+      const vertices = sand.sandMesh.geometry.getAttribute('position')
+      for (let i = 0; i < vertices.count; i += 17) {
+        const height = y + vertices.getZ(i)
+        expect(height).toBeCloseTo(evaluateAragoniteSandWorldY(vertices.getX(i), z - vertices.getY(i), false, NSA_SUBSTRATE_CONTACTS), 5)
+        expect(height).toBeLessThan(AQUARIUM_WATER_BOUNDS.min.y)
+      }
+      const arch = placements.find(({ islandId }) => islandId === 'reef-nsa-high-arch-span')!.reef
+      for (const { x, z } of NSA_SUBSTRATE_CONTACTS.slice(1, 3)) {
+        const pier = new THREE.Raycaster(new THREE.Vector3(x, -2.9, z), new THREE.Vector3(0, 1, 0), 0, .35)
+        expect(pier.intersectObject(arch, true).length).toBeGreaterThan(0)
+      }
+      expect(evaluateRockBaseContactFactor(-.2, -2.2, false, NSA_SUBSTRATE_CONTACTS)).toBeGreaterThan(.88)
+      const matrix = new THREE.Matrix4()
+      const position = new THREE.Vector3()
+      const scale = new THREE.Vector3()
+      let largestShell = 0
+      for (let i = 0; i < sand.shellInstances.count; i++) {
+        sand.shellInstances.getMatrixAt(i, matrix)
+        matrix.decompose(position, new THREE.Quaternion(), scale)
+        const floorY = evaluateAragoniteSandWorldY(position.x, position.z, false, NSA_SUBSTRATE_CONTACTS)
+        expect(position.y - floorY).toBeCloseTo(.002, 5)
+        largestShell = Math.max(largestShell, scale.x)
+      }
+      expect(largestShell).toBeGreaterThan(.012)
+    } finally {
+      sand.dispose()
     }
     const camera = new THREE.Vector3(0, .15, 9)
     function isVisible(point: { x: number; y: number; z: number }) {

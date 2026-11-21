@@ -19,6 +19,8 @@ AQ-94 now packages seven saved NSA rock exports in one 3,956,104-byte shared-atl
 
 The lower-left shelf now mounts the saved rose bubble-tip anemone. The modular scene derives its host anchor from the mounted crown. The exact-kit fixture verifies 40 seconds of resident movement at the current navigation radius and a straight clip-envelope approach to 0.24 m in front of the crown. Full animated clearance at the crown remains open. The laptop evidence is under `docs/asset-evidence/aq94/modular-clownfish-review/`.
 
+The preview sand follows five contact footprints fitted to the modular rock bases, including separate arch piers. Sand height, contact shading, shell and rubble scatter, and benthic placement use the same footprints. Six smaller placements of the saved talus sit along the bases and clear the moray's head corridor. Laptop evidence is under `docs/asset-evidence/aq94/modular-substrate-review/`. Review grounding and the composition again in the default habitat before closing AQ-94.
+
 ## Fish depth and surface shafts — 2026-11-20
 
 AQ-87 applies species depth bands to general anchor destinations and held interaction targets. Actual laptop scene geometry supplies an in-band option for each authored compatible anchor group. The staged preview had 12 inhabitants and no band misses. The custom host-placement exception preserves the physical relationship with its anemone. Animated body clearance and all-depth picking remain open.

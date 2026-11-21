@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-11 04:55'
-updated_date: '2026-11-21 18:51'
+updated_date: '2026-11-21 18:56'
 labels:
   - modeling
   - blender
@@ -62,6 +62,8 @@ Build a deterministic shared-atlas kit from the seven saved NSA exports so the m
 Use the assembled kit and mounted coral colliders to measure a sheltered right-side moray pose. Confirm the head clears solid geometry and sand and is visible from the laptop camera while the partial rear stays visually sheltered. Connect the preview to the existing fail-closed resident checks only after this evidence.
 
 Fit a saved bubble-tip anemone to a supported left-module socket, derive its host point from the mounted crown, and reproduce a clear clownfish approach with the exact shared-atlas reef. Reuse the species-specific soft-tissue allowance and preserve the canyon and moray head checks.
+
+Fit substrate contact footprints to the low sections of the exact modular foundation, seat the saved rubble on the same sand profile, and review the 1440×900 rock-to-sand transition while retaining the clear canyon and moray approach.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -99,4 +101,6 @@ Root review 2026-11-21. The seven current NSA exports now package into a single 
 Root modular moray review 2026-11-21. Authored a wide-preview residence at root (2.14, -2.41, -0.33), yaw -0.72, beside the existing right ledge and bommie. Runtime requires the same loaded crevice-idle rig, both actual right-module colliders, and the existing clear exposed-head capsule. The exact kit test includes all 13 mounted corals, a >0.13 scene-unit endpoint margin to the sand under the exposed-head bound, disjoint talus boxes, visible head/tip and six rear cross-section points hidden from the front-on camera. Native 1440×900 DPR 1 review loaded 15 resolved inhabitants with zero warnings/errors. Pointer body click opened the configured Snowflake moray eel service card. Evidence docs/asset-evidence/aq94/modular-moray-review/. The proof checks the exposed head and front-on shelter, not a continuous whole-body animation certificate. The preview remains development-only pending production layout and interaction review.
 
 Root modular clownfish review 2026-11-21. The seven saved sculpted modules share one verified 2048px trim atlas. The packed GLB uses normal texture 0 and shared roughness/AO texture 1 on all seven materials; the source test verifies atlas dimensions and byte-identical image digests. AC2 verified for the assembled kit. The lower-left buttress now mounts the existing rose bubble-tip anemone. Actual crown geometry yields the ocellaris-only host; the exact reef test clears the current 0.04 m navigation probe throughout a 40-second simulation. A source-pinned straight skeletal swim envelope clears to 0.24 m in front of the crown; close-in full-body clearance is pending. The central canyon and right moray checks remain. The native 1440×900 overview rendered 15 inhabitants with no failed assets or console warnings/errors. Evidence docs/asset-evidence/aq94/modular-clownfish-review/. Keep AQ-94 In Progress for default-layout composition and substrate grounding.
+
+Root modular substrate review 2026-11-21. Fitted five contacts to below-Y -2.55 mesh sections for the buttress, two separate arch piers, bommie and right ledge. The preview uses one footprint array for sand geometry, contact shading, scatter and benthic placement. Six smaller placements reuse the saved rubble at exposed rock edges. Exact-kit clearance retains the central 0.04 capsule, clownfish motion, and moray head and shelter tests. The laptop comparison had 15 inhabitants, zero failed assets and zero browser warnings/errors. Evidence docs/asset-evidence/aq94/modular-substrate-review/. Final composition and grounding remain open for default-layout review.
 <!-- SECTION:NOTES:END -->
