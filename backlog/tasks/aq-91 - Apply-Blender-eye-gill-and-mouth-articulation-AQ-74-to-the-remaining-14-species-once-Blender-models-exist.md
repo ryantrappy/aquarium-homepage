@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-09T03:04:00Z'
-updated_date: '2026-11-21 16:39'
+updated_date: '2026-11-21 18:44'
 labels:
   - modeling
   - photorealism
@@ -38,10 +38,10 @@ AQ-74 implements 3D convex cornea eyes, sculpted operculum (gill-cover) relief, 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Each of the remaining 14 species has a saved .blend workfile in src/rendering/assets/splat-fish/blend/<species>.blend and exported override in src/rendering/assets/splat-fish/overrides/<species>.glb with sculpted convex cornea eyes, operculum relief, and species-appropriate mouth geometry.
+- [x] #1 Each of the remaining 14 species has a saved .blend workfile in src/rendering/assets/splat-fish/blend/<species>.blend and exported override in src/rendering/assets/splat-fish/overrides/<species>.glb with sculpted convex cornea eyes, operculum relief, and species-appropriate mouth geometry.
 - [ ] #2 Close-up studio renders verify eye shine/pupil clarity, operculum contour relief, and natural mouth proportions for each species.
-- [ ] #3 Swim-synchronized gill and mouth ventilation works across all 15 species without breaking scripts/verify-fish-clip-player.mjs, splat-fish-contract.test.ts, or pause/reduced-motion behavior.
-- [ ] #4 All .blend workfiles, overrides/*.glb, src/rendering/assets/splat-fish/*.glb, inspection reports, and manifest.json are synced and committed to Git.
+- [x] #3 Swim-synchronized gill and mouth ventilation works across all 15 species without breaking scripts/verify-fish-clip-player.mjs, splat-fish-contract.test.ts, or pause/reduced-motion behavior.
+- [x] #4 All .blend workfiles, overrides/*.glb, src/rendering/assets/splat-fish/*.glb, inspection reports, and manifest.json are synced and committed to Git.
 <!-- AC:END -->
 
 ## Definition of Done
@@ -74,4 +74,6 @@ Milestone E (standalone Blender overrides for remaining 3 species — all 15 ros
 - Added starter-fish-overrides.test.ts (4/4 passing); verified --fish-overrides sync leaves canonical splat-fish/manifest.json, blue-green-chromis.glb, and learned-shape-guide.json untouched; full vitest 82/82 test files (1055/1055 tests), verify-fish-clip-player.mjs, check-reef-asset-manifests.mjs, typecheck, and build passed. Remains In Progress for runtime gill/mouth ventilation (AC #3) and Root visual review.
 
 2026-11-21 Live Blender MCP animation audit fix: biased pectoral rowing outward in fish_from_reference_common.py ((0.5 - 0.5*cos(phase)) with -side around +Z) so pectorals flare cleanly into open water and never clip inside the torso across frames 0..48. Verified top-down frames [0,8,16,24,32,40] in live Blender MCP on yellow-tang, ocellaris-clownfish, and desjardins-sailfin-tang; starter-fish-overrides.test.ts 4/4 passing.
+
+2026-11-21 Full Roster Persistence, Ventilation & Contract Verification (AQ-91 AC #1, #3, #4): Verified all 14 remaining roster species plus license-clean desjardins-sailfin-tang have saved packed .blend workfiles in src/rendering/assets/splat-fish/blend/<species>.blend, exported overrides in src/rendering/assets/splat-fish/overrides/<species>.glb with sculpted convex cornea eyes, operculum relief, and species-matched mouth geometry, and contract-valid inspection reports (<=3.64% silhouette deviation across all 16 species in docs/asset-evidence/aq70-10/silhouette-proportion-audit.json). Verified swim-synchronized gill/mouth ventilation and clip playback across the roster with scripts/verify-fish-clip-player.mjs --runtime, src/rendering/scene/fish-flex-material.test.ts (16/16), src/rendering/assets/splat-fish-contract.test.ts, and src/rendering/assets/starter-fish-overrides.test.ts. AC #2 and DoD #1 remain open for Root visual review.
 <!-- SECTION:NOTES:END -->

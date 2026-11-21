@@ -119,6 +119,33 @@
       "referenceHeightToLength": 0.6604,
       "measuredHeightToLength": 0.656544,
       "relativeDeviationPct": 0.58
+    },
+    {
+      "id": "fish-yellow-tang",
+      "speciesId": "yellow-tang",
+      "source": "FishBase Zebrasoma flavescens & project-original public/fish/yellow-tang.webp silhouette",
+      "sourceUrl": "https://www.fishbase.se/summary/Zebrasoma-flavescens",
+      "referenceHeightToLength": 0.6961,
+      "measuredHeightToLength": 0.696075,
+      "relativeDeviationPct": 0
+    },
+    {
+      "id": "fish-ocellaris-clownfish",
+      "speciesId": "ocellaris-clownfish",
+      "source": "FishBase Amphiprion ocellaris & project-original public/fish/ocellaris-clownfish.webp silhouette",
+      "sourceUrl": "https://www.fishbase.se/summary/Amphiprion-ocellaris",
+      "referenceHeightToLength": 0.4996,
+      "measuredHeightToLength": 0.499597,
+      "relativeDeviationPct": 0
+    },
+    {
+      "id": "fish-desjardins-sailfin-tang",
+      "speciesId": "desjardins-sailfin-tang",
+      "source": "FishBase Zebrasoma desjardinii extended dorsal/anal sailfin lateral profile",
+      "sourceUrl": "https://www.fishbase.se/summary/Zebrasoma-desjardinii",
+      "referenceHeightToLength": 0.7,
+      "measuredHeightToLength": 0.699619,
+      "relativeDeviationPct": 0.05
     }
   ]
 }

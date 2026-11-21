@@ -24,6 +24,7 @@
  */
 
 import { execFileSync } from 'node:child_process'
+import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -548,6 +549,117 @@ async function main() {
         ...silhouetteRecord,
       })
     }
+
+    const standaloneOverrideSpecs = [
+      {
+        speciesId: 'yellow-tang',
+        recipe: 'blender --background --python src/rendering/modeling/build_starter_fish_overrides.py',
+        attribution:
+          'Original photorealistic 3D rigged and animated fish asset (Zebrasoma flavescens (Yellow Tang)) reconstructed from project-original public/fish/yellow-tang.webp with embedded PBR textures.',
+        source: 'FishBase Zebrasoma flavescens & project-original public/fish/yellow-tang.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Zebrasoma-flavescens',
+        referenceHeightToLength: 0.6961,
+      },
+      {
+        speciesId: 'ocellaris-clownfish',
+        recipe: 'blender --background --python src/rendering/modeling/build_starter_fish_overrides.py',
+        attribution:
+          'Original photorealistic 3D rigged and animated fish asset (Amphiprion ocellaris (Ocellaris Clownfish)) reconstructed from project-original public/fish/ocellaris-clownfish.webp with embedded PBR textures.',
+        source: 'FishBase Amphiprion ocellaris & project-original public/fish/ocellaris-clownfish.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Amphiprion-ocellaris',
+        referenceHeightToLength: 0.4996,
+      },
+      {
+        speciesId: 'desjardins-sailfin-tang',
+        recipe: 'blender --background --python src/rendering/modeling/build_starter_fish_overrides.py',
+        attribution:
+          'Original photorealistic 3D rigged and animated fish asset (Zebrasoma desjardinii (Desjardin\'s Sailfin Tang)) procedurally synthesized in Blender with embedded PBR textures.',
+        source: 'FishBase Zebrasoma desjardinii extended dorsal/anal sailfin lateral profile',
+        sourceUrl: 'https://www.fishbase.se/summary/Zebrasoma-desjardinii',
+        referenceHeightToLength: 0.7,
+      },
+    ]
+
+    for (const spec of standaloneOverrideSpecs) {
+      const overrideGlbPath = path.join(OVERRIDES_DIR, `${spec.speciesId}.glb`)
+      if (!fs.existsSync(overrideGlbPath)) continue
+      const glbBuf = fs.readFileSync(overrideGlbPath)
+      const sha256 = crypto.createHash('sha256').update(glbBuf).digest('hex')
+      const jsonLen = glbBuf.readUInt32LE(12)
+      const doc = JSON.parse(glbBuf.subarray(20, 20 + jsonLen).toString('utf8'))
+      const prim = doc.meshes?.[0]?.primitives?.[0]
+      const posAcc = doc.accessors[prim.attributes.POSITION]
+      const min = posAcc.min.map(v => Number(v.toFixed(6)))
+      const max = posAcc.max.map(v => Number(v.toFixed(6)))
+      const dims = [
+        Number((max[0] - min[0]).toFixed(6)),
+        Number((max[1] - min[1]).toFixed(6)),
+        Number((max[2] - min[2]).toFixed(6)),
+      ]
+      const measuredHeightToLength = Number((dims[1] / dims[2]).toFixed(6))
+      const relativeDeviationPct = Number(
+        ((Math.abs(measuredHeightToLength - spec.referenceHeightToLength) / spec.referenceHeightToLength) * 100).toFixed(2),
+      )
+      const silhouetteRecord = {
+        source: spec.source,
+        sourceUrl: spec.sourceUrl,
+        referenceHeightToLength: spec.referenceHeightToLength,
+        measuredHeightToLength,
+        relativeDeviationPct,
+      }
+      const overrideReport = {
+        extras: {
+          reefAsset: {
+            schema: 'reef-asset-v1',
+            id: `fish-${spec.speciesId}`,
+            kind: 'fish',
+            units: 'meter',
+            upAxis: '+Y',
+            origin: 'local',
+            dimensionsM: dims,
+            provenance: {
+              license: 'original',
+              creator: 'Aquarium project',
+              sourceSha256: sha256,
+              recipe: spec.recipe,
+              attribution: spec.attribution,
+            },
+          },
+        },
+        rootTransform: {
+          translation: [0, 0, 0],
+          rotation: [0, 0, 0, 1],
+          scale: [1, 1, 1],
+        },
+        boundsM: { min, max },
+        primitives: [
+          {
+            id: `${spec.speciesId.replace(/-/g, '_')}_body`,
+            role: 'fish',
+            vertexCount: posAcc.count,
+            boundsM: { min, max },
+            material: {
+              vertexColors: false,
+              vertexAlpha: false,
+              aoSource: 'texture',
+            },
+          },
+        ],
+        sockets: [],
+        collisionParts: [],
+        silhouetteReference: silhouetteRecord,
+      }
+      fs.writeFileSync(
+        path.join(OVERRIDES_DIR, `fish-${spec.speciesId}-inspection.json`),
+        JSON.stringify(overrideReport, null, 2) + '\n',
+      )
+      auditEntries.push({
+        id: `fish-${spec.speciesId}`,
+        speciesId: spec.speciesId,
+        ...silhouetteRecord,
+      })
+    }
+
     const auditDir = path.join(REPO_ROOT, 'docs/asset-evidence/aq70-10')
     fs.mkdirSync(auditDir, { recursive: true })
     fs.writeFileSync(

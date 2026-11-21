@@ -1,0 +1,87 @@
+{
+  "extras": {
+    "reefAsset": {
+      "schema": "reef-asset-v1",
+      "id": "fish-desjardins-sailfin-tang",
+      "kind": "fish",
+      "units": "meter",
+      "upAxis": "+Y",
+      "origin": "local",
+      "dimensionsM": [
+        0.313532,
+        1.399238,
+        2
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "5ffd16a9396767fc6a77263eaddd8e0316eb4e7a495761b232311a59bd09ca1e",
+        "recipe": "blender --background --python src/rendering/modeling/build_starter_fish_overrides.py",
+        "attribution": "Original photorealistic 3D rigged and animated fish asset (Zebrasoma desjardinii (Desjardin's Sailfin Tang)) procedurally synthesized in Blender with embedded PBR textures."
+      }
+    }
+  },
+  "rootTransform": {
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "boundsM": {
+    "min": [
+      -0.156766,
+      -0.699619,
+      -1
+    ],
+    "max": [
+      0.156766,
+      0.699619,
+      1
+    ]
+  },
+  "primitives": [
+    {
+      "id": "desjardins_sailfin_tang_body",
+      "role": "fish",
+      "vertexCount": 6598,
+      "boundsM": {
+        "min": [
+          -0.156766,
+          -0.699619,
+          -1
+        ],
+        "max": [
+          0.156766,
+          0.699619,
+          1
+        ]
+      },
+      "material": {
+        "vertexColors": false,
+        "vertexAlpha": false,
+        "aoSource": "texture"
+      }
+    }
+  ],
+  "sockets": [],
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Zebrasoma desjardinii extended dorsal/anal sailfin lateral profile",
+    "sourceUrl": "https://www.fishbase.se/summary/Zebrasoma-desjardinii",
+    "referenceHeightToLength": 0.7,
+    "measuredHeightToLength": 0.699619,
+    "relativeDeviationPct": 0.05
+  }
+}

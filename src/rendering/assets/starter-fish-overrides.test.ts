@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 // @ts-expect-error Exercise pure exported override inspector without separate declaration file.
 import { extractShapeGuideFromOverride } from '../../../scripts/sync-blender-override.mjs'
+import { validateAssetContract } from './contract'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = path.resolve(__dirname, '../../..')
@@ -121,6 +122,20 @@ describe('standalone Blender starter & license-clean fish overrides (AQ-91 / AQ-
       const guide = extractShapeGuideFromOverride(id, overridePath)
       expect(guide.longitudinalMultipliers).toHaveLength(16)
       expect(guide.dorsoventralMultipliers).toHaveLength(10)
+
+      // Contract-valid inspection JSON with cited silhouette proportions (<= 8% deviation)
+      const inspectionPath = path.join(SPLAT_DIR, 'overrides', `fish-${id}-inspection.json`)
+      expect(fs.existsSync(inspectionPath)).toBe(true)
+      const report = JSON.parse(fs.readFileSync(inspectionPath, 'utf8'))
+      const contractRes = validateAssetContract(report)
+      expect(
+        contractRes.valid,
+        `fish-${id} contract issues: ${JSON.stringify('issues' in contractRes ? contractRes.issues : [])}`,
+      ).toBe(true)
+      expect(report.extras.reefAsset.id).toBe(`fish-${id}`)
+      expect(report.extras.reefAsset.provenance.license).toBe('original')
+      expect(report.silhouetteReference).toBeDefined()
+      expect(report.silhouetteReference?.relativeDeviationPct).toBeLessThanOrEqual(8)
     },
   )
 
