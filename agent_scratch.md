@@ -118,3 +118,7 @@
 ### 2026-11-20 — AQ-87 depth-aware anchor routing
 *Root reviewed retained scratch entries. Standing asset ownership, active-only scope, laptop verification and local delivery rules are current policy. Completed water, coral integration, and fixed cave geometry checkpoints are actioned. Animated clearance and broader visual acceptance remain pending.*
 - Verified current anchor depths from the laptop reef GLBs and constrained general anchor selection and held poses to species bands. Firefish include the measured burrow floor and clownfish reach below midpoint. Existing attached host behavior passed. AQ-87 species-depth acceptance was checked. Full animated clearance and interaction checks remain open.
+
+### 2026-11-20 — AQ-58 body-clearance evidence
+*Root reviewed the retained handoffs. Project scope and asset policy are current. Depth band and shaft milestones are actioned. Live animated clearance and art acceptance remain pending.*
+- Added a continuous body-capsule sweep and a clip-only envelope option. Exact reef checks verified the blue tang front-water route and identified why the root probe alone cannot validate the cave. The left clownfish crown admits an aligned sampled pose, with the conservative whole-clip bound blocked.
