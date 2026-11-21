@@ -200,3 +200,13 @@ rubric, variant, support and rendering-budget requirements remain open.
     - `reef-brain-fleshy-lobophyllia.glb`: `24,000` triangles, `2,218,308` bytes (`mounded-lps`, `socket_brain_apron_04`)
     - `reef-zoanthid-palythoa-cluster.glb`: `27,812` triangles, `1,751,772` bytes (`zoanthid-mat`, `socket_soft_mat_02`)
   - Canonical `corals/` assets remain preserved; look-dev captures, physical scale/rubric evaluation, and Root approval remain pending.
+
+## Clean-up-crew reef invertebrates (Trochus snail, scarlet hermit crab, emerald crab, cleaner shrimp) — `AQ-109` (Phase 1)
+
+- Original **$0** rigged and animated 3D invertebrate geometry and `512×512` procedural PBR texture maps (BaseColor, Normal, packed ORM) authored from scratch in Blender (`invertebrate_common.py`, `build_invertebrate_banded_trochus_snail.py`, `build_invertebrate_scarlet_reef_hermit_crab.py`, `build_invertebrate_emerald_mithrax_crab.py`, `build_invertebrate_scarlet_skunk_cleaner_shrimp.py`). Packed sources and textures live under `src/rendering/assets/splat-fish/blend/` and overrides under `src/rendering/assets/splat-fish/overrides/`; `blue_crab.blend` and existing canonical `fish/`, `corals/`, and `splat-fish/` catalogs remain untouched.
+- Synced into `src/rendering/assets/invertebrates/` with `600×400` studio Cycles transparent WebP thumbnails in `public/fish/`:
+  - `invertebrate-banded-trochus-snail.glb`: `8,268` triangles, `1,126,348` bytes, `9` joints, clip `trochus_snail_glide`, thumbnail `public/fish/banded-trochus-snail.webp`
+  - `invertebrate-scarlet-reef-hermit-crab.glb`: `7,104` triangles, `1,067,576` bytes, `12` joints, clip `hermit_crab_scurry`, thumbnail `public/fish/scarlet-reef-hermit-crab.webp`
+  - `invertebrate-emerald-mithrax-crab.glb`: `4,192` triangles, `1,035,928` bytes, `13` joints, clip `emerald_crab_forage`, thumbnail `public/fish/emerald-mithrax-crab.webp`
+  - `invertebrate-scarlet-skunk-cleaner-shrimp.glb`: `3,880` triangles, `511,932` bytes, `13` joints, clip `cleaner_shrimp_rock`, thumbnail `public/fish/scarlet-skunk-cleaner-shrimp.webp`
+- Runtime species/locomotion/UI integration (`AQ-109` Phase 2) and Root visual review remain pending.
