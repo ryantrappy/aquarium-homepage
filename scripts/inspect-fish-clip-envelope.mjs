@@ -3,9 +3,9 @@ import { createHash } from 'node:crypto'
 import { dirname, resolve } from 'node:path'
 import { analyzeFishClipEnvelope } from '../src/rendering/assets/fish-clip-envelope.ts'
 
-const usage = 'Usage: node scripts/inspect-fish-clip-envelope.mjs <fish.glb> --expected-sha256 <hash> --clip <name> --source-length-axis +Z --source-length-m <meters> --source-authority <verified-reference> --adult-length-m <meters> --composition <single-clip|procedural-overlay|clip-blend> [--bounded-overlay-contract <json> --expected-overlay-contract-sha256 <hash>]'
+const usage = 'Usage: node scripts/inspect-fish-clip-envelope.mjs <fish.glb> --expected-sha256 <hash> --clip <name> --source-length-axis +Z --source-length-m <meters> --source-authority <verified-reference> --adult-length-m <meters> --composition <single-clip|procedural-overlay|clip-blend> [--capsule-half-axis-m <meters>] [--bounded-overlay-contract <json> --expected-overlay-contract-sha256 <hash>]'
 const required = ['--expected-sha256', '--clip', '--source-length-axis', '--source-length-m', '--source-authority', '--adult-length-m', '--composition']
-const names = [...required, '--bounded-overlay-contract', '--expected-overlay-contract-sha256']
+const names = [...required, '--capsule-half-axis-m', '--bounded-overlay-contract', '--expected-overlay-contract-sha256']
 const limit = 16 * 1024 * 1024
 async function boundedRead(path, maxBytes = limit) {
   if ((await stat(path)).size > maxBytes) throw Error('Input exceeds byte limit')
@@ -49,6 +49,7 @@ try {
       expectedSha256: flags['--expected-sha256'], clipName: flags['--clip'],
       sourceReference: { lengthAxis: flags['--source-length-axis'], lengthM: decimal(flags['--source-length-m']), authority: flags['--source-authority'] },
       adultLengthM: decimal(flags['--adult-length-m']), composition: flags['--composition'], boundedOverlay,
+      capsuleHalfAxisM: flags['--capsule-half-axis-m'] === undefined ? undefined : decimal(flags['--capsule-half-axis-m']),
     })
     for (const snapshot of snapshots) if (!snapshot.bytes.equals(await boundedRead(snapshot.path, snapshot.limit))) throw Error('Source/contract/producer/reset changed during inspection; discard the result and rerun')
     console.log(JSON.stringify(result, null, 2))

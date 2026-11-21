@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-05 03:13'
-updated_date: '2026-11-21 01:54'
+updated_date: '2026-11-21 03:33'
 labels:
   - modeling
   - validation
@@ -84,6 +84,10 @@ Root2026-11-12 current-export fallback correction: derive conservative world-spa
 Test the established left cave probe after applying the live laptop placement, foundation rise, contour sculpt, and full mounted-coral assembly. Record the exact export identity and distinguish the fixed-radius geometry probe from animated fish clearance.
 
 Restore the real-loader runtime validation command for the current model map, including the explicit fixed-moray key and its own clip semantics. Run the current asset set and retain the clip-only scope while preparing posed-body measurements.
+
+Use the existing capsule/BVH query to check a conservative sweep of a finite-length body. Bound the full linear motion of its paired axis endpoints using longitudinal slices and one shared work budget. Prove obvious contact and return indeterminate for unresolved padded bounds. Compare the 0.04 root probe with a fitted starter model pose in the exact raised cave assembly. Keep runtime promotion gated on continuous pose bounds and live hosting evidence.
+
+Extend the existing continuous clip-envelope analyzer with an optional local +Z capsule. Reuse its per-vertex displacement bounds and numerical margin for distance to the axis segment. Verify the new bound against an independent animated fixture and current starter assets. Retain the current source restrictions and do not promote unbounded shader or turn behavior.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -118,6 +122,8 @@ Root final d862bf9 verified handoff: all748tests/66files,52focusedtests/2files, 
 Root exact laptop assembly review 2026-11-20. Runtime source SHA-256: reef-full-model-left.glb 8d04c4fce1e6e1bf3c2e021968c205b4c9e4af9041a23d9304a7e291fcf6414f, reef-full-model-right.glb 009a847175661ea2fdcf273d994a30cc12834ff6720b4d7bd4aea2391179bd3b. The new reef-mesh-navigation.test.ts probe uses the left GLTFLoader scene and all runtime coral templates, the 2× foundation rise, 6× island placement and full assembled mounts. The exact transformed rock BVH indexes all 24,572 triangles and welds 12,288 positions into one consistently oriented closed component with no boundary, non-manifold, duplicate or degenerate defects. The established centerline is blocked by a coral envelope in the current assembly. The continuous 0.04 m capsule clears at unraised local x=-0.025, y=0.02 and z=-0.36 through 0.36, and the adjacent x=-0.05 probe contacts the wall. The focused tests also cover the historical known missed vertex and the current right moray route. Both packaged collisionParts arrays are empty. Targeted collision, reef assembly and hosting suites passed 95 tests with typecheck and 17 script checks. AC2 checked for source-pinned method, coverage and passage evidence. Keep AC1 and AC3 open for species-specific animated envelopes and live routed/occlusion acceptance.
 
 Root fish envelope diagnostic 2026-11-20. Restored the read-only verifier with the shared fixed-moray key and clip-only cave playback. Runtime verification runs 120 samples for each of 17 mapped assets and historical verification covers 8 assets. The scale-test source now uses the active clownfish-copy GLB (SHA-256 be6e9cbd2b5b6a76d5204f3a140ae7538a0115e6a067dcbabd0dfd1a273db7ac). Its axis length remains 2.0. Separate local posed-vertex diagnostic loaded the five default GLBs without textures, used fishModelScale, the active clip/reset and turning adapter, and CPU equivalent post-skinning flex. It ran 120 steps at 60 Hz, sampling all skinned vertices on every fifth step, with unit-normalized cruising flex and turn input yaw rate 1.2, curvature 0.5, delayed curvature 0.3, exit-stroke phase frame×0.21. Minimum-to-maximum sampled per-pose root reaches in scene units: yellow tang 0.530759–0.542008, Banggai 0.233927–0.237408, gramma 0.219835–0.233291, clown 0.239753–0.249718, blue tang 0.728539–0.736867. The 0.04 navigation sphere undercovers every measured body. These are sampled radial reaches around the root and cannot certify continuous or oriented routes. They identify the need for pose-aware envelopes and planning. No collision radii or geometry promoted.
+
+Root body-clearance review. Added a bounded continuous capsule sweep for linearly moving axis endpoints and a source-pinned whole-clip capsule option in the offline skeletal analyzer. Both reuse the existing triangle/capsule and displacement math. Unresolved padded contact returns indeterminate and work is shared across all slices. The exact raised left reef clears the 0.04 root probe but rejects the full-clip blue tang capsule (half-axis 0.50, radius 0.499369 scene units) on that cave route. The same full-clip bound clears the front-water route. At the left anemone, the measured 0.35 s clownfish pose (half-axis 0.16, radius 0.143547) clears when aligned to the tank depth axis and is blocked crosswise. Its whole-clip bound (radius 0.205815) is blocked even when aligned. The analyzer also bounds the current gramma and cardinalfish clip-only capsules. The active yellow tang export still fails the single-root validation. The certified scope excludes unbounded turning and shader flex. No live collision policy or models changed. Eight focused suites passed 244 tests plus typecheck. AC1 and AC3 remain pending.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
