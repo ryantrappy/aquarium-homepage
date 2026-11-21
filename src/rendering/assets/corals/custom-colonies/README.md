@@ -268,3 +268,60 @@ node scripts/sync-blender-override.mjs --coral reef-anemone-rose-bta --learn-gui
 /Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_anemone_sunburst_bta.py
 node scripts/sync-blender-override.mjs --coral reef-anemone-sunburst-bta --learn-guide
 ```
+
+
+## `reef-euphyllia-gold-torch`
+
+- **Archetype / Socket**: `tentaculate-lps` (`socket_lps_mid_02` on Left Island)
+- **Builder script**: `src/rendering/modeling/build_reef_euphyllia_gold_torch.py`
+- **Source `.blend`**: `src/rendering/assets/splat-fish/blend/reef-euphyllia-gold-torch.blend`
+- **Synced package**: `reef-euphyllia-gold-torch.glb` (`25,604` triangles, `1,610,836` bytes, `dimensionsM: [0.1751, 0.1422, 0.1674]`)
+- **Primitives**: `gold_torch_crown` (`coral-soft`) + `gold_torch_skeleton` (`coral-rigid`)
+- **Morphology**: Six phaceloid skeletal heads with `132` flowing Dragon-Soul / 24K Gold Torch (*Euphyllia glabrescens*) tentacles, royal-violet bases, gold-streaked shafts, and cream-lime bulbous acrosphere tips.
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_euphyllia_gold_torch.py
+node scripts/sync-blender-override.mjs --coral reef-euphyllia-gold-torch --learn-guide
+```
+
+## `reef-euphyllia-branching-frogspawn`
+
+- **Archetype / Socket**: `tentaculate-lps` (`socket_lps_mid_04` on Right Island)
+- **Builder script**: `src/rendering/modeling/build_reef_euphyllia_branching_frogspawn.py`
+- **Source `.blend`**: `src/rendering/assets/splat-fish/blend/reef-euphyllia-branching-frogspawn.blend`
+- **Synced package**: `reef-euphyllia-branching-frogspawn.glb` (`24,822` triangles, `1,672,372` bytes, `dimensionsM: [0.1900, 0.1207, 0.1560]`)
+- **Primitives**: `frogspawn_crown` (`coral-soft`) + `frogspawn_skeleton` (`coral-rigid`)
+- **Morphology**: Five forked phaceloid limestone stalks supporting `85` fleshy *Euphyllia paradivisa* tentacles studded with `255` beaded translucent lavender/chartreuse lateral grape-egg vesicles.
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_euphyllia_branching_frogspawn.py
+node scripts/sync-blender-override.mjs --coral reef-euphyllia-branching-frogspawn --learn-guide
+```
+
+## `reef-acropora-staghorn-thicket`
+
+- **Archetype / Socket**: `branching-sps` (`socket_sps_crest_03` on Left Island)
+- **Builder script**: `src/rendering/modeling/build_reef_acropora_staghorn_thicket.py`
+- **Source `.blend`**: `src/rendering/assets/splat-fish/blend/reef-acropora-staghorn-thicket.blend`
+- **Synced package**: `reef-acropora-staghorn-thicket.glb` (`19,648` triangles, `1,841,052` bytes, `dimensionsM: [0.1660, 0.1663, 0.1701]`)
+- **Primitives**: `reef_acropora_staghorn_thicket` (`coral-rigid`)
+- **Morphology**: Dichotomous deer-antler *Acropora cervicornis* thicket (`22` branches) lined with `368` sculpted 3D tubular radial corallites and pale emerald-ivory axial growth tips.
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_acropora_staghorn_thicket.py
+node scripts/sync-blender-override.mjs --coral reef-acropora-staghorn-thicket --learn-guide
+```
+
+## `reef-acanthastrea-lordhowensis`
+
+- **Archetype / Socket**: `mounded-lps` (`socket_brain_apron_02` on Left Island)
+- **Builder script**: `src/rendering/modeling/build_reef_acanthastrea_lordhowensis.py`
+- **Source `.blend`**: `src/rendering/assets/splat-fish/blend/reef-acanthastrea-lordhowensis.blend`
+- **Synced package**: `reef-acanthastrea-lordhowensis.glb` (`20,480` triangles, `1,503,816` bytes, `dimensionsM: [0.1967, 0.0689, 0.1790]`)
+- **Primitives**: `reef_acanthastrea_lordhowensis` (`coral-rigid`)
+- **Morphology**: Watertight geodesic cushion *Micromussa lordhowensis* colony featuring `30` equidistant-azimuthal Voronoi polyps, radially ribbed fiery crimson/gold septa, teal-slate interstitial troughs, and a dark coralline basal apron.
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_acanthastrea_lordhowensis.py
+node scripts/sync-blender-override.mjs --coral reef-acanthastrea-lordhowensis --learn-guide
+```

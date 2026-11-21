@@ -61,6 +61,18 @@ const coralCases = [
     socketName: 'socket_brain_apron_04',
     archetype: 'mounded-lps',
   },
+  {
+    id: 'reef-acropora-staghorn-thicket',
+    mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
+    socketName: 'socket_sps_crest_03',
+    archetype: 'branching-sps',
+  },
+  {
+    id: 'reef-acanthastrea-lordhowensis',
+    mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
+    socketName: 'socket_brain_apron_02',
+    archetype: 'mounded-lps',
+  },
 ] as const
 
 type GlbDocument = {

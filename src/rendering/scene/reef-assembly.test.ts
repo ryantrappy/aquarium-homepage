@@ -108,6 +108,10 @@ function buildMockCoralTemplates(): Map<string, THREE.Object3D> {
     ['reef-acropora-corymbose', [['reef_acropora_corymbose', 'coral-rigid']]],
     ['reef-anemone-rose-bta', [['anemone_tentacle_crown', 'coral-soft'], ['anemone_column_disc', 'coral-rigid']]],
     ['reef-anemone-sunburst-bta', [['anemone_tentacle_crown', 'coral-soft'], ['anemone_column_disc', 'coral-rigid']]],
+    ['reef-euphyllia-gold-torch', [['gold_torch_crown', 'coral-soft'], ['gold_torch_skeleton', 'coral-rigid']]],
+    ['reef-euphyllia-branching-frogspawn', [['frogspawn_crown', 'coral-soft'], ['frogspawn_skeleton', 'coral-rigid']]],
+    ['reef-acropora-staghorn-thicket', [['reef_acropora_staghorn_thicket', 'coral-rigid']]],
+    ['reef-acanthastrea-lordhowensis', [['reef_acanthastrea_lordhowensis', 'coral-rigid']]],
     ['reef-euphyllia-flowing-torch', [['flowing_torch_crown', 'coral-soft'], ['flowing_torch_skeleton', 'coral-rigid']]],
     ['reef-euphyllia-anchor-hammer', [['anchor_hammer_crown', 'coral-soft'], ['anchor_hammer_skeleton', 'coral-rigid']]],
     ['reef-montipora-whorled-plate', [['reef_montipora_whorled_plate', 'coral-rigid']]],
@@ -699,6 +703,80 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
       expect(columnMat.userData.coralRawMasks.uniforms.uRoleIsSoft.value).toBe(0)
       expect(columnMat.userData.coralRawMasks.uniforms.uAnemoneMode.value).toBe(1)
       expect(columnMat.userData.coralRawMasks.uniforms.uFluorescenceStrength.value).toBe(0)
+    }
+  })
+
+  it('registers and mounts the four AQ-70.11 LPS and SPS upgrade colonies with baked-pbr materials and non-fluorescent rigid skeletons', () => {
+    const dualUpgradeCases = [
+      {
+        id: 'reef-euphyllia-gold-torch',
+        report: 'live-rock-island-left-socket-report.json',
+        mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
+        socketName: 'socket_lps_mid_02',
+        crownId: 'gold_torch_crown',
+        skeletonId: 'gold_torch_skeleton',
+      },
+      {
+        id: 'reef-euphyllia-branching-frogspawn',
+        report: 'live-rock-island-right-socket-report.json',
+        mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+        socketName: 'socket_lps_mid_04',
+        crownId: 'frogspawn_crown',
+        skeletonId: 'frogspawn_skeleton',
+      },
+    ] as const
+
+    for (const entry of dualUpgradeCases) {
+      expect(MODULAR_CORAL_ASSET_URLS[entry.id]).toContain(`/custom-colonies/${entry.id}.glb`)
+      const rockRoot = buildRockFixtureFromSocketReport(entry.report)
+      const assembly = assembleCoralsOnRockSockets(rockRoot, buildMockCoralTemplates(), entry.mounts)
+      const mounted = assembly.mountedCorals.find(candidate => candidate.socketName === entry.socketName)!
+      expect(mounted.coralAssetId).toBe(entry.id)
+
+      let crownMesh: THREE.Mesh | undefined
+      let skeletonMesh: THREE.Mesh | undefined
+      mounted.root.traverse(node => {
+        if (!(node instanceof THREE.Mesh)) return
+        if (node.userData?.reefPrimitive?.id === entry.crownId) crownMesh = node
+        if (node.userData?.reefPrimitive?.id === entry.skeletonId) skeletonMesh = node
+      })
+      expect(crownMesh).toBeDefined()
+      expect(skeletonMesh).toBeDefined()
+      const crownMat = crownMesh!.material as THREE.MeshStandardMaterial
+      const skeletonMat = skeletonMesh!.material as THREE.MeshStandardMaterial
+      expect(crownMat.customProgramCacheKey()).toContain(':coral-soft:baked-pbr')
+      expect(skeletonMat.customProgramCacheKey()).toContain(':coral-rigid:baked-pbr')
+      expect(skeletonMat.userData.coralRawMasks.uniforms.uFluorescenceStrength.value).toBe(0)
+    }
+
+    const rigidUpgradeCases = [
+      {
+        id: 'reef-acropora-staghorn-thicket',
+        socketName: 'socket_sps_crest_03',
+        primId: 'reef_acropora_staghorn_thicket',
+      },
+      {
+        id: 'reef-acanthastrea-lordhowensis',
+        socketName: 'socket_brain_apron_02',
+        primId: 'reef_acanthastrea_lordhowensis',
+      },
+    ] as const
+
+    const leftRock = buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json')
+    const leftAssembly = assembleCoralsOnRockSockets(leftRock, buildMockCoralTemplates(), DEFAULT_LEFT_ISLAND_MOUNTS)
+    for (const entry of rigidUpgradeCases) {
+      expect(MODULAR_CORAL_ASSET_URLS[entry.id]).toContain(`/custom-colonies/${entry.id}.glb`)
+      const mounted = leftAssembly.mountedCorals.find(candidate => candidate.socketName === entry.socketName)!
+      expect(mounted.coralAssetId).toBe(entry.id)
+      let foundMesh: THREE.Mesh | undefined
+      mounted.root.traverse(node => {
+        if (node instanceof THREE.Mesh && node.userData?.reefPrimitive?.id === entry.primId) {
+          foundMesh = node
+        }
+      })
+      expect(foundMesh).toBeDefined()
+      const mat = foundMesh!.material as THREE.MeshStandardMaterial
+      expect(mat.customProgramCacheKey()).toContain(':coral-rigid:baked-pbr')
     }
   })
 

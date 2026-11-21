@@ -809,7 +809,8 @@ async function loadActualGlb(bytes: Uint8Array) {
       nose: reef.localToWorld(new THREE.Vector3(x, height, z + halfAxisLocal)),
     })
     const caveSweep = querySweptBodyCapsule(query, pose(-.025, y, -.36), pose(-.025, y, .36), radius, budget)
-    expect(caveSweep).toMatchObject({ status: 'blocked', reason: 'coral-envelope' })
+    // Tighter custom colonies clear the cave corridor so the large fitted blue tang contacts the rock cave wall directly.
+    expect(caveSweep).toMatchObject({ status: 'blocked', reason: 'surface-contact' })
     const frontPose = (x: number) => ({ tail: p(x - halfAxis, 1.65, 1.9), nose: p(x + halfAxis, 1.65, 1.9) })
     const frontSweep = querySweptBodyCapsule(query, frontPose(-.6), frontPose(.5), radius, budget)
     expect(frontSweep.status).toBe('clear')

@@ -61,6 +61,20 @@ const dualCoralCases = [
     socketName: 'socket_lps_mid_05',
     archetype: 'tentaculate-lps',
   },
+  {
+    id: 'reef-euphyllia-gold-torch',
+    mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
+    minFlexLevels: 10,
+    socketName: 'socket_lps_mid_02',
+    archetype: 'tentaculate-lps',
+  },
+  {
+    id: 'reef-euphyllia-branching-frogspawn',
+    mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+    minFlexLevels: 9,
+    socketName: 'socket_lps_mid_04',
+    archetype: 'tentaculate-lps',
+  },
 ] as const
 const registryDir = 'src/rendering/assets/corals/custom-colonies'
 const registryPath = `${registryDir}/manifest.json`
