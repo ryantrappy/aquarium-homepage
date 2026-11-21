@@ -183,7 +183,7 @@ def disc(center, radius, material, mask):
         prev = ring
 
 
-heads = [Vector(p) for p in [(0, 0, 0.058), (-0.044, -0.012, 0.046), (0.041, -0.018, 0.043), (0.025, 0.036, 0.052), (-0.028, 0.038, 0.041)]]
+heads = [Vector(p) for p in [(0, 0, 0.058), (-0.035, -0.010, 0.046), (0.033, -0.014, 0.043), (0.020, 0.029, 0.052), (-0.022, 0.030, 0.041)]]
 for hi, center in enumerate(heads):
     a = Vector((0, 0, 0.002))
     b = Vector((center.x * 0.45, center.y * 0.45, 0.018))
@@ -216,21 +216,23 @@ for hi, center in enumerate(heads):
         r = 0.0028 + 0.0128 * math.sqrt((ti + 0.5) / 29.0)
         phase = rng.uniform(0.04, 0.96)
         p0 = center + radial * r + Vector((0, 0, 0.005))
-        reach = 0.017 + 0.024 * (r / 0.016) + rng.uniform(-0.003, 0.005)
+        reach = 0.013 + 0.018 * (r / 0.016) + rng.uniform(-0.002, 0.004)
         height = 0.046 + 0.025 * (1.0 - r / 0.016) + rng.uniform(-0.007, 0.007)
-        flow = Vector((0.011, -0.004, 0)) * rng.uniform(0.30, 1.10) + side * rng.uniform(-0.010, 0.010)
+        flow = side * rng.uniform(-0.008, 0.008)
         p3 = p0 + radial * reach + flow + Vector((0, 0, height))
-        p1 = p0 - radial * rng.uniform(0.001, 0.007) + side * rng.uniform(-0.007, 0.007) + Vector((0, 0, 0.032))
-        p2 = p3 - radial * rng.uniform(0.002, 0.012) - flow * 0.15 + Vector((0, 0, rng.uniform(-0.008, 0.022))) + side * rng.uniform(-0.011, 0.011)
+        p1 = p0 - radial * rng.uniform(0.001, 0.006) + side * rng.uniform(-0.006, 0.006) + Vector((0, 0, 0.032))
+        p2 = p3 - radial * rng.uniform(0.002, 0.010) - flow * 0.15 + Vector((0, 0, rng.uniform(-0.008, 0.022))) + side * rng.uniform(-0.009, 0.009)
         ts = [0.0, 0.18, 0.38, 0.58, 0.74, 0.84, 0.915, 0.97, 1.0]
         points = [cubic(p0, p1, p2, p3, t) for t in ts]
-        base = rng.uniform(0.0020, 0.0026)
+        base = rng.uniform(0.0020, 0.0025)
         # Anchor bar direction oriented roughly tangent to head perimeter with natural twist
         twist = rng.uniform(-0.55, 0.55)
         bar_dir = (side * math.cos(twist) + radial * math.sin(twist) + Vector((0, 0, rng.uniform(-0.12, 0.12)))).normalized()
+        tent_stiff = 0.86 + 0.14 * ((ti % 7) / 6.0)
 
-        def raw(t, ph=phase):
-            return (t ** 1.8, smooth(0.76, 0.94, t), ph, 0.40 + 0.60 * smooth(0.0, 0.50, t))
+        def raw(t, ph=phase, stiff=tent_stiff):
+            r_flex = 0.0 if t <= 0.0 else min(1.0, (t ** 1.8) * stiff)
+            return (r_flex, smooth(0.76, 0.94, t), ph, 0.40 + 0.60 * smooth(0.0, 0.50, t))
 
         hammer_tentacle(points, ts, base, bar_dir, raw, 0, sides=10, phase=phase)
 
@@ -239,7 +241,7 @@ tube(pts, [0.018, 0.0185, 0.011], lambda t: (0.0, 0.0, 0.5, 0.40 + 0.30 * t), 1,
 
 z0 = min(p[2] for p in verts)
 z1 = max(p[2] for p in verts)
-scale = 0.172 / (z1 - z0)
+scale = 0.148 / (z1 - z0)
 verts = [(x * scale, y * scale, (z - z0) * scale) for x, y, z in verts]
 
 mesh = bpy.data.meshes.new("Anchor_Hammer_Tissue_And_Skeleton")
@@ -347,7 +349,7 @@ for label, material_id, size in [("tissue", 0, 512), ("skeleton", 1, 256)]:
 obj["authoring_notes"] = (
     "Original five-head Euphyllia anchor/hammer coral, 145 curved tentacles with bilobed T-crescent tips "
     "and fluted phaceloid skeleton calyces. Raw R arc flex on soft tissue only; rigid R=0, G crescent tips, "
-    "B phase, A analytic contact. Chosen 0.172m comparison height, no imported visuals."
+    "B phase, A analytic contact. Chosen 0.148m comparison height, no imported visuals."
 )
 triangulate = obj.modifiers.new("Stable_Export_Triangles", "TRIANGULATE")
 bpy.ops.object.modifier_apply(modifier=triangulate.name)
