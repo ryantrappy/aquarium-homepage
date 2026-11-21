@@ -1,0 +1,167 @@
+{
+  "extras": {
+    "reefAsset": {
+      "schema": "reef-asset-v1",
+      "id": "reef-nsa-cantilever-shelf",
+      "kind": "rock",
+      "units": "meter",
+      "upAxis": "+Y",
+      "origin": "local",
+      "dimensionsM": [
+        0.6669048070907593,
+        0.31097906827926636,
+        0.33306533098220825
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "5e39b37bb3fe97e05bdeb18ba0ab135448b4b9966e7d115218f74b9685b01b86",
+        "recipe": "Blender background --python src/rendering/modeling/build_reef_nsa_cantilever_shelf.py; node scripts/sync-blender-override.mjs --reef reef-nsa-cantilever-shelf --learn-guide",
+        "attribution": "Original custom procedural limestone arch and embedded textures; no imported visual assets."
+      }
+    }
+  },
+  "rootTransform": {
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "boundsM": {
+    "min": [
+      -0.33345240354537964,
+      0,
+      -0.16653266549110413
+    ],
+    "max": [
+      0.33345240354537964,
+      0.31097906827926636,
+      0.16653266549110413
+    ]
+  },
+  "primitives": [
+    {
+      "id": "reef_nsa_cantilever_shelf",
+      "role": "rock",
+      "vertexCount": 9462,
+      "boundsM": {
+        "min": [
+          -0.33345240354537964,
+          0,
+          -0.16653266549110413
+        ],
+        "max": [
+          0.33345240354537964,
+          0.31097906827926636,
+          0.16653266549110413
+        ]
+      },
+      "material": {
+        "vertexColors": false,
+        "vertexAlpha": false,
+        "aoSource": "texture"
+      }
+    }
+  ],
+  "sockets": [
+    {
+      "name": "socket_lps_mid_21",
+      "role": "coral-mount",
+      "parentMesh": "reef_nsa_cantilever_shelf",
+      "archetype": "tentaculate-lps",
+      "positionM": [
+        -0.13746044039726257,
+        0.2998526692390442,
+        -0.022065002471208572
+      ],
+      "normal": [
+        0.16397037300214776,
+        0.9652239563945716,
+        -0.20360852334700175
+      ],
+      "rotation": [
+        -0.10270109022456106,
+        -8.905566856828532e-12,
+        -0.08270740504719176,
+        0.9912678604782093
+      ],
+      "footprintRadiusM": 0.024,
+      "clearanceRadiusM": 0.042,
+      "support": {
+        "pointM": [
+          -0.13746043857864731,
+          0.29985267994445985,
+          -0.02206500472945534
+        ],
+        "normal": [
+          0.16397037300214776,
+          0.9652239563945716,
+          -0.20360852334700175
+        ],
+        "supportedRadiusM": 0.024,
+        "freeRadiusM": 0.042,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "491a4a1038ddf21935321add046b27b13dc73d2653757054fe2361f4de257b2f",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-nsa-cantilever-shelf-socket-report.json"
+        }
+      }
+    },
+    {
+      "name": "socket_plate_ledge_22",
+      "role": "coral-mount",
+      "parentMesh": "reef_nsa_cantilever_shelf",
+      "archetype": "plating-sps",
+      "positionM": [
+        0.12198331952095032,
+        0.2432282418012619,
+        0.02374410443007946
+      ],
+      "normal": [
+        0.048288864091012455,
+        0.9795968953290186,
+        -0.19508487452016163
+      ],
+      "rotation": [
+        -0.09804383043555782,
+        6.084881320122591e-11,
+        -0.024268541796613183,
+        0.9948861468492712
+      ],
+      "footprintRadiusM": 0.025,
+      "clearanceRadiusM": 0.045,
+      "support": {
+        "pointM": [
+          0.12198331928025741,
+          0.24322823691852077,
+          0.023744105402468147
+        ],
+        "normal": [
+          0.048288864091012455,
+          0.9795968953290186,
+          -0.19508487452016163
+        ],
+        "supportedRadiusM": 0.025,
+        "freeRadiusM": 0.045,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "491a4a1038ddf21935321add046b27b13dc73d2653757054fe2361f4de257b2f",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-nsa-cantilever-shelf-socket-report.json"
+        }
+      }
+    }
+  ],
+  "collisionParts": []
+}

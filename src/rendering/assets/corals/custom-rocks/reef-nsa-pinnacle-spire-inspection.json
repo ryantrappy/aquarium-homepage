@@ -1,0 +1,167 @@
+{
+  "extras": {
+    "reefAsset": {
+      "schema": "reef-asset-v1",
+      "id": "reef-nsa-pinnacle-spire",
+      "kind": "rock",
+      "units": "meter",
+      "upAxis": "+Y",
+      "origin": "local",
+      "dimensionsM": [
+        0.6439521312713623,
+        0.738231360912323,
+        0.34543368220329285
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "5a96e72d85620c4c927dd0e2e7f1943b00d42da695d6f805cd70955d81dee527",
+        "recipe": "Blender background --python src/rendering/modeling/build_reef_nsa_pinnacle_spire.py; node scripts/sync-blender-override.mjs --reef reef-nsa-pinnacle-spire --learn-guide",
+        "attribution": "Original custom procedural limestone arch and embedded textures; no imported visual assets."
+      }
+    }
+  },
+  "rootTransform": {
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "boundsM": {
+    "min": [
+      -0.32197606563568115,
+      0,
+      -0.17271684110164642
+    ],
+    "max": [
+      0.32197606563568115,
+      0.738231360912323,
+      0.17271684110164642
+    ]
+  },
+  "primitives": [
+    {
+      "id": "reef_nsa_pinnacle_spire",
+      "role": "rock",
+      "vertexCount": 12516,
+      "boundsM": {
+        "min": [
+          -0.32197606563568115,
+          0,
+          -0.17271684110164642
+        ],
+        "max": [
+          0.32197606563568115,
+          0.738231360912323,
+          0.17271684110164642
+        ]
+      },
+      "material": {
+        "vertexColors": false,
+        "vertexAlpha": false,
+        "aoSource": "texture"
+      }
+    }
+  ],
+  "sockets": [
+    {
+      "name": "socket_plate_ledge_21",
+      "role": "coral-mount",
+      "parentMesh": "reef_nsa_pinnacle_spire",
+      "archetype": "plating-sps",
+      "positionM": [
+        -0.24068641662597656,
+        0.2995379567146301,
+        0.017289718613028526
+      ],
+      "normal": [
+        -0.015931659873905994,
+        0.9887465642676906,
+        -0.14874950037731172
+      ],
+      "rotation": [
+        -0.07458487859647678,
+        6.1984456433429534e-12,
+        0.007988336454390078,
+        0.9971826725156431
+      ],
+      "footprintRadiusM": 0.024,
+      "clearanceRadiusM": 0.042,
+      "support": {
+        "pointM": [
+          -0.24068641599966561,
+          0.29953791784468164,
+          0.01728972446072057
+        ],
+        "normal": [
+          -0.015931659873905994,
+          0.9887465642676906,
+          -0.14874950037731172
+        ],
+        "supportedRadiusM": 0.024,
+        "freeRadiusM": 0.042,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "9ec1b747d628b77376365150192ca567dd805d09fd35992b35a6bc5643444637",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-nsa-pinnacle-spire-socket-report.json"
+        }
+      }
+    },
+    {
+      "name": "socket_sps_crest_21",
+      "role": "coral-mount",
+      "parentMesh": "reef_nsa_pinnacle_spire",
+      "archetype": "branching-sps",
+      "positionM": [
+        -0.013077094219624996,
+        0.5916118025779724,
+        0.034413229674100876
+      ],
+      "normal": [
+        -0.25425618409620326,
+        0.9640863232696467,
+        0.07675515704662472
+      ],
+      "rotation": [
+        0.03872686298161418,
+        1.2604915135981398e-10,
+        0.12828509668380592,
+        0.9909809100343103
+      ],
+      "footprintRadiusM": 0.024,
+      "clearanceRadiusM": 0.042,
+      "support": {
+        "pointM": [
+          -0.013077094166993016,
+          0.5916118023784029,
+          0.03441322965821227
+        ],
+        "normal": [
+          -0.25425618409620326,
+          0.9640863232696467,
+          0.07675515704662472
+        ],
+        "supportedRadiusM": 0.024,
+        "freeRadiusM": 0.042,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "9ec1b747d628b77376365150192ca567dd805d09fd35992b35a6bc5643444637",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-nsa-pinnacle-spire-socket-report.json"
+        }
+      }
+    }
+  ],
+  "collisionParts": []
+}

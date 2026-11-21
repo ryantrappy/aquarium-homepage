@@ -1,0 +1,124 @@
+{
+  "extras": {
+    "reefAsset": {
+      "schema": "reef-asset-v1",
+      "id": "reef-nsa-cave-buttress",
+      "kind": "rock",
+      "units": "meter",
+      "upAxis": "+Y",
+      "origin": "local",
+      "dimensionsM": [
+        0.8097794651985168,
+        0.5463067293167114,
+        0.31705230474472046
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "4b6a3658357eee34ac291c12189ad0fff0b3b5605a12695789b8b721869eeb58",
+        "recipe": "Blender background --python src/rendering/modeling/build_reef_nsa_cave_buttress.py; node scripts/sync-blender-override.mjs --reef reef-nsa-cave-buttress --learn-guide",
+        "attribution": "Original custom procedural limestone arch and embedded textures; no imported visual assets."
+      }
+    }
+  },
+  "rootTransform": {
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "boundsM": {
+    "min": [
+      -0.4048897325992584,
+      0,
+      -0.15852615237236023
+    ],
+    "max": [
+      0.4048897325992584,
+      0.5463067293167114,
+      0.15852615237236023
+    ]
+  },
+  "primitives": [
+    {
+      "id": "reef_nsa_cave_buttress",
+      "role": "rock",
+      "vertexCount": 15781,
+      "boundsM": {
+        "min": [
+          -0.4048897325992584,
+          0,
+          -0.15852615237236023
+        ],
+        "max": [
+          0.4048897325992584,
+          0.5463067293167114,
+          0.15852615237236023
+        ]
+      },
+      "material": {
+        "vertexColors": false,
+        "vertexAlpha": false,
+        "aoSource": "texture"
+      }
+    }
+  ],
+  "sockets": [
+    {
+      "name": "socket_lps_mid_22",
+      "role": "coral-mount",
+      "parentMesh": "reef_nsa_cave_buttress",
+      "archetype": "tentaculate-lps",
+      "positionM": [
+        0.21337473392486572,
+        0.4032604396343231,
+        0.048189427703619
+      ],
+      "normal": [
+        0.2726175831417316,
+        0.8733077540930032,
+        0.4037489566587088
+      ],
+      "rotation": [
+        0.20858926967101152,
+        3.400821840737192e-10,
+        -0.14084269025498747,
+        0.9678087895756329
+      ],
+      "footprintRadiusM": 0.024,
+      "clearanceRadiusM": 0.042,
+      "support": {
+        "pointM": [
+          0.2133747311906097,
+          0.4032604308753614,
+          0.048189423654162615
+        ],
+        "normal": [
+          0.2726175831417316,
+          0.8733077540930032,
+          0.4037489566587088
+        ],
+        "supportedRadiusM": 0.024,
+        "freeRadiusM": 0.042,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "99a37ff80fcfb0b2df88d768e812c04bf24b613a3169ee574ee49f961f21c31b",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-nsa-cave-buttress-socket-report.json"
+        }
+      }
+    }
+  ],
+  "collisionParts": []
+}

@@ -1,0 +1,167 @@
+{
+  "extras": {
+    "reefAsset": {
+      "schema": "reef-asset-v1",
+      "id": "reef-nsa-bommie-mound",
+      "kind": "rock",
+      "units": "meter",
+      "upAxis": "+Y",
+      "origin": "local",
+      "dimensionsM": [
+        0.5563504695892334,
+        0.3924998641014099,
+        0.33578717708587646
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "97373b80885669d9fc77382c1c2ad1e34bc1443efa82e356ce8fb908177d8245",
+        "recipe": "Blender background --python src/rendering/modeling/build_reef_nsa_bommie_mound.py; node scripts/sync-blender-override.mjs --reef reef-nsa-bommie-mound --learn-guide",
+        "attribution": "Original custom procedural limestone arch and embedded textures; no imported visual assets."
+      }
+    }
+  },
+  "rootTransform": {
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "boundsM": {
+    "min": [
+      -0.2781752347946167,
+      0,
+      -0.16789358854293823
+    ],
+    "max": [
+      0.2781752347946167,
+      0.3924998641014099,
+      0.16789358854293823
+    ]
+  },
+  "primitives": [
+    {
+      "id": "reef_nsa_bommie_mound",
+      "role": "rock",
+      "vertexCount": 12266,
+      "boundsM": {
+        "min": [
+          -0.2781752347946167,
+          0,
+          -0.16789358854293823
+        ],
+        "max": [
+          0.2781752347946167,
+          0.3924998641014099,
+          0.16789358854293823
+        ]
+      },
+      "material": {
+        "vertexColors": false,
+        "vertexAlpha": false,
+        "aoSource": "texture"
+      }
+    }
+  ],
+  "sockets": [
+    {
+      "name": "socket_brain_apron_21",
+      "role": "coral-mount",
+      "parentMesh": "reef_nsa_bommie_mound",
+      "archetype": "mounded-lps",
+      "positionM": [
+        0.15989071130752563,
+        0.22293278574943542,
+        0.048422202467918396
+      ],
+      "normal": [
+        0.0853943687909884,
+        0.9268991633715502,
+        0.36546647277131883
+      ],
+      "rotation": [
+        0.1861671526524891,
+        -1.7730162865657082e-10,
+        -0.04349954847147826,
+        0.9815546752759331
+      ],
+      "footprintRadiusM": 0.025,
+      "clearanceRadiusM": 0.044,
+      "support": {
+        "pointM": [
+          0.15989071119886342,
+          0.22293278456997917,
+          0.04842220200287135
+        ],
+        "normal": [
+          0.0853943687909884,
+          0.9268991633715502,
+          0.36546647277131883
+        ],
+        "supportedRadiusM": 0.025,
+        "freeRadiusM": 0.044,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "7763925eb9357872c2a89600a9c07f1874493c3bb63f52f9f743dfb9b4e7f89a",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-nsa-bommie-mound-socket-report.json"
+        }
+      }
+    },
+    {
+      "name": "socket_soft_mat_21",
+      "role": "coral-mount",
+      "parentMesh": "reef_nsa_bommie_mound",
+      "archetype": "zoanthid-mat",
+      "positionM": [
+        -0.13749878108501434,
+        0.33017903566360474,
+        0.021411146968603134
+      ],
+      "normal": [
+        0.029411959688008624,
+        0.9955183169982977,
+        0.08987890268682519
+      ],
+      "rotation": [
+        0.044989887850786225,
+        -6.674239846312354e-12,
+        -0.014722488894778769,
+        0.9988789507802819
+      ],
+      "footprintRadiusM": 0.024,
+      "clearanceRadiusM": 0.042,
+      "support": {
+        "pointM": [
+          -0.13749878108501434,
+          0.33017903566360474,
+          0.021411146968603134
+        ],
+        "normal": [
+          0.029411959688008624,
+          0.9955183169982977,
+          0.08987890268682519
+        ],
+        "supportedRadiusM": 0.024,
+        "freeRadiusM": 0.042,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "7763925eb9357872c2a89600a9c07f1874493c3bb63f52f9f743dfb9b4e7f89a",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-nsa-bommie-mound-socket-report.json"
+        }
+      }
+    }
+  ],
+  "collisionParts": []
+}

@@ -228,3 +228,14 @@ rubric, variant, support and rendering-budget requirements remain open.
   - `invertebrate-emerald-mithrax-crab.glb`: `4,192` triangles, `1,035,928` bytes, `13` joints, clip `emerald_crab_forage`, thumbnail `public/fish/emerald-mithrax-crab.webp`
   - `invertebrate-scarlet-skunk-cleaner-shrimp.glb`: `3,880` triangles, `511,932` bytes, `13` joints, clip `cleaner_shrimp_rock`, thumbnail `public/fish/scarlet-skunk-cleaner-shrimp.webp`
 - Runtime species/locomotion/UI integration (`AQ-109` Phase 2) and Root visual review remain pending.
+
+## Negative Space Aquascape (NSA) modular live-rock library — `AQ-94`
+
+- Original **$0** procedural calcium-carbonate live-rock geometry and shared `2048×2048` 4-quadrant PBR trim sheet (`textures/reef-nsa-trim-2048-{albedo,normal,orm}.jpg`) authored from scratch in Blender (`reef_nsa_trim_sheet.py`, `build_reef_nsa_*.py`; packed sources in `src/rendering/assets/splat-fish/blend/` and overrides in `src/rendering/assets/splat-fish/overrides/`). Canonical `corals/`, `corals/manifest.json`, `splat-fish/manifest.json`, and `reef-center-arch.glb` remain untouched.
+- Synced into `src/rendering/assets/corals/custom-rocks/` (`manifest.json`, `6` modules total including `reef-center-arch`), each grounded flush at `boundsM.min[1] = 0`, `aoSource: 'texture'`, zero rejected sockets, and byte-identical embedded `2048×2048` JPEG textures:
+  - `reef-nsa-pinnacle-spire.glb`: `13,380` triangles, `1,553,272` bytes (`0.6440 × 0.7382 × 0.3454` m; sockets `socket_plate_ledge_21`, `socket_sps_crest_21`)
+  - `reef-nsa-cantilever-shelf.glb`: `10,628` triangles, `1,439,016` bytes (`0.6669 × 0.3110 × 0.3331` m; sockets `socket_lps_mid_21`, `socket_plate_ledge_22`)
+  - `reef-nsa-cave-buttress.glb`: `16,928` triangles, `1,678,664` bytes (`0.8098 × 0.5463 × 0.3171` m; socket `socket_lps_mid_22`)
+  - `reef-nsa-bommie-mound.glb`: `12,500` triangles, `1,539,956` bytes (`0.5564 × 0.3925 × 0.3358` m; sockets `socket_brain_apron_21`, `socket_soft_mat_21`)
+  - `reef-nsa-rubble-talus.glb`: `6,640` triangles, `1,299,896` bytes (`0.3883 × 0.0940 × 0.2687` m; substrate rubble apron, `0` sockets)
+- Runtime pinnacle-canyon full-scape composition and Root visual/budget acceptance remain pending.

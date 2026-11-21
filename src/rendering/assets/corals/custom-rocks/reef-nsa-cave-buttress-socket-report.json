@@ -1,0 +1,136 @@
+{
+  "schema": "socket-support-inspection-v1",
+  "assetId": "reef-nsa-cave-buttress",
+  "sourceSha256": "99a37ff80fcfb0b2df88d768e812c04bf24b613a3169ee574ee49f961f21c31b",
+  "method": {
+    "contactToleranceM": 0.002,
+    "upNormalVectorTolerance": 0.002,
+    "footprintSampleSpacingM": 0.005,
+    "footprintSampleCount": 97,
+    "footprintNormalMaxAngleDeg": 30,
+    "clearanceEnvelope": {
+      "shape": "oriented-cylinder",
+      "radiusM": "requested reefSocket.clearanceRadiusM",
+      "heightM": "same as radius",
+      "baseOffsetM": 0.002
+    },
+    "limitations": [
+      "Socket local/world basis must remain unit-scale and orthogonal; footprint and clearance radii are interpreted in exported asset meters.",
+      "Contact normal uses the geometric normal of the nearest triangle; at shared-vertex ties it is facet-sensitive and may select one of several incident faces.",
+      "Footprint support is a finite radial sample lattice at the reported spacing, not a continuous disk certificate.",
+      "Clearance checks only intersection with an oriented rock-space cylinder; it does not prove whole-colony fit, fish passage or biological suitability.",
+      "Only the default glTF scene and embedded, uncompressed TRIANGLES geometry are inspected."
+    ]
+  },
+  "supportedSockets": [
+    {
+      "name": "socket_lps_mid_22",
+      "role": "coral-mount",
+      "parentMesh": "reef_nsa_cave_buttress",
+      "archetype": "tentaculate-lps",
+      "positionM": [
+        0.21337473392486572,
+        0.4032604396343231,
+        0.048189427703619
+      ],
+      "normal": [
+        0.2726175831417316,
+        0.8733077540930032,
+        0.4037489566587088
+      ],
+      "rotation": [
+        0.20858926967101152,
+        3.400821840737192e-10,
+        -0.14084269025498747,
+        0.9678087895756329
+      ],
+      "footprintRadiusM": 0.024,
+      "clearanceRadiusM": 0.042,
+      "support": {
+        "pointM": [
+          0.2133747311906097,
+          0.4032604308753614,
+          0.048189423654162615
+        ],
+        "normal": [
+          0.2726175831417316,
+          0.8733077540930032,
+          0.4037489566587088
+        ],
+        "supportedRadiusM": 0.024,
+        "freeRadiusM": 0.042,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "99a37ff80fcfb0b2df88d768e812c04bf24b613a3169ee574ee49f961f21c31b",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-nsa-cave-buttress-socket-report.json"
+        }
+      }
+    }
+  ],
+  "measurements": [
+    {
+      "nodeIndex": 0,
+      "name": "socket_lps_mid_22",
+      "supported": true,
+      "data": {
+        "sourceNode": 0,
+        "socketToSurfaceDistanceM": 1.0029639248722672e-8,
+        "measuredPointM": [
+          0.2133747311906097,
+          0.4032604308753614,
+          0.048189423654162615
+        ],
+        "measuredSurfaceNormal": [
+          0.2726175831417316,
+          0.8733077540930032,
+          0.4037489566587088
+        ],
+        "nearestTriangleIndex": 3252,
+        "upNormalVectorDifference": 1.1128573354898964e-7,
+        "footprintSampleSpacingM": 0.005,
+        "originalIntent": {
+          "role": "coral-mount",
+          "parentMesh": "reef_nsa_cave_buttress",
+          "archetype": "tentaculate-lps",
+          "footprintRadiusM": 0.024,
+          "clearanceRadiusM": 0.042
+        },
+        "rawSocketTransform": {
+          "translation": [
+            0.21337473392486572,
+            0.4032604396343231,
+            0.048189427703619
+          ],
+          "rotation": [
+            0.20858927071094513,
+            0,
+            -0.14084269106388092,
+            0.9678087830543518
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "worldSocketUp": [
+          0.27261758729438534,
+          0.8733077063597033,
+          0.40374905710173764
+        ],
+        "footprintSamples": 97,
+        "footprintFailedSamples": 0,
+        "footprintMaxSlopeDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": 0.042,
+          "heightM": 0.042,
+          "baseOffsetM": 0.002,
+          "blockerTriangleCount": 0,
+          "blockers": []
+        }
+      }
+    }
+  ],
+  "rejectedSockets": []
+}
