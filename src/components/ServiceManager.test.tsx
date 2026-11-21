@@ -151,6 +151,31 @@ describe('ServiceManager fish picker', () => {
       expect(view.querySelector('.fish-picker-selected strong')?.textContent).toBe(commonName)
     }
   })
+
+  it('shows how many of each species are already in the tank on picker options and selected preview', async () => {
+    const view = await renderManager(props({
+      services: [
+        { id: 's1', name: 'A', url: 'https://a.test', fishId: 'yellow-tang', isExample: false },
+        { id: 's2', name: 'B', url: '', fishId: 'yellow-tang', isExample: false },
+        { id: 's3', name: 'C', url: 'https://c.test', fishId: 'blue-tang', isExample: false },
+      ],
+    }))
+
+    const yellowOption = view.querySelector<HTMLInputElement>('input[type="radio"][value="yellow-tang"]')!.closest('label')!
+    const blueOption = view.querySelector<HTMLInputElement>('input[type="radio"][value="blue-tang"]')!.closest('label')!
+    const flameOption = view.querySelector<HTMLInputElement>('input[type="radio"][value="flame-angelfish"]')!.closest('label')!
+
+    expect(yellowOption.querySelector('.fish-picker-count')?.textContent).toBe('2 in tank')
+    expect(blueOption.querySelector('.fish-picker-count')?.textContent).toBe('1 in tank')
+    expect(flameOption.querySelector('.fish-picker-count')).toBeNull()
+
+    // Default selected is ocellaris-clownfish (0 in tank)
+    expect(view.querySelector('.fish-picker-selected .fish-picker-count')?.textContent).toBe('None in tank')
+    await act(async () => {
+      yellowOption.querySelector<HTMLInputElement>('input[type="radio"]')!.click()
+    })
+    expect(view.querySelector('.fish-picker-selected .fish-picker-count')?.textContent).toBe('2 in tank')
+  })
 })
 
 describe('ServiceManager async persistence', () => {

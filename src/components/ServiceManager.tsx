@@ -227,6 +227,11 @@ export function ServiceManager({
 
   const formDisabled = Boolean(loadError) || busy !== null
   const selectedFish = getFishById(draft.fishId) ?? REEF_FISH[0]
+  const speciesCounts = new Map<string, number>()
+  for (const service of services) {
+    speciesCounts.set(service.fishId, (speciesCounts.get(service.fishId) ?? 0) + 1)
+  }
+  const selectedCount = speciesCounts.get(selectedFish.id) ?? 0
 
   return (
     <dialog ref={dialogRef} className="service-manager-dialog" aria-labelledby="manager-title" onCancel={(event) => { event.preventDefault(); onClose() }} onClick={(event) => { if (event.target === event.currentTarget) onClose() }}>
@@ -285,10 +290,11 @@ export function ServiceManager({
                 }}
                 onLoad={(event) => { event.currentTarget.hidden = false }}
               />
-              <span><strong>{selectedFish.commonName}</strong><em>{selectedFish.scientificName}</em></span>
+              <span><strong>{selectedFish.commonName}</strong><em>{selectedFish.scientificName}</em><small className="fish-picker-count">{selectedCount > 0 ? `${selectedCount} in tank` : 'None in tank'}</small></span>
             </div>
             <div className="fish-picker-options">
               {REEF_FISH.map((fish) => {
+                const count = speciesCounts.get(fish.id) ?? 0
                 const assignedElsewhere = Boolean(fish.uniqueService && services.some(service => service.id !== editingId && service.fishId === fish.id))
                 return <label className={`fish-picker-option${draft.fishId === fish.id ? ' is-selected' : ''}${assignedElsewhere ? ' is-unavailable' : ''}`} key={fish.id}>
                 <input type="radio" name="service-fish" value={fish.id} checked={draft.fishId === fish.id} required disabled={assignedElsewhere} onChange={() => { setDraft({ ...draft, fishId: fish.id }); setFormError('') }} />
@@ -301,7 +307,7 @@ export function ServiceManager({
                   }}
                   onLoad={(event) => { event.currentTarget.hidden = false }}
                 />
-                <span><strong>{fish.commonName}</strong><em>{fish.scientificName}</em>{assignedElsewhere && <small>Already assigned to another service</small>}</span>
+                <span><strong>{fish.commonName}</strong><em>{fish.scientificName}</em>{count > 0 && <small className="fish-picker-count">{count} in tank</small>}{assignedElsewhere && <small>Already assigned to another service</small>}</span>
               </label>})}
             </div>
           </fieldset>

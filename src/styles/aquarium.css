@@ -151,6 +151,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .fish-picker-option strong { overflow: hidden; color: #edf6ee; font-size: 10px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .fish-picker-option em { overflow: hidden; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
 .fish-picker-option small { color: #e5b6a1; font-size: 8px; line-height: 1.2; }
+.fish-picker-selected .fish-picker-count { color: var(--seafoam); font-size: 9px; font-weight: 600; line-height: 1.2; }
+.fish-picker-option small.fish-picker-count { color: var(--seafoam); font-size: 8px; font-weight: 600; }
 .fish-picker:disabled .fish-picker-option { opacity: .5; cursor: not-allowed; }
 .service-form input, .service-form select, .import-form textarea { width: 100%; min-width: 0; height: 44px; padding: 0 10px; border: 1px solid rgba(199,231,208,.17); border-radius: 6px; color: #eaf4ed; background: #102f35; font-size: 12px; }
 .service-form .fish-picker-option input[type="radio"] { position: absolute; width: 1px; height: 1px; margin: 0; padding: 0; border: 0; opacity: 0; }
