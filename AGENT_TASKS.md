@@ -23,6 +23,10 @@ The modular sand follows five contact footprints fitted to the rock bases, inclu
 
 The modular scene publishes compatible habitat destinations after exact collision is ready. The full-kit test verifies 16 species/interaction pairs and a watchman goby's clear approach to the shared burrow entrance. The production review opens an inspect card by clicking a fish body and verifies Pause, Services and Settings. Whole-body clearance remains under AQ-58. Continue coral density, water optics, asset promotion and other active tasks within the existing scope.
 
+## Modular coral cover — 2026-11-21
+
+AQ-101 now adds ten instanced zoanthid mats to the wide reef's exposed pinnacle, buttress, arch and right ledge. The saved substrate and coral exports supply the geometry. Site checks sample the footprint against the actual authored face. Individual instance boxes join the exact collider, while fallback routing includes the mats in each foundation box. The 1440×900 view retains the tall silhouette and swim-through. Full photographic and animated-clearance acceptance remains open. [Evidence](docs/asset-evidence/aq101/modular-face-colonies/).
+
 ## Fish depth and surface shafts — 2026-11-20
 
 AQ-87 applies species depth bands to general anchor destinations and held interaction targets. Actual laptop scene geometry supplies an in-band option for each authored compatible anchor group. The staged preview had 12 inhabitants and no band misses. The custom host-placement exception preserves the physical relationship with its anemone. Animated body clearance and all-depth picking remain open.

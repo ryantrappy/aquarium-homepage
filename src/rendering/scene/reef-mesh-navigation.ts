@@ -66,6 +66,7 @@ export type ReefMeshIslandInput = {
   reef: THREE.Object3D
   islandId: string
   mountedCorals: readonly AssembledCoralBinding[]
+  surfaceCoralObstacles?: readonly SolidObstacleVolume[]
 }
 
 export type ReefMeshIslandDiagnostics = {
@@ -150,6 +151,25 @@ export function segmentIntersectsInflatedBox(start: Vec3, end: Vec3, box: Box, r
   return true
 }
 
+/** Bound each shallow coral instance separately in both navigation modes. */
+export function createSurfaceCoralObstacles(instances: readonly THREE.InstancedMesh[], islandId: string): SolidObstacleVolume[] {
+  const matrix = new THREE.Matrix4()
+  return instances.flatMap((batch, batchIndex) => {
+    batch.updateWorldMatrix(true, false)
+    batch.geometry.computeBoundingBox()
+    const sourceBounds = batch.geometry.boundingBox!.clone().expandByScalar(measuredCoralShaderMargin(batch.geometry) ?? 0)
+    return Array.from({ length: batch.count }, (_, index) => {
+      batch.getMatrixAt(index, matrix)
+      matrix.premultiply(batch.matrixWorld)
+      const bounds = sourceBounds.clone().applyMatrix4(matrix)
+      if (bounds.isEmpty() || !finiteVec3(bounds.min) || !finiteVec3(bounds.max)) {
+        throw new Error(`Invalid surface coral bounds for ${islandId}`)
+      }
+      return { id: `${islandId}-surface-coral-${batchIndex}-${index}`, bounds }
+    })
+  })
+}
+
 function extractRockTriangles(reef: THREE.Object3D): MeshTriangle[] | undefined {
   reef.updateMatrixWorld(true)
   const triangles: MeshTriangle[] = []
@@ -190,6 +210,7 @@ function extractRockTriangles(reef: THREE.Object3D): MeshTriangle[] | undefined 
 export function createRockFallbackObstacles(
   reef: THREE.Object3D,
   islandId: string,
+  surfaceCoralObstacles: readonly SolidObstacleVolume[] = [],
 ): RockFallbackObstaclesResult {
   if (!islandId.trim()) return { status: 'unavailable', reason: 'invalid-island-id' }
 
@@ -260,6 +281,16 @@ export function createRockFallbackObstacles(
 
   if (invalidReason) return { status: 'unavailable', reason: invalidReason }
   if (rockCount === 0 || obstacles.length === 0) return { status: 'unavailable', reason: 'rock-mesh-missing' }
+  if (surfaceCoralObstacles.length > 0) {
+    // Surface colonies share the foundation's conservative AABB. The exact
+    // planner still checks each instance without expanding the rock mesh.
+    const bounds = new THREE.Box3()
+    for (const { bounds: volume } of [...obstacles, ...surfaceCoralObstacles]) {
+      bounds.expandByPoint(new THREE.Vector3(volume.min.x, volume.min.y, volume.min.z))
+      bounds.expandByPoint(new THREE.Vector3(volume.max.x, volume.max.y, volume.max.z))
+    }
+    return { status: 'ready', obstacles: [{ id: `${islandId}-foundation-surface`, bounds }] }
+  }
   return { status: 'ready', obstacles }
 }
 
@@ -489,6 +520,10 @@ export async function createReefMeshNavigation(
     colliders.push(built.collider)
     coralBoxes.push(...boxes)
     residentCoralBoxes.push(...residentBoxes)
+    for (const obstacle of island.surfaceCoralObstacles ?? []) {
+      coralBoxes.push(obstacle.bounds)
+      residentCoralBoxes.push(obstacle.bounds)
+    }
   }
 
   const meshQuery = createMeshClearanceQuery(colliders)

@@ -7,6 +7,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { AQUARIUM_WATER_BOUNDS, assembleCoralsOnRockSockets, MODULAR_CORAL_ASSET_URLS } from './reef-assembly'
 import {
   NSA_MODULE_MOUNTS,
+  NSA_ENCRUSTING_FACE_SITES,
   NSA_KIT_URL,
   NSA_ROCK_URLS,
   NSA_SUBSTRATE_CONTACTS,
@@ -16,7 +17,8 @@ import {
   disposeRubbleTalusMaterials,
   rubbleTalusPlacementsForViewport,
 } from './reef-nsa'
-import { createReefMeshNavigation, MESH_NAVIGATION_MOVEMENT_BUDGET, segmentIntersectsInflatedBox } from './reef-mesh-navigation'
+import { createMountedCoralFallbackObstacles, createReefMeshNavigation, createRockFallbackObstacles, createSurfaceCoralObstacles, MESH_NAVIGATION_MOVEMENT_BUDGET, segmentIntersectsInflatedBox } from './reef-mesh-navigation'
+import { isWaterSegmentSafe } from '../../simulation/habitat-navigation'
 import { resolveNsaMorayResidence, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M } from './moray-residence'
 import { createAragoniteSandBed, evaluateAragoniteSandWorldY, evaluateRockBaseContactFactor } from './aragonite-sand'
 import { mountedAnemoneHosts } from './anemone-host'
@@ -51,16 +53,36 @@ describe('AQ-94 NSA modular rock library & rubble-talus grounding', () => {
       for (const mount of mounts) expect(reef.getObjectByName(mount.socketName), mount.socketName).toBeDefined()
     }
     const templates = new Map<string, THREE.Object3D>()
-    for (const id of new Set(placements.flatMap(({ mounts }) => mounts.map(mount => mount.coralAssetId)))) {
+    for (const id of new Set(['coral-zoanthid-mat', ...placements.flatMap(({ mounts }) => mounts.map(mount => mount.coralAssetId))])) {
       const model = readFileSync(new URL(MODULAR_CORAL_ASSET_URLS[id]))
       const { scene: template } = await loader.parseAsync(Uint8Array.from(model).buffer, '')
       templates.set(id, template)
     }
-    const assemblies = placements.map(({ reef, islandId, mounts }) => ({
-      reef, islandId,
-      mountedCorals: assembleCoralsOnRockSockets(reef, templates, mounts, { preserveAuthoredRock: true, includeScatter: false }).mountedCorals,
-    }))
+    const assemblies = placements.map(({ reef, islandId, mounts }) => {
+      const encrustingFaceSites = NSA_ENCRUSTING_FACE_SITES[islandId]
+      const { mountedCorals, instancedMeshes } = assembleCoralsOnRockSockets(reef, templates, mounts, {
+        preserveAuthoredRock: true,
+        includeScatter: Boolean(encrustingFaceSites),
+        encrustingFaceSites,
+      })
+      const surfaceCoralObstacles = createSurfaceCoralObstacles(instancedMeshes, islandId)
+      return { reef, islandId, mountedCorals, surfaceCoralObstacles }
+    })
     expect(assemblies.flatMap(assembly => assembly.mountedCorals)).toHaveLength(13)
+    expect(assemblies.flatMap(({ surfaceCoralObstacles }) => surfaceCoralObstacles)).toHaveLength(10)
+    const obstacles = assemblies.flatMap(({ reef, islandId, mountedCorals, surfaceCoralObstacles }) => {
+      const rock = createRockFallbackObstacles(reef, islandId, surfaceCoralObstacles)
+      const coral = createMountedCoralFallbackObstacles(mountedCorals, islandId)
+      if (rock.status !== 'ready' || coral.status !== 'ready') throw new Error(`Missing fallback geometry for ${islandId}`)
+      return [...rock.obstacles, ...coral.obstacles]
+    })
+    expect(isWaterSegmentSafe({
+      start: { x: -.2, y: 1.7, z: 1.6 },
+      target: { x: .2, y: 1.7, z: 1.6 },
+      waterBounds: AQUARIUM_WATER_BOUNDS,
+      fishClearanceRadius: .04,
+      obstacles,
+    })).toBe(true)
     const result = await createReefMeshNavigation(assemblies)
     expect(result.status, JSON.stringify(result.diagnostics)).toBe('ready')
     if (result.status !== 'ready') return
