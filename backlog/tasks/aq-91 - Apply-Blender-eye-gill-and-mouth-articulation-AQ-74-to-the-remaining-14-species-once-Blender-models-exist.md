@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-09T03:04:00Z'
-updated_date: '2026-11-21 14:54'
+updated_date: '2026-11-21 15:14'
 labels:
   - modeling
   - photorealism
@@ -65,4 +65,11 @@ Batch 3 (final 4 un-modeled splat-fish species, 11/11 complete; 12/13 total over
   - yellow-watchman-goby: 10,405 tris, 886,676 bytes
   - tailspot-blenny: 11,140 tris, 936,936 bytes
 - Verified verify-fish-clip-player.mjs, check-reef-asset-manifests.mjs (32 files), npm run typecheck (18 scripts), npm run build, and npx vitest run --maxWorkers=3 (81/81 test files, 1051/1051 tests passing). Status remains In Progress pending starter-fish triage (AQ-70.9) and Root visual review.
+
+Milestone E (standalone Blender overrides for remaining 3 species — all 15 roster fish + original desjardins-sailfin-tang now have .blend workfiles & sculpted overrides):
+- Created fish_from_reference_common.py and authored packed .blend + 512x512 RGB PBR overrides under src/rendering/assets/splat-fish/{blend,overrides}/:
+  - yellow-tang: 12,800 tris, 773,664 B, sha256 7a730e8ddd6294220f6c19a8ac03a25ddad8d3b758c99cfc5e31487cf883fbb7
+  - ocellaris-clownfish: 12,580 tris, 819,784 B, sha256 9a9f334ed1341771456c8d8a01833193e4635d0840df65373021fdce0e57a0b0
+  - desjardins-sailfin-tang: 13,184 tris, 940,252 B, sha256 28e92078de67e6856d32fc607791a74419de08946ded59b751d751fd2db7896b
+- Added starter-fish-overrides.test.ts (4/4 passing); verified --fish-overrides sync leaves canonical splat-fish/manifest.json, blue-green-chromis.glb, and learned-shape-guide.json untouched; full vitest 82/82 test files (1055/1055 tests), verify-fish-clip-player.mjs, check-reef-asset-manifests.mjs, typecheck, and build passed. Remains In Progress for runtime gill/mouth ventilation (AC #3) and Root visual review.
 <!-- SECTION:NOTES:END -->
