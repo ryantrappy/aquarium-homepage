@@ -128,6 +128,8 @@ const modelUrls: Record<string, string> = {
 export type SceneStatus = 'loading' | 'ready' | 'failed'
 export type AquariumController = { update(services: ServiceConfig[], paused: boolean, configurationReady?: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void; zoomIn(): boolean; zoomOut(): boolean; zoomToFocalArea(id: FocalAreaId): boolean; resetZoom(): boolean; isZoomed(): boolean; getCameraZoom(): CameraZoomState; focusServiceFish?(id: string): boolean; getFocusedServiceId?(): string | undefined }
 declare global { interface Window { __AQUARIUM_LOOKDEV__?: LookDevBridge } }
+type ReefLayout = 'nsa' | 'legacy'
+
 type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; flex?: FishFlexBinding; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean; schoolmate: boolean; lod: FishLod; lodModel?: THREE.Object3D; headBone?: THREE.Bone }
 
 function hasAuthoredSnowflakeMorayModel(model?: GLTF): boolean {
@@ -154,7 +156,11 @@ function disposeTree(root: THREE.Object3D, borrowedEnvironment?: THREE.Texture) 
 
 export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, initialServices: ServiceConfig[], initialPaused: boolean, status: (status: SceneStatus) => void, focusFallback: () => HTMLElement | null = () => null, fishExtensions: FishExtensionConfig = EMPTY_FISH_EXTENSIONS, onFrameRate?: (sample: FrameRateSample | null) => void, initialConfigurationReady = true): AquariumController {
   const lookDevConfig = import.meta.env.DEV ? resolveLookDevConfig(window.location.search, true) : undefined
-  const nsaReview = import.meta.env.DEV && new URLSearchParams(window.location.search).get('reef') === 'nsa'
+  const reefOverride = import.meta.env.DEV ? new URLSearchParams(window.location.search).get('reef') : null
+  function reefLayoutForWidth(width: number): ReefLayout {
+    if (reefOverride === 'nsa' || reefOverride === 'legacy') return reefOverride
+    return width < 600 ? 'legacy' : 'nsa'
+  }
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' })
   renderer.setPixelRatio(lookDevConfig ? 1 : Math.min(devicePixelRatio, 1.5))
   renderer.outputColorSpace = THREE.SRGBColorSpace
@@ -276,8 +282,8 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   // as floating. AQ-70.6: the sand's own caustic ridge network was removed;
   // the shared cellular caustic chunk is applied here instead, so the sand
   // shows the same caustic system as the rock, coral, and fish.
-  const contactFootprints = nsaReview ? NSA_SUBSTRATE_CONTACTS : undefined
-  const sandBed = createAragoniteSandBed({ narrow: false, contactFootprints })
+  let contactFootprints: typeof NSA_SUBSTRATE_CONTACTS | undefined
+  const sandBed = createAragoniteSandBed()
   applyEnvironmentMapIntensity(sandBed.group, ENVIRONMENT_MAP_INTENSITY.sand, environmentMap?.texture)
   const sand = sandBed.sandMesh
   // Surface-driven lighting (AQ-96 / AQ-70.6): the sand threshold is
@@ -521,6 +527,12 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   let rockIslandLeftBase: GLTF | undefined, rockIslandRightBase: GLTF | undefined
   let centerArchBase: GLTF | undefined
   let nsaKitBase: GLTF | undefined
+  let activeReefLayout: ReefLayout | undefined
+  let pendingReefLayout: ReefLayout | undefined
+  let failedReefLayout: ReefLayout | undefined
+  const reefLayoutLoads = new Map<ReefLayout, Promise<void>>()
+  const readyReefLayouts = new Set<ReefLayout>()
+  const sceneAssetLoads = new Map<string, Promise<GLTF>>()
   const authoredReefPlacements: THREE.Object3D[] = []
   let rubbleTalusBase: GLTF | undefined
   let rubbleTalusPlacement: THREE.Object3D | undefined
@@ -703,6 +715,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   }
   function settleLookDevReadiness() {
     if (!lookDevConfig || lookDevReady || lookDevContextLost || lookDevFailure || disposed) return
+    if (pendingReefLayout && activeReefLayout !== reefLayoutForWidth(width)) return
     if (!lookDevConfigurationReady) return
     if (document.hidden) return
     if (spawnUnavailable) {
@@ -843,7 +856,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     if (!query || !hasAuthoredSnowflakeMorayModel(modelBases.get(SNOWFLAKE_MORAY_EEL_ID))) return undefined
     const isClear = (start: MorayResidence['headAxisStart'], end: MorayResidence['headAxisEnd'], radius: number) =>
       query(start, end, radius, { ...mesh.movementBudget }).status === 'clear'
-    if (nsaKitBase) {
+    if (activeReefLayout === 'nsa') {
       const residence = resolveNsaMorayResidence(width < 600, readyMeshIslandIds)
       if (residence && isClear(residence.headAxisStart, residence.headAxisEnd, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M)) return residence
       return undefined
@@ -908,13 +921,14 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     if (rubbleTalusPlacement) { disposeRubbleTalusMaterials(rubbleTalusPlacement); rubbleTalusPlacement = undefined }
     reefs.forEach(reef => { scene.remove(reef) }); reefs.length = 0; hitMeshes.length = 0; reefMeshes.length = 0; fishMeshes.length = 0
     reefControllers = []; habitat.obstacles = []; habitat.anchors = []
-    if ((!nsaKitBase && (!rockIslandLeftBase || !rockIslandRightBase)) || coralTemplates.size === 0) {
+    const kit = activeReefLayout === 'nsa' ? nsaKitBase : undefined
+    if ((!kit && (!rockIslandLeftBase || !rockIslandRightBase)) || coralTemplates.size === 0) {
       meshNavigationSettledGeneration = generation
       settleLookDevReadiness()
       return
     }
     const reducedMotion = Boolean(reducedMotionQuery?.matches)
-    const placements = (nsaKitBase ? [] : reefPlacementsForViewport(width < 600)).map(placement => ({
+    const placements = (kit ? [] : reefPlacementsForViewport(width < 600)).map(placement => ({
       ...placement,
       rockScene: placement.islandKind === 'left' ? rockIslandLeftBase!.scene : rockIslandRightBase!.scene,
       mounts: placement.islandKind === 'left' ? DEFAULT_LEFT_ISLAND_MOUNTS : DEFAULT_RIGHT_ISLAND_MOUNTS,
@@ -1003,7 +1017,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       reef.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) })
       meshIslands.push({ reef, islandId: `reef-${i}`, mountedCorals: assembled.mountedCorals })
     }
-    const authoredReefs = nsaKitBase ? createNsaReviewReef(nsaKitBase.scene)
+    const authoredReefs = kit ? createNsaReviewReef(kit.scene)
       : width >= 600 && centerArchBase ? [{ reef: createCenterArch(centerArchBase.scene), islandId: 'reef-center-arch', mounts: CENTER_ARCH_MOUNTS }] : []
     for (const { reef, islandId, mounts } of authoredReefs) {
       authoredReefPlacements.push(reef)
@@ -1048,9 +1062,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       habitat.obstacles.push(...coralFallback.obstacles)
       meshIslands.push({ reef, islandId, mountedCorals: controller.mountedCorals })
     }
-    const rubbleSource = nsaKitBase?.scene.getObjectByName('reef-nsa-rubble-talus') ?? rubbleTalusBase?.scene
+    const rubbleSource = kit ? kit.scene.getObjectByName('reef-nsa-rubble-talus') : rubbleTalusBase?.scene
     if (rubbleSource) {
-      const rubble = createRubbleTalusGroundingAprons(rubbleSource, width < 600, Boolean(nsaKitBase))
+      const rubble = createRubbleTalusGroundingAprons(rubbleSource, width < 600, Boolean(kit))
       rubbleTalusPlacement = rubble
       rubble.traverse(node => {
         if (!(node instanceof THREE.Mesh)) return
@@ -1073,7 +1087,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       if (result.status === 'ready') {
         habitat.meshNavigation = result.meshNavigation
         readyMeshIslandIds = new Set(result.diagnostics.islands.map(island => island.islandId))
-        if (nsaKitBase && result.meshNavigation.queryCapsule) {
+        if (kit && result.meshNavigation.queryCapsule) {
           habitat.anchors.push(...createNsaHabitatAnchors(meshIslands, habitat.bounds, habitat.maxAbsXAtDepth, result.meshNavigation.queryCapsule))
         }
         // Relocate any fish or schoolmate that drifted into a coral envelope
@@ -1858,6 +1872,29 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       const bufferSize = renderer.getDrawingBufferSize(new THREE.Vector2())
       shaftPass.setSize(bufferSize.x, bufferSize.y)
     }
+    const wantedLayout = reefLayoutForWidth(width)
+    const layoutChanged = loaded && activeReefLayout !== wantedLayout && readyReefLayouts.has(wantedLayout)
+    if (loaded && activeReefLayout !== wantedLayout && !layoutChanged && failedReefLayout !== wantedLayout) {
+      // Keep the current habitat valid until the alternate geometry is ready.
+      // Multiple observer callbacks share the request, including when the user
+      // resizes back and forth before an asset has finished loading.
+      if (pendingReefLayout !== wantedLayout) {
+        pendingReefLayout = wantedLayout
+        void ensureReefLayout(wantedLayout).then(() => {
+          pendingReefLayout = undefined
+          if (reefLayoutForWidth(width) === wantedLayout) resize()
+        }).catch(error => {
+          pendingReefLayout = undefined
+          failedReefLayout = wantedLayout
+          console.warn('Aquarium could not load the alternate reef layout', error)
+          if (reefLayoutForWidth(width) === wantedLayout) resize()
+        })
+      }
+      if (!spawnUnavailable) render(0, true)
+      return
+    }
+    if (layoutChanged) activeReefLayout = wantedLayout
+    if (activeReefLayout === wantedLayout) failedReefLayout = undefined
     // The nearest fish depth controls the safe horizontal envelope, so depth
     // changes cannot send an otherwise in-bounds fish beyond the view edge.
     // AQ-62: the envelope is measured from the overview camera distance,
@@ -1879,10 +1916,13 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     let rebuildSucceeded: boolean | undefined
     // AQ-73: the sand bed follows the single-/dual-island layout with the
     // habitat; setLayout is a no-op when the layout already matches.
-    if (newNarrow !== narrow) sandBed.setLayout(newNarrow)
-    const habitatLayoutChanged = narrow !== newNarrow
+    syncSandLayout(newNarrow)
+    const habitatLayoutChanged = narrow !== newNarrow || layoutChanged
     if (loaded && (habitatLayoutChanged || (spawnUnavailable && sizeChanged) || [...fish, ...schoolmates].some(item => !isSafeCurrentInhabitantPosition(item)))) {
-      narrow = newNarrow; rebuildHabitat(); rebuildSucceeded = rebuildFish()
+      narrow = newNarrow
+      rebuildHabitat()
+      if (failed) return
+      rebuildSucceeded = rebuildFish()
       if (habitatLayoutChanged) captureWaterRadianceForHabitatLayout()
       if (rebuildSucceeded !== undefined) status(fishSceneStatus(!rebuildSucceeded))
     }
@@ -2132,21 +2172,50 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       })
     }
   }
-  async function initialize() {
-    const load = async (url: string) => {
-      const lookDevKey = `scene:${url}`
-      beginLookDevAsset(lookDevKey)
-      try {
-        const model = await loader.loadAsync(url)
-        if (disposed || failed) disposeTree(model.scene, environmentMap?.texture)
-        else loadedAssets.add(model)
-        finishLookDevAsset(lookDevKey)
-        return model
-      } catch (error) {
-        finishLookDevAsset(lookDevKey, true)
-        throw error
+  function loadSceneAsset(url: string): Promise<GLTF> {
+    const started = sceneAssetLoads.get(url)
+    if (started) return started
+    const lookDevKey = `scene:${url}`
+    beginLookDevAsset(lookDevKey)
+    const request = loader.loadAsync(url).then(model => {
+      if (disposed || failed) disposeTree(model.scene, environmentMap?.texture)
+      else loadedAssets.add(model)
+      finishLookDevAsset(lookDevKey)
+      return model
+    }).catch(error => {
+      sceneAssetLoads.delete(url)
+      finishLookDevAsset(lookDevKey, true)
+      throw error
+    })
+    sceneAssetLoads.set(url, request)
+    return request
+  }
+  function ensureReefLayout(layout: ReefLayout): Promise<void> {
+    const started = reefLayoutLoads.get(layout)
+    if (started) return started
+    const request = (async () => {
+      if (layout === 'nsa') nsaKitBase = await loadSceneAsset(NSA_KIT_URL)
+      else {
+        [rockIslandLeftBase, rockIslandRightBase, centerArchBase, rubbleTalusBase] = await Promise.all([
+          loadSceneAsset(LIVE_ROCK_ISLAND_URLS.left),
+          loadSceneAsset(LIVE_ROCK_ISLAND_URLS.right),
+          loadSceneAsset(CENTER_ARCH_URL),
+          loadSceneAsset(RUBBLE_TALUS_URL),
+        ])
       }
-    }
+      readyReefLayouts.add(layout)
+    })().catch(error => {
+      reefLayoutLoads.delete(layout)
+      throw error
+    })
+    reefLayoutLoads.set(layout, request)
+    return request
+  }
+  function syncSandLayout(narrow: boolean) {
+    contactFootprints = activeReefLayout === 'nsa' ? NSA_SUBSTRATE_CONTACTS : undefined
+    sandBed.setLayout(narrow, { contactFootprints })
+  }
+  async function initialize() {
     const coralIds = Object.keys(MODULAR_CORAL_ASSET_URLS)
     // Lazy loading (AQ-76 AC #2): Phase 0 blocks first paint on the rocks,
     // corals, and the first 3 configured species only. The remaining
@@ -2154,24 +2223,24 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     // no configured service never load at all.
     const configuredFishIds = [...new Set(services.map(service => service.fishId))]
     const phase0Ids = phase0SpeciesIds(configuredFishIds)
-    const [rockLeft, rockRight, rockArch, rockRubble, kit, ...restModels] = await Promise.all([
-      nsaReview ? undefined : load(LIVE_ROCK_ISLAND_URLS.left),
-      nsaReview ? undefined : load(LIVE_ROCK_ISLAND_URLS.right),
-      nsaReview ? undefined : load(CENTER_ARCH_URL),
-      nsaReview ? undefined : load(RUBBLE_TALUS_URL),
-      nsaReview ? load(NSA_KIT_URL) : undefined,
-      ...coralIds.map(id => load(MODULAR_CORAL_ASSET_URLS[id])),
+    const [, ...restModels] = await Promise.all([
+      ensureReefLayout(reefLayoutForWidth(width)),
+      ...coralIds.map(id => loadSceneAsset(MODULAR_CORAL_ASSET_URLS[id])),
       ...phase0Ids.map(id => loadFishModel(id)),
     ])
+    while (!disposed && !failed) {
+      const desired = reefLayoutForWidth(width)
+      if (readyReefLayouts.has(desired)) { activeReefLayout = desired; break }
+      await ensureReefLayout(desired)
+    }
     if (disposed || failed) return
-    rockIslandLeftBase = rockLeft
-    rockIslandRightBase = rockRight
-    centerArchBase = rockArch
-    rubbleTalusBase = rockRubble
-    nsaKitBase = kit
     coralIds.forEach((id, i) => coralTemplates.set(id, restModels[i]!.scene))
     phase0Ids.forEach((id, i) => { const model = restModels[coralIds.length + i]; if (model) modelBases.set(id, model) })
-    loaded = true; narrow = width < 600; rebuildHabitat()
+    loaded = true
+    narrow = width < 600
+    syncSandLayout(narrow)
+    rebuildHabitat()
+    if (failed) return
     const initialSpawnSucceeded = rebuildFish() === true
     captureWaterRadianceForHabitatLayout()
     status(fishSceneStatus(!initialSpawnSucceeded))

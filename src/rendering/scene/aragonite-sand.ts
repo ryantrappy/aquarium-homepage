@@ -26,7 +26,7 @@ export type AragoniteSandBed = Readonly<{
   normalTexture: THREE.DataTexture
   roughnessTexture: THREE.DataTexture
   update(elapsedSeconds: number, paused: boolean, reducedMotion: boolean): void
-  setLayout(narrow: boolean): void
+  setLayout(narrow: boolean, layout?: Pick<AragoniteSandConfig, 'contactFootprints'>): void
   dispose(): void
 }>
 
@@ -519,10 +519,10 @@ function populateScatterInstances(
 
 export function createAragoniteSandBed(config: AragoniteSandConfig = {}): AragoniteSandBed {
   let narrow = Boolean(config.narrow)
-  const customContacts = config.contactFootprints
+  let customContacts = config.contactFootprints
   const resolveFootprints = () => customContacts ?? getRockFootprintsForViewport(narrow)
   let footprints = resolveFootprints()
-  const contactSlots = Math.max(1, customContacts?.length ?? 2)
+  let contactSlots = Math.max(1, customContacts?.length ?? 2)
   const { albedoTexture, normalTexture, roughnessTexture } = createAragoniteSandPbrTextures(
     config.textureSize ?? 512,
   )
@@ -814,9 +814,17 @@ diffuseColor.rgb = edgeColor;`,
     update(_elapsedSeconds: number, _paused: boolean, _reducedMotion: boolean) {
       // No-op: sand caustics now come from the shared caustics chunk.
     },
-    setLayout(nextNarrow: boolean) {
-      if (narrow === nextNarrow) return
+    setLayout(nextNarrow: boolean, layout?: Pick<AragoniteSandConfig, 'contactFootprints'>) {
+      const nextContacts = layout ? layout.contactFootprints : customContacts
+      if (narrow === nextNarrow && customContacts === nextContacts) return
+      const nextSlots = Math.max(1, nextContacts?.length ?? 2)
+      if (contactSlots !== nextSlots || Boolean(customContacts) !== Boolean(nextContacts)) {
+        contactSlots = nextSlots
+        sandUniforms.uContactFootprints.value = Array.from({ length: contactSlots }, () => new THREE.Vector4(0, 0, 1, 1))
+        sandMaterial.needsUpdate = true
+      }
       narrow = nextNarrow
+      customContacts = nextContacts
       footprints = resolveFootprints()
       syncFootprintUniforms()
       const nextSandGeom = createSandPlaneGeometry(narrow, footprints)
