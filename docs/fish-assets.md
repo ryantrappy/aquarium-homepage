@@ -1,23 +1,23 @@
 # Reef fish thumbnail assets
 
 <!-- AGENT_DOC_METADATA
-Category: Evidence / Asset Provenance
+Category: Evidence / Asset Provenance & Material Contract
 Status: Active
-Authority: Evidentiary Record
-Backlog: AQ-40, AQ-33, AQ-66, AQ-106
+Authority: Evidentiary Record & Rendering Specification
+Backlog: AQ-40, AQ-33, AQ-66, AQ-70.8, AQ-70.9, AQ-70.10, AQ-72, AQ-74, AQ-91, AQ-106
 Owner: @root
-Updated: 2026-11-15
-Upstream: docs/reef-fish-roster.md
-Downstream: docs/fish-art-provenance.json, public/fish/*
+Updated: 2026-11-21
+Upstream: docs/reef-fish-roster.md, docs/asset-contract.md
+Downstream: docs/fish-art-provenance.json, public/fish/*, src/rendering/assets/splat-fish/*, src/rendering/scene/fish-flex-material.ts
 -->
 
 > [!NOTE]
 > **Agent Context & Authority**
-> - **Category**: 2D Asset Provenance & Thumbnail Catalog
-> - **Status**: Active / Evidentiary
-> - **Authority**: Evidentiary Record
-> - **Backlog Reference**: `AQ-40`, `AQ-33`, `AQ-106`
-> - **Summary**: Provenance documentation and visual trait checks for the 16 standard service thumbnails plus the AQ-106 picker-only moray image.
+> - **Category**: 2D Asset Provenance, Thumbnail Catalog & 3D Fish Material Contract
+> - **Status**: Active / Evidentiary & Normative Contract
+> - **Authority**: Evidentiary Record & Rendering Specification
+> - **Backlog Reference**: `AQ-40`, `AQ-33`, `AQ-66`, `AQ-70.8`, `AQ-70.9`, `AQ-70.10`, `AQ-72`, `AQ-74`, `AQ-91`, `AQ-106`
+> - **Summary**: Provenance documentation and visual trait checks for the 16 standard service thumbnails plus the AQ-106 picker-only moray image, together with the 3D Fish Material & Part Contract (`AQ-70.8` / `AQ-72`).
 
 Fish cutouts power the service fish picker and service list previews; most can also provide a temporary in-scene fallback, but the AQ-106 moray image is picker-only and is never a moving fish substitute. Static recognition art is not final production animation. The roster's anatomy and color notes guide documented project-original images; linked references are for species verification and were not copied as image sources.
 
@@ -57,3 +57,47 @@ Per-file hashes and provenance status are recorded in [`fish-art-provenance.json
 | `scarlet-reef-hermit-crab` | Scarlet reef hermit crab: scarlet legs/claws, yellow eyestalks, coralline Cerith shell ($0 original Blender studio render) | `public/fish/scarlet-reef-hermit-crab.webp` | [SeaLifeBase](https://www.sealifebase.se/summary/Paguristes-cadenati) |
 | `emerald-mithrax-crab` | Emerald mithrax crab: glossy emerald carapace, spoon-tipped pincers, olive setose legs ($0 original Blender studio render) | `public/fish/emerald-mithrax-crab.webp` | [SeaLifeBase](https://www.sealifebase.se/summary/Mithraculus-sculptus) |
 | `scarlet-skunk-cleaner-shrimp` | Scarlet skunk cleaner shrimp: white dorsal skunk stripe on crimson saddle, white antennae ($0 original Blender studio render) | `public/fish/scarlet-skunk-cleaner-shrimp.webp` | [SeaLifeBase](https://www.sealifebase.se/summary/Lysmata-amboinensis) |
+
+## 3D Fish Material & Part Contract (`AQ-70.8` / `AQ-72`)
+
+This contract connects the Blender fish modeling pipeline (`src/rendering/modeling/fish_*.py`, `src/rendering/assets/splat-fish/`) to the runtime Three.js shader and physical material binder (`src/rendering/scene/fish-flex-material.ts`).
+
+### 1. Part & Primitive Naming Conventions
+
+Fish GLBs may expose either a unified single-primitive `SkinnedMesh` (`<species_snake>_body`, with anatomical regions encoded in UVs and texture channels) or multi-part primitives classified by name:
+
+| Canonical Part Role | Recognized Part / Material Name Tokens | Optical Behavior |
+| --- | --- | --- |
+| `body` | `body`, `torso`, `skin`, `flank`, or default unified `<species>_body` | Wet mucus clearcoat (`IOR = 1.35`, `clearcoat = 0.36`, `clearcoatRoughness = 0.12`), ctenoid scale & lateral-line normal relief, species-selective guanine iridescence (`iridescenceIOR = 1.83`), and backlit fin-margin sheen on unified meshes. |
+| `fin` | `fin`, `dorsal`, `anal`, `caudal`, `pectoral`, `pelvic`, `tail` | Double-sided (`THREE.DoubleSide`) rayed fin membrane with backlit sheen/translucency (`sheen = 0.42`, `clearcoat = 0.24`), fin-ray normal relief, and stable depth writing so turning fish never sort-pop against coral. |
+| `eye` / `cornea` | `eye`, `cornea`, `iris`, `pupil` | Ultra-glossy convex cornea dome (`roughness <= 0.04`, `clearcoat = 0.92`, `clearcoatRoughness = 0.03`, `IOR = 1.38`) producing crisp overhead fixture specular pinpoint highlights. |
+
+### 2. Required & Optional Texture Maps
+
+Every contract-validated 3D fish GLB in `src/rendering/assets/splat-fish/` embeds three `512×512` 24-bit RGB PNG textures (zero alpha-channel waste, meeting `AQ-70.3` budgets):
+
+1. **BaseColor (`pbrMetallicRoughness.baseColorTexture`, sRGB)**:
+   - Delit species coloration with soft organic pattern transitions, dark pupil + metallic iris ring on the eye dome, operculum crease shading, and subtle fin-ray contrast.
+2. **Normal (`normalTexture`, linear tangent-space RGB)**:
+   - Encodes overlapping ctenoid/cycloid scale micro-relief on the body core, the curved lateral-line sensory canal, radial fin-ray ridges across dorsal/anal/caudal/pectoral membranes, 3D orbital socket rim, curved operculum gill cover ridge + gill slit depression, and buccal mouth cleft relief.
+3. **Packed ORM (`pbrMetallicRoughness.metallicRoughnessTexture` shared with `occlusionTexture`, linear RGB)**:
+   - **R (Occlusion)**: Recessed AO in the gill slit (`~0.38`), mouth cleft (`~0.42`), orbital rim, and fin bases.
+   - **G (Roughness)**: Spatial roughness map driving regional optical response on unified single-draw-call meshes — ultra-glossy cornea dome (`G ≈ 0.035`), wet mucus flank scales (`G ≈ 0.24–0.32`), and silky translucent fin membranes (`G ≈ 0.36–0.44`).
+   - **B (Metallic / Guanine Specular Mask)**: Low dielectric baseline (`B ≈ 0.02–0.06`) with elevated metallic/iridescent reflection on iris rings and guanine-rich flank regions.
+4. **Graceful Runtime Fallback**:
+   - If an asset or test fixture omits optional textures (`normalMap`, `roughnessMap`, `metalnessMap`, `aoMap`), `upgradeFishMaterialForPhotorealism` in `src/rendering/scene/fish-flex-material.ts` preserves all present maps and scalar material properties without throwing or dropping the post-skinning `patchFishFlexShader` vertex deformation hook.
+
+### 3. Physical Optical Parameters & Species Iridescence (`MeshPhysicalMaterial`)
+
+At runtime, `bindFishFlexToModel` upgrades each fish's cloned `MeshStandardMaterial` to a `THREE.MeshPhysicalMaterial` (preserving `customProgramCacheKey` and the `AQ-12` / `AQ-49` / `AQ-74` post-skinning Lighthill + buccal-opercular vertex shader patch):
+
+- **Wet Mucus Clearcoat (`AQ-72` AC #3)**:
+  - All fish bodies receive a thin epidermal mucus clearcoat (`ior = 1.35`, `clearcoat = 0.36`, `clearcoatRoughness = 0.12`, `reflectivity = 0.55`) that catches sharp overhead reef-fixture highlights without washing out underlying sRGB base colors.
+- **Species-Selective Guanine Iridescence (`AQ-72` AC #2)**:
+  - Real teleost iridophores contain stacked guanine crystal platelets ($n \approx 1.83$) separated by cytoplasm ($n \approx 1.33$). Species with structural metallic/iridescent scales receive view-angle-dependent iridescence (`iridescenceIOR = 1.83`, thickness range configured within `160–380 nm` so shifts stay within natural blue-green/cyan/violet bands rather than a cartoon rainbow):
+    - High iridescence (`0.42–0.48`): `blue-green-chromis`, `mandarin-dragonet`, `mccoskers-flasher-wrasse`, `lyretail-anthias`.
+    - Moderate iridescence (`0.22–0.34`): `blue-tang`, `flame-angelfish`, `royal-gramma`, `six-line-wrasse`, `banggai-cardinalfish`, `copperband-butterflyfish`, `firefish`.
+    - Low/subtle mucus-only interference (`0.06–0.12`): `ocellaris-clownfish`, `yellow-tang`, `desjardins-sailfin-tang`, `yellow-watchman-goby`, `tailspot-blenny`.
+- **Supported glTF 2.0 Extensions**:
+  - `GLTFLoader` natively ingests `KHR_materials_clearcoat`, `KHR_materials_iridescence`, `KHR_materials_sheen`, `KHR_materials_specular`, `KHR_materials_transmission`, and `KHR_materials_volume`; runtime material upgrading harmonizes both extension-authored and standard-ORM-authored fish GLBs under the same shader cache key.
+

@@ -62,6 +62,276 @@ export type FishFlexBinding = Readonly<{
 
 const FLEX_PROGRAM_CACHE_KEY = 'fish-flex-v1'
 
+export type FishMaterialPartRole = 'body' | 'fin' | 'eye'
+
+export type SpeciesOpticalProfile = Readonly<{
+  iridescence: number
+  iridescenceIOR: number
+  iridescenceThicknessRange: readonly [number, number]
+  clearcoat: number
+  clearcoatRoughness: number
+  sheen: number
+  sheenColorHex: number
+}>
+
+const DEFAULT_OPTICAL_PROFILE: SpeciesOpticalProfile = {
+  iridescence: 0.14,
+  iridescenceIOR: 1.83,
+  iridescenceThicknessRange: [180, 320],
+  clearcoat: 0.36,
+  clearcoatRoughness: 0.12,
+  sheen: 0.24,
+  sheenColorHex: 0xd8f0ff,
+}
+
+export const SPECIES_OPTICAL_PROFILES: Readonly<Record<string, SpeciesOpticalProfile>> = {
+  'blue-green-chromis': {
+    iridescence: 0.48,
+    iridescenceIOR: 1.83,
+    iridescenceThicknessRange: [190, 340],
+    clearcoat: 0.42,
+    clearcoatRoughness: 0.1,
+    sheen: 0.34,
+    sheenColorHex: 0x7ef4ff,
+  },
+  'mandarin-dragonet': {
+    iridescence: 0.45,
+    iridescenceIOR: 1.83,
+    iridescenceThicknessRange: [210, 360],
+    clearcoat: 0.46,
+    clearcoatRoughness: 0.09,
+    sheen: 0.32,
+    sheenColorHex: 0x6cd8ff,
+  },
+  'mccoskers-flasher-wrasse': {
+    iridescence: 0.44,
+    iridescenceIOR: 1.83,
+    iridescenceThicknessRange: [200, 355],
+    clearcoat: 0.38,
+    clearcoatRoughness: 0.11,
+    sheen: 0.38,
+    sheenColorHex: 0xffb8e0,
+  },
+  'lyretail-anthias': {
+    iridescence: 0.42,
+    iridescenceIOR: 1.83,
+    iridescenceThicknessRange: [195, 340],
+    clearcoat: 0.38,
+    clearcoatRoughness: 0.11,
+    sheen: 0.36,
+    sheenColorHex: 0xffc6e8,
+  },
+  'blue-tang': {
+    iridescence: 0.32,
+    iridescenceIOR: 1.83,
+    iridescenceThicknessRange: [185, 315],
+    clearcoat: 0.38,
+    clearcoatRoughness: 0.11,
+    sheen: 0.28,
+    sheenColorHex: 0x82c8ff,
+  },
+  'flame-angelfish': {
+    iridescence: 0.3,
+    iridescenceIOR: 1.83,
+    iridescenceThicknessRange: [200, 345],
+    clearcoat: 0.38,
+    clearcoatRoughness: 0.11,
+    sheen: 0.3,
+    sheenColorHex: 0x9ab8ff,
+  },
+  'six-line-wrasse': {
+    iridescence: 0.28,
+    iridescenceIOR: 1.83,
+    iridescenceThicknessRange: [190, 330],
+    clearcoat: 0.38,
+    clearcoatRoughness: 0.11,
+    sheen: 0.26,
+    sheenColorHex: 0x9ce6ff,
+  },
+  'royal-gramma': {
+    iridescence: 0.26,
+    iridescenceIOR: 1.83,
+    iridescenceThicknessRange: [205, 340],
+    clearcoat: 0.36,
+    clearcoatRoughness: 0.12,
+    sheen: 0.28,
+    sheenColorHex: 0xd8a8ff,
+  },
+  'banggai-cardinalfish': {
+    iridescence: 0.28,
+    iridescenceIOR: 1.83,
+    iridescenceThicknessRange: [180, 310],
+    clearcoat: 0.35,
+    clearcoatRoughness: 0.12,
+    sheen: 0.3,
+    sheenColorHex: 0xe4f2ff,
+  },
+  'copperband-butterflyfish': {
+    iridescence: 0.24,
+    iridescenceIOR: 1.83,
+    iridescenceThicknessRange: [185, 315],
+    clearcoat: 0.35,
+    clearcoatRoughness: 0.12,
+    sheen: 0.28,
+    sheenColorHex: 0xfff0d4,
+  },
+  firefish: {
+    iridescence: 0.22,
+    iridescenceIOR: 1.83,
+    iridescenceThicknessRange: [190, 325],
+    clearcoat: 0.35,
+    clearcoatRoughness: 0.12,
+    sheen: 0.3,
+    sheenColorHex: 0xffd0e0,
+  },
+  'yellow-tang': {
+    iridescence: 0.1,
+    iridescenceIOR: 1.83,
+    iridescenceThicknessRange: [180, 290],
+    clearcoat: 0.34,
+    clearcoatRoughness: 0.13,
+    sheen: 0.26,
+    sheenColorHex: 0xfff8b8,
+  },
+  'desjardins-sailfin-tang': {
+    iridescence: 0.12,
+    iridescenceIOR: 1.83,
+    iridescenceThicknessRange: [185, 305],
+    clearcoat: 0.35,
+    clearcoatRoughness: 0.12,
+    sheen: 0.28,
+    sheenColorHex: 0xffe8b0,
+  },
+  'ocellaris-clownfish': {
+    iridescence: 0.08,
+    iridescenceIOR: 1.83,
+    iridescenceThicknessRange: [175, 275],
+    clearcoat: 0.36,
+    clearcoatRoughness: 0.12,
+    sheen: 0.24,
+    sheenColorHex: 0xffe2c4,
+  },
+  'yellow-watchman-goby': {
+    iridescence: 0.1,
+    iridescenceIOR: 1.83,
+    iridescenceThicknessRange: [180, 295],
+    clearcoat: 0.36,
+    clearcoatRoughness: 0.12,
+    sheen: 0.2,
+    sheenColorHex: 0xfff2c0,
+  },
+  'tailspot-blenny': {
+    iridescence: 0.1,
+    iridescenceIOR: 1.83,
+    iridescenceThicknessRange: [180, 295],
+    clearcoat: 0.35,
+    clearcoatRoughness: 0.12,
+    sheen: 0.2,
+    sheenColorHex: 0xe8d8c8,
+  },
+}
+
+/**
+ * Classifies a mesh/material name into one of the canonical Fish Material Contract part roles (`AQ-70.8`).
+ */
+export function classifyFishMaterialPartRole(meshName = '', materialName = ''): FishMaterialPartRole {
+  const words = `${meshName} ${materialName}`.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean)
+  if (words.some(w => w === 'eye' || w === 'eyes' || w === 'cornea' || w === 'iris' || w === 'pupil')) {
+    return 'eye'
+  }
+  if (
+    words.some(
+      w =>
+        w === 'fin' ||
+        w === 'fins' ||
+        w === 'dorsal' ||
+        w === 'anal' ||
+        w === 'caudal' ||
+        w === 'pectoral' ||
+        w === 'pelvic' ||
+        w === 'tail',
+    )
+  ) {
+    return 'fin'
+  }
+  return 'body'
+}
+
+/**
+ * Upgrades a standard fish material into a `THREE.MeshPhysicalMaterial` configured for
+ * wet mucus clearcoat (n ≈ 1.35), species-selective guanine iridescence (n ≈ 1.83),
+ * backlit fin sheen, and ultra-glossy cornea highlights (`AQ-70.8` / `AQ-72`).
+ * Gracefully preserves present maps and falls back cleanly when optional maps are absent.
+ */
+export function upgradeFishMaterialForPhotorealism(
+  source: THREE.MeshStandardMaterial,
+  speciesId: string,
+  partRole: FishMaterialPartRole = 'body',
+): THREE.MeshPhysicalMaterial {
+  const profile = SPECIES_OPTICAL_PROFILES[speciesId] ?? DEFAULT_OPTICAL_PROFILE
+  const physical = new THREE.MeshPhysicalMaterial()
+  THREE.MeshStandardMaterial.prototype.copy.call(physical, source)
+
+  const setThicknessRange = (minNm: number, maxNm: number) => {
+    const target = physical as THREE.MeshPhysicalMaterial & {
+      iridescenceThicknessMinimum?: number
+      iridescenceThicknessMaximum?: number
+    }
+    if ('iridescenceThicknessMinimum' in target && 'iridescenceThicknessMaximum' in target) {
+      target.iridescenceThicknessMinimum = minNm
+      target.iridescenceThicknessMaximum = maxNm
+    } else {
+      physical.iridescenceThicknessRange = [minNm, maxNm]
+    }
+  }
+
+  if (partRole === 'eye') {
+    physical.ior = 1.38
+    physical.roughness = Math.min(source.roughness ?? 0.2, 0.04)
+    physical.metalness = Math.min(source.metalness ?? 0.05, 0.08)
+    physical.clearcoat = 0.92
+    physical.clearcoatRoughness = 0.03
+    physical.iridescence = 0.08
+    physical.iridescenceIOR = 1.83
+    setThicknessRange(180, 280)
+    return physical
+  }
+
+  if (partRole === 'fin') {
+    physical.ior = 1.35
+    physical.side = THREE.DoubleSide
+    physical.clearcoat = 0.24
+    physical.clearcoatRoughness = 0.16
+    physical.iridescence = Number((profile.iridescence * 0.65).toFixed(3))
+    physical.iridescenceIOR = profile.iridescenceIOR
+    setThicknessRange(profile.iridescenceThicknessRange[0], profile.iridescenceThicknessRange[1])
+    physical.sheen = Math.max(0.42, profile.sheen)
+    physical.sheenRoughness = 0.32
+    physical.sheenColor.setHex(profile.sheenColorHex)
+    return physical
+  }
+
+  // Default 'body' role (including unified single-primitive <species>_body meshes where
+  // packed ORM green channel encodes 0.035 cornea gloss, ~0.26 flank scale mucus, and ~0.38 fin membranes):
+  physical.ior = 1.35
+  physical.clearcoat = profile.clearcoat
+  physical.clearcoatRoughness = profile.clearcoatRoughness
+  if (source.roughnessMap) {
+    physical.clearcoatRoughnessMap = source.roughnessMap
+  }
+  if (source.normalMap) {
+    physical.clearcoatNormalMap = source.normalMap
+    physical.clearcoatNormalScale.set(0.35, 0.35)
+  }
+  physical.iridescence = profile.iridescence
+  physical.iridescenceIOR = profile.iridescenceIOR
+  setThicknessRange(profile.iridescenceThicknessRange[0], profile.iridescenceThicknessRange[1])
+  physical.sheen = profile.sheen
+  physical.sheenRoughness = 0.35
+  physical.sheenColor.setHex(profile.sheenColorHex)
+  return physical
+}
+
 /** CPU counterpart of FLEX_VERTEX_DISPLACEMENT. Preparing once per mesh keeps
  * uniform reads and the frame-constant respiratory trig out of the vertex loop.
  * This is screen geometry, not a navigation/body-envelope proof. */
@@ -229,22 +499,22 @@ export function bindFishFlexToModel(
   const records: FlexMeshRecord[] = []
   for (const mesh of skinned) {
     const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
-    const standardIndex = materials.findIndex(
-      (material): material is THREE.MeshStandardMaterial =>
-        material instanceof THREE.MeshStandardMaterial,
-    )
-    if (standardIndex < 0) continue
-    const standard = materials[standardIndex] as THREE.MeshStandardMaterial
-    const cloned = standard.clone()
-    cloned.customProgramCacheKey = () => FLEX_PROGRAM_CACHE_KEY
-    cloned.onBeforeCompile = shader => {
-      patchFishFlexShader(shader, uniforms)
-    }
     const originalMaterial = mesh.material
-    mesh.material = Array.isArray(mesh.material)
-      ? materials.map((material, index) => (index === standardIndex ? cloned : material))
-      : cloned
-    records.push({ mesh, originalMaterial, clonedMaterial: cloned })
+    let didUpgradeAny = false
+    const nextMaterials = materials.map(material => {
+      if (!(material instanceof THREE.MeshStandardMaterial)) return material
+      didUpgradeAny = true
+      const partRole = classifyFishMaterialPartRole(mesh.name, material.name)
+      const cloned = upgradeFishMaterialForPhotorealism(material, speciesId, partRole)
+      cloned.customProgramCacheKey = () => FLEX_PROGRAM_CACHE_KEY
+      cloned.onBeforeCompile = shader => {
+        patchFishFlexShader(shader, uniforms)
+      }
+      records.push({ mesh, originalMaterial, clonedMaterial: cloned })
+      return cloned
+    })
+    if (!didUpgradeAny) continue
+    mesh.material = Array.isArray(mesh.material) ? nextMaterials : nextMaterials[0]
   }
   if (records.length === 0) return undefined
   const boundMeshes = new Set<THREE.Mesh>(records.map(record => record.mesh))
