@@ -8,14 +8,14 @@
       "upAxis": "+Y",
       "origin": "local",
       "dimensionsM": [
-        0.38825860619544983,
-        0.09403721988201141,
-        0.26866990327835083
+        0.4060978591442108,
+        0.09168773144483566,
+        0.29362887144088745
       ],
       "provenance": {
         "license": "original",
         "creator": "Aquarium project",
-        "sourceSha256": "eaab1a2fb14aa020abd3bbad680f639a3d7b8b62d962fa859a3c2bb93ed145c2",
+        "sourceSha256": "d586e3a28c32f12cec0a56d857e14ae3313718561c0c988fb9743dacc1d62936",
         "recipe": "Blender background --python src/rendering/modeling/build_reef_nsa_rubble_talus.py; node scripts/sync-blender-override.mjs --reef reef-nsa-rubble-talus --learn-guide",
         "attribution": "Original custom procedural limestone arch and embedded textures; no imported visual assets."
       }
@@ -41,31 +41,31 @@
   },
   "boundsM": {
     "min": [
-      -0.19412930309772491,
+      -0.2030489295721054,
       0,
-      -0.13433495163917542
+      -0.14681443572044373
     ],
     "max": [
-      0.19412930309772491,
-      0.09403721988201141,
-      0.13433495163917542
+      0.2030489295721054,
+      0.09168773144483566,
+      0.14681443572044373
     ]
   },
   "primitives": [
     {
       "id": "reef_nsa_rubble_talus",
       "role": "rock",
-      "vertexCount": 5885,
+      "vertexCount": 4991,
       "boundsM": {
         "min": [
-          -0.19412930309772491,
+          -0.2030489295721054,
           0,
-          -0.13433495163917542
+          -0.14681443572044373
         ],
         "max": [
-          0.19412930309772491,
-          0.09403721988201141,
-          0.13433495163917542
+          0.2030489295721054,
+          0.09168773144483566,
+          0.14681443572044373
         ]
       },
       "material": {

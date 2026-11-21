@@ -1,7 +1,7 @@
 {
   "schema": "socket-support-inspection-v1",
   "assetId": "reef-nsa-rubble-talus",
-  "sourceSha256": "df30279ea8fd6cc8c88a66cfb233d6fed6fd4b902c745bf93138960b84f2187d",
+  "sourceSha256": "869bb47edf1f2514332bb8c2cb56dc025d4653e653570ef80a38beca7cc7598b",
   "method": {
     "contactToleranceM": 0.002,
     "upNormalVectorTolerance": 0.002,

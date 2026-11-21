@@ -233,13 +233,13 @@ rubric, variant, support and rendering-budget requirements remain open.
 
 - Original **$0** procedural calcium-carbonate live-rock geometry and shared `2048×2048` 4-quadrant PBR trim sheet (`textures/reef-nsa-trim-2048-{albedo,normal,orm}.jpg`) authored from scratch in Blender (`reef_nsa_trim_sheet.py`, `build_reef_nsa_*.py`; packed sources in `src/rendering/assets/splat-fish/blend/` and overrides in `src/rendering/assets/splat-fish/overrides/`). Canonical `corals/`, `corals/manifest.json`, `splat-fish/manifest.json`, and `reef-center-arch.glb` remain untouched.
 - Synced into `src/rendering/assets/corals/custom-rocks/` (`manifest.json`, `8` modules total including `reef-center-arch`), each grounded flush at `boundsM.min[1] = 0`, `aoSource: 'texture'`, zero rejected sockets, and byte-identical embedded `2048×2048` JPEG textures:
-  - `reef-nsa-pinnacle-spire.glb`: `13,380` triangles, `1,553,272` bytes (`0.6440 × 0.7382 × 0.3454` m; sockets `socket_plate_ledge_21`, `socket_sps_crest_21`)
-  - `reef-nsa-cantilever-shelf.glb`: `10,628` triangles, `1,439,016` bytes (`0.6669 × 0.3110 × 0.3331` m; sockets `socket_lps_mid_21`, `socket_plate_ledge_22`)
-  - `reef-nsa-cave-buttress.glb`: `16,928` triangles, `1,678,664` bytes (`0.8098 × 0.5463 × 0.3171` m; socket `socket_lps_mid_22`)
-  - `reef-nsa-bommie-mound.glb`: `12,500` triangles, `1,539,956` bytes (`0.5564 × 0.3925 × 0.3358` m; sockets `socket_brain_apron_21`, `socket_soft_mat_21`)
-  - `reef-nsa-rubble-talus.glb`: `6,640` triangles, `1,299,896` bytes (`0.3883 × 0.0940 × 0.2687` m; substrate rubble apron, `0` sockets)
-  - `reef-nsa-high-arch-span.glb`: `16,228` triangles, `1,642,516` bytes (`0.8155 × 0.7194 × 0.3608` m; sockets `socket_sps_crest_22`, `socket_plate_ledge_23`)
-  - `reef-nsa-encrusting-ledge.glb`: `9,946` triangles, `1,432,940` bytes (`0.6745 × 0.2608 × 0.3585` m; sockets `socket_brain_apron_22`, `socket_soft_mat_22`)
+  - `reef-nsa-pinnacle-spire.glb`: `14,526` triangles, `1,617,840` bytes (`0.6736 × 0.7157 × 0.3702` m; sockets `socket_plate_ledge_21`, `socket_sps_crest_21`)
+  - `reef-nsa-cantilever-shelf.glb`: `11,524` triangles, `1,546,096` bytes (`0.7109 × 0.2705 × 0.3587` m; sockets `socket_lps_mid_21`, `socket_plate_ledge_22`)
+  - `reef-nsa-cave-buttress.glb`: `19,458` triangles, `1,771,648` bytes (`0.8377 × 0.5091 × 0.3491` m; socket `socket_lps_mid_22`)
+  - `reef-nsa-bommie-mound.glb`: `14,606` triangles, `1,645,744` bytes (`0.6291 × 0.3813 × 0.3730` m; sockets `socket_brain_apron_21`, `socket_soft_mat_21`)
+  - `reef-nsa-rubble-talus.glb`: `7,210` triangles, `1,420,888` bytes (`0.4061 × 0.0917 × 0.2936` m; substrate rubble apron, `0` sockets)
+  - `reef-nsa-high-arch-span.glb`: `18,578` triangles, `1,735,588` bytes (`0.8790 × 0.6393 × 0.3921` m; sockets `socket_sps_crest_22`, `socket_plate_ledge_23`)
+  - `reef-nsa-encrusting-ledge.glb`: `10,564` triangles, `1,513,116` bytes (`0.6908 × 0.2486 × 0.3702` m; sockets `socket_brain_apron_22`, `socket_soft_mat_22`)
 - Runtime pinnacle-canyon full-scape composition and Root visual/budget acceptance remain pending.
 
 ## Sculpted fish eye/gill/mouth anatomy & `512×512` biological PBR maps — `AQ-91` (Batches 1–3; all 11 remaining `splat-fish` species complete)

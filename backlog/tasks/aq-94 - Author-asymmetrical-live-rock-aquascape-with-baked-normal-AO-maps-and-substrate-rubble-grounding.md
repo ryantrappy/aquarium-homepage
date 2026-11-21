@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-11 04:55'
-updated_date: '2026-11-21 15:21'
+updated_date: '2026-11-21 17:25'
 labels:
   - modeling
   - blender
@@ -85,4 +85,6 @@ Milestone F (8/8 modular custom live-rock library complete on custom-rocks/manif
   - reef-nsa-encrusting-ledge: 9,946 tris, 1,432,940 B (0.6745 x 0.2608 x 0.3585 m, sha256 5cb1020ad6b45ad5141827b02c5d239a68f95271f9ed8ba467fa2a8e9a306f0a), sockets socket_brain_apron_22 (mounded-lps) & socket_soft_mat_22 (zoanthid-mat), 0 rejected sockets.
 - Wired both modules into src/rendering/scene/reef-nsa.ts and updated src/rendering/assets/sync-reef-override.test.ts (verifying all 7 reef-nsa-* pieces share byte-identical 2048px JPEG textures) + src/rendering/scene/reef-nsa.test.ts (all 7 URLs and socket presets).
 - Verified check-reef-asset-manifests.mjs (32 files), npm run typecheck (18 scripts), npx vitest run --maxWorkers=3 (82/82 test files, 1055/1055 tests passing), and npm run build exited 0. Remains In Progress pending pinnacle-canyon runtime composition and Root visual review.
+
+2026-11-21 Live Blender MCP visual audit overhaul: upgraded reef_nsa_trim_sheet.py and build_reef_nsa_*.py to replace circular Worley dot holes and pale plaster palette with heavily domain-warped F2-F1 karst fissures, anisotropic carbonate strata, and mature wet plum/violet-magenta coralline plates matching docs/more-realistic-reef-guide.png; added pre-remesh angular slab/tapered-crag shaping + 3D Voronoi/strata chiseling + height-bounded socket clearance (eliminating stacked round balls and vertical curtain artifacts); and implemented 8-iteration Laplacian-smoothed macro-region connected-island UVs (eliminating triangle-confetti quadrant switching and per-triangle clamping seams). Rebuilt, synced, and verified all 7 reef-nsa-* modules in live Blender MCP (pinnacle-spire 14,526 tris/1,617,840 B, cantilever-shelf 11,524 tris/1,546,096 B, cave-buttress 19,458 tris/1,771,648 B, bommie-mound 14,606 tris/1,645,744 B, rubble-talus 7,210 tris/1,420,888 B, high-arch-span 18,578 tris/1,735,588 B, encrusting-ledge 10,564 tris/1,513,116 B; combined live runtime rock GLBs 4,295,708 B < 5,000,000 B). Verified 82/82 Vitest files (1055/1055 tests), check-reef-asset-manifests.mjs, typecheck, and build.
 <!-- SECTION:NOTES:END -->

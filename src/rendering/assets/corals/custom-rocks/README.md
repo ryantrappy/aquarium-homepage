@@ -62,13 +62,13 @@ Every `reef-nsa-*` module has applied identity transforms, `boundsM.min[1] == 0`
 boundary edges, and byte-identical embedded `2048×2048` JPEG textures verified by
 `src/rendering/assets/sync-reef-override.test.ts`:
 
-- `reef-nsa-pinnacle-spire`: `13,380` tris, `1,553,272` B, `0.6440 × 0.7382 × 0.3454` m, sockets `socket_plate_ledge_21` (`plating-sps`), `socket_sps_crest_21` (`branching-sps`)
-- `reef-nsa-cantilever-shelf`: `10,628` tris, `1,439,016` B, `0.6669 × 0.3110 × 0.3331` m, sockets `socket_lps_mid_21` (`tentaculate-lps`), `socket_plate_ledge_22` (`plating-sps`)
-- `reef-nsa-cave-buttress`: `16,928` tris, `1,678,664` B, `0.8098 × 0.5463 × 0.3171` m, socket `socket_lps_mid_22` (`tentaculate-lps`)
-- `reef-nsa-bommie-mound`: `12,500` tris, `1,539,956` B, `0.5564 × 0.3925 × 0.3358` m, sockets `socket_brain_apron_21` (`mounded-lps`), `socket_soft_mat_21` (`zoanthid-mat`)
-- `reef-nsa-rubble-talus`: `6,640` tris, `1,299,896` B, `0.3883 × 0.0940 × 0.2687` m, `0` sockets (substrate grounding apron)
-- `reef-nsa-high-arch-span`: `16,228` tris, `1,642,516` B, `0.8155 × 0.7194 × 0.3608` m, sockets `socket_sps_crest_22` (`branching-sps`), `socket_plate_ledge_23` (`plating-sps`)
-- `reef-nsa-encrusting-ledge`: `9,946` tris, `1,432,940` B, `0.6745 × 0.2608 × 0.3585` m, sockets `socket_brain_apron_22` (`mounded-lps`), `socket_soft_mat_22` (`zoanthid-mat`)
+- `reef-nsa-pinnacle-spire`: `14,526` tris, `1,617,840` B, `0.6736 × 0.7157 × 0.3702` m, sockets `socket_plate_ledge_21` (`plating-sps`), `socket_sps_crest_21` (`branching-sps`)
+- `reef-nsa-cantilever-shelf`: `11,524` tris, `1,546,096` B, `0.7109 × 0.2705 × 0.3587` m, sockets `socket_lps_mid_21` (`tentaculate-lps`), `socket_plate_ledge_22` (`plating-sps`)
+- `reef-nsa-cave-buttress`: `19,458` tris, `1,771,648` B, `0.8377 × 0.5091 × 0.3491` m, socket `socket_lps_mid_22` (`tentaculate-lps`)
+- `reef-nsa-bommie-mound`: `14,606` tris, `1,645,744` B, `0.6291 × 0.3813 × 0.3730` m, sockets `socket_brain_apron_21` (`mounded-lps`), `socket_soft_mat_21` (`zoanthid-mat`)
+- `reef-nsa-rubble-talus`: `7,210` tris, `1,420,888` B, `0.4061 × 0.0917 × 0.2936` m, `0` sockets (substrate grounding apron)
+- `reef-nsa-high-arch-span`: `18,578` tris, `1,735,588` B, `0.8790 × 0.6393 × 0.3921` m, sockets `socket_sps_crest_22` (`branching-sps`), `socket_plate_ledge_23` (`plating-sps`)
+- `reef-nsa-encrusting-ledge`: `10,564` tris, `1,513,116` B, `0.6908 × 0.2486 × 0.3702` m, sockets `socket_brain_apron_22` (`mounded-lps`), `socket_soft_mat_22` (`zoanthid-mat`)
 
 Rebuild any NSA piece cleanly from the repository root:
 

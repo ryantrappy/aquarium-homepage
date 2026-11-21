@@ -8,14 +8,14 @@
       "upAxis": "+Y",
       "origin": "local",
       "dimensionsM": [
-        0.8097794651985168,
-        0.5463067293167114,
-        0.31705230474472046
+        0.8377487659454346,
+        0.5091182589530945,
+        0.34905529022216797
       ],
       "provenance": {
         "license": "original",
         "creator": "Aquarium project",
-        "sourceSha256": "4b6a3658357eee34ac291c12189ad0fff0b3b5605a12695789b8b721869eeb58",
+        "sourceSha256": "f5cc446a1bbaa18d50ec7031ba3ea92735de56c65477671cd7e598f1bfaadeae",
         "recipe": "Blender background --python src/rendering/modeling/build_reef_nsa_cave_buttress.py; node scripts/sync-blender-override.mjs --reef reef-nsa-cave-buttress --learn-guide",
         "attribution": "Original custom procedural limestone arch and embedded textures; no imported visual assets."
       }
@@ -41,31 +41,31 @@
   },
   "boundsM": {
     "min": [
-      -0.4048897325992584,
+      -0.4188743829727173,
       0,
-      -0.15852615237236023
+      -0.17452764511108398
     ],
     "max": [
-      0.4048897325992584,
-      0.5463067293167114,
-      0.15852615237236023
+      0.4188743829727173,
+      0.5091182589530945,
+      0.17452764511108398
     ]
   },
   "primitives": [
     {
       "id": "reef_nsa_cave_buttress",
       "role": "rock",
-      "vertexCount": 15781,
+      "vertexCount": 13644,
       "boundsM": {
         "min": [
-          -0.4048897325992584,
+          -0.4188743829727173,
           0,
-          -0.15852615237236023
+          -0.17452764511108398
         ],
         "max": [
-          0.4048897325992584,
-          0.5463067293167114,
-          0.15852615237236023
+          0.4188743829727173,
+          0.5091182589530945,
+          0.17452764511108398
         ]
       },
       "material": {
@@ -82,39 +82,39 @@
       "parentMesh": "reef_nsa_cave_buttress",
       "archetype": "tentaculate-lps",
       "positionM": [
-        0.21337473392486572,
-        0.4032604396343231,
-        0.048189427703619
+        0.24309512972831726,
+        0.28600621223449707,
+        0.06562547385692596
       ],
       "normal": [
-        0.2726175831417316,
-        0.8733077540930032,
-        0.4037489566587088
+        0.1278506041401818,
+        0.985345275960164,
+        0.1129110719282161
       ],
       "rotation": [
-        0.20858926967101152,
-        3.400821840737192e-10,
-        -0.14084269025498747,
-        0.9678087895756329
+        0.05666351816979612,
+        -1.6498453261108866e-10,
+        -0.06416080291943937,
+        0.9963295825565724
       ],
       "footprintRadiusM": 0.024,
       "clearanceRadiusM": 0.042,
       "support": {
         "pointM": [
-          0.2133747311906097,
-          0.4032604308753614,
-          0.048189423654162615
+          0.24309513067295058,
+          0.28600621951479105,
+          0.06562547469117748
         ],
         "normal": [
-          0.2726175831417316,
-          0.8733077540930032,
-          0.4037489566587088
+          0.1278506041401818,
+          0.985345275960164,
+          0.1129110719282161
         ],
         "supportedRadiusM": 0.024,
         "freeRadiusM": 0.042,
         "evidence": {
           "method": "surface-probes-v1",
-          "geometrySha256": "99a37ff80fcfb0b2df88d768e812c04bf24b613a3169ee574ee49f961f21c31b",
+          "geometrySha256": "12fef74ef42a2d933fb5705f98cd9f4c7af0f07d4742fcea5f1c97a801405f05",
           "report": "src/rendering/assets/corals/custom-rocks/reef-nsa-cave-buttress-socket-report.json"
         }
       }
