@@ -38,7 +38,7 @@ import { SURFACE_WAVE_GLSL } from './surface-waves'
 import { RaymarchedShaftPass, SHAFT_BEAM_GLSL } from './light-shafts'
 import { createAragoniteSandBed, evaluateAragoniteSandTilt, evaluateAragoniteSandWorldY, getRockFootprintsForViewport } from './aragonite-sand'
 import { reefPlacementsForViewport } from './reef-layout'
-import { hasReadyRightIslandCollider, resolveAvailableSnowflakeMorayResidence, resolveSnowflakeMorayResidence, SNOWFLAKE_MORAY_CAVE_COLLISION_RADIUS_M, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M, type MorayResidence } from './moray-residence'
+import { hasReadyRightIslandCollider, resolveAvailableSnowflakeMorayResidence, resolveNsaMorayResidence, SNOWFLAKE_MORAY_CAVE_COLLISION_RADIUS_M, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M, type MorayResidence } from './moray-residence'
 import { CENTER_ARCH_URL, CENTER_ARCH_MOUNTS, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
 import { NSA_KIT_URL, RUBBLE_TALUS_URL, createNsaReviewReef, createRubbleTalusGroundingAprons, disposeRubbleTalusMaterials } from './reef-nsa'
 import { createGlassEnclosure, glassEnclosureLayout } from './glass-enclosure'
@@ -835,16 +835,26 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     }
     return visible
   }
+  function currentMorayResidence(): MorayResidence | undefined {
+    const mesh = habitat.meshNavigation
+    const query = mesh?.queryCapsule
+    if (!query || !hasAuthoredSnowflakeMorayModel(modelBases.get(SNOWFLAKE_MORAY_EEL_ID))) return undefined
+    const isClear = (start: MorayResidence['headAxisStart'], end: MorayResidence['headAxisEnd'], radius: number) =>
+      query(start, end, radius, { ...mesh.movementBudget }).status === 'clear'
+    if (nsaKitBase) {
+      const residence = resolveNsaMorayResidence(width < 600, readyMeshIslandIds)
+      if (residence && isClear(residence.headAxisStart, residence.headAxisEnd, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M)) return residence
+      return undefined
+    }
+    const placements = reefPlacementsForViewport(width < 600)
+    return resolveAvailableSnowflakeMorayResidence(placements, hasReadyRightIslandCollider(placements, readyMeshIslandIds), isClear)
+  }
   function isSafeCurrentInhabitantPosition(item: Inhabitant): boolean {
     if (item.service.fishId === SNOWFLAKE_MORAY_EEL_ID) {
-      const placements = reefPlacementsForViewport(width < 600)
-      if (!hasReadyRightIslandCollider(placements, readyMeshIslandIds)) return false
-      const residence = resolveSnowflakeMorayResidence(placements)
-      const mesh = habitat.meshNavigation
-      if (!residence || !mesh?.queryCapsule) return false
+      const residence = currentMorayResidence()
+      if (!residence) return false
       const p = item.motion.position
-      if (Math.hypot(p.x - residence.position.x, p.y - residence.position.y, p.z - residence.position.z) > 1e-4) return false
-      return mesh.queryCapsule(residence.headAxisStart, residence.headAxisEnd, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M, { ...mesh.movementBudget }).status === 'clear'
+      return Math.hypot(p.x - residence.position.x, p.y - residence.position.y, p.z - residence.position.z) <= 1e-4
     }
     if (habitat.meshNavigation?.queryCapsule) {
       const r = MESH_NAVIGATION_COLLISION_RADIUS_M
@@ -1351,17 +1361,8 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     const current = new Map(fish.map(item => [item.service.id, item]))
     const configuredServices = services.filter(service => getFishById(service.fishId))
     const morayServiceCount = configuredServices.filter(service => service.fishId === SNOWFLAKE_MORAY_EEL_ID).length
-    const morayRequested = morayServiceCount > 0
     const meshNavigation = habitat.meshNavigation
-    const morayPlacements = reefPlacementsForViewport(width < 600)
-    const morayResidence = morayRequested && morayServiceCount === 1 ? resolveAvailableSnowflakeMorayResidence(
-      morayPlacements,
-      hasAuthoredSnowflakeMorayModel(modelBases.get(SNOWFLAKE_MORAY_EEL_ID))
-        && hasReadyRightIslandCollider(morayPlacements, readyMeshIslandIds),
-      meshNavigation?.queryCapsule
-        ? (start, end, radius) => meshNavigation.queryCapsule!(start, end, radius, { ...meshNavigation.movementBudget }).status === 'clear'
-        : undefined,
-    ) : undefined
+    const morayResidence = morayServiceCount === 1 ? currentMorayResidence() : undefined
     const nextServices = configuredServices.filter(service => service.fishId !== SNOWFLAKE_MORAY_EEL_ID || Boolean(morayResidence))
     const spawnOrderKey = (id: string) => lookDevConfig ? `${lookDevConfig.seed}:${id}` : id
     const horizontalSlots = fishSpawnSlotsForServices(nextServices)

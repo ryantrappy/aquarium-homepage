@@ -15,7 +15,9 @@ import {
   disposeRubbleTalusMaterials,
   rubbleTalusPlacementsForViewport,
 } from './reef-nsa'
-import { createReefMeshNavigation, MESH_NAVIGATION_MOVEMENT_BUDGET } from './reef-mesh-navigation'
+import { createReefMeshNavigation, MESH_NAVIGATION_MOVEMENT_BUDGET, segmentIntersectsInflatedBox } from './reef-mesh-navigation'
+import { resolveNsaMorayResidence, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M } from './moray-residence'
+import { evaluateAragoniteSandWorldY } from './aragonite-sand'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
 
@@ -52,6 +54,36 @@ describe('AQ-94 NSA modular rock library & rubble-talus grounding', () => {
     if (result.status !== 'ready') return
     const query = result.meshNavigation.queryCapsule!
     expect(query({ x: -.2, y: -1.95, z: -3.8 }, { x: -.2, y: -1.95, z: 1.9 }, .04, MESH_NAVIGATION_MOVEMENT_BUDGET).status).toBe('clear')
+
+    const readyIds = new Set(result.diagnostics.islands.map(island => island.islandId))
+    const moray = resolveNsaMorayResidence(false, readyIds)!
+    const radius = SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M
+    expect(query(moray.headAxisStart, moray.headAxisEnd, radius, MESH_NAVIGATION_MOVEMENT_BUDGET).status).toBe('clear')
+    for (const point of [moray.headAxisStart, moray.headAxisEnd]) {
+      expect(point.y - radius - evaluateAragoniteSandWorldY(point.x, point.z, false)).toBeGreaterThan(.13)
+    }
+    const rubble = createRubbleTalusGroundingAprons(scene.getObjectByName('reef-nsa-rubble-talus')!, false)
+    try {
+      for (const piece of rubble.children) {
+        const bounds = new THREE.Box3().setFromObject(piece)
+        expect(segmentIntersectsInflatedBox(moray.headAxisStart, moray.headAxisEnd, bounds, radius)).toBe(false)
+      }
+    } finally {
+      disposeRubbleTalusMaterials(rubble)
+    }
+    const camera = new THREE.Vector3(0, .15, 9)
+    function isVisible(point: { x: number; y: number; z: number }) {
+      const direction = new THREE.Vector3(point.x, point.y, point.z).sub(camera)
+      const ray = new THREE.Raycaster(camera, direction.clone().normalize(), 0, direction.length() - .03)
+      return ray.intersectObjects(placements.map(item => item.reef), true).length === 0
+    }
+    expect(isVisible(moray.headAxisStart)).toBe(true)
+    expect(isVisible(moray.headAxisEnd)).toBe(true)
+    for (const x of [-.075, 0, .075]) {
+      for (const y of [-.075, .08]) {
+        expect(isVisible({ x: moray.position.x + x, y: moray.position.y + y, z: moray.position.z })).toBe(false)
+      }
+    }
   }, 20_000)
 
   it('resolves all 7 NSA module URLs on disk and keeps combined live runtime rock GLBs under 5 MB', () => {
