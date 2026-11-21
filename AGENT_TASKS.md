@@ -17,6 +17,8 @@ Root verified prior Root-checkpoint facts against the current checkout. The late
 
 AQ-94 now packages seven saved NSA rock exports in one 3,956,104-byte shared-atlas GLB for the development aquarium preview. The 1440×900 review shows the taller left pinnacle, lower right island and measured through-arch with 13 mounted corals. The modular right ledge shelters the fixed moray with a clear exposed-head corridor, and native body picking opens its service card. Production promotion still needs grounding, coral coverage and broader habitat interaction review.
 
+The lower-left shelf now mounts the saved rose bubble-tip anemone. The modular scene derives its host anchor from the mounted crown. The exact-kit fixture verifies 40 seconds of resident movement at the current navigation radius and a straight clip-envelope approach to 0.24 m in front of the crown. Full animated clearance at the crown remains open. The laptop evidence is under `docs/asset-evidence/aq94/modular-clownfish-review/`.
+
 ## Fish depth and surface shafts — 2026-11-20
 
 AQ-87 applies species depth bands to general anchor destinations and held interaction targets. Actual laptop scene geometry supplies an in-band option for each authored compatible anchor group. The staged preview had 12 inhabitants and no band misses. The custom host-placement exception preserves the physical relationship with its anemone. Animated body clearance and all-depth picking remain open.
