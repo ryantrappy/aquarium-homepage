@@ -1,0 +1,167 @@
+{
+  "extras": {
+    "reefAsset": {
+      "schema": "reef-asset-v1",
+      "id": "reef-nsa-high-arch-span",
+      "kind": "rock",
+      "units": "meter",
+      "upAxis": "+Y",
+      "origin": "local",
+      "dimensionsM": [
+        0.8154736161231995,
+        0.7193586230278015,
+        0.3607741594314575
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "aa3ff46447f75e8a3a046839c258e17ed6b299a649ff276e6d93eee79f015871",
+        "recipe": "Blender background --python src/rendering/modeling/build_reef_nsa_high_arch_span.py; node scripts/sync-blender-override.mjs --reef reef-nsa-high-arch-span --learn-guide",
+        "attribution": "Original custom procedural limestone arch and embedded textures; no imported visual assets."
+      }
+    }
+  },
+  "rootTransform": {
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "boundsM": {
+    "min": [
+      -0.40773680806159973,
+      0,
+      -0.18038707971572876
+    ],
+    "max": [
+      0.40773680806159973,
+      0.7193586230278015,
+      0.18038707971572876
+    ]
+  },
+  "primitives": [
+    {
+      "id": "reef_nsa_high_arch_span",
+      "role": "rock",
+      "vertexCount": 14773,
+      "boundsM": {
+        "min": [
+          -0.40773680806159973,
+          0,
+          -0.18038707971572876
+        ],
+        "max": [
+          0.40773680806159973,
+          0.7193586230278015,
+          0.18038707971572876
+        ]
+      },
+      "material": {
+        "vertexColors": false,
+        "vertexAlpha": false,
+        "aoSource": "texture"
+      }
+    }
+  ],
+  "sockets": [
+    {
+      "name": "socket_plate_ledge_23",
+      "role": "coral-mount",
+      "parentMesh": "reef_nsa_high_arch_span",
+      "archetype": "plating-sps",
+      "positionM": [
+        0.15305224061012268,
+        0.2826462388038635,
+        0.11864881217479706
+      ],
+      "normal": [
+        -0.11866134592344536,
+        0.8490749269533568,
+        0.5147730115330331
+      ],
+      "rotation": [
+        0.26768473232027556,
+        6.223276594088783e-10,
+        0.061704532511718764,
+        0.9615286967897175
+      ],
+      "footprintRadiusM": 0.024,
+      "clearanceRadiusM": 0.042,
+      "support": {
+        "pointM": [
+          0.15305224085541536,
+          0.28264623704868475,
+          0.11864881111067581
+        ],
+        "normal": [
+          -0.11866134592344536,
+          0.8490749269533568,
+          0.5147730115330331
+        ],
+        "supportedRadiusM": 0.024,
+        "freeRadiusM": 0.042,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "5fb4e25300f7721026a3a4a29da63ae36d1347ec8f369bea35609a6ec71f6fa9",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-nsa-high-arch-span-socket-report.json"
+        }
+      }
+    },
+    {
+      "name": "socket_sps_crest_22",
+      "role": "coral-mount",
+      "parentMesh": "reef_nsa_high_arch_span",
+      "archetype": "branching-sps",
+      "positionM": [
+        -0.01964740827679634,
+        0.578680694103241,
+        0.029943212866783142
+      ],
+      "normal": [
+        -0.08610346970202726,
+        0.96371218370083,
+        0.25267572002835914
+      ],
+      "rotation": [
+        0.12749996843375652,
+        1.3922268341856534e-9,
+        0.04344773096396169,
+        0.9908864984060861
+      ],
+      "footprintRadiusM": 0.024,
+      "clearanceRadiusM": 0.042,
+      "support": {
+        "pointM": [
+          -0.019647408262987047,
+          0.5786806939486806,
+          0.029943212826258957
+        ],
+        "normal": [
+          -0.08610346970202726,
+          0.96371218370083,
+          0.25267572002835914
+        ],
+        "supportedRadiusM": 0.024,
+        "freeRadiusM": 0.042,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "5fb4e25300f7721026a3a4a29da63ae36d1347ec8f369bea35609a6ec71f6fa9",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-nsa-high-arch-span-socket-report.json"
+        }
+      }
+    }
+  ],
+  "collisionParts": []
+}

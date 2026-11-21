@@ -316,7 +316,7 @@ describe('reef sync early CLI dispatch', () => {
     expect(totalRuntimeBytes).toBeLessThan(5_000_000)
   })
 
-  it('verifies all 5 AQ-94 modular NSA rock pieces, grounded bounds, socket evidence, and shared 2048px JPEG trim atlas', () => {
+  it('verifies all 7 AQ-94 modular NSA rock pieces, grounded bounds, socket evidence, and shared 2048px JPEG trim atlas', () => {
     const readJpegDimensions = (jpeg: Buffer): { width: number; height: number } => {
       expect(jpeg.readUInt16BE(0)).toBe(0xffd8)
       let pos = 2
@@ -341,11 +341,13 @@ describe('reef sync early CLI dispatch', () => {
       'reef-nsa-cave-buttress',
       'reef-nsa-bommie-mound',
       'reef-nsa-rubble-talus',
+      'reef-nsa-high-arch-span',
+      'reef-nsa-encrusting-ledge',
     ] as const
     const customManifestPath = path.join(repoRoot, 'src/rendering/assets/corals/custom-rocks/manifest.json')
     const manifest = JSON.parse(fs.readFileSync(customManifestPath, 'utf8'))
     expect(manifest.schema).toBe('custom-reef-modules-v1')
-    expect(manifest.assets.length).toBeGreaterThanOrEqual(6)
+    expect(manifest.assets.length).toBeGreaterThanOrEqual(8)
 
     const hash = (bytes: Buffer) => createHash('sha256').update(bytes).digest('hex')
     let expectedAtlasDigests: string[] | null = null

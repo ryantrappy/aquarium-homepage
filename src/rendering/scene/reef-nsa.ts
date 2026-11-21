@@ -8,6 +8,8 @@ export type NsaRockId =
   | 'reef-nsa-cave-buttress'
   | 'reef-nsa-bommie-mound'
   | 'reef-nsa-rubble-talus'
+  | 'reef-nsa-high-arch-span'
+  | 'reef-nsa-encrusting-ledge'
 
 export const NSA_ROCK_URLS: Readonly<Record<NsaRockId, string>> = Object.freeze({
   'reef-nsa-pinnacle-spire': new URL('../assets/corals/custom-rocks/reef-nsa-pinnacle-spire.glb', import.meta.url).href,
@@ -15,6 +17,8 @@ export const NSA_ROCK_URLS: Readonly<Record<NsaRockId, string>> = Object.freeze(
   'reef-nsa-cave-buttress': new URL('../assets/corals/custom-rocks/reef-nsa-cave-buttress.glb', import.meta.url).href,
   'reef-nsa-bommie-mound': new URL('../assets/corals/custom-rocks/reef-nsa-bommie-mound.glb', import.meta.url).href,
   'reef-nsa-rubble-talus': new URL('../assets/corals/custom-rocks/reef-nsa-rubble-talus.glb', import.meta.url).href,
+  'reef-nsa-high-arch-span': new URL('../assets/corals/custom-rocks/reef-nsa-high-arch-span.glb', import.meta.url).href,
+  'reef-nsa-encrusting-ledge': new URL('../assets/corals/custom-rocks/reef-nsa-encrusting-ledge.glb', import.meta.url).href,
 })
 
 export const RUBBLE_TALUS_URL = NSA_ROCK_URLS['reef-nsa-rubble-talus']
@@ -157,6 +161,84 @@ export const NSA_MODULE_MOUNTS: Readonly<
         baseColor: '#2ea888',
         tipColor: '#9cf264',
         creviceColor: '#163830',
+        regradeStrength: 0.34,
+        roughness: 1,
+        fluorescenceStrength: 0.1,
+      },
+      rigidPaletteOverride: {
+        surfaceMode: 'baked-pbr',
+        baseColor: '#6b5e54',
+        tipColor: '#94867a',
+        creviceColor: '#2e2722',
+        regradeStrength: 0.2,
+        roughness: 1,
+        fluorescenceStrength: 0,
+      },
+      preserveSkeletonShape: true,
+    },
+  ]),
+  'reef-nsa-high-arch-span': Object.freeze<readonly ModularCoralMountEntry[]>([
+    {
+      socketName: 'socket_sps_crest_22',
+      coralAssetId: 'reef-acropora-violet-millepora',
+      archetype: 'branching-sps',
+      yawRad: 0.35,
+      scale: 0.58,
+      paletteOverride: {
+        surfaceMode: 'baked-pbr',
+        baseColor: '#764e9e',
+        tipColor: '#d9c6f5',
+        creviceColor: '#27173b',
+        regradeStrength: 0.34,
+        roughness: 1,
+        fluorescenceStrength: 0.08,
+      },
+    },
+    {
+      socketName: 'socket_plate_ledge_23',
+      coralAssetId: 'reef-montipora-undata-cap',
+      archetype: 'plating-sps',
+      yawRad: -0.42,
+      scale: 0.62,
+      paletteOverride: {
+        surfaceMode: 'baked-pbr',
+        baseColor: '#4e7e68',
+        tipColor: '#d4eed8',
+        creviceColor: '#1b3127',
+        regradeStrength: 0.34,
+        roughness: 1,
+        fluorescenceStrength: 0.06,
+      },
+    },
+  ]),
+  'reef-nsa-encrusting-ledge': Object.freeze<readonly ModularCoralMountEntry[]>([
+    {
+      socketName: 'socket_brain_apron_22',
+      coralAssetId: 'reef-favia-war-coral',
+      archetype: 'mounded-lps',
+      yawRad: 0.28,
+      scale: 0.54,
+      paletteOverride: {
+        surfaceMode: 'baked-pbr',
+        baseColor: '#a23b32',
+        tipColor: '#93e288',
+        creviceColor: '#37120e',
+        regradeStrength: 0.34,
+        roughness: 1,
+        fluorescenceStrength: 0.1,
+      },
+    },
+    {
+      socketName: 'socket_soft_mat_22',
+      coralAssetId: 'reef-zoanthid-colonial-mat',
+      archetype: 'zoanthid-mat',
+      yawRad: -0.5,
+      scale: 0.26,
+      paletteOverride: {
+        surfaceMode: 'baked-pbr',
+        baseColor: '#3699b0',
+        tipColor: '#f5b858',
+        creviceColor: '#14333d',
         regradeStrength: 0.34,
         roughness: 1,
         fluorescenceStrength: 0.1,

@@ -1,0 +1,242 @@
+{
+  "schema": "socket-support-inspection-v1",
+  "assetId": "reef-nsa-encrusting-ledge",
+  "sourceSha256": "5cb1020ad6b45ad5141827b02c5d239a68f95271f9ed8ba467fa2a8e9a306f0a",
+  "method": {
+    "contactToleranceM": 0.002,
+    "upNormalVectorTolerance": 0.002,
+    "footprintSampleSpacingM": 0.005,
+    "footprintSampleCount": 194,
+    "footprintNormalMaxAngleDeg": 30,
+    "clearanceEnvelope": {
+      "shape": "oriented-cylinder",
+      "radiusM": "requested reefSocket.clearanceRadiusM",
+      "heightM": "same as radius",
+      "baseOffsetM": 0.002
+    },
+    "limitations": [
+      "Socket local/world basis must remain unit-scale and orthogonal; footprint and clearance radii are interpreted in exported asset meters.",
+      "Contact normal uses the geometric normal of the nearest triangle; at shared-vertex ties it is facet-sensitive and may select one of several incident faces.",
+      "Footprint support is a finite radial sample lattice at the reported spacing, not a continuous disk certificate.",
+      "Clearance checks only intersection with an oriented rock-space cylinder; it does not prove whole-colony fit, fish passage or biological suitability.",
+      "Only the default glTF scene and embedded, uncompressed TRIANGLES geometry are inspected."
+    ]
+  },
+  "supportedSockets": [
+    {
+      "name": "socket_brain_apron_22",
+      "role": "coral-mount",
+      "parentMesh": "reef_nsa_encrusting_ledge",
+      "archetype": "mounded-lps",
+      "positionM": [
+        -0.19063572585582733,
+        0.17778581380844116,
+        0.05712040513753891
+      ],
+      "normal": [
+        -0.2014333009228211,
+        0.9773593115309233,
+        0.06475647800132209
+      ],
+      "rotation": [
+        0.032563075867115175,
+        9.34442371982961e-11,
+        0.10129162810521763,
+        0.9943237159828116
+      ],
+      "footprintRadiusM": 0.024,
+      "clearanceRadiusM": 0.042,
+      "support": {
+        "pointM": [
+          -0.1906357240692173,
+          0.1777858051397656,
+          0.057120404563182174
+        ],
+        "normal": [
+          -0.2014333009228211,
+          0.9773593115309233,
+          0.06475647800132209
+        ],
+        "supportedRadiusM": 0.024,
+        "freeRadiusM": 0.042,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "5cb1020ad6b45ad5141827b02c5d239a68f95271f9ed8ba467fa2a8e9a306f0a",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-nsa-encrusting-ledge-socket-report.json"
+        }
+      }
+    },
+    {
+      "name": "socket_soft_mat_22",
+      "role": "coral-mount",
+      "parentMesh": "reef_nsa_encrusting_ledge",
+      "archetype": "zoanthid-mat",
+      "positionM": [
+        0.17881739139556885,
+        0.23597392439842224,
+        0.036208443343639374
+      ],
+      "normal": [
+        -0.06290601172567917,
+        0.9903765912924373,
+        -0.12327627958671318
+      ],
+      "rotation": [
+        -0.06178698002824976,
+        -2.747344749215098e-10,
+        0.031528970588176976,
+        0.997591245507216
+      ],
+      "footprintRadiusM": 0.024,
+      "clearanceRadiusM": 0.042,
+      "support": {
+        "pointM": [
+          0.17881739194145543,
+          0.2359739158041199,
+          0.036208444413407814
+        ],
+        "normal": [
+          -0.06290601172567917,
+          0.9903765912924373,
+          -0.12327627958671318
+        ],
+        "supportedRadiusM": 0.024,
+        "freeRadiusM": 0.042,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "5cb1020ad6b45ad5141827b02c5d239a68f95271f9ed8ba467fa2a8e9a306f0a",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-nsa-encrusting-ledge-socket-report.json"
+        }
+      }
+    }
+  ],
+  "measurements": [
+    {
+      "nodeIndex": 0,
+      "name": "socket_brain_apron_22",
+      "supported": true,
+      "data": {
+        "sourceNode": 0,
+        "socketToSurfaceDistanceM": 8.869486846916175e-9,
+        "measuredPointM": [
+          -0.1906357240692173,
+          0.1777858051397656,
+          0.057120404563182174
+        ],
+        "measuredSurfaceNormal": [
+          -0.2014333009228211,
+          0.9773593115309233,
+          0.06475647800132209
+        ],
+        "nearestTriangleIndex": 3355,
+        "upNormalVectorDifference": 3.5919690487384763e-8,
+        "footprintSampleSpacingM": 0.005,
+        "originalIntent": {
+          "role": "coral-mount",
+          "parentMesh": "reef_nsa_encrusting_ledge",
+          "archetype": "mounded-lps",
+          "footprintRadiusM": 0.024,
+          "clearanceRadiusM": 0.042
+        },
+        "rawSocketTransform": {
+          "translation": [
+            -0.19063572585582733,
+            0.17778581380844116,
+            0.05712040513753891
+          ],
+          "rotation": [
+            0.03256307542324066,
+            0,
+            0.10129162669181824,
+            0.99432373046875
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "worldSocketUp": [
+          -0.20143333610497224,
+          0.9773593043317336,
+          0.06475647721897056
+        ],
+        "footprintSamples": 97,
+        "footprintFailedSamples": 0,
+        "footprintMaxSlopeDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": 0.042,
+          "heightM": 0.042,
+          "baseOffsetM": 0.002,
+          "blockerTriangleCount": 0,
+          "blockers": []
+        }
+      }
+    },
+    {
+      "nodeIndex": 1,
+      "name": "socket_soft_mat_22",
+      "supported": true,
+      "data": {
+        "sourceNode": 1,
+        "socketToSurfaceDistanceM": 8.677812490354583e-9,
+        "measuredPointM": [
+          0.17881739194145543,
+          0.2359739158041199,
+          0.036208444413407814
+        ],
+        "measuredSurfaceNormal": [
+          -0.06290601172567917,
+          0.9903765912924373,
+          -0.12327627958671318
+        ],
+        "nearestTriangleIndex": 1727,
+        "upNormalVectorDifference": 4.4062185735439365e-8,
+        "footprintSampleSpacingM": 0.005,
+        "originalIntent": {
+          "role": "coral-mount",
+          "parentMesh": "reef_nsa_encrusting_ledge",
+          "archetype": "zoanthid-mat",
+          "footprintRadiusM": 0.024,
+          "clearanceRadiusM": 0.042
+        },
+        "rawSocketTransform": {
+          "translation": [
+            0.17881739139556885,
+            0.23597392439842224,
+            0.036208443343639374
+          ],
+          "rotation": [
+            -0.06178697571158409,
+            0,
+            0.03152896836400032,
+            0.9975913166999817
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "worldSocketUp": [
+          -0.0629060500432897,
+          0.9903765862252771,
+          -0.12327630074234655
+        ],
+        "footprintSamples": 97,
+        "footprintFailedSamples": 0,
+        "footprintMaxSlopeDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": 0.042,
+          "heightM": 0.042,
+          "baseOffsetM": 0.002,
+          "blockerTriangleCount": 0,
+          "blockers": []
+        }
+      }
+    }
+  ],
+  "rejectedSockets": []
+}

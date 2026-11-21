@@ -86,6 +86,48 @@
       ]
     },
     {
+      "id": "reef-nsa-encrusting-ledge",
+      "kind": "rock",
+      "path": "src/rendering/assets/corals/custom-rocks/reef-nsa-encrusting-ledge.glb",
+      "inspection": "src/rendering/assets/corals/custom-rocks/reef-nsa-encrusting-ledge-inspection.json",
+      "socketReport": "src/rendering/assets/corals/custom-rocks/reef-nsa-encrusting-ledge-socket-report.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-nsa-encrusting-ledge.blend",
+      "nativeSha256": "8e00a5c7e878d6156ff19075088b93d5abfe1fe073445d7c8be3d1951211936c",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-nsa-encrusting-ledge.glb",
+      "overrideSha256": "f3fc201622aaa80a626257359367e34409ee66bc0695b6613f0005df02e35ff1",
+      "generatorPath": "src/rendering/modeling/build_reef_nsa_encrusting_ledge.py",
+      "generatorSha256": "e3f9b1e5720a10db78e80136dbb93da61f56380b1ae5289099b05a93d0be4dea",
+      "sha256": "5cb1020ad6b45ad5141827b02c5d239a68f95271f9ed8ba467fa2a8e9a306f0a",
+      "bytes": 1432940,
+      "triangles": 9946,
+      "dimensionsM": [
+        0.6745381355285645,
+        0.2608240246772766,
+        0.3584740161895752
+      ]
+    },
+    {
+      "id": "reef-nsa-high-arch-span",
+      "kind": "rock",
+      "path": "src/rendering/assets/corals/custom-rocks/reef-nsa-high-arch-span.glb",
+      "inspection": "src/rendering/assets/corals/custom-rocks/reef-nsa-high-arch-span-inspection.json",
+      "socketReport": "src/rendering/assets/corals/custom-rocks/reef-nsa-high-arch-span-socket-report.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-nsa-high-arch-span.blend",
+      "nativeSha256": "1e4244401c6f8a1f3a750028d1782d2739707dd70f814022174fbabfb25529c7",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-nsa-high-arch-span.glb",
+      "overrideSha256": "aa3ff46447f75e8a3a046839c258e17ed6b299a649ff276e6d93eee79f015871",
+      "generatorPath": "src/rendering/modeling/build_reef_nsa_high_arch_span.py",
+      "generatorSha256": "95b07d18367512cfa6464120031e58913454825823d3a9c8641b092bb73a0ebe",
+      "sha256": "5fb4e25300f7721026a3a4a29da63ae36d1347ec8f369bea35609a6ec71f6fa9",
+      "bytes": 1642516,
+      "triangles": 16228,
+      "dimensionsM": [
+        0.8154736161231995,
+        0.7193586230278015,
+        0.3607741594314575
+      ]
+    },
+    {
       "id": "reef-nsa-pinnacle-spire",
       "kind": "rock",
       "path": "src/rendering/assets/corals/custom-rocks/reef-nsa-pinnacle-spire.glb",

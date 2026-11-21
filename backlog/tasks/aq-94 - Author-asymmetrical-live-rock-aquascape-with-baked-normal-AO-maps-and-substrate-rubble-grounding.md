@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-11 04:55'
-updated_date: '2026-11-21 14:29'
+updated_date: '2026-11-21 15:21'
 labels:
   - modeling
   - blender
@@ -78,4 +78,11 @@ Root exactd454c27 verification complete:791tests/68files, typecheck15scripts and
 2026-11-21 Blender MCP NSA Modular Library + 2048px Trim Sheet Batch (Milestone B): Authored 5 grounded (zsh procedural) NSA carbonate live-rock modules in live Blender 5.2.3 LTS sharing one deterministic 2048x2048 4-quadrant limestone PBR trim sheet (src/rendering/modeling/reef_nsa_trim_sheet.py; textures in src/rendering/assets/corals/custom-rocks/textures/reef-nsa-trim-2048-{albedo,normal,orm}.jpg) and registered in src/rendering/assets/corals/custom-rocks/manifest.json (6 modules total alongside reef-center-arch): reef-nsa-pinnacle-spire (13,380 tris, 1,553,272 B, sockets socket_plate_ledge_21 + socket_sps_crest_21), reef-nsa-cantilever-shelf (10,628 tris, 1,439,016 B, sockets socket_lps_mid_21 + socket_plate_ledge_22), reef-nsa-cave-buttress (16,928 tris, 1,678,664 B, socket socket_lps_mid_22), reef-nsa-bommie-mound (12,500 tris, 1,539,956 B, sockets socket_brain_apron_21 + socket_soft_mat_21), and reef-nsa-rubble-talus (6,640 tris, 1,299,896 B, substrate grounding apron, 0 sockets). Every module passes watertight topology (0 non-manifold/boundary/loose), boundsM.min[1]==0 grounded alignment, aoSource:'texture', zero rejected sockets, and automated 2048x2048 JPEG SOF + shared byte-digest identity tests in src/rendering/assets/sync-reef-override.test.ts. Remains In Progress for full-tank NSA canyon assembly and Root visual review.
 
 2026-11-21 Runtime NSA Integration (Milestone C): Added typed modular NSA rock catalog & verified custom-coral mount presets in src/rendering/scene/reef-nsa.ts and mounted reef-nsa-rubble-talus.glb live in src/rendering/scene/aquarium.ts (6 sand-tilted non-pickable grounding aprons on desktop, 2 on phone) with caustics/IBL and cloned-material disposal. Combined live runtime rock GLBs measure 4,174,716 bytes (< 5,000,000). Added unit and lifecycle tests in src/rendering/scene/reef-nsa.test.ts and aquarium-lifecycle.test.ts; keeps AQ-94 In Progress pending Root 1440x900 visual review and full pinnacle-canyon runtime composition.
+
+Milestone F (8/8 modular custom live-rock library complete on custom-rocks/manifest.json):
+- Authored build_reef_nsa_high_arch_span.py and build_reef_nsa_encrusting_ledge.py in Blender 5.2.3 LTS sharing the identical 2048x2048 4-quadrant limestone trim sheet (reef-nsa-trim-2048-{albedo,normal,orm}.jpg), visually inspected front + oblique Cycles previews, and synced via --reef ... --learn-guide:
+  - reef-nsa-high-arch-span: 16,228 tris, 1,642,516 B (0.8155 x 0.7194 x 0.3608 m, sha256 5fb4e25300f7721026a3a4a29da63ae36d1347ec8f369bea35609a6ec71f6fa9), sockets socket_sps_crest_22 (branching-sps) & socket_plate_ledge_23 (plating-sps), 0 rejected sockets.
+  - reef-nsa-encrusting-ledge: 9,946 tris, 1,432,940 B (0.6745 x 0.2608 x 0.3585 m, sha256 5cb1020ad6b45ad5141827b02c5d239a68f95271f9ed8ba467fa2a8e9a306f0a), sockets socket_brain_apron_22 (mounded-lps) & socket_soft_mat_22 (zoanthid-mat), 0 rejected sockets.
+- Wired both modules into src/rendering/scene/reef-nsa.ts and updated src/rendering/assets/sync-reef-override.test.ts (verifying all 7 reef-nsa-* pieces share byte-identical 2048px JPEG textures) + src/rendering/scene/reef-nsa.test.ts (all 7 URLs and socket presets).
+- Verified check-reef-asset-manifests.mjs (32 files), npm run typecheck (18 scripts), npx vitest run --maxWorkers=3 (82/82 test files, 1055/1055 tests passing), and npm run build exited 0. Remains In Progress pending pinnacle-canyon runtime composition and Root visual review.
 <!-- SECTION:NOTES:END -->

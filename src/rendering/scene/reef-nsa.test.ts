@@ -16,8 +16,8 @@ import {
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
 
 describe('AQ-94 NSA modular rock library & rubble-talus grounding', () => {
-  it('resolves all 5 NSA module URLs on disk and keeps combined live runtime rock GLBs under 5 MB', () => {
-    expect(Object.keys(NSA_ROCK_URLS)).toHaveLength(5)
+  it('resolves all 7 NSA module URLs on disk and keeps combined live runtime rock GLBs under 5 MB', () => {
+    expect(Object.keys(NSA_ROCK_URLS)).toHaveLength(7)
     for (const url of Object.values(NSA_ROCK_URLS)) {
       const filePath = fileURLToPath(url)
       expect(existsSync(filePath), `missing ${filePath}`).toBe(true)
