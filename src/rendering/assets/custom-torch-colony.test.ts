@@ -75,6 +75,13 @@ const dualCoralCases = [
     socketName: 'socket_lps_mid_04',
     archetype: 'tentaculate-lps',
   },
+  {
+    id: 'reef-goniopora-flowerpot-lps',
+    mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+    minFlexLevels: 10,
+    socketName: 'socket_lps_mid_06',
+    archetype: 'tentaculate-lps',
+  },
 ] as const
 const registryDir = 'src/rendering/assets/corals/custom-colonies'
 const registryPath = `${registryDir}/manifest.json`

@@ -325,3 +325,59 @@ node scripts/sync-blender-override.mjs --coral reef-acropora-staghorn-thicket --
 /Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_acanthastrea_lordhowensis.py
 node scripts/sync-blender-override.mjs --coral reef-acanthastrea-lordhowensis --learn-guide
 ```
+
+## Final 6-Colony Batch Completing All `23/23` Primary Sockets (`AQ-70.11`)
+
+### `reef-acropora-violet-millepora`
+
+- **Archetype / Socket**: `branching-sps` (`socket_sps_crest_02` on Left Island)
+- **Builder script**: `src/rendering/modeling/build_reef_acropora_violet_millepora.py`
+- **Source `.blend`**: `src/rendering/assets/splat-fish/blend/reef-acropora-violet-millepora.blend`
+- **Synced package**: `reef-acropora-violet-millepora.glb` (`25,096` triangles, `2,272,348` bytes, `dimensionsM: [0.1870, 0.1459, 0.1379]`)
+- **Primitives**: `reef_acropora_violet_millepora` (`coral-rigid`)
+- **Morphology**: Dense bushy corymbose cushion *Acropora millepora* with `456` sculpted nariform radial corallite cups and pale lilac axial growth tips.
+
+### `reef-stylophora-magenta-club`
+
+- **Archetype / Socket**: `branching-sps` (`socket_sps_crest_06` on Right Island)
+- **Builder script**: `src/rendering/modeling/build_reef_stylophora_magenta_club.py`
+- **Source `.blend`**: `src/rendering/assets/splat-fish/blend/reef-stylophora-magenta-club.blend`
+- **Synced package**: `reef-stylophora-magenta-club.glb` (`16,184` triangles, `1,764,308` bytes, `dimensionsM: [0.1660, 0.1760, 0.1542]`)
+- **Primitives**: `reef_stylophora_magenta_club` (`coral-rigid`)
+- **Morphology**: *Stylophora pistillata* Milka/Rose-Magenta Club SPS with dichotomous blunt club fingers, honeycomb polyp dimple maps, `219` rounded side verrucae, and blush-pink tips.
+
+### `reef-montipora-undata-cap`
+
+- **Archetype / Socket**: `plating-sps` (`socket_plate_ledge_02` on Left Island)
+- **Builder script**: `src/rendering/modeling/build_reef_montipora_undata_cap.py`
+- **Source `.blend`**: `src/rendering/assets/splat-fish/blend/reef-montipora-undata-cap.blend`
+- **Synced package**: `reef-montipora-undata-cap.glb` (`15,120` triangles, `1,555,064` bytes, `dimensionsM: [0.1948, 0.0773, 0.1815]`)
+- **Primitives**: `reef_montipora_undata_cap` (`coral-rigid`)
+- **Morphology**: Scrolling three-whorl cabbage chalice *Montipora undata / capricornis* with ruffled growth lips, `190` raised 3D verrucose tubercles, and chalky calcareous undersides.
+
+### `reef-montipora-sunset-shelf`
+
+- **Archetype / Socket**: `plating-sps` (`socket_plate_ledge_03` on Right Island)
+- **Builder script**: `src/rendering/modeling/build_reef_montipora_sunset_shelf.py`
+- **Source `.blend`**: `src/rendering/assets/splat-fish/blend/reef-montipora-sunset-shelf.blend`
+- **Synced package**: `reef-montipora-sunset-shelf.glb` (`14,236` triangles, `1,462,592` bytes, `dimensionsM: [0.2100, 0.0614, 0.2087]`)
+- **Primitives**: `reef_montipora_sunset_shelf` (`coral-rigid`)
+- **Morphology**: Sunset *Montipora* asymmetrical triple bracket shelf cantilevered forward with scalloped lobes, `175` polyp verrucae, flame-orange coenosteum, and vivid neon-mint polyp highlights.
+
+### `reef-goniopora-flowerpot-lps`
+
+- **Archetype / Socket**: `tentaculate-lps` (`socket_lps_mid_06` on Right Island)
+- **Builder script**: `src/rendering/modeling/build_reef_goniopora_flowerpot_lps.py`
+- **Source `.blend`**: `src/rendering/assets/splat-fish/blend/reef-goniopora-flowerpot-lps.blend`
+- **Synced package**: `reef-goniopora-flowerpot-lps.glb` (`20,536` triangles, `1,660,916` bytes, `dimensionsM: [0.1660, 0.0818, 0.1520]`)
+- **Primitives**: `goniopora_polyp_crown` (`coral-soft`) + `goniopora_skeleton_dome` (`coral-rigid`)
+- **Morphology**: Flowerpot Coral (*Goniopora stokesi*) featuring a corallite-dimpled limestone dome skeleton and `58` flexing tubular stalks topped by scalloped 12-petal rose-coral daisy rosettes with mint-aqua oral disks.
+
+### `reef-favia-war-coral`
+
+- **Archetype / Socket**: `mounded-lps` (`socket_brain_apron_03` on Right Island)
+- **Builder script**: `src/rendering/modeling/build_reef_favia_war_coral.py`
+- **Source `.blend`**: `src/rendering/assets/splat-fish/blend/reef-favia-war-coral.blend`
+- **Synced package**: `reef-favia-war-coral.glb` (`20,480` triangles, `1,500,424` bytes, `dimensionsM: [0.1820, 0.0621, 0.1668]`)
+- **Primitives**: `reef_favia_war_coral` (`coral-rigid`)
+- **Morphology**: Compact Dragon-Soul *Favites pentagona* War Coral dome (`20,480`-tri equidistant azimuthal mesh with `38` angular polygonal calyces, toothed crimson walls, and neon-emerald oral eyes) clearing the adjacent Right Island moray cave mouth.

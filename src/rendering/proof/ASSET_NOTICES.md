@@ -209,6 +209,14 @@ rubric, variant, support and rendering-budget requirements remain open.
     - `reef-euphyllia-branching-frogspawn.glb`: `24,822` triangles, `1,672,372` bytes (`tentaculate-lps`, `socket_lps_mid_04`)
     - `reef-acropora-staghorn-thicket.glb`: `19,648` triangles, `1,841,052` bytes (`branching-sps`, `socket_sps_crest_03`)
     - `reef-acanthastrea-lordhowensis.glb`: `20,480` triangles, `1,503,816` bytes (`mounded-lps`, `socket_brain_apron_02`)
+  - **`AQ-70.11` Final 6-colony socket-completion batch (`23/23` primary mounts custom Blender assets)**:
+    - Original **$0** procedural 3D geometry and procedural/baked PBR texture maps authored from scratch in Blender (`build_reef_acropora_violet_millepora.py`, `build_reef_stylophora_magenta_club.py`, `build_reef_montipora_undata_cap.py`, `build_reef_montipora_sunset_shelf.py`, `build_reef_goniopora_flowerpot_lps.py`, `build_reef_favia_war_coral.py`; packed sources under `src/rendering/assets/splat-fish/blend/`).
+    - `reef-acropora-violet-millepora.glb`: `25,096` triangles, `2,272,348` bytes (`branching-sps`, `socket_sps_crest_02`)
+    - `reef-stylophora-magenta-club.glb`: `16,184` triangles, `1,764,308` bytes (`branching-sps`, `socket_sps_crest_06`)
+    - `reef-montipora-undata-cap.glb`: `15,120` triangles, `1,555,064` bytes (`plating-sps`, `socket_plate_ledge_02`)
+    - `reef-montipora-sunset-shelf.glb`: `14,236` triangles, `1,462,592` bytes (`plating-sps`, `socket_plate_ledge_03`)
+    - `reef-goniopora-flowerpot-lps.glb`: `20,536` triangles, `1,660,916` bytes (`tentaculate-lps`, `socket_lps_mid_06`)
+    - `reef-favia-war-coral.glb`: `20,480` triangles, `1,500,424` bytes (`mounded-lps`, `socket_brain_apron_03`)
   - Canonical `corals/` assets remain preserved; look-dev captures, physical scale/rubric evaluation, and Root approval remain pending.
 
 ## Clean-up-crew reef invertebrates (Trochus snail, scarlet hermit crab, emerald crab, cleaner shrimp) — `AQ-109` (Phase 1)
