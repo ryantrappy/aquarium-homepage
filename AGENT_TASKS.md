@@ -13,6 +13,10 @@ Downstream: Current implementation and review work
 
 Root verified prior Root-checkpoint facts against the current checkout. The latest user request (2026-11-15) limits this execution to the 18 tasks that were already In Progress at request start; do not start To Do tasks or create new tasks. This request-specific boundary supersedes the older fixed-showcase execution scope below without changing the historical release record or Backlog acceptance criteria.
 
+## Modular reef preview — 2026-11-21
+
+AQ-94 now packages seven saved NSA rock exports in one 3,956,104-byte shared-atlas GLB for the development aquarium preview. The 1440×900 review shows the taller left pinnacle, lower right island and measured through-arch with 13 mounted corals. The current production habitat stays in place while grounding, visible coral coverage, fish interaction and the fixed moray residence are validated on the new layout.
+
 ## Fish depth and surface shafts — 2026-11-20
 
 AQ-87 applies species depth bands to general anchor destinations and held interaction targets. Actual laptop scene geometry supplies an in-band option for each authored compatible anchor group. The staged preview had 12 inhabitants and no band misses. The custom host-placement exception preserves the physical relationship with its anemone. Animated body clearance and all-depth picking remain open.

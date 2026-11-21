@@ -22,6 +22,7 @@ export const NSA_ROCK_URLS: Readonly<Record<NsaRockId, string>> = Object.freeze(
 })
 
 export const RUBBLE_TALUS_URL = NSA_ROCK_URLS['reef-nsa-rubble-talus']
+export const NSA_KIT_URL = new URL('../assets/corals/custom-rocks/reef-nsa-kit.glb', import.meta.url).href
 
 /** Verified custom-coral mount presets matching AQ-94 sculpted rock sockets. */
 export const NSA_MODULE_MOUNTS: Readonly<
@@ -263,6 +264,55 @@ export type RubbleTalusPlacement = Readonly<{
   yaw: number
   scale: number
 }>
+
+const NSA_REVIEW_PLACEMENTS = [
+  { id: 'reef-nsa-cave-buttress', x: -3.48, y: -2.8, z: -1.55, yaw: .12, scale: 5.25 },
+  { id: 'reef-nsa-pinnacle-spire', x: -3.57, y: -1.8, z: -1.6, yaw: -.16, scale: 6.25 },
+  { id: 'reef-nsa-cantilever-shelf', x: -3.55, y: -.72, z: -.97, yaw: -.08, scale: 4.05 },
+  { id: 'reef-nsa-high-arch-span', x: -.45, y: -2.76, z: -2.1, yaw: .06, scale: 4.65 },
+  { id: 'reef-nsa-bommie-mound', x: 2.83, y: -2.8, z: -1.65, yaw: -.16, scale: 6.1 },
+  { id: 'reef-nsa-pinnacle-spire', x: 3.36, y: -1.85, z: -1.88, yaw: .58, scale: 3.98 },
+  { id: 'reef-nsa-encrusting-ledge', x: 3.34, y: -2.75, z: -.17, yaw: .24, scale: 4.95 },
+] as const satisfies readonly ({ id: Exclude<NsaRockId, 'reef-nsa-rubble-talus'> } & RubbleTalusPlacement & { y: number })[]
+
+/** Assembles the saved modules at the calibration poses used in the full-tank review. */
+export function createNsaReviewReef(source: THREE.Object3D) {
+  return NSA_REVIEW_PLACEMENTS.map(({ id, x, y, z, yaw, scale }) => {
+    const template = source.children.find(node => node.name === id)
+    if (!template) throw new Error(`Missing reef kit module ${id}`)
+    const reef = template.clone(true)
+    reef.position.set(x, y, z)
+    reef.rotation.y = yaw
+    reef.scale.setScalar(scale)
+    reef.traverse(node => {
+      if (!(node instanceof THREE.Mesh)) return
+      const materials = (Array.isArray(node.material) ? node.material : [node.material]).map(material => {
+        const graded = material.clone()
+        if (graded instanceof THREE.MeshStandardMaterial) {
+          graded.color.multiply(new THREE.Color(1.52, 1.6, 1.2))
+          graded.onBeforeCompile = shader => {
+            shader.fragmentShader = shader.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
+              float rockLuminance = dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+              diffuseColor.rgb = mix(diffuseColor.rgb, vec3(1.08, 1.02, 0.91) * rockLuminance, 0.4);`)
+          }
+          graded.customProgramCacheKey = () => 'nsa-rock-color-review'
+        }
+        return graded
+      })
+      node.material = Array.isArray(node.material) ? materials : materials[0]
+      node.castShadow = true
+      node.receiveShadow = true
+    })
+    const secondarySpire = id === 'reef-nsa-pinnacle-spire' && x > 0
+    const mounts = NSA_MODULE_MOUNTS[id].map(mount => ({
+      ...mount,
+      coralAssetId: secondarySpire && mount.archetype === 'branching-sps' ? 'reef-acropora-corymbose' : mount.coralAssetId,
+      // The cap at the arch mouth needs clearance for the measured swim lane.
+      scale: mount.scale * (mount.socketName === 'socket_plate_ledge_23' ? 1 : 1.8),
+    }))
+    return { reef, islandId: secondarySpire ? `${id}-right` : id, mounts }
+  })
+}
 
 const LAPTOP_RUBBLE_PLACEMENTS: readonly RubbleTalusPlacement[] = Object.freeze([
   // Frame left island rock-to-sand edges cleanly while keeping the front cave clear

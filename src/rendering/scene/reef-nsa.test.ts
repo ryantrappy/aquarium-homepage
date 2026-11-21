@@ -2,20 +2,58 @@ import { existsSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import * as THREE from 'three'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { describe, expect, it, vi } from 'vitest'
-import { MODULAR_CORAL_ASSET_URLS } from './reef-assembly'
+import { assembleCoralsOnRockSockets, MODULAR_CORAL_ASSET_URLS } from './reef-assembly'
 import {
   NSA_MODULE_MOUNTS,
+  NSA_KIT_URL,
   NSA_ROCK_URLS,
   RUBBLE_TALUS_URL,
   createRubbleTalusGroundingAprons,
+  createNsaReviewReef,
   disposeRubbleTalusMaterials,
   rubbleTalusPlacementsForViewport,
 } from './reef-nsa'
+import { createReefMeshNavigation, MESH_NAVIGATION_MOVEMENT_BUDGET } from './reef-mesh-navigation'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
 
 describe('AQ-94 NSA modular rock library & rubble-talus grounding', () => {
+  it('loads the shared-atlas kit and assembles exact module collision in the review layout', async () => {
+    const bytes = readFileSync(new URL(NSA_KIT_URL))
+    expect(bytes.byteLength).toBeLessThan(5_000_000)
+    const document = JSON.parse(bytes.toString('utf8', 20, 20 + bytes.readUInt32LE(12)))
+    expect(document.images).toHaveLength(3)
+    const loader = new GLTFLoader().register(() => ({
+      name: 'reef-kit-test-geometry',
+      loadMaterial: async () => new THREE.MeshStandardMaterial(),
+    }))
+    const { scene } = await loader.parseAsync(Uint8Array.from(bytes).buffer, '')
+    expect(scene.children.map(node => node.name).sort()).toEqual(Object.keys(NSA_ROCK_URLS).sort())
+    const placements = createNsaReviewReef(scene)
+    expect(placements).toHaveLength(7)
+    for (const { reef, mounts } of placements) {
+      for (const mount of mounts) expect(reef.getObjectByName(mount.socketName), mount.socketName).toBeDefined()
+    }
+    const templates = new Map<string, THREE.Object3D>()
+    for (const id of new Set(placements.flatMap(({ mounts }) => mounts.map(mount => mount.coralAssetId)))) {
+      const model = readFileSync(new URL(MODULAR_CORAL_ASSET_URLS[id]))
+      const { scene: template } = await loader.parseAsync(Uint8Array.from(model).buffer, '')
+      templates.set(id, template)
+    }
+    const assemblies = placements.map(({ reef, islandId, mounts }) => ({
+      reef, islandId,
+      mountedCorals: assembleCoralsOnRockSockets(reef, templates, mounts, { preserveAuthoredRock: true, includeScatter: false }).mountedCorals,
+    }))
+    expect(assemblies.flatMap(assembly => assembly.mountedCorals)).toHaveLength(13)
+    const result = await createReefMeshNavigation(assemblies)
+    expect(result.status, JSON.stringify(result.diagnostics)).toBe('ready')
+    if (result.status !== 'ready') return
+    const query = result.meshNavigation.queryCapsule!
+    expect(query({ x: -.2, y: -1.95, z: -3.8 }, { x: -.2, y: -1.95, z: 1.9 }, .04, MESH_NAVIGATION_MOVEMENT_BUDGET).status).toBe('clear')
+  }, 20_000)
+
   it('resolves all 7 NSA module URLs on disk and keeps combined live runtime rock GLBs under 5 MB', () => {
     expect(Object.keys(NSA_ROCK_URLS)).toHaveLength(7)
     for (const url of Object.values(NSA_ROCK_URLS)) {
