@@ -215,3 +215,7 @@
 ### 2026-11-21 — AQ-94 modular substrate
 *Root reviewed the retained entries. The active scope, laptop review and local delivery policies are current. The preview grounding is actioned. Default-layout composition, wider habitat interactions and final grounding acceptance remain pending.*
 - Five sand contacts follow the modular foundations and leave an open channel between the arch piers. The same profile drives elevation, shading, scatter, and benthic pose. Six placements of the saved talus sit along the rock edges. Exact-kit checks cover sand penetration, moray head clearance and the canyon probe. The 1440×900 comparison shows the grounding change without a shift in the upper scene.
+
+### 2026-11-21 — AQ-94 live modular habitat
+*Root reviewed the retained entries. Active scope, local/laptop verification and preservation of saved assets are current policy. The modular interaction destinations and normal live development route are actioned. Production selection and whole-body routing remain pending.*
+- The mounted roots and measured cave, burrow and slope points supply collision-checked habitat destinations. The full-kit fixture verifies 16 compatible fish/interaction pairs and a 20-second watchman goby approach. The controller fixture proves the destinations reach the normal animation loop after the exact collider becomes ready. Native `/?reef=nsa` showed 9 of 12 service projections move by more than two pixels over 32 animation frames, then zero while paused.

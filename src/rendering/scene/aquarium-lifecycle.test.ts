@@ -11,6 +11,8 @@ import { refreshFishLink } from './fish-inhabitants'
 import { createAquarium, type AquariumController, type SceneStatus } from './aquarium'
 import { ENVIRONMENT_MAP_INTENSITY } from './environment-map'
 import { CENTER_ARCH_MOUNTS } from './reef-arch'
+import { NSA_ROCK_URLS } from './reef-nsa'
+import { stepSwimmingSchool } from './motion'
 import { projectFishBodyBounds } from './fish-link-projection'
 import * as labelLayout from './fish-label-layout'
 import * as glassEnclosure from './glass-enclosure'
@@ -52,6 +54,15 @@ vi.mock('three/addons/loaders/GLTFLoader.js', async () => {
   return { GLTFLoader: class {
     async loadAsync(url: string) {
       const root = new T.Group()
+      if (url.includes('reef-nsa-kit.glb')) {
+        for (const name of Object.keys(NSA_ROCK_URLS)) {
+          const mesh = new T.Mesh(new T.BoxGeometry(.2, .2, .2), new T.MeshStandardMaterial())
+          mesh.name = name
+          mesh.userData.reefPrimitive = { role: 'rock' }
+          root.add(mesh)
+        }
+        return { scene: root, animations: [] }
+      }
       if (url.includes('reef-center-arch.glb')) {
         const addRock = (name: string, size: [number, number, number], position: [number, number, number]) => {
           const mesh = new T.Mesh(new T.BoxGeometry(...size), new T.MeshStandardMaterial())
@@ -201,7 +212,7 @@ vi.mock('./environment-map', async importOriginal => {
 })
 vi.mock('./motion', async importOriginal => {
   const real = await importOriginal<typeof import('./motion')>()
-  return { ...real, createSwimmingFish: (...args: Parameters<typeof real.createSwimmingFish>) => {
+  return { ...real, stepSwimmingSchool: vi.fn(real.stepSwimmingSchool), createSwimmingFish: (...args: Parameters<typeof real.createSwimmingFish>) => {
     if (args[0] === state.throwCreateForId) { state.beforeCreateFailure?.(); throw Error('Fixture extension setup failed') }
     const fish = real.createSwimmingFish(args[0], args[1] === 'artwork-fixture' ? 'ocellaris-clownfish' : args[1], ...args.slice(2) as [typeof args[2], typeof args[3], typeof args[4]])
     vi.spyOn(fish.extensions, 'dispose'); state.created.push(fish); return fish
@@ -286,6 +297,7 @@ beforeEach(() => {
   state.fakeEnvironmentMap = undefined
   state.standardFishMaterials = false
   state.forceLabelExposure = false
+  vi.mocked(stepSwimmingSchool).mockClear()
   vi.stubGlobal('devicePixelRatio', 1)
   vi.stubGlobal('ResizeObserver', class { constructor(callback: () => void) { state.resizeCallback = callback } observe() {} disconnect() {} })
   vi.spyOn(document, 'hidden', 'get').mockImplementation(() => documentHidden)
@@ -438,6 +450,30 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     expect(state.reefFallbackIslandIds.slice(state.reefFallbackIslandIds.indexOf('reef-center-arch') + 1)).not.toContain('reef-center-arch')
     expect(state.reefNavigationIslandIds.at(-1)).not.toContain('reef-center-arch')
     expect(state.reefNavigationCoralSockets.at(-1)).not.toContain(CENTER_ARCH_MOUNTS[0]!.socketName)
+  })
+
+  it('feeds modular destinations into the live simulation only after collision is ready', async () => {
+    window.history.replaceState({}, '', '/?reef=nsa')
+    state.deferMeshNavigation = true
+    const goby = service('modular-goby', 'yellow-watchman-goby')
+    await start([goby])
+    expect(state.reefNavigationIslandIds.at(-1)).toContain('reef-nsa-high-arch-span')
+    advance()
+    const stepped = vi.mocked(stepSwimmingSchool)
+    expect(stepped).toHaveBeenCalled()
+    const before = stepped.mock.lastCall![1].anchors.map(({ id }) => id)
+    expect(before).not.toContain('nsa-buttress-sand-sandBurrowEntrance')
+
+    state.meshNavigationResult = readyMeshNavigation(state.reefNavigationIslandIds.at(-1)!)
+    state.pendingMeshNavigationReleases.shift()!()
+    await vi.waitFor(() => {
+      expect(stepped.mock.lastCall![1].anchors).toContainEqual(
+        expect.objectContaining({ id: 'nsa-buttress-sand-sandBurrowEntrance' }),
+      )
+    })
+    state.renderer!.loop?.(100)
+    expect(stepped.mock.lastCall![0]).toContainEqual(expect.objectContaining({ id: goby.id }))
+    expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(goby.url + '/')
   })
 
   it('fails closed if an arch-mounted coral has no measurable fallback bounds after resize', async () => {
