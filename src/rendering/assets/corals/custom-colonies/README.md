@@ -126,7 +126,7 @@ self-intersection, metric scale and animated fish clearance remain open.
 `reef-euphyllia-anchor-hammer` is an original five-head *Euphyllia*-like hammer
 colony with 145 curved tentacles ending in bilobed T-shaped / crescent anchor
 tips and fluted phaceloid skeletal calyces. It mounts at `socket_lps_mid_03` on
-the left island (`28,116` triangles, `1,507,824` bytes), preserving the supplied
+the left island (`28,116` triangles, `1,507,832` bytes), preserving the supplied
 canonical `coral-euphyllia-hammer` GLB. Native packed `.blend` holds six packed
 images (three 512px tissue maps and three 256px skeleton maps), explicit
 `coral-soft` / `coral-rigid` primitive roles, `transmission=0.12`, `ior=1.36`,

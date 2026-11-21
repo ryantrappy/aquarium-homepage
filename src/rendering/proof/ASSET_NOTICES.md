@@ -178,7 +178,7 @@ rubric, variant, support and rendering-budget requirements remain open.
 
 ## Additional custom coral colonies (anchor hammer, whorled Montipora, meandroid brain, colonial zoanthid) — AQ-70.11
 
-- `custom-colonies/reef-euphyllia-anchor-hammer.glb` (`28,116` triangles, `1,507,824` bytes),
+- `custom-colonies/reef-euphyllia-anchor-hammer.glb` (`28,116` triangles, `1,507,832` bytes),
   `custom-colonies/reef-montipora-whorled-plate.glb` (`21,950` triangles, `1,744,376` bytes),
   `custom-colonies/reef-brain-meandroid-diploria.glb` (`24,000` triangles, `2,273,252` bytes),
   and `custom-colonies/reef-zoanthid-colonial-mat.glb` (`28,452` triangles, `1,851,136` bytes)

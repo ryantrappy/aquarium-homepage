@@ -198,14 +198,15 @@ for pi, (cx, cy, disc_r) in enumerate(polyp_specs[:26]):
     # B. Soft cupped oral disc with raised hypostome mouth cone (material 0, pinned center R=0 -> rim R=0.24)
     disc_sides = 22
     disc_top = origin_base + axis * (col_height * 0.96)
+    polyp_flex = 0.84 + 0.16 * ((pi % 8) / 7.0)
     # Center attachment vertex pinned R=0.0, raised slightly into mouth cone.
     mouth_peak = vertex(disc_top + axis * (0.0022 * (disc_r / 0.011)), (0.0, 0.85, phase, 0.55))
     disc_spec = [
         # (rad_frac, z_off_m, r_flex, g_fluor, v_uv, ao)
         (0.18, 0.0024, 0.00, 0.95, 0.06, 0.62),  # raised hypostome lip
-        (0.48, 0.0002, 0.08, 0.15, 0.18, 0.68),  # concave inner oral plate
-        (0.78, 0.0008, 0.16, 0.88, 0.31, 0.78),  # bright radiating oral ring
-        (1.00, 0.0014, 0.24, 0.35, 0.43, 0.86),  # outer oral disc margin
+        (0.48, 0.0002, 0.08 * polyp_flex, 0.15, 0.18, 0.68),  # concave inner oral plate
+        (0.78, 0.0008, 0.16 * polyp_flex, 0.88, 0.31, 0.78),  # bright radiating oral ring
+        (1.00, 0.0014, 0.24 * polyp_flex, 0.35, 0.43, 0.86),  # outer oral disc margin
     ]
     d_rings = []
     for rf, zoff, flex_r, g_f, v_uv, ao_v in disc_spec:
@@ -251,7 +252,7 @@ for pi, (cx, cy, disc_r) in enumerate(polyp_specs[:26]):
             n_t = lat_dir.cross(tan).normalized()
             b_t = tan.cross(n_t).normalized()
             radius = base_tr * (1.0 - 0.76 * (t ** 1.15))
-            flex_r = 0.24 + 0.76 * (t ** 1.6)
+            flex_r = min(1.0, (0.24 + 0.76 * (t ** 1.6)) * polyp_flex)
             g_fluor = smooth(0.45, 0.95, t)
             ao_v = 0.45 + 0.55 * smooth(0.0, 0.65, t)
             ring = []

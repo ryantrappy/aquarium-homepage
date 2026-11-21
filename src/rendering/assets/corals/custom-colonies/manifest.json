@@ -67,18 +67,18 @@
       "path": "src/rendering/assets/corals/custom-colonies/reef-euphyllia-anchor-hammer.glb",
       "inspection": "src/rendering/assets/corals/custom-colonies/reef-euphyllia-anchor-hammer-inspection.json",
       "nativePath": "src/rendering/assets/splat-fish/blend/reef-euphyllia-anchor-hammer.blend",
-      "nativeSha256": "d76a7c9f718ee7acf5079f0a0b0c732c2264865e06a876ff5d96098d61642099",
+      "nativeSha256": "4f8a040deabe4270ca32e60f935abbbdb2fce3871c609741db58bfd548625d91",
       "overridePath": "src/rendering/assets/splat-fish/overrides/reef-euphyllia-anchor-hammer.glb",
-      "overrideSha256": "026d9f20782bafebaba26a229975c062f2d530cdb772f983ea62c67525757ad0",
+      "overrideSha256": "e554a187fd396e6a0efa4bf74d151eb7da18184703e8ba9aa13d720296a706b0",
       "generatorPath": "src/rendering/modeling/build_reef_euphyllia_anchor_hammer.py",
-      "generatorSha256": "47b92ec7e3788f69021801981d2072760950064fe66329df79df1fcd1d7bffa4",
-      "sha256": "8983c16e7cd587c9a745732a57ad0e3ec583d574bb44e36e18329de9179a8892",
-      "bytes": 1507824,
+      "generatorSha256": "c33351221a5725582267f75f627f01084a96a4be0449ed7792e2507a595d4c0f",
+      "sha256": "b7bfa60f46d7976b9ed4516d7efafb509aec91927221dc016622b46f7194fe83",
+      "bytes": 1507832,
       "triangles": 28116,
       "dimensionsM": [
-        0.2538954094052315,
-        0.1720000058412552,
-        0.21545375138521194
+        0.1709303855895996,
+        0.14800000190734863,
+        0.14225411042571068
       ]
     },
     {
@@ -127,12 +127,12 @@
       "path": "src/rendering/assets/corals/custom-colonies/reef-zoanthid-colonial-mat.glb",
       "inspection": "src/rendering/assets/corals/custom-colonies/reef-zoanthid-colonial-mat-inspection.json",
       "nativePath": "src/rendering/assets/splat-fish/blend/reef-zoanthid-colonial-mat.blend",
-      "nativeSha256": "312f01b62c6a2b1d07d9e4711ac148aed076c7fab874efb0d1c87263cae4c24f",
+      "nativeSha256": "e44736a26f72e259c50269f5653cb84dfc184ef698bcb6d7b551feb535c73690",
       "overridePath": "src/rendering/assets/splat-fish/overrides/reef-zoanthid-colonial-mat.glb",
-      "overrideSha256": "c958312aa80363703a97e91b8c0e2418fbfe7bc73e10ec4ceb3947f15100c64e",
+      "overrideSha256": "0bab691e54f3bc8add536146a4b0b0789b8770ea0b1215d286ca1d0ec396a226",
       "generatorPath": "src/rendering/modeling/build_reef_zoanthid_colonial_mat.py",
-      "generatorSha256": "090c13fea76b6736ba44a6c78824154a7ef95e608b92fc40b5c122cbe98ef56e",
-      "sha256": "210a908990e585956781f995cedd98faecdf5c728c73589437d9630cb96f28a4",
+      "generatorSha256": "198dbd630687f965af510cd5deccff7408ccf9a2ed53e4597ed209c0680ac4cc",
+      "sha256": "0466e66f817a97ba49d090c50900c7aa5ee1063d791a7dc48cad40430c6b840a",
       "bytes": 1851136,
       "triangles": 28452,
       "dimensionsM": [
