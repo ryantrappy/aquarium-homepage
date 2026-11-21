@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TestCoralRouteImport } from './routes/test-coral'
 import { Route as ApiConfigRouteImport } from './routes/api/config'
 import { Route as ApiTelemetryCpuTemperatureRouteImport } from './routes/api/telemetry/cpu-temperature'
 import { Route as ApiTelemetryNetworkTrafficRouteImport } from './routes/api/telemetry/network-traffic'
@@ -17,6 +18,11 @@ import { Route as ApiTelemetryNetworkTrafficRouteImport } from './routes/api/tel
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestCoralRoute = TestCoralRouteImport.update({
+  id: '/test-coral',
+  path: '/test-coral',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiConfigRoute = ApiConfigRouteImport.update({
@@ -39,12 +45,14 @@ const ApiTelemetryNetworkTrafficRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/test-coral': typeof TestCoralRoute
   '/api/config': typeof ApiConfigRoute
   '/api/telemetry/cpu-temperature': typeof ApiTelemetryCpuTemperatureRoute
   '/api/telemetry/network-traffic': typeof ApiTelemetryNetworkTrafficRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/test-coral': typeof TestCoralRoute
   '/api/config': typeof ApiConfigRoute
   '/api/telemetry/cpu-temperature': typeof ApiTelemetryCpuTemperatureRoute
   '/api/telemetry/network-traffic': typeof ApiTelemetryNetworkTrafficRoute
@@ -52,6 +60,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/test-coral': typeof TestCoralRoute
   '/api/config': typeof ApiConfigRoute
   '/api/telemetry/cpu-temperature': typeof ApiTelemetryCpuTemperatureRoute
   '/api/telemetry/network-traffic': typeof ApiTelemetryNetworkTrafficRoute
@@ -60,18 +69,21 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/test-coral'
     | '/api/config'
     | '/api/telemetry/cpu-temperature'
     | '/api/telemetry/network-traffic'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/test-coral'
     | '/api/config'
     | '/api/telemetry/cpu-temperature'
     | '/api/telemetry/network-traffic'
   id:
     | '__root__'
     | '/'
+    | '/test-coral'
     | '/api/config'
     | '/api/telemetry/cpu-temperature'
     | '/api/telemetry/network-traffic'
@@ -79,6 +91,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  TestCoralRoute: typeof TestCoralRoute
   ApiConfigRoute: typeof ApiConfigRoute
   ApiTelemetryCpuTemperatureRoute: typeof ApiTelemetryCpuTemperatureRoute
   ApiTelemetryNetworkTrafficRoute: typeof ApiTelemetryNetworkTrafficRoute
@@ -91,6 +104,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test-coral': {
+      id: '/test-coral'
+      path: '/test-coral'
+      fullPath: '/test-coral'
+      preLoaderRoute: typeof TestCoralRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/config': {
@@ -119,6 +139,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  TestCoralRoute: TestCoralRoute,
   ApiConfigRoute: ApiConfigRoute,
   ApiTelemetryCpuTemperatureRoute: ApiTelemetryCpuTemperatureRoute,
   ApiTelemetryNetworkTrafficRoute: ApiTelemetryNetworkTrafficRoute,

@@ -23,11 +23,25 @@ const coralCases = [
     id: 'reef-acropora-antler',
     mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
     socketName: 'socket_sps_crest_01',
+    archetype: 'branching-sps',
   },
   {
     id: 'reef-acropora-corymbose',
     mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
     socketName: 'socket_sps_crest_05',
+    archetype: 'branching-sps',
+  },
+  {
+    id: 'reef-montipora-whorled-plate',
+    mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
+    socketName: 'socket_plate_ledge_01',
+    archetype: 'plating-sps',
+  },
+  {
+    id: 'reef-brain-meandroid-diploria',
+    mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
+    socketName: 'socket_brain_apron_01',
+    archetype: 'mounded-lps',
   },
 ] as const
 
@@ -121,7 +135,7 @@ function channelSummary(values: readonly number[], channel: number) {
   }
 }
 
-describe.each(coralCases)('$id custom rigid coral colony package', ({ id, mounts, socketName }) => {
+describe.each(coralCases)('$id custom rigid coral colony package', ({ id, mounts, socketName, archetype }) => {
   it('keeps source identities, mask contract, geometry and embedded PBR package in sync', () => {
     const registry = JSON.parse(fs.readFileSync(path.join(repoRoot, registryPath), 'utf8'))
     expect(registry.schema).toBe('custom-coral-colonies-v1')
@@ -129,7 +143,7 @@ describe.each(coralCases)('$id custom rigid coral colony package', ({ id, mounts
     expect(entry).toBeDefined()
     if (!entry) return
     const primaryMount = sourceBoundPrimaryMount(id, socketName, mounts)
-    expect(primaryMount).toMatchObject({ coralAssetId: id, archetype: 'branching-sps' })
+    expect(primaryMount).toMatchObject({ coralAssetId: id, archetype })
     expect(primaryMount?.socketName).toBe(socketName)
     expect(primaryMount.paletteOverride?.surfaceMode).toBe('baked-pbr')
     const runtimePath = registeredRuntimePath(id)

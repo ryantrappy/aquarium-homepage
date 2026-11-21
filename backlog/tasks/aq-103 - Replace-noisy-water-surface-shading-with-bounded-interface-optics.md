@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@junie'
 created_date: '2026-11-13 05:41'
-updated_date: '2026-11-15 16:01'
+updated_date: '2026-11-21 01:28'
 labels:
   - rendering
   - optics
@@ -59,6 +59,8 @@ Root expands radiance-source iteration after two rejected native proxy trials: c
 2026-11-15 focused correction: generated fragment shader inspection found the front meniscus alpha is added after and outside `frontClip`; its Gaussian is nonzero at `uFrontZ`, so the bright line reaches the enclosure boundary. Add a shader regression for front-boundary attenuation, multiply meniscus color/alpha by the existing front clip, and run the focused water-surface suite. Keep AC 2/3 and Done pending visual evidence, since no usable browser is available.
 
 Next iteration: share the existing enclosure frontClip with both the front-meniscus color tint and alpha contribution; add source-contract assertions for the front boundary, then verify the red/green water-surface regression.
+
+Root follow-up: stabilize the clipped front meniscus on both sides of its center, blend into transmission only after the water-to-air critical angle, and temper overly saturated rear reflection in the laptop overview. Review deterministic native overview and actual shader compile.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -87,6 +89,8 @@ Latest user steering: discontinue phone checks and assume phone behavior; priori
 2026-11-15 focused implementation evidence: added the frontClip meniscus regression, verified it failed against the pre-fix shader, then updated both meniscus tint and alpha to use clippedFrontMeniscus. Water-surface/wave/glass-enclosure/aquarium-lifecycle suites pass 72/72; radiance-probe suite passes 4/4; typecheck plus 17 script syntax checks pass; production build succeeds with the existing >500 kB aquarium chunk warning; git diff --check passes. No browser visual review was possible, so AC 2/3 and Root visual acceptance remain open; task stays In Progress.
 
 2026-11-15 Junie iteration: added assertions requiring the meniscus color and alpha to use clippedFrontMeniscus = frontMeniscus * frontClip, with frontClip reaching zero at uFrontZ. Against the original shader expressions, 8/9 water-surface tests passed and the new shader contract test failed; after applying the shared clip to tint and alpha, all 9/9 water-surface tests pass. `npm run typecheck` (including 17 script syntax checks), `npm run build`, and `git diff --check` pass; build reports the existing >500 kB aquarium chunk advisory. No browser visual review was available; AC #2/#3 remain open and no criteria were checked.
+
+Root verified the 1440×900 DPR 1 overview at seed 2026/time 1.25. Tempering captured coral saturation affected the upper reflected strip (mean RGB absolute differences 1.11/0.45/1.52 out of 255 in the interior upper 100 px vs <0.001 below y=120 in the sampled center). The shader now ramps in fixture transmission from the water-to-air critical cosine and evaluates the signed meniscus distance by multiplication before clipping. Browser ready, no failed assets or warnings/errors. Capture docs/asset-evidence/aq103/critical-angle-review/laptop.png includes unrelated concurrent sand/glass work. The overview does not expose the front meniscus or transmission window, so the remaining AC2/3 art gates stay open.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

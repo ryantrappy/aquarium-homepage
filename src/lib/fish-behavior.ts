@@ -221,7 +221,7 @@ function transitionsFor(
 
 const profiles = {
   'ocellaris-clownfish': {
-    speciesId: 'ocellaris-clownfish', habitatMode: 'host-associated', preferredZone: 'upper-reef', depthRange: [0.18, 0.48],
+    speciesId: 'ocellaris-clownfish', habitatMode: 'host-associated', preferredZone: 'upper-reef', depthRange: [0.18, 0.54],
     anchors: ['hostAnemone'],
     locomotion: { gait: 'fin-hover', speedTankWidthsPerSecond: [0.012, 0.045], turnDegreesPerSecond: [28, 72] },
     states: {
@@ -323,7 +323,7 @@ const profiles = {
     evidence: { kind: 'documented-behavior', summary: 'Groups shelter among branching Acropora and retreat into branches on disturbance; individual spacing is scene tuning.', sourceRefs: ['https://aquarium.org/animals/blue-green-chromis/'] },
   },
   'firefish': {
-    speciesId: 'firefish', habitatMode: 'burrow-associated', preferredZone: 'lower-reef', depthRange: [0.48, 0.82],
+    speciesId: 'firefish', habitatMode: 'burrow-associated', preferredZone: 'lower-reef', depthRange: [0.48, 0.98],
     anchors: ['sandBurrowEntrance'],
     locomotion: { gait: 'sand-burrow-hover', speedTankWidthsPerSecond: [0.018, 0.065], turnDegreesPerSecond: [52, 120], higherEffortGaits: ['short-refuge-dart'] },
     states: {

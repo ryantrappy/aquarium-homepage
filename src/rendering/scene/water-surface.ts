@@ -6,6 +6,7 @@ import { SUN_DIRECTION } from './underwater-optics'
 const WATER_SURFACE_WIDTH_SEGMENTS = 96
 const WATER_SURFACE_DEPTH_SEGMENTS = 48
 export const WATER_TO_AIR_ETA = 1.3333333
+const WATER_TO_AIR_CRITICAL_COSINE = Math.sqrt(1 - 1 / WATER_TO_AIR_ETA ** 2)
 export const TIR_RADIANCE_PROXY_DEPTH = 0.9
 export const TIR_RADIANCE_PROXY_MAX_TRAVEL = 2.4
 export const TIR_CORAL_REAR_START_OFFSET = 3.8
@@ -191,7 +192,11 @@ export function createWaterSurface(initialLayout: WaterSurfaceLayout) {
         // A softened transition centered around the underwater critical-angle cosine (~0.66).
         float focus = surfaceWaveFocus(p, uTime);
         float snellWindow = smoothstep(0.53, 0.76, NoV + max(focus, 0.0) * 0.07);
-        float transmissionWindow = snellWindow * refractionValid;
+        // GLSL refract jumps from a zero vector to a grazing ray at the
+        // critical angle. Ramp in its contribution rather than its length.
+        float criticalFade = smoothstep(${WATER_TO_AIR_CRITICAL_COSINE.toFixed(7)},
+          ${(WATER_TO_AIR_CRITICAL_COSINE + 0.065).toFixed(7)}, NoV);
+        float transmissionWindow = snellWindow * refractionValid * criticalFade;
         float tirFactor = 1.0 - transmissionWindow;
 
         // TIR returns radiance from within the tank. Project that ray a bounded
@@ -214,7 +219,11 @@ export function createWaterSurface(initialLayout: WaterSurfaceLayout) {
         // reflectedRay and CubeCamera faces share world axes. Render-target
         // cube samples are linear radiance; colorspace_fragment encodes once.
         vec3 capturedTirRadiance = textureCube(uRadianceProbe, reflectedRay).rgb;
-        vec3 tirRadianceSource = mix(analyticTirRadiance, capturedTirRadiance, uUseRadianceProbe);
+        // Preserve reflected contours while keeping the strongest coral colors
+        // from reading as saturated patches painted on the surface.
+        float capturedLuma = dot(capturedTirRadiance, vec3(0.2126, 0.7152, 0.0722));
+        vec3 reflectedCoral = mix(vec3(capturedLuma), capturedTirRadiance, 0.76);
+        vec3 tirRadianceSource = mix(analyticTirRadiance, reflectedCoral, uUseRadianceProbe);
         // Reef-colored reflection is limited to grazing views of rear/mid water.
         // Outside that region, TIR falls back to deep water. The offsets retain
         // full weight over the overview's visible rear strip while suppressing
@@ -252,7 +261,8 @@ export function createWaterSurface(initialLayout: WaterSurfaceLayout) {
         // Keep the meniscus fully inside the front-glass plane and side bounds.
         float frontClip = 1.0 - smoothstep(uFrontZ - 0.02, uFrontZ, p.y);
         float meniscusSides = 1.0 - smoothstep(uHalfWidth - 0.14, uHalfWidth, abs(p.x));
-        float frontMeniscus = exp(-pow((p.y - (uFrontZ - 0.015)) / 0.018, 2.0)) * meniscusSides;
+        float meniscusDistance = (p.y - (uFrontZ - 0.015)) / 0.018;
+        float frontMeniscus = exp(-meniscusDistance * meniscusDistance) * meniscusSides;
         float clippedFrontMeniscus = frontMeniscus * frontClip;
         col = mix(col, vec3(0.48, 0.80, 0.98), clippedFrontMeniscus * 0.72);
 

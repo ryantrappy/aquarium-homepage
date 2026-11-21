@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-08'
-updated_date: '2026-11-15 15:55'
+updated_date: '2026-11-21 01:51'
 labels:
   - optics
   - photorealism
@@ -38,7 +38,7 @@ Give the tank visible depth with a restrained haze that starts behind the primar
 <!-- AC:BEGIN -->
 - [ ] #1 Haze is visible in the rear water column / graded background, starts behind the primary fish volume (z < -1.5), and leaves foreground and mid-tank fish colours un-veiled at 1440x900 and 402x874
 - [ ] #2 Soft volumetric shafts descend from the surface, weaken with depth, freeze under pause / reduced motion / page-hidden, and never flicker
-- [ ] #3 No open-ocean fog, blue veil, blur, or dark vignette is added; any vignette decision is recorded with amended ACs in AQ-39, AQ-14.6, and AQ-14.2 first
+- [x] #3 No open-ocean fog, blue veil, blur, or dark vignette is added; any vignette decision is recorded with amended ACs in AQ-39, AQ-14.6, and AQ-14.2 first
 - [x] #4 The hard horizontal background/sand seam is gone at 1440x900 and 402x874, verified in look-dev captures
 - [ ] #5 No frame-time regression at either viewport; Root reviews the captures before Done
 <!-- AC:END -->
@@ -55,6 +55,8 @@ Give the tank visible depth with a restrained haze that starts behind the primar
 Root renderer correction: verify the existing shaft offscreen/additive blend path against Three WebGLState, remove repeated alpha attenuation so soft shaft radiance survives compositing, and preserve exact motion/depth/tier contracts. Cover the actual pass materials/render-state restoration, then compare native fixed-pose scenes at both target viewports before tuning intensity. Keep haze/seam and measured-budget acceptance open until separately demonstrated.
 
 Root rear-seam iteration: compare settled native two-size views, then replace generic lateral sand darkening with bounded rear-wall contact illumination falloff. Preserve warm foreground, sharp grain geometry, water clarity and current substrate work. Verify actual shader compilation/captures before acceptance; no blur, full-frame vignette, model or navigation changes.
+
+Compare the fixed laptop pose before and after lengthening the raymarched surface-light falloff. Keep the existing depth clip, scattering budget and clear foreground. Accept the trial only if the upper water gains readable shaft detail and the lower water stays neutral.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -69,4 +71,6 @@ Root native trial softens the bright floor/rear-wall cut with substrate-only con
 Root final exact-source219e3da two-size review: native before/after PNGs and ready renderFrozen sidecars under docs/asset-evidence/aq86/rear-seam-20261112/. Harsh bright horizontal cut is now a soft rear-floor contact transition at both1440x900/402x874; Root acceptsAC4. Physical floor/wall boundary remains geometrically present. Laptop clear-channel20x30region max adjacent-row display-luminance jump falls108.25 to28.66 (~73.5percent); no whole-frame/phone numeric claim. After reload zero captured consolewarnings/errors; mapless front-edge shader repairedAQ70.12. Isolated43focused tests/4files, typecheck14scripts, productionbuild pass. Before shadererrors and frozen inspection timings invalidate runtime cost comparison; AC5 and fullshaft/haze/freezegates remain open. No model/Blender edits.
 
 2026-11-15 active-only verification: existing shaft materials/offscreen pass already implement premultiplied ONE/ONE additive compositing and restore renderer state; light-shafts.test.ts plus underwater-optics.test.ts pass 28/28, and the recently run aquarium-lifecycle suite passes 46/46 including full-height haze/shaft planes. AC4 rear-seam softening remains checked with saved 1440x900/402x874 evidence. Existing AQ86 capture sets are source-pinned to older commits (35581ed and 219e3da), so they are not current-source visual acceptance; no browser/GPU frame-time measurement was available. Keep AC1/2/3/5 and Root DoD open; no code or scene values changed.
+
+Root laptop review 2026-11-20. Extended the high-tier raymarched shaft falloff from the shared surface height and maintained a smooth floor cutoff. Midpoint samples eliminated the visible diagonal dither pattern exposed by the brighter trial. The ray bounds, occluder pre-pass, sample count and render-target size remain unchanged. Compared with docs/asset-evidence/aq87/anchor-depth-review/laptop.png at the same scene pose, the upper clear-water rectangle (520,115)-(815,290) gains mean RGB 2.85/4.01/6.28 encoded values, with blue peak change 17. The inspected lower arch and foreground sand rectangles are pixel-identical. Two adjacent 1/60 s phase comparisons in the upper rectangle have blue mean differences 0.414 and 0.419, with maxima 3. Current 1440×900 DPR 1 capture docs/asset-evidence/aq86/surface-shaft-depth-review/laptop.png shows 12 inhabitants with no failed assets or browser warnings or errors. Both captures include concurrent sand and glass styling. Checked AC3 for the depth-occluded shaft adjustment and clear foreground. Keep the full temporal/visibility, haze and frame-time criteria open.
 <!-- SECTION:NOTES:END -->

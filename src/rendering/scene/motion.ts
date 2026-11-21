@@ -160,6 +160,13 @@ export const ANCHOR_HOLD_RADIUS_M = 0.8
 /** How often a fish holding at an anchor re-checks that it should stay. */
 export const ANCHOR_HOLD_REFRESH_SECONDS = 0.25
 
+function isAnchorDepthAllowed(location: HabitatAnchorLocation, range: readonly [number, number] | undefined): boolean {
+  const y = location.position.y
+  // A clownfish follows its actual host when a custom layout places the
+  // anemone outside the habitat's normal cruising band.
+  return Number.isFinite(y) && (location.anchor === 'hostAnemone' || !range || (y >= range[0] && y <= range[1]))
+}
+
 /**
  * Nearest compatible anchor location of `anchor` within holding range, or
  * undefined. Compatibility is the profile check from AQ-45 (never a
@@ -168,15 +175,19 @@ export const ANCHOR_HOLD_REFRESH_SECONDS = 0.25
 function nearestCompatibleAnchor(fish: SwimmingFish, habitat: WaterHabitat, anchor: HabitatAnchor): HabitatAnchorLocation | undefined {
   let best: HabitatAnchorLocation | undefined
   let bestDistance = Infinity
+  const range = evaluateTieredVerticalDepthRange(fish.speciesId, habitat.bounds)?.worldYRange
   for (const location of habitat.anchors) {
-    if (location.anchor !== anchor || !isSpeciesCompatibleWithAnchor(fish.speciesId, location)) continue
+    if (location.anchor !== anchor || !isSpeciesCompatibleWithAnchor(fish.speciesId, location)
+      || !isAnchorDepthAllowed(location, range)) continue
     const dist = distance(location.position, fish.position)
     if (dist < bestDistance) { best = location; bestDistance = dist }
   }
   return bestDistance <= ANCHOR_HOLD_RADIUS_M ? best : undefined
 }
 function hasCompatibleAnchor(fish: SwimmingFish, habitat: WaterHabitat, anchor: HabitatAnchor): boolean {
-  return habitat.anchors.some(location => location.anchor === anchor && isSpeciesCompatibleWithAnchor(fish.speciesId, location))
+  const range = evaluateTieredVerticalDepthRange(fish.speciesId, habitat.bounds)?.worldYRange
+  return habitat.anchors.some(location => location.anchor === anchor && isSpeciesCompatibleWithAnchor(fish.speciesId, location)
+    && isAnchorDepthAllowed(location, range))
 }
 
 /**
@@ -228,11 +239,16 @@ function applyAnchorInteraction(fish: SwimmingFish, habitat: WaterHabitat, dt: n
     reducedMotion,
   })
   if (!offset) return
+  const range = evaluateTieredVerticalDepthRange(fish.speciesId, habitat.bounds)?.worldYRange
+  const y = location.position.y
+  const positionOffset = range && y >= range[0] && y <= range[1]
+    ? { ...offset.positionOffset, y: clamp(y + offset.positionOffset.y, range[0], range[1]) - y }
+    : offset.positionOffset
   const clearance = anchorApproachClearanceM(fish)
   let target = resolveSafeAnchorInteractionTarget({
     currentPosition: fish.position,
     location,
-    offset,
+    offset: { ...offset, positionOffset },
     waterBounds: habitat.bounds,
     obstacles: habitat.meshNavigation === undefined ? habitat.obstacles : [],
     fishClearanceRadius: fish.clearance,
@@ -616,9 +632,11 @@ function planMesh(fish: SwimmingFish, habitat: WaterHabitat) {
   const lateralClearanceRadius = lateralClearanceForFish(fish, habitat, radiusM)
   if (request && fish.routeGeneration !== request.generation && fish.startleSeconds <= 0) {
     const profile = getSpeciesBehaviorProfile(request.speciesId)
+    const range = evaluateTieredVerticalDepthRange(fish.speciesId, habitat.bounds)?.worldYRange
     const candidates = validMeshRequest(fish, request) && profile
       ? orderHabitatAnchorsForRequest(request, habitat.bounds, habitat.anchors.filter(location => location.anchor === request.anchor
         && (!location.compatibleSpecies || location.compatibleSpecies.includes(profile.speciesId))
+        && isAnchorDepthAllowed(location, range)
         && insideMeshWater(fish, habitat, location.position)))
       : []
     let failure: 'blocked' | 'unavailable' = candidates.length ? 'blocked' : 'unavailable'
@@ -709,7 +727,9 @@ function plan(fish: SwimmingFish, habitat: WaterHabitat) {
     // measured point, and the legacy 0.5 m envelope would strand the fish
     // outside the interaction zone it is supposed to enter.
     const approachClearance = anchorApproachClearanceM(fish)
-    const result = resolveHabitatRoute({ request, start: fish.position, waterBounds: habitat.bounds, obstacles: habitat.obstacles, anchorLocations: habitat.anchors, fishClearanceRadius: approachClearance, maxAbsXAtDepth: habitat.maxAbsXAtDepth, lateralClearanceRadius: lateralClearanceForFish(fish, habitat, approachClearance) })
+    const range = evaluateTieredVerticalDepthRange(fish.speciesId, habitat.bounds)?.worldYRange
+    const anchorLocations = habitat.anchors.filter(location => isAnchorDepthAllowed(location, range))
+    const result = resolveHabitatRoute({ request, start: fish.position, waterBounds: habitat.bounds, obstacles: habitat.obstacles, anchorLocations, fishClearanceRadius: approachClearance, maxAbsXAtDepth: habitat.maxAbsXAtDepth, lateralClearanceRadius: lateralClearanceForFish(fish, habitat, approachClearance) })
     fish.routeGeneration = request.generation
     if (result.status === 'route') { fish.targetWait = 0; fish.route = result.path; fish.waypoint = 1; fish.navigationAnchor = request.anchor; return }
     fish.behavior = reportNavigationOutcome(fish.behavior, request.generation, request.anchor, result.status)

@@ -11,7 +11,7 @@ import {
 
 const root = resolve(__dirname, '../../..')
 const runtimeModels: Record<string, string> = {
-  'ocellaris-clownfish': 'src/rendering/proof/candidate-real-clown.glb',
+  'ocellaris-clownfish': 'src/rendering/assets/fish/download_testing_copies/clownfish-copy.glb',
   'yellow-tang': 'src/rendering/proof/candidate-real-tang.glb',
   'blue-tang': 'src/rendering/assets/splat-fish/blue-tang.glb',
   'royal-gramma': 'src/rendering/assets/splat-fish/royal-gramma.glb',

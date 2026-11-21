@@ -15,6 +15,11 @@ import { reefPlacementsForViewport } from './reef-layout'
 import { resolveSnowflakeMorayResidence, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M } from './moray-residence'
 import { DEFAULT_CAMERA_ZOOM_STATE } from './camera-zoom'
 import { createAragoniteSandBed, evaluateAragoniteSandElevation } from './aragonite-sand'
+import { querySweptBodyCapsule } from '../../simulation/swept-body-capsule'
+import { createFishClipPlayer } from './fish-animation'
+import { MODEL_SWIM_AXIS_LENGTH, fishModelScale, fishRenderLength } from './fish-scale'
+import { mountedAnemoneHosts } from './anemone-host'
+import { analyzeFishClipEnvelope } from '../assets/fish-clip-envelope'
 
 type P = { x: number; y: number; z: number }
 const p = (x: number, y: number, z: number): P => ({ x, y, z })
@@ -45,6 +50,40 @@ function boxRock(size = 1): THREE.Mesh {
   mesh.userData.reefPrimitive = { role: 'rock' }
   return mesh
 }
+
+it('checks the full translating body and shares its BVH budget across slices', async () => {
+  const reef = new THREE.Group()
+  const rock = boxRock(.3)
+  rock.position.set(.7, 0, 0)
+  reef.add(rock)
+  const navigation = await createReefMeshNavigation([{ reef, islandId: 'body-sweep-box', mountedCorals: [] }])
+  expect(navigation.status).toBe('ready')
+  if (navigation.status !== 'ready') return
+  const query = navigation.meshNavigation.queryCapsule!
+  const budget = { ...MESH_NAVIGATION_MOVEMENT_BUDGET }
+  const from = { tail: p(-.8, 0, -1), nose: p(.8, 0, -1) }
+  const to = { tail: p(-.8, 0, 1), nose: p(.8, 0, 1) }
+  expect(query(p(0, 0, -1), p(0, 0, 1), .04, budget).status).toBe('clear')
+  expect(querySweptBodyCapsule(query, from, to, .04, budget).status).toBe('blocked')
+
+  function lift(axis: typeof from) {
+    return { tail: { ...axis.tail, y: .29 }, nose: { ...axis.nose, y: .29 } }
+  }
+  expect(querySweptBodyCapsule(query, lift(from), lift(to), .04, budget).status).toBe('clear')
+  expect(querySweptBodyCapsule(query, lift(from), lift(to), .04, { maxNodeVisits: 1, maxTriangleTests: 1 }).status).toBe('indeterminate')
+})
+
+it('cannot treat a padded body-sweep overlap as proven contact', () => {
+  const from = { tail: p(-.8, 0, -1), nose: p(.8, 0, -1) }
+  const to = { tail: p(-.8, 0, 1), nose: p(.8, 0, 1) }
+  const paddingOnly = (_start: P, _end: P, radius: number) => ({
+    status: radius > .04 ? 'blocked' as const : 'clear' as const,
+    work: { nodeVisits: 1, triangleTests: 1 },
+  })
+  expect(querySweptBodyCapsule(paddingOnly, from, to, .04, MESH_NAVIGATION_MOVEMENT_BUDGET)).toMatchObject({
+    status: 'indeterminate', reason: 'body-sweep-resolution',
+  })
+})
 
 function boxCoral(center: P, size = 0.2): THREE.Group {
   const geometry = new THREE.BoxGeometry(size, size, size)
@@ -682,6 +721,121 @@ async function loadActualGlb(bytes: Uint8Array) {
     }
   }
 }
+
+  async function measureClipBodyRadius(url: URL, modelScale: number, halfAxis: number): Promise<number> {
+    const { scene, animations } = await loadActualGlb(readFileSync(url))
+    scene.scale.setScalar(modelScale)
+    const player = createFishClipPlayer(scene, animations[0]!, .35)
+    scene.updateMatrixWorld(true)
+    const vertex = new THREE.Vector3()
+    let radius = 0
+    scene.traverse(node => {
+      if (!(node instanceof THREE.SkinnedMesh)) return
+      for (let index = 0; index < node.geometry.getAttribute('position').count; index++) {
+        node.getVertexPosition(index, vertex).applyMatrix4(node.matrixWorld)
+        const axialOverhang = Math.max(0, Math.abs(vertex.z) - halfAxis)
+        radius = Math.max(radius, Math.hypot(vertex.x, vertex.y, axialOverhang))
+      }
+    })
+    player.dispose()
+    return radius
+  }
+
+  function certifiedClipRadius(url: URL, speciesId: string, expectedSha256: string, clipName: string, halfAxis: number): number {
+    const certificate = analyzeFishClipEnvelope(readFileSync(url), {
+      expectedSha256,
+      clipName,
+      adultLengthM: fishRenderLength(speciesId),
+      // This fixture uses the runtime's world scale for both the body and reef.
+      sourceReference: { lengthAxis: '+Z', lengthM: MODEL_SWIM_AXIS_LENGTH[speciesId], authority: 'AQ-58 runtime scene scale fixture' },
+      composition: 'single-clip',
+      capsuleHalfAxisM: halfAxis,
+    })
+    if (certificate.status !== 'ready') throw new Error(certificate.reason)
+    return certificate.activeEnvelope.capsule!.radiusM
+  }
+
+  it('checks fitted fish bodies against the cave and host in the raised laptop assembly', async () => {
+    const placement = reefPlacementsForViewport(false).find(item => item.islandKind === 'left')!
+    const { scene: reef } = await loadActualGlb(readFileSync(new URL(LIVE_ROCK_ISLAND_URLS.left)))
+    const coralTemplates = new Map<string, THREE.Object3D>()
+    for (const [id, url] of Object.entries(MODULAR_CORAL_ASSET_URLS)) {
+      const coral = await loadActualGlb(readFileSync(new URL(url)))
+      coralTemplates.set(id, coral.scene)
+    }
+    const assembled = assembleCoralsOnRockSockets(reef, coralTemplates, DEFAULT_LEFT_ISLAND_MOUNTS, {
+      foundationHeightScale: placement.foundationHeightScale,
+    })
+    expect(assembled.mountedCorals).toHaveLength(DEFAULT_LEFT_ISLAND_MOUNTS.length)
+    reef.scale.setScalar(placement.uniformScale)
+    reef.position.copy(placement.position)
+    reef.rotation.y = placement.yaw
+    const navigation = await createReefMeshNavigation([{ reef, islandId: 'reef-left', mountedCorals: assembled.mountedCorals }])
+    expect(navigation.status).toBe('ready')
+    if (navigation.status !== 'ready') return
+    expect(navigation.diagnostics.islands[0]).toMatchObject({
+      rockTriangles: 24_572,
+      rockVertices: 12_288,
+      rockComponents: 1,
+      boundaryEdges: 0,
+      nonManifoldEdges: 0,
+      nonManifoldVertices: 0,
+      inconsistentEdges: 0,
+      duplicateFaces: 0,
+      degenerateFaces: 0,
+    })
+
+    // The full coral assembly leaves a lower, slightly left-of-center route
+    // through the cave. Coordinates start in the unraised export's frame.
+    const y = 0.02 * placement.foundationHeightScale
+    const budget = { ...MESH_NAVIGATION_MOVEMENT_BUDGET }
+    const query = navigation.meshNavigation.queryCapsule!
+    function probeAtX(x: number) {
+      const start = reef.localToWorld(new THREE.Vector3(x, y, -0.36))
+      const end = reef.localToWorld(new THREE.Vector3(x, y, 0.36))
+      return query(start, end, MESH_NAVIGATION_COLLISION_RADIUS_M, budget)
+    }
+    expect(probeAtX(-0.025)).toMatchObject({ status: 'clear' })
+    expect(probeAtX(-0.05)).toMatchObject({ status: 'blocked', reason: 'surface-contact' })
+
+    // Use the continuous skeletal clip envelope for the scaled blue tang.
+    const halfAxis = .5
+    const radius = certifiedClipRadius(new URL('../assets/splat-fish/blue-tang.glb', import.meta.url),
+      'blue-tang', 'de1aaf4fcbc72b82749190e4047d26a226cd2d987bee8ef06f50849aac36fc9e', 'blue_tang_labriform_swim', halfAxis)
+    expect(radius).toBeGreaterThan(MESH_NAVIGATION_COLLISION_RADIUS_M)
+    const halfAxisLocal = halfAxis / placement.uniformScale
+    const pose = (x: number, height: number, z: number) => ({
+      tail: reef.localToWorld(new THREE.Vector3(x, height, z - halfAxisLocal)),
+      nose: reef.localToWorld(new THREE.Vector3(x, height, z + halfAxisLocal)),
+    })
+    const caveSweep = querySweptBodyCapsule(query, pose(-.025, y, -.36), pose(-.025, y, .36), radius, budget)
+    expect(caveSweep).toMatchObject({ status: 'blocked', reason: 'coral-envelope' })
+    const frontPose = (x: number) => ({ tail: p(x - halfAxis, 1.65, 1.9), nose: p(x + halfAxis, 1.65, 1.9) })
+    const frontSweep = querySweptBodyCapsule(query, frontPose(-.6), frontPose(.5), radius, budget)
+    expect(frontSweep.status).toBe('clear')
+
+    const clownHalfAxis = .16
+    const clownUrl = new URL('../assets/fish/download_testing_copies/clownfish-copy.glb', import.meta.url)
+    const clownRadius = await measureClipBodyRadius(clownUrl, fishModelScale('ocellaris-clownfish'), clownHalfAxis)
+    const clownClipRadius = certifiedClipRadius(clownUrl, 'ocellaris-clownfish',
+      'be6e9cbd2b5b6a76d5204f3a140ae7538a0115e6a067dcbabd0dfd1a273db7ac', 'clownfish_subcarangiform_swim', clownHalfAxis)
+    expect(clownRadius).toBeGreaterThan(MESH_NAVIGATION_COLLISION_RADIUS_M)
+    const [host] = mountedAnemoneHosts(assembled.mountedCorals, 'reef-left')
+    expect(host).toBeDefined()
+    const residentQuery = navigation.meshNavigation.queryCapsuleForSpecies!['ocellaris-clownfish']
+    function approachPose(yaw: number, frontOffset: number) {
+      const { x, y, z } = host.position
+      const dx = Math.sin(yaw) * clownHalfAxis, dz = Math.cos(yaw) * clownHalfAxis
+      return { tail: p(x - dx, y, z + frontOffset - dz), nose: p(x + dx, y, z + frontOffset + dz) }
+    }
+    expect(querySweptBodyCapsule(residentQuery, approachPose(0, .4), approachPose(0, 0), clownRadius, budget).status).toBe('clear')
+    expect(querySweptBodyCapsule(residentQuery, approachPose(Math.PI / 2, .4), approachPose(Math.PI / 2, 0), clownRadius, budget)).toMatchObject({
+      status: 'blocked', reason: 'coral-envelope',
+    })
+    expect(querySweptBodyCapsule(residentQuery, approachPose(0, .4), approachPose(0, 0), clownClipRadius, budget)).toMatchObject({
+      status: 'blocked', reason: 'coral-envelope',
+    })
+  }, 120_000)
 
   it('clears the exposed moray head at its fixed right-cave mouth across the full assembled right island and sand', async () => {
     const placement = reefPlacementsForViewport(false).find(item => item.islandKind === 'right')!

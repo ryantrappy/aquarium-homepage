@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-05 03:13'
-updated_date: '2026-11-15 15:50'
+updated_date: '2026-11-21 02:29'
 labels:
   - modeling
   - validation
@@ -34,7 +34,7 @@ Independent exact-export audit of left rock SHA 2f90be064f3f5b15291dffd25a3ea00e
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 Collision representation conservatively covers exact exported solid rock including sloped cave walls and exposes a measured safe passage with fish-radius clearance; tests include the known under-covered vertex.
-- [ ] #2 Evidence pins source hash and documents method/resolution and both coverage and pass-through checks; metadata is absent/unavailable until validation passes.
+- [x] #2 Evidence pins source hash and documents method/resolution and both coverage and pass-through checks; metadata is absent/unavailable until validation passes.
 - [ ] #3 Root reviews collision and actual-mesh routing/occlusion evidence before modular scene promotion, with original visual geometry preserved unless a coordinated functional change is required.
 <!-- AC:END -->
 
@@ -80,6 +80,14 @@ Proof extension: for q_total=q_clip*D1*D2, triangle inequality gives ||R_total-R
 Root-approved functional integration iteration2026-11-05: independently review existing fish-animation.ts; make clean-pose capture atomic; restrict the player to one shared skin palette; install sole-clip FishClipPlayer in aquarium initialization/advance/disposal while preserving static unsupported fish/native controls. Retire malformed per-fish playback once without failing the scene. Keep metric collision and overlay certificates uninstalled until separate exact-source review.
 
 Root2026-11-12 current-export fallback correction: derive conservative world-space rock fallback bounds from the same assembled render mesh vertices and matrices passed to mesh navigation, replacing only stale manual rock bands in main runtime. Preserve tight coral-base obstacles, native picking, exact BVH activation/generation checks and truthful unavailable state. One AABB per static rock mesh is deliberately conservative during startup/failure; it does not certify caves/animated envelopes or replace exact mesh routing. Validate actual runtime URL GLBs at both current placements, finite/transformed geometry, stale cached bounding boxes, nonindexed meshes and malformed/no-rock failure. Root wires aquarium only after helper review; no model or canonical source swaps.
+
+Test the established left cave probe after applying the live laptop placement, foundation rise, contour sculpt, and full mounted-coral assembly. Record the exact export identity and distinguish the fixed-radius geometry probe from animated fish clearance.
+
+Restore the real-loader runtime validation command for the current model map, including the explicit fixed-moray key and its own clip semantics. Run the current asset set and retain the clip-only scope while preparing posed-body measurements.
+
+Use the existing capsule/BVH query to check a conservative sweep of a finite-length body. Bound the full linear motion of its paired axis endpoints using longitudinal slices and one shared work budget. Prove obvious contact and return indeterminate for unresolved padded bounds. Compare the 0.04 root probe with a fitted starter model pose in the exact raised cave assembly. Keep runtime promotion gated on continuous pose bounds and live hosting evidence.
+
+Extend the existing continuous clip-envelope analyzer with an optional local +Z capsule. Reuse its per-vertex displacement bounds and numerical margin for distance to the axis segment. Verify the new bound against an independent animated fixture and current starter assets. Retain the current source restrictions and do not promote unbounded shader or turn behavior.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -110,6 +118,10 @@ Root/Luna current-runtime fallback correction: helper scans current assembled ro
 Root final d862bf9 verified handoff: all748tests/66files,52focusedtests/2files, typecheck14scripts and productionbuild pass in isolated exact-source checkout. Native1440x900/402x874DPR1 capture evidence under docs/asset-evidence/aq58/current-fallback-20261113/ is ready with no failed/pending assets and zero captured warnings/errors;11inhabitants staged, all8phone service targets remain>=44px and contained inviewport. This proves current-source fallback integration and retained links, not actual animated-body cave routing. Historical collisionAC2remainsunchecked for current runtime acceptance. No model/asset/Blender edits.
 
 2026-11-15 active-only review: focused collision/socket/asset-contract tests pass 31/31; npm run typecheck and scripts:check pass (17 scripts); node scripts/check-socket-reports.mjs passes (left 12 supported, right 11 supported). Live live-rock-island-left.glb SHA-256 is 2f81f8fc212886aa3eea9a0d316ca0a1f4badccac20044583f8ad4f0bdd9c2ef and right is 7d8cc1ce22d850d199f28652437c6d95d64ab4cc80606cc451c4c58c702558c1; neither matches the historical exact-geometry snapshot in README/fixture (left 2f90be..., right 68337f...). The 2026-11-13 fallback captures different reef-full-model assets and explicitly does not certify cave/animated-fish clearance. Keep all acceptance criteria and collision metadata open; fresh source-pinned collision evidence and Root actual-mesh route/occlusion review are still required. No assets, candidates, reports, or scene metadata changed.
+
+Root exact laptop assembly review 2026-11-20. Runtime source SHA-256: reef-full-model-left.glb 8d04c4fce1e6e1bf3c2e021968c205b4c9e4af9041a23d9304a7e291fcf6414f, reef-full-model-right.glb 009a847175661ea2fdcf273d994a30cc12834ff6720b4d7bd4aea2391179bd3b. The new reef-mesh-navigation.test.ts probe uses the left GLTFLoader scene and all runtime coral templates, the 2× foundation rise, 6× island placement and full assembled mounts. The exact transformed rock BVH indexes all 24,572 triangles and welds 12,288 positions into one consistently oriented closed component with no boundary, non-manifold, duplicate or degenerate defects. The established centerline is blocked by a coral envelope in the current assembly. The continuous 0.04 m capsule clears at unraised local x=-0.025, y=0.02 and z=-0.36 through 0.36, and the adjacent x=-0.05 probe contacts the wall. The focused tests also cover the historical known missed vertex and the current right moray route. Both packaged collisionParts arrays are empty. Targeted collision, reef assembly and hosting suites passed 95 tests with typecheck and 17 script checks. AC2 checked for source-pinned method, coverage and passage evidence. Keep AC1 and AC3 open for species-specific animated envelopes and live routed/occlusion acceptance.
+
+Root fish envelope diagnostic 2026-11-20. Restored the read-only verifier with the shared fixed-moray key and clip-only cave playback. Runtime verification runs 120 samples for each of 17 mapped assets and historical verification covers 8 assets. The scale-test source now uses the active clownfish-copy GLB (SHA-256 be6e9cbd2b5b6a76d5204f3a140ae7538a0115e6a067dcbabd0dfd1a273db7ac). Its axis length remains 2.0. Separate local posed-vertex diagnostic loaded the five default GLBs without textures, used fishModelScale, the active clip/reset and turning adapter, and CPU equivalent post-skinning flex. It ran 120 steps at 60 Hz, sampling all skinned vertices on every fifth step, with unit-normalized cruising flex and turn input yaw rate 1.2, curvature 0.5, delayed curvature 0.3, exit-stroke phase frame×0.21. Minimum-to-maximum sampled per-pose root reaches in scene units: yellow tang 0.530759–0.542008, Banggai 0.233927–0.237408, gramma 0.219835–0.233291, clown 0.239753–0.249718, blue tang 0.728539–0.736867. The 0.04 navigation sphere undercovers every measured body. These are sampled radial reaches around the root and cannot certify continuous or oriented routes. They identify the need for pose-aware envelopes and planning. No collision radii or geometry promoted.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

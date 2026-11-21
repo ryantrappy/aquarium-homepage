@@ -106,6 +106,10 @@ export const LIVE_ROCK_ISLAND_URLS: Readonly<Record<'left' | 'right', string>> =
 
 export const MODULAR_CORAL_ASSET_URLS: Readonly<Record<string, string>> = Object.freeze({
   'reef-euphyllia-flowing-torch': new URL('../assets/corals/custom-colonies/reef-euphyllia-flowing-torch.glb', import.meta.url).href,
+  'reef-euphyllia-anchor-hammer': new URL('../assets/corals/custom-colonies/reef-euphyllia-anchor-hammer.glb', import.meta.url).href,
+  'reef-montipora-whorled-plate': new URL('../assets/corals/custom-colonies/reef-montipora-whorled-plate.glb', import.meta.url).href,
+  'reef-brain-meandroid-diploria': new URL('../assets/corals/custom-colonies/reef-brain-meandroid-diploria.glb', import.meta.url).href,
+  'reef-zoanthid-colonial-mat': new URL('../assets/corals/custom-colonies/reef-zoanthid-colonial-mat.glb', import.meta.url).href,
   'reef-acropora-corymbose': new URL('../assets/corals/custom-colonies/reef-acropora-corymbose.glb', import.meta.url).href,
   'reef-acropora-antler': new URL('../assets/corals/custom-colonies/reef-acropora-antler.glb', import.meta.url).href,
   'coral-acropora-staghorn': new URL('../assets/corals/coral-acropora-staghorn.glb', import.meta.url).href,
@@ -460,14 +464,23 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
   // 2. Mid-Upper Cantilevered Plateau Shelf: Broad Terracotta-Rose Montipora Plate
   {
     socketName: 'socket_plate_ledge_01',
-    coralAssetId: 'coral-montipora-plate',
+    coralAssetId: 'reef-montipora-whorled-plate',
     archetype: 'plating-sps',
     yawRad: 0.10,
     scale: 1.18,
     tiltXRad: 0.04,
     tiltZRad: 0.05,
     offsetM: [-0.03, -0.008, 0.01],
-    paletteOverride: PALETTE_TERRACOTTA_MONTIPORA_PLATE,
+    paletteOverride: {
+      surfaceMode: 'baked-pbr',
+      baseColor: '#c2604e',
+      tipColor: '#f5dcd0',
+      creviceColor: '#4c1e16',
+      regradeStrength: 0.38,
+      roughness: 1,
+      fluorescenceStrength: 0.06,
+    },
+    scatterPaletteOverride: PALETTE_TERRACOTTA_MONTIPORA_PLATE,
   },
   {
     socketName: 'socket_plate_ledge_02',
@@ -508,14 +521,17 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
   },
   {
     socketName: 'socket_lps_mid_03',
-    coralAssetId: 'coral-euphyllia-hammer',
+    coralAssetId: 'reef-euphyllia-anchor-hammer',
     archetype: 'tentaculate-lps',
     yawRad: 0.60,
-    scale: 1.06,
+    scale: 0.88,
     tiltXRad: 0.12,
     tiltZRad: 0.04,
-    offsetM: [0.0, -0.008, 0.0],
-    paletteOverride: PALETTE_EUPHYLLIA_TEAL_HAMMER,
+    offsetM: [-0.027, -0.008, -0.015],
+    paletteOverride: { surfaceMode: 'baked-pbr', baseColor: '#38a87c', tipColor: '#b4f5a8', creviceColor: '#163c2e', regradeStrength: 0.35, roughness: 1, fluorescenceStrength: 0.08 },
+    rigidPaletteOverride: { surfaceMode: 'baked-pbr', baseColor: '#b2a890', tipColor: '#d2c9b4', creviceColor: '#4b4338', regradeStrength: 0.15, roughness: 1, fluorescenceStrength: 0 },
+    preserveSkeletonShape: true,
+    scatterPaletteOverride: PALETTE_EUPHYLLIA_TEAL_HAMMER,
   },
   {
     socketName: 'socket_anemone_crevice_01',
@@ -532,14 +548,15 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
   // 4. Foreground Apron: Emerald Brain Coral, Fiery Orange-Red Acanthastrea & Colonial Zoanthids
   {
     socketName: 'socket_brain_apron_01',
-    coralAssetId: 'coral-brain-diploria',
+    coralAssetId: 'reef-brain-meandroid-diploria',
     archetype: 'mounded-lps',
     yawRad: 0.30,
     scale: 1.08,
     tiltXRad: 0.10,
     tiltZRad: 0.04,
     offsetM: [0.0, -0.008, 0.0],
-    paletteOverride: PALETTE_EUPHYLLIA_TEAL_HAMMER,
+    paletteOverride: { surfaceMode: 'baked-pbr', baseColor: '#587854', tipColor: '#7cf0a8', creviceColor: '#26241e', regradeStrength: 0.36, roughness: 1, fluorescenceStrength: 0.12 },
+    scatterPaletteOverride: PALETTE_EUPHYLLIA_TEAL_HAMMER,
   },
   {
     socketName: 'socket_brain_apron_02',
@@ -554,14 +571,17 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
   },
   {
     socketName: 'socket_soft_mat_01',
-    coralAssetId: 'coral-zoanthid-mat',
+    coralAssetId: 'reef-zoanthid-colonial-mat',
     archetype: 'zoanthid-mat',
     yawRad: 0.20,
     scale: 1.05,
     tiltXRad: 0.10,
     tiltZRad: 0.04,
     offsetM: [0.0, -0.008, 0.0],
-    paletteOverride: PALETTE_ZOANTHID_ORANGE_GREEN,
+    paletteOverride: { surfaceMode: 'baked-pbr', baseColor: '#d45a2a', tipColor: '#7ef564', creviceColor: '#381c18', regradeStrength: 0.34, roughness: 1, fluorescenceStrength: 0.10 },
+    rigidPaletteOverride: { surfaceMode: 'baked-pbr', baseColor: '#6e5864', tipColor: '#96828c', creviceColor: '#2e2229', regradeStrength: 0.20, roughness: 1, fluorescenceStrength: 0 },
+    preserveSkeletonShape: true,
+    scatterPaletteOverride: PALETTE_ZOANTHID_ORANGE_GREEN,
   },
 ] as const
 
@@ -1204,6 +1224,64 @@ export const MODULAR_CORAL_VARIATION_LIBRARY: readonly CoralVariationSpec[] = Ob
   },
 ])
 
+// Front-facing encrusting patches hug the measured surface. Probe the footprint
+// as well as its center so an overhang or a hole cannot leave a floating mat.
+function sampleEncrustingFaces(
+  rockRoot: THREE.Object3D,
+  rocks: THREE.Mesh[],
+  occupied: readonly THREE.Vector3[],
+): { position: THREE.Vector3; orientation: THREE.Quaternion; scale: number }[] {
+  const bounds = new THREE.Box3()
+  const fromWorld = rockRoot.matrixWorld.clone().invert()
+  for (const rock of rocks) {
+    if (!rock.geometry.boundingBox) rock.geometry.computeBoundingBox()
+    if (rock.geometry.boundingBox) bounds.union(rock.geometry.boundingBox.clone()
+      .applyMatrix4(fromWorld.clone().multiply(rock.matrixWorld)))
+  }
+  if (bounds.isEmpty()) return []
+  const ray = new THREE.Raycaster()
+  const direction = new THREE.Vector3(0, 0, -1).transformDirection(rockRoot.matrixWorld)
+  const size = bounds.getSize(new THREE.Vector3())
+  const patches: ReturnType<typeof sampleEncrustingFaces> = []
+  function probe(x: number, y: number) {
+    ray.set(new THREE.Vector3(x, y, bounds.max.z + 0.05).applyMatrix4(rockRoot.matrixWorld), direction)
+    const hit = ray.intersectObjects(rocks, false)[0]
+    if (!hit?.face) return undefined
+    const localTransform = fromWorld.clone().multiply(hit.object.matrixWorld)
+    const normal = hit.face.normal.clone().applyNormalMatrix(new THREE.Matrix3().getNormalMatrix(localTransform))
+    if (normal.z < 0.50 || normal.y < -0.22) return undefined
+    return { point: hit.point.applyMatrix4(fromWorld), normal }
+  }
+  const locations = [
+    [0.28, 0.27], [0.44, 0.23], [0.57, 0.24], [0.73, 0.30],
+    [0.25, 0.38], [0.38, 0.34], [0.60, 0.37], [0.73, 0.40],
+    [0.34, 0.43], [0.48, 0.40], [0.53, 0.50], [0.67, 0.52],
+    [0.30, 0.54], [0.45, 0.59], [0.67, 0.62],
+    [0.39, 0.65], [0.60, 0.72], [0.49, 0.74],
+  ]
+  for (const [u, v] of locations) {
+    if (patches.length === 5) break
+    const x = bounds.min.x + size.x * u
+    const y = bounds.min.y + size.y * v
+    const center = probe(x, y)
+    if (!center || occupied.some(socket => socket.distanceTo(center.point) < 0.093)
+      || patches.some(patch => patch.position.distanceTo(center.point) < 0.12)) continue
+    const supported = [[-0.021, 0], [0.021, 0], [0, -0.021], [0, 0.021]].every(([dx, dy]) => {
+      const edge = probe(x + dx, y + dy)
+      return edge && center.normal.dot(edge.normal) > 0.62
+        && Math.abs(edge.point.sub(center.point).dot(center.normal)) < 0.014
+    })
+    if (!supported) continue
+    patches.push({
+      position: center.point.addScaledVector(center.normal, -0.004),
+      orientation: new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), center.normal)
+        .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), u * 11)),
+      scale: 0.33 + 0.08 * v,
+    })
+  }
+  return patches
+}
+
 /**
  * Builds `THREE.InstancedMesh` batches (AQ-95 AC #4) to scatter colonial polyp
  * and companion coral variations across the rock foundation with randomized
@@ -1214,6 +1292,7 @@ function buildInstancedCoralScatters(
   coralTemplates: ReadonlyMap<string, THREE.Object3D>,
   mounts: readonly ModularCoralMountEntry[],
   socketNodes: ReadonlyMap<string, THREE.Object3D>,
+  foundationMeshes: THREE.Mesh[],
   options: { paused?: boolean; reducedMotion?: boolean; actinicLevel?: number } | undefined,
   materialControllers: Array<ReturnType<typeof applyCoralRawMaskMaterial>>,
   geometryBindings: CoralMaterialBoundBinding[],
@@ -1228,6 +1307,7 @@ function buildInstancedCoralScatters(
       yawRad: number
       tiltXRad: number
       tiltZRad: number
+      orientation?: THREE.Quaternion
       scale: number
       palette: CoralPaletteOverride
       rimTint: CoralActinicRimTint
@@ -1264,6 +1344,17 @@ function buildInstancedCoralScatters(
     })
     scatterGroups.set(scatterAssetId, list)
   })
+
+  const zoanthids = scatterGroups.get('coral-zoanthid-mat')
+  if (zoanthids && foundationMeshes.length > 0) {
+    const occupied = [...socketNodes.values()].map(socket => socket.position)
+    for (const patch of sampleEncrustingFaces(rockRoot, foundationMeshes, occupied)) {
+      zoanthids.push({
+        ...patch, yawRad: 0, tiltXRad: 0, tiltZRad: 0,
+        palette: zoanthids[0]!.palette, rimTint: zoanthids[0]!.rimTint,
+      })
+    }
+  }
 
   for (const [assetId, placements] of scatterGroups.entries()) {
     const template = coralTemplates.get(assetId)
@@ -1302,7 +1393,8 @@ function buildInstancedCoralScatters(
       instanced.customDepthMaterial = binding.depthMaterial
       placements.forEach((p, i) => {
         dummy.position.copy(p.position)
-        dummy.rotation.set(p.tiltXRad, p.yawRad, p.tiltZRad, 'YXZ')
+        if (p.orientation) dummy.quaternion.copy(p.orientation)
+        else dummy.rotation.set(p.tiltXRad, p.yawRad, p.tiltZRad, 'YXZ')
         dummy.scale.setScalar(p.scale)
         dummy.updateMatrix()
         instanced.setMatrixAt(i, dummy.matrix)
@@ -1355,14 +1447,14 @@ export function assembleCoralsOnRockSockets(
   update(timeSeconds: number, paused?: boolean, reducedMotion?: boolean): void
 } {
   raiseFoundation(rockRoot, options?.foundationHeightScale ?? 1)
-  let hasRockGeometry = false
+  const foundationMeshes: THREE.Mesh[] = []
   const preserveAuthoredRock = options?.preserveAuthoredRock === true
   rockRoot.traverse(node => {
     if (!(node instanceof THREE.Mesh)) return
     const reefPrim = node.userData?.reefPrimitive ?? node.parent?.userData?.reefPrimitive
     if (reefPrim?.role === 'rock' || node.name.toLowerCase().includes('live_rock')) {
       if (!preserveAuthoredRock && (node.geometry.getAttribute('position')?.count ?? 0) > 100) {
-        hasRockGeometry = true
+        foundationMeshes.push(node)
       }
       if (preserveAuthoredRock) return
       const rockMats = (Array.isArray(node.material) ? node.material : [node.material]).map(mat => {
@@ -1373,7 +1465,7 @@ export function assembleCoralsOnRockSockets(
     }
   })
 
-  if (hasRockGeometry) {
+  if (foundationMeshes.length > 0) {
     sculptOrganicRockContour(rockRoot)
   }
 
@@ -1399,7 +1491,7 @@ export function assembleCoralsOnRockSockets(
   const geometryBindings: CoralMaterialBoundBinding[] = []
   const instancedControllers: Array<ReturnType<typeof applyCoralRawMaskMaterial>> = []
   const isLeftIsland = socketNodes.has('socket_sps_crest_01')
-  const companionSpecs = hasRockGeometry
+  const companionSpecs = foundationMeshes.length > 0
     ? isLeftIsland
       ? EXTRA_COMPANION_CLUSTERS_LEFT
       : EXTRA_COMPANION_CLUSTERS_RIGHT
@@ -1489,6 +1581,7 @@ export function assembleCoralsOnRockSockets(
       coralTemplates,
       mounts,
       socketNodes,
+      foundationMeshes,
       options,
       instancedControllers,
       geometryBindings,

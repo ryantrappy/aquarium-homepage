@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { glassEnclosureLayout } from './glass-enclosure'
 import { reefContactFootprints } from './reef-layout'
 
 export type RockFootprint = Readonly<{
@@ -30,6 +31,21 @@ export type AragoniteSandBed = Readonly<{
 
 const LEFT_CONTACT_AO_STRENGTH = 0.55
 const RIGHT_CONTACT_AO_STRENGTH = 0.52
+const FRONT_SAND_EDGE_Z = 1.22
+const FRONT_SAND_EDGE_BOTTOM_Y = -2.845
+
+function sandEnclosureBounds(narrow: boolean) {
+  const { halfWidth, backZ, bottomY } = glassEnclosureLayout(narrow, 2.6)
+  return {
+    halfWidth,
+    width: halfWidth * 2,
+    backZ,
+    frontZ: FRONT_SAND_EDGE_Z,
+    depth: FRONT_SAND_EDGE_Z - backZ,
+    centerZ: (FRONT_SAND_EDGE_Z + backZ) / 2,
+    bottomY,
+  }
+}
 
 export function getRockFootprintsForViewport(narrow: boolean): readonly RockFootprint[] {
   return reefContactFootprints(narrow)
@@ -285,13 +301,17 @@ export function evaluateRockBaseContactFactor(
   return factor
 }
 
-function applySandGeometryElevation(geometry: THREE.PlaneGeometry, narrow: boolean): void {
+function applySandGeometryElevation(
+  geometry: THREE.PlaneGeometry,
+  narrow: boolean,
+  centerZ: number,
+): void {
   const pos = geometry.getAttribute('position')
   for (let i = 0; i < pos.count; i++) {
     const sx = pos.getX(i)
     const sy = pos.getY(i)
     const worldX = sx
-    const worldZ = -sy
+    const worldZ = centerZ - sy
     const elevation = evaluateAragoniteSandElevation(worldX, worldZ, narrow)
     pos.setZ(i, elevation)
   }
@@ -299,12 +319,17 @@ function applySandGeometryElevation(geometry: THREE.PlaneGeometry, narrow: boole
   geometry.computeVertexNormals()
 }
 
+function createSandPlaneGeometry(narrow: boolean): THREE.PlaneGeometry {
+  const { width, depth, centerZ } = sandEnclosureBounds(narrow)
+  const geometry = new THREE.PlaneGeometry(width, depth, 128, 80)
+  applySandGeometryElevation(geometry, narrow, centerZ)
+  return geometry
+}
+
 function createFrontSandEdgeGeometry(narrow: boolean): THREE.BufferGeometry {
   const segmentsX = 96
-  const width = 16
-  const frontZ = 2.82
-  const bottomY = -3.18
-  const baseSandY = -2.8
+  const { width, frontZ, bottomY: baseSandY } = sandEnclosureBounds(narrow)
+  const bottomY = FRONT_SAND_EDGE_BOTTOM_Y
 
   const positions = new Float32Array((segmentsX + 1) * 2 * 3)
   const normals = new Float32Array((segmentsX + 1) * 2 * 3)
@@ -359,7 +384,7 @@ function populateScatterInstances(
   const footprints = getRockFootprintsForViewport(narrow)
   const dummy = new THREE.Object3D()
   const color = new THREE.Color()
-  const baseSandY = -2.8
+  const { halfWidth, backZ, frontZ, bottomY: baseSandY } = sandEnclosureBounds(narrow)
 
   let seed = narrow ? 4109 : 8293
   const rand = () => {
@@ -385,10 +410,10 @@ function populateScatterInstances(
     } else {
       const halfSpanX = narrow ? 1.8 : 4.2
       wx = (rand() - 0.5) * 2 * halfSpanX
-      wz = -3.4 + rand() * 5.8
+      wz = -3.4 + rand() * 4.4
     }
-    wx = clamp(wx, -4.6, 4.6)
-    wz = clamp(wz, -4.4, 2.55)
+    wx = clamp(wx, -halfWidth + 0.15, halfWidth - 0.15)
+    wz = clamp(wz, backZ + 0.25, frontZ - 0.12)
     const wy = baseSandY + evaluateAragoniteSandElevation(wx, wz, narrow) - 0.004
     return { wx, wy, wz, nearRock }
   }
@@ -447,8 +472,7 @@ export function createAragoniteSandBed(config: AragoniteSandConfig = {}): Aragon
     config.textureSize ?? 512,
   )
 
-  const sandGeometry = new THREE.PlaneGeometry(32, 20, 128, 80)
-  applySandGeometryElevation(sandGeometry, narrow)
+  let sandGeometry = createSandPlaneGeometry(narrow)
 
   const sandUniforms = {
     uLeftFootprint: { value: new THREE.Vector4() },
@@ -623,10 +647,11 @@ normal = perturbNormalArb(-vViewPosition, normal, dHdxy_fwd(), faceDirection);
     )
   }
 
+  const initialBounds = sandEnclosureBounds(narrow)
   const sandMesh = new THREE.Mesh(sandGeometry, sandMaterial)
   sandMesh.name = 'AragoniteSandBed'
   sandMesh.rotation.x = -Math.PI / 2
-  sandMesh.position.y = -2.8
+  sandMesh.position.set(0, initialBounds.bottomY, initialBounds.centerZ)
   sandMesh.receiveShadow = true
 
   let frontEdgeGeometry = createFrontSandEdgeGeometry(narrow)
@@ -664,6 +689,9 @@ float strataNoise = sin(vFrontEdgeUv.y * 115.0 + sin(vFrontEdgeUv.x * 8.0) * 1.5
 vec3 edgeColor = mix(deepBedColor, compactedBedColor, smoothstep(0.23, 0.27, vFrontEdgeUv.y));
 edgeColor = mix(edgeColor, oxygenatedCrustColor, smoothstep(0.80, 0.84, vFrontEdgeUv.y));
 edgeColor += strataNoise * middleLayerMask * vec3(0.70, 0.65, 0.55);
+vec3 bottomGlassLipColor = vec3(0.18, 0.31, 0.36);
+float bottomGlassLipMask = 1.0 - smoothstep(0.10, 0.22, vFrontEdgeUv.y);
+edgeColor = mix(edgeColor, bottomGlassLipColor, bottomGlassLipMask * 0.84);
 diffuseColor.rgb = edgeColor;`,
     )
   }
@@ -733,7 +761,12 @@ diffuseColor.rgb = edgeColor;`,
       if (narrow === nextNarrow) return
       narrow = nextNarrow
       syncFootprintUniforms(narrow)
-      applySandGeometryElevation(sandGeometry, narrow)
+      const nextSandGeom = createSandPlaneGeometry(narrow)
+      sandMesh.geometry.dispose()
+      sandMesh.geometry = nextSandGeom
+      sandGeometry = nextSandGeom
+      const nextBounds = sandEnclosureBounds(narrow)
+      sandMesh.position.set(0, nextBounds.bottomY, nextBounds.centerZ)
       const nextFrontGeom = createFrontSandEdgeGeometry(narrow)
       frontEdgeMesh.geometry.dispose()
       frontEdgeMesh.geometry = nextFrontGeom

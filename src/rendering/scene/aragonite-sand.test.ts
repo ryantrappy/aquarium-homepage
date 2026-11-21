@@ -8,6 +8,7 @@ import {
   evaluateRockBaseContactFactor,
   getRockFootprintsForViewport,
 } from './aragonite-sand'
+import { glassEnclosureLayout } from './glass-enclosure'
 
 function expandShaderIncludes(source: string, depth = 0): string {
   if (depth > 32) throw new Error('Three shader chunk include expansion exceeded 32 levels')
@@ -298,5 +299,60 @@ describe('photoreal aragonite sand bed (AQ-70.12)', () => {
     const other = createAragoniteSandPbrTextures(64)
     expect(other.albedoTexture.image.width).toBe(64)
     expect(other.albedoTexture.image.data).not.toBe(first.albedoTexture.image.data)
+    first.albedoTexture.dispose()
+    first.normalTexture.dispose()
+    first.roughnessTexture.dispose()
+    second.albedoTexture.dispose()
+    second.normalTexture.dispose()
+    second.roughnessTexture.dispose()
+    other.albedoTexture.dispose()
+    other.normalTexture.dispose()
+    other.roughnessTexture.dispose()
+  })
+
+  it('bounds sand bed, front edge, and scatter instances to the glass enclosure in both layouts (AQ-102 AC #1)', () => {
+    const bed = createAragoniteSandBed({ textureSize: 64, narrow: false })
+    const vertex = new THREE.Vector3()
+    const matrix = new THREE.Matrix4()
+    const instancePos = new THREE.Vector3()
+    const instanceRot = new THREE.Quaternion()
+    const instanceScale = new THREE.Vector3()
+
+    const assertBounded = (narrow: boolean) => {
+      const { halfWidth, backZ, frontZ } = glassEnclosureLayout(narrow, 2.6)
+      bed.sandMesh.updateMatrixWorld(true)
+      const sandPos = bed.sandMesh.geometry.getAttribute('position')
+      for (let i = 0; i < sandPos.count; i++) {
+        vertex.fromBufferAttribute(sandPos, i).applyMatrix4(bed.sandMesh.matrixWorld)
+        expect(Math.abs(vertex.x)).toBeLessThanOrEqual(halfWidth + 1e-5)
+        expect(vertex.z).toBeGreaterThanOrEqual(backZ - 1e-5)
+        expect(vertex.z).toBeLessThanOrEqual(frontZ + 1e-5)
+      }
+
+      const edgePos = bed.frontEdgeMesh.geometry.getAttribute('position')
+      for (let i = 0; i < edgePos.count; i++) {
+        vertex.fromBufferAttribute(edgePos, i)
+        expect(Math.abs(vertex.x)).toBeLessThanOrEqual(halfWidth + 1e-5)
+        expect(vertex.z).toBeGreaterThanOrEqual(backZ - 1e-5)
+        expect(vertex.z).toBeLessThanOrEqual(frontZ + 1e-5)
+      }
+
+      for (const mesh of [bed.rubbleInstances, bed.shellInstances, bed.corallineInstances]) {
+        for (let i = 0; i < mesh.count; i++) {
+          mesh.getMatrixAt(i, matrix)
+          matrix.decompose(instancePos, instanceRot, instanceScale)
+          expect(Math.abs(instancePos.x)).toBeLessThanOrEqual(halfWidth)
+          expect(instancePos.z).toBeGreaterThanOrEqual(backZ)
+          expect(instancePos.z).toBeLessThanOrEqual(frontZ)
+        }
+      }
+    }
+
+    assertBounded(false)
+    bed.setLayout(true)
+    assertBounded(true)
+    bed.setLayout(false)
+    assertBounded(false)
+    bed.dispose()
   })
 })

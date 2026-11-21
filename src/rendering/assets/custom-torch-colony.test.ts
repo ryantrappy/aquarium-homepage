@@ -17,8 +17,26 @@ import {
 // @ts-expect-error Test the actual source-bound custom colony packager.
 import { syncCoralOverride } from '../../../scripts/sync-coral-override.mjs'
 
-const id = 'reef-euphyllia-flowing-torch'
-const socketName = 'socket_lps_mid_01'
+const dualCoralCases = [
+  {
+    id: 'reef-euphyllia-flowing-torch',
+    minFlexLevels: 11,
+    socketName: 'socket_lps_mid_01',
+    archetype: 'tentaculate-lps',
+  },
+  {
+    id: 'reef-euphyllia-anchor-hammer',
+    minFlexLevels: 9,
+    socketName: 'socket_lps_mid_03',
+    archetype: 'tentaculate-lps',
+  },
+  {
+    id: 'reef-zoanthid-colonial-mat',
+    minFlexLevels: 7,
+    socketName: 'socket_soft_mat_01',
+    archetype: 'zoanthid-mat',
+  },
+] as const
 const registryDir = 'src/rendering/assets/corals/custom-colonies'
 const registryPath = `${registryDir}/manifest.json`
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
@@ -55,7 +73,7 @@ function sha256(bytes: Buffer) {
   return createHash('sha256').update(bytes).digest('hex')
 }
 
-function registeredRuntimePath() {
+function registeredRuntimePath(id: string) {
   const url = MODULAR_CORAL_ASSET_URLS[id]
   expect(url).toBeDefined()
   return fileURLToPath(new URL(url!))
@@ -138,7 +156,7 @@ async function loadActualGlb(glbBytes: Buffer) {
   }
 }
 
-describe('custom flowing torch coral colony package', () => {
+describe.each(dualCoralCases)('$id custom dual-primitive coral colony package', ({ id, socketName, archetype, minFlexLevels }) => {
   it('keeps the native, generated, packaged and default-mounted asset in sync', async () => {
     const registry = JSON.parse(fs.readFileSync(path.join(repoRoot, registryPath), 'utf8'))
     expect(registry.schema).toBe('custom-coral-colonies-v1')
@@ -147,8 +165,8 @@ describe('custom flowing torch coral colony package', () => {
     if (!entry) return
 
     const primaryMount = DEFAULT_LEFT_ISLAND_MOUNTS.find(mount => mount.socketName === socketName && mount.coralAssetId === id)
-    expect(primaryMount, `${id} should be mounted at ${socketName}`).toBeDefined()
-    const runtimePath = registeredRuntimePath()
+    expect(primaryMount, `${id} should be mounted at ${socketName}`).toMatchObject({ coralAssetId: id, archetype })
+    const runtimePath = registeredRuntimePath(id)
     expect(path.relative(repoRoot, runtimePath)).toBe(entry.path)
 
     for (const [hashField, relativePath] of [
@@ -256,7 +274,7 @@ describe('custom flowing torch coral colony package', () => {
   })
 
   it('preserves separate soft and rigid raw masks and evaluates their real displacement behavior', () => {
-    const { document, binary } = readGlb(registeredRuntimePath())
+    const { document, binary } = readGlb(registeredRuntimePath(id))
     const byRole = new Map<ReefPrimitive['role'], { positions: number[][]; masks: number[][] }>()
     for (const primitive of document.meshes[0]!.primitives) {
       const role = primitive.extras?.reefPrimitive?.role
@@ -275,7 +293,11 @@ describe('custom flowing torch coral colony package', () => {
     const softFlex = summary(soft.masks, 0)
     expect(softFlex.min).toBe(0)
     expect(softFlex.max).toBeGreaterThan(0)
-    expect(softFlex.uniqueCount).toBeGreaterThan(10)
+    // The models use different ring counts. Require the authored gradient,
+    // including interior weights as well as the pinned base and flexible tip.
+    expect(softFlex.uniqueCount).toBeGreaterThanOrEqual(minFlexLevels)
+    expect(soft.masks.some(([flex]) => flex! > 0 && flex! < 0.5)).toBe(true)
+    expect(soft.masks.some(([flex]) => flex! > 0.5 && flex! < 1)).toBe(true)
     expect(summary(soft.masks, 1).max).toBe(1)
     expect(summary(soft.masks, 2).min).toBeGreaterThan(0)
     expect(summary(soft.masks, 2).max).toBeLessThan(1)
@@ -297,11 +319,11 @@ describe('custom flowing torch coral colony package', () => {
     expect([first.dx, first.dy, first.dz]).not.toEqual([second.dx, second.dy, second.dz])
   })
 
-  it('binds both actual loaded torch roles on the default socket and preserves soft transmission and skeleton shape', async () => {
+  it('binds both actual loaded roles on the default socket and preserves soft transmission and skeleton shape', async () => {
     const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(candidate => candidate.socketName === socketName && candidate.coralAssetId === id)
     expect(mount).toBeDefined()
     if (!mount) return
-    const { bytes } = readGlb(registeredRuntimePath())
+    const { bytes } = readGlb(registeredRuntimePath(id))
     const gltf = await loadActualGlb(bytes)
     const sourceMeshes: THREE.Mesh[] = []
     gltf.scene.traverse(object => {

@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Procedural Coral / Live Rock Study (Unintegrated Test)</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font: 14px/1.45 system-ui, -apple-system, sans-serif;
+        background: #091926;
+        color: #eaf3f8;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; }
+      main { max-width: 1440px; margin: 0 auto; padding: 14px; }
+      h1 { margin: 0 0 6px; font-size: 19px; }
+      p { margin: 0 0 12px; color: #a7c5da; }
+      .grid {
+        display: grid;
+        grid-template-columns: minmax(360px, 1.3fr) minmax(320px, 1fr);
+        gap: 14px;
+      }
+      .card {
+        background: #0e2436;
+        border: 1px solid rgba(124, 196, 255, 0.22);
+        border-radius: 10px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .card-header {
+        padding: 10px 14px;
+        border-bottom: 1px solid rgba(124, 196, 255, 0.14);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+        height: min(62vh, 560px);
+        min-height: 320px;
+        background: #3d5169;
+      }
+      .controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      button {
+        padding: 6px 10px;
+        font: inherit;
+        font-size: 12px;
+        border-radius: 6px;
+        border: 1px solid rgba(124, 196, 255, 0.3);
+        background: #143552;
+        color: #eaf3f8;
+        cursor: pointer;
+      }
+      img {
+        width: 100%;
+        display: block;
+        border-bottom: 1px solid rgba(124, 196, 255, 0.14);
+      }
+      output {
+        display: block;
+        padding: 12px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        color: #bce0fa;
+      }
+      @media (max-width: 800px) {
+        .grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Procedural Coral / Live Rock Study (Cycles Adaptive Displacement → Three.js GLB)</h1>
+      <p>
+        Synthesized from Ryan King Art's Procedural Coral Rock tutorial (Cycles Experimental, Adaptive Subdivision Dicing Scale 5.0, Filmic Very High Contrast). Rendered in an isolated study page without modifying the production reef manifest.
+      </p>
+      <div class="grid">
+        <section class="card">
+          <div class="card-header">
+            <strong>Three.js Interactive GLB Turntable</strong>
+            <div class="controls">
+              <button id="toggle-lighting" type="button">Lighting: Studio</button>
+              <button id="toggle-rotate" type="button">Auto-Rotate: On</button>
+              <button id="toggle-wireframe" type="button">Wireframe: Off</button>
+            </div>
+          </div>
+          <canvas id="coral-canvas" aria-label="Procedural Coral Rock 3D Study"></canvas>
+          <output id="study-output" role="status">Loading /test-assets/procedural-coral-rock.glb…</output>
+        </section>
+        <section class="card">
+          <div class="card-header">
+            <strong>Blender 5.2 Cycles Adaptive Displacement Reference</strong>
+          </div>
+          <img src="/test-assets/procedural-coral-rock-cycles.png" alt="Cycles Adaptive Displacement Render" />
+          <output id="spec-summary">Shader Node Tree:
+- Texture Coordinate (Object)
+- Noise (Scale 15, Detail 15, Roughness 0.5) + MixRGB (Linear Light, Fac 0.010)
+- Voronoi (3D, Smooth F1, Euclidean, Scale 14.0, Smoothness 0.200, Randomness 1.0)
+- Voronoi ColorRamp (#303030 @ 0.0, #FFFFFF @ 0.535)
+- Macro Noise (Scale 2.0, Detail 15.0, Roughness 0.5) -> ColorRamp (0.353..0.561)
+- Displacement MixRGB (Color1=VoronoiRamp, Color2=#000000, Fac=MacroRamp)
+- Displacement (Midlevel 0.500, Scale 0.140) -> Material Output (Displacement)
+- Chained Bump (0.400 -> 0.300) -> Principled BSDF (Normal)
+- Roughness ColorRamp (#404040..#FFFFFF) & Base Color Ramp (#31140B @ 0.208, #8A5D40 @ 0.530, #BF9B7C @ 0.938)</output>
+        </section>
+      </div>
+    </main>
+    <script type="module" src="./procedural-coral-rock-study.ts"></script>
+  </body>
+</html>

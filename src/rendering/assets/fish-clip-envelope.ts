@@ -6,6 +6,8 @@ export type FishClipEnvelopeOptions = {
   clipName: string
   sourceReference: { lengthAxis: '+Z'; lengthM: number; authority: string }
   adultLengthM: number
+  /** Optional half-length of a root-centered +Z capsule axis at adult scale. */
+  capsuleHalfAxisM?: number
   composition: 'single-clip' | 'procedural-overlay' | 'clip-blend'
   boundedOverlay?: BoundedFishOverlayInput
 }
@@ -34,6 +36,7 @@ export type ClipSphereCertificate = {
   clipName: string
   centerM: [number, number, number]
   radiusM: number
+  capsule?: { halfAxisM: number; radiusM: number }
   uniformScale: number
   sourceReference: FishClipEnvelopeOptions['sourceReference']
   adultLengthM: number
@@ -98,7 +101,7 @@ const vec = (v: readonly number[]) => new Vector3(v[0], v[1], v[2])
 const same = (a: readonly number[], b: readonly number[]) => a.length === b.length && a.every((v, i) => v === b[i])
 const compose = (t: number[], q: number[], s: number[]) => new Matrix4().compose(vec(t), new Quaternion(...q as [number, number, number, number]), vec(s))
 
-/** Offline only. The returned sphere certifies the declared normalized single-clip
+/** Offline only. The returned bounds certify the declared normalized single-clip
  * skinning contract, not a renderer's unvalidated overlay or shader deformation. */
 export function analyzeFishClipEnvelope(bytes: Uint8Array, options: FishClipEnvelopeOptions): FishClipEnvelopeResult {
   try {
@@ -106,6 +109,7 @@ export function analyzeFishClipEnvelope(bytes: Uint8Array, options: FishClipEnve
     const buffer = Buffer.from(bytes) // Own bytes before hashing/decoding.
     const sourceSha256 = createHash('sha256').update(buffer).digest('hex')
     const expectedSha256 = options?.expectedSha256, clipName = options?.clipName, adultLengthM = options?.adultLengthM, requestedComposition = options?.composition, overlayInput = options?.boundedOverlay
+    const capsuleHalfAxisM = options?.capsuleHalfAxisM
     const suppliedReference = options?.sourceReference
     const reference = { lengthAxis: suppliedReference?.lengthAxis, lengthM: suppliedReference?.lengthM, authority: suppliedReference?.authority }
     check(typeof expectedSha256 === 'string' && /^[a-f0-9]{64}$/.test(expectedSha256) && expectedSha256 === sourceSha256, 'Exact source hash mismatch')
@@ -113,6 +117,7 @@ export function analyzeFishClipEnvelope(bytes: Uint8Array, options: FishClipEnve
     check(reference && reference.lengthAxis === '+Z' && finite(reference.lengthM) && reference.lengthM > 0 && reference.lengthM <= 2
       && typeof reference.authority === 'string' && reference.authority.trim().length > 0 && reference.authority.length <= 1024, 'Require explicit verified +Z metric source-reference authority and length')
     check(finite(adultLengthM) && adultLengthM > 0 && adultLengthM <= 2, 'Require explicit positive bounded adult length in meters')
+    check(capsuleHalfAxisM === undefined || (finite(capsuleHalfAxisM) && capsuleHalfAxisM > 0 && capsuleHalfAxisM <= 2), 'Require a positive bounded capsule half-axis')
     check(['single-clip', 'procedural-overlay', 'clip-blend'].includes(requestedComposition), 'Unknown playback composition')
     check(!overlayInput || requestedComposition === 'procedural-overlay', 'Bounded overlay supplied for non-overlay composition')
     const sourceReference = { ...reference }, uniformScale = adultLengthM / reference.lengthM
@@ -277,7 +282,8 @@ export function analyzeFishClipEnvelope(bytes: Uint8Array, options: FishClipEnve
     const prefixNorms = paths.map(path => { let scale = 1; return path.map(id => { const result = scale; scale *= scaleNorm[id]; return result }) })
     const makeCertificate = (localDeltas: number[], additionalRotations = 0): ClipSphereCertificate => {
       let rawWeightMin = Infinity, rawWeightMax = -Infinity, storedWeightMin = Infinity, storedWeightMax = -Infinity
-      let referenceRadius = 0, allRotationRadius = 0, absoluteBound = 0
+      let referenceRadius = 0, allRotationRadius = 0, absoluteBound = 0, capsuleReferenceRadius = 0
+      const sourceHalfAxis = capsuleHalfAxisM === undefined ? undefined : capsuleHalfAxisM / uniformScale
       for (let v = 0; v < positions.length; v++) {
         const raw = weights[v], sum = raw.reduce((a, b) => a + b, 0)
         check(raw.every(w => w >= 0 && w <= 1) && sum >= .9999 && sum <= 1.0001, 'Invalid nonnegative skin weights or sum')
@@ -305,6 +311,14 @@ export function analyzeFishClipEnvelope(bytes: Uint8Array, options: FishClipEnve
           coarse += w[influence] * chain; absolute += w[influence] * absoluteChain
         }
         referenceRadius = Math.max(referenceRadius, referencePoint.length() + displacement)
+        if (sourceHalfAxis !== undefined) {
+          spend(4)
+          // Distance to a closed segment is 1-Lipschitz. The same displacement
+          // allowance therefore bounds distance to the capsule's centerline.
+          const overhang = Math.max(0, Math.abs(referencePoint.z) - sourceHalfAxis)
+          const distance = Math.hypot(referencePoint.x, referencePoint.y, overhang)
+          capsuleReferenceRadius = Math.max(capsuleReferenceRadius, distance + displacement)
+        }
         allRotationRadius = Math.max(allRotationRadius, coarse); absoluteBound = Math.max(absoluteBound, absolute)
       }
       // Deliberately generous sequential-operation bound for local matrix/quaternion
@@ -324,6 +338,9 @@ export function analyzeFishClipEnvelope(bytes: Uint8Array, options: FishClipEnve
       const certificate: ClipSphereCertificate = {
         scope: 'single-clip-only', sourceSha256, assetId: metadata.id, clipName,
         centerM: [0, 0, 0], radiusM, uniformScale, sourceReference, adultLengthM,
+        ...(capsuleHalfAxisM === undefined ? {} : {
+          capsule: { halfAxisM: capsuleHalfAxisM, radiusM: Math.min(radiusM, capsuleReferenceRadius * uniformScale + paddingM) },
+        }),
         geometry: { vertices: positions.length, triangles: indices.length / 3, joints: jointIds.length, maxJointDepth: maxDepth },
         proof: { method: 'joint-product-telescope-and-whole-slerp-chord-bounds', sourceRadiusM: sourceRadius,
           referenceDisplacementRadiusM: referenceRadius, allRotationRadiusM: allRotationRadius,

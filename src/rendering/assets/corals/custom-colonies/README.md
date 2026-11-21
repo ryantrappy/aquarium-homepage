@@ -120,3 +120,66 @@ uses undistorted colonies seated at root-space socket poses; this torch removes
 its old outward stand-off offsets and preserves its authored skeleton transform.
 Full tissue/rubric accuracy, all-archetype variants, comprehensive contact/support,
 self-intersection, metric scale and animated fish clearance remain open.
+
+## Anchor hammer colony (`reef-euphyllia-anchor-hammer`)
+
+`reef-euphyllia-anchor-hammer` is an original five-head *Euphyllia*-like hammer
+colony with 145 curved tentacles ending in bilobed T-shaped / crescent anchor
+tips and fluted phaceloid skeletal calyces. It mounts at `socket_lps_mid_03` on
+the left island (`28,116` triangles, `1,507,824` bytes), preserving the supplied
+canonical `coral-euphyllia-hammer` GLB. Native packed `.blend` holds six packed
+images (three 512px tissue maps and three 256px skeleton maps), explicit
+`coral-soft` / `coral-rigid` primitive roles, `transmission=0.12`, `ior=1.36`,
+`coat=0.12`, raw R flex on soft tissue only, and raw G crescent-tip fluorescence.
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_euphyllia_anchor_hammer.py
+node scripts/sync-blender-override.mjs --coral reef-euphyllia-anchor-hammer --learn-guide
+```
+
+## Whorled Montipora plate (`reef-montipora-whorled-plate`)
+
+`reef-montipora-whorled-plate` is an original three-tier scrolling *Montipora
+capricornis*-like plate colony with undulating ruffled lobes, 820 high-source
+verrucose corallites, and pale growing margins. It mounts at `socket_plate_ledge_01`
+on the left island (`21,950` triangles, `1,744,376` bytes), baked from a
+326,700-triangle high-poly source into three 512px PBR maps (`tissue`, `normal`,
+`roughness`) plus `contact-ao` PNG sampled into raw mask `A` (floored 0.18).
+Raw `R=0` (rigid), `G` marks growing margins and polyp rims, and `B` stores
+continuous whorl phase.
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_montipora_whorled_plate.py
+node scripts/sync-blender-override.mjs --coral reef-montipora-whorled-plate --learn-guide
+```
+
+## Meandroid brain coral (`reef-brain-meandroid-diploria`)
+
+`reef-brain-meandroid-diploria` is an original *Diploria*-like hemispherical
+meandroid labyrinth dome with isotropic meandering valleys, double-crested
+ambulacral colline walls, and transverse septal costae. It mounts at
+`socket_brain_apron_01` on the left island (`24,000` triangles, `2,273,252` bytes),
+baked from a 122,880-triangle high-poly source into three 512px PBR maps plus
+`contact-ao` PNG sampled into raw mask `A`. Raw `R=0` (rigid) and `G` masks
+only the recessed valley floors for actinic fluorescence (zero blanket emission).
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_brain_meandroid_diploria.py
+node scripts/sync-blender-override.mjs --coral reef-brain-meandroid-diploria --learn-guide
+```
+
+## Colonial zoanthid mat (`reef-zoanthid-colonial-mat`)
+
+`reef-zoanthid-colonial-mat` is an original 26-polyp size-varied colonial
+zoanthid mat (`572` recurved marginal tentacles, patterned sunburst oral discs,
+and a rigid stoloniferous coenenchyme base) mounted at `socket_soft_mat_01` on
+the left island (`28,452` triangles, `1,851,136` bytes). Native packed `.blend`
+holds six packed images (three 512px polyp crown maps and three 256px base
+maps) with explicit `coral-soft` / `coral-rigid` primitive roles, raw `R` flex
+pinned to `0` on the base mat and oral attachment center, and raw `G` marking
+radiating oral-disc sunburst rings and tentacle tips.
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_zoanthid_colonial_mat.py
+node scripts/sync-blender-override.mjs --coral reef-zoanthid-colonial-mat --learn-guide
+```

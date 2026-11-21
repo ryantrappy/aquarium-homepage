@@ -6,12 +6,32 @@ Status: Active
 Authority: Binding Checkpoint; Backlog controls acceptance
 Backlog: AQ-44, AQ-49, AQ-54, AQ-59, AQ-70.2, AQ-70.13, AQ-74, AQ-86, AQ-104, AQ-105, AQ-106
 Owner: @root
-Updated: 2026-11-17
+Updated: 2026-11-20
 Upstream: AGENTS.md, agent_scratch.md, docs/requirements.md
 Downstream: Current implementation and review work
 -->
 
 Root verified prior Root-checkpoint facts against the current checkout. The latest user request (2026-11-15) limits this execution to the 18 tasks that were already In Progress at request start; do not start To Do tasks or create new tasks. This request-specific boundary supersedes the older fixed-showcase execution scope below without changing the historical release record or Backlog acceptance criteria.
+
+## Fish depth and surface shafts — 2026-11-20
+
+AQ-87 applies species depth bands to general anchor destinations and held interaction targets. Actual laptop scene geometry supplies an in-band option for each authored compatible anchor group. The staged preview had 12 inhabitants and no band misses. The custom host-placement exception preserves the physical relationship with its anemone. Animated body clearance and all-depth picking remain open.
+
+AQ-86 lengthens raymarched falloff and uses midpoint samples to remove a visible diagonal pattern. The laptop before/after showed clearer upper shafts with pixel-identical sampled lower arch and sand. Full temporal, haze, and frame-time acceptance remains open.
+
+AQ-58 verifies a fixed capsule through the raised left cave and restores the runtime clip checker for 17 assets. Posed reach sampling found every starter extends beyond the current 0.04 scene query radius. A body-aware envelope and live routed validation remain pending.
+
+## Reef faces and glass controls — 2026-11-20
+
+AQ-101 adds shallow zoanthid mats seated against the actual raised foundations. Existing batch assets supply the colonies. The exact checkout passed 973 tests, typecheck and build. The working-tree laptop preview shows 12 inhabitants and includes concurrent sand and glass styling. Full visual and swimming-clearance acceptance remains open.
+
+AQ-102 holds the current reflection phase through pause and reduced motion. The live laptop review produced identical consecutive frames in each stopped state, and a body click opened the Copperband butterflyfish inspect card. The enclosure appearance and end-to-end service navigation remain open.
+
+## Coral asset review — 2026-11-20
+
+AQ-70.11 commit `515e586` packages four supplied custom corals with their packed Blender sources, raw exports, generators and runtime manifests. The anchor hammer was scaled to 0.88 and moved 27 mm left and 15 mm back in island-local coordinates to clear the clownfish approach to its host. All five actual-geometry hosting cases pass. The 1440×900 DPR 1 working-tree preview displayed 12 inhabitants with no failed assets or browser warnings or errors. The screenshot includes concurrent sand and glass changes. Further close-up and variant review remains open under AQ-70.11.
+
+AQ-59 records a preliminary review of the procedural porous rock study. Direct inspection found 30,720 triangles and embedded 1024px base color, normal and roughness maps. The study sidecar reports 15,360 polygons. It has a single rounded mesh and lacks mounting sockets. In-tank scale, support, placement and cave clearance still need review before promotion.
 
 ## Current user-requested execution scope — 2026-11-15
 

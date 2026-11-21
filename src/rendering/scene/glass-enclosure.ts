@@ -34,8 +34,8 @@ const reflectionShader = {
       vec3 viewDir = normalize(cameraPosition - vPaneWorld);
       float grazing = 1.0 - abs(dot(viewDir, normalize(vPaneNormal)));
       float edge = smoothstep(0.0, 0.025, vPaneUv.y) * (1.0 - smoothstep(0.975, 1.0, vPaneUv.y));
-      float alpha = (0.035 + 0.085 * pow(grazing, 3.0)) * edge;
-      vec3 reflected = texture2DProj(tDiffuse, vReflectionUv).rgb;
+      float alpha = (0.14 + 0.24 * pow(grazing, 2.2)) * edge;
+      vec3 reflected = texture2DProj(tDiffuse, vReflectionUv).rgb * (1.05 + 0.25 * grazing);
       gl_FragColor = vec4(reflected, alpha);
       #include <tonemapping_fragment>
       #include <colorspace_fragment>
@@ -62,11 +62,13 @@ function clearPaneMaterial(): THREE.ShaderMaterial {
       varying vec3 vPaneNormal;
       void main() {
         float grazing = 1.0 - abs(dot(normalize(cameraPosition - vPaneWorld), normalize(vPaneNormal)));
-        float edgeDistance = min(min(vPaneUv.x, 1.0-vPaneUv.x), min(vPaneUv.y, 1.0-vPaneUv.y));
-        float edge = 1.0 - smoothstep(0.0, 0.012, edgeDistance);
-        float diagonal = exp(-pow((vPaneUv.x + vPaneUv.y * 0.75 - 1.05) / 0.028, 2.0));
-        float light = edge * (0.008 + 0.012 * pow(grazing, 5.0)) + diagonal * 0.003;
-        gl_FragColor = vec4(vec3(0.64, 0.82, 0.90) * light, light);
+        float edgeDistance = min(min(vPaneUv.x, 1.0 - vPaneUv.x), min(vPaneUv.y, 1.0 - vPaneUv.y));
+        float edge = 1.0 - smoothstep(0.0, 0.018, edgeDistance);
+        float bottomLip = 1.0 - smoothstep(0.0, 0.014, vPaneUv.y);
+        float diagonal = exp(-pow((vPaneUv.x + vPaneUv.y * 0.75 - 1.05) / 0.045, 2.0))
+          + 0.65 * exp(-pow((vPaneUv.x + vPaneUv.y * 0.72 - 0.62) / 0.055, 2.0));
+        float light = edge * (0.018 + 0.028 * pow(grazing, 3.5)) + bottomLip * 0.022 + diagonal * 0.012 * (0.35 + 0.65 * grazing);
+        gl_FragColor = vec4(vec3(0.66, 0.84, 0.92) * light, light);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`,
@@ -83,8 +85,8 @@ export function createGlassEnclosure(options: {
   group.name = 'AquariumGlassEnclosure'
   const walls: Wall[] = []
   const clearMaterial = clearPaneMaterial()
-  const seamMaterial = new THREE.MeshBasicMaterial({ color: '#20333c', transparent: true, opacity: 0.38, depthWrite: false })
-  const edgeMaterial = new THREE.MeshBasicMaterial({ color: '#8aa6af', transparent: true, opacity: 0.18, depthWrite: false })
+  const seamMaterial = new THREE.MeshBasicMaterial({ color: '#2b4754', transparent: true, opacity: 0.46, depthWrite: false })
+  const edgeMaterial = new THREE.MeshBasicMaterial({ color: '#9ac0cc', transparent: true, opacity: 0.28, depthWrite: false })
   const geometries: THREE.BufferGeometry[] = []
   let sceneTime = 0, sceneRevision = 0, tier: QualityTier = 'high', disposed = false
 

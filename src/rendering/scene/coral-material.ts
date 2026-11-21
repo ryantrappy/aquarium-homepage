@@ -458,7 +458,8 @@ if (uAnemoneMode > 1.5) {
   vec3 shaftTint = mix(uPaletteBase, uPaletteTip, 0.22 * phaseVar);
   vec3 shaftCol = mix(diffuseColor.rgb, shaftTint * (0.76 + 0.44 * texLuma), clamp(uPaletteRegrade, 0.0, 1.0));
   vec3 ringCol = mix(uPaletteCrevice, uPaletteTip, 0.35);
-  float ringBand = exp(-pow((hTent - 0.885) / 0.038, 2.0));
+  float ringDistance = (hTent - 0.885) / 0.038;
+  float ringBand = exp(-ringDistance * ringDistance);
   vec3 tentCol = mix(rootCol, shaftCol, smoothstep(0.04, 0.32, hTent));
   tentCol = mix(tentCol, ringCol, ringBand * 0.32);
   tentCol = mix(tentCol, uPaletteTip, smoothstep(0.86, 0.97, hTent));
@@ -544,7 +545,7 @@ totalEmissiveRadiance += coralSss + coralGlow;
 /**
  * Configures a Three.js `MeshStandardMaterial` for coralline-encrusted porous reef live rock
  * matching the deep actinic indigo/plum/violet reef-rock foundations in the reference photos.
- * Evaluates in 3D meter space `(vRockObjPos, vRockObjNormal)` with zero UV stretching.
+ * Samples three-dimensional detail and surface exposure in world space.
  */
 export function applyLiveRockMaterial(
   material: THREE.MeshStandardMaterial,
@@ -563,21 +564,23 @@ export function applyLiveRockMaterial(
   material.aoMap = null
   material.color.set('#ffffff')
 
-  const cacheKey = 'live-rock-3d-aragonite-v1'
+  const cacheKey = 'live-rock-3d-aragonite-v2'
   material.customProgramCacheKey = () => cacheKey
   material.onBeforeCompile = shader => {
     shader.vertexShader =
       `
-varying vec3 vRockObjPos;
-varying vec3 vRockObjNormal;
+varying vec3 vRockWorldNormal;
 varying vec3 vRockWorldPos;
 ` + shader.vertexShader
 
     shader.vertexShader = shader.vertexShader.replace(
+      '#include <defaultnormal_vertex>',
+      `#include <defaultnormal_vertex>
+vRockWorldNormal = transformNormalByInverseViewMatrix(transformedNormal, viewMatrix);`,
+    )
+    shader.vertexShader = shader.vertexShader.replace(
       '#include <begin_vertex>',
       `#include <begin_vertex>
-vRockObjPos = position.xyz;
-vRockObjNormal = normalize(objectNormal.xyz);
 vec4 rockWp = modelMatrix * vec4(transformed, 1.0);
 vRockWorldPos = rockWp.xyz;
 `,
@@ -585,8 +588,7 @@ vRockWorldPos = rockWp.xyz;
 
     shader.fragmentShader =
       `
-varying vec3 vRockObjPos;
-varying vec3 vRockObjNormal;
+varying vec3 vRockWorldNormal;
 varying vec3 vRockWorldPos;
 
 float rockHash31(vec3 p) {
@@ -634,7 +636,7 @@ float rockRidged3D(vec3 p) {
       '#include <color_fragment>',
       `#include <color_fragment>
 vec3 rPos = vRockWorldPos * 0.30;
-vec3 rNorm = normalize(vRockObjNormal);
+vec3 rNorm = normalize(vRockWorldNormal);
 vec3 warp = vec3(
   rockNoise3D(rPos * 14.0 + vec3(1.3, 4.7, -2.1)) - 0.5,
   rockNoise3D(rPos * 14.0 + vec3(-3.8, 2.2, 5.4)) - 0.5,
@@ -648,7 +650,9 @@ float finePores = rockNoise3D(rPos * 115.0);
 float microGrain = rockNoise3D(rPos * 220.0);
 
 float holeField = rockNoise3D(wPos * 34.0) * 0.55 + rockNoise3D(wPos * 78.0) * 0.45;
-float vugPit = smoothstep(0.26, 0.58, holeField);
+float poreOpen = 1.0 - smoothstep(0.26, 0.42, holeField);
+float poreLip = smoothstep(0.27, 0.37, holeField) * (1.0 - smoothstep(0.40, 0.53, holeField));
+float vugPit = smoothstep(0.24, 0.53, holeField);
 float fissure = smoothstep(0.04, 0.22, abs(rockNoise3D(wPos * 26.0) - 0.5));
 float overhangShade = smoothstep(-0.45, 0.58, rNorm.y);
 float rockCavityAo = clamp(vugPit * (0.48 + 0.52 * fissure) * (0.28 + 0.72 * overhangShade), 0.05, 1.0);
@@ -656,7 +660,7 @@ float rockCavityAo = clamp(vugPit * (0.48 + 0.52 * fissure) * (0.28 + 0.72 * ove
 // Neutral porous carbonate with restrained rose coralline patches.
 // Keep the substrate distinct from the brighter coral tissue above it.
 vec3 cPoreDeep = vec3(0.012, 0.010, 0.007);
-vec3 cCarbShaded = vec3(0.055, 0.048, 0.036);
+vec3 cCarbShaded = vec3(0.080, 0.069, 0.053);
 vec3 cCarbSunlit = vec3(0.16, 0.135, 0.095);
 vec3 cOliveFilm = vec3(0.045, 0.046, 0.032);
 
@@ -682,7 +686,8 @@ float corMask = smoothstep(0.48, 0.74, corPatchField) * (0.38 + 0.62 * upwardExp
 vec3 corColor = mix(cCorDeep, cCorMagenta, smoothstep(0.26, 0.64, medCrag));
 corColor = mix(corColor, cCorLavender, smoothstep(0.54, 0.84, cragRidge) * 0.68);
 // Calcified rose-violet margin ring on coralline plaque edges
-float plaqueRim = exp(-pow((corPatchField - 0.54) / 0.032, 2.0)) * upwardExp;
+float plaqueDistance = (corPatchField - 0.54) / 0.032;
+float plaqueRim = exp(-plaqueDistance * plaqueDistance) * upwardExp;
 corColor = mix(corColor, cCorMargin, plaqueRim * 0.28);
 
 // Direct encrusting coral & Ricordea mushroom rock patches on sunlit mid-slope shelves (AQ-95 AC #2 & AQ-101 AC #2)
@@ -698,6 +703,8 @@ vec3 finalRockColor = mix(carbColor, corColor, corMask * 0.72);
 finalRockColor = mix(finalRockColor, cEncTeal, encTealMask * 0.65);
 finalRockColor = mix(finalRockColor, cEncGold, encGoldMask * 0.65);
 finalRockColor *= (0.78 + 0.28 * (0.6 * finePores + 0.4 * microGrain));
+finalRockColor *= mix(1.0, 0.55, poreOpen);
+finalRockColor += vec3(0.043, 0.036, 0.025) * poreLip * overhangShade;
 
 diffuseColor.rgb = finalRockColor;
 diffuseColor.a = 1.0;
@@ -717,7 +724,7 @@ roughnessFactor = mix(0.90, 0.65, corMask * 0.85);
 // Reuse the exact height field already sampled for color. A view-space
 // surface gradient avoids sixteen redundant noise-octave evaluations.
 // Unparametrized bump mapping, as in Three.js perturbNormalArb/Mikkelsen.
-float rockHeight = medCrag * 0.65 + finePores * 0.35;
+float rockHeight = medCrag * 0.52 + finePores * 0.23 - poreOpen * 0.25;
 vec3 rockSigmaX = dFdx(-vViewPosition);
 vec3 rockSigmaY = dFdy(-vViewPosition);
 vec3 rockR1 = cross(rockSigmaY, normal);
@@ -729,7 +736,7 @@ if (abs(rockDet) > 1e-10) normal = normalize(abs(rockDet) * normal - rockSurface
     )
   }
 
-  material.userData.liveRockShader = 'live-rock-3d-aragonite-v1'
+  material.userData.liveRockShader = 'live-rock-3d-aragonite-v2'
   material.needsUpdate = true
   return material
 }

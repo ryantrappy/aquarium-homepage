@@ -107,6 +107,10 @@ function buildMockCoralTemplates(): Map<string, THREE.Object3D> {
     ['reef-acropora-antler', [['reef_acropora_antler', 'coral-rigid']]],
     ['reef-acropora-corymbose', [['reef_acropora_corymbose', 'coral-rigid']]],
     ['reef-euphyllia-flowing-torch', [['flowing_torch_crown', 'coral-soft'], ['flowing_torch_skeleton', 'coral-rigid']]],
+    ['reef-euphyllia-anchor-hammer', [['anchor_hammer_crown', 'coral-soft'], ['anchor_hammer_skeleton', 'coral-rigid']]],
+    ['reef-montipora-whorled-plate', [['reef_montipora_whorled_plate', 'coral-rigid']]],
+    ['reef-brain-meandroid-diploria', [['reef_brain_meandroid_diploria', 'coral-rigid']]],
+    ['reef-zoanthid-colonial-mat', [['zoanthid_colonial_polyp_crowns', 'coral-soft'], ['zoanthid_colonial_mat_base', 'coral-rigid']]],
     ['coral-montipora-plate', [['montipora_plate_colony', 'coral-rigid']]],
     ['coral-brain-diploria', [['diploria_brain_colony', 'coral-soft']]],
     ['coral-zoanthid-mat', [['zoanthid_button_cluster', 'coral-soft']]],
@@ -129,6 +133,14 @@ function buildMockCoralTemplates(): Map<string, THREE.Object3D> {
       if (id === 'reef-euphyllia-flowing-torch' && primId === 'flowing_torch_skeleton') {
         mesh.position.set(0.011, 0.028, -0.017)
         mesh.scale.set(0.8, 1.1, 0.9)
+      }
+      if (id === 'reef-euphyllia-anchor-hammer' && primId === 'anchor_hammer_skeleton') {
+        mesh.position.set(0.008, 0.021, -0.013)
+        mesh.scale.set(0.85, 1.05, 0.92)
+      }
+      if (id === 'reef-zoanthid-colonial-mat' && primId === 'zoanthid_colonial_mat_base') {
+        mesh.position.set(0.004, 0.009, -0.006)
+        mesh.scale.set(0.95, 1.02, 0.97)
       }
       group.add(mesh)
     }
@@ -166,7 +178,7 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
 
     const leftRockMesh = leftRock.getObjectByName('Live_Rock_Island') as THREE.Mesh
     expect(leftRockMesh.material).not.toBe(originalLeftRockMaterial)
-    expect((leftRockMesh.material as THREE.MeshStandardMaterial).userData.liveRockShader).toBe('live-rock-3d-aragonite-v1')
+    expect((leftRockMesh.material as THREE.MeshStandardMaterial).userData.liveRockShader).toBe('live-rock-3d-aragonite-v2')
     expect((leftRockMesh.material as THREE.MeshStandardMaterial).map).toBeNull()
 
     for (const mounted of [...leftAssembly.mountedCorals, ...rightAssembly.mountedCorals]) {
@@ -364,7 +376,7 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     expect(assembly.instancedMeshes).toEqual([])
     expect(rockRoot.children.some(child => child instanceof THREE.InstancedMesh)).toBe(false)
     const rockMesh = rockRoot.getObjectByName('Live_Rock_Island') as THREE.Mesh
-    expect((rockMesh.material as THREE.MeshStandardMaterial).userData.liveRockShader).toBe('live-rock-3d-aragonite-v1')
+    expect((rockMesh.material as THREE.MeshStandardMaterial).userData.liveRockShader).toBe('live-rock-3d-aragonite-v2')
   })
 
   it('keeps the custom baked-PBR primary palette separate from its legacy violet scatter palette', () => {
@@ -491,6 +503,95 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     const roleMaterial = roleMesh.material as THREE.MeshStandardMaterial
     expect(roleMaterial.userData.coralRawMasks.uniforms.uRoleIsSoft.value).toBe(0)
     expect(roleMaterial.customProgramCacheKey()).toContain(':coral-rigid')
+  })
+
+  it('mounts the four new custom baked-PBR colonies at their primary left sockets while preserving legacy scatter palettes', () => {
+    const templates = buildMockCoralTemplates()
+    const rockRoot = buildRockFixtureFromSocketReport('live-rock-island-left-socket-report.json')
+    const assembly = assembleCoralsOnRockSockets(rockRoot, templates, DEFAULT_LEFT_ISLAND_MOUNTS)
+
+    const rigidCases = [
+      {
+        id: 'reef-montipora-whorled-plate',
+        socketName: 'socket_plate_ledge_01',
+        archetype: 'plating-sps',
+        expectedScatterBaseHex: 'b85042',
+      },
+      {
+        id: 'reef-brain-meandroid-diploria',
+        socketName: 'socket_brain_apron_01',
+        archetype: 'mounded-lps',
+        expectedScatterBaseHex: '28a86e',
+      },
+    ] as const
+
+    for (const entry of rigidCases) {
+      const registeredUrl = MODULAR_CORAL_ASSET_URLS[entry.id]
+      expect(registeredUrl).toBeDefined()
+      expect(new URL(registeredUrl!).pathname).toContain(`/custom-colonies/${entry.id}.glb`)
+
+      const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(m => m.socketName === entry.socketName)
+      expect(mount).toMatchObject({ coralAssetId: entry.id, archetype: entry.archetype })
+      expect(mount?.paletteOverride?.surfaceMode).toBe('baked-pbr')
+
+      const mounted = assembly.mountedCorals.find(m => m.socketName === entry.socketName)!
+      expect(mounted.coralAssetId).toBe(entry.id)
+      const binding = mounted.materialControllers[0]!
+      expect(binding.material.customProgramCacheKey()).toContain(':coral-rigid:baked-pbr')
+      expect(binding.uniforms.uRoleIsSoft.value).toBe(0)
+      expect(binding.uniforms.uPaletteBase.value.getHexString()).toBe(new THREE.Color(mount!.paletteOverride!.baseColor).getHexString())
+    }
+
+    const dualCases = [
+      {
+        id: 'reef-euphyllia-anchor-hammer',
+        socketName: 'socket_lps_mid_03',
+        archetype: 'tentaculate-lps',
+        softName: 'anchor_hammer_crown',
+        rigidName: 'anchor_hammer_skeleton',
+      },
+      {
+        id: 'reef-zoanthid-colonial-mat',
+        socketName: 'socket_soft_mat_01',
+        archetype: 'zoanthid-mat',
+        softName: 'zoanthid_colonial_polyp_crowns',
+        rigidName: 'zoanthid_colonial_mat_base',
+      },
+    ] as const
+
+    for (const entry of dualCases) {
+      const registeredUrl = MODULAR_CORAL_ASSET_URLS[entry.id]
+      expect(registeredUrl).toBeDefined()
+      expect(new URL(registeredUrl!).pathname).toContain(`/custom-colonies/${entry.id}.glb`)
+
+      const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(m => m.socketName === entry.socketName)
+      expect(mount).toMatchObject({
+        coralAssetId: entry.id,
+        archetype: entry.archetype,
+        preserveSkeletonShape: true,
+        paletteOverride: { surfaceMode: 'baked-pbr' },
+        rigidPaletteOverride: { surfaceMode: 'baked-pbr', fluorescenceStrength: 0 },
+      })
+
+      const templateRigid = templates.get(entry.id)!.getObjectByName(entry.rigidName) as THREE.Mesh
+      const mounted = assembly.mountedCorals.find(m => m.socketName === entry.socketName)!
+      const soft = mounted.root.getObjectByName(entry.softName) as THREE.Mesh
+      const rigid = mounted.root.getObjectByName(entry.rigidName) as THREE.Mesh
+      const softMat = soft.material as THREE.MeshStandardMaterial
+      const rigidMat = rigid.material as THREE.MeshStandardMaterial
+      expect(mounted.coralAssetId).toBe(entry.id)
+      expect(softMat.customProgramCacheKey()).toContain(':coral-soft:baked-pbr')
+      expect(rigidMat.customProgramCacheKey()).toContain(':coral-rigid:baked-pbr')
+      expect(softMat.userData.coralRawMasks.uniforms.uRoleIsSoft.value).toBe(1)
+      expect(rigidMat.userData.coralRawMasks.uniforms.uRoleIsSoft.value).toBe(0)
+      expect(rigidMat.userData.coralRawMasks.uniforms.uFluorescenceStrength.value).toBe(0)
+      expect(rigid.position.toArray()).toEqual(templateRigid.position.toArray())
+      expect(rigid.scale.toArray()).toEqual(templateRigid.scale.toArray())
+    }
+
+    const scatter = assembly.instancedMeshes.find(mesh => mesh.name.startsWith('instanced_coral-zoanthid-mat_'))!
+    const scatterMaterial = scatter.material as THREE.MeshStandardMaterial
+    expect(scatterMaterial.customProgramCacheKey()).not.toContain(':baked-pbr')
   })
 
   it('forwards the fixture actinic level to every mounted coral material, defaulting to 1 (AQ-70.6 AC #3)', () => {
