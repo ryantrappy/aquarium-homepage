@@ -76,5 +76,12 @@
     }
   ],
   "sockets": [],
-  "collisionParts": []
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Pterapogon kauderni & project-original public/fish/banggai-cardinalfish.webp silhouette",
+    "sourceUrl": "https://www.fishbase.se/summary/Pterapogon-kauderni",
+    "referenceHeightToLength": 0.7005,
+    "measuredHeightToLength": 0.700804,
+    "relativeDeviationPct": 0.04
+  }
 }

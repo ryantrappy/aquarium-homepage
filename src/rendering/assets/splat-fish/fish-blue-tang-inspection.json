@@ -76,5 +76,12 @@
     }
   ],
   "sockets": [],
-  "collisionParts": []
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Paracanthurus hepatus lateral profile & extended dorsal/anal span",
+    "sourceUrl": "https://www.fishbase.se/summary/Paracanthurus-hepatus",
+    "referenceHeightToLength": 0.585,
+    "measuredHeightToLength": 0.591325,
+    "relativeDeviationPct": 1.08
+  }
 }

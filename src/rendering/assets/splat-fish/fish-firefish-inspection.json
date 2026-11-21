@@ -76,5 +76,12 @@
     }
   ],
   "sockets": [],
-  "collisionParts": []
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Nemateleotris magnifica & project-original public/fish/firefish.webp silhouette",
+    "sourceUrl": "https://www.fishbase.se/summary/Nemateleotris-magnifica",
+    "referenceHeightToLength": 0.388,
+    "measuredHeightToLength": 0.3793,
+    "relativeDeviationPct": 2.24
+  }
 }

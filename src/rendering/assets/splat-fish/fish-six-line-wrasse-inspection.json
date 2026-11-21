@@ -76,5 +76,12 @@
     }
   ],
   "sockets": [],
-  "collisionParts": []
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Pseudocheilinus hexataenia & project-original public/fish/six-line-wrasse.webp silhouette",
+    "sourceUrl": "https://www.fishbase.se/summary/Pseudocheilinus-hexataenia",
+    "referenceHeightToLength": 0.3683,
+    "measuredHeightToLength": 0.368777,
+    "relativeDeviationPct": 0.13
+  }
 }

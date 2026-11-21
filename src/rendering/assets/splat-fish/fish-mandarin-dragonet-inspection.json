@@ -76,5 +76,12 @@
     }
   ],
   "sockets": [],
-  "collisionParts": []
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Synchiropus splendidus & project-original public/fish/mandarin-dragonet.webp silhouette",
+    "sourceUrl": "https://www.fishbase.se/summary/Synchiropus-splendidus",
+    "referenceHeightToLength": 0.4498,
+    "measuredHeightToLength": 0.447118,
+    "relativeDeviationPct": 0.6
+  }
 }

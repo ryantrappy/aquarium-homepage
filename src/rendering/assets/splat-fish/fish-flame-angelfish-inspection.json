@@ -76,5 +76,12 @@
     }
   ],
   "sockets": [],
-  "collisionParts": []
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Centropyge loricula & project-original public/fish/flame-angelfish.webp silhouette",
+    "sourceUrl": "https://www.fishbase.se/summary/Centropyge-loricula",
+    "referenceHeightToLength": 0.6386,
+    "measuredHeightToLength": 0.631598,
+    "relativeDeviationPct": 1.1
+  }
 }

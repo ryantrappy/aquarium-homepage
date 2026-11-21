@@ -76,5 +76,12 @@
     }
   ],
   "sockets": [],
-  "collisionParts": []
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Cryptocentrus cinctus & project-original public/fish/yellow-watchman-goby.webp silhouette",
+    "sourceUrl": "https://www.fishbase.se/summary/Cryptocentrus-cinctus",
+    "referenceHeightToLength": 0.3542,
+    "measuredHeightToLength": 0.353882,
+    "relativeDeviationPct": 0.09
+  }
 }

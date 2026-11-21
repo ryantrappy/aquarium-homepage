@@ -76,5 +76,12 @@
     }
   ],
   "sockets": [],
-  "collisionParts": []
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Gramma loreto & project-original public/fish/royal-gramma.webp silhouette",
+    "sourceUrl": "https://www.fishbase.se/summary/Gramma-loreto",
+    "referenceHeightToLength": 0.4765,
+    "measuredHeightToLength": 0.45918,
+    "relativeDeviationPct": 3.63
+  }
 }

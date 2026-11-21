@@ -76,5 +76,12 @@
     }
   ],
   "sockets": [],
-  "collisionParts": []
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Pseudanthias squamipinnis & project-original public/fish/lyretail-anthias.webp silhouette",
+    "sourceUrl": "https://www.fishbase.se/summary/Pseudanthias-squamipinnis",
+    "referenceHeightToLength": 0.4053,
+    "measuredHeightToLength": 0.399942,
+    "relativeDeviationPct": 1.32
+  }
 }

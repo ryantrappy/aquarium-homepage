@@ -76,5 +76,12 @@
     }
   ],
   "sockets": [],
-  "collisionParts": []
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Paracheilinus mccoskeri & project-original public/fish/mccoskers-flasher-wrasse.webp silhouette",
+    "sourceUrl": "https://www.fishbase.se/summary/Paracheilinus-mccoskeri",
+    "referenceHeightToLength": 0.4699,
+    "measuredHeightToLength": 0.463139,
+    "relativeDeviationPct": 1.44
+  }
 }

@@ -452,6 +452,113 @@ async function main() {
       )
       fs.writeFileSync(manifestPath, JSON.stringify(rebuiltManifest, null, 2) + '\n')
     }
+
+    const silhouetteRefs = {
+      'blue-tang': {
+        source: 'FishBase Paracanthurus hepatus lateral profile & extended dorsal/anal span',
+        sourceUrl: 'https://www.fishbase.se/summary/Paracanthurus-hepatus',
+        referenceHeightToLength: 0.585,
+      },
+      'royal-gramma': {
+        source: 'FishBase Gramma loreto & project-original public/fish/royal-gramma.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Gramma-loreto',
+        referenceHeightToLength: 0.4765,
+      },
+      'banggai-cardinalfish': {
+        source: 'FishBase Pterapogon kauderni & project-original public/fish/banggai-cardinalfish.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Pterapogon-kauderni',
+        referenceHeightToLength: 0.7005,
+      },
+      'mandarin-dragonet': {
+        source: 'FishBase Synchiropus splendidus & project-original public/fish/mandarin-dragonet.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Synchiropus-splendidus',
+        referenceHeightToLength: 0.4498,
+      },
+      'blue-green-chromis': {
+        source: 'FishBase Chromis viridis & project-original public/fish/blue-green-chromis.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Chromis-viridis',
+        referenceHeightToLength: 0.4653,
+      },
+      'firefish': {
+        source: 'FishBase Nemateleotris magnifica & project-original public/fish/firefish.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Nemateleotris-magnifica',
+        referenceHeightToLength: 0.388,
+      },
+      'yellow-watchman-goby': {
+        source: 'FishBase Cryptocentrus cinctus & project-original public/fish/yellow-watchman-goby.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Cryptocentrus-cinctus',
+        referenceHeightToLength: 0.3542,
+      },
+      'tailspot-blenny': {
+        source: 'FishBase Ecsenius stigmatura lateral body-depth proportion',
+        sourceUrl: 'https://www.fishbase.se/summary/Ecsenius-stigmatura',
+        referenceHeightToLength: 0.2564,
+      },
+      'six-line-wrasse': {
+        source: 'FishBase Pseudocheilinus hexataenia & project-original public/fish/six-line-wrasse.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Pseudocheilinus-hexataenia',
+        referenceHeightToLength: 0.3683,
+      },
+      'mccoskers-flasher-wrasse': {
+        source: 'FishBase Paracheilinus mccoskeri & project-original public/fish/mccoskers-flasher-wrasse.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Paracheilinus-mccoskeri',
+        referenceHeightToLength: 0.4699,
+      },
+      'lyretail-anthias': {
+        source: 'FishBase Pseudanthias squamipinnis & project-original public/fish/lyretail-anthias.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Pseudanthias-squamipinnis',
+        referenceHeightToLength: 0.4053,
+      },
+      'flame-angelfish': {
+        source: 'FishBase Centropyge loricula & project-original public/fish/flame-angelfish.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Centropyge-loricula',
+        referenceHeightToLength: 0.6386,
+      },
+      'copperband-butterflyfish': {
+        source: 'FishBase Chelmon rostratus & project-original public/fish/copperband-butterflyfish.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Chelmon-rostratus',
+        referenceHeightToLength: 0.6604,
+      },
+    }
+
+    const auditEntries = []
+    for (const [speciesId, refSpec] of Object.entries(silhouetteRefs)) {
+      const inspPath = path.join(ASSETS_DIR, `fish-${speciesId}-inspection.json`)
+      if (!fs.existsSync(inspPath)) continue
+      const report = JSON.parse(fs.readFileSync(inspPath, 'utf8'))
+      const dims = report.extras.reefAsset.dimensionsM
+      const measuredHeightToLength = Number((dims[1] / dims[2]).toFixed(6))
+      const relativeDeviationPct = Number(
+        ((Math.abs(measuredHeightToLength - refSpec.referenceHeightToLength) / refSpec.referenceHeightToLength) * 100).toFixed(2),
+      )
+      const silhouetteRecord = {
+        source: refSpec.source,
+        sourceUrl: refSpec.sourceUrl,
+        referenceHeightToLength: refSpec.referenceHeightToLength,
+        measuredHeightToLength,
+        relativeDeviationPct,
+      }
+      if (speciesId !== 'blue-green-chromis') {
+        report.silhouetteReference = silhouetteRecord
+        fs.writeFileSync(inspPath, JSON.stringify(report, null, 2) + '\n')
+      }
+      auditEntries.push({
+        id: `fish-${speciesId}`,
+        speciesId,
+        ...silhouetteRecord,
+      })
+    }
+    const auditDir = path.join(REPO_ROOT, 'docs/asset-evidence/aq70-10')
+    fs.mkdirSync(auditDir, { recursive: true })
+    fs.writeFileSync(
+      path.join(auditDir, 'silhouette-proportion-audit.json'),
+      JSON.stringify({
+        schema: 'fish-silhouette-proportion-audit-v1',
+        backlogTask: 'AQ-70.10',
+        maxAllowedDeviationPct: 8,
+        species: auditEntries,
+      }, null, 2) + '\n',
+    )
     console.log('Synced fish overrides; preserved AQ-107 blue-green-chromis and learned-shape-guide.json.')
     return
   }
