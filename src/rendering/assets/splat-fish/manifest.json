@@ -67,22 +67,22 @@
       "kind": "fish",
       "rigArchetype": "subcarangiform_schooler",
       "species": "Gramma loreto (Royal Gramma / Fairy Basslet)",
-      "sha256": "ffb095bfc7f3e836971b0ef70c203e7c2e1301af2133efbbd4609db7f2af4d06",
-      "bytes": 850968,
-      "triangles": 10544,
+      "sha256": "90e79b533c32eaff373f4ef809e40ad1b3a6caa14f225ae6a3908a75786cb2d2",
+      "bytes": 925256,
+      "triangles": 10484,
       "dimensionsM": [
-        0.293486,
+        0.302188,
         0.91836,
         2
       ],
       "boundsM": {
         "min": [
-          -0.146743,
+          -0.151094,
           -0.450951,
           -1
         ],
         "max": [
-          0.146743,
+          0.151094,
           0.467409,
           1
         ]
@@ -104,7 +104,7 @@
         {
           "id": "royal_gramma_body",
           "role": "fish",
-          "vertexCount": 5336
+          "vertexCount": 5434
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",
@@ -297,9 +297,9 @@
       "kind": "fish",
       "rigArchetype": "subcarangiform_schooler",
       "species": "Nemateleotris magnifica (Firefish / Magnificent Dartfish)",
-      "sha256": "3ffd93d5db1b308987c371636ff2f43d39a5359be16a998ba6aa9a7ad153732a",
-      "bytes": 718276,
-      "triangles": 8480,
+      "sha256": "82fad5c865ed241af41bf85014988f0595aa2ad48f22dee937f772fadc010e89",
+      "bytes": 788460,
+      "triangles": 8403,
       "dimensionsM": [
         0.252702,
         0.758601,
@@ -334,7 +334,7 @@
         {
           "id": "firefish_body",
           "role": "fish",
-          "vertexCount": 4313
+          "vertexCount": 4428
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",
@@ -462,22 +462,22 @@
       "kind": "fish",
       "rigArchetype": "subcarangiform_schooler",
       "species": "Pseudocheilinus hexataenia (Six-Line Wrasse)",
-      "sha256": "a23addc928cf6c2a8828108a885f04c4d4ba5aaf97e322669225c0f04dff49f9",
-      "bytes": 872900,
-      "triangles": 12184,
+      "sha256": "6beaffb2f428f8ea40986836659309e9d2ec54fd9efe124aaff5fdc261712471",
+      "bytes": 963144,
+      "triangles": 12107,
       "dimensionsM": [
-        0.278296,
+        0.2866,
         0.737555,
         2
       ],
       "boundsM": {
         "min": [
-          -0.139148,
+          -0.1433,
           -0.368869,
           -1
         ],
         "max": [
-          0.139148,
+          0.1433,
           0.368686,
           1
         ]
@@ -499,7 +499,7 @@
         {
           "id": "six_line_wrasse_body",
           "role": "fish",
-          "vertexCount": 6159
+          "vertexCount": 6265
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",
@@ -572,22 +572,22 @@
       "kind": "fish",
       "rigArchetype": "subcarangiform_schooler",
       "species": "Pseudanthias squamipinnis (Lyretail Anthias)",
-      "sha256": "04b7b8cc411c9a29dd7b94c44358a39374032d2896c1e66c7819df65ba0b5007",
-      "bytes": 708712,
-      "triangles": 9800,
+      "sha256": "5fe72b48864db8c66ac9a155c0f3fe17ecbff20e3a6fd45d5cf555a1d0cd082b",
+      "bytes": 840420,
+      "triangles": 9739,
       "dimensionsM": [
-        0.282292,
+        0.286712,
         0.799884,
         2
       ],
       "boundsM": {
         "min": [
-          -0.141146,
+          -0.143356,
           -0.39913,
           -1
         ],
         "max": [
-          0.141146,
+          0.143356,
           0.400754,
           1
         ]
@@ -609,7 +609,7 @@
         {
           "id": "lyretail_anthias_body",
           "role": "fish",
-          "vertexCount": 4971
+          "vertexCount": 5077
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",

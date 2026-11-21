@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-09T03:04:00Z'
-updated_date: '2026-11-21 14:45'
+updated_date: '2026-11-21 14:49'
 labels:
   - modeling
   - photorealism
@@ -54,4 +54,6 @@ AQ-74 implements 3D convex cornea eyes, sculpted operculum (gill-cover) relief, 
 
 <!-- SECTION:NOTES:BEGIN -->
 2026-11-21 Batch 1 Fish Eye/Gill/Mouth Sculpting & Biological PBR Pipeline (AQ-91): Added safe --fish-overrides sync dispatch in scripts/sync-blender-override.mjs (preserving AQ-107 blue-green-chromis and learned-shape-guide.json byte-for-byte) and reusable Blender 5.2.3 LTS anatomical sculpting & 512x512 24-bit RGB PNG PBR map generator in src/rendering/modeling/fish_head_sculpt_common.py (convex glossy cornea dome + orbital rim, curved operculum gill cover + recessed gill slit, species-specific buccal mouth lips/cleft, fine ctenoid scales, lateral line, and fin rays). Authored, rendered in Cycles, synced, and verified Batch 1 (3 species): flame-angelfish (999,592 B, 11,664 tris), copperband-butterflyfish (966,924 B, 10,306 tris), and banggai-cardinalfish (886,908 B, 7,076 tris). Saved uncompressed .blend files + textures under src/rendering/assets/splat-fish/blend/ and overrides under src/rendering/assets/splat-fish/overrides/. Verified verify-fish-clip-player.mjs, check-reef-asset-manifests.mjs, typecheck, build, and full vitest (81/81 files, 1051/1051 tests including budgets.test.ts and chromis-contour.test.ts). Remaining 8 species queued in Batches 2-3; Root review pending.
+
+2026-11-21 Batch 2 Fish Eye/Gill/Mouth Sculpting & 512x512 Biological PBR Maps (AQ-91): Authored, Cycles-rendered, saved uncompressed .blend + textures under src/rendering/assets/splat-fish/blend/, exported overrides/*.glb, and synced via --fish-overrides (blue-green-chromis & learned-shape-guide preserved): royal-gramma (925,256 B, 10,484 tris), firefish (788,460 B, 8,403 tris), lyretail-anthias (840,420 B, 9,739 tris), and six-line-wrasse (963,144 B, 12,107 tris). Verified verify-fish-clip-player.mjs, check-reef-asset-manifests.mjs, typecheck, build, and full vitest (81/81 files, 1051/1051 tests passed including budgets.test.ts and chromis-contour.test.ts). Remaining 4 species queued in Batch 3; Root review pending.
 <!-- SECTION:NOTES:END -->

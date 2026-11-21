@@ -247,4 +247,9 @@ rubric, variant, support and rendering-budget requirements remain open.
   - `flame-angelfish.glb`: `11,664` triangles, `999,592` bytes (`0.953` MiB)
   - `copperband-butterflyfish.glb`: `10,306` triangles, `966,924` bytes (`0.922` MiB)
   - `banggai-cardinalfish.glb`: `7,076` triangles, `886,908` bytes (`0.846` MiB)
-- Remaining 8 species and Root visual/native review remain pending.
+- Batch 2 synced in `src/rendering/assets/splat-fish/`:
+  - `royal-gramma.glb`: `10,484` triangles, `925,256` bytes (`0.882` MiB)
+  - `firefish.glb`: `8,403` triangles, `788,460` bytes (`0.752` MiB)
+  - `lyretail-anthias.glb`: `9,739` triangles, `840,420` bytes (`0.801` MiB)
+  - `six-line-wrasse.glb`: `12,107` triangles, `963,144` bytes (`0.919` MiB)
+- Remaining 4 species (`mccoskers-flasher-wrasse`, `mandarin-dragonet`, `yellow-watchman-goby`, `tailspot-blenny`) and Root visual/native review remain pending.
