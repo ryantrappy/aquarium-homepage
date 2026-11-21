@@ -202,3 +202,7 @@
 ### 2026-11-21 — AQ-94 shared-atlas preview
 *Root reviewed retained entries. Laptop-only verification, original asset preservation and local review are current policy. New modular source and fin fixes are actioned. Candidate fish promotion and full production aquascape review remain pending.*
 - Seven saved rock exports now load as one shared-atlas kit in the development reef preview. Root checked the rendered pinnacle and canyon and reproduced the mounted 0.04 capsule route. Preview evidence is under docs/asset-evidence/aq94/shared-atlas-preview.
+
+### 2026-11-21 — AQ-94 modular moray shelter
+*Root reviewed retained handoffs. Local/laptop-only review, asset preservation and active scope remain current. The shared-atlas preview and right-side shelter are actioned. Default-layout promotion and broader fish interactions remain pending.*
+- The exact shared-atlas collision test and native 1440×900 review now show the fixed moray tucked beside the right ledge. A body click opens its service card. The cut rear is visually sheltered in the overview.

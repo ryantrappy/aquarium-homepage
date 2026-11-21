@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { fishModelScale, fishRenderLength, SNOWFLAKE_MORAY_FOREBODY_BOUNDS, SNOWFLAKE_MORAY_HEAD_BONE_BIND_POSITION, TANK_UNITS_PER_INCH } from './fish-scale'
-import { hasReadyRightIslandCollider, resolveAvailableSnowflakeMorayResidence, resolveSnowflakeMorayResidence, SNOWFLAKE_MORAY_CAVE_CENTER_LOCAL, SNOWFLAKE_MORAY_CAVE_COLLISION_RADIUS_M, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M } from './moray-residence'
+import { hasReadyRightIslandCollider, resolveAvailableSnowflakeMorayResidence, resolveNsaMorayResidence, resolveSnowflakeMorayResidence, SNOWFLAKE_MORAY_CAVE_CENTER_LOCAL, SNOWFLAKE_MORAY_CAVE_COLLISION_RADIUS_M, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M } from './moray-residence'
 import { reefPlacementsForViewport, type ReefPlacement } from './reef-layout'
 
 describe('snowflake moray residence', () => {
@@ -50,5 +50,13 @@ describe('snowflake moray residence', () => {
     expect(hasReadyRightIslandCollider(reefPlacementsForViewport(false), new Set(['reef-0']))).toBe(false)
     expect(hasReadyRightIslandCollider(reefPlacementsForViewport(false), new Set(['reef-0', 'reef-1']))).toBe(true)
     expect(hasReadyRightIslandCollider(reefPlacementsForViewport(true), new Set(['reef-0']))).toBe(false)
+  })
+
+  it('requires both modular right-side colliders for the authored wide-layout residence', () => {
+    const modules = new Set(['reef-nsa-bommie-mound', 'reef-nsa-encrusting-ledge'])
+    expect(resolveNsaMorayResidence(false, modules)).toBeDefined()
+    expect(resolveNsaMorayResidence(true, modules)).toBeUndefined()
+    expect(resolveNsaMorayResidence(false, new Set(['reef-nsa-bommie-mound']))).toBeUndefined()
+    expect(resolveNsaMorayResidence(false, new Set(['reef-nsa-encrusting-ledge']))).toBeUndefined()
   })
 })
