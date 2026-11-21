@@ -49,7 +49,7 @@ export const SNOWFLAKE_MORAY_HEAD_BONE_BIND_POSITION = Object.freeze({ x: 0, y: 
  * fish-scale.test.ts re-reads the files and fails if these change.
  */
 export const MODEL_SWIM_AXIS_LENGTH: Readonly<Record<string, number>> = Object.freeze({
-  'ocellaris-clownfish': 2, // src/rendering/proof/candidate-real-clown.glb, z -1 … 1
+  'ocellaris-clownfish': 2, // src/rendering/assets/fish/download_testing_copies/clownfish-copy.glb, z -1 … 1
   'yellow-tang': 1.985423, // src/rendering/proof/candidate-real-tang.glb, z -0.999266 … 0.986158
   'blue-tang': 2, // src/rendering/assets/splat-fish/blue-tang.glb, z -1 … 1
   'royal-gramma': 2, // src/rendering/assets/splat-fish/royal-gramma.glb, z -1 … 1
