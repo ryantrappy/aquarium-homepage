@@ -40,7 +40,7 @@ import { createAragoniteSandBed, evaluateAragoniteSandTilt, evaluateAragoniteSan
 import { reefPlacementsForViewport } from './reef-layout'
 import { hasReadyRightIslandCollider, resolveAvailableSnowflakeMorayResidence, resolveNsaMorayResidence, SNOWFLAKE_MORAY_CAVE_COLLISION_RADIUS_M, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M, type MorayResidence } from './moray-residence'
 import { CENTER_ARCH_URL, CENTER_ARCH_MOUNTS, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
-import { NSA_KIT_URL, RUBBLE_TALUS_URL, createNsaReviewReef, createRubbleTalusGroundingAprons, disposeRubbleTalusMaterials } from './reef-nsa'
+import { NSA_KIT_URL, NSA_SUBSTRATE_CONTACTS, RUBBLE_TALUS_URL, createNsaReviewReef, createRubbleTalusGroundingAprons, disposeRubbleTalusMaterials } from './reef-nsa'
 import { createGlassEnclosure, glassEnclosureLayout } from './glass-enclosure'
 import { createWaterSurface } from './water-surface'
 import { WaterRadianceProbeManager } from './water-radiance-probe'
@@ -275,7 +275,8 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   // as floating. AQ-70.6: the sand's own caustic ridge network was removed;
   // the shared cellular caustic chunk is applied here instead, so the sand
   // shows the same caustic system as the rock, coral, and fish.
-  const sandBed = createAragoniteSandBed({ narrow: false })
+  const contactFootprints = nsaReview ? NSA_SUBSTRATE_CONTACTS : undefined
+  const sandBed = createAragoniteSandBed({ narrow: false, contactFootprints })
   applyEnvironmentMapIntensity(sandBed.group, ENVIRONMENT_MAP_INTENSITY.sand, environmentMap?.texture)
   const sand = sandBed.sandMesh
   // Surface-driven lighting (AQ-96 / AQ-70.6): the sand threshold is
@@ -666,13 +667,13 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     const yaw = presentationYaw ?? pose.yaw
     if (isInvertebrateSpecies(item.service.fishId)) {
       const narrow = width < 600
-      const sandY = evaluateAragoniteSandWorldY(pose.position.x, pose.position.z, narrow)
+      const sandY = evaluateAragoniteSandWorldY(pose.position.x, pose.position.z, narrow, contactFootprints)
       item.root.position.set(pose.position.x, sandY, pose.position.z)
       if (item.fallback) {
         item.root.rotation.set(0, 0, 0)
         item.root.scale.x = presentationYaw !== undefined ? 1 : evaluateSpriteTurnScaleX(yaw)
       } else {
-        const tilt = evaluateAragoniteSandTilt(pose.position.x, pose.position.z, yaw, narrow)
+        const tilt = evaluateAragoniteSandTilt(pose.position.x, pose.position.z, yaw, narrow, contactFootprints)
         item.root.rotation.set(tilt.pitch, yaw, tilt.roll, 'YXZ')
       }
       return
@@ -1048,7 +1049,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     }
     const rubbleSource = nsaKitBase?.scene.getObjectByName('reef-nsa-rubble-talus') ?? rubbleTalusBase?.scene
     if (rubbleSource) {
-      const rubble = createRubbleTalusGroundingAprons(rubbleSource, width < 600)
+      const rubble = createRubbleTalusGroundingAprons(rubbleSource, width < 600, Boolean(nsaKitBase))
       rubbleTalusPlacement = rubble
       rubble.traverse(node => {
         if (!(node instanceof THREE.Mesh)) return

@@ -185,8 +185,11 @@ describe('photoreal aragonite sand bed (AQ-70.12)', () => {
     expect(shader.fragmentShader).not.toContain('vec3(0.16, 0.17, 0.34)')
     expect(shader.fragmentShader).toContain('warmDetritus')
     expect(shader.fragmentShader).toContain('rockContactAo')
-    expect(shader.fragmentShader).toContain('1.0 - 0.55 * (1.0 - smoothstep(0.55, 1.55, rLeft))')
-    expect(shader.fragmentShader).toContain('1.0 - 0.52 * (1.0 - smoothstep(0.55, 1.55, rRight))')
+    expect(shader.fragmentShader).toContain('float strength = i == 0 ? 0.55 : 0.52')
+    expect(shader.fragmentShader).toContain('1.0 - strength * (1.0 - smoothstep(0.55, 1.55, radius))')
+    expect(shader.uniforms.uContactCount.value).toBe(2)
+    bed.setLayout(true)
+    expect(shader.uniforms.uContactCount.value).toBe(1)
     // The macro luminance modulation survives mipmapping at overview distance (visual-check fix)
     expect(shader.fragmentShader).toContain('0.90 + 0.20 * sandMacroBlend')
 

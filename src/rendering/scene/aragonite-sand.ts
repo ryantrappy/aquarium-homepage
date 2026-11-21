@@ -12,6 +12,7 @@ export type RockFootprint = Readonly<{
 export type AragoniteSandConfig = Readonly<{
   textureSize?: number
   narrow?: boolean
+  contactFootprints?: readonly RockFootprint[]
 }>
 
 export type AragoniteSandBed = Readonly<{
@@ -252,6 +253,7 @@ export function evaluateAragoniteSandElevation(
   worldX: number,
   worldZ: number,
   narrow = false,
+  footprints = getRockFootprintsForViewport(narrow),
 ): number {
   const backProgress = clamp((2.8 - worldZ) / 8.2, 0, 1)
   const backSlope = 0.25 * Math.pow(backProgress, 1.25)
@@ -260,7 +262,6 @@ export function evaluateAragoniteSandElevation(
   const ripple2 = 0.020 * Math.cos(worldZ * 1.85 - worldX * 0.62)
   const duneUndulation = 0.032 * Math.sin(worldX * 0.45 - 0.6) * Math.cos(worldZ * 0.38)
 
-  const footprints = getRockFootprintsForViewport(narrow)
   let rockTalus = 0
   for (const fp of footprints) {
     const nx = (worldX - fp.x) / fp.radiusX
@@ -281,10 +282,11 @@ export function evaluateAragoniteSandWorldY(
   worldX: number,
   worldZ: number,
   narrow = false,
+  footprints = getRockFootprintsForViewport(narrow),
 ): number {
   const bounds = sandEnclosureBounds(narrow)
   const clampedZ = clamp(worldZ, bounds.backZ, bounds.frontZ)
-  return bounds.bottomY + evaluateAragoniteSandElevation(worldX, clampedZ, narrow)
+  return bounds.bottomY + evaluateAragoniteSandElevation(worldX, clampedZ, narrow, footprints)
 }
 
 /**
@@ -296,6 +298,7 @@ export function evaluateAragoniteSandTilt(
   worldZ: number,
   yaw: number,
   narrow = false,
+  footprints = getRockFootprintsForViewport(narrow),
 ): { pitch: number; roll: number } {
   const eps = 0.04
   const bounds = sandEnclosureBounds(narrow)
@@ -305,10 +308,10 @@ export function evaluateAragoniteSandTilt(
   const rightX = Math.cos(yaw)
   const rightZ = -Math.sin(yaw)
 
-  const hFwd = evaluateAragoniteSandElevation(worldX + fwdX * eps, clamp(clampedZ + fwdZ * eps, bounds.backZ, bounds.frontZ), narrow)
-  const hBack = evaluateAragoniteSandElevation(worldX - fwdX * eps, clamp(clampedZ - fwdZ * eps, bounds.backZ, bounds.frontZ), narrow)
-  const hRight = evaluateAragoniteSandElevation(worldX + rightX * eps, clamp(clampedZ + rightZ * eps, bounds.backZ, bounds.frontZ), narrow)
-  const hLeft = evaluateAragoniteSandElevation(worldX - rightX * eps, clamp(clampedZ - rightZ * eps, bounds.backZ, bounds.frontZ), narrow)
+  const hFwd = evaluateAragoniteSandElevation(worldX + fwdX * eps, clamp(clampedZ + fwdZ * eps, bounds.backZ, bounds.frontZ), narrow, footprints)
+  const hBack = evaluateAragoniteSandElevation(worldX - fwdX * eps, clamp(clampedZ - fwdZ * eps, bounds.backZ, bounds.frontZ), narrow, footprints)
+  const hRight = evaluateAragoniteSandElevation(worldX + rightX * eps, clamp(clampedZ + rightZ * eps, bounds.backZ, bounds.frontZ), narrow, footprints)
+  const hLeft = evaluateAragoniteSandElevation(worldX - rightX * eps, clamp(clampedZ - rightZ * eps, bounds.backZ, bounds.frontZ), narrow, footprints)
 
   const slopeFwd = (hFwd - hBack) / (2 * eps)
   const slopeRight = (hRight - hLeft) / (2 * eps)
@@ -331,8 +334,8 @@ export function evaluateRockBaseContactFactor(
   worldX: number,
   worldZ: number,
   narrow = false,
+  footprints = getRockFootprintsForViewport(narrow),
 ): number {
-  const footprints = getRockFootprintsForViewport(narrow)
   let factor = 1.0
   for (let i = 0; i < footprints.length; i++) {
     const fp = footprints[i]
@@ -350,6 +353,7 @@ function applySandGeometryElevation(
   geometry: THREE.PlaneGeometry,
   narrow: boolean,
   centerZ: number,
+  footprints: readonly RockFootprint[],
 ): void {
   const pos = geometry.getAttribute('position')
   for (let i = 0; i < pos.count; i++) {
@@ -357,21 +361,21 @@ function applySandGeometryElevation(
     const sy = pos.getY(i)
     const worldX = sx
     const worldZ = centerZ - sy
-    const elevation = evaluateAragoniteSandElevation(worldX, worldZ, narrow)
+    const elevation = evaluateAragoniteSandElevation(worldX, worldZ, narrow, footprints)
     pos.setZ(i, elevation)
   }
   pos.needsUpdate = true
   geometry.computeVertexNormals()
 }
 
-function createSandPlaneGeometry(narrow: boolean): THREE.PlaneGeometry {
+function createSandPlaneGeometry(narrow: boolean, footprints: readonly RockFootprint[]): THREE.PlaneGeometry {
   const { width, depth, centerZ } = sandEnclosureBounds(narrow)
   const geometry = new THREE.PlaneGeometry(width, depth, 128, 80)
-  applySandGeometryElevation(geometry, narrow, centerZ)
+  applySandGeometryElevation(geometry, narrow, centerZ, footprints)
   return geometry
 }
 
-function createFrontSandEdgeGeometry(narrow: boolean): THREE.BufferGeometry {
+function createFrontSandEdgeGeometry(narrow: boolean, footprints: readonly RockFootprint[]): THREE.BufferGeometry {
   const segmentsX = 96
   const { width, frontZ, bottomY: baseSandY } = sandEnclosureBounds(narrow)
   const bottomY = FRONT_SAND_EDGE_BOTTOM_Y
@@ -384,7 +388,7 @@ function createFrontSandEdgeGeometry(narrow: boolean): THREE.BufferGeometry {
   for (let i = 0; i <= segmentsX; i++) {
     const u = i / segmentsX
     const wx = (u - 0.5) * width
-    const topY = baseSandY + evaluateAragoniteSandElevation(wx, frontZ, narrow)
+    const topY = baseSandY + evaluateAragoniteSandElevation(wx, frontZ, narrow, footprints)
 
     const topIdx = i * 2
     const botIdx = i * 2 + 1
@@ -425,8 +429,9 @@ function populateScatterInstances(
   shellMesh: THREE.InstancedMesh,
   corallineMesh: THREE.InstancedMesh,
   narrow: boolean,
+  footprints: readonly RockFootprint[],
+  visibleFragments: boolean,
 ): void {
-  const footprints = getRockFootprintsForViewport(narrow)
   const dummy = new THREE.Object3D()
   const color = new THREE.Color()
   const { halfWidth, backZ, frontZ, bottomY: baseSandY } = sandEnclosureBounds(narrow)
@@ -439,7 +444,8 @@ function populateScatterInstances(
 
   const sampleFragmentScale = (nearRock: boolean) => {
     const size = Math.pow(rand(), 2.2)
-    return nearRock && rand() > 0.94 ? 0.004 + size * 0.004 : 0.001 + size * 0.001
+    const scale = nearRock && rand() > 0.94 ? 0.004 + size * 0.004 : 0.001 + size * 0.001
+    return visibleFragments && nearRock ? scale * 3 : scale
   }
 
   const sampleScatterPoint = (index: number, total: number) => {
@@ -447,7 +453,7 @@ function populateScatterInstances(
     const nearRock = index < total * 0.72
     let wx: number
     let wz: number
-    if (nearRock) {
+    if (nearRock && fp) {
       const angle = rand() * Math.PI * 2
       const dist = 0.78 + rand() * 0.95
       wx = fp.x + Math.cos(angle) * fp.radiusX * dist
@@ -459,7 +465,7 @@ function populateScatterInstances(
     }
     wx = clamp(wx, -halfWidth + 0.15, halfWidth - 0.15)
     wz = clamp(wz, backZ + 0.25, frontZ - 0.12)
-    const wy = baseSandY + evaluateAragoniteSandElevation(wx, wz, narrow) - 0.004
+    const wy = baseSandY + evaluateAragoniteSandElevation(wx, wz, narrow, footprints) - (visibleFragments ? 0.001 : 0.004)
     return { wx, wy, wz, nearRock }
   }
 
@@ -513,29 +519,29 @@ function populateScatterInstances(
 
 export function createAragoniteSandBed(config: AragoniteSandConfig = {}): AragoniteSandBed {
   let narrow = Boolean(config.narrow)
+  const customContacts = config.contactFootprints
+  const resolveFootprints = () => customContacts ?? getRockFootprintsForViewport(narrow)
+  let footprints = resolveFootprints()
+  const contactSlots = Math.max(1, customContacts?.length ?? 2)
   const { albedoTexture, normalTexture, roughnessTexture } = createAragoniteSandPbrTextures(
     config.textureSize ?? 512,
   )
 
-  let sandGeometry = createSandPlaneGeometry(narrow)
+  let sandGeometry = createSandPlaneGeometry(narrow, footprints)
 
   const sandUniforms = {
-    uLeftFootprint: { value: new THREE.Vector4() },
-    uRightFootprint: { value: new THREE.Vector4() },
-    uSingleIslandMode: { value: narrow ? 1 : 0 },
+    uContactFootprints: { value: Array.from({ length: contactSlots }, () => new THREE.Vector4(0, 0, 1, 1)) },
+    uContactCount: { value: 0 },
+    uSingleIslandMode: { value: 0 },
   }
-
-  const syncFootprintUniforms = (isNarrow: boolean) => {
-    const fps = getRockFootprintsForViewport(isNarrow)
-    sandUniforms.uLeftFootprint.value.set(fps[0].x, fps[0].z, fps[0].radiusX, fps[0].radiusZ)
-    if (fps[1]) {
-      sandUniforms.uRightFootprint.value.set(fps[1].x, fps[1].z, fps[1].radiusX, fps[1].radiusZ)
-      sandUniforms.uSingleIslandMode.value = 0
-    } else {
-      sandUniforms.uSingleIslandMode.value = 1
-    }
+  const syncFootprintUniforms = () => {
+    footprints.forEach(({ x, z, radiusX, radiusZ }, i) => {
+      sandUniforms.uContactFootprints.value[i].set(x, z, radiusX, radiusZ)
+    })
+    sandUniforms.uContactCount.value = footprints.length
+    sandUniforms.uSingleIslandMode.value = narrow ? 1 : 0
   }
-  syncFootprintUniforms(narrow)
+  syncFootprintUniforms()
 
   const sandMaterial = new THREE.MeshStandardMaterial({
     map: albedoTexture,
@@ -546,6 +552,7 @@ export function createAragoniteSandBed(config: AragoniteSandConfig = {}): Aragon
     metalness: 0.0,
   })
 
+  sandMaterial.customProgramCacheKey = () => `aragonite-sand-${contactSlots}-${Boolean(customContacts)}`
   sandMaterial.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, sandUniforms)
     shader.vertexShader =
@@ -555,7 +562,7 @@ export function createAragoniteSandBed(config: AragoniteSandConfig = {}): Aragon
       `#include <begin_vertex>\nvec4 sandWp = modelMatrix * vec4(transformed, 1.0);\nvSandWorldPos = sandWp.xyz;\nvSandRawUv = uv;`,
     )
     shader.fragmentShader =
-      `uniform vec4 uLeftFootprint;\nuniform vec4 uRightFootprint;\nuniform float uSingleIslandMode;\nvarying vec3 vSandWorldPos;\nvarying vec2 vSandRawUv;\n` +
+      `uniform vec4 uContactFootprints[${contactSlots}];\nuniform int uContactCount;\nuniform float uSingleIslandMode;\nvarying vec3 vSandWorldPos;\nvarying vec2 vSandRawUv;\n` +
       shader.fragmentShader
     shader.fragmentShader = shader.fragmentShader.replace(
       '#include <clipping_planes_fragment>',
@@ -581,14 +588,16 @@ diffuseColor *= sampledDiffuseColor;
       '#include <color_fragment>',
         `#include <color_fragment>
 // Macro warm aragonite variation & natural olive-tan detritus settling near rock bases (AQ-70.12 AC #1 & #2)
-vec2 dLeft = (vSandWorldPos.xz - uLeftFootprint.xy) / (uLeftFootprint.zw * 0.92);
-float rLeft = length(dLeft);
-float aoLeft = 1.0 - ${LEFT_CONTACT_AO_STRENGTH.toFixed(2)} * (1.0 - smoothstep(0.55, 1.55, rLeft));
-
-vec2 dRight = (vSandWorldPos.xz - uRightFootprint.xy) / (uRightFootprint.zw * 0.92);
-float rRight = length(dRight);
-float aoRight = mix(1.0 - ${RIGHT_CONTACT_AO_STRENGTH.toFixed(2)} * (1.0 - smoothstep(0.55, 1.55, rRight)), 1.0, uSingleIslandMode);
-float rockContactAo = min(aoLeft, aoRight);
+float rockContactAo = 1.0;
+float rockContactRadius = 99.0;
+for (int i = 0; i < ${contactSlots}; i++) {
+  if (i >= uContactCount) break;
+  vec4 footprint = uContactFootprints[i];
+  float radius = length((vSandWorldPos.xz - footprint.xy) / (footprint.zw * 0.92));
+  float strength = i == 0 ? ${LEFT_CONTACT_AO_STRENGTH.toFixed(2)} : ${RIGHT_CONTACT_AO_STRENGTH.toFixed(2)};
+  rockContactAo = min(rockContactAo, 1.0 - strength * (1.0 - smoothstep(0.55, 1.55, radius)));
+  rockContactRadius = min(rockContactRadius, radius);
+}
 
 // Flow-sculpted sand ripple crests & troughs + under-arch shadow pockets (AQ-70.12, AQ-73, AQ-94)
 float rippleWave = 0.5 + 0.34 * sin(vSandWorldPos.x * 2.45 + vSandWorldPos.z * 1.15 + 0.45 * sin(vSandWorldPos.z * 1.5)) + 0.16 * cos(vSandWorldPos.z * 3.2 - vSandWorldPos.x * 1.3);
@@ -596,16 +605,17 @@ float troughMask = (1.0 - smoothstep(0.24, 0.56, rippleWave)) * 0.12;
 float crestHighlight = smoothstep(0.58, 0.88, rippleWave) * 0.08;
 
 // Subtle warm detritus & dampened aragonite near rock bases and ripple troughs (never blue-grey or indigo)
-float detritusMask = clamp((1.0 - smoothstep(0.70, 1.60, min(rLeft, mix(rRight, 99.0, uSingleIslandMode)))) * 0.50 + troughMask, 0.0, 0.68);
+float detritusMask = clamp((1.0 - smoothstep(0.70, 1.60, rockContactRadius)) * 0.50 + troughMask, 0.0, 0.68);
 vec3 warmDetritus = vec3(0.76, 0.70, 0.58);
 diffuseColor.rgb = mix(diffuseColor.rgb, warmDetritus, detritusMask);
 diffuseColor.rgb *= (1.0 + crestHighlight);
 
-// Deep under-arch & cave-mouth contact shadow pockets framing the swim-through channels
+${customContacts ? '' : `// Deep under-arch & cave-mouth contact shadow pockets framing the swim-through channels
 float leftCaveShadow = exp(-pow((vSandWorldPos.x + 2.35) / 0.55, 2.0) - pow((vSandWorldPos.z + 1.15) / 0.50, 2.0)) * 0.28;
 float rightArchShadow = exp(-pow((vSandWorldPos.x - 2.35) / 0.68, 2.0) - pow((vSandWorldPos.z + 1.05) / 0.52, 2.0)) * 0.32 * (1.0 - uSingleIslandMode);
 rockContactAo *= (1.0 - max(leftCaveShadow, rightArchShadow));
 
+`}
 // Gentle rear-water depth attenuation preserving warm cream foreground on caustic ridges
 // while shading ambient sand into moody underwater reef-blue shadow (more_realistic_reef_guide.png)
 float rearFade = smoothstep(-5.2, -0.4, vSandWorldPos.z);
@@ -618,14 +628,16 @@ diffuseColor.rgb *= mix(rearWaterTint, frontSandTint, rearFade);
 float rearWallDistance = max(vSandWorldPos.z + 5.5, 0.0);
 float rearWallContact = mix(0.035, 1.0, smoothstep(0.0, 0.95, rearWallDistance));
 diffuseColor.rgb *= rearWallContact;
-// Local central arch pocket remains tied to the reef footprint.
-float centerArchPocket = exp(-pow(vSandWorldPos.x / 1.45, 2.0) - pow((vSandWorldPos.z + 1.25) / 1.15, 2.0)) * 0.42 * (1.0 - uSingleIslandMode);
 // Visual-check fix: the dual-scale UV blend only swaps grain phase, so at
 // overview distance (mipmapped) both samples average to the same mean and
 // the field reads flat white. Modulate luminance by the same macro signal
 // so broad warm patches (±10%, zero mean change) survive at any distance.
 diffuseColor.rgb *= 0.90 + 0.20 * sandMacroBlend;
-diffuseColor.rgb *= rockContactAo * (1.0 - centerArchPocket);
+diffuseColor.rgb *= rockContactAo;
+${customContacts ? '' : `
+// Preserve the existing broad ambient shadow beneath the legacy center arch.
+float centerArchPocket = exp(-pow(vSandWorldPos.x / 1.45, 2.0) - pow((vSandWorldPos.z + 1.25) / 1.15, 2.0)) * 0.42 * (1.0 - uSingleIslandMode);
+diffuseColor.rgb *= (1.0 - centerArchPocket);`}
 // AQ-70.6: the sand's own caustic ridge network was removed. The shared
 // cellular caustic chunk (caustics.ts) is applied to the sand material in
 // rebuildHabitat, so the sand, rock, coral, and fish all show the one
@@ -699,7 +711,7 @@ normal = perturbNormalArb(-vViewPosition, normal, dHdxy_fwd(), faceDirection);
   sandMesh.position.set(0, initialBounds.bottomY, initialBounds.centerZ)
   sandMesh.receiveShadow = true
 
-  let frontEdgeGeometry = createFrontSandEdgeGeometry(narrow)
+  let frontEdgeGeometry = createFrontSandEdgeGeometry(narrow, footprints)
   const frontEdgeMaterial = new THREE.MeshStandardMaterial({
     map: albedoTexture,
     roughness: 0.94,
@@ -777,7 +789,7 @@ diffuseColor.rgb = edgeColor;`,
   corallineInstances.receiveShadow = true
   corallineInstances.raycast = () => {}
 
-  populateScatterInstances(rubbleInstances, shellInstances, corallineInstances, narrow)
+  populateScatterInstances(rubbleInstances, shellInstances, corallineInstances, narrow, footprints, Boolean(customContacts))
 
   const group = new THREE.Group()
   group.name = 'AragoniteSandGroup'
@@ -805,18 +817,19 @@ diffuseColor.rgb = edgeColor;`,
     setLayout(nextNarrow: boolean) {
       if (narrow === nextNarrow) return
       narrow = nextNarrow
-      syncFootprintUniforms(narrow)
-      const nextSandGeom = createSandPlaneGeometry(narrow)
+      footprints = resolveFootprints()
+      syncFootprintUniforms()
+      const nextSandGeom = createSandPlaneGeometry(narrow, footprints)
       sandMesh.geometry.dispose()
       sandMesh.geometry = nextSandGeom
       sandGeometry = nextSandGeom
       const nextBounds = sandEnclosureBounds(narrow)
       sandMesh.position.set(0, nextBounds.bottomY, nextBounds.centerZ)
-      const nextFrontGeom = createFrontSandEdgeGeometry(narrow)
+      const nextFrontGeom = createFrontSandEdgeGeometry(narrow, footprints)
       frontEdgeMesh.geometry.dispose()
       frontEdgeMesh.geometry = nextFrontGeom
       frontEdgeGeometry = nextFrontGeom
-      populateScatterInstances(rubbleInstances, shellInstances, corallineInstances, narrow)
+      populateScatterInstances(rubbleInstances, shellInstances, corallineInstances, narrow, footprints, Boolean(customContacts))
     },
     dispose() {
       sandGeometry.dispose()

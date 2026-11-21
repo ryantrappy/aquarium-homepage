@@ -1,5 +1,6 @@
 import * as THREE from 'three'
-import { evaluateAragoniteSandTilt, evaluateAragoniteSandWorldY } from './aragonite-sand'
+import { evaluateAragoniteSandTilt, evaluateAragoniteSandWorldY, type RockFootprint } from './aragonite-sand'
+import { glassEnclosureLayout } from './glass-enclosure'
 import type { ModularCoralMountEntry } from './reef-assembly'
 
 export type NsaRockId =
@@ -276,6 +277,16 @@ const NSA_REVIEW_PLACEMENTS = [
   { id: 'reef-nsa-encrusting-ledge', x: 3.34, y: -2.75, z: -.17, yaw: .24, scale: 4.95 },
 ] as const satisfies readonly ({ id: Exclude<NsaRockId, 'reef-nsa-rubble-talus'> } & RubbleTalusPlacement & { y: number })[]
 
+// Fitted to the mounted mesh sections below y = -2.55. Keep the two arch
+// piers separate so the sand berm and contact shadow leave the canyon open.
+export const NSA_SUBSTRATE_CONTACTS: readonly RockFootprint[] = [
+  { x: -3.49, z: -1.48, radiusX: 2.16, radiusZ: .81 }, // cave buttress
+  { x: -1.44, z: -2.21, radiusX: .87, radiusZ: .68 }, // left pier
+  { x: .85, z: -2.26, radiusX: .69, radiusZ: .59 }, // right pier
+  { x: 2.64, z: -1.77, radiusX: 1.57, radiusZ: 1.01 }, // bommie
+  { x: 3.38, z: -.24, radiusX: 1.39, radiusZ: .81 }, // encrusting ledge
+]
+
 /** Assembles the saved modules at the calibration poses used in the full-tank review. */
 export function createNsaReviewReef(source: THREE.Object3D) {
   return NSA_REVIEW_PLACEMENTS.map(({ id, x, y, z, yaw, scale }) => {
@@ -332,6 +343,15 @@ const PHONE_RUBBLE_PLACEMENTS: readonly RubbleTalusPlacement[] = Object.freeze([
   Object.freeze({ x: 1.05, z: -0.40, yaw: -0.52, scale: 1.95 }),
 ])
 
+const NSA_RUBBLE_PLACEMENTS: readonly RubbleTalusPlacement[] = [
+  { x: -4.83, z: -.76, yaw: .42, scale: 1.05 },
+  { x: -4.45, z: -.67, yaw: -.35, scale: .84 },
+  { x: -1.79, z: -.69, yaw: -.58, scale: 1.15 },
+  { x: -1.32, z: -1.54, yaw: .25, scale: .92 },
+  { x: 3.58, z: .62, yaw: -.48, scale: 1.2 },
+  { x: 4.38, z: .44, yaw: .7, scale: .82 },
+]
+
 export function rubbleTalusPlacementsForViewport(narrow: boolean): readonly RubbleTalusPlacement[] {
   return narrow ? PHONE_RUBBLE_PLACEMENTS : LAPTOP_RUBBLE_PLACEMENTS
 }
@@ -341,10 +361,13 @@ export function rubbleTalusPlacementsForViewport(narrow: boolean): readonly Rubb
  * soften hard rock-to-sand intersections (AQ-94 AC #5). Clones materials only so
  * shared geometry/maps stay owned by loadedAssets; marks meshes non-pickable.
  */
-export function createRubbleTalusGroundingAprons(source: THREE.Object3D, narrow: boolean): THREE.Group {
+export function createRubbleTalusGroundingAprons(source: THREE.Object3D, narrow: boolean, modular = false): THREE.Group {
   const group = new THREE.Group()
   group.name = 'reef-nsa-rubble-talus-grounding'
-  const placements = rubbleTalusPlacementsForViewport(narrow)
+  const placements = modular
+    ? NSA_RUBBLE_PLACEMENTS.filter(({ x, scale }) => Math.abs(x) + .26 * scale < glassEnclosureLayout(narrow, 2.6).halfWidth)
+    : rubbleTalusPlacementsForViewport(narrow)
+  const footprints = modular ? NSA_SUBSTRATE_CONTACTS : undefined
   for (let i = 0; i < placements.length; i++) {
     const placement = placements[i]!
     const apron = source.clone(true)
@@ -359,8 +382,8 @@ export function createRubbleTalusGroundingAprons(source: THREE.Object3D, narrow:
       node.receiveShadow = true
       node.raycast = () => {}
     })
-    const sandY = evaluateAragoniteSandWorldY(placement.x, placement.z, narrow) - 0.025
-    const tilt = evaluateAragoniteSandTilt(placement.x, placement.z, placement.yaw, narrow)
+    const sandY = evaluateAragoniteSandWorldY(placement.x, placement.z, narrow, footprints) - (modular ? .014 : .025)
+    const tilt = evaluateAragoniteSandTilt(placement.x, placement.z, placement.yaw, narrow, footprints)
     apron.position.set(placement.x, sandY, placement.z)
     apron.rotation.order = 'YXZ'
     apron.rotation.set(tilt.pitch, placement.yaw, tilt.roll)
