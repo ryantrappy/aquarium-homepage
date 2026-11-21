@@ -157,9 +157,9 @@ function disposeTree(root: THREE.Object3D, borrowedEnvironment?: THREE.Texture) 
 export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, initialServices: ServiceConfig[], initialPaused: boolean, status: (status: SceneStatus) => void, focusFallback: () => HTMLElement | null = () => null, fishExtensions: FishExtensionConfig = EMPTY_FISH_EXTENSIONS, onFrameRate?: (sample: FrameRateSample | null) => void, initialConfigurationReady = true): AquariumController {
   const lookDevConfig = import.meta.env.DEV ? resolveLookDevConfig(window.location.search, true) : undefined
   const reefOverride = import.meta.env.DEV ? new URLSearchParams(window.location.search).get('reef') : null
-  function reefLayoutForWidth(width: number): ReefLayout {
+  function reefLayoutForWidth(_width: number): ReefLayout {
     if (reefOverride === 'nsa' || reefOverride === 'legacy') return reefOverride
-    return width < 600 ? 'legacy' : 'nsa'
+    return 'legacy'
   }
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' })
   renderer.setPixelRatio(lookDevConfig ? 1 : Math.min(devicePixelRatio, 1.5))

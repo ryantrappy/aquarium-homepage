@@ -9,7 +9,7 @@ export const CENTER_ARCH_MOUNTS: readonly ModularCoralMountEntry[] = Object.free
     coralAssetId: 'reef-zoanthid-colonial-mat',
     archetype: 'zoanthid-mat',
     yawRad: 0.3,
-    scale: 0.24,
+    scale: 0.42,
     paletteOverride: {
       surfaceMode: 'baked-pbr',
       baseColor: '#d45a2a',
@@ -35,7 +35,7 @@ export const CENTER_ARCH_MOUNTS: readonly ModularCoralMountEntry[] = Object.free
     coralAssetId: 'reef-montipora-whorled-plate',
     archetype: 'plating-sps',
     yawRad: -0.4,
-    scale: 0.65,
+    scale: 0.78,
     paletteOverride: {
       surfaceMode: 'baked-pbr',
       baseColor: '#c2604e',
@@ -51,7 +51,7 @@ export const CENTER_ARCH_MOUNTS: readonly ModularCoralMountEntry[] = Object.free
     coralAssetId: 'reef-zoanthid-palythoa-cluster',
     archetype: 'zoanthid-mat',
     yawRad: -0.7,
-    scale: 0.24,
+    scale: 0.42,
     paletteOverride: {
       surfaceMode: 'baked-pbr',
       baseColor: '#2ea888',
@@ -77,7 +77,7 @@ export const CENTER_ARCH_MOUNTS: readonly ModularCoralMountEntry[] = Object.free
     coralAssetId: 'reef-acropora-violet-millepora',
     archetype: 'branching-sps',
     yawRad: 0.8,
-    scale: 0.62,
+    scale: 0.76,
     paletteOverride: {
       surfaceMode: 'baked-pbr',
       baseColor: '#7a52a8',

@@ -911,7 +911,96 @@ const EXTRA_COMPANION_CLUSTERS_LEFT: ReadonlyArray<{
   scale: number
   paletteOverride: CoralPaletteOverride
   columnPaletteOverride?: CoralPaletteOverride
-}> = []
+  rigidPaletteOverride?: CoralPaletteOverride
+  preserveSkeletonShape?: boolean
+}> = [
+  // Lush Montipora tier-shelf companion overlapping below the upper-left whorled plate
+  {
+    parentSocket: 'socket_plate_ledge_01',
+    coralAssetId: 'reef-montipora-tier-shelf',
+    localOffsetM: [0.042, -0.024, 0.028],
+    yawRad: 0.45,
+    tiltXRad: 0.04,
+    tiltZRad: 0.03,
+    scale: 0.56,
+    paletteOverride: {
+      surfaceMode: 'baked-pbr',
+      baseColor: '#a84e8e',
+      tipColor: '#ebd4f2',
+      creviceColor: '#3a163d',
+      regradeStrength: 0.36,
+      roughness: 1,
+      fluorescenceStrength: 0.07,
+    },
+  },
+  // Secondary violet Acropora millepora cluster flanking the outer-left crest
+  {
+    parentSocket: 'socket_sps_crest_01',
+    coralAssetId: 'reef-acropora-violet-millepora',
+    localOffsetM: [-0.055, -0.022, 0.022],
+    yawRad: -0.52,
+    tiltXRad: 0.06,
+    tiltZRad: 0.08,
+    scale: 0.58,
+    paletteOverride: {
+      surfaceMode: 'baked-pbr',
+      baseColor: '#7a52a8',
+      tipColor: '#d4b8f0',
+      creviceColor: '#2d1844',
+      regradeStrength: 0.36,
+      roughness: 1,
+      fluorescenceStrength: 0.08,
+    },
+  },
+  // Dragon-soul Favia sub-colony nestled beside the lower-left Diploria brain apron
+  {
+    parentSocket: 'socket_brain_apron_01',
+    coralAssetId: 'reef-favia-war-coral',
+    localOffsetM: [-0.048, -0.012, 0.022],
+    yawRad: 0.65,
+    tiltXRad: 0.06,
+    tiltZRad: 0.04,
+    scale: 0.54,
+    paletteOverride: {
+      surfaceMode: 'baked-pbr',
+      baseColor: '#a82234',
+      tipColor: '#66f08a',
+      creviceColor: '#320b14',
+      regradeStrength: 0.30,
+      roughness: 1,
+      fluorescenceStrength: 0.12,
+    },
+  },
+  // Palythoa button cluster creeping along the lower-right Acanthastrea apron
+  {
+    parentSocket: 'socket_brain_apron_02',
+    coralAssetId: 'reef-zoanthid-palythoa-cluster',
+    localOffsetM: [0.052, -0.014, 0.018],
+    yawRad: -0.48,
+    tiltXRad: 0.08,
+    tiltZRad: -0.04,
+    scale: 0.52,
+    paletteOverride: {
+      surfaceMode: 'baked-pbr',
+      baseColor: '#2ea888',
+      tipColor: '#9cf264',
+      creviceColor: '#163830',
+      regradeStrength: 0.34,
+      roughness: 1,
+      fluorescenceStrength: 0.10,
+    },
+    rigidPaletteOverride: {
+      surfaceMode: 'baked-pbr',
+      baseColor: '#6b5e54',
+      tipColor: '#94867a',
+      creviceColor: '#2e2722',
+      regradeStrength: 0.20,
+      roughness: 1,
+      fluorescenceStrength: 0,
+    },
+    preserveSkeletonShape: true,
+  },
+]
 
 const EXTRA_COMPANION_CLUSTERS_RIGHT: ReadonlyArray<{
   parentSocket: string
@@ -923,7 +1012,96 @@ const EXTRA_COMPANION_CLUSTERS_RIGHT: ReadonlyArray<{
   scale: number
   paletteOverride: CoralPaletteOverride
   columnPaletteOverride?: CoralPaletteOverride
-}> = []
+  rigidPaletteOverride?: CoralPaletteOverride
+  preserveSkeletonShape?: boolean
+}> = [
+  // Layered Montipora undata cap stepping below the right tier-shelf plate
+  {
+    parentSocket: 'socket_plate_ledge_04',
+    coralAssetId: 'reef-montipora-undata-cap',
+    localOffsetM: [-0.044, -0.022, 0.026],
+    yawRad: -0.55,
+    tiltXRad: 0.05,
+    tiltZRad: -0.05,
+    scale: 0.56,
+    paletteOverride: {
+      surfaceMode: 'baked-pbr',
+      baseColor: '#cf6828',
+      tipColor: '#f5d478',
+      creviceColor: '#3d3014',
+      regradeStrength: 0.34,
+      roughness: 1,
+      fluorescenceStrength: 0.08,
+    },
+  },
+  // Secondary neon-green staghorn thicket flanking the left-side right crest
+  {
+    parentSocket: 'socket_sps_crest_06',
+    coralAssetId: 'reef-acropora-staghorn-thicket',
+    localOffsetM: [-0.048, -0.020, 0.020],
+    yawRad: 0.62,
+    tiltXRad: 0.05,
+    tiltZRad: -0.06,
+    scale: 0.56,
+    paletteOverride: {
+      surfaceMode: 'baked-pbr',
+      baseColor: '#2ea852',
+      tipColor: '#b4f596',
+      creviceColor: '#144424',
+      regradeStrength: 0.34,
+      roughness: 1,
+      fluorescenceStrength: 0.08,
+    },
+  },
+  // Fiery Acanthastrea sub-colony flanking the right Lobophyllia apron
+  {
+    parentSocket: 'socket_brain_apron_04',
+    coralAssetId: 'reef-acanthastrea-lordhowensis',
+    localOffsetM: [0.048, -0.012, 0.020],
+    yawRad: 0.38,
+    tiltXRad: 0.06,
+    tiltZRad: -0.04,
+    scale: 0.54,
+    paletteOverride: {
+      surfaceMode: 'baked-pbr',
+      baseColor: '#d94828',
+      tipColor: '#ffa878',
+      creviceColor: '#183e46',
+      regradeStrength: 0.32,
+      roughness: 1,
+      fluorescenceStrength: 0.11,
+    },
+  },
+  // Colonial zoanthid mat creeping along the lower-left Favia apron
+  {
+    parentSocket: 'socket_brain_apron_03',
+    coralAssetId: 'reef-zoanthid-colonial-mat',
+    localOffsetM: [-0.046, -0.014, 0.018],
+    yawRad: 0.42,
+    tiltXRad: 0.08,
+    tiltZRad: 0.04,
+    scale: 0.52,
+    paletteOverride: {
+      surfaceMode: 'baked-pbr',
+      baseColor: '#d45a2a',
+      tipColor: '#7ef564',
+      creviceColor: '#381c18',
+      regradeStrength: 0.34,
+      roughness: 1,
+      fluorescenceStrength: 0.10,
+    },
+    rigidPaletteOverride: {
+      surfaceMode: 'baked-pbr',
+      baseColor: '#6e5864',
+      tipColor: '#96828c',
+      creviceColor: '#2e2229',
+      regradeStrength: 0.20,
+      roughness: 1,
+      fluorescenceStrength: 0,
+    },
+    preserveSkeletonShape: true,
+  },
+]
 
 const LEFT_ISLAND_LOCAL_OBSTACLES_M: ReadonlyArray<{ id: string; min: [number, number, number]; max: [number, number, number] }> = [
   { id: 'rock-part-01', min: [-0.495452, -0.012, -0.271264], max: [-0.09066, 0.03775, 0.265537] },
@@ -1755,6 +1933,8 @@ export function assembleCoralsOnRockSockets(
         options,
         materialControllers,
         geometryBindings,
+        comp.rigidPaletteOverride,
+        comp.preserveSkeletonShape,
       )
       cloneRoot.add(compGroup)
     }
