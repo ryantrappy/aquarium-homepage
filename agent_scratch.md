@@ -206,3 +206,8 @@
 ### 2026-11-21 — AQ-94 modular moray shelter
 *Root reviewed retained handoffs. Local/laptop-only review, asset preservation and active scope remain current. The shared-atlas preview and right-side shelter are actioned. Default-layout promotion and broader fish interactions remain pending.*
 - The exact shared-atlas collision test and native 1440×900 review now show the fixed moray tucked beside the right ledge. A body click opens its service card. The cut rear is visually sheltered in the overview.
+
+### 2026-11-21 — AQ-94 modular clownfish host
+*Root reviewed retained entries. The local/laptop-only, active-scope and asset preservation policies are current. Modular hosting is actioned. Close-in animated-body clearance, production composition and substrate grounding remain pending.*
+- The saved rose bubble-tip anemone replaces the frogspawn on the lower-left buttress socket in the development preview. Actual mounted geometry verifies the current resident query and 40 seconds of normal simulation movement. The clip-only body envelope clears the front approach to 0.24 m short of the crown. The laptop screenshot confirms the anemone is visible on its ledge.
+- The asset audit found the previously recorded AQ-59 porous-rock study under `public/test-assets/`. Recent coral and fish additions already have assembly or manifest wiring. Root visual and promotion review remains pending for candidates as recorded in their tasks.

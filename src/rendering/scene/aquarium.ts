@@ -1037,6 +1037,12 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         failReefSetup(`Reef module ${islandId} coral bounds unavailable: ${coralFallback.reason}`)
         return
       }
+      try {
+        habitat.anchors.push(...mountedAnemoneHosts(controller.mountedCorals, islandId))
+      } catch (error) {
+        failReefSetup(`Reef module ${islandId} habitat geometry unavailable: ${String(error)}`)
+        return
+      }
       habitat.obstacles.push(...coralFallback.obstacles)
       meshIslands.push({ reef, islandId, mountedCorals: controller.mountedCorals })
     }

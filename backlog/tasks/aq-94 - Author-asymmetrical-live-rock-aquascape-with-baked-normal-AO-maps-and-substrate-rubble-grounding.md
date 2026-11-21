@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-11 04:55'
-updated_date: '2026-11-21 18:43'
+updated_date: '2026-11-21 18:51'
 labels:
   - modeling
   - blender
@@ -44,7 +44,7 @@ Architect the live rock aquascape from scratch using Negative Space Aquascaping 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 Aquascape forms an asymmetrical Negative Space Aquascape (NSA) with a left arch rising to a high pinnacle, lower right island, and central swim canyon
-- [ ] #2 Reef is assembled from a reusable library of 5–8 modular sculpted rock pieces sharing a single 2048x2048 PBR texture atlas (Normal, Roughness, AO)
+- [x] #2 Reef is assembled from a reusable library of 5–8 modular sculpted rock pieces sharing a single 2048x2048 PBR texture atlas (Normal, Roughness, AO)
 - [x] #3 Upper half of the water column preserves open negative space for unobstructed fish swimming and label visibility
 - [x] #4 Total exported .glb asset size for assembled foundations remains under 5 MB with minimal draw calls
 - [ ] #5 Substrate dunes, shell fragments, and rubble eliminate hard intersecting seams at the sand bed base
@@ -60,6 +60,8 @@ Next Root visual iteration: grow four small existing coral colonies on the centr
 Build a deterministic shared-atlas kit from the seven saved NSA exports so the modular foundation can fit the asset budget. Preserve per-module geometry, root names, and coral sockets. Assemble and review the new modules at 1440×900 with the established front-on camera, keeping the production reef while the new layout is being reviewed.
 
 Use the assembled kit and mounted coral colliders to measure a sheltered right-side moray pose. Confirm the head clears solid geometry and sand and is visible from the laptop camera while the partial rear stays visually sheltered. Connect the preview to the existing fail-closed resident checks only after this evidence.
+
+Fit a saved bubble-tip anemone to a supported left-module socket, derive its host point from the mounted crown, and reproduce a clear clownfish approach with the exact shared-atlas reef. Reuse the species-specific soft-tissue allowance and preserve the canyon and moray head checks.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -95,4 +97,6 @@ Milestone F (8/8 modular custom live-rock library complete on custom-rocks/manif
 Root review 2026-11-21. The seven current NSA exports now package into a single deterministic 3,956,104-byte GLB with one set of the three 2048px trim maps. PACK and CHECK SHA-256 c90fe8541f67a8984b65aa57169c5c44f5930e11766f66e4395093fac36c21b4. The existing aquarium look-dev entry point at /?lookdev=1&reef=nsa loads the kit in development, instantiates a left pinnacle and cave buttress, high center arch, right bommie with reused smaller spire, shelves and talus, and mounts 13 corals. The fixed current right cave resident is absent in this experimental layout. The assembled live collision snapshot built successfully. A 0.04-scene-unit capsule clears the mounted canyon at x=-0.2 and y=-1.95 from z=-3.8 to z=1.9 after the cap at socket_plate_ledge_23 was restored to its authored scale. This does not establish animated-body clearance. The 1440×900 DPR 1 screenshot under docs/asset-evidence/aq94/shared-atlas-preview/ has 14 resolved inhabitants and no warnings or failed assets. The kit uses the existing packed Blender sources and does not alter their geometry or textures. The default habitat remains the production composition. Keep AC1, AC2 and AC5 open for final art, runtime habitat/occlusion, and grounding review.
 
 Root modular moray review 2026-11-21. Authored a wide-preview residence at root (2.14, -2.41, -0.33), yaw -0.72, beside the existing right ledge and bommie. Runtime requires the same loaded crevice-idle rig, both actual right-module colliders, and the existing clear exposed-head capsule. The exact kit test includes all 13 mounted corals, a >0.13 scene-unit endpoint margin to the sand under the exposed-head bound, disjoint talus boxes, visible head/tip and six rear cross-section points hidden from the front-on camera. Native 1440×900 DPR 1 review loaded 15 resolved inhabitants with zero warnings/errors. Pointer body click opened the configured Snowflake moray eel service card. Evidence docs/asset-evidence/aq94/modular-moray-review/. The proof checks the exposed head and front-on shelter, not a continuous whole-body animation certificate. The preview remains development-only pending production layout and interaction review.
+
+Root modular clownfish review 2026-11-21. The seven saved sculpted modules share one verified 2048px trim atlas. The packed GLB uses normal texture 0 and shared roughness/AO texture 1 on all seven materials; the source test verifies atlas dimensions and byte-identical image digests. AC2 verified for the assembled kit. The lower-left buttress now mounts the existing rose bubble-tip anemone. Actual crown geometry yields the ocellaris-only host; the exact reef test clears the current 0.04 m navigation probe throughout a 40-second simulation. A source-pinned straight skeletal swim envelope clears to 0.24 m in front of the crown; close-in full-body clearance is pending. The central canyon and right moray checks remain. The native 1440×900 overview rendered 15 inhabitants with no failed assets or console warnings/errors. Evidence docs/asset-evidence/aq94/modular-clownfish-review/. Keep AQ-94 In Progress for default-layout composition and substrate grounding.
 <!-- SECTION:NOTES:END -->

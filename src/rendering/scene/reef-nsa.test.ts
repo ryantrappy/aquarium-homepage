@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { describe, expect, it, vi } from 'vitest'
-import { assembleCoralsOnRockSockets, MODULAR_CORAL_ASSET_URLS } from './reef-assembly'
+import { AQUARIUM_WATER_BOUNDS, assembleCoralsOnRockSockets, MODULAR_CORAL_ASSET_URLS } from './reef-assembly'
 import {
   NSA_MODULE_MOUNTS,
   NSA_KIT_URL,
@@ -18,6 +18,10 @@ import {
 import { createReefMeshNavigation, MESH_NAVIGATION_MOVEMENT_BUDGET, segmentIntersectsInflatedBox } from './reef-mesh-navigation'
 import { resolveNsaMorayResidence, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M } from './moray-residence'
 import { evaluateAragoniteSandWorldY } from './aragonite-sand'
+import { mountedAnemoneHosts } from './anemone-host'
+import { createSwimmingFish, distance, stepSwimmingFish } from './motion'
+import { analyzeFishClipEnvelope } from '../assets/fish-clip-envelope'
+import { fishRenderLength, MODEL_SWIM_AXIS_LENGTH } from './fish-scale'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
 
@@ -27,9 +31,14 @@ describe('AQ-94 NSA modular rock library & rubble-talus grounding', () => {
     expect(bytes.byteLength).toBeLessThan(5_000_000)
     const document = JSON.parse(bytes.toString('utf8', 20, 20 + bytes.readUInt32LE(12)))
     expect(document.images).toHaveLength(3)
-    const loader = new GLTFLoader().register(() => ({
+    const loader = new GLTFLoader().register(parser => ({
       name: 'reef-kit-test-geometry',
-      loadMaterial: async () => new THREE.MeshStandardMaterial(),
+      loadMaterial: async (index: number) => {
+        // Keep authored collision roles while skipping image decoding in Node.
+        const material = new THREE.MeshStandardMaterial()
+        material.userData = parser.json.materials[index].extras ?? {}
+        return material
+      },
     }))
     const { scene } = await loader.parseAsync(Uint8Array.from(bytes).buffer, '')
     expect(scene.children.map(node => node.name).sort()).toEqual(Object.keys(NSA_ROCK_URLS).sort())
@@ -54,6 +63,47 @@ describe('AQ-94 NSA modular rock library & rubble-talus grounding', () => {
     if (result.status !== 'ready') return
     const query = result.meshNavigation.queryCapsule!
     expect(query({ x: -.2, y: -1.95, z: -3.8 }, { x: -.2, y: -1.95, z: 1.9 }, .04, MESH_NAVIGATION_MOVEMENT_BUDGET).status).toBe('clear')
+
+    const hosts = assemblies.flatMap(({ mountedCorals, islandId }) => mountedAnemoneHosts(mountedCorals, islandId))
+    expect(hosts).toHaveLength(1)
+    const [host] = hosts
+    expect(host.id).toBe('reef-nsa-cave-buttress-anchor-socket_lps_mid_22-hostAnemone')
+    expect(host.compatibleSpecies).toEqual(['ocellaris-clownfish'])
+    const resident = result.meshNavigation.queryCapsuleForSpecies!['ocellaris-clownfish']!
+    const approach = { ...host.position, z: host.position.z + .45 }
+    expect(query(host.position, host.position, .04, MESH_NAVIGATION_MOVEMENT_BUDGET).status).toBe('blocked')
+    expect(resident(approach, host.position, .04, MESH_NAVIGATION_MOVEMENT_BUDGET).status).toBe('clear')
+
+    const species = 'ocellaris-clownfish'
+    const halfAxis = .16
+    const envelope = analyzeFishClipEnvelope(readFileSync(new URL('../assets/fish/download_testing_copies/clownfish-copy.glb', import.meta.url)), {
+      expectedSha256: 'be6e9cbd2b5b6a76d5204f3a140ae7538a0115e6a067dcbabd0dfd1a273db7ac',
+      clipName: 'clownfish_subcarangiform_swim',
+      adultLengthM: fishRenderLength(species),
+      sourceReference: { lengthAxis: '+Z', lengthM: MODEL_SWIM_AXIS_LENGTH[species], authority: 'AQ-58 runtime scene scale fixture' },
+      composition: 'single-clip',
+      capsuleHalfAxisM: halfAxis,
+    })
+    if (envelope.status !== 'ready') throw new Error(envelope.reason)
+    // The Z-aligned body translates straight in over this interval, so its
+    // swept volume is one capsule spanning the nearest and farthest endpoints.
+    const nearBodyEnd = { ...host.position, z: host.position.z + .24 - halfAxis }
+    const farBodyEnd = { ...approach, z: approach.z + halfAxis }
+    expect(resident(nearBodyEnd, farBodyEnd, envelope.activeEnvelope.capsule!.radiusM, MESH_NAVIGATION_MOVEMENT_BUDGET).status).toBe('clear')
+
+    const habitat = { bounds: AQUARIUM_WATER_BOUNDS, obstacles: [], anchors: hosts, meshNavigation: result.meshNavigation }
+    const clownfish = createSwimmingFish('modular-clownfish', species, approach, .5, undefined, { collisionRadiusM: .04 })
+    const heights: number[] = []
+    for (let frame = 0; frame < 1200; frame++) {
+      const before = { ...clownfish.position }
+      stepSwimmingFish(clownfish, habitat, 1 / 30)
+      expect(resident(before, clownfish.position, .04, MESH_NAVIGATION_MOVEMENT_BUDGET).status).toBe('clear')
+      if (frame >= 600) {
+        expect(distance(clownfish.position, host.position)).toBeLessThan(.8)
+        heights.push(clownfish.position.y)
+      }
+    }
+    expect(Math.max(...heights) - Math.min(...heights)).toBeGreaterThan(.015)
 
     const readyIds = new Set(result.diagnostics.islands.map(island => island.islandId))
     const moray = resolveNsaMorayResidence(false, readyIds)!
