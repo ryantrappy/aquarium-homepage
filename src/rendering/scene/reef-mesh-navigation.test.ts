@@ -683,6 +683,50 @@ async function loadActualGlb(bytes: Uint8Array) {
   }
 }
 
+  it('keeps the left cave probe clear in the raised laptop assembly', async () => {
+    const placement = reefPlacementsForViewport(false).find(item => item.islandKind === 'left')!
+    const { scene: reef } = await loadActualGlb(readFileSync(new URL(LIVE_ROCK_ISLAND_URLS.left)))
+    const coralTemplates = new Map<string, THREE.Object3D>()
+    for (const [id, url] of Object.entries(MODULAR_CORAL_ASSET_URLS)) {
+      const coral = await loadActualGlb(readFileSync(new URL(url)))
+      coralTemplates.set(id, coral.scene)
+    }
+    const assembled = assembleCoralsOnRockSockets(reef, coralTemplates, DEFAULT_LEFT_ISLAND_MOUNTS, {
+      foundationHeightScale: placement.foundationHeightScale,
+    })
+    expect(assembled.mountedCorals).toHaveLength(DEFAULT_LEFT_ISLAND_MOUNTS.length)
+    reef.scale.setScalar(placement.uniformScale)
+    reef.position.copy(placement.position)
+    reef.rotation.y = placement.yaw
+    const navigation = await createReefMeshNavigation([{ reef, islandId: 'reef-left', mountedCorals: assembled.mountedCorals }])
+    expect(navigation.status).toBe('ready')
+    if (navigation.status !== 'ready') return
+    expect(navigation.diagnostics.islands[0]).toMatchObject({
+      rockTriangles: 24_572,
+      rockVertices: 12_288,
+      rockComponents: 1,
+      boundaryEdges: 0,
+      nonManifoldEdges: 0,
+      nonManifoldVertices: 0,
+      inconsistentEdges: 0,
+      duplicateFaces: 0,
+      degenerateFaces: 0,
+    })
+
+    // The full coral assembly leaves a lower, slightly left-of-center route
+    // through the cave. Coordinates start in the unraised export's frame.
+    const y = 0.02 * placement.foundationHeightScale
+    const budget = { ...MESH_NAVIGATION_MOVEMENT_BUDGET }
+    const query = navigation.meshNavigation.queryCapsule!
+    function probeAtX(x: number) {
+      const start = reef.localToWorld(new THREE.Vector3(x, y, -0.36))
+      const end = reef.localToWorld(new THREE.Vector3(x, y, 0.36))
+      return query(start, end, MESH_NAVIGATION_COLLISION_RADIUS_M, budget)
+    }
+    expect(probeAtX(-0.025)).toMatchObject({ status: 'clear' })
+    expect(probeAtX(-0.05)).toMatchObject({ status: 'blocked', reason: 'surface-contact' })
+  }, 120_000)
+
   it('clears the exposed moray head at its fixed right-cave mouth across the full assembled right island and sand', async () => {
     const placement = reefPlacementsForViewport(false).find(item => item.islandKind === 'right')!
     const rockGltf = await loadActualGlb(readFileSync(new URL(LIVE_ROCK_ISLAND_URLS.right)))
