@@ -217,6 +217,7 @@ def _sculpt_head_geometry(
     u_eye: float,
     v_eye: float,
     spec: dict,
+    smooth_pre_existing: bool = True,
 ) -> None:
     eye = spec["eye"]
     op = spec["operculum"]
@@ -226,31 +227,32 @@ def _sculpt_head_geometry(
     n_verts = len(mesh.vertices)
     is_edge = [abs(v.co.x) <= 0.0045 for v in mesh.vertices]
 
-    # Build vertex adjacency for gentle smoothing of any pre-existing generic head bumps
-    adj: list[list[int]] = [[] for _ in range(n_verts)]
-    for e in mesh.edges:
-        a, b = e.vertices[0], e.vertices[1]
-        adj[a].append(b)
-        adj[b].append(a)
+    if smooth_pre_existing:
+        # Build vertex adjacency for gentle smoothing of any pre-existing generic head bumps
+        adj: list[list[int]] = [[] for _ in range(n_verts)]
+        for e in mesh.edges:
+            a, b = e.vertices[0], e.vertices[1]
+            adj[a].append(b)
+            adj[b].append(a)
 
-    for _pass in range(2):
-        new_x = [v.co.x for v in mesh.vertices]
-        for vi, v in enumerate(mesh.vertices):
-            if is_pectoral[vi] or is_edge[vi]:
-                continue
-            u, _vt = v_uvs[vi]
-            if u < 0.58 or abs(v.co.x) < 0.006:
-                continue
-            same_side = [
-                mesh.vertices[nb].co.x
-                for nb in adj[vi]
-                if not is_pectoral[nb] and (mesh.vertices[nb].co.x * v.co.x >= 0.0)
-            ]
-            if same_side:
-                avg_x = sum(same_side) / len(same_side)
-                new_x[vi] = v.co.x * 0.55 + avg_x * 0.45
-        for vi, xval in enumerate(new_x):
-            mesh.vertices[vi].co.x = xval
+        for _pass in range(2):
+            new_x = [v.co.x for v in mesh.vertices]
+            for vi, v in enumerate(mesh.vertices):
+                if is_pectoral[vi] or is_edge[vi]:
+                    continue
+                u, _vt = v_uvs[vi]
+                if u < 0.58 or abs(v.co.x) < 0.006:
+                    continue
+                same_side = [
+                    mesh.vertices[nb].co.x
+                    for nb in adj[vi]
+                    if not is_pectoral[nb] and (mesh.vertices[nb].co.x * v.co.x >= 0.0)
+                ]
+                if same_side:
+                    avg_x = sum(same_side) / len(same_side)
+                    new_x[vi] = v.co.x * 0.55 + avg_x * 0.45
+            for vi, xval in enumerate(new_x):
+                mesh.vertices[vi].co.x = xval
 
     ru = float(eye["ru"])
     rv = float(eye["rv"])
@@ -559,7 +561,7 @@ def _wire_packed_material(mesh_obj: bpy.types.Object, base_path: Path, norm_path
     # glTF Material Output so Occlusion from ORM.R survives Blender -> GLB export
     gltf_group = nt.nodes.new("ShaderNodeGroup")
     if "glTF Material Output" not in bpy.data.node_groups:
-        ng = bpy.data.node_groups.new("glTF Material Output", "ShaderTree")
+        ng = bpy.data.node_groups.new("glTF Material Output", "ShaderNodeTree")
         ng.interface.new_socket(name="Occlusion", in_out="INPUT", socket_type="NodeSocketFloat")
     gltf_group.node_tree = bpy.data.node_groups["glTF Material Output"]
     gltf_group.location = (450, -240)
