@@ -15,7 +15,7 @@ Root verified prior Root-checkpoint facts against the current checkout. The late
 
 ## Modular reef preview — 2026-11-21
 
-AQ-94 now packages seven saved NSA rock exports in one 3,956,104-byte shared-atlas GLB for the development aquarium preview. The 1440×900 review shows the taller left pinnacle, lower right island and measured through-arch with 13 mounted corals. The current production habitat stays in place while grounding, visible coral coverage, fish interaction and the fixed moray residence are validated on the new layout.
+AQ-94 now packages seven saved NSA rock exports in one 3,956,104-byte shared-atlas GLB for the development aquarium preview. The 1440×900 review shows the taller left pinnacle, lower right island and measured through-arch with 13 mounted corals. The modular right ledge shelters the fixed moray with a clear exposed-head corridor, and native body picking opens its service card. Production promotion still needs grounding, coral coverage and broader habitat interaction review.
 
 ## Fish depth and surface shafts — 2026-11-20
 
