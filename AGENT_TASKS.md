@@ -17,7 +17,7 @@ Root verified prior Root-checkpoint facts against the current checkout. The late
 
 AQ-70.11 commit `515e586` packages four supplied custom corals with their packed Blender sources, raw exports, generators and runtime manifests. The anchor hammer was scaled to 0.88 and moved 27 mm left and 15 mm back in island-local coordinates to clear the clownfish approach to its host. All five actual-geometry hosting cases pass. The 1440×900 DPR 1 working-tree preview displayed 12 inhabitants with no failed assets or browser warnings or errors. The screenshot includes concurrent sand and glass changes. Further close-up and variant review remains open under AQ-70.11.
 
-AQ-59 records a preliminary review of the procedural porous rock study. The 15,360-triangle export has embedded base color, normal and roughness maps. It has a single rounded mesh and lacks mounting sockets. In-tank scale, support, placement and cave clearance still need review before promotion.
+AQ-59 records a preliminary review of the procedural porous rock study. Direct inspection found 30,720 triangles and embedded 1024px base color, normal and roughness maps. The study sidecar reports 15,360 polygons. It has a single rounded mesh and lacks mounting sockets. In-tank scale, support, placement and cave clearance still need review before promotion.
 
 ## Current user-requested execution scope — 2026-11-15
 

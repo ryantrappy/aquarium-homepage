@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-05 03:13'
-updated_date: '2026-11-21 01:25'
+updated_date: '2026-11-21 01:28'
 labels:
   - modeling
 dependencies: []
@@ -88,6 +88,8 @@ Root read-only native/export audit saved docs/asset-evidence/aq59/runtime-source
 Root compared the working-tree laptop overview with the earlier four-colony capture at the same 1440×900 DPR 1, seed 2026 and time 1.25. The existing foundation shader now uses world-space normals under the vertical island scale and reuses its 3D field for pore wells, rims and bump. Squaring signed rim distances by multiplication avoids undefined GLSL power on negative inputs in coralline and anemone rim shading. The aquarium loaded with no failed assets or browser warnings/errors. Capture: docs/asset-evidence/aq59/porous-shading-review/laptop.png. The capture includes the ongoing glass and sand changes; this task commit contains the shading changes only. The separate rock study GLB has three embedded 1024px maps and no authored socket nodes. Its Cycles image is reference evidence, while the deployed model still needs exact-export art, physical dimensions, grounding and cave certification. No acceptance criterion was checked.
 
 The study generator ends after rendering Cycles and saving the native file. It does not bake the texture maps or export the supplied GLB. In the GLB POSITION stream, the vertex distance from origin runs from 0.9245 to 1.0656 export units. This supports a rounded, irregular silhouette but does not prove that the Cycles pore cavities are geometrically reproduced in the exported mesh. Recover the bake/export recipe before approving the study as a production asset.
+
+Corrected study figures from direct GLB inspection: 92,160 indices produce 30,720 triangles; 15,902 POSITION vertices. The sidecar count of 15,360 is polygons, not triangles. The study GLB SHA-256 is 1967aee06bd40aa6f5d4d409568fe062641af19c62442a41d916abedfcc4afc8. Generator Cycles material uses render-time displacement, while GLB uses baked base color, normal and roughness maps with no glTF displacement extension. Its independently exported relief is uncalibrated.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
