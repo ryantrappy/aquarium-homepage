@@ -87,6 +87,27 @@ describe('rendered fish travel adapter', () => {
     expect(fish.route.at(-1)!.y).toBeLessThanOrEqual(range.worldYRange[1])
   })
 
+  it.each(['mesh', 'AABB'])('keeps %s grazing destinations within the fish depth band', mode => {
+    const clear: CapsuleClearanceQuery = () => ({ status: 'clear', work: { nodeVisits: 0, triangleTests: 0 } })
+    const tooShallow = { id: 'shallow-graze', anchor: 'grazingSurface' as const, position: { x: -.3, y: .76, z: 0 } }
+    const valid = { id: 'valid-graze', anchor: 'grazingSurface' as const, position: { x: .5, y: 0, z: 0 } }
+    for (const anchors of [[tooShallow], [tooShallow, valid]]) {
+      const fish = createSwimmingFish('grazing-depth-band', 'yellow-tang', { x: -.65, y: 0, z: 0 }, .2, undefined, { collisionRadiusM: .04 })
+      fish.behavior = dispatchBehaviorEvent(fish.behavior, { type: 'behavior-opportunity', instanceId: fish.id, trigger: 'foraging-opportunity' })
+      const water: WaterHabitat = mode === 'mesh' ? meshHabitat(clear, anchors) : { bounds: meshWater, anchors, obstacles: [] }
+      stepSwimmingFish(fish, water, 1 / 60)
+      const target = fish.route.at(-1)
+      expect(target).toBeDefined()
+      if (anchors.includes(valid)) {
+        expect(fish.navigationAnchor).toBe('grazingSurface')
+        expect(target).toEqual(valid.position)
+      } else {
+        expect(fish.navigationAnchor).toBeUndefined()
+        expect(target!.y).toBeLessThanOrEqual(.56)
+      }
+    }
+  })
+
   it('keeps an active route when a swim transition requests an unavailable habitat anchor', () => {
     const fish = createSwimmingFish('missing-anchor-route', 'royal-gramma', { x: -3.8, y: 0, z: 0 }, .2)
     fish.behavior = {

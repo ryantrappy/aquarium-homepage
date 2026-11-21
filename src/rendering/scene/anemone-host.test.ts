@@ -2,11 +2,13 @@ import { readFileSync } from 'node:fs'
 import * as THREE from 'three'
 import { expect, it } from 'vitest'
 import { mountedAnemoneHosts } from './anemone-host'
-import { assembleCoralsOnRockSockets, DEFAULT_LEFT_ISLAND_MOUNTS, DEFAULT_RIGHT_ISLAND_MOUNTS, LIVE_ROCK_ISLAND_URLS, MODULAR_CORAL_ASSET_URLS } from './reef-assembly'
+import { AQUARIUM_WATER_BOUNDS, assembleCoralsOnRockSockets, DEFAULT_LEFT_ISLAND_MOUNTS, DEFAULT_RIGHT_ISLAND_MOUNTS, instantiateModularReefHabitat, LIVE_ROCK_ISLAND_URLS, MODULAR_CORAL_ASSET_URLS, snapshotMountedCoralOrigins } from './reef-assembly'
 import { overviewHalfWidthAtDepth } from './camera-zoom'
 import { reefPlacementsForViewport } from './reef-layout'
 import { createReefMeshNavigation, MESH_NAVIGATION_MOVEMENT_BUDGET } from './reef-mesh-navigation'
 import { createSwimmingFish, distance, stepSwimmingFish } from './motion'
+import { evaluateTieredVerticalDepthRange } from './fish-spawn'
+import { getSpeciesBehaviorProfile, SPECIES_BEHAVIOR_IDS } from '../../lib/fish-behavior'
 
 // Static positions/transforms/roles from the same runtime URLs, without image decoding.
 function staticGlb(url: string): THREE.Group {
@@ -95,6 +97,42 @@ it.each([[false,'left'],[true,'left'],[false,'right']] as const)('keeps actual m
 it('does not invent a host for missing or malformed crown geometry', () => {
   expect(mountedAnemoneHosts([], 'reef')).toEqual([])
   expect(()=>mountedAnemoneHosts([{socketName:'socket_anemone_crevice_01',coralAssetId:'coral-anemone-bta',root:new THREE.Group(),materialControllers:[]}], 'reef')).toThrow(/unavailable/)
+})
+
+it('provides in-band alternatives for the anchor types supplied by the current laptop reef', () => {
+  const halfWidth = overviewHalfWidthAtDepth(1440 / 900, -1.35)
+  const bounds = {
+    min: { ...AQUARIUM_WATER_BOUNDS.min, x: -halfWidth },
+    max: { ...AQUARIUM_WATER_BOUNDS.max, x: halfWidth },
+  }
+  const templates = new Map(Object.entries(MODULAR_CORAL_ASSET_URLS).map(([id, url]) => [id, staticGlb(url)]))
+  const anchors = reefPlacementsForViewport(false).flatMap((placement, index) => {
+    const kind = placement.islandKind
+    const reef = staticGlb(LIVE_ROCK_ISLAND_URLS[kind])
+    const mounts = kind === 'left' ? DEFAULT_LEFT_ISLAND_MOUNTS : DEFAULT_RIGHT_ISLAND_MOUNTS
+    const { mountedCorals } = assembleCoralsOnRockSockets(reef, templates, mounts, { foundationHeightScale: placement.foundationHeightScale })
+    const prefix = `reef-${index}`
+    const origins = snapshotMountedCoralOrigins(mountedCorals)
+    const habitat = instantiateModularReefHabitat(kind, placement.uniformScale, placement.position, prefix, placement.yaw, mounts, bounds, origins)
+    reef.position.copy(placement.position)
+    reef.scale.setScalar(placement.uniformScale)
+    reef.rotation.y = placement.yaw
+    return [...habitat.anchors.filter(anchor => anchor.anchor !== 'hostAnemone'), ...mountedAnemoneHosts(mountedCorals, prefix)]
+  })
+  for (const species of SPECIES_BEHAVIOR_IDS) {
+    const profile = getSpeciesBehaviorProfile(species)!
+    if (profile.habitatMode === 'crevice-resident') continue
+    const range = evaluateTieredVerticalDepthRange(species, bounds)!
+    expect(range.normalizedDepthRange[1], species).toBeGreaterThan(.5)
+    const [minY, maxY] = range.worldYRange
+    for (const anchorType of profile.anchors) {
+      const candidates = anchors.filter(anchor => anchor.anchor === anchorType && anchor.compatibleSpecies?.includes(species))
+      if (candidates.length === 0) continue
+      expect(candidates.some(anchor => anchor.position.y >= minY && anchor.position.y <= maxY), `${species}: ${anchorType}`).toBe(true)
+    }
+  }
+  const burrows = anchors.filter(anchor => anchor.anchor === 'sandBurrowEntrance')
+  expect(burrows).toHaveLength(2)
 })
 
 it('keeps the phone host available after sharing templates with both laptop reefs', async () => {

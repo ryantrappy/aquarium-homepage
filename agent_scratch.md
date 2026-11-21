@@ -114,3 +114,7 @@
 ### 2026-11-20 — AQ-101 exposed reef faces
 *Root reviewed the retained handoffs. Earlier mounted-coral and water-surface milestones are actioned, and standing asset, laptop-only, and local review instructions are current policy. Broader visual and navigation gates remain pending.*
 - Added surface-mounted zoanthid mats to both raised foundations. Root verified actual mesh attachments and reviewed the laptop preview. AQ-101 remains in progress.
+
+### 2026-11-20 — AQ-87 depth-aware anchor routing
+*Root reviewed retained scratch entries. Standing asset ownership, active-only scope, laptop verification and local delivery rules are current policy. Completed water, coral integration, and fixed cave geometry checkpoints are actioned. Animated clearance and broader visual acceptance remain pending.*
+- Verified current anchor depths from the laptop reef GLBs and constrained general anchor selection and held poses to species bands. Firefish include the measured burrow floor and clownfish reach below midpoint. Existing attached host behavior passed. AQ-87 species-depth acceptance was checked. Full animated clearance and interaction checks remain open.
