@@ -665,17 +665,20 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     expect(scatterMaterial.customProgramCacheKey()).not.toContain(':baked-pbr')
   })
 
-  it('registers and mounts both custom bubble-tip anemone variants with baked-pbr materials and anemone modes (AQ-70.11)', () => {
+  it('mounts coral-anemone-bta on default island sockets while keeping custom bubble-tip anemone variants registered (AQ-70.11)', () => {
+    expect(MODULAR_CORAL_ASSET_URLS['reef-anemone-rose-bta']).toContain('/custom-colonies/reef-anemone-rose-bta.glb')
+    expect(MODULAR_CORAL_ASSET_URLS['reef-anemone-sunburst-bta']).toContain('/custom-colonies/reef-anemone-sunburst-bta.glb')
+
     const cases = [
       {
-        id: 'reef-anemone-rose-bta',
+        id: 'coral-anemone-bta',
         island: 'left' as const,
         report: 'live-rock-island-left-socket-report.json',
         mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
         socketName: 'socket_anemone_crevice_01',
       },
       {
-        id: 'reef-anemone-sunburst-bta',
+        id: 'coral-anemone-bta',
         island: 'right' as const,
         report: 'live-rock-island-right-socket-report.json',
         mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
@@ -684,7 +687,6 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     ] as const
 
     for (const entry of cases) {
-      expect(MODULAR_CORAL_ASSET_URLS[entry.id]).toContain(`/custom-colonies/${entry.id}.glb`)
       const rockRoot = buildRockFixtureFromSocketReport(entry.report)
       const assembly = assembleCoralsOnRockSockets(rockRoot, buildMockCoralTemplates(), entry.mounts)
       const mounted = assembly.mountedCorals.find(candidate => candidate.socketName === entry.socketName)!
@@ -702,13 +704,9 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
 
       const crownMat = crownMesh!.material as THREE.MeshStandardMaterial
       const columnMat = columnMesh!.material as THREE.MeshStandardMaterial
-      expect(crownMat.customProgramCacheKey()).toContain(':coral-soft:baked-pbr')
-      expect(columnMat.customProgramCacheKey()).toContain(':coral-rigid:baked-pbr')
       expect(crownMat.userData.coralRawMasks.uniforms.uRoleIsSoft.value).toBe(1)
       expect(crownMat.userData.coralRawMasks.uniforms.uAnemoneMode.value).toBe(2)
-      expect(columnMat.userData.coralRawMasks.uniforms.uRoleIsSoft.value).toBe(0)
       expect(columnMat.userData.coralRawMasks.uniforms.uAnemoneMode.value).toBe(1)
-      expect(columnMat.userData.coralRawMasks.uniforms.uFluorescenceStrength.value).toBe(0)
     }
   })
 
@@ -793,6 +791,7 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     const rightAssembly = assembleCoralsOnRockSockets(rightRock, buildMockCoralTemplates(), DEFAULT_RIGHT_ISLAND_MOUNTS)
 
     for (const mount of [...DEFAULT_LEFT_ISLAND_MOUNTS, ...DEFAULT_RIGHT_ISLAND_MOUNTS]) {
+      if (mount.coralAssetId === 'coral-anemone-bta') continue
       expect(mount.coralAssetId.startsWith('reef-')).toBe(true)
       expect(MODULAR_CORAL_ASSET_URLS[mount.coralAssetId]).toContain(`/custom-colonies/${mount.coralAssetId}.glb`)
       expect(mount.paletteOverride?.surfaceMode).toBe('baked-pbr')

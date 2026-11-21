@@ -36,7 +36,7 @@ import {
 } from './underwater-optics'
 import { SURFACE_WAVE_GLSL } from './surface-waves'
 import { RaymarchedShaftPass, SHAFT_BEAM_GLSL } from './light-shafts'
-import { createAragoniteSandBed, evaluateAragoniteSandTilt, evaluateAragoniteSandWorldY, getRockFootprintsForViewport } from './aragonite-sand'
+import { createAragoniteSandBed, evaluateAragoniteSandTilt, evaluateAragoniteSandWorldY, getRockFootprintsForViewport, INVERTEBRATE_MAX_SAND_Z } from './aragonite-sand'
 import { reefPlacementsForViewport } from './reef-layout'
 import { hasReadyRightIslandCollider, resolveAvailableSnowflakeMorayResidence, resolveNsaMorayResidence, SNOWFLAKE_MORAY_CAVE_COLLISION_RADIUS_M, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M, type MorayResidence } from './moray-residence'
 import { CENTER_ARCH_URL, CENTER_ARCH_MOUNTS, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
@@ -680,13 +680,14 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     const yaw = presentationYaw ?? pose.yaw
     if (isInvertebrateSpecies(item.service.fishId)) {
       const narrow = width < 600
-      const sandY = evaluateAragoniteSandWorldY(pose.position.x, pose.position.z, narrow, contactFootprints)
-      item.root.position.set(pose.position.x, sandY, pose.position.z)
+      const clampedSandZ = Math.min(pose.position.z, INVERTEBRATE_MAX_SAND_Z)
+      const sandY = evaluateAragoniteSandWorldY(pose.position.x, clampedSandZ, narrow, contactFootprints)
+      item.root.position.set(pose.position.x, sandY, clampedSandZ)
       if (item.fallback) {
         item.root.rotation.set(0, 0, 0)
         item.root.scale.x = presentationYaw !== undefined ? 1 : evaluateSpriteTurnScaleX(yaw)
       } else {
-        const tilt = evaluateAragoniteSandTilt(pose.position.x, pose.position.z, yaw, narrow, contactFootprints)
+        const tilt = evaluateAragoniteSandTilt(pose.position.x, clampedSandZ, yaw, narrow, contactFootprints)
         item.root.rotation.set(tilt.pitch, yaw, tilt.roll, 'YXZ')
       }
       return
@@ -817,6 +818,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     return nearestHit(x, y)?.object.userData.serviceId as string | undefined
   }
   function fishLinkPoint(item: Inhabitant): THREE.Vector3 {
+    if (isInvertebrateSpecies(item.service.fishId)) {
+      return item.root.position.clone()
+    }
     return item.headBone ? item.headBone.getWorldPosition(new THREE.Vector3()) : item.root.position
   }
   function updateVisibility(item: Inhabitant) {
@@ -875,6 +879,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       const r = MESH_NAVIGATION_COLLISION_RADIUS_M
       const { min, max } = habitat.bounds
       const p = item.motion.position
+      if (isInvertebrateSpecies(item.service.fishId) && p.z > INVERTEBRATE_MAX_SAND_Z) return false
       if (!isSafeFishPosition(p, r, habitat.bounds, [], habitat.maxAbsXAtDepth)) return false
       if (
         p.x < min.x + r || p.x > max.x - r ||
@@ -888,6 +893,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
           ...habitat.meshNavigation.movementBudget,
         }).status === 'clear'
       )
+    }
+    if (isInvertebrateSpecies(item.service.fishId) && item.motion.position.z > INVERTEBRATE_MAX_SAND_Z) {
+      return false
     }
     return isSafeFishPosition(
       item.motion.position,
@@ -1114,15 +1122,24 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         }
         for (const item of allInhabitants) {
           if (isSafeCurrentInhabitantPosition(item)) continue
+          const relocationBounds = isInvertebrateSpecies(item.service.fishId)
+            ? {
+                min: habitat.bounds.min,
+                max: {
+                  ...habitat.bounds.max,
+                  z: Math.min(habitat.bounds.max.z, INVERTEBRATE_MAX_SAND_Z + item.motion.clearance),
+                },
+              }
+            : habitat.bounds
           const relocated = findSafeFishSpawn(
             item.motion.position,
-            habitat.bounds,
+            relocationBounds,
             habitat.obstacles,
             item.motion.clearance,
             occupiedForRelocation,
             meshCheck,
             fishBodyRadiusM(item.service.fishId),
-            evaluateTieredVerticalDepthRange(item.service.fishId, habitat.bounds, item.motion.clearance)?.worldYRange,
+            evaluateTieredVerticalDepthRange(item.service.fishId, relocationBounds, item.motion.clearance)?.worldYRange,
             habitat.maxAbsXAtDepth,
           )
           if (relocated) {
@@ -1434,7 +1451,16 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       const preferredPosition = preference && foregroundCruiser
         ? { ...preference.position, z: habitat.bounds.max.z - clearance - (service.fishId === 'blue-tang' ? 0.65 : 0.25) }
         : preference?.position
-      const position = preference && preferredPosition && findSafeFishSpawn(preferredPosition, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(service.fishId), evaluateTieredVerticalDepthRange(service.fishId, habitat.bounds, clearance)?.worldYRange, habitat.maxAbsXAtDepth)
+      const spawnWaterBounds = isInvertebrateSpecies(service.fishId)
+        ? {
+            min: habitat.bounds.min,
+            max: {
+              ...habitat.bounds.max,
+              z: Math.min(habitat.bounds.max.z, INVERTEBRATE_MAX_SAND_Z + clearance),
+            },
+          }
+        : habitat.bounds
+      const position = preference && preferredPosition && findSafeFishSpawn(preferredPosition, spawnWaterBounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(service.fishId), evaluateTieredVerticalDepthRange(service.fishId, spawnWaterBounds, clearance)?.worldYRange, habitat.maxAbsXAtDepth)
       if (!position || !preference) {
         // Keep existing instances intact during the truthful full-native fallback.
         // A later fitting configuration can reuse their exact poses and clocks.

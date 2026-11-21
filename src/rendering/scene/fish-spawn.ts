@@ -1,5 +1,7 @@
 import { isWaterSegmentSafe, type AxisAlignedBox, type MaxAbsXAtDepth, type SolidObstacleVolume, type Vec3 } from '../../simulation/habitat-navigation'
+import { isInvertebrateSpecies } from '../../lib/fish'
 import { getSpeciesBehaviorProfile } from '../../lib/fish-behavior'
+import { INVERTEBRATE_MAX_SAND_Z } from './aragonite-sand'
 
 const SPAWN_SEARCH_DIVISIONS = 4
 const INITIAL_HEADING_ALTERNATIVES = 8
@@ -229,7 +231,10 @@ export function fishSpawnPreference(
   if (!ecologicalRange) return undefined
 
   const safeMin = { x: waterBounds.min.x + clearance, y: waterBounds.min.y + clearance, z: waterBounds.min.z + clearance }
-  const safeMax = { x: waterBounds.max.x - clearance, y: waterBounds.max.y - clearance, z: waterBounds.max.z - clearance }
+  const maxWaterZ = isInvertebrateSpecies(speciesId)
+    ? Math.min(waterBounds.max.z - clearance, INVERTEBRATE_MAX_SAND_Z)
+    : waterBounds.max.z - clearance
+  const safeMax = { x: waterBounds.max.x - clearance, y: waterBounds.max.y - clearance, z: maxWaterZ }
   if (safeMin.x > safeMax.x || safeMin.y > safeMax.y || safeMin.z > safeMax.z) return undefined
 
   const seed = spawnSeed(instanceId, speciesId)

@@ -1,5 +1,7 @@
 import * as THREE from 'three'
+import { isInvertebrateSpecies } from '../../lib/fish'
 import { getSpeciesBehaviorProfile, type HabitatAnchor } from '../../lib/fish-behavior'
+import { INVERTEBRATE_MAX_SAND_Z } from './aragonite-sand'
 import { advanceFishBehavior, createFishBehaviorInstance, dispatchBehaviorEvent, getMotionIntent, getNavigationRequest, reportNavigationOutcome, type FishBehaviorInstance } from '../../simulation/behavior-runtime'
 import { evaluateSchoolingSteering, isGroupSchoolingSpecies, type SchoolingPeer } from './schooling-navigation'
 import { evaluateAnchorInteractionOffset, isSpeciesCompatibleWithAnchor, resolveSafeAnchorInteractionTarget } from './habitat-anchor-interactions'
@@ -385,9 +387,11 @@ function sampleFreeWaterTarget(
   localLoiter: boolean,
 ): Vec3 | undefined {
   const { min, max } = habitat.bounds
+  const isInvertebrate = isInvertebrateSpecies(fish.speciesId)
+  const effectiveMaxZ = isInvertebrate ? Math.min(max.z, INVERTEBRATE_MAX_SAND_Z + clearance) : max.z
   const isSchool = isGroupSchoolingSpecies(fish.speciesId)
-  const preferForeReefZ = isSchool || habitat.obstacles.length > 0 || (max.z - min.z) > 3.5
-  const zSpan = max.z - min.z - 2 * clearance
+  const preferForeReefZ = isSchool || habitat.obstacles.length > 0 || (effectiveMaxZ - min.z) > 3.5
+  const zSpan = effectiveMaxZ - min.z - 2 * clearance
   if (zSpan < 0) return undefined
 
   let y: number
@@ -449,10 +453,19 @@ function sampleFreeWaterTarget(
 
 function routeInput(fish: SwimmingFish, habitat: WaterHabitat, target: Vec3, clearanceOverride?: number) {
   const collisionClearance = clearanceOverride ?? fish.clearance
+  const waterBounds = isInvertebrateSpecies(fish.speciesId)
+    ? {
+        min: habitat.bounds.min,
+        max: {
+          ...habitat.bounds.max,
+          z: Math.min(habitat.bounds.max.z, INVERTEBRATE_MAX_SAND_Z + collisionClearance),
+        },
+      }
+    : habitat.bounds
   return {
     start: fish.position,
     target,
-    waterBounds: habitat.bounds,
+    waterBounds,
     obstacles: habitat.obstacles,
     fishClearanceRadius: collisionClearance,
     maxAbsXAtDepth: habitat.maxAbsXAtDepth,
@@ -569,6 +582,7 @@ function reportMeshNavigationFailure(fish: SwimmingFish, request: NonNullable<Re
 }
 function insideMeshWater(fish: SwimmingFish, habitat: WaterHabitat, point: Vec3): boolean {
   const radiusM = fish.collisionRadiusM!
+  if (isInvertebrateSpecies(fish.speciesId) && point.z > INVERTEBRATE_MAX_SAND_Z) return false
   return isWithinDepthAwareWaterBounds(point, habitat.bounds, radiusM, habitat.maxAbsXAtDepth, lateralClearanceForFish(fish, habitat, radiusM))
 }
 function selectFreeWaterAttemptTarget(
@@ -593,7 +607,10 @@ function selectFreeWaterAttemptTarget(
   let target: Vec3 | undefined
   if (fish.startleSeconds > 0) {
     const evasiveYaw = fish.yaw + (attempt % 2 ? -1 : 1) * (.7 + random(fish) * .4)
-    const z = clamp(fish.position.z + Math.cos(evasiveYaw) * 1.4, min.z + clearance, max.z - clearance)
+    const maxWaterZ = isInvertebrateSpecies(fish.speciesId)
+      ? Math.min(max.z - clearance, INVERTEBRATE_MAX_SAND_Z)
+      : max.z - clearance
+    const z = clamp(fish.position.z + Math.cos(evasiveYaw) * 1.4, min.z + clearance, maxWaterZ)
     const safeRange = safeLateralRange(habitat, z, lateralClearance)
     const height = max.y - min.y
     const minY = clamp(max.y - depthRange[1] * height, min.y + clearance, max.y - clearance)

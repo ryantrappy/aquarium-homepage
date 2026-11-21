@@ -32,7 +32,9 @@ export type AragoniteSandBed = Readonly<{
 
 const LEFT_CONTACT_AO_STRENGTH = 0.55
 const RIGHT_CONTACT_AO_STRENGTH = 0.52
-const FRONT_SAND_EDGE_Z = 1.22
+export const FRONT_SAND_EDGE_Z = 1.22
+/** Maximum Z (with 0.14 m front margin) so benthic crawlers stay on the visible aragonite sand bed inside the front glass. */
+export const INVERTEBRATE_MAX_SAND_Z = FRONT_SAND_EDGE_Z - 0.14
 const FRONT_SAND_EDGE_BOTTOM_Y = -2.845
 
 function sandEnclosureBounds(narrow: boolean) {

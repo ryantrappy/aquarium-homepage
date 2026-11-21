@@ -9,6 +9,8 @@ import { fishBodyRadiusM, fishClearanceRadius, fishRenderLength } from './fish-s
 import { projectFishLinkBounds } from './fish-link-projection'
 import { overviewHalfWidthAtDepth } from './camera-zoom'
 import { createSwimmingFish, stepSwimmingFish } from './motion'
+import { INVERTEBRATE_SPECIES_IDS } from '../../lib/fish'
+import { INVERTEBRATE_MAX_SAND_Z } from './aragonite-sand'
 import { canRunFishSceneLoop, classifySpeciesVerticalTier, evaluateTieredVerticalDepthRange, findSafeFishHeading, findSafeFishSpawn, fishSceneStatus, fishSpawnPreference, fishSpawnSlotsForServices, isSafeFishPosition, FISH_SPAWN_DEPTH_PLANES, FISH_SPAWN_DEPTH_PLANE_JITTER, TIERED_VERTICAL_DEPTH_ZONES, type OccupiedFishSpawn } from './fish-spawn'
 import { instantiateModularReefHabitat } from './reef-assembly'
 import { reefPlacementsForViewport } from './reef-layout'
@@ -541,6 +543,25 @@ describe('safe aquarium fish spawning', () => {
       const normalizedDepth = (bounds.max.y - preference!.position.y) / columnHeight
       expect(normalizedDepth, fish.id).toBeGreaterThanOrEqual(ecologicalRange!.normalizedDepthRange[0] - 1e-12)
       expect(normalizedDepth, fish.id).toBeLessThanOrEqual(ecologicalRange!.normalizedDepthRange[1] + 1e-12)
+    }
+  })
+
+  it('constrains benthic invertebrates to spawn and forage behind the aragonite front sand edge (z <= INVERTEBRATE_MAX_SAND_Z)', () => {
+    const bounds = waterBounds(1440, 900)
+    const habitat = { bounds, obstacles: [], anchors: [] }
+    for (const speciesId of INVERTEBRATE_SPECIES_IDS) {
+      const clearance = fishClearanceRadius(speciesId)
+      for (let i = 0; i < 6; i++) {
+        const pref = fishSpawnPreference(`inv-${speciesId}-${i}`, speciesId, bounds, clearance, { index: i, count: 6 })!
+        expect(pref).toBeDefined()
+        expect(pref.position.z).toBeLessThanOrEqual(INVERTEBRATE_MAX_SAND_Z + 1e-9)
+      }
+      const start = fishSpawnPreference(`inv-start-${speciesId}`, speciesId, bounds, clearance, { index: 0, count: 2 })!.position
+      const crawler = createSwimmingFish(`inv-${speciesId}`, speciesId, start, clearance)
+      for (let step = 0; step < 240; step++) {
+        stepSwimmingFish(crawler, habitat, 1 / 15)
+        expect(crawler.position.z).toBeLessThanOrEqual(INVERTEBRATE_MAX_SAND_Z + 1e-6)
+      }
     }
   })
 })
