@@ -78,6 +78,7 @@ export function ServiceManager({
 }: ServiceManagerProps) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [draft, setDraft] = useState<ServiceDraft>(blankDraft)
+  const [displayOnly, setDisplayOnly] = useState(false)
   const [formError, setFormError] = useState('')
   const [notice, setNotice] = useState('')
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
@@ -119,10 +120,12 @@ export function ServiceManager({
   function focusNameInput() { scheduleFocus(() => nameInput.current) }
   function focusFormError() { scheduleFocus(() => formErrorRef.current) }
 
-  function resetForm() { setEditingId(null); setDraft(blankDraft); setFormError('') }
+  function resetForm() { setEditingId(null); setDraft(blankDraft); setDisplayOnly(false); setFormError('') }
   function beginEdit(service: ServiceConfig) {
+    const unlinked = !hasServiceUrl(service)
     setEditingId(service.id)
-    setDraft({ name: service.name, url: service.url, fishId: service.fishId })
+    setDisplayOnly(unlinked)
+    setDraft({ name: service.name, url: unlinked ? '' : service.url, fishId: service.fishId })
     setFormError('')
     focusNameInput()
   }
@@ -133,11 +136,19 @@ export function ServiceManager({
     let succeeded = false
     setBusy('save')
     try {
+      const chosenFish = getFishById(draft.fishId) ?? REEF_FISH[0]
       const normalizedUrl = draft.url.trim()
-      const normalizedDraft: ServiceDraft = {
-        ...draft,
-        url: normalizedUrl === 'https://' || normalizedUrl === 'http://' ? '' : normalizedUrl,
-      }
+      const normalizedDraft: ServiceDraft = displayOnly
+        ? {
+            ...draft,
+            name: draft.name.trim() || chosenFish.commonName,
+            url: '',
+          }
+        : {
+            ...draft,
+            name: draft.name.trim(),
+            url: normalizedUrl === 'https://' || normalizedUrl === 'http://' ? '' : normalizedUrl,
+          }
       if (editingId) await onUpdate(editingId, normalizedDraft)
       else await onAdd(normalizedDraft)
       resetForm()
@@ -243,8 +254,25 @@ export function ServiceManager({
           <h3>{editingId ? 'Edit service' : 'Add a service'}</h3>
           {notice && <p className="manager-notice" role="status" aria-live="polite">{notice}</p>}
           {formError && <p ref={formErrorRef} className="form-error" role="alert" aria-live="assertive" tabIndex={-1}>{formError}</p>}
-          <label>Service name<input ref={nameInput} value={draft.name} onChange={(e) => { setDraft({ ...draft, name: e.target.value }); setFormError('') }} maxLength={80} placeholder="e.g. Home Assistant" required disabled={formDisabled} /></label>
-          <label>Web address (optional — leave blank for display fish)<input type="url" value={draft.url} onChange={(e) => { setDraft({ ...draft, url: e.target.value }); setFormError('') }} placeholder="https://example.com or leave blank" disabled={formDisabled} /></label>
+          <label className="display-only-toggle">
+            <input
+              type="checkbox"
+              checked={displayOnly}
+              disabled={formDisabled}
+              onChange={(event) => {
+                const next = event.target.checked
+                setDisplayOnly(next)
+                setDraft((prev) => ({
+                  ...prev,
+                  url: next ? '' : prev.url.trim() ? prev.url : 'https://',
+                }))
+                setFormError('')
+              }}
+            />
+            <span>Display-only fish (no link)</span>
+          </label>
+          <label>{displayOnly ? 'Display name (optional)' : 'Service name'}<input ref={nameInput} value={draft.name} onChange={(e) => { setDraft({ ...draft, name: e.target.value }); setFormError('') }} maxLength={80} placeholder={displayOnly ? selectedFish.commonName : 'e.g. Home Assistant'} required={!displayOnly} disabled={formDisabled} /></label>
+          {!displayOnly && <label>Web address (optional — leave blank for display fish)<input type="url" value={draft.url} onChange={(e) => { setDraft({ ...draft, url: e.target.value }); setFormError('') }} placeholder="https://example.com or leave blank" disabled={formDisabled} /></label>}
           <fieldset className="fish-picker" disabled={formDisabled}>
             <legend>Choose a fish</legend>
             <div className="fish-picker-selected" aria-live="polite">

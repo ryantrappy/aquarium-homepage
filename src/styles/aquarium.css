@@ -130,7 +130,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .service-form { display: grid; grid-template-columns: 1fr 1fr; gap: 11px 13px; padding: 20px 0 17px; border-bottom: 1px solid var(--line); }
 .service-form h3 { grid-column: 1 / -1; margin: 0 0 1px; color: #dfefe4; font-family: var(--font-ui); font-size: 16px; letter-spacing: -.02em; }
 .service-form label, .import-form label { display: flex; flex-direction: column; gap: 6px; color: #a7c6bc; font-size: 10px; }
-.service-form label:first-of-type, .service-form label:nth-of-type(2) { grid-column: span 1; }
+.service-form label.display-only-toggle { grid-column: 1 / -1; flex-direction: row; align-items: center; gap: 9px; min-height: 36px; color: #e8f4ec; font-size: 12px; cursor: pointer; }
+.service-form .display-only-toggle input[type="checkbox"] { width: 18px; height: 18px; flex: 0 0 auto; padding: 0; accent-color: var(--seafoam); }
+.service-form label:not(.display-only-toggle) { grid-column: span 1; }
 .fish-picker { grid-column: 1 / -1; min-width: 0; margin: 0; padding: 0; border: 0; }
 .fish-picker legend { margin-bottom: 7px; color: #a7c6bc; font-size: 10px; }
 .fish-picker-selected { min-height: 62px; display: flex; align-items: center; gap: 12px; margin-bottom: 9px; padding: 7px 10px; border: 1px solid rgba(151,206,177,.3); border-radius: 7px; background: rgba(42,91,76,.2); }

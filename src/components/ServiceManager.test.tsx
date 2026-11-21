@@ -259,11 +259,50 @@ describe('ServiceManager async persistence', () => {
       fishId: 'desjardins-sailfin-tang',
     })
   })
+
+  it('supports the display-only fish checkbox with optional name and hides the URL input', async () => {
+    const onAdd = vi.fn<(draft: ServiceDraft) => Promise<void>>().mockResolvedValue(undefined)
+    const view = await renderManager(props({ onAdd }))
+    const toggle = view.querySelector<HTMLInputElement>('.display-only-toggle input[type="checkbox"]')!
+    expect(toggle.checked).toBe(false)
+    expect(view.querySelector('input[type="url"]')).not.toBeNull()
+
+    await act(async () => { toggle.click() })
+    expect(toggle.checked).toBe(true)
+    expect(view.querySelector('input[type="url"]')).toBeNull()
+
+    const nameInput = view.querySelector<HTMLInputElement>('form.service-form input:not([type="checkbox"]):not([type="radio"])')!
+    expect(nameInput.required).toBe(false)
+
+    await act(async () => {
+      view.querySelector<HTMLInputElement>('input[type="radio"][value="desjardins-sailfin-tang"]')!.click()
+    })
+    await submitForm(view.querySelector('form.service-form')!)
+    expect(onAdd).toHaveBeenCalledWith({
+      name: 'Desjardins’ sailfin tang',
+      url: '',
+      fishId: 'desjardins-sailfin-tang',
+    })
+    expect(toggle.checked).toBe(false)
+
+    await act(async () => { toggle.click() })
+    const customNameInput = view.querySelector<HTMLInputElement>('form.service-form input:not([type="checkbox"]):not([type="radio"])')!
+    await act(async () => {
+      changeTextInput(customNameInput, 'Tank Mascot')
+      view.querySelector<HTMLInputElement>('input[type="radio"][value="flame-angelfish"]')!.click()
+    })
+    await submitForm(view.querySelector('form.service-form')!)
+    expect(onAdd).toHaveBeenCalledWith({
+      name: 'Tank Mascot',
+      url: '',
+      fishId: 'flame-angelfish',
+    })
+  })
 })
 
 describe('ServiceManager FPS counter toggle (AQ-83 AC #1)', () => {
   function fpsToggle(view: HTMLDivElement) {
-    return view.querySelector<HTMLInputElement>('input[type="checkbox"]')
+    return view.querySelector<HTMLInputElement>('.debug-setting input[type="checkbox"]')
   }
 
   it('shows the toggle unchecked by default', async () => {
