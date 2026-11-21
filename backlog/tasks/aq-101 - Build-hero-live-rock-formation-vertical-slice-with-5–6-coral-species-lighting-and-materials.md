@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-11 05:17'
-updated_date: '2026-11-13 05:37'
+updated_date: '2026-11-21 01:34'
 labels:
   - modeling
   - blender
@@ -51,8 +51,16 @@ Prioritize building ONE exceptionally convincing hero rock formation with 5–6 
 - [ ] #5 Fish swimming lanes and label sightlines in front of and above the formation remain clear
 <!-- AC:END -->
 
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Fill exposed front faces with small groups of existing encrusting polyps. Locate attachments by probing actual transformed foundation triangles, confirm face support at the center and around each footprint, and keep the growth away from hero mounts, cave mouths and the central passage. Reuse the existing instanced batch and compare the laptop view before and after.
+<!-- SECTION:PLAN:END -->
+
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 Root2026-11-12 review withdraws unproven photographic-realism and full fish-clearance completion. Current exact-source native1440x900/402x874 views exist underAQ70.13/taller-20261112 andAQ87/distribution-20261112; these show useful authored coral archetypes and taller composition, but repeated simple colony forms, broad mound foundations and conspicuous shader patterns still fall short of the supplied photographic reef goal. No dedicated historical hero capture proving AC4 was found. Actual runtime foundation files also differ from canonical measured mount/cave evidence (AQ59runtime-source-audit-20261112). Keep verified archetype layering/lighting integration criteria, but AC1biological art, AC4photographic acceptance and AC5actual animated clearance remain open. No model rollback or edits.
+
+Root review 2026-11-20. Added shallow zoanthid mats to exposed rock faces on both islands, reusing the existing instanced batch and asset. Each mat probes the actual foundation at its center and four neighboring points. The existing anchor offsets and central passage remain in place. Added two exact-foundation attachment tests. Attachment, assembly, cave, and anemone route suites pass 58 tests. The 1440×900 DPR 1 working-tree capture at docs/asset-evidence/aq101/face-colony-review/laptop.png shows 12 inhabitants and no failed assets or browser warnings or errors. The preview includes concurrent sand and glass edits. The mats are decorative instances. Full animated-body and label-clearance review, biological art, and photographic acceptance remain open.
 <!-- SECTION:NOTES:END -->

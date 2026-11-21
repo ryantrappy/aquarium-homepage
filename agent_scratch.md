@@ -110,3 +110,7 @@
 ### AQ-103 water surface follow-up
 *Root reviewed retained entries. The prior rock shading delivery is actioned, standing local and laptop-only scope remains current, and backlog acceptance gates remain pending.*
 - The water shader now eases in transmission above the critical angle, preserves a finite meniscus Gaussian, and moderates saturation in captured reflections. Laptop overview rendered cleanly. Its front meniscus remains outside the view.
+
+### 2026-11-20 — AQ-101 exposed reef faces
+*Root reviewed the retained handoffs. Earlier mounted-coral and water-surface milestones are actioned, and standing asset, laptop-only, and local review instructions are current policy. Broader visual and navigation gates remain pending.*
+- Added surface-mounted zoanthid mats to both raised foundations. Root verified actual mesh attachments and reviewed the laptop preview. AQ-101 remains in progress.

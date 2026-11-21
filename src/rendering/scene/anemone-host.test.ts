@@ -116,3 +116,29 @@ it('keeps the phone host available after sharing templates with both laptop reef
     for(const host of hosts)expect(query(host.position,host.position,.04,{...MESH_NAVIGATION_MOVEMENT_BUDGET}),JSON.stringify({narrow,host})).toMatchObject({status:'clear'})
   }
 },15000)
+
+it.each(['left', 'right'] as const)('seats added %s face colonies against the actual foundation', island => {
+  const layout = reefPlacementsForViewport(false).find(p => p.islandKind === island)!
+  const reef = staticGlb(LIVE_ROCK_ISLAND_URLS[island])
+  const rocks = reef.children.filter((node): node is THREE.Mesh => node instanceof THREE.Mesh)
+  expect(rocks.length).toBeGreaterThan(0)
+  const mounts = island === 'left' ? DEFAULT_LEFT_ISLAND_MOUNTS : DEFAULT_RIGHT_ISLAND_MOUNTS
+  const templates = new Map(Object.entries(MODULAR_CORAL_ASSET_URLS).map(([id, url]) => [id, staticGlb(url)]))
+  const { instancedMeshes } = assembleCoralsOnRockSockets(reef, templates, mounts, {
+    foundationHeightScale: layout.foundationHeightScale,
+  })
+  const batch = instancedMeshes.find(mesh => mesh.name.startsWith('instanced_coral-zoanthid-mat_'))!
+  expect(batch.count).toBeGreaterThan(mounts.length)
+  expect(batch.count).toBeLessThanOrEqual(mounts.length + 5)
+  const matrix = new THREE.Matrix4()
+  const ray = new THREE.Raycaster()
+  for (let index = mounts.length; index < batch.count; index++) {
+    batch.getMatrixAt(index, matrix)
+    const center = new THREE.Vector3().setFromMatrixPosition(matrix)
+    const outward = new THREE.Vector3(0, 1, 0).transformDirection(matrix)
+    expect(outward.z).toBeGreaterThanOrEqual(0.49)
+    ray.set(center.clone().addScaledVector(outward, 0.025), outward.clone().negate())
+    const hit = ray.intersectObjects(rocks, false)[0]
+    expect(hit?.point.distanceTo(center)).toBeCloseTo(0.004, 4)
+  }
+})
