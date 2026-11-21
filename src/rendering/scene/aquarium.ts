@@ -1661,7 +1661,8 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     const reflectOverview = lookDevConfig
       ? lookDevPreset === 'full-scene'
       : isOverviewZoomState(cameraZoomCurrent) && isOverviewZoomState(cameraZoomDesired)
-    glassEnclosure.update(effectiveEnvTime, reflectOverview ? qualityTier : 'low', loadedAssets.size * 1000 + meshNavigationGeneration)
+    // Hold the reflection cache at the current phase when motion stops.
+    glassEnclosure.update(sceneTime, reflectOverview ? qualityTier : 'low', loadedAssets.size * 1000 + meshNavigationGeneration)
     try {
     if (shaftMode === 'raymarch' && !shaftPassFailed) {
       if (!shaftPass) {

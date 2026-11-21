@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-12 05:15'
-updated_date: '2026-11-15 16:07'
+updated_date: '2026-11-21 01:37'
 labels:
   - rendering
   - optics
@@ -56,6 +56,8 @@ Comparison between the photorealism reference images and the live WebGL build sh
 Implement the Root-approved GO as restrained tank enclosure only: (1) bound the water and aragonite bed with front/left/right/back planes, subtle corner seams, and a bottom glass lip; (2) add faint left/right interior reflections by mirroring actual outer reef and sand/caustic scene content, never painted silhouettes; (3) keep the front pane optically clear, using edge/grazing Fresnel highlight and faint diagonal sheen only—no full-frame blur, refraction, color veil, or scene-blocking glare; (4) set raycast to no-op on every glass mesh; (5) advance/freeze all glass reflection motion on the existing scene clock for active, pause, reduced-motion, and page-hidden states; (6) verify pointer/link behavior and the two required DPR1 viewports, plus scoped unit tests/typecheck/build.
 
 Root next visual iteration after reviewed PR47: build a separate glass-enclosure scene module with clear front/back/side boundaries, corner seams and sand lip. Prototype real side-plane reflected scene content using the established Three reflector path at bounded resolution/tier/update cadence; compare against a no-reflection baseline before accepting costs or appearance. Exclude enclosure from reflection recursion, shaft depth occluders and picking; use shared paused/reduced/hidden scene clocks. Preserve all supplied models/Blender work. Verify both exact viewports and native link/focus controls; keep scene readability and overall reference fidelity as the acceptance gate, not mere mesh presence.
+
+Exercise the real aquarium-to-enclosure clock across pause and reduced-motion transitions. Keep the side reflections on the held scene phase so toggling motion does not invalidate the cached frames.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -68,4 +70,6 @@ Root first functional enclosure handoff: new glass-enclosure.ts builds clear fro
 Exact-source native enclosure/taller-colony handoff images at both target viewports are indexed by docs/asset-evidence/aq70-13/taller-20261112/review.json (sourcee5fd2e1). Full722tests/65files and productionbuild pass; no captured shader warnings/errors. Clear seams/panes render and links remain visible; do not mark Done yet: front bottom-lip framing and controlled moving-scene reflection cost/final art still require review.
 
 2026-11-15 active-backlog review: the focused combined runtime-quality, aquarium-lifecycle, and glass-enclosure suites pass 83/83. `glass-enclosure.test.ts` directly verifies enclosure meshes produce no raycast hits and reflection updates reuse the last capture at a frozen scene time; no two-viewport live visual review or direct reduced-motion enclosure integration review was available. No acceptance criteria were checked; retain In Progress pending 1440x900/402x874 Root review of bounds, interior reflections, Fresnel visibility, fish picking, and reduced-motion behavior.
+
+Root review 2026-11-20. The aquarium previously passed zero to the glass controller when paused or under reduced motion, invalidating its timed reflection cache. It now passes the held scene phase. New real-controller regression reproduced the 0 versus 0.1 second reset and passes with the change. The focused runtime, enclosure and caustic suites pass 94 tests in the working tree. Live 1440×900 DPR 1 preview produced identical consecutive screenshots while paused and separately under system reduced motion. A canvas click through the glass focused the Copperband butterflyfish and exposed the configured radarr link in its inspect card. The external service was not opened. Native preview includes concurrent sand/enclosure styling. Evidence is under docs/asset-evidence/aq102/reflection-clock-review/. Keep AQ-102 open for full containment, reflections and sheen review.
 <!-- SECTION:NOTES:END -->

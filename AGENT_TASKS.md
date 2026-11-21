@@ -13,6 +13,12 @@ Downstream: Current implementation and review work
 
 Root verified prior Root-checkpoint facts against the current checkout. The latest user request (2026-11-15) limits this execution to the 18 tasks that were already In Progress at request start; do not start To Do tasks or create new tasks. This request-specific boundary supersedes the older fixed-showcase execution scope below without changing the historical release record or Backlog acceptance criteria.
 
+## Reef faces and glass controls — 2026-11-20
+
+AQ-101 adds shallow zoanthid mats seated against the actual raised foundations. Existing batch assets supply the colonies. The exact checkout passed 973 tests, typecheck and build. The working-tree laptop preview shows 12 inhabitants and includes concurrent sand and glass styling. Full visual and swimming-clearance acceptance remains open.
+
+AQ-102 holds the current reflection phase through pause and reduced motion. The live laptop review produced identical consecutive frames in each stopped state, and a body click opened the Copperband butterflyfish inspect card. The enclosure appearance and end-to-end service navigation remain open.
+
 ## Coral asset review — 2026-11-20
 
 AQ-70.11 commit `515e586` packages four supplied custom corals with their packed Blender sources, raw exports, generators and runtime manifests. The anchor hammer was scaled to 0.88 and moved 27 mm left and 15 mm back in island-local coordinates to clear the clownfish approach to its host. All five actual-geometry hosting cases pass. The 1440×900 DPR 1 working-tree preview displayed 12 inhabitants with no failed assets or browser warnings or errors. The screenshot includes concurrent sand and glass changes. Further close-up and variant review remains open under AQ-70.11.

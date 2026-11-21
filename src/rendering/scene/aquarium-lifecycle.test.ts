@@ -13,6 +13,7 @@ import { ENVIRONMENT_MAP_INTENSITY } from './environment-map'
 import { CENTER_ARCH_MOUNTS } from './reef-arch'
 import { projectFishBodyBounds } from './fish-link-projection'
 import * as labelLayout from './fish-label-layout'
+import * as glassEnclosure from './glass-enclosure'
 import type { FishExtensionConfig, FishExtensionSnapshot } from '../../simulation/fish-extensions'
 
 const state = vi.hoisted(() => ({
@@ -890,6 +891,46 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     expect(surfaceTime()).toBe(0)
     state.renderer!.loop?.(5300)
     expect(surfaceTime()).toBeCloseTo(beforePauseTime + 0.1)
+  })
+
+  it('holds the side reflection phase on pause and under reduced motion', async () => {
+    let reducedMotion = false
+    vi.stubGlobal('matchMedia', () => ({
+      get matches() { return reducedMotion },
+      addEventListener() {},
+      removeEventListener() {},
+    }))
+    const createEnclosure = vi.spyOn(glassEnclosure, 'createGlassEnclosure')
+    const services = [service('reflection-clock')]
+    await start(services)
+    const enclosure = createEnclosure.mock.results[0]!.value as ReturnType<typeof glassEnclosure.createGlassEnclosure>
+    const update = vi.spyOn(enclosure, 'update')
+    const reflectionTime = () => update.mock.lastCall?.[0]
+    const frame = (timestamp: number) => state.renderer!.loop?.(timestamp)
+
+    frame(0)
+    frame(100)
+    const beforePause = reflectionTime()!
+    expect(beforePause).toBeGreaterThan(0)
+    controller.update(services, true)
+    expect(reflectionTime()).toBe(beforePause)
+
+    controller.update(services, false)
+    frame(5000)
+    expect(reflectionTime()).toBe(beforePause)
+    frame(5050)
+    const beforeReducedMotion = reflectionTime()!
+    expect(beforeReducedMotion).toBeCloseTo(beforePause + 0.05)
+
+    reducedMotion = true
+    frame(5100)
+    frame(5150)
+    expect(reflectionTime()).toBe(beforeReducedMotion)
+    reducedMotion = false
+    frame(5150)
+    expect(reflectionTime()).toBe(beforeReducedMotion)
+    frame(5200)
+    expect(reflectionTime()).toBeCloseTo(beforeReducedMotion + 0.05)
   })
 
   it('upgrades every schoolmate when its shared lazy-loaded species arrives', async () => {
