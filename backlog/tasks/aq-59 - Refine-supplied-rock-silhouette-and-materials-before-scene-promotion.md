@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-05 03:13'
-updated_date: '2026-11-21 01:28'
+updated_date: '2026-11-21 01:35'
 labels:
   - modeling
 dependencies: []
@@ -90,6 +90,8 @@ Root compared the working-tree laptop overview with the earlier four-colony capt
 The study generator ends after rendering Cycles and saving the native file. It does not bake the texture maps or export the supplied GLB. In the GLB POSITION stream, the vertex distance from origin runs from 0.9245 to 1.0656 export units. This supports a rounded, irregular silhouette but does not prove that the Cycles pore cavities are geometrically reproduced in the exported mesh. Recover the bake/export recipe before approving the study as a production asset.
 
 Corrected study figures from direct GLB inspection: 92,160 indices produce 30,720 triangles; 15,902 POSITION vertices. The sidecar count of 15,360 is polygons, not triangles. The study GLB SHA-256 is 1967aee06bd40aa6f5d4d409568fe062641af19c62442a41d916abedfcc4afc8. Generator Cycles material uses render-time displacement, while GLB uses baked base color, normal and roughness maps with no glTF displacement extension. Its independently exported relief is uncalibrated.
+
+Root asset audit 2026-11-20. The rock study environment named felsen_labyrinth_1k.hdr is 512×256 Radiance RGBE, SHA-256 9cd39f9fcaef7b03bcaf3fc5794da378260f45217680fd04c14006ae8d549dc8. The study generator synthesizes sky, ground and sun pixels locally and packs the result into its Blender World. No runtime caller was found. The name does not establish an external photo source. Retain the generated HDR as study evidence and keep the aquarium’s existing generated PMREM. The study rock still needs mounting, contact and cave-clearance evidence before promotion.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
