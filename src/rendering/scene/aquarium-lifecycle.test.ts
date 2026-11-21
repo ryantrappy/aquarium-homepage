@@ -462,6 +462,7 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
   })
 
   it('feeds modular destinations into the live simulation only after collision is ready', async () => {
+    window.history.replaceState({}, '', '/?reef=nsa')
     state.deferMeshNavigation = true
     const goby = service('modular-goby', 'yellow-watchman-goby')
     await start([goby])
@@ -484,36 +485,37 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(goby.url + '/')
   })
 
-  it('lazy-loads the narrow reef and ignores a completed switch after returning to wide', async () => {
+  it('loads the default legacy reef once and toggles wide/narrow islands cleanly across resizes while paused', async () => {
     const services = [service('resize-link')]
     const resizeTo = (width: number) => {
       Object.defineProperty(host, 'clientWidth', { configurable: true, value: width })
       state.resizeCallback?.()
     }
     state.deferLegacyReef = true
-    await start(services)
-    expect(state.reefLoads).toEqual(['nsa'])
+    anchors(services)
+    controller = createAquarium(host.querySelector('canvas')!, overlay, services, false, status)
+    await vi.waitFor(() => expect(state.reefLoads).toEqual(['legacy']))
+    expect(status).not.toHaveBeenCalledWith('ready')
+
+    state.releaseLegacyReef!()
+    await vi.waitFor(() => expect(status).toHaveBeenLastCalledWith('ready'))
+
     const scene = state.renderer!.scene!
-    expect(scene.getObjectByName('reef-nsa-high-arch-span')).toBeDefined()
+    expect(scene.getObjectByName('reef-center-arch')).toBeDefined()
+    expect(scene.getObjectByName('reef-nsa-high-arch-span')).toBeUndefined()
+
     controller.update(services, true)
     resizeTo(402)
     resizeTo(420)
-    expect(state.reefLoads).toEqual(['nsa', 'legacy'])
-    expect(scene.getObjectByName('reef-nsa-high-arch-span')).toBeDefined()
-    resizeTo(1440)
-    state.releaseLegacyReef!()
-    await new Promise(resolve => setTimeout(resolve, 0))
-    expect(scene.getObjectByName('reef-nsa-high-arch-span')).toBeDefined()
-
-    resizeTo(402)
-    await vi.waitFor(() => expect(state.reefNavigationIslandIds.at(-1)).toEqual(['reef-0']))
-    expect(scene.getObjectByName('reef-nsa-high-arch-span')).toBeUndefined()
+    expect(state.reefLoads).toEqual(['legacy'])
+    expect(state.reefNavigationIslandIds.at(-1)).toEqual(['reef-0'])
+    expect(scene.getObjectByName('reef-center-arch')).toBeUndefined()
     expect(state.renderer!.loop).toBeNull()
     expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(services[0]!.url + '/')
 
     resizeTo(1440)
-    expect(scene.getObjectByName('reef-nsa-high-arch-span')).toBeDefined()
-    expect(state.reefLoads).toEqual(['nsa', 'legacy'])
+    expect(scene.getObjectByName('reef-center-arch')).toBeDefined()
+    expect(state.reefLoads).toEqual(['legacy'])
     controller.update(services, false)
     expect(state.renderer!.loop).not.toBeNull()
   })
