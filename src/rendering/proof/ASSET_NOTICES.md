@@ -191,3 +191,12 @@ rubric, variant, support and rendering-budget requirements remain open.
   `socket_brain_apron_01`, `socket_soft_mat_01`). Canonical `corals/` assets
   remain preserved; full rubric, two-variant, physical scale, and budget
   acceptance remain open for Root review.
+
+- **`AQ-70.11` Right-Island variant colonies (`reef-acropora-tabular-plate`, `reef-montipora-tier-shelf`, `reef-brain-fleshy-lobophyllia`, `reef-zoanthid-palythoa-cluster`)**:
+  - Original **$0** procedural 3D geometry and baked PBR texture maps authored from scratch in Blender (`build_reef_acropora_tabular_plate.py`, `build_reef_montipora_tier_shelf.py`, `build_reef_brain_fleshy_lobophyllia.py`, `build_reef_zoanthid_palythoa_cluster.py`; packed sources under `src/rendering/assets/splat-fish/blend/`).
+  - Synced into `src/rendering/assets/corals/custom-colonies/`:
+    - `reef-acropora-tabular-plate.glb`: `24,821` triangles, `2,382,948` bytes (`branching-sps`, `socket_sps_crest_04`)
+    - `reef-montipora-tier-shelf.glb`: `21,324` triangles, `1,607,356` bytes (`plating-sps`, `socket_plate_ledge_04`)
+    - `reef-brain-fleshy-lobophyllia.glb`: `24,000` triangles, `2,218,308` bytes (`mounded-lps`, `socket_brain_apron_04`)
+    - `reef-zoanthid-palythoa-cluster.glb`: `27,812` triangles, `1,751,772` bytes (`zoanthid-mat`, `socket_soft_mat_02`)
+  - Canonical `corals/` assets remain preserved; look-dev captures, physical scale/rubric evaluation, and Root approval remain pending.

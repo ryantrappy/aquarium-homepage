@@ -122,3 +122,12 @@
 ### 2026-11-20 — AQ-58 body-clearance evidence
 *Root reviewed the retained handoffs. Project scope and asset policy are current. Depth band and shaft milestones are actioned. Live animated clearance and art acceptance remain pending.*
 - Added a continuous body-capsule sweep and a clip-only envelope option. Exact reef checks verified the blue tang front-water route and identified why the root probe alone cannot validate the cave. The left clownfish crown admits an aligned sampled pose, with the conservative whole-clip bound blocked.
+
+### 2026-11-20 — AQ-70.11 right-island custom coral variants
+*Resume review 2026-11-20: inspected retained handoff entries in agent_scratch.md (standing local-only, laptop-only 1440×900, canonical asset preservation, and Blender packed-save/export/sync/commit rules—current policy; completed AQ-58 depth/body-clearance and prior left-island AQ-70.11 checkpoints—actioned; AQ-70.11 art/rubric/physical-scale/Root review and look-dev captures, AQ-59, AQ-101, and remaining showcase gates—pending).*
+- Authored via Blender MCP, inspected with `get_scene_info` + rendered `look`, packed/saved `.blend` + textures, exported overrides, synced via `node scripts/sync-blender-override.mjs --coral <id> --learn-guide`, and mounted four new Right-Island custom coral variants in `src/rendering/scene/reef-assembly.ts`:
+  - `reef-acropora-tabular-plate` (`branching-sps`, `socket_sps_crest_04`, `24,821` tris, `2,382,948` bytes)
+  - `reef-montipora-tier-shelf` (`plating-sps` Variant #2, `socket_plate_ledge_04`, `21,324` tris, `1,607,356` bytes)
+  - `reef-brain-fleshy-lobophyllia` (`mounded-lps` Variant #2, `socket_brain_apron_04`, `24,000` tris, `2,218,308` bytes)
+  - `reef-zoanthid-palythoa-cluster` (`zoanthid-mat` Variant #2, `socket_soft_mat_02`, `27,812` tris, `1,751,772` bytes)
+- Verified cleanly without touching `DEFAULT_LEFT_ISLAND_MOUNTS`, `reef-mesh-navigation.test.ts`, or canonical `src/rendering/assets/corals/*.glb`: 6 targeted Vitest suites passed `124/124` (`budgets.test.ts`, `reef-assembly.test.ts`, `sync-coral-override.test.ts`, `custom-torch-colony.test.ts`, `anemone-host.test.ts`, `custom-coral-colony.test.ts`); `reef-mesh-navigation.test.ts` passed `25/26` matching clean `dc603ae` (Right-Island moray clearance passed; only pre-existing Left-Island failure at line 832); `node scripts/check-reef-asset-manifests.mjs`, `npm run typecheck`, and `npm run build` exited 0. `AQ-70.11` remains `In Progress` for Root visual/rubric review and look-dev captures.

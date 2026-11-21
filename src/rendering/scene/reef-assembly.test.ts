@@ -111,6 +111,10 @@ function buildMockCoralTemplates(): Map<string, THREE.Object3D> {
     ['reef-montipora-whorled-plate', [['reef_montipora_whorled_plate', 'coral-rigid']]],
     ['reef-brain-meandroid-diploria', [['reef_brain_meandroid_diploria', 'coral-rigid']]],
     ['reef-zoanthid-colonial-mat', [['zoanthid_colonial_polyp_crowns', 'coral-soft'], ['zoanthid_colonial_mat_base', 'coral-rigid']]],
+    ['reef-acropora-tabular-plate', [['reef_acropora_tabular_plate', 'coral-rigid']]],
+    ['reef-montipora-tier-shelf', [['reef_montipora_tier_shelf', 'coral-rigid']]],
+    ['reef-brain-fleshy-lobophyllia', [['reef_brain_fleshy_lobophyllia', 'coral-rigid']]],
+    ['reef-zoanthid-palythoa-cluster', [['zoanthid_palythoa_polyp_crowns', 'coral-soft'], ['zoanthid_palythoa_mat_base', 'coral-rigid']]],
     ['coral-montipora-plate', [['montipora_plate_colony', 'coral-rigid']]],
     ['coral-brain-diploria', [['diploria_brain_colony', 'coral-soft']]],
     ['coral-zoanthid-mat', [['zoanthid_button_cluster', 'coral-soft']]],
@@ -138,7 +142,10 @@ function buildMockCoralTemplates(): Map<string, THREE.Object3D> {
         mesh.position.set(0.008, 0.021, -0.013)
         mesh.scale.set(0.85, 1.05, 0.92)
       }
-      if (id === 'reef-zoanthid-colonial-mat' && primId === 'zoanthid_colonial_mat_base') {
+      if (
+        (id === 'reef-zoanthid-colonial-mat' && primId === 'zoanthid_colonial_mat_base')
+        || (id === 'reef-zoanthid-palythoa-cluster' && primId === 'zoanthid_palythoa_mat_base')
+      ) {
         mesh.position.set(0.004, 0.009, -0.006)
         mesh.scale.set(0.95, 1.02, 0.97)
       }
@@ -588,6 +595,58 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
       expect(rigid.position.toArray()).toEqual(templateRigid.position.toArray())
       expect(rigid.scale.toArray()).toEqual(templateRigid.scale.toArray())
     }
+
+    const scatter = assembly.instancedMeshes.find(mesh => mesh.name.startsWith('instanced_coral-zoanthid-mat_'))!
+    const scatterMaterial = scatter.material as THREE.MeshStandardMaterial
+    expect(scatterMaterial.customProgramCacheKey()).not.toContain(':baked-pbr')
+  })
+
+  it('registers and mounts all four custom right-island variant colonies with baked-pbr materials while keeping zoanthid scatter non-baked', () => {
+    const rightVariants = [
+      { socketName: 'socket_sps_crest_04', id: 'reef-acropora-tabular-plate', primId: 'reef_acropora_tabular_plate' },
+      { socketName: 'socket_plate_ledge_04', id: 'reef-montipora-tier-shelf', primId: 'reef_montipora_tier_shelf' },
+      { socketName: 'socket_brain_apron_04', id: 'reef-brain-fleshy-lobophyllia', primId: 'reef_brain_fleshy_lobophyllia' },
+      { socketName: 'socket_soft_mat_02', id: 'reef-zoanthid-palythoa-cluster', primId: 'zoanthid_palythoa_polyp_crowns' },
+    ] as const
+
+    for (const variant of rightVariants) {
+      expect(MODULAR_CORAL_ASSET_URLS[variant.id]).toContain(`${variant.id}.glb`)
+    }
+
+    const rockRoot = buildRockFixtureFromSocketReport('live-rock-island-right-socket-report.json')
+    const assembly = assembleCoralsOnRockSockets(rockRoot, buildMockCoralTemplates(), DEFAULT_RIGHT_ISLAND_MOUNTS)
+
+    for (const variant of rightVariants) {
+      const mounted = assembly.mountedCorals.find(candidate => candidate.socketName === variant.socketName)
+      expect(mounted?.coralAssetId).toBe(variant.id)
+      let foundMesh: THREE.Mesh | undefined
+      mounted!.root.traverse(node => {
+        if (node instanceof THREE.Mesh && node.userData?.reefPrimitive?.id === variant.primId) {
+          foundMesh = node
+        }
+      })
+      expect(foundMesh).toBeDefined()
+      const material = foundMesh!.material as THREE.MeshStandardMaterial
+      expect(material.customProgramCacheKey()).toContain(':baked-pbr')
+    }
+
+    const palythoa = assembly.mountedCorals.find(candidate => candidate.socketName === 'socket_soft_mat_02')!
+    let matBase: THREE.Mesh | undefined
+    palythoa.root.traverse(node => {
+      if (node instanceof THREE.Mesh && node.userData?.reefPrimitive?.id === 'zoanthid_palythoa_mat_base') {
+        matBase = node
+      }
+    })
+    expect(matBase).toBeDefined()
+    const baseMaterial = matBase!.material as THREE.MeshStandardMaterial
+    expect(baseMaterial.customProgramCacheKey()).toContain(':baked-pbr')
+    expect(baseMaterial.userData.coralRawMasks.uniforms.uFluorescenceStrength.value).toBe(0)
+    expect(matBase!.position.x).toBeCloseTo(0.004, 5)
+    expect(matBase!.position.y).toBeCloseTo(0.009, 5)
+    expect(matBase!.position.z).toBeCloseTo(-0.006, 5)
+    expect(matBase!.scale.x).toBeCloseTo(0.95, 5)
+    expect(matBase!.scale.y).toBeCloseTo(1.02, 5)
+    expect(matBase!.scale.z).toBeCloseTo(0.97, 5)
 
     const scatter = assembly.instancedMeshes.find(mesh => mesh.name.startsWith('instanced_coral-zoanthid-mat_'))!
     const scatterMaterial = scatter.material as THREE.MeshStandardMaterial

@@ -183,3 +183,59 @@ radiating oral-disc sunburst rings and tentacle tips.
 /Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_zoanthid_colonial_mat.py
 node scripts/sync-blender-override.mjs --coral reef-zoanthid-colonial-mat --learn-guide
 ```
+
+## `reef-acropora-tabular-plate`
+
+- **Archetype / Socket**: `branching-sps` (`socket_sps_crest_04` on Right Island)
+- **Builder script**: `src/rendering/modeling/build_reef_acropora_tabular_plate.py`
+- **Source `.blend`**: `src/rendering/assets/splat-fish/blend/reef-acropora-tabular-plate.blend`
+- **Synced package**: `reef-acropora-tabular-plate.glb` (`24,821` triangles, `2,382,948` bytes, `dimensionsM: [0.1989, 0.1327, 0.1478]`)
+- **Primitives**: `reef_acropora_tabular_plate` (`coral-rigid`)
+- **Morphology**: Horizontal *Acropora hyacinthus* anastomosing tabular coral lattice with stout central pedicel and pale upturned axial corallite tips.
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_acropora_tabular_plate.py
+node scripts/sync-blender-override.mjs --coral reef-acropora-tabular-plate --learn-guide
+```
+
+## `reef-montipora-tier-shelf`
+
+- **Archetype / Socket**: `plating-sps` Variant #2 (`socket_plate_ledge_04` on Right Island)
+- **Builder script**: `src/rendering/modeling/build_reef_montipora_tier_shelf.py`
+- **Source `.blend`**: `src/rendering/assets/splat-fish/blend/reef-montipora-tier-shelf.blend`
+- **Synced package**: `reef-montipora-tier-shelf.glb` (`21,324` triangles, `1,607,356` bytes, `dimensionsM: [0.2052, 0.0638, 0.1562]`)
+- **Primitives**: `reef_montipora_tier_shelf` (`coral-rigid`)
+- **Morphology**: Four staggered plum-magenta cantilevered bracket shelves with scalloped ivory growth rims and pale carbonate undersides.
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_montipora_tier_shelf.py
+node scripts/sync-blender-override.mjs --coral reef-montipora-tier-shelf --learn-guide
+```
+
+## `reef-brain-fleshy-lobophyllia`
+
+- **Archetype / Socket**: `mounded-lps` Variant #2 (`socket_brain_apron_04` on Right Island)
+- **Builder script**: `src/rendering/modeling/build_reef_brain_fleshy_lobophyllia.py`
+- **Source `.blend`**: `src/rendering/assets/splat-fish/blend/reef-brain-fleshy-lobophyllia.blend`
+- **Synced package**: `reef-brain-fleshy-lobophyllia.glb` (`24,000` triangles, `2,218,308` bytes, `dimensionsM: [0.1997, 0.0780, 0.1669]`)
+- **Primitives**: `reef_brain_fleshy_lobophyllia` (`coral-rigid`)
+- **Morphology**: Broad cobalt-slate fleshy *Lobophyllia* lobes with turquoise oral valleys and transverse septal costae (`0` non-manifold, `0` boundary edges).
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_brain_fleshy_lobophyllia.py
+node scripts/sync-blender-override.mjs --coral reef-brain-fleshy-lobophyllia --learn-guide
+```
+
+## `reef-zoanthid-palythoa-cluster`
+
+- **Archetype / Socket**: `zoanthid-mat` Variant #2 (`socket_soft_mat_02` on Right Island)
+- **Builder script**: `src/rendering/modeling/build_reef_zoanthid_palythoa_cluster.py`
+- **Source `.blend`**: `src/rendering/assets/splat-fish/blend/reef-zoanthid-palythoa-cluster.blend`
+- **Synced package**: `reef-zoanthid-palythoa-cluster.glb` (`27,812` triangles, `1,751,772` bytes, `dimensionsM: [0.1853, 0.0470, 0.1589]`)
+- **Primitives**: `zoanthid_palythoa_polyp_crowns` (`coral-soft`) + `zoanthid_palythoa_mat_base` (`coral-rigid`)
+- **Morphology**: Eighteen tall-stalked varied-size *Palythoa* polyps with cupped emerald-teal oral discs, peach-gold mouths, `468` long wispy lime-tipped tentacles, and a rocky leathery coenenchyme mat base.
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_zoanthid_palythoa_cluster.py
+node scripts/sync-blender-override.mjs --coral reef-zoanthid-palythoa-cluster --learn-guide
+```

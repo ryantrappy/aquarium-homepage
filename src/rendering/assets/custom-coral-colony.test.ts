@@ -43,6 +43,24 @@ const coralCases = [
     socketName: 'socket_brain_apron_01',
     archetype: 'mounded-lps',
   },
+  {
+    id: 'reef-acropora-tabular-plate',
+    mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+    socketName: 'socket_sps_crest_04',
+    archetype: 'branching-sps',
+  },
+  {
+    id: 'reef-montipora-tier-shelf',
+    mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+    socketName: 'socket_plate_ledge_04',
+    archetype: 'plating-sps',
+  },
+  {
+    id: 'reef-brain-fleshy-lobophyllia',
+    mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+    socketName: 'socket_brain_apron_04',
+    archetype: 'mounded-lps',
+  },
 ] as const
 
 type GlbDocument = {
