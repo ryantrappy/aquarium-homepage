@@ -1,13 +1,18 @@
 import { existsSync, statSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { getFishById, REEF_FISH, SNOWFLAKE_MORAY_EEL_ID } from './fish'
+import { getFishById, INVERTEBRATE_SPECIES_IDS, isInvertebrateSpecies, REEF_FISH, SNOWFLAKE_MORAY_EEL_ID } from './fish'
 
 describe('reef fish catalog', () => {
   it('contains the complete roster with stable unique IDs and matching thumbnail files', () => {
-    expect(REEF_FISH).toHaveLength(17)
+    expect(REEF_FISH).toHaveLength(21)
     expect(new Set(REEF_FISH.map((fish) => fish.id)).size).toBe(REEF_FISH.length)
     expect(REEF_FISH.filter((fish) => fish.uniqueService).map((fish) => fish.id)).toEqual([SNOWFLAKE_MORAY_EEL_ID])
+
+    for (const id of INVERTEBRATE_SPECIES_IDS) {
+      expect(isInvertebrateSpecies(id)).toBe(true)
+    }
+    expect(isInvertebrateSpecies('yellow-tang')).toBe(false)
 
     for (const fish of REEF_FISH) {
       expect(fish.commonName).not.toBe('')

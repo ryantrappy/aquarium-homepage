@@ -3,7 +3,7 @@ import { mountedAnemoneHosts } from './anemone-host'
 import { GLTFLoader, type GLTF } from 'three/addons/loaders/GLTFLoader.js'
 import { clone } from 'three/addons/utils/SkeletonUtils.js'
 import type { ServiceConfig } from '../../lib/services'
-import { getFishById, SNOWFLAKE_MORAY_EEL_ID } from '../../lib/fish'
+import { getFishById, isInvertebrateSpecies, SNOWFLAKE_MORAY_EEL_ID } from '../../lib/fish'
 import {
   DEFAULT_LEFT_ISLAND_MOUNTS,
   DEFAULT_RIGHT_ISLAND_MOUNTS,
@@ -36,7 +36,7 @@ import {
 } from './underwater-optics'
 import { SURFACE_WAVE_GLSL } from './surface-waves'
 import { RaymarchedShaftPass, SHAFT_BEAM_GLSL } from './light-shafts'
-import { createAragoniteSandBed, getRockFootprintsForViewport } from './aragonite-sand'
+import { createAragoniteSandBed, evaluateAragoniteSandTilt, evaluateAragoniteSandWorldY, getRockFootprintsForViewport } from './aragonite-sand'
 import { reefPlacementsForViewport } from './reef-layout'
 import { hasReadyRightIslandCollider, resolveAvailableSnowflakeMorayResidence, resolveSnowflakeMorayResidence, SNOWFLAKE_MORAY_CAVE_COLLISION_RADIUS_M, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M, type MorayResidence } from './moray-residence'
 import { CENTER_ARCH_URL, CENTER_ARCH_MOUNTS, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
@@ -118,6 +118,10 @@ const modelUrls: Record<string, string> = {
   'flame-angelfish': new URL('../assets/splat-fish/flame-angelfish.glb', import.meta.url).href,
   'copperband-butterflyfish': new URL('../assets/splat-fish/copperband-butterflyfish.glb', import.meta.url).href,
   [SNOWFLAKE_MORAY_EEL_ID]: new URL('../assets/fish/snowflake-moray-eel.glb', import.meta.url).href,
+  'banded-trochus-snail': new URL('../assets/invertebrates/invertebrate-banded-trochus-snail.glb', import.meta.url).href,
+  'scarlet-reef-hermit-crab': new URL('../assets/invertebrates/invertebrate-scarlet-reef-hermit-crab.glb', import.meta.url).href,
+  'emerald-mithrax-crab': new URL('../assets/invertebrates/invertebrate-emerald-mithrax-crab.glb', import.meta.url).href,
+  'scarlet-skunk-cleaner-shrimp': new URL('../assets/invertebrates/invertebrate-scarlet-skunk-cleaner-shrimp.glb', import.meta.url).href,
 }
 export type SceneStatus = 'loading' | 'ready' | 'failed'
 export type AquariumController = { update(services: ServiceConfig[], paused: boolean, configurationReady?: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void; zoomIn(): boolean; zoomOut(): boolean; zoomToFocalArea(id: FocalAreaId): boolean; resetZoom(): boolean; isZoomed(): boolean; getCameraZoom(): CameraZoomState; focusServiceFish?(id: string): boolean; getFocusedServiceId?(): string | undefined }
@@ -652,6 +656,32 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     cameraZoomCurrent = { ...cameraZoomDesired }
     applyCameraZoom()
   }
+  function applyInhabitantRootTransform(item: Inhabitant, presentationYaw?: number) {
+    const pose = item.motion
+    const yaw = presentationYaw ?? pose.yaw
+    if (isInvertebrateSpecies(item.service.fishId)) {
+      const narrow = width < 600
+      const sandY = evaluateAragoniteSandWorldY(pose.position.x, pose.position.z, narrow)
+      item.root.position.set(pose.position.x, sandY, pose.position.z)
+      if (item.fallback) {
+        item.root.rotation.set(0, 0, 0)
+        item.root.scale.x = presentationYaw !== undefined ? 1 : evaluateSpriteTurnScaleX(yaw)
+      } else {
+        const tilt = evaluateAragoniteSandTilt(pose.position.x, pose.position.z, yaw, narrow)
+        item.root.rotation.set(tilt.pitch, yaw, tilt.roll, 'YXZ')
+      }
+      return
+    }
+    item.root.position.set(pose.position.x, pose.position.y, pose.position.z)
+    if (item.fallback) {
+      item.root.rotation.set(0, 0, 0)
+      item.root.scale.x = presentationYaw !== undefined ? 1 : evaluateSpriteTurnScaleX(yaw)
+    } else if (item.service.fishId === SNOWFLAKE_MORAY_EEL_ID || presentationYaw !== undefined) {
+      item.root.rotation.set(0, yaw, 0, 'YXZ')
+    } else {
+      item.root.rotation.set(pose.pitch, yaw, pose.bank, 'YXZ')
+    }
+  }
   function applyLookDevPresentation() {
     if (!lookDevConfig) return
     for (const item of [...fish, ...schoolmates]) {
@@ -659,10 +689,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       item.motion.pitch = 0
       item.motion.bank = 0
       item.motion.speed = 0
-      item.root.position.set(item.motion.position.x, item.motion.position.y, item.motion.position.z)
-      if (item.fallback) item.root.scale.x = 1
-      else if (item.service.fishId === SNOWFLAKE_MORAY_EEL_ID) item.root.rotation.set(0, item.motion.yaw, 0, 'YXZ')
-      else item.root.rotation.set(0, Math.PI / 2, 0, 'YXZ')
+      applyInhabitantRootTransform(item, item.motion.yaw)
       item.root.updateMatrix()
       item.root.updateMatrixWorld()
     }
@@ -1041,7 +1068,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
             item.motion.position = relocated
             item.motion.route = []
             item.motion.speed = 0
-            item.root.position.set(relocated.x, relocated.y, relocated.z)
+            applyInhabitantRootTransform(item)
             occupiedForRelocation.push({ position: relocated, clearance: item.motion.clearance, bodyRadiusM: fishBodyRadiusM(item.service.fishId) })
           }
         }
@@ -1109,7 +1136,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
           ? (clip.duration > 0 ? lookDevTimeSeconds % clip.duration : 0)
           : (seedForId(item.service.id) % 1500) / 1000
         item.clipPlayer = createFishClipPlayer(model, clip, initialClipTime)
-        if (!caveResident) {
+        if (!caveResident && !isInvertebrateSpecies(item.service.fishId)) {
           item.turningRig = bindFishTurningRig(model, item.service.fishId)
           try {
             const flexSeed = lookDevConfig ? `${lookDevConfig.seed}:${item.service.id}` : item.service.id
@@ -1227,7 +1254,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     try {
       if (base) bindGlbToInhabitant(item, base)
       else if (!caveResident) item.artwork = buildSprite(item)
-      root.position.set(motion.position.x, motion.position.y, motion.position.z)
+      applyInhabitantRootTransform(item)
       // Schoolmates are never pickable (AQ-41 AC #4 / AQ-13): only service
       // fish get a serviceId on their meshes, so picking can never resolve a
       // click or a focus target to a schoolmate. Their meshes still join
@@ -1626,9 +1653,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       })
     }
     for (const item of [...fish, ...schoolmates]) {
-      const pose = item.motion; item.root.position.set(pose.position.x, pose.position.y, pose.position.z)
-      if (item.fallback) { item.root.rotation.set(0, 0, 0); item.root.scale.x = evaluateSpriteTurnScaleX(pose.yaw) }
-      else { item.root.rotation.set(pose.pitch, pose.yaw, pose.bank, 'YXZ') }
+      applyInhabitantRootTransform(item)
       item.root.updateMatrix()
       item.root.updateMatrixWorld()
     }

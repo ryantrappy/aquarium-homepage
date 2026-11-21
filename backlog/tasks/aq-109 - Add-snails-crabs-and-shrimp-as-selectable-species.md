@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-18 04:36'
-updated_date: '2026-11-21 05:17'
+updated_date: '2026-11-21 06:08'
 labels: []
 dependencies: []
 priority: '22'
@@ -24,7 +24,7 @@ Phase 1 builds, inspects via Blender MCP, persists, syncs, and generates studio 
 <!-- AC:BEGIN -->
 - [x] #1 Author 4 original rigged & animated invertebrate GLBs (banded-trochus-snail, scarlet-reef-hermit-crab, emerald-mithrax-crab, scarlet-skunk-cleaner-shrimp) in Blender 5.2.3 LTS with Cycles PBR materials, substrate grounding, and multi-angle + animation inspection via Blender MCP.
 - [x] #2 Persist packed .blend sources + PNG textures, export overrides, sync via sync-blender-override.mjs --invertebrate into src/rendering/assets/invertebrates/manifest.json, generate 600x400 WebP thumbnails in public/fish/, document zsh provenance in ASSET_NOTICES.md, and pass unit/contract/typecheck/build verification.
-- [ ] #3 Integrate the 4 invertebrate species into the selectable species catalog, benthic reef locomotion/scale system, and service picker UI (Phase 2).
+- [x] #3 Integrate the 4 invertebrate species into the selectable species catalog, benthic reef locomotion/scale system, and service picker UI (Phase 2).
 - [ ] #4 Pass full test suite, typecheck, build, and 1440x900 visual review by Root before marking Done.
 <!-- AC:END -->
 
@@ -52,4 +52,11 @@ Phase 1 builds, inspects via Blender MCP, persists, syncs, and generates studio 
   - `npx vitest run src/rendering/assets/invertebrate-assets.test.ts src/rendering/assets/sync-reef-override.test.ts src/rendering/assets/sync-coral-override.test.ts src/rendering/assets/splat-fish-contract.test.ts src/rendering/assets/budgets.test.ts src/rendering/assets/manifest-checker.test.ts`: **6 test files passed, 82/82 tests passed**.
   - `node scripts/check-reef-asset-manifests.mjs` (32 files), `npm run typecheck` (18 scripts checked), and `npm run build` all exited 0.
 - Phase 2 (runtime selectable-species, benthic locomotion/scale, and service picker UI) and Root 1440x900 visual review remain pending; `AQ-109` stays `In Progress`.
+
+### 2026-11-21 Phase 2: Runtime Catalog, Benthic Locomotion, Docs & Picker Integration
+- Integrated all 4 invertebrate species (`invertebrate-banded-trochus-snail`, `invertebrate-scarlet-reef-hermit-crab`, `invertebrate-emerald-mithrax-crab`, `invertebrate-scarlet-skunk-cleaner-shrimp`) into `src/lib/fish.ts` (`INVERTEBRATE_SPECIES_IDS`, `isInvertebrateSpecies()`, 21 total `REEF_FISH`), `src/lib/fish-behavior.ts`, `src/rendering/scene/species-locomotion-extensions.ts`, `src/rendering/scene/schooling-navigation.ts` (`'pair-or-solitary'`), `src/rendering/scene/fish-scale.ts`, and `src/rendering/scene/fish-spawn.ts` (`TIERED_VERTICAL_DEPTH_ZONES.benthic`).
+- Exported `evaluateAragoniteSandWorldY` and `evaluateAragoniteSandTilt` in `src/rendering/scene/aragonite-sand.ts` and wired `src/rendering/scene/aquarium.ts` (`modelUrls`, skipping finfish `bindFishTurningRig`/`bindFishFlexToModel`, and `applyInhabitantRootTransform()` for benthic sand grounding & ripple slope alignment).
+- Updated documentation and provenance (`docs/fish-scale-reference.md`, `docs/reef-fish-roster.md`, `docs/fish-assets.md`, `docs/fish-art-provenance.json`) and tests (`fish.test.ts`, `fish-scale.test.ts`, `fish-spawn.test.ts`, `fish-body-flex.test.ts`, `aragonite-sand.test.ts`, `ServiceManager.test.tsx`).
+- Verified after final edits: `npx vitest run` (**80/80 test files passed, 1003/1003 tests passed**), `node scripts/check-reef-asset-manifests.mjs` (32 files verified), `npm run typecheck` (18 scripts checked), and `npm run build` (client + SSR + Nitro) all exited 0.
+- AC #4 and Root 1440x900 live visual review remain pending; `AQ-109` stays `In Progress`.
 <!-- SECTION:NOTES:END -->

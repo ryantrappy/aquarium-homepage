@@ -87,6 +87,10 @@ export const SPECIES_SOCIAL_GROUPING_MODE: Readonly<
   'copperband-butterflyfish': 'pair-or-solitary',
   'desjardins-sailfin-tang': 'pair-or-solitary',
   'snowflake-moray-eel': 'pair-or-solitary',
+  'banded-trochus-snail': 'pair-or-solitary',
+  'scarlet-reef-hermit-crab': 'pair-or-solitary',
+  'emerald-mithrax-crab': 'pair-or-solitary',
+  'scarlet-skunk-cleaner-shrimp': 'pair-or-solitary',
 })
 
 const MAX_STEERING_OFFSET_PER_SEC = 0.45

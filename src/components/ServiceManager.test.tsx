@@ -135,6 +135,22 @@ describe('ServiceManager fish picker', () => {
     expect(view.querySelector('.fish-picker-selected strong')?.textContent).toBe('Firefish')
     expect(view.querySelector<HTMLInputElement>('input[type="radio"][value="firefish"]')?.checked).toBe(true)
   })
+
+  it('exposes all four reef clean-up-crew invertebrate species as selectable service options', async () => {
+    const view = await renderManager(props())
+    for (const [id, commonName] of [
+      ['banded-trochus-snail', 'Banded trochus snail'],
+      ['scarlet-reef-hermit-crab', 'Scarlet reef hermit crab'],
+      ['emerald-mithrax-crab', 'Emerald mithrax crab'],
+      ['scarlet-skunk-cleaner-shrimp', 'Scarlet skunk cleaner shrimp'],
+    ] as const) {
+      const radio = view.querySelector<HTMLInputElement>(`input[type="radio"][value="${id}"]`)
+      expect(radio, id).toBeTruthy()
+      await act(async () => { radio!.click() })
+      expect(radio!.checked, id).toBe(true)
+      expect(view.querySelector('.fish-picker-selected strong')?.textContent).toBe(commonName)
+    }
+  })
 })
 
 describe('ServiceManager async persistence', () => {

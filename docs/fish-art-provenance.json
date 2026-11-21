@@ -474,6 +474,60 @@
       "history": "docs/design.md only describes it as the prior background retained during design review. Removed because no current code references it; the deletion is recoverable from Git history."
     }
   ],
+  "original_blender_studio_thumbnails": [
+    {
+      "species_id": "banded-trochus-snail",
+      "path": "public/fish/banded-trochus-snail.webp",
+      "sha256": "42607761915fe2f3550e5e20fc40d4dd1de682db23bd546daa08f5d4364ab448",
+      "bytes": 11256,
+      "dimensions_px": [
+        600,
+        400
+      ],
+      "alpha_visible_width_fraction": 0.433333,
+      "license": "original",
+      "source": "Project-original Blender 5.2.3 LTS Cycles transparent render (build_invertebrate_banded_trochus_snail.py); encoded with cwebp -q 88."
+    },
+    {
+      "species_id": "scarlet-reef-hermit-crab",
+      "path": "public/fish/scarlet-reef-hermit-crab.webp",
+      "sha256": "2684faa1c1cb908dc209b0f4f637436b1d490565cb1d929e972c1811ca9a298e",
+      "bytes": 12304,
+      "dimensions_px": [
+        600,
+        400
+      ],
+      "alpha_visible_width_fraction": 0.451667,
+      "license": "original",
+      "source": "Project-original Blender 5.2.3 LTS Cycles transparent render (build_invertebrate_scarlet_reef_hermit_crab.py); encoded with cwebp -q 88."
+    },
+    {
+      "species_id": "emerald-mithrax-crab",
+      "path": "public/fish/emerald-mithrax-crab.webp",
+      "sha256": "ae90a46aa8be32da3e7725628cf8603ac7f54fa95deafa492cc2b4237aadef54",
+      "bytes": 12432,
+      "dimensions_px": [
+        600,
+        400
+      ],
+      "alpha_visible_width_fraction": 0.536667,
+      "license": "original",
+      "source": "Project-original Blender 5.2.3 LTS Cycles transparent render (build_invertebrate_emerald_mithrax_crab.py); encoded with cwebp -q 88."
+    },
+    {
+      "species_id": "scarlet-skunk-cleaner-shrimp",
+      "path": "public/fish/scarlet-skunk-cleaner-shrimp.webp",
+      "sha256": "dfbce03642abf7a5241f0a32f1a98687ad8109dde104ea1f5dca748f61459dea",
+      "bytes": 9842,
+      "dimensions_px": [
+        600,
+        400
+      ],
+      "alpha_visible_width_fraction": 0.458333,
+      "license": "original",
+      "source": "Project-original Blender 5.2.3 LTS Cycles transparent render (build_invertebrate_scarlet_skunk_cleaner_shrimp.py); encoded with cwebp -q 88."
+    }
+  ],
   "archived_original_png_total_bytes": 6446063,
   "active_fish_thumbnail_total_bytes": 695298
 }

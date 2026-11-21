@@ -24,6 +24,10 @@ export const SPECIES_BEHAVIOR_IDS = [
   'copperband-butterflyfish',
   'desjardins-sailfin-tang',
   'snowflake-moray-eel',
+  'banded-trochus-snail',
+  'scarlet-reef-hermit-crab',
+  'emerald-mithrax-crab',
+  'scarlet-skunk-cleaner-shrimp',
 ] as const
 
 export type SpeciesBehaviorId = typeof SPECIES_BEHAVIOR_IDS[number]
@@ -497,6 +501,73 @@ const profiles = {
     transitions: transitionsFor(),
     individuality: { phaseOffsetRadians: [0, Math.PI * 2], homeOffsetTankWidths: [0, 0.001] },
     evidence: { kind: 'habitat-staging-inference', summary: 'FishBase describes a solitary reef moray associated with rocky crevices; permanent residence and ventilation-only movement are staging choices for the supplied partial model, not claims about wild movement.', sourceRefs: ['https://www.fishbase.se/summary/Echidna-nebulosa'] },
+  },
+  'banded-trochus-snail': {
+    speciesId: 'banded-trochus-snail', habitatMode: 'substrate-foraging', preferredZone: 'substrate', depthRange: [0.88, 0.98],
+    anchors: ['grazingSurface', 'foragingPatch'],
+    locomotion: { gait: 'substrate-stop-start', speedTankWidthsPerSecond: [0.006, 0.014], turnDegreesPerSecond: [12, 24] },
+    states: {
+      idle: { cue: 'Hold steadily on substrate while sweeping tactile cephalic tentacles.', durationSeconds: [3.2, 8.5], anchor: 'grazingSurface', speedMultiplier: 0.1 },
+      swim: { cue: 'Glide slowly along aragonite sand and low rock borders with subtle shell rock.', durationSeconds: [4.5, 11.0], speedMultiplier: 1 },
+      forage: { cue: 'Pause to rasp film algae across sand grains and rock skirts.', durationSeconds: [3.5, 9.0], anchor: 'foragingPatch', speedMultiplier: 0.25 },
+    },
+    transitions: transitionsFor([
+      { from: 'swim', to: 'forage', trigger: 'foraging-opportunity', selectionWeight: 0.55 },
+      { from: 'forage', to: 'swim', trigger: 'foraging-window-complete', selectionWeight: 0.9 },
+    ]),
+    individuality: { phaseOffsetRadians: [0, Math.PI * 2], homeOffsetTankWidths: [0.02, 0.08] },
+    evidence: { kind: 'documented-behavior', summary: 'Herbivorous marine trochid snail grazing benthic film algae slowly across reef substrate; numeric ranges are scene tuning.', sourceRefs: ['https://www.sealifebase.se/summary/Trochus-histrio'] },
+  },
+  'scarlet-reef-hermit-crab': {
+    speciesId: 'scarlet-reef-hermit-crab', habitatMode: 'substrate-foraging', preferredZone: 'substrate', depthRange: [0.86, 0.98],
+    anchors: ['foragingPatch', 'reefSlopeRubble'],
+    locomotion: { gait: 'substrate-stop-start', speedTankWidthsPerSecond: [0.016, 0.032], turnDegreesPerSecond: [30, 56] },
+    states: {
+      idle: { cue: 'Rest braced on walking legs while scanning with yellow eyestalks and antennae.', durationSeconds: [2.0, 5.5], anchor: 'reefSlopeRubble', speedMultiplier: 0.08 },
+      swim: { cue: 'Scurry briskly in diagonal steps across sand and rubble patches.', durationSeconds: [3.0, 7.2], speedMultiplier: 1 },
+      forage: { cue: 'Pick detritus and micro-algae cleanly with asymmetrical scarlet chelipeds.', durationSeconds: [2.6, 6.8], anchor: 'foragingPatch', speedMultiplier: 0.35 },
+    },
+    transitions: transitionsFor([
+      { from: 'swim', to: 'forage', trigger: 'foraging-opportunity', selectionWeight: 0.6 },
+      { from: 'forage', to: 'swim', trigger: 'foraging-window-complete', selectionWeight: 0.9 },
+    ]),
+    individuality: { phaseOffsetRadians: [0, Math.PI * 2], homeOffsetTankWidths: [0.03, 0.11] },
+    evidence: { kind: 'documented-behavior', summary: 'Scarlet reef hermit crab scavenging benthic rubble and filamentous algae while carrying an adopted gastropod shell; numeric ranges are scene tuning.', sourceRefs: ['https://www.sealifebase.se/summary/Paguristes-cadenati'] },
+  },
+  'emerald-mithrax-crab': {
+    speciesId: 'emerald-mithrax-crab', habitatMode: 'substrate-foraging', preferredZone: 'substrate', depthRange: [0.84, 0.97],
+    anchors: ['grazingSurface', 'rockPerch'],
+    locomotion: { gait: 'crevice-inspection', speedTankWidthsPerSecond: [0.014, 0.028], turnDegreesPerSecond: [28, 52] },
+    states: {
+      idle: { cue: 'Cling low near rock skirts and sand margins while flexing spoon-tipped claws.', durationSeconds: [2.2, 5.8], anchor: 'rockPerch', speedMultiplier: 0.05 },
+      swim: { cue: 'Step sideways and forward cautiously between reef ledges and substrate.', durationSeconds: [2.8, 6.4], speedMultiplier: 1 },
+      forage: { cue: 'Scrape turf and bubble algae alternately with heavy spoon-tipped pincers.', durationSeconds: [3.0, 7.5], anchor: 'grazingSurface', speedMultiplier: 0.3 },
+    },
+    transitions: transitionsFor([
+      { from: 'swim', to: 'forage', trigger: 'foraging-opportunity', selectionWeight: 0.64 },
+      { from: 'forage', to: 'swim', trigger: 'foraging-window-complete', selectionWeight: 0.9 },
+    ]),
+    individuality: { phaseOffsetRadians: [0, Math.PI * 2], homeOffsetTankWidths: [0.02, 0.09] },
+    evidence: { kind: 'documented-behavior', summary: 'Herbivorous clinging mithracid crab grazing reef algae near live rock bases and crevices; numeric ranges are scene tuning.', sourceRefs: ['https://www.sealifebase.se/summary/Mithraculus-sculptus'] },
+  },
+  'scarlet-skunk-cleaner-shrimp': {
+    speciesId: 'scarlet-skunk-cleaner-shrimp', habitatMode: 'substrate-foraging', preferredZone: 'lower-reef', depthRange: [0.82, 0.96],
+    anchors: ['rockCrevice', 'foragingPatch'],
+    locomotion: { gait: 'near-rock-darts', speedTankWidthsPerSecond: [0.018, 0.036], turnDegreesPerSecond: [36, 66] },
+    states: {
+      idle: { cue: 'Hold station on a sandy ledge while swaying side-to-side with white antennae.', durationSeconds: [2.4, 6.0], anchor: 'rockCrevice', speedMultiplier: 0.1 },
+      swim: { cue: 'Step crisply across sand flats near reef overhangs toward an adjacent station.', durationSeconds: [2.4, 5.6], speedMultiplier: 1 },
+      forage: { cue: 'Probe substrate crevices and flutter swimmerets cleanly.', durationSeconds: [2.2, 5.4], anchor: 'foragingPatch', speedMultiplier: 0.4 },
+      display: { cue: 'Perform an elevated cleaner-station dance waving snow-white antennae and front chelipeds.', durationSeconds: [2.5, 6.0], speedMultiplier: 0.12 },
+    },
+    transitions: transitionsFor([
+      { from: 'swim', to: 'forage', trigger: 'foraging-opportunity', selectionWeight: 0.45 },
+      { from: 'forage', to: 'swim', trigger: 'foraging-window-complete', selectionWeight: 0.85 },
+      { from: 'swim', to: 'display', trigger: 'display-opportunity', selectionWeight: 0.35 },
+      { from: 'display', to: 'swim', trigger: 'display-window-complete', selectionWeight: 0.9 },
+    ]),
+    individuality: { phaseOffsetRadians: [0, Math.PI * 2], homeOffsetTankWidths: [0.03, 0.12] },
+    evidence: { kind: 'documented-behavior', summary: 'Cleaner-station shrimp displaying rhythmic lateral rock and conspicuous snow-white antennae near reef overhangs; numeric ranges are scene tuning.', sourceRefs: ['https://www.sealifebase.se/summary/Lysmata-amboinensis'] },
   },
 } as const satisfies Record<SpeciesBehaviorId, SpeciesBehaviorProfile>
 

@@ -274,6 +274,51 @@ export function evaluateAragoniteSandElevation(
 }
 
 /**
+ * World-space Y height of the aragonite sand floor at `(worldX, worldZ)` (`AQ-109`).
+ * Equals `sandMesh.position.y + evaluateAragoniteSandElevation(...)`, clamping Z to the sand slab bounds.
+ */
+export function evaluateAragoniteSandWorldY(
+  worldX: number,
+  worldZ: number,
+  narrow = false,
+): number {
+  const bounds = sandEnclosureBounds(narrow)
+  const clampedZ = clamp(worldZ, bounds.backZ, bounds.frontZ)
+  return bounds.bottomY + evaluateAragoniteSandElevation(worldX, clampedZ, narrow)
+}
+
+/**
+ * Local substrate slope pitch and roll (radians, YXZ Euler convention) for benthic
+ * crawlers aligned along heading `yaw` on the aragonite sand floor (`AQ-109`).
+ */
+export function evaluateAragoniteSandTilt(
+  worldX: number,
+  worldZ: number,
+  yaw: number,
+  narrow = false,
+): { pitch: number; roll: number } {
+  const eps = 0.04
+  const bounds = sandEnclosureBounds(narrow)
+  const clampedZ = clamp(worldZ, bounds.backZ, bounds.frontZ)
+  const fwdX = Math.sin(yaw)
+  const fwdZ = Math.cos(yaw)
+  const rightX = Math.cos(yaw)
+  const rightZ = -Math.sin(yaw)
+
+  const hFwd = evaluateAragoniteSandElevation(worldX + fwdX * eps, clamp(clampedZ + fwdZ * eps, bounds.backZ, bounds.frontZ), narrow)
+  const hBack = evaluateAragoniteSandElevation(worldX - fwdX * eps, clamp(clampedZ - fwdZ * eps, bounds.backZ, bounds.frontZ), narrow)
+  const hRight = evaluateAragoniteSandElevation(worldX + rightX * eps, clamp(clampedZ + rightZ * eps, bounds.backZ, bounds.frontZ), narrow)
+  const hLeft = evaluateAragoniteSandElevation(worldX - rightX * eps, clamp(clampedZ - rightZ * eps, bounds.backZ, bounds.frontZ), narrow)
+
+  const slopeFwd = (hFwd - hBack) / (2 * eps)
+  const slopeRight = (hRight - hLeft) / (2 * eps)
+  return {
+    pitch: clamp(-Math.atan(slopeFwd), -0.22, 0.22),
+    roll: clamp(Math.atan(slopeRight), -0.22, 0.22),
+  }
+}
+
+/**
  * Evaluates tight physical rock-base contact ambient occlusion (`1.0` in open sand,
  * darkening smoothly to `0.45` right where the live-rock base meets the aragonite bed).
  * Replaces the old oversized hand-painted indigo blobs. The strengths were

@@ -27,6 +27,10 @@ export const FISH_RENDER_LENGTH_INCHES: Readonly<Record<string, number>> = Objec
   'copperband-butterflyfish': 6.5,
   'desjardins-sailfin-tang': 12,
   'snowflake-moray-eel': 9,
+  'banded-trochus-snail': 1.75,
+  'scarlet-reef-hermit-crab': 2,
+  'emerald-mithrax-crab': 2,
+  'scarlet-skunk-cleaner-shrimp': 3.25,
 })
 
 /** Project-selected total biological reference, separate from the partial rendered forebody. */
@@ -66,6 +70,10 @@ export const MODEL_SWIM_AXIS_LENGTH: Readonly<Record<string, number>> = Object.f
   'copperband-butterflyfish': 2, // src/rendering/assets/splat-fish/copperband-butterflyfish.glb, z -1 … 1
   'desjardins-sailfin-tang': 1.985423, // src/rendering/assets/fish/download_testing_copies/zebrasoma_desjardinii-copy.glb, z -0.999266 … 0.986158
   'snowflake-moray-eel': 2.0055999756, // src/rendering/assets/fish/snowflake-moray-eel.glb; cut rear to head, no tail
+  'banded-trochus-snail': 0.0514188, // src/rendering/assets/invertebrates/invertebrate-banded-trochus-snail.glb
+  'scarlet-reef-hermit-crab': 0.05348665, // src/rendering/assets/invertebrates/invertebrate-scarlet-reef-hermit-crab.glb
+  'emerald-mithrax-crab': 0.04461663, // src/rendering/assets/invertebrates/invertebrate-emerald-mithrax-crab.glb
+  'scarlet-skunk-cleaner-shrimp': 0.0852842, // src/rendering/assets/invertebrates/invertebrate-scarlet-skunk-cleaner-shrimp.glb
 })
 
 /** Fallback artwork plane width in world units before species scaling. */
@@ -92,6 +100,10 @@ export const SPRITE_ARTWORK_LENGTH_FRACTION: Readonly<Record<string, number>> = 
   'flame-angelfish': .953333,
   'copperband-butterflyfish': .983333,
   'desjardins-sailfin-tang': .898333,
+  'banded-trochus-snail': .433333,
+  'scarlet-reef-hermit-crab': .451667,
+  'emerald-mithrax-crab': .536667,
+  'scarlet-skunk-cleaner-shrimp': .458333,
 })
 
 const FALLBACK_LENGTH_INCHES = 3
