@@ -240,7 +240,7 @@ rubric, variant, support and rendering-budget requirements remain open.
   - `reef-nsa-rubble-talus.glb`: `6,640` triangles, `1,299,896` bytes (`0.3883 × 0.0940 × 0.2687` m; substrate rubble apron, `0` sockets)
 - Runtime pinnacle-canyon full-scape composition and Root visual/budget acceptance remain pending.
 
-## Sculpted fish eye/gill/mouth anatomy & `512×512` biological PBR maps — `AQ-91` (Batch 1)
+## Sculpted fish eye/gill/mouth anatomy & `512×512` biological PBR maps — `AQ-91` (Batches 1–3; all 11 remaining `splat-fish` species complete)
 
 - Original **$0** 3D anatomical head sculpts (convex glossy cornea dome + orbital socket rim, curved operculum gill cover + recessed gill slit, species-matched buccal mouth lips/cleft) and `512×512` 24-bit RGB PNG PBR maps (BaseColor, biological Normal with scales/lateral line/fin rays/head anatomy, packed ORM with `0.035` cornea roughness) authored in Blender 5.2.3 LTS (`fish_head_sculpt_common.py`, `build_fish_*.py`; packed sources in `src/rendering/assets/splat-fish/blend/` and overrides in `src/rendering/assets/splat-fish/overrides/`). `blue-green-chromis.glb` (`AQ-107`) and `learned-shape-guide.json` remain untouched via `sync-blender-override.mjs --fish-overrides`.
 - Batch 1 synced in `src/rendering/assets/splat-fish/`:
@@ -252,4 +252,9 @@ rubric, variant, support and rendering-budget requirements remain open.
   - `firefish.glb`: `8,403` triangles, `788,460` bytes (`0.752` MiB)
   - `lyretail-anthias.glb`: `9,739` triangles, `840,420` bytes (`0.801` MiB)
   - `six-line-wrasse.glb`: `12,107` triangles, `963,144` bytes (`0.919` MiB)
-- Remaining 4 species (`mccoskers-flasher-wrasse`, `mandarin-dragonet`, `yellow-watchman-goby`, `tailspot-blenny`) and Root visual/native review remain pending.
+- Batch 3 synced in `src/rendering/assets/splat-fish/`:
+  - `mccoskers-flasher-wrasse.glb`: `9,639` triangles, `937,420` bytes (`0.894` MiB)
+  - `mandarin-dragonet.glb`: `9,279` triangles, `1,026,052` bytes (`0.979` MiB)
+  - `yellow-watchman-goby.glb`: `10,405` triangles, `886,676` bytes (`0.846` MiB)
+  - `tailspot-blenny.glb`: `11,140` triangles, `936,936` bytes (`0.894` MiB)
+- All `11/11` previously un-modeled `splat-fish` species (`12/13` overridden total alongside `blue-tang` + preserved `AQ-107` `blue-green-chromis`) are sculpted and synced; Root visual/native review remains pending.
