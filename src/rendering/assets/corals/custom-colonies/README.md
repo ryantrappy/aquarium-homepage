@@ -239,3 +239,32 @@ node scripts/sync-blender-override.mjs --coral reef-brain-fleshy-lobophyllia --l
 /Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_zoanthid_palythoa_cluster.py
 node scripts/sync-blender-override.mjs --coral reef-zoanthid-palythoa-cluster --learn-guide
 ```
+
+
+## `reef-anemone-rose-bta`
+
+- **Archetype / Socket**: `host-anemone` Variant #1 (`socket_anemone_crevice_01` on Left Island)
+- **Builder script**: `src/rendering/modeling/build_reef_anemone_rose_bta.py`
+- **Source `.blend`**: `src/rendering/assets/splat-fish/blend/reef-anemone-rose-bta.blend`
+- **Synced package**: `reef-anemone-rose-bta.glb` (`26,192` triangles, `1,679,172` bytes, `dimensionsM: [0.2894, 0.1565, 0.2771]`)
+- **Primitives**: `anemone_tentacle_crown` (`coral-soft`) + `anemone_column_disc` (`coral-rigid`)
+- **Morphology**: Rose Bubble-Tip Anemone (*Entacmaea quadricolor*) with pleated oral disc, `104` hydrostat bubble-tipped tentacles with sub-terminal bulbous vesicles, six packed PBR maps, and a compact five-lobed verrucose pedal column tucked inside the rock crevice.
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_anemone_rose_bta.py
+node scripts/sync-blender-override.mjs --coral reef-anemone-rose-bta --learn-guide
+```
+
+## `reef-anemone-sunburst-bta`
+
+- **Archetype / Socket**: `host-anemone` / `tentaculate-lps` Variant #2 (`socket_lps_mid_05` on Right Island)
+- **Builder script**: `src/rendering/modeling/build_reef_anemone_sunburst_bta.py`
+- **Source `.blend`**: `src/rendering/assets/splat-fish/blend/reef-anemone-sunburst-bta.blend`
+- **Synced package**: `reef-anemone-sunburst-bta.glb` (`27,120` triangles, `1,742,476` bytes, `dimensionsM: [0.2357, 0.1344, 0.2397]`)
+- **Primitives**: `anemone_tentacle_crown` (`coral-soft`) + `anemone_column_disc` (`coral-rigid`)
+- **Morphology**: Colorado Sunburst Bubble-Tip Anemone (*Entacmaea quadricolor*) with lower cascading rosette, `108` asymmetrical flow-swept tentacles featuring double-pinched pear vesicles and warm amber-gold/copper PBR maps over an umber verrucose crevice column.
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender --background --threads 4 --python src/rendering/modeling/build_reef_anemone_sunburst_bta.py
+node scripts/sync-blender-override.mjs --coral reef-anemone-sunburst-bta --learn-guide
+```

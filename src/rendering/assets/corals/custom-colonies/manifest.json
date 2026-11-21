@@ -62,6 +62,46 @@
       ]
     },
     {
+      "id": "reef-anemone-rose-bta",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-anemone-rose-bta.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-anemone-rose-bta-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-anemone-rose-bta.blend",
+      "nativeSha256": "d2ff4a6346773abd00c4187475fdec63c4db3ffbbb6d3f36a3b050c6f1c5002a",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-anemone-rose-bta.glb",
+      "overrideSha256": "bb4a0bc276eeab76cda9ccf71f895ce285e97f2acb8f3181174891a7701b029d",
+      "generatorPath": "src/rendering/modeling/build_reef_anemone_rose_bta.py",
+      "generatorSha256": "9c278e1d18e13d20d79f111539b38351c6f2742e090ef80b390d48aede65e80f",
+      "sha256": "feadb2ad98f7d4bb7d8694fb2e021ea45574fb66a766760ec364ea05e4b1ab13",
+      "bytes": 1679172,
+      "triangles": 26192,
+      "dimensionsM": [
+        0.2893517017364502,
+        0.15650993026793003,
+        0.2770743817090988
+      ]
+    },
+    {
+      "id": "reef-anemone-sunburst-bta",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-anemone-sunburst-bta.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-anemone-sunburst-bta-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-anemone-sunburst-bta.blend",
+      "nativeSha256": "00108b3907426b36d46b9c589a75ef58040853bdfe4892879f6934a59ad81441",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-anemone-sunburst-bta.glb",
+      "overrideSha256": "ab07e27241586288f560377002f523c72d7d72675b75e81dd87d84a92001d390",
+      "generatorPath": "src/rendering/modeling/build_reef_anemone_sunburst_bta.py",
+      "generatorSha256": "a0ec0324f8637f722414bae32f0cda8f9cfff7110c5212243fa58e93c52822d6",
+      "sha256": "5adf4bc5e02ee529fd6b7578f683b1051d8892b0f99b8cf5934e6c1a7683938b",
+      "bytes": 1742476,
+      "triangles": 27120,
+      "dimensionsM": [
+        0.2356734350323677,
+        0.1344121340662241,
+        0.2397284358739853
+      ]
+    },
+    {
       "id": "reef-brain-fleshy-lobophyllia",
       "kind": "coral",
       "path": "src/rendering/assets/corals/custom-colonies/reef-brain-fleshy-lobophyllia.glb",

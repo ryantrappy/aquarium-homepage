@@ -31,6 +31,7 @@ import type {
 } from '../../simulation/mesh-navigation'
 import type { SolidObstacleVolume } from '../../simulation/habitat-navigation'
 import type { MeshNavigationConfig } from './motion'
+import { isHostAnemoneCoralAsset } from './anemone-host'
 import { measuredCoralShaderMargin, type AssembledCoralBinding } from './reef-assembly'
 
 /** Lattice spacing for mesh route planning (m). The fixed water bounds give
@@ -311,7 +312,7 @@ function coralMeshBoxes(mountedCorals: readonly AssembledCoralBinding[], tight =
         bounds.min.sub(padding); bounds.max.add(padding)
       }
       const primitive = node.userData.reefPrimitive ?? node.parent?.userData.reefPrimitive
-      const softAnemone = mounted.coralAssetId === 'coral-anemone-bta' && primitive?.role === 'coral-soft'
+      const softAnemone = isHostAnemoneCoralAsset(mounted.coralAssetId) && primitive?.role === 'coral-soft'
         && ['anemone_column_disc', 'anemone_tentacle_crown'].includes(primitive.id)
       boxes.push({
         ...(softAnemone ? { softAnemone: true } : {}),

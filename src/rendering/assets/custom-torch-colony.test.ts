@@ -47,6 +47,20 @@ const dualCoralCases = [
     socketName: 'socket_soft_mat_02',
     archetype: 'zoanthid-mat',
   },
+  {
+    id: 'reef-anemone-rose-bta',
+    mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
+    minFlexLevels: 11,
+    socketName: 'socket_anemone_crevice_01',
+    archetype: 'host-anemone',
+  },
+  {
+    id: 'reef-anemone-sunburst-bta',
+    mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+    minFlexLevels: 11,
+    socketName: 'socket_lps_mid_05',
+    archetype: 'tentaculate-lps',
+  },
 ] as const
 const registryDir = 'src/rendering/assets/corals/custom-colonies'
 const registryPath = `${registryDir}/manifest.json`

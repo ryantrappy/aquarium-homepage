@@ -199,6 +199,10 @@ rubric, variant, support and rendering-budget requirements remain open.
     - `reef-montipora-tier-shelf.glb`: `21,324` triangles, `1,607,356` bytes (`plating-sps`, `socket_plate_ledge_04`)
     - `reef-brain-fleshy-lobophyllia.glb`: `24,000` triangles, `2,218,308` bytes (`mounded-lps`, `socket_brain_apron_04`)
     - `reef-zoanthid-palythoa-cluster.glb`: `27,812` triangles, `1,751,772` bytes (`zoanthid-mat`, `socket_soft_mat_02`)
+  - **`AQ-70.11` Host-Anemone two-variant BTA batch (`reef-anemone-rose-bta`, `reef-anemone-sunburst-bta`)**:
+    - Original **$0** procedural 3D geometry and baked PBR texture maps authored from scratch in Blender (`build_reef_anemone_rose_bta.py`, `build_reef_anemone_sunburst_bta.py`; packed sources under `src/rendering/assets/splat-fish/blend/`).
+    - `reef-anemone-rose-bta.glb`: `26,192` triangles, `1,679,172` bytes (`host-anemone`, `socket_anemone_crevice_01` on Left Island)
+    - `reef-anemone-sunburst-bta.glb`: `27,120` triangles, `1,742,476` bytes (`host-anemone` Variant #2 mounted at `socket_lps_mid_05` on Right Island)
   - Canonical `corals/` assets remain preserved; look-dev captures, physical scale/rubric evaluation, and Root approval remain pending.
 
 ## Clean-up-crew reef invertebrates (Trochus snail, scarlet hermit crab, emerald crab, cleaner shrimp) — `AQ-109` (Phase 1)
