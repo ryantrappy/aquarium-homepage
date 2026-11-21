@@ -265,9 +265,6 @@ export class RaymarchedShaftPass {
         varying vec2 vUv;
         ${SURFACE_WAVE_GLSL}
         ${SHAFT_BEAM_GLSL}
-        float shaftIgn(vec2 p) {
-          return fract(52.9829189 * fract(0.06711056 * p.x + 0.00583715 * p.y));
-        }
         void main() {
           float depth = texture2D(tDepth, vUv).x;
           if (depth >= 1.0) { gl_FragColor = vec4(0.0); return; }
@@ -287,11 +284,11 @@ export class RaymarchedShaftPass {
           // straight up the beam axis (where step banding would show).
           float axisFade = 1.0 - smoothstep(0.75, 0.95, abs(dot(rayDir, uSunDir)));
           float stepLen = rayLen / float(uSteps);
-          float jitter = shaftIgn(gl_FragCoord.xy);
           float accum = 0.0;
           for (int i = 0; i < 32; i++) {
             if (i >= uSteps) break;
-            float t = entryT + (float(i) + jitter) * stepLen;
+            // Sample the middle of each step without imprinting screen-space noise.
+            float t = entryT + (float(i) + 0.5) * stepLen;
             vec3 p = uCameraPos + rayDir * t;
             if (p.y > uSurfaceY || p.y < -2.8) continue;
             // Surface footpoint the light passed through (gentle vertical sun-slant).
@@ -301,8 +298,8 @@ export class RaymarchedShaftPass {
             float beam = pow(shaftBeamPattern(surf, uTime), 2.4);
             float curtainStriation = 0.55 + 0.45 * shaftValueNoise(vec2(surf.x * 3.8 + uTime * 0.05, p.y * 0.35));
             float rippleGate = smoothstep(-0.15, 0.75, focus) * curtainStriation;
-            float depthFade = exp(-max(3.20 - p.y, 0.0) * 0.82) * smoothstep(-1.4, 3.15, p.y);
-            accum += beam * (0.20 + 0.80 * rippleGate) * depthFade * stepLen * 0.30;
+            float depthFade = exp(-max(uSurfaceY - p.y, 0.0) * 0.46) * smoothstep(-1.2, 2.1, p.y);
+            accum += beam * (0.14 + 0.86 * rippleGate) * depthFade * stepLen * 1.05;
           }
           float light = (1.0 - exp(-accum * uSoftClamp)) * axisFade * uAlpha * 0.58;
           gl_FragColor = vec4(vec3(0.24, 0.60, 0.94) * light, light);
