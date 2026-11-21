@@ -776,11 +776,11 @@ def _create_rigged_animated_fish(
             pb.rotation_quaternion = Quaternion((0.0, 0.0, 1.0), rel_angles[i])
             pb.keyframe_insert(data_path="rotation_quaternion", frame=frame)
 
-        sweep_rad = math.radians(pect_sweep_deg) * math.sin(phase)
-        feather_rad = math.radians(pect_feather_deg) * math.cos(phase)
+        outward_sweep_rad = math.radians(pect_sweep_deg) * (0.5 - 0.5 * math.cos(phase))
+        feather_rad = math.radians(pect_feather_deg) * math.sin(phase)
         for name, side in (("pectoral_L", 1.0), ("pectoral_R", -1.0)):
             pb = arm_obj.pose.bones[name]
-            q_sweep = Quaternion((0.0, 0.0, 1.0), side * sweep_rad)
+            q_sweep = Quaternion((0.0, 0.0, 1.0), -side * outward_sweep_rad)
             q_feather = Quaternion((0.0, 1.0, 0.0), side * feather_rad)
             pb.rotation_quaternion = q_sweep @ q_feather
             pb.keyframe_insert(data_path="rotation_quaternion", frame=frame)

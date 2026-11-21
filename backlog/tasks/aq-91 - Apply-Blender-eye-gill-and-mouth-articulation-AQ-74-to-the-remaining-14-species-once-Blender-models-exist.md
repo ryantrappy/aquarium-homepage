@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-09T03:04:00Z'
-updated_date: '2026-11-21 15:14'
+updated_date: '2026-11-21 16:39'
 labels:
   - modeling
   - photorealism
@@ -72,4 +72,6 @@ Milestone E (standalone Blender overrides for remaining 3 species — all 15 ros
   - ocellaris-clownfish: 12,580 tris, 819,784 B, sha256 9a9f334ed1341771456c8d8a01833193e4635d0840df65373021fdce0e57a0b0
   - desjardins-sailfin-tang: 13,184 tris, 940,252 B, sha256 28e92078de67e6856d32fc607791a74419de08946ded59b751d751fd2db7896b
 - Added starter-fish-overrides.test.ts (4/4 passing); verified --fish-overrides sync leaves canonical splat-fish/manifest.json, blue-green-chromis.glb, and learned-shape-guide.json untouched; full vitest 82/82 test files (1055/1055 tests), verify-fish-clip-player.mjs, check-reef-asset-manifests.mjs, typecheck, and build passed. Remains In Progress for runtime gill/mouth ventilation (AC #3) and Root visual review.
+
+2026-11-21 Live Blender MCP animation audit fix: biased pectoral rowing outward in fish_from_reference_common.py ((0.5 - 0.5*cos(phase)) with -side around +Z) so pectorals flare cleanly into open water and never clip inside the torso across frames 0..48. Verified top-down frames [0,8,16,24,32,40] in live Blender MCP on yellow-tang, ocellaris-clownfish, and desjardins-sailfin-tang; starter-fish-overrides.test.ts 4/4 passing.
 <!-- SECTION:NOTES:END -->
