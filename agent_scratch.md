@@ -106,3 +106,7 @@
 ### AQ-59 porous rock shading review
 *Root reviewed the retained handoffs. Scoped coral integrations are actioned. Current local review and asset ownership rules remain in effect. Exact-export rock art, grounding and cave certification remain pending.*
 - Compared the porous rock study with the laptop reef. Refined the installed rock shader to emphasize pore depth and use correct world-space normals on the tall islands. The candidate GLB remains in its study route and retains its original geometry and maps.
+
+### AQ-103 water surface follow-up
+*Root reviewed retained entries. The prior rock shading delivery is actioned, standing local and laptop-only scope remains current, and backlog acceptance gates remain pending.*
+- The water shader now eases in transmission above the critical angle, preserves a finite meniscus Gaussian, and moderates saturation in captured reflections. Laptop overview rendered cleanly. Its front meniscus remains outside the view.
