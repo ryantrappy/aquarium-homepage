@@ -23,6 +23,8 @@ import { mountedAnemoneHosts } from './anemone-host'
 import { createSwimmingFish, distance, stepSwimmingFish } from './motion'
 import { analyzeFishClipEnvelope } from '../assets/fish-clip-envelope'
 import { fishRenderLength, MODEL_SWIM_AXIS_LENGTH } from './fish-scale'
+import { createNsaHabitatAnchors } from './reef-nsa-habitat'
+import { overviewHalfWidthAtDepth } from './camera-zoom'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
 
@@ -64,6 +66,47 @@ describe('AQ-94 NSA modular rock library & rubble-talus grounding', () => {
     if (result.status !== 'ready') return
     const query = result.meshNavigation.queryCapsule!
     expect(query({ x: -.2, y: -1.95, z: -3.8 }, { x: -.2, y: -1.95, z: 1.9 }, .04, MESH_NAVIGATION_MOVEMENT_BUDGET).status).toBe('clear')
+    const aspect = 1440 / 900
+    const halfWidth = overviewHalfWidthAtDepth(aspect, -1.35)
+    const bounds = {
+      min: { ...AQUARIUM_WATER_BOUNDS.min, x: -halfWidth },
+      max: { ...AQUARIUM_WATER_BOUNDS.max, x: halfWidth },
+    }
+    const lateralLimit = (z: number) => Math.min(halfWidth, overviewHalfWidthAtDepth(aspect, z))
+    const destinations = createNsaHabitatAnchors(assemblies, bounds, lateralLimit, query)
+    const anchorPairs = new Set(destinations.flatMap(({ anchor, compatibleSpecies }) =>
+      compatibleSpecies?.map(species => `${species}/${anchor}`) ?? []))
+    for (const pair of [
+      'yellow-tang/grazingSurface',
+      'desjardins-sailfin-tang/grazingSurface',
+      'blue-tang/branchingCoralRefuge',
+      'blue-green-chromis/branchingCoralRefuge',
+      'banggai-cardinalfish/branchingCoralShelter',
+      'six-line-wrasse/branchingCoralShelter',
+      'six-line-wrasse/rockCrevice',
+      'royal-gramma/rockCrevice',
+      'flame-angelfish/rockCrevice',
+      'copperband-butterflyfish/rockCrevice',
+      'mandarin-dragonet/foragingPatch',
+      'tailspot-blenny/rockPerch',
+      'firefish/sandBurrowEntrance',
+      'yellow-watchman-goby/sandBurrowEntrance',
+      'mccoskers-flasher-wrasse/reefSlopeRubble',
+      'lyretail-anthias/coralOutcrop',
+    ]) expect(anchorPairs.has(pair), pair).toBe(true)
+
+    const burrow = destinations.find(({ anchor }) => anchor === 'sandBurrowEntrance')!
+    const gobyApproach = { ...burrow.position, z: burrow.position.z + .3 }
+    const goby = createSwimmingFish('modular-goby', 'yellow-watchman-goby', gobyApproach, .5, undefined, { collisionRadiusM: .04 })
+    const modularHabitat = { bounds, maxAbsXAtDepth: lateralLimit, obstacles: [], anchors: destinations, meshNavigation: result.meshNavigation }
+    let reachedBurrow = false
+    for (let frame = 0; frame < 600; frame++) {
+      const before = { ...goby.position }
+      stepSwimmingFish(goby, modularHabitat, 1 / 30)
+      expect(query(before, goby.position, .04, MESH_NAVIGATION_MOVEMENT_BUDGET).status).toBe('clear')
+      reachedBurrow ||= distance(goby.position, burrow.position) < .14
+    }
+    expect(reachedBurrow).toBe(true)
 
     const hosts = assemblies.flatMap(({ mountedCorals, islandId }) => mountedAnemoneHosts(mountedCorals, islandId))
     expect(hosts).toHaveLength(1)

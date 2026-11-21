@@ -41,6 +41,7 @@ import { reefPlacementsForViewport } from './reef-layout'
 import { hasReadyRightIslandCollider, resolveAvailableSnowflakeMorayResidence, resolveNsaMorayResidence, SNOWFLAKE_MORAY_CAVE_COLLISION_RADIUS_M, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M, type MorayResidence } from './moray-residence'
 import { CENTER_ARCH_URL, CENTER_ARCH_MOUNTS, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
 import { NSA_KIT_URL, NSA_SUBSTRATE_CONTACTS, RUBBLE_TALUS_URL, createNsaReviewReef, createRubbleTalusGroundingAprons, disposeRubbleTalusMaterials } from './reef-nsa'
+import { createNsaHabitatAnchors } from './reef-nsa-habitat'
 import { createGlassEnclosure, glassEnclosureLayout } from './glass-enclosure'
 import { createWaterSurface } from './water-surface'
 import { WaterRadianceProbeManager } from './water-radiance-probe'
@@ -153,7 +154,7 @@ function disposeTree(root: THREE.Object3D, borrowedEnvironment?: THREE.Texture) 
 
 export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, initialServices: ServiceConfig[], initialPaused: boolean, status: (status: SceneStatus) => void, focusFallback: () => HTMLElement | null = () => null, fishExtensions: FishExtensionConfig = EMPTY_FISH_EXTENSIONS, onFrameRate?: (sample: FrameRateSample | null) => void, initialConfigurationReady = true): AquariumController {
   const lookDevConfig = import.meta.env.DEV ? resolveLookDevConfig(window.location.search, true) : undefined
-  const nsaReview = Boolean(lookDevConfig && new URLSearchParams(window.location.search).get('reef') === 'nsa')
+  const nsaReview = import.meta.env.DEV && new URLSearchParams(window.location.search).get('reef') === 'nsa'
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' })
   renderer.setPixelRatio(lookDevConfig ? 1 : Math.min(devicePixelRatio, 1.5))
   renderer.outputColorSpace = THREE.SRGBColorSpace
@@ -1072,6 +1073,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       if (result.status === 'ready') {
         habitat.meshNavigation = result.meshNavigation
         readyMeshIslandIds = new Set(result.diagnostics.islands.map(island => island.islandId))
+        if (nsaKitBase && result.meshNavigation.queryCapsule) {
+          habitat.anchors.push(...createNsaHabitatAnchors(meshIslands, habitat.bounds, habitat.maxAbsXAtDepth, result.meshNavigation.queryCapsule))
+        }
         // Relocate any fish or schoolmate that drifted into a coral envelope
         // during the brief AABB window before the async mesh collider resolved.
         const meshCheck = (candidate: SwimmingFish['position']) =>

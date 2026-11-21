@@ -21,6 +21,8 @@ The lower-left shelf now mounts the saved rose bubble-tip anemone. The modular s
 
 The preview sand follows five contact footprints fitted to the modular rock bases, including separate arch piers. Sand height, contact shading, shell and rubble scatter, and benthic placement use the same footprints. Six smaller placements of the saved talus sit along the bases and clear the moray's head corridor. Laptop evidence is under `docs/asset-evidence/aq94/modular-substrate-review/`. Review grounding and the composition again in the default habitat before closing AQ-94.
 
+Development now supports normal swimming at `/?reef=nsa`. The modular scene publishes compatible habitat destinations after exact collision is ready. The full-kit test verifies 16 species/interaction pairs and a watchman goby's clear approach to the shared burrow entrance. The laptop browser review verified movement and Pause in the normal animation loop. Default-layout promotion and whole-body clearance remain open.
+
 ## Fish depth and surface shafts — 2026-11-20
 
 AQ-87 applies species depth bands to general anchor destinations and held interaction targets. Actual laptop scene geometry supplies an in-band option for each authored compatible anchor group. The staged preview had 12 inhabitants and no band misses. The custom host-placement exception preserves the physical relationship with its anemone. Animated body clearance and all-depth picking remain open.
