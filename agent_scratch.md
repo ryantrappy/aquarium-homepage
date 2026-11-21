@@ -219,3 +219,7 @@
 ### 2026-11-21 — AQ-94 live modular habitat
 *Root reviewed the retained entries. Active scope, local/laptop verification and preservation of saved assets are current policy. The modular interaction destinations and normal live development route are actioned. Production selection and whole-body routing remain pending.*
 - The mounted roots and measured cave, burrow and slope points supply collision-checked habitat destinations. The full-kit fixture verifies 16 compatible fish/interaction pairs and a 20-second watchman goby approach. The controller fixture proves the destinations reach the normal animation loop after the exact collider becomes ready. Native `/?reef=nsa` showed 9 of 12 service projections move by more than two pixels over 32 animation frames, then zero while paused.
+
+### 2026-11-21 — AQ-94 default wide layout
+*Root reviewed the retained entries. The active scope, local/laptop review and saved asset preservation remain current policy. AQ-94 is actioned and Done after the default-layout review. Whole-body fish clearance and subsequent art tasks remain pending.*
+- The compiled wide homepage loads only the 3,956,104-byte NSA foundation kit for the initial reef. At 1440×900 the left coral-to-base silhouette spans approximately 78% of the frame, with a lower right bommie, open canyon and grounded piers. A body click opens the Blue tang service card. Pause, Services and Settings worked. Tests cover narrow asset loading and stale resize completion. Verification passed all 1,059 tests, typecheck, production build and kit check.

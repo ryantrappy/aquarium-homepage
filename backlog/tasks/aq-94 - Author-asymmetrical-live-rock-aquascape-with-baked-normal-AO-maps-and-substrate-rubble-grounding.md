@@ -3,11 +3,11 @@ id: AQ-94
 title: >-
   Author Negative Space Aquascape (NSA) with 5–8 modular rock pieces, pinnacle
   canyon, and 2048px trim sheet
-status: In Progress
+status: Done
 assignee:
   - '@gemini'
 created_date: '2026-11-11 04:55'
-updated_date: '2026-11-21 19:03'
+updated_date: '2026-11-21 19:10'
 labels:
   - modeling
   - blender
@@ -43,11 +43,11 @@ Architect the live rock aquascape from scratch using Negative Space Aquascaping 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Aquascape forms an asymmetrical Negative Space Aquascape (NSA) with a left arch rising to a high pinnacle, lower right island, and central swim canyon
+- [x] #1 Aquascape forms an asymmetrical Negative Space Aquascape (NSA) with a left arch rising to a high pinnacle, lower right island, and central swim canyon
 - [x] #2 Reef is assembled from a reusable library of 5–8 modular sculpted rock pieces sharing a single 2048x2048 PBR texture atlas (Normal, Roughness, AO)
 - [x] #3 Upper half of the water column preserves open negative space for unobstructed fish swimming and label visibility
 - [x] #4 Total exported .glb asset size for assembled foundations remains under 5 MB with minimal draw calls
-- [ ] #5 Substrate dunes, shell fragments, and rubble eliminate hard intersecting seams at the sand bed base
+- [x] #5 Substrate dunes, shell fragments, and rubble eliminate hard intersecting seams at the sand bed base
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -66,6 +66,8 @@ Fit a saved bubble-tip anemone to a supported left-module socket, derive its hos
 Fit substrate contact footprints to the low sections of the exact modular foundation, seat the saved rubble on the same sand profile, and review the 1440×900 rock-to-sand transition while retaining the clear canyon and moray approach.
 
 Restore habitat behavior parity for the wide modular reef by deriving shelter, forage and perch destinations from mounted modules and checking measured cave, rubble and sand destinations with the exact collision query. Keep each destination in a compatible ecological band and verify an approach before publishing it.
+
+Use the shared modular reef for the default wide display. Keep the existing narrow reef, lazy-load a new foundation only when its layout is needed, and switch its sand, collision and habitat together. Validate the default production build at 1440x900 and verify repeat breakpoint changes with controller tests.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -107,4 +109,12 @@ Root modular clownfish review 2026-11-21. The seven saved sculpted modules share
 Root modular substrate review 2026-11-21. Fitted five contacts to below-Y -2.55 mesh sections for the buttress, two separate arch piers, bommie and right ledge. The preview uses one footprint array for sand geometry, contact shading, scatter and benthic placement. Six smaller placements reuse the saved rubble at exposed rock edges. Exact-kit clearance retains the central 0.04 capsule, clownfish motion, and moray head and shelter tests. The laptop comparison had 15 inhabitants, zero failed assets and zero browser warnings/errors. Evidence docs/asset-evidence/aq94/modular-substrate-review/. Final composition and grounding remain open for default-layout review.
 
 Root live habitat review 2026-11-21. The modular composition now runs the normal animation path at the development-only /?reef=nsa. It derives plate and branching destinations from mounted colony geometry and uses measured sites beside the arch, sand and slope. All destinations require an in-band compatible species and a clear 0.04 scene-unit approach using the exact collider. The exact-kit test verifies 16 fish/interaction pairs and a 20-second watchman goby simulation that reaches the burrow entrance without a blocked movement sample. The controller test confirms the destinations reach the live simulation only after mesh readiness. At 1440x900 DPR 1, nine of twelve link projections moved by more than two pixels over 32 animation frames; zero moved while paused. Browser warnings/errors: zero. Default wide selection and close-in full-body clearance remain open.
+
+Root production acceptance 2026-11-21. The compiled homepage at 1440x900 DPR 1 selects the modular reef with no query or development bridge. Initial foundation request: the shared 3,956,104-byte kit only. The left coral-to-base silhouette spans approximately 78% of frame height, right bommie is lower, and the canyon and softened substrate contact are visible. Exact geometry verifies the clearance and bedding conditions. Blue tang body picking opened the Internet Archive service card. Pause/Resume, Services and Settings worked; browser warnings/errors: zero. Controller tests verify lazy narrow load, stale completion handling, repeated resize and preserved Pause/link. 1,059 tests, typecheck, production build and deterministic kit check passed. Screenshot and verification in docs/asset-evidence/aq94/default-laptop-review/.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+The compiled wide homepage uses seven saved modular rock pieces sharing one 2048px PBR atlas, with an asymmetrical pinnacle and canyon, 13 mounted colonies and sand-fit rubble. The 1440x900 default route and exact assets verified the composition, grounding and asset budget. Tests cover the narrow fallback and the modular habitat. Follow-on whole-body clearance remains tracked under AQ-58.
+<!-- SECTION:FINAL_SUMMARY:END -->
