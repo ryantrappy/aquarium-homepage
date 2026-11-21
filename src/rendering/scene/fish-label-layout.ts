@@ -141,7 +141,9 @@ export function resolveLabelDeconflicts(
           if (y < body.y + body.height && body.y < y + caption.height) sides.push({ x, y })
         }
       }
-      sides.sort((a, b) => Math.hypot(a.x - caption.x, a.y - caption.y) - Math.hypot(b.x - caption.x, b.y - caption.y)
+      // Quantize distance comparison to 0.05 px so symmetric left/right side candidates
+      // never flip-flop across frames due to floating-point sub-pixel rounding noise.
+      sides.sort((a, b) => Math.round((Math.hypot(a.x - caption.x, a.y - caption.y) - Math.hypot(b.x - caption.x, b.y - caption.y)) * 20)
         || a.x - b.x || a.y - b.y)
       for (const side of sides) add(side.x, side.y)
     }

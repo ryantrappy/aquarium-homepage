@@ -1497,6 +1497,21 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     camera.updateMatrixWorld(true)
     const bodies = new Map<Inhabitant, LabelRect>()
     for (const item of [...fish, ...schoolmates]) {
+      if (isInvertebrateSpecies(item.service.fishId) && !item.fallback) {
+        const linkPt = fishLinkPoint(item)
+        const invBounds = projectFishLinkBounds(
+          linkPt,
+          camera,
+          width,
+          height,
+          fishRenderLength(item.service.fishId),
+          projected,
+        )
+        if (invBounds) {
+          bodies.set(item, invBounds)
+          continue
+        }
+      }
       const body = projectFishBodyBounds(item.root, camera, width, height, projected, item.flex?.vertexDeformerFor)
       if (body) bodies.set(item, body)
     }
