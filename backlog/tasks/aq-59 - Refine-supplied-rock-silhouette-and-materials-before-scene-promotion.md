@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-05 03:13'
-updated_date: '2026-11-20 22:23'
+updated_date: '2026-11-21 01:25'
 labels:
   - modeling
 dependencies: []
@@ -47,6 +47,8 @@ Root-approved functional AQ59 texture-pipeline iteration. Before editing, snapsh
 Root renderer-only refinement 2026-11-12: keep Gemini geometry, Blender sources, GLBs, socket data and manifests unchanged; replace blue-biased carbonate shader colors with neutral warm dark aragonite and reduce broad coralline coverage/rims. Verify actual compiled WebGL at the two viewports and retain porous geometry detail. This is an assembled-material improvement, not acceptance of exact-export model criteria.
 
 Root GPU-cost refinement2026-11-12: native callback/draw diagnostics suggest graphics/presentation cost, while the rock normal shader redundantly reevaluates the same four-octave3D field at four offsets per fragment. Reuse its existing height signal and derive the surface gradient with screen-space derivatives in the view-space tangent frame. Preserve substrate/pore/color fields and geometry; verify actual WebGL compile, macro detail and both native frame-time cases before accepting.
+
+Review the porous-rock study geometry and maps. Improve the existing in-tank rock shading using world-space surface normals, shallow pore highlights, and stable coralline rim math. Compare fixed laptop look-dev frames. Keep geometry, sockets and cave clearances intact.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -82,6 +84,8 @@ Root read-only native/export audit saved docs/asset-evidence/aq59/runtime-source
 2026-11-15 active-only review: all three art/export acceptance criteria remain unchecked. Existing renderer refinements are recorded in AGENT_TASKS.md (neutral carbonate/less broad coralline; reused height samples for derivative normals), but no measured speedup or exact-export acceptance is claimed. The latest handoff also warns that runtime reef-full-model-left/right differ from canonical live-rock manifest/socket evidence and lack embedded maps; this session has no browser/native review interface for the required current exact-export visual and GPU frame-time checks. Preserve Gemini model ownership; no model, generator, asset, or renderer changes made. Keep task In Progress for current-source/library/render review by Root/Gemini.
 
 2026-11-20 candidate review: public/test-assets/procedural-coral-rock.glb is a single porous rock study with embedded base-color, normal and roughness images (3,496,352 bytes, 15,360 triangles). Its Cycles preview shows distinct carbonate pores and a rounded profile. The export contains one mesh node and no mounting sockets. It is a candidate surface/model reference for the exposed reef faces. Current evidence leaves in-tank scale, grounded support, mount locations, cave clearance and provenance review open.
+
+Root compared the working-tree laptop overview with the earlier four-colony capture at the same 1440×900 DPR 1, seed 2026 and time 1.25. The existing foundation shader now uses world-space normals under the vertical island scale and reuses its 3D field for pore wells, rims and bump. Squaring signed rim distances by multiplication avoids undefined GLSL power on negative inputs in coralline and anemone rim shading. The aquarium loaded with no failed assets or browser warnings/errors. Capture: docs/asset-evidence/aq59/porous-shading-review/laptop.png. The capture includes the ongoing glass and sand changes; this task commit contains the shading changes only. The separate rock study GLB has three embedded 1024px maps and no authored socket nodes. Its Cycles image is reference evidence, while the deployed model still needs exact-export art, physical dimensions, grounding and cave certification. No acceptance criterion was checked.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

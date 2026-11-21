@@ -329,7 +329,7 @@ describe('coral-raw-masks-v1 material and shader adapter (AQ-53 / AQ-42)', () =>
     applyLiveRockMaterial(rockMat)
     expect(rockMat.map).toBeNull()
     expect(rockMat.normalMap).toBeNull()
-    expect(rockMat.userData.liveRockShader).toBe('live-rock-3d-aragonite-v1')
+    expect(rockMat.userData.liveRockShader).toBe('live-rock-3d-aragonite-v2')
 
     const mockShader: THREE.WebGLProgramParametersWithUniforms = {
       uniforms: {},
@@ -337,7 +337,8 @@ describe('coral-raw-masks-v1 material and shader adapter (AQ-53 / AQ-42)', () =>
       fragmentShader: THREE.ShaderLib.standard.fragmentShader,
     } as unknown as THREE.WebGLProgramParametersWithUniforms
     rockMat.onBeforeCompile(mockShader, {} as THREE.WebGLRenderer)
-    expect(mockShader.vertexShader).toContain('vRockObjPos = position.xyz;')
+    expect(mockShader.vertexShader).toContain('transformNormalByInverseViewMatrix(transformedNormal, viewMatrix)')
+    expect(mockShader.fragmentShader).toContain('exp(-plaqueDistance * plaqueDistance)')
     expect(mockShader.fragmentShader).toContain('finalRockColor')
     expect(mockShader.fragmentShader).toContain('roughnessFactor = mix(0.90, 0.65, corMask * 0.85);')
 

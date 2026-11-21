@@ -102,3 +102,7 @@
 *Root reviewed retained handoffs. Local/laptop-only review and asset preservation are current policy. Earlier completed milestones are actioned, and remaining art, provenance and performance gates are pending.*
 - Reviewed four AQ-70.11 colonies. Verified native packed maps and registry hashes, fixed hammer size and offset to restore clownfish hosting, and reviewed the live laptop preview. Full checkout passed 973 tests, typecheck and build. The individual coral acceptance rubric remains open.
 - Reviewed the separate procedural rock study for AQ-59. Its porous surface is promising and its export contains a single model without sockets. Placement, scale, support and cave clearance are pending.
+
+### AQ-59 porous rock shading review
+*Root reviewed the retained handoffs. Scoped coral integrations are actioned. Current local review and asset ownership rules remain in effect. Exact-export rock art, grounding and cave certification remain pending.*
+- Compared the porous rock study with the laptop reef. Refined the installed rock shader to emphasize pore depth and use correct world-space normals on the tall islands. The candidate GLB remains in its study route and retains its original geometry and maps.
