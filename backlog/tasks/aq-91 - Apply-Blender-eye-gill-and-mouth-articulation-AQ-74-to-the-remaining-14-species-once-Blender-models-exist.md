@@ -3,10 +3,11 @@ id: AQ-91
 title: >-
   Apply Blender eye, gill, and mouth articulation (AQ-74) to the remaining 14
   species once Blender models exist
-status: To Do
+status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-09T03:04:00Z'
+updated_date: '2026-11-21 14:45'
 labels:
   - modeling
   - photorealism
@@ -48,3 +49,9 @@ AQ-74 implements 3D convex cornea eyes, sculpted operculum (gill-cover) relief, 
 - [ ] #1 Root agent reviews the completed work before the task is marked Done.
 - [ ] #2 Implementation follows project policy: default to Luna with high reasoning effort for routine work; root may choose a stronger model for demanding tasks.
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-11-21 Batch 1 Fish Eye/Gill/Mouth Sculpting & Biological PBR Pipeline (AQ-91): Added safe --fish-overrides sync dispatch in scripts/sync-blender-override.mjs (preserving AQ-107 blue-green-chromis and learned-shape-guide.json byte-for-byte) and reusable Blender 5.2.3 LTS anatomical sculpting & 512x512 24-bit RGB PNG PBR map generator in src/rendering/modeling/fish_head_sculpt_common.py (convex glossy cornea dome + orbital rim, curved operculum gill cover + recessed gill slit, species-specific buccal mouth lips/cleft, fine ctenoid scales, lateral line, and fin rays). Authored, rendered in Cycles, synced, and verified Batch 1 (3 species): flame-angelfish (999,592 B, 11,664 tris), copperband-butterflyfish (966,924 B, 10,306 tris), and banggai-cardinalfish (886,908 B, 7,076 tris). Saved uncompressed .blend files + textures under src/rendering/assets/splat-fish/blend/ and overrides under src/rendering/assets/splat-fish/overrides/. Verified verify-fish-clip-player.mjs, check-reef-asset-manifests.mjs, typecheck, build, and full vitest (81/81 files, 1051/1051 tests including budgets.test.ts and chromis-contour.test.ts). Remaining 8 species queued in Batches 2-3; Root review pending.
+<!-- SECTION:NOTES:END -->

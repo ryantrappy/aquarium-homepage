@@ -428,6 +428,33 @@ async function main() {
     syncInvertebrateOverride(REPO_ROOT, id)
     return
   }
+  // Safe fish override rebuild: applies overrides/*.glb without altering learned-shape-guide.json or AQ-107 blue-green-chromis.
+  if (args.includes('--fish-overrides')) {
+    const chromisGlbPath = path.join(ASSETS_DIR, 'blue-green-chromis.glb')
+    const chromisInspectionPath = path.join(ASSETS_DIR, 'fish-blue-green-chromis-inspection.json')
+    const manifestPath = path.join(ASSETS_DIR, 'manifest.json')
+    const chromisGlbBackup = fs.existsSync(chromisGlbPath) ? fs.readFileSync(chromisGlbPath) : null
+    const chromisInspectionBackup = fs.existsSync(chromisInspectionPath) ? fs.readFileSync(chromisInspectionPath) : null
+    const oldManifest = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manifestPath, 'utf8')) : null
+    const oldChromisEntry = oldManifest?.assets?.find(item => item.id === 'fish-blue-green-chromis') ?? null
+
+    execFileSync(process.execPath, ['--experimental-strip-types', BUILD_SCRIPT_PATH], {
+      cwd: REPO_ROOT,
+      stdio: 'inherit',
+    })
+
+    if (chromisGlbBackup) fs.writeFileSync(chromisGlbPath, chromisGlbBackup)
+    if (chromisInspectionBackup) fs.writeFileSync(chromisInspectionPath, chromisInspectionBackup)
+    if (oldChromisEntry && fs.existsSync(manifestPath)) {
+      const rebuiltManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+      rebuiltManifest.assets = rebuiltManifest.assets.map(item =>
+        item.id === 'fish-blue-green-chromis' ? oldChromisEntry : item,
+      )
+      fs.writeFileSync(manifestPath, JSON.stringify(rebuiltManifest, null, 2) + '\n')
+    }
+    console.log('Synced fish overrides; preserved AQ-107 blue-green-chromis and learned-shape-guide.json.')
+    return
+  }
   ensureDocumentationAndRules()
 
   const freezeIdx = args.indexOf('--freeze')

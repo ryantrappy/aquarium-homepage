@@ -122,22 +122,22 @@
       "kind": "fish",
       "rigArchetype": "banner_hoverer",
       "species": "Pterapogon kauderni (Banggai Cardinalfish)",
-      "sha256": "2227babc3370b84e18b66f2c81ec15c4ec2f09b68156471c13a90805620807d7",
-      "bytes": 676712,
-      "triangles": 7164,
+      "sha256": "4f2bd0343e9826cb49b1a09e3b348b74e9cad5d4e0412204aceb236f923380ae",
+      "bytes": 886908,
+      "triangles": 7076,
       "dimensionsM": [
-        0.275092,
+        0.286816,
         1.401608,
         2
       ],
       "boundsM": {
         "min": [
-          -0.137546,
+          -0.143408,
           -0.70205,
           -1
         ],
         "max": [
-          0.137546,
+          0.143408,
           0.699558,
           1
         ]
@@ -159,7 +159,7 @@
         {
           "id": "banggai_cardinalfish_body",
           "role": "fish",
-          "vertexCount": 3657
+          "vertexCount": 3807
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",
@@ -627,22 +627,22 @@
       "kind": "fish",
       "rigArchetype": "subcarangiform_schooler",
       "species": "Centropyge loricula (Flame Angelfish)",
-      "sha256": "6739db04161fb7fed09e2337a80f23d4c26af352fc9a5180ca94a749e2cd6da9",
-      "bytes": 915348,
-      "triangles": 11740,
+      "sha256": "ca38ed0d311a91f3b87fbb54c7da891991c946286a7f09b9956db7c7f6873180",
+      "bytes": 999592,
+      "triangles": 11664,
       "dimensionsM": [
-        0.279412,
+        0.29683,
         1.263197,
         2
       ],
       "boundsM": {
         "min": [
-          -0.139706,
+          -0.148415,
           -0.625324,
           -1
         ],
         "max": [
-          0.139706,
+          0.148415,
           0.637873,
           1
         ]
@@ -664,7 +664,7 @@
         {
           "id": "flame_angelfish_body",
           "role": "fish",
-          "vertexCount": 5933
+          "vertexCount": 6056
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",
@@ -682,9 +682,9 @@
       "kind": "fish",
       "rigArchetype": "subcarangiform_schooler",
       "species": "Chelmon rostratus (Copperband Butterflyfish)",
-      "sha256": "66c341c2663574522f523f3a11284a760c06fdee47a183d2af808ae489d50aa0",
-      "bytes": 882128,
-      "triangles": 10384,
+      "sha256": "32bc11587d0249c203bd1b3a9829146cfd383f155f1f7b8670971fcfd78fb1f0",
+      "bytes": 966924,
+      "triangles": 10306,
       "dimensionsM": [
         0.252702,
         1.313088,
@@ -719,7 +719,7 @@
         {
           "id": "copperband_butterflyfish_body",
           "role": "fish",
-          "vertexCount": 5242
+          "vertexCount": 5368
         }
       ],
       "generator": "scripts/build-splat-fish-glbs.mjs",

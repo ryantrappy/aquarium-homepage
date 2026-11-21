@@ -239,3 +239,12 @@ rubric, variant, support and rendering-budget requirements remain open.
   - `reef-nsa-bommie-mound.glb`: `12,500` triangles, `1,539,956` bytes (`0.5564 × 0.3925 × 0.3358` m; sockets `socket_brain_apron_21`, `socket_soft_mat_21`)
   - `reef-nsa-rubble-talus.glb`: `6,640` triangles, `1,299,896` bytes (`0.3883 × 0.0940 × 0.2687` m; substrate rubble apron, `0` sockets)
 - Runtime pinnacle-canyon full-scape composition and Root visual/budget acceptance remain pending.
+
+## Sculpted fish eye/gill/mouth anatomy & `512×512` biological PBR maps — `AQ-91` (Batch 1)
+
+- Original **$0** 3D anatomical head sculpts (convex glossy cornea dome + orbital socket rim, curved operculum gill cover + recessed gill slit, species-matched buccal mouth lips/cleft) and `512×512` 24-bit RGB PNG PBR maps (BaseColor, biological Normal with scales/lateral line/fin rays/head anatomy, packed ORM with `0.035` cornea roughness) authored in Blender 5.2.3 LTS (`fish_head_sculpt_common.py`, `build_fish_*.py`; packed sources in `src/rendering/assets/splat-fish/blend/` and overrides in `src/rendering/assets/splat-fish/overrides/`). `blue-green-chromis.glb` (`AQ-107`) and `learned-shape-guide.json` remain untouched via `sync-blender-override.mjs --fish-overrides`.
+- Batch 1 synced in `src/rendering/assets/splat-fish/`:
+  - `flame-angelfish.glb`: `11,664` triangles, `999,592` bytes (`0.953` MiB)
+  - `copperband-butterflyfish.glb`: `10,306` triangles, `966,924` bytes (`0.922` MiB)
+  - `banggai-cardinalfish.glb`: `7,076` triangles, `886,908` bytes (`0.846` MiB)
+- Remaining 8 species and Root visual/native review remain pending.
