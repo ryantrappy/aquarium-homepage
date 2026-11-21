@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import { REEF_FISH } from './fish'
 
-export const serviceUrlSchema = z.string().trim().min(1).refine((value) => {
+export const serviceUrlSchema = z.string().trim().refine((value) => {
+  if (value === '') return true
   try {
     const url = new URL(value)
     return (

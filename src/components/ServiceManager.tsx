@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react'
 import { ZodError } from 'zod'
 import { REEF_FISH, getFishById } from '../lib/fish'
-import type { ServiceConfig, ServiceDraft } from '../lib/services'
+import { hasServiceUrl, type ServiceConfig, type ServiceDraft } from '../lib/services'
 import { CloseIcon } from './Icons'
 import assetCreditsUrl from '../rendering/proof/ASSET_NOTICES.md?url'
 import {
@@ -133,8 +133,13 @@ export function ServiceManager({
     let succeeded = false
     setBusy('save')
     try {
-      if (editingId) await onUpdate(editingId, draft)
-      else await onAdd(draft)
+      const normalizedUrl = draft.url.trim()
+      const normalizedDraft: ServiceDraft = {
+        ...draft,
+        url: normalizedUrl === 'https://' || normalizedUrl === 'http://' ? '' : normalizedUrl,
+      }
+      if (editingId) await onUpdate(editingId, normalizedDraft)
+      else await onAdd(normalizedDraft)
       resetForm()
       succeeded = true
       setNotice(wasEditing ? 'Service updated.' : 'Service added.')
@@ -224,10 +229,11 @@ export function ServiceManager({
         <div className="manager-list">
           {services.map((service) => {
             const fish = getFishById(service.fishId)
-            return <article className="managed-service" key={service.id}>
+            const linked = hasServiceUrl(service)
+            return <article className={`managed-service${linked ? '' : ' is-unlinked'}`} key={service.id}>
               <span className={`managed-fish managed-${service.fishId}`}><img src={fish?.thumbnail} alt="" /></span>
-              <div className="managed-details"><strong>{service.name}{service.isExample && <small>example</small>}</strong><span>{service.url}</span><em>{fish?.commonName}</em></div>
-              <div className="row-actions"><a className="managed-open" href={service.url} target="_blank" rel="noreferrer" aria-label={`Open ${service.name} in a new tab`}>Open</a><button type="button" onClick={() => beginEdit(service)} disabled={formDisabled} aria-label={`Edit ${service.name}`}>Edit</button><button ref={(element) => { if (element) removeButtonRefs.current.set(service.id, element); else removeButtonRefs.current.delete(service.id) }} type="button" className="remove-action" onClick={() => setConfirmDelete(service.id)} disabled={formDisabled} aria-label={`Remove ${service.name}`}>Remove</button></div>
+              <div className="managed-details"><strong>{service.name}{!linked && <small className="no-link-badge">no link</small>}{service.isExample && <small>example</small>}</strong><span>{linked ? service.url : 'No link · Display fish'}</span><em>{fish?.commonName}</em></div>
+              <div className="row-actions">{linked ? <a className="managed-open" href={service.url} target="_blank" rel="noreferrer" aria-label={`Open ${service.name} in a new tab`}>Open</a> : <span className="managed-open is-unlinked" aria-label={`${service.name} has no link`}>No link</span>}<button type="button" onClick={() => beginEdit(service)} disabled={formDisabled} aria-label={`Edit ${service.name}`}>Edit</button><button ref={(element) => { if (element) removeButtonRefs.current.set(service.id, element); else removeButtonRefs.current.delete(service.id) }} type="button" className="remove-action" onClick={() => setConfirmDelete(service.id)} disabled={formDisabled} aria-label={`Remove ${service.name}`}>Remove</button></div>
               {confirmDelete === service.id && <div className="delete-confirm"><span>Remove {service.name}?</span><button type="button" onClick={() => { void removeService(service.id) }} disabled={busy !== null}>{busy === 'delete' ? 'Removing…' : 'Remove'}</button><button type="button" onClick={() => { setConfirmDelete(null); scheduleFocus(() => removeButtonRefs.current.get(service.id) ?? null) }} disabled={busy !== null}>Keep</button></div>}
             </article>
           })}
@@ -238,7 +244,7 @@ export function ServiceManager({
           {notice && <p className="manager-notice" role="status" aria-live="polite">{notice}</p>}
           {formError && <p ref={formErrorRef} className="form-error" role="alert" aria-live="assertive" tabIndex={-1}>{formError}</p>}
           <label>Service name<input ref={nameInput} value={draft.name} onChange={(e) => { setDraft({ ...draft, name: e.target.value }); setFormError('') }} maxLength={80} placeholder="e.g. Home Assistant" required disabled={formDisabled} /></label>
-          <label>Web address<input type="url" value={draft.url} onChange={(e) => { setDraft({ ...draft, url: e.target.value }); setFormError('') }} placeholder="https://example.com" required disabled={formDisabled} /></label>
+          <label>Web address (optional — leave blank for display fish)<input type="url" value={draft.url} onChange={(e) => { setDraft({ ...draft, url: e.target.value }); setFormError('') }} placeholder="https://example.com or leave blank" disabled={formDisabled} /></label>
           <fieldset className="fish-picker" disabled={formDisabled}>
             <legend>Choose a fish</legend>
             <div className="fish-picker-selected" aria-live="polite">

@@ -4,6 +4,10 @@ export type ServiceConfig = ReturnType<typeof serviceConfigSchema.parse>
 export type ServiceDraft = ReturnType<typeof serviceDraftSchema.parse>
 export type { SharedConfig }
 
+export function hasServiceUrl(service: Pick<ServiceConfig, 'url'>): boolean {
+  return service.url.trim().length > 0
+}
+
 // Public showcase examples. Inclusion does not indicate reachability or health.
 export const EXAMPLE_SERVICES: ServiceConfig[] = [
   {

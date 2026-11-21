@@ -328,6 +328,38 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   background: #4ade80;
   box-shadow: 0 0 6px rgba(74, 222, 128, .75);
 }
+.fish-status-dot.is-unlinked {
+  background: transparent;
+  border: 1.5px solid #93c5be;
+  box-shadow: none;
+}
+.no-link-badge {
+  color: #9ec4bc !important;
+  border-color: rgba(158, 196, 188, .32) !important;
+}
+.service-link.is-unlinked {
+  cursor: default;
+}
+.service-link.is-unlinked:hover {
+  background: rgba(101, 174, 154, .04);
+}
+.service-open.is-unlinked,
+.managed-open.is-unlinked {
+  color: #749892;
+  cursor: default;
+  text-decoration: none !important;
+}
+.fish-inspect-unlinked {
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px dashed rgba(199, 231, 208, .28);
+  border-radius: 7px;
+  color: #a8c7c0;
+  background: rgba(11, 38, 44, .45);
+  font-size: 11px;
+}
 /* Fish inspect card (AQ-100 AC #2/#3): compact glassmorphic overlay shown
  * when a service fish is focused via click or Services selection. */
 .fish-inspect-card {

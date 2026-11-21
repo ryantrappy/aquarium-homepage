@@ -231,6 +231,34 @@ describe('ServiceManager async persistence', () => {
     expect(onAdd).toHaveBeenCalledWith({ name: 'Docs', url: 'https://www.wikipedia.org', fishId: REEF_FISH[0].id })
     expect(url.value).toBe('https://')
   })
+
+  it('allows adding a display fish with no URL (either blank or untouched https://) and shows a no-link badge in the list', async () => {
+    const onAdd = vi.fn<(draft: ServiceDraft) => Promise<void>>().mockResolvedValue(undefined)
+    const unlinkedFish: ServiceConfig = {
+      id: 'display-sailfin',
+      name: 'Sailfin',
+      url: '',
+      fishId: 'desjardins-sailfin-tang',
+      isExample: false,
+    }
+    const view = await renderManager(props({ services: [unlinkedFish], onAdd }))
+    expect(view.querySelector('.managed-service.is-unlinked .no-link-badge')?.textContent).toBe('no link')
+    expect(view.querySelector('.managed-service.is-unlinked')?.textContent).toContain('No link · Display fish')
+    expect(view.querySelector('a.managed-open')).toBeNull()
+
+    const name = view.querySelector<HTMLInputElement>('input[placeholder="e.g. Home Assistant"]')!
+    // Leaving the prefilled 'https://' untouched normalizes to '' (no link)
+    await act(async () => {
+      changeTextInput(name, 'Reef Cruiser')
+      view.querySelector<HTMLInputElement>('input[type="radio"][value="desjardins-sailfin-tang"]')!.click()
+    })
+    await submitForm(view.querySelector('form.service-form')!)
+    expect(onAdd).toHaveBeenCalledWith({
+      name: 'Reef Cruiser',
+      url: '',
+      fishId: 'desjardins-sailfin-tang',
+    })
+  })
 })
 
 describe('ServiceManager FPS counter toggle (AQ-83 AC #1)', () => {
