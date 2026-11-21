@@ -494,6 +494,10 @@ describe('safe aquarium fish spawning', () => {
       'tailspot-blenny',
       'yellow-watchman-goby',
       'mandarin-dragonet',
+      'banded-trochus-snail',
+      'scarlet-reef-hermit-crab',
+      'emerald-mithrax-crab',
+      'scarlet-skunk-cleaner-shrimp',
     ]))
 
     const chromisZone = evaluateTieredVerticalDepthRange('blue-green-chromis', bounds, fishClearanceRadius('blue-green-chromis'))!
@@ -519,7 +523,7 @@ describe('safe aquarium fish spawning', () => {
   it.each([['phone 402x874', 402, 874], ['laptop 1440x900', 1440, 900]])('stages every mobile catalog species inside its ecological vertical interval at %s', (_label, width, height) => {
     const bounds = waterBounds(Number(width), Number(height))
     const columnHeight = bounds.max.y - bounds.min.y
-    expect(REEF_FISH.length).toBe(17)
+    expect(REEF_FISH.length).toBe(21)
 
     for (const fish of REEF_FISH) {
       if (getSpeciesBehaviorProfile(fish.id)?.habitatMode === 'crevice-resident') {

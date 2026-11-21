@@ -11,6 +11,7 @@ import { evaluateCoralVertexDisplacement } from '../scene/coral-material'
 import {
   assembleCoralsOnRockSockets,
   DEFAULT_LEFT_ISLAND_MOUNTS,
+  DEFAULT_RIGHT_ISLAND_MOUNTS,
   MODULAR_CORAL_ASSET_URLS,
 } from '../scene/reef-assembly'
 // The installer is plain .mjs without a declaration file.
@@ -20,21 +21,66 @@ import { syncCoralOverride } from '../../../scripts/sync-coral-override.mjs'
 const dualCoralCases = [
   {
     id: 'reef-euphyllia-flowing-torch',
+    mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
     minFlexLevels: 11,
     socketName: 'socket_lps_mid_01',
     archetype: 'tentaculate-lps',
   },
   {
     id: 'reef-euphyllia-anchor-hammer',
+    mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
     minFlexLevels: 9,
     socketName: 'socket_lps_mid_03',
     archetype: 'tentaculate-lps',
   },
   {
     id: 'reef-zoanthid-colonial-mat',
+    mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
     minFlexLevels: 7,
     socketName: 'socket_soft_mat_01',
     archetype: 'zoanthid-mat',
+  },
+  {
+    id: 'reef-zoanthid-palythoa-cluster',
+    mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+    minFlexLevels: 12,
+    socketName: 'socket_soft_mat_02',
+    archetype: 'zoanthid-mat',
+  },
+  {
+    id: 'reef-anemone-rose-bta',
+    mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
+    minFlexLevels: 11,
+    socketName: 'socket_anemone_crevice_01',
+    archetype: 'host-anemone',
+  },
+  {
+    id: 'reef-anemone-sunburst-bta',
+    mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+    minFlexLevels: 11,
+    socketName: 'socket_lps_mid_05',
+    archetype: 'tentaculate-lps',
+  },
+  {
+    id: 'reef-euphyllia-gold-torch',
+    mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
+    minFlexLevels: 10,
+    socketName: 'socket_lps_mid_02',
+    archetype: 'tentaculate-lps',
+  },
+  {
+    id: 'reef-euphyllia-branching-frogspawn',
+    mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+    minFlexLevels: 9,
+    socketName: 'socket_lps_mid_04',
+    archetype: 'tentaculate-lps',
+  },
+  {
+    id: 'reef-goniopora-flowerpot-lps',
+    mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+    minFlexLevels: 10,
+    socketName: 'socket_lps_mid_06',
+    archetype: 'tentaculate-lps',
   },
 ] as const
 const registryDir = 'src/rendering/assets/corals/custom-colonies'
@@ -156,7 +202,7 @@ async function loadActualGlb(glbBytes: Buffer) {
   }
 }
 
-describe.each(dualCoralCases)('$id custom dual-primitive coral colony package', ({ id, socketName, archetype, minFlexLevels }) => {
+describe.each(dualCoralCases)('$id custom dual-primitive coral colony package', ({ id, mounts, socketName, archetype, minFlexLevels }) => {
   it('keeps the native, generated, packaged and default-mounted asset in sync', async () => {
     const registry = JSON.parse(fs.readFileSync(path.join(repoRoot, registryPath), 'utf8'))
     expect(registry.schema).toBe('custom-coral-colonies-v1')
@@ -164,7 +210,7 @@ describe.each(dualCoralCases)('$id custom dual-primitive coral colony package', 
     expect(entry).toBeDefined()
     if (!entry) return
 
-    const primaryMount = DEFAULT_LEFT_ISLAND_MOUNTS.find(mount => mount.socketName === socketName && mount.coralAssetId === id)
+    const primaryMount = mounts.find(mount => mount.socketName === socketName && mount.coralAssetId === id)
     expect(primaryMount, `${id} should be mounted at ${socketName}`).toMatchObject({ coralAssetId: id, archetype })
     const runtimePath = registeredRuntimePath(id)
     expect(path.relative(repoRoot, runtimePath)).toBe(entry.path)
@@ -320,7 +366,7 @@ describe.each(dualCoralCases)('$id custom dual-primitive coral colony package', 
   })
 
   it('binds both actual loaded roles on the default socket and preserves soft transmission and skeleton shape', async () => {
-    const mount = DEFAULT_LEFT_ISLAND_MOUNTS.find(candidate => candidate.socketName === socketName && candidate.coralAssetId === id)
+    const mount = mounts.find(candidate => candidate.socketName === socketName && candidate.coralAssetId === id)
     expect(mount).toBeDefined()
     if (!mount) return
     const { bytes } = readGlb(registeredRuntimePath(id))

@@ -1,0 +1,91 @@
+{
+  "extras": {
+    "reefInvertebrate": {
+      "schema": "reef-invertebrate-v1",
+      "id": "invertebrate-scarlet-skunk-cleaner-shrimp",
+      "speciesId": "scarlet-skunk-cleaner-shrimp",
+      "kind": "invertebrate",
+      "units": "meter",
+      "upAxis": "+Y",
+      "forwardAxis": "+Z",
+      "origin": "substrate-grounded",
+      "dimensionsM": [
+        0.05046578869223595,
+        0.03366437926888466,
+        0.08528419956564903
+      ],
+      "jointCount": 13,
+      "jointNames": [
+        "root",
+        "abdomen_1",
+        "abdomen_2",
+        "tail_fan",
+        "pleopods",
+        "antenna_L",
+        "antenna_L_tip",
+        "antenna_R",
+        "antenna_R_tip",
+        "claw_L",
+        "claw_R",
+        "legs_L",
+        "legs_R"
+      ],
+      "animationClips": [
+        "cleaner_shrimp_rock"
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "0a99c19a67d056dfb4c77731c8fd588a5c2136551b334e2425d9ec891fe67c44",
+        "recipe": "Blender --background --python src/rendering/modeling/build_invertebrate_scarlet_skunk_cleaner_shrimp.py; node scripts/sync-blender-override.mjs --invertebrate invertebrate-scarlet-skunk-cleaner-shrimp --learn-guide",
+        "attribution": "Original rigged and animated 3D reef invertebrate (scarlet-skunk-cleaner-shrimp) with procedural 512x512 BaseColor/Normal/ORM PBR textures; zero external donor assets."
+      }
+    }
+  },
+  "boundsM": {
+    "min": [
+      -0.025232894346117973,
+      0,
+      -0.03519155830144882
+    ],
+    "max": [
+      0.025232894346117973,
+      0.03366437926888466,
+      0.05009264126420021
+    ]
+  },
+  "triangles": 3880,
+  "bytes": 511932,
+  "primitives": [
+    {
+      "id": "invertebrate_scarlet_skunk_cleaner_shrimp_0",
+      "role": "invertebrate",
+      "vertexCount": 2255,
+      "triangles": 3880,
+      "aoSource": "texture"
+    }
+  ],
+  "textures": [
+    {
+      "name": "invertebrate-scarlet-skunk-cleaner-shrimp-normal",
+      "mimeType": "image/png",
+      "widthPx": 512,
+      "heightPx": 512,
+      "bytes": 154343
+    },
+    {
+      "name": "invertebrate-scarlet-skunk-cleaner-shrimp-orm",
+      "mimeType": "image/png",
+      "widthPx": 512,
+      "heightPx": 512,
+      "bytes": 70381
+    },
+    {
+      "name": "invertebrate-scarlet-skunk-cleaner-shrimp-albedo",
+      "mimeType": "image/png",
+      "widthPx": 512,
+      "heightPx": 512,
+      "bytes": 119463
+    }
+  ]
+}

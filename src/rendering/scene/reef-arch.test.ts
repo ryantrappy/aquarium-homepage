@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import * as THREE from 'three'
 import { describe, expect, it, vi } from 'vitest'
 import { CENTER_ARCH_MOUNTS, CENTER_ARCH_PLACEMENT, CENTER_ARCH_URL, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
+import { MODULAR_CORAL_ASSET_URLS } from './reef-assembly'
 import { createReefMeshNavigation, MESH_NAVIGATION_COLLISION_RADIUS_M, MESH_NAVIGATION_MOVEMENT_BUDGET } from './reef-mesh-navigation'
 
 type Point = { x: number; y: number; z: number }
@@ -190,7 +191,11 @@ describe('createCenterArch', () => {
     expect(CENTER_ARCH_MOUNTS).toHaveLength(4)
     for (const mount of CENTER_ARCH_MOUNTS) {
       expect(inspectedSockets.get(mount.socketName)?.archetype).toBe(mount.archetype)
-      expect(readFileSync(new URL(`../assets/corals/${mount.coralAssetId}.glb`, import.meta.url)).byteLength).toBeGreaterThan(0)
+      expect(mount.coralAssetId.startsWith('reef-')).toBe(true)
+      expect(mount.paletteOverride?.surfaceMode).toBe('baked-pbr')
+      const registeredUrl = MODULAR_CORAL_ASSET_URLS[mount.coralAssetId]
+      expect(registeredUrl).toContain(`/custom-colonies/${mount.coralAssetId}.glb`)
+      expect(readFileSync(new URL(registeredUrl!)).byteLength).toBeGreaterThan(0)
       expect(sourceSockets.has(mount.socketName)).toBe(true)
     }
 

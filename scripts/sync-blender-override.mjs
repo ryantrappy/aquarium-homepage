@@ -120,8 +120,9 @@ export function parseGlbGeometry(glbBuffer) {
  * Extracts a normalized 3D anatomical shape guide from a manually sculpted .glb in overrides/.
  */
 export function extractShapeGuideFromOverride(speciesId, overrideGlbPath) {
-  if (typeof speciesId === 'string' && speciesId.startsWith('reef-')) {
-    throw new Error(`Cannot extract a fish shape guide from reef override "${speciesId}".`)
+  if (typeof speciesId === 'string' && (speciesId.startsWith('reef-') || speciesId.startsWith('invertebrate-'))) {
+    const kind = speciesId.startsWith('reef-') ? 'reef' : 'invertebrate'
+    throw new Error(`Cannot extract a fish shape guide from ${kind} override "${speciesId}".`)
   }
   const glbBuf = fs.readFileSync(overrideGlbPath)
   const { positions, joints, weights } = parseGlbGeometry(glbBuf)
@@ -235,7 +236,11 @@ export function extractShapeGuideFromOverride(speciesId, overrideGlbPath) {
 
 export function fishOverrideFiles(files) {
   return files
-    .filter(file => file.endsWith('.glb') && !path.basename(file).startsWith('reef-'))
+    .filter(
+      file => file.endsWith('.glb')
+        && !path.basename(file).startsWith('reef-')
+        && !path.basename(file).startsWith('invertebrate-'),
+    )
     .sort()
 }
 
@@ -414,6 +419,40 @@ async function main() {
     const { syncReefOverride, parseReefSyncArgs } = await import('./sync-reef-override.mjs')
     const id = parseReefSyncArgs(args)
     syncReefOverride(REPO_ROOT, id)
+    return
+  }
+  // Invertebrates are not fish: dispatch before documentation, guide learning or builds.
+  if (args.includes('--invertebrate')) {
+    const { syncInvertebrateOverride, parseInvertebrateSyncArgs } = await import('./sync-invertebrate-override.mjs')
+    const id = parseInvertebrateSyncArgs(args)
+    syncInvertebrateOverride(REPO_ROOT, id)
+    return
+  }
+  // Safe fish override rebuild: applies overrides/*.glb without altering learned-shape-guide.json or AQ-107 blue-green-chromis.
+  if (args.includes('--fish-overrides')) {
+    const chromisGlbPath = path.join(ASSETS_DIR, 'blue-green-chromis.glb')
+    const chromisInspectionPath = path.join(ASSETS_DIR, 'fish-blue-green-chromis-inspection.json')
+    const manifestPath = path.join(ASSETS_DIR, 'manifest.json')
+    const chromisGlbBackup = fs.existsSync(chromisGlbPath) ? fs.readFileSync(chromisGlbPath) : null
+    const chromisInspectionBackup = fs.existsSync(chromisInspectionPath) ? fs.readFileSync(chromisInspectionPath) : null
+    const oldManifest = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manifestPath, 'utf8')) : null
+    const oldChromisEntry = oldManifest?.assets?.find(item => item.id === 'fish-blue-green-chromis') ?? null
+
+    execFileSync(process.execPath, ['--experimental-strip-types', BUILD_SCRIPT_PATH], {
+      cwd: REPO_ROOT,
+      stdio: 'inherit',
+    })
+
+    if (chromisGlbBackup) fs.writeFileSync(chromisGlbPath, chromisGlbBackup)
+    if (chromisInspectionBackup) fs.writeFileSync(chromisInspectionPath, chromisInspectionBackup)
+    if (oldChromisEntry && fs.existsSync(manifestPath)) {
+      const rebuiltManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+      rebuiltManifest.assets = rebuiltManifest.assets.map(item =>
+        item.id === 'fish-blue-green-chromis' ? oldChromisEntry : item,
+      )
+      fs.writeFileSync(manifestPath, JSON.stringify(rebuiltManifest, null, 2) + '\n')
+    }
+    console.log('Synced fish overrides; preserved AQ-107 blue-green-chromis and learned-shape-guide.json.')
     return
   }
   ensureDocumentationAndRules()

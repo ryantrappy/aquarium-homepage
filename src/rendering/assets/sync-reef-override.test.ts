@@ -315,4 +315,97 @@ describe('reef sync early CLI dispatch', () => {
     const totalRuntimeBytes = runtimeGlbs.reduce((total, file) => total + fs.statSync(file).size, 0)
     expect(totalRuntimeBytes).toBeLessThan(5_000_000)
   })
+
+  it('verifies all 5 AQ-94 modular NSA rock pieces, grounded bounds, socket evidence, and shared 2048px JPEG trim atlas', () => {
+    const readJpegDimensions = (jpeg: Buffer): { width: number; height: number } => {
+      expect(jpeg.readUInt16BE(0)).toBe(0xffd8)
+      let pos = 2
+      while (pos + 4 < jpeg.length) {
+        if (jpeg[pos] !== 0xff) break
+        while (pos < jpeg.length && jpeg[pos] === 0xff) pos++
+        const marker = jpeg[pos++]
+        if (marker === 0xd9 || marker === 0xda) break
+        if (marker === 0x01 || (marker >= 0xd0 && marker <= 0xd8)) continue
+        const segLen = jpeg.readUInt16BE(pos)
+        if (marker === 0xc0 || marker === 0xc1 || marker === 0xc2) {
+          return { width: jpeg.readUInt16BE(pos + 5), height: jpeg.readUInt16BE(pos + 3) }
+        }
+        pos += segLen
+      }
+      throw new Error('Could not locate JPEG SOF dimensions marker')
+    }
+
+    const nsaIds = [
+      'reef-nsa-pinnacle-spire',
+      'reef-nsa-cantilever-shelf',
+      'reef-nsa-cave-buttress',
+      'reef-nsa-bommie-mound',
+      'reef-nsa-rubble-talus',
+    ] as const
+    const customManifestPath = path.join(repoRoot, 'src/rendering/assets/corals/custom-rocks/manifest.json')
+    const manifest = JSON.parse(fs.readFileSync(customManifestPath, 'utf8'))
+    expect(manifest.schema).toBe('custom-reef-modules-v1')
+    expect(manifest.assets.length).toBeGreaterThanOrEqual(6)
+
+    const hash = (bytes: Buffer) => createHash('sha256').update(bytes).digest('hex')
+    let expectedAtlasDigests: string[] | null = null
+
+    for (const id of nsaIds) {
+      const entry = manifest.assets.find((asset: { id: string }) => asset.id === id)
+      expect(entry, `missing manifest entry for ${id}`).toBeDefined()
+      if (!entry) continue
+
+      const installedBytes = fs.readFileSync(path.join(repoRoot, entry.path))
+      const nativeBytes = fs.readFileSync(path.join(repoRoot, entry.nativePath))
+      const overrideBytes = fs.readFileSync(path.join(repoRoot, entry.overridePath))
+      const generatorBytes = fs.readFileSync(path.join(repoRoot, entry.generatorPath))
+      expect(entry.nativeSha256).toBe(hash(nativeBytes))
+      expect(entry.overrideSha256).toBe(hash(overrideBytes))
+      expect(entry.generatorSha256).toBe(hash(generatorBytes))
+      expect(entry.sha256).toBe(hash(installedBytes))
+      expect(entry.bytes).toBe(installedBytes.length)
+      expect(entry.bytes).toBeLessThan(2_000_000)
+
+      const inspection = JSON.parse(fs.readFileSync(path.join(repoRoot, entry.inspection), 'utf8'))
+      expect(validateAssetContract(inspection)).toMatchObject({ valid: true })
+      expect(inspection.primitives[0].material.aoSource).toBe('texture')
+      expect(Math.abs(inspection.boundsM.min[1])).toBeLessThanOrEqual(0.006)
+      expect(inspection.extras.reefAsset.provenance.sourceSha256).toBe(entry.overrideSha256)
+
+      const socketReport = JSON.parse(fs.readFileSync(path.join(repoRoot, entry.socketReport), 'utf8'))
+      expect(socketReport.rejectedSockets).toEqual([])
+      if (id === 'reef-nsa-rubble-talus') {
+        expect(socketReport.supportedSockets).toHaveLength(0)
+      } else {
+        expect(socketReport.supportedSockets.length).toBeGreaterThanOrEqual(1)
+      }
+
+      const jsonLength = installedBytes.readUInt32LE(12)
+      const glbDoc = JSON.parse(installedBytes.toString('utf8', 20, 20 + jsonLength).trim())
+      const binStart = 20 + jsonLength + 8
+      const binLength = installedBytes.readUInt32LE(20 + jsonLength)
+      const bin = installedBytes.subarray(binStart, binStart + binLength)
+      const rootIndex = glbDoc.scenes[glbDoc.scene ?? 0].nodes[0]
+      expect(glbDoc.nodes[rootIndex].extras.reefAsset).toEqual(inspection.extras.reefAsset)
+
+      const images = (glbDoc.images ?? []) as Array<{ mimeType?: string; bufferView?: number }>
+      expect(images).toHaveLength(3)
+      const moduleDigests = images
+        .map((img) => {
+          expect(img.mimeType).toBe('image/jpeg')
+          const bv = glbDoc.bufferViews[img.bufferView!]
+          const offset = bv.byteOffset ?? 0
+          const jpegBuf = bin.subarray(offset, offset + bv.byteLength)
+          expect(readJpegDimensions(jpegBuf)).toEqual({ width: 2048, height: 2048 })
+          return hash(jpegBuf)
+        })
+        .sort()
+
+      if (expectedAtlasDigests === null) {
+        expectedAtlasDigests = moduleDigests
+      } else {
+        expect(moduleDigests).toEqual(expectedAtlasDigests)
+      }
+    }
+  })
 })

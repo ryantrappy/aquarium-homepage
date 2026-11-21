@@ -65,6 +65,13 @@ vi.mock('three/addons/loaders/GLTFLoader.js', async () => {
         addRock('arch-cap', [1.95, 0.35, 0.5], [0, 0.925, 0])
         return { scene: root, animations: [] }
       }
+      if (url.includes('reef-nsa-rubble-talus.glb')) {
+        const mesh = new T.Mesh(new T.BoxGeometry(0.39, 0.094, 0.27), new T.MeshStandardMaterial())
+        mesh.name = 'rubble-talus-apron'
+        mesh.userData.reefPrimitive = { role: 'rock' }
+        root.add(mesh)
+        return { scene: root, animations: [] }
+      }
       if (url.includes('left-rock') || url.includes('right-rock') || url === 'coral') return { scene: root, animations: [] }
       if (state.failFishLoads && url.includes('.glb')) throw new Error('Fixture fish asset failure')
       if (state.deferFishLoads && url.includes('.glb')) await new Promise<void>(resolve => state.pendingFishLoadReleases.push(resolve))
@@ -409,6 +416,7 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     }]
     await start([service('center-arch-link')])
     expect(state.renderer!.scene!.getObjectByName('reef-center-arch')).toBeDefined()
+    expect(state.renderer!.scene!.getObjectByName('reef-nsa-rubble-talus-grounding')?.children).toHaveLength(6)
     expect(state.reefFallbackIslandIds).toContain('reef-center-arch')
     expect(state.reefNavigationIslandIds.at(-1)).toContain('reef-center-arch')
     const archAssembly = state.reefAssemblyCalls.find(call => call.reefName === 'reef-center-arch')!
@@ -426,6 +434,7 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     state.resizeCallback?.()
 
     expect(state.renderer!.scene!.getObjectByName('reef-center-arch')).toBeUndefined()
+    expect(state.renderer!.scene!.getObjectByName('reef-nsa-rubble-talus-grounding')?.children).toHaveLength(2)
     expect(state.reefFallbackIslandIds.slice(state.reefFallbackIslandIds.indexOf('reef-center-arch') + 1)).not.toContain('reef-center-arch')
     expect(state.reefNavigationIslandIds.at(-1)).not.toContain('reef-center-arch')
     expect(state.reefNavigationCoralSockets.at(-1)).not.toContain(CENTER_ARCH_MOUNTS[0]!.socketName)

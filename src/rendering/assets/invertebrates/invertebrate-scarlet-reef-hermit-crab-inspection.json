@@ -1,0 +1,90 @@
+{
+  "extras": {
+    "reefInvertebrate": {
+      "schema": "reef-invertebrate-v1",
+      "id": "invertebrate-scarlet-reef-hermit-crab",
+      "speciesId": "scarlet-reef-hermit-crab",
+      "kind": "invertebrate",
+      "units": "meter",
+      "upAxis": "+Y",
+      "forwardAxis": "+Z",
+      "origin": "substrate-grounded",
+      "dimensionsM": [
+        0.041603561490774155,
+        0.021976949647068977,
+        0.0534866526722908
+      ],
+      "jointCount": 12,
+      "jointNames": [
+        "root",
+        "antenna_L",
+        "antenna_R",
+        "claw_L",
+        "claw_R",
+        "eye_L",
+        "eye_R",
+        "leg_L1",
+        "leg_L2",
+        "leg_R1",
+        "leg_R2",
+        "shell"
+      ],
+      "animationClips": [
+        "hermit_crab_scurry"
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "bc9bc819f80986b7f4f5144c51760297099cead8271118b5684edadd7049b0e5",
+        "recipe": "Blender --background --python src/rendering/modeling/build_invertebrate_scarlet_reef_hermit_crab.py; node scripts/sync-blender-override.mjs --invertebrate invertebrate-scarlet-reef-hermit-crab --learn-guide",
+        "attribution": "Original rigged and animated 3D reef invertebrate (scarlet-reef-hermit-crab) with procedural 512x512 BaseColor/Normal/ORM PBR textures; zero external donor assets."
+      }
+    }
+  },
+  "boundsM": {
+    "min": [
+      -0.020801780745387077,
+      0,
+      -0.02334030717611313
+    ],
+    "max": [
+      0.020801780745387077,
+      0.021976949647068977,
+      0.030146345496177673
+    ]
+  },
+  "triangles": 7104,
+  "bytes": 1067576,
+  "primitives": [
+    {
+      "id": "invertebrate_scarlet_reef_hermit_crab_0",
+      "role": "invertebrate",
+      "vertexCount": 3788,
+      "triangles": 7104,
+      "aoSource": "texture"
+    }
+  ],
+  "textures": [
+    {
+      "name": "invertebrate-scarlet-reef-hermit-crab-normal",
+      "mimeType": "image/png",
+      "widthPx": 512,
+      "heightPx": 512,
+      "bytes": 306800
+    },
+    {
+      "name": "invertebrate-scarlet-reef-hermit-crab-orm",
+      "mimeType": "image/png",
+      "widthPx": 512,
+      "heightPx": 512,
+      "bytes": 233947
+    },
+    {
+      "name": "invertebrate-scarlet-reef-hermit-crab-albedo",
+      "mimeType": "image/png",
+      "widthPx": 512,
+      "heightPx": 512,
+      "bytes": 261754
+    }
+  ]
+}

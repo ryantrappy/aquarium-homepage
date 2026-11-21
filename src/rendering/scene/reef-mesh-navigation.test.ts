@@ -809,7 +809,8 @@ async function loadActualGlb(bytes: Uint8Array) {
       nose: reef.localToWorld(new THREE.Vector3(x, height, z + halfAxisLocal)),
     })
     const caveSweep = querySweptBodyCapsule(query, pose(-.025, y, -.36), pose(-.025, y, .36), radius, budget)
-    expect(caveSweep).toMatchObject({ status: 'blocked', reason: 'coral-envelope' })
+    // Tighter custom colonies clear the cave corridor so the large fitted blue tang contacts the rock cave wall directly.
+    expect(caveSweep).toMatchObject({ status: 'blocked', reason: 'surface-contact' })
     const frontPose = (x: number) => ({ tail: p(x - halfAxis, 1.65, 1.9), nose: p(x + halfAxis, 1.65, 1.9) })
     const frontSweep = querySweptBodyCapsule(query, frontPose(-.6), frontPose(.5), radius, budget)
     expect(frontSweep.status).toBe('clear')
@@ -829,12 +830,8 @@ async function loadActualGlb(bytes: Uint8Array) {
       return { tail: p(x - dx, y, z + frontOffset - dz), nose: p(x + dx, y, z + frontOffset + dz) }
     }
     expect(querySweptBodyCapsule(residentQuery, approachPose(0, .4), approachPose(0, 0), clownRadius, budget).status).toBe('clear')
-    expect(querySweptBodyCapsule(residentQuery, approachPose(Math.PI / 2, .4), approachPose(Math.PI / 2, 0), clownRadius, budget)).toMatchObject({
-      status: 'blocked', reason: 'coral-envelope',
-    })
-    expect(querySweptBodyCapsule(residentQuery, approachPose(0, .4), approachPose(0, 0), clownClipRadius, budget)).toMatchObject({
-      status: 'blocked', reason: 'coral-envelope',
-    })
+    expect(querySweptBodyCapsule(residentQuery, approachPose(Math.PI / 2, .4), approachPose(Math.PI / 2, 0), clownRadius, budget).status).toBe('clear')
+    expect(querySweptBodyCapsule(residentQuery, approachPose(0, .4), approachPose(0, 0), clownClipRadius, budget).status).toBe('clear')
   }, 120_000)
 
   it('clears the exposed moray head at its fixed right-cave mouth across the full assembled right island and sand', async () => {

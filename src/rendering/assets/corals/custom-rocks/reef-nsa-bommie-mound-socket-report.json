@@ -1,0 +1,242 @@
+{
+  "schema": "socket-support-inspection-v1",
+  "assetId": "reef-nsa-bommie-mound",
+  "sourceSha256": "7763925eb9357872c2a89600a9c07f1874493c3bb63f52f9f743dfb9b4e7f89a",
+  "method": {
+    "contactToleranceM": 0.002,
+    "upNormalVectorTolerance": 0.002,
+    "footprintSampleSpacingM": 0.005,
+    "footprintSampleCount": 196,
+    "footprintNormalMaxAngleDeg": 30,
+    "clearanceEnvelope": {
+      "shape": "oriented-cylinder",
+      "radiusM": "requested reefSocket.clearanceRadiusM",
+      "heightM": "same as radius",
+      "baseOffsetM": 0.002
+    },
+    "limitations": [
+      "Socket local/world basis must remain unit-scale and orthogonal; footprint and clearance radii are interpreted in exported asset meters.",
+      "Contact normal uses the geometric normal of the nearest triangle; at shared-vertex ties it is facet-sensitive and may select one of several incident faces.",
+      "Footprint support is a finite radial sample lattice at the reported spacing, not a continuous disk certificate.",
+      "Clearance checks only intersection with an oriented rock-space cylinder; it does not prove whole-colony fit, fish passage or biological suitability.",
+      "Only the default glTF scene and embedded, uncompressed TRIANGLES geometry are inspected."
+    ]
+  },
+  "supportedSockets": [
+    {
+      "name": "socket_brain_apron_21",
+      "role": "coral-mount",
+      "parentMesh": "reef_nsa_bommie_mound",
+      "archetype": "mounded-lps",
+      "positionM": [
+        0.15989071130752563,
+        0.22293278574943542,
+        0.048422202467918396
+      ],
+      "normal": [
+        0.0853943687909884,
+        0.9268991633715502,
+        0.36546647277131883
+      ],
+      "rotation": [
+        0.1861671526524891,
+        -1.7730162865657082e-10,
+        -0.04349954847147826,
+        0.9815546752759331
+      ],
+      "footprintRadiusM": 0.025,
+      "clearanceRadiusM": 0.044,
+      "support": {
+        "pointM": [
+          0.15989071119886342,
+          0.22293278456997917,
+          0.04842220200287135
+        ],
+        "normal": [
+          0.0853943687909884,
+          0.9268991633715502,
+          0.36546647277131883
+        ],
+        "supportedRadiusM": 0.025,
+        "freeRadiusM": 0.044,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "7763925eb9357872c2a89600a9c07f1874493c3bb63f52f9f743dfb9b4e7f89a",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-nsa-bommie-mound-socket-report.json"
+        }
+      }
+    },
+    {
+      "name": "socket_soft_mat_21",
+      "role": "coral-mount",
+      "parentMesh": "reef_nsa_bommie_mound",
+      "archetype": "zoanthid-mat",
+      "positionM": [
+        -0.13749878108501434,
+        0.33017903566360474,
+        0.021411146968603134
+      ],
+      "normal": [
+        0.029411959688008624,
+        0.9955183169982977,
+        0.08987890268682519
+      ],
+      "rotation": [
+        0.044989887850786225,
+        -6.674239846312354e-12,
+        -0.014722488894778769,
+        0.9988789507802819
+      ],
+      "footprintRadiusM": 0.024,
+      "clearanceRadiusM": 0.042,
+      "support": {
+        "pointM": [
+          -0.13749878108501434,
+          0.33017903566360474,
+          0.021411146968603134
+        ],
+        "normal": [
+          0.029411959688008624,
+          0.9955183169982977,
+          0.08987890268682519
+        ],
+        "supportedRadiusM": 0.024,
+        "freeRadiusM": 0.042,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "7763925eb9357872c2a89600a9c07f1874493c3bb63f52f9f743dfb9b4e7f89a",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-nsa-bommie-mound-socket-report.json"
+        }
+      }
+    }
+  ],
+  "measurements": [
+    {
+      "nodeIndex": 0,
+      "name": "socket_brain_apron_21",
+      "supported": true,
+      "data": {
+        "sourceNode": 0,
+        "socketToSurfaceDistanceM": 1.2724752597238076e-9,
+        "measuredPointM": [
+          0.15989071119886342,
+          0.22293278456997917,
+          0.04842220200287135
+        ],
+        "measuredSurfaceNormal": [
+          0.0853943687909884,
+          0.9268991633715502,
+          0.36546647277131883
+        ],
+        "nearestTriangleIndex": 7758,
+        "upNormalVectorDifference": 6.024590806174772e-9,
+        "footprintSampleSpacingM": 0.005,
+        "originalIntent": {
+          "role": "coral-mount",
+          "parentMesh": "reef_nsa_bommie_mound",
+          "archetype": "mounded-lps",
+          "footprintRadiusM": 0.025,
+          "clearanceRadiusM": 0.044
+        },
+        "rawSocketTransform": {
+          "translation": [
+            0.15989071130752563,
+            0.22293278574943542,
+            0.048422202467918396
+          ],
+          "rotation": [
+            0.1861671507358551,
+            0,
+            -0.043499547988176346,
+            0.9815546870231628
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "worldSocketUp": [
+          0.0853943702831276,
+          0.9268991611120847,
+          0.3654664781531429
+        ],
+        "footprintSamples": 99,
+        "footprintFailedSamples": 0,
+        "footprintMaxSlopeDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": 0.044,
+          "heightM": 0.044,
+          "baseOffsetM": 0.002,
+          "blockerTriangleCount": 0,
+          "blockers": []
+        }
+      }
+    },
+    {
+      "nodeIndex": 1,
+      "name": "socket_soft_mat_21",
+      "supported": true,
+      "data": {
+        "sourceNode": 1,
+        "socketToSurfaceDistanceM": 0,
+        "measuredPointM": [
+          -0.13749878108501434,
+          0.33017903566360474,
+          0.021411146968603134
+        ],
+        "measuredSurfaceNormal": [
+          0.029411959688008624,
+          0.9955183169982977,
+          0.08987890268682519
+        ],
+        "nearestTriangleIndex": 566,
+        "upNormalVectorDifference": 8.92851983857122e-9,
+        "footprintSampleSpacingM": 0.005,
+        "originalIntent": {
+          "role": "coral-mount",
+          "parentMesh": "reef_nsa_bommie_mound",
+          "archetype": "zoanthid-mat",
+          "footprintRadiusM": 0.024,
+          "clearanceRadiusM": 0.042
+        },
+        "rawSocketTransform": {
+          "translation": [
+            -0.13749878108501434,
+            0.33017903566360474,
+            0.021411146968603134
+          ],
+          "rotation": [
+            0.04498988762497902,
+            0,
+            -0.014722488820552826,
+            0.9988789558410645
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "worldSocketUp": [
+          0.029411968519581385,
+          0.9955183166238335,
+          0.08987890394442831
+        ],
+        "footprintSamples": 97,
+        "footprintFailedSamples": 0,
+        "footprintMaxSlopeDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": 0.042,
+          "heightM": 0.042,
+          "baseOffsetM": 0.002,
+          "blockerTriangleCount": 0,
+          "blockers": []
+        }
+      }
+    }
+  ],
+  "rejectedSockets": []
+}

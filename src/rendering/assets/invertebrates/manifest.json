@@ -1,0 +1,197 @@
+{
+  "schema": "custom-invertebrates-v1",
+  "assets": [
+    {
+      "id": "invertebrate-banded-trochus-snail",
+      "speciesId": "banded-trochus-snail",
+      "kind": "invertebrate",
+      "path": "src/rendering/assets/invertebrates/invertebrate-banded-trochus-snail.glb",
+      "inspection": "src/rendering/assets/invertebrates/invertebrate-banded-trochus-snail-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/invertebrate-banded-trochus-snail.blend",
+      "nativeSha256": "c7fe378e98beab2cc2c05284964364bdb303f2477be7879691140e2c938473d9",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/invertebrate-banded-trochus-snail.glb",
+      "overrideSha256": "2430a0c6a4b22d0f6249b3e81c78766d93226252b2f701c6d9f955819d1b3821",
+      "generatorPath": "src/rendering/modeling/build_invertebrate_banded_trochus_snail.py",
+      "generatorSha256": "3667b1f60e15176e179470cd3027f75e47c3ce02265dd397be6a6f47abed59e7",
+      "sha256": "13bc68adc14a94b686287ec140d761d3bef3499651e541e2c2e4d97f5be2b86f",
+      "bytes": 1126348,
+      "triangles": 8268,
+      "dimensionsM": [
+        0.03294825088232756,
+        0.03125296160578728,
+        0.05141880363225937
+      ],
+      "jointCount": 9,
+      "animationClips": [
+        "trochus_snail_glide"
+      ],
+      "textures": [
+        {
+          "name": "invertebrate-banded-trochus-snail-normal",
+          "mimeType": "image/png",
+          "widthPx": 512,
+          "heightPx": 512,
+          "bytes": 306004
+        },
+        {
+          "name": "invertebrate-banded-trochus-snail-orm",
+          "mimeType": "image/png",
+          "widthPx": 512,
+          "heightPx": 512,
+          "bytes": 159449
+        },
+        {
+          "name": "invertebrate-banded-trochus-snail-albedo",
+          "mimeType": "image/png",
+          "widthPx": 512,
+          "heightPx": 512,
+          "bytes": 360357
+        }
+      ]
+    },
+    {
+      "id": "invertebrate-emerald-mithrax-crab",
+      "speciesId": "emerald-mithrax-crab",
+      "kind": "invertebrate",
+      "path": "src/rendering/assets/invertebrates/invertebrate-emerald-mithrax-crab.glb",
+      "inspection": "src/rendering/assets/invertebrates/invertebrate-emerald-mithrax-crab-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/invertebrate-emerald-mithrax-crab.blend",
+      "nativeSha256": "e4a21d96afec53200730cba86fd8743abcb475b07390041e8496473d7a7ed951",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/invertebrate-emerald-mithrax-crab.glb",
+      "overrideSha256": "316b5cec131b75098d029613d4959e83757a14b8617af32edc573355d0e9655f",
+      "generatorPath": "src/rendering/modeling/build_invertebrate_emerald_mithrax_crab.py",
+      "generatorSha256": "10c7042fb477ade5d907b65cc98c323aa2ffd56aa1752ca471fc6baa4f3e5e27",
+      "sha256": "27e72a7f0ad0f89f9823a28df8a3c7d6b80126de9b6e667d49f29ffd7eea7a3a",
+      "bytes": 1035928,
+      "triangles": 4192,
+      "dimensionsM": [
+        0.057077351957559586,
+        0.015502924099564552,
+        0.04461662843823433
+      ],
+      "jointCount": 13,
+      "animationClips": [
+        "emerald_crab_forage"
+      ],
+      "textures": [
+        {
+          "name": "invertebrate-emerald-mithrax-crab-normal",
+          "mimeType": "image/png",
+          "widthPx": 512,
+          "heightPx": 512,
+          "bytes": 413061
+        },
+        {
+          "name": "invertebrate-emerald-mithrax-crab-orm",
+          "mimeType": "image/png",
+          "widthPx": 512,
+          "heightPx": 512,
+          "bytes": 264127
+        },
+        {
+          "name": "invertebrate-emerald-mithrax-crab-albedo",
+          "mimeType": "image/png",
+          "widthPx": 512,
+          "heightPx": 512,
+          "bytes": 182513
+        }
+      ]
+    },
+    {
+      "id": "invertebrate-scarlet-reef-hermit-crab",
+      "speciesId": "scarlet-reef-hermit-crab",
+      "kind": "invertebrate",
+      "path": "src/rendering/assets/invertebrates/invertebrate-scarlet-reef-hermit-crab.glb",
+      "inspection": "src/rendering/assets/invertebrates/invertebrate-scarlet-reef-hermit-crab-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/invertebrate-scarlet-reef-hermit-crab.blend",
+      "nativeSha256": "d3a1f9c1997ca54cff3ce984706dd34e2b46ac65f68059ddc42d057f8fb8072c",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/invertebrate-scarlet-reef-hermit-crab.glb",
+      "overrideSha256": "bc9bc819f80986b7f4f5144c51760297099cead8271118b5684edadd7049b0e5",
+      "generatorPath": "src/rendering/modeling/build_invertebrate_scarlet_reef_hermit_crab.py",
+      "generatorSha256": "8f6b8f77ef6660cacb434b8fc38a17d83e6ff5db6cca8f44e9a96d66524b41a8",
+      "sha256": "d97f73c0c7c88e6330dbb7d753272eea34d5992d14988067b893d47ea4740056",
+      "bytes": 1067576,
+      "triangles": 7104,
+      "dimensionsM": [
+        0.041603561490774155,
+        0.021976949647068977,
+        0.0534866526722908
+      ],
+      "jointCount": 12,
+      "animationClips": [
+        "hermit_crab_scurry"
+      ],
+      "textures": [
+        {
+          "name": "invertebrate-scarlet-reef-hermit-crab-normal",
+          "mimeType": "image/png",
+          "widthPx": 512,
+          "heightPx": 512,
+          "bytes": 306800
+        },
+        {
+          "name": "invertebrate-scarlet-reef-hermit-crab-orm",
+          "mimeType": "image/png",
+          "widthPx": 512,
+          "heightPx": 512,
+          "bytes": 233947
+        },
+        {
+          "name": "invertebrate-scarlet-reef-hermit-crab-albedo",
+          "mimeType": "image/png",
+          "widthPx": 512,
+          "heightPx": 512,
+          "bytes": 261754
+        }
+      ]
+    },
+    {
+      "id": "invertebrate-scarlet-skunk-cleaner-shrimp",
+      "speciesId": "scarlet-skunk-cleaner-shrimp",
+      "kind": "invertebrate",
+      "path": "src/rendering/assets/invertebrates/invertebrate-scarlet-skunk-cleaner-shrimp.glb",
+      "inspection": "src/rendering/assets/invertebrates/invertebrate-scarlet-skunk-cleaner-shrimp-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/invertebrate-scarlet-skunk-cleaner-shrimp.blend",
+      "nativeSha256": "97de70339141d1bbecb74f120cdf1d9a432a5b7d520f0d4688a45fd8d6bc0753",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/invertebrate-scarlet-skunk-cleaner-shrimp.glb",
+      "overrideSha256": "0a99c19a67d056dfb4c77731c8fd588a5c2136551b334e2425d9ec891fe67c44",
+      "generatorPath": "src/rendering/modeling/build_invertebrate_scarlet_skunk_cleaner_shrimp.py",
+      "generatorSha256": "fa121c937b3cdbcdc0386c99534b7cbe5cac4e493aa37b465e4708566beee10f",
+      "sha256": "64c0ca9ba7913262d5f5cfcf412ce2c8229685b184e67131e71443876dcb8855",
+      "bytes": 511932,
+      "triangles": 3880,
+      "dimensionsM": [
+        0.05046578869223595,
+        0.03366437926888466,
+        0.08528419956564903
+      ],
+      "jointCount": 13,
+      "animationClips": [
+        "cleaner_shrimp_rock"
+      ],
+      "textures": [
+        {
+          "name": "invertebrate-scarlet-skunk-cleaner-shrimp-normal",
+          "mimeType": "image/png",
+          "widthPx": 512,
+          "heightPx": 512,
+          "bytes": 154343
+        },
+        {
+          "name": "invertebrate-scarlet-skunk-cleaner-shrimp-orm",
+          "mimeType": "image/png",
+          "widthPx": 512,
+          "heightPx": 512,
+          "bytes": 70381
+        },
+        {
+          "name": "invertebrate-scarlet-skunk-cleaner-shrimp-albedo",
+          "mimeType": "image/png",
+          "widthPx": 512,
+          "heightPx": 512,
+          "bytes": 119463
+        }
+      ]
+    }
+  ]
+}

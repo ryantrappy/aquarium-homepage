@@ -2,10 +2,20 @@ import * as THREE from 'three'
 import type { HabitatAnchorLocation } from '../../simulation/habitat-navigation'
 import type { AssembledCoralBinding } from './reef-assembly'
 
+export const HOST_ANEMONE_CORAL_ASSET_IDS: ReadonlySet<string> = new Set([
+  'coral-anemone-bta',
+  'reef-anemone-rose-bta',
+  'reef-anemone-sunburst-bta',
+])
+
+export function isHostAnemoneCoralAsset(coralAssetId: string): boolean {
+  return HOST_ANEMONE_CORAL_ASSET_IDS.has(coralAssetId)
+}
+
 /** Host points come from the displayed crown, including all mount/reef transforms.
  * Never project an absent or out-of-water host onto a detached safe plane. */
 export function mountedAnemoneHosts(bindings: readonly AssembledCoralBinding[], prefix: string): HabitatAnchorLocation[] {
-  return bindings.filter(binding => binding.coralAssetId === 'coral-anemone-bta').map(binding => {
+  return bindings.filter(binding => isHostAnemoneCoralAsset(binding.coralAssetId)).map(binding => {
     binding.root.updateWorldMatrix(true, true)
     const bounds = new THREE.Box3()
     let crownMeshes = 0
