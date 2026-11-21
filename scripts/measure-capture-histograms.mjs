@@ -2,10 +2,11 @@
 /**
  * measure-capture-histograms.mjs — repeatable realism measurement for aquarium captures.
  *
- * Computes luminance / saturation / hue statistics from a PNG capture so a
- * reviewer can score it against docs/photorealism-rubric.md without
- * eyeballing it. Dependency-free: decodes PNG in-process (8-bit and 16-bit
- * samples, color types 0/2/3/4/6, non-interlaced) with node:zlib.
+ * Computes luminance / saturation / hue statistics AND caustic spatial-frequency /
+ * local-contrast metrics from a PNG capture so a reviewer can score it against
+ * docs/photorealism-rubric.md without eyeballing it. Dependency-free: decodes PNG
+ * in-process (8-bit and 16-bit samples, color types 0/2/3/4/6, non-interlaced)
+ * with node:zlib.
  *
  * Usage:
  *   node scripts/measure-capture-histograms.mjs <capture.png> [--crop x,y,w,h] [--sample N] [--json]
@@ -14,19 +15,9 @@
  *                    e.g. the sand bed, one coral colony, the water column).
  *   --sample N       measure every Nth pixel (default 1; use 4+ for 4K captures).
  *   --json           print the full result as JSON instead of the summary.
- *
- * Notes:
- * - Luminance is Rec. 709 on the sRGB bytes (display-referred, not linear);
- *   it is comparable across captures taken the same way, which is what the
- *   rubric needs. Do not compare it against linear-light measurements.
- * - Saturation is HSV saturation (max-min)/max per pixel.
- * - JPEG captures are not supported: convert to PNG first (e.g. with
- *   Python PIL: Image.open('capture.jpg').convert('RGB').save('capture.png')).
- *   The baseline screenshot (JPEG, missing from the repo — see the rubric's
- *   gap table) must be re-saved and converted before it can be measured.
- * - Interlaced (Adam7) PNGs are rejected: re-save them non-interlaced.
  */
 import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { inflateSync } from 'node:zlib'
 
 function fail(message) {
@@ -35,7 +26,7 @@ function fail(message) {
   throw new Error(message)
 }
 
-function parseArgs(argv) {
+export function parseArgs(argv) {
   const positional = []
   const options = { crop: null, sample: 1, json: false }
   for (let i = 0; i < argv.length; i++) {
@@ -75,7 +66,7 @@ function readChunks(buffer) {
   return chunks
 }
 
-function decodePng(buffer) {
+export function decodePng(buffer) {
   const chunks = readChunks(buffer)
   const ihdr = chunks.find((c) => c.type === 'IHDR')
   if (!ihdr) fail('PNG has no IHDR chunk')
@@ -149,25 +140,85 @@ function percentile(sorted, p) {
   return sorted[Math.min(sorted.length - 1, Math.floor(p * sorted.length))]
 }
 
-function measure(file, crop, sampleStep) {
+/**
+ * Computes repeatable 1D/2D high-pass caustic spatial frequency (cycles per 1000 px)
+ * and local RMS contrast on a sampled 2D luminance grid.
+ */
+export function computeCausticSpatialMetrics(grid, cols, rows, sampleStep = 1) {
+  if (cols < 8 || rows < 4) {
+    return { cyclesPer1000Px: 0, meanCellSpacingPx: 0, localRmsContrast: 0 }
+  }
+  const radius = Math.max(3, Math.round(16 / sampleStep))
+  const hp = new Float32Array(cols * rows)
+  let sumSq = 0
+  for (let r = 0; r < rows; r++) {
+    const rowOff = r * cols
+    for (let c = 0; c < cols; c++) {
+      const c0 = Math.max(0, c - radius)
+      const c1 = Math.min(cols - 1, c + radius)
+      let acc = 0
+      for (let k = c0; k <= c1; k++) acc += grid[rowOff + k]
+      const meanLocal = acc / (c1 - c0 + 1)
+      const diff = grid[rowOff + c] - meanLocal
+      hp[rowOff + c] = diff
+      sumSq += diff * diff
+    }
+  }
+  const localRmsContrast = Math.sqrt(sumSq / (cols * rows))
+  const threshold = Math.max(0.004, 0.35 * localRmsContrast)
+  let totalCycles = 0
+  let totalSpanPx = 0
+  for (let r = 0; r < rows; r++) {
+    const rowOff = r * cols
+    let state = 0 // -1 below -threshold, +1 above +threshold
+    let rowCycles = 0
+    for (let c = 0; c < cols; c++) {
+      const v = hp[rowOff + c]
+      if (v > threshold) {
+        if (state === -1) rowCycles++
+        state = 1
+      } else if (v < -threshold) {
+        state = -1
+      }
+    }
+    totalCycles += rowCycles
+    totalSpanPx += cols * sampleStep
+  }
+  const cyclesPer1000Px = totalSpanPx > 0 ? (totalCycles / totalSpanPx) * 1000 : 0
+  const meanCellSpacingPx = cyclesPer1000Px > 0.1 ? 1000 / cyclesPer1000Px : 0
+  return {
+    cyclesPer1000Px: Number(cyclesPer1000Px.toFixed(2)),
+    meanCellSpacingPx: Number(meanCellSpacingPx.toFixed(1)),
+    localRmsContrast: Number(localRmsContrast.toFixed(4)),
+  }
+}
+
+export function measure(file, crop = null, sampleStep = 1) {
   const { width, height, sampleAt } = decodePng(readFileSync(file))
   const region = crop
     ? { x: crop[0], y: crop[1], w: Math.min(crop[2], width - crop[0]), h: Math.min(crop[3], height - crop[1]) }
     : { x: 0, y: 0, w: width, h: height }
   if (region.w <= 0 || region.h <= 0) fail('crop region is empty or outside the image')
+  const cols = Math.ceil(region.w / sampleStep)
+  const rows = Math.ceil(region.h / sampleStep)
+  const lumGrid = new Float32Array(cols * rows)
   const luminances = []
   const saturations = []
   const hueBuckets = [0, 0, 0, 0, 0, 0] // red, yellow, green, cyan, blue, magenta
   let counted = 0
   let overSaturated06 = 0
   let overSaturated08 = 0
+  let rIdx = 0
   for (let y = region.y; y < region.y + region.h; y += sampleStep) {
+    let cIdx = 0
     for (let x = region.x; x < region.x + region.w; x += sampleStep) {
       const [r, g, b] = sampleAt(x, y).map((v) => v / 255)
       const max = Math.max(r, g, b)
       const min = Math.min(r, g, b)
       const delta = max - min
-      luminances.push(0.2126 * r + 0.7152 * g + 0.0722 * b)
+      const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
+      lumGrid[rIdx * cols + cIdx] = lum
+      luminances.push(lum)
       const saturation = max === 0 ? 0 : delta / max
       saturations.push(saturation)
       if (saturation > 0.6) overSaturated06++
@@ -178,8 +229,11 @@ function measure(file, crop, sampleStep) {
         hueBuckets[Math.min(5, Math.floor(hue / 60))]++
       }
       counted++
+      cIdx++
     }
+    rIdx++
   }
+  const caustics = computeCausticSpatialMetrics(lumGrid, cols, rows, sampleStep)
   luminances.sort((a, b) => a - b)
   saturations.sort((a, b) => a - b)
   const mean = (values) => values.reduce((sum, v) => sum + v, 0) / values.length
@@ -209,20 +263,25 @@ function measure(file, crop, sampleStep) {
       blue: hueBuckets[4] / counted,
       magenta: hueBuckets[5] / counted,
     },
+    caustics,
   }
 }
 
-const { file, crop, sample, json } = parseArgs(process.argv.slice(2))
-const result = measure(file, crop, sample)
-if (json) {
-  process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
-} else {
-  const { luminance, saturation, hueFractions } = result
-  const pct = (v) => `${(v * 100).toFixed(1)}%`
-  process.stdout.write(
-    `${result.file} (${result.image.width}x${result.image.height}, region ${result.region.width}x${result.region.height} at ${result.region.x},${result.region.y}, ${result.pixelsMeasured} px measured)\n` +
-    `  luminance  mean ${luminance.mean.toFixed(3)}  p10 ${luminance.p10.toFixed(3)}  p50 ${luminance.p50.toFixed(3)}  p90 ${luminance.p90.toFixed(3)}\n` +
-    `  saturation mean ${saturation.mean.toFixed(3)}  p50 ${saturation.p50.toFixed(3)}  p90 ${saturation.p90.toFixed(3)}  >0.6 ${pct(saturation.fractionAbove06)}  >0.8 ${pct(saturation.fractionAbove08)}\n` +
-    `  hue        red ${pct(hueFractions.red)}  yellow ${pct(hueFractions.yellow)}  green ${pct(hueFractions.green)}  cyan ${pct(hueFractions.cyan)}  blue ${pct(hueFractions.blue)}  magenta ${pct(hueFractions.magenta)}\n`,
-  )
+const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]
+if (isMain) {
+  const { file, crop, sample, json } = parseArgs(process.argv.slice(2))
+  const result = measure(file, crop, sample)
+  if (json) {
+    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+  } else {
+    const { luminance, saturation, hueFractions, caustics } = result
+    const pct = (v) => `${(v * 100).toFixed(1)}%`
+    process.stdout.write(
+      `${result.file} (${result.image.width}x${result.image.height}, region ${result.region.width}x${result.region.height} at ${result.region.x},${result.region.y}, ${result.pixelsMeasured} px measured)\n` +
+      `  luminance  mean ${luminance.mean.toFixed(3)}  p10 ${luminance.p10.toFixed(3)}  p50 ${luminance.p50.toFixed(3)}  p90 ${luminance.p90.toFixed(3)}\n` +
+      `  saturation mean ${saturation.mean.toFixed(3)}  p50 ${saturation.p50.toFixed(3)}  p90 ${saturation.p90.toFixed(3)}  >0.6 ${pct(saturation.fractionAbove06)}  >0.8 ${pct(saturation.fractionAbove08)}\n` +
+      `  hue        red ${pct(hueFractions.red)}  yellow ${pct(hueFractions.yellow)}  green ${pct(hueFractions.green)}  cyan ${pct(hueFractions.cyan)}  blue ${pct(hueFractions.blue)}  magenta ${pct(hueFractions.magenta)}\n` +
+      `  caustics   freq ${caustics.cyclesPer1000Px.toFixed(2)} cycles/1000px  spacing ${caustics.meanCellSpacingPx.toFixed(1)} px  localRmsContrast ${caustics.localRmsContrast.toFixed(4)}\n`,
+    )
+  }
 }
