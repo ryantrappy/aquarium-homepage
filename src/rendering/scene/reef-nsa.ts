@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { evaluateAragoniteSandTilt, evaluateAragoniteSandWorldY, type RockFootprint } from './aragonite-sand'
 import { glassEnclosureLayout } from './glass-enclosure'
-import type { ModularCoralMountEntry } from './reef-assembly'
+import type { EncrustingFaceSite, ModularCoralMountEntry } from './reef-assembly'
 
 export type NsaRockId =
   | 'reef-nsa-pinnacle-spire'
@@ -24,6 +24,23 @@ export const NSA_ROCK_URLS: Readonly<Record<NsaRockId, string>> = Object.freeze(
 
 export const RUBBLE_TALUS_URL = NSA_ROCK_URLS['reef-nsa-rubble-talus']
 export const NSA_KIT_URL = new URL('../assets/corals/custom-rocks/reef-nsa-kit.glb', import.meta.url).href
+
+// Candidate faces in module-local normalized bounds. The assembly rejects
+// candidates whose exported surface cannot support the instance footprint.
+export const NSA_ENCRUSTING_FACE_SITES: Readonly<Partial<Record<string, readonly EncrustingFaceSite[]>>> = {
+  'reef-nsa-pinnacle-spire': [
+    [.645, .745, .47], [.495, .52, .40], [.67, .395, .47],
+  ],
+  'reef-nsa-cave-buttress': [
+    [.295, .47, .47], [.72, .245, .40],
+  ],
+  'reef-nsa-high-arch-span': [
+    [.295, .87, .28], [.295, .62, .40], [.77, .495, .34], [.37, .42, .47],
+  ],
+  'reef-nsa-encrusting-ledge': [
+    [.595, .495, .34],
+  ],
+}
 
 /** Verified custom-coral mount presets matching AQ-94 sculpted rock sockets. */
 export const NSA_MODULE_MOUNTS: Readonly<

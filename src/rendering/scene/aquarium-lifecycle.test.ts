@@ -167,7 +167,7 @@ vi.mock('./reef-assembly', async importOriginal => {
         ? state.archMountedCoralBindings
         : state.mountedCoralBindings
       state.reefAssemblyCalls.push({ reefName: reef.name, mounts, options })
-      return { update() {}, mountedCorals }
+      return { update() {}, mountedCorals, instancedMeshes: [] }
     },
     instantiateModularReefHabitat: () => ({ obstacles: [], anchors: [] }),
   }

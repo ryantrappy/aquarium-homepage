@@ -40,7 +40,7 @@ import { createAragoniteSandBed, evaluateAragoniteSandTilt, evaluateAragoniteSan
 import { reefPlacementsForViewport } from './reef-layout'
 import { hasReadyRightIslandCollider, resolveAvailableSnowflakeMorayResidence, resolveNsaMorayResidence, SNOWFLAKE_MORAY_CAVE_COLLISION_RADIUS_M, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M, type MorayResidence } from './moray-residence'
 import { CENTER_ARCH_URL, CENTER_ARCH_MOUNTS, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
-import { NSA_KIT_URL, NSA_SUBSTRATE_CONTACTS, RUBBLE_TALUS_URL, createNsaReviewReef, createRubbleTalusGroundingAprons, disposeRubbleTalusMaterials } from './reef-nsa'
+import { NSA_ENCRUSTING_FACE_SITES, NSA_KIT_URL, NSA_SUBSTRATE_CONTACTS, RUBBLE_TALUS_URL, createNsaReviewReef, createRubbleTalusGroundingAprons, disposeRubbleTalusMaterials } from './reef-nsa'
 import { createNsaHabitatAnchors } from './reef-nsa-habitat'
 import { createGlassEnclosure, glassEnclosureLayout } from './glass-enclosure'
 import { createWaterSurface } from './water-surface'
@@ -48,7 +48,7 @@ import { WaterRadianceProbeManager } from './water-radiance-probe'
 import { estimateCaptionRect, resolveLabelDeconflicts, type LabelRect } from './fish-label-layout'
 import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
 import { meshQueryForSpecies, createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
-import { createReefMeshNavigation, createRockFallbackObstacles, createMountedCoralFallbackObstacles, MESH_NAVIGATION_COLLISION_RADIUS_M, type ReefMeshIslandInput } from './reef-mesh-navigation'
+import { createReefMeshNavigation, createRockFallbackObstacles, createMountedCoralFallbackObstacles, createSurfaceCoralObstacles, MESH_NAVIGATION_COLLISION_RADIUS_M, type ReefMeshIslandInput } from './reef-mesh-navigation'
 import { applyFishTurningRigOverlay, bindFishTurningRig, evaluateSpriteTurnScaleX, type FishTurningRig } from './fish-turning'
 import { SPRITE_PLANE_WIDTH, fishBodyRadiusM, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale } from './fish-scale'
 import { canRunFishSceneLoop, evaluateTieredVerticalDepthRange, findSafeFishHeading, findSafeFishSpawn, fishSceneStatus, fishSpawnPreference, fishSpawnSlotsForServices, isSafeFishPosition } from './fish-spawn'
@@ -1021,12 +1021,14 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       : width >= 600 && centerArchBase ? [{ reef: createCenterArch(centerArchBase.scene), islandId: 'reef-center-arch', mounts: CENTER_ARCH_MOUNTS }] : []
     for (const { reef, islandId, mounts } of authoredReefs) {
       authoredReefPlacements.push(reef)
+      const encrustingFaceSites = kit ? NSA_ENCRUSTING_FACE_SITES[islandId] : undefined
       const controller = assembleCoralsOnRockSockets(reef, coralTemplates, mounts, {
         paused: paused || document.hidden,
         reducedMotion,
         actinicLevel: evaluateFluorescenceActinicFactor(optics.fixtureWhiteBalance),
         preserveAuthoredRock: true,
-        includeScatter: false,
+        includeScatter: Boolean(encrustingFaceSites),
+        encrustingFaceSites,
       })
       reefControllers.push(controller)
       reef.traverse(node => {
@@ -1042,25 +1044,26 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       scene.add(reef)
       reefs.push(reef)
       applyEnvironmentMapIntensity(reef, ENVIRONMENT_MAP_INTENSITY.reef, environmentMap?.texture)
-      const fallback = createRockFallbackObstacles(reef, islandId)
+      let surfaceCoralObstacles: ReturnType<typeof createSurfaceCoralObstacles>
+      try {
+        habitat.anchors.push(...mountedAnemoneHosts(controller.mountedCorals, islandId))
+        surfaceCoralObstacles = createSurfaceCoralObstacles(controller.instancedMeshes, islandId)
+      } catch (error) {
+        failReefSetup(`Reef module ${islandId} habitat geometry unavailable: ${String(error)}`)
+        return
+      }
+      const fallback = createRockFallbackObstacles(reef, islandId, surfaceCoralObstacles)
       if (fallback.status !== 'ready') {
         failReefSetup(`Reef module ${islandId} collision geometry unavailable: ${fallback.reason}`)
         return
       }
-      habitat.obstacles.push(...fallback.obstacles)
       const coralFallback = createMountedCoralFallbackObstacles(controller.mountedCorals, islandId)
       if (coralFallback.status !== 'ready') {
         failReefSetup(`Reef module ${islandId} coral bounds unavailable: ${coralFallback.reason}`)
         return
       }
-      try {
-        habitat.anchors.push(...mountedAnemoneHosts(controller.mountedCorals, islandId))
-      } catch (error) {
-        failReefSetup(`Reef module ${islandId} habitat geometry unavailable: ${String(error)}`)
-        return
-      }
-      habitat.obstacles.push(...coralFallback.obstacles)
-      meshIslands.push({ reef, islandId, mountedCorals: controller.mountedCorals })
+      habitat.obstacles.push(...fallback.obstacles, ...coralFallback.obstacles)
+      meshIslands.push({ reef, islandId, mountedCorals: controller.mountedCorals, surfaceCoralObstacles })
     }
     const rubbleSource = kit ? kit.scene.getObjectByName('reef-nsa-rubble-talus') : rubbleTalusBase?.scene
     if (rubbleSource) {

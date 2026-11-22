@@ -223,3 +223,7 @@
 ### 2026-11-21 — AQ-94 default wide layout
 *Root reviewed the retained entries. The active scope, local/laptop review and saved asset preservation remain current policy. AQ-94 is actioned and Done after the default-layout review. Whole-body fish clearance and subsequent art tasks remain pending.*
 - The compiled wide homepage loads only the 3,956,104-byte NSA foundation kit for the initial reef. At 1440×900 the left coral-to-base silhouette spans approximately 78% of the frame, with a lower right bommie, open canyon and grounded piers. A body click opens the Blue tang service card. Pause, Services and Settings worked. Tests cover narrow asset loading and stale resize completion. Verification passed all 1,059 tests, typecheck, production build and kit check.
+
+### 2026-11-21 — AQ-101 modular face colonies
+*Root reviewed the retained entries. Active scope, local/laptop review and saved asset preservation are current policy. The ten colony placements are actioned. Final photographic and animated-body acceptance remains pending.*
+- The default wide layout mounts ten existing zoanthid mats on four exact module faces, with no Blender or asset changes. Early unsupported placements were rejected. Each accepted instance is bounded for mesh routing and included in its foundation's fallback bounds. The staged laptop capture and canyon, goby, clownfish and moray tests retain the earlier routes.

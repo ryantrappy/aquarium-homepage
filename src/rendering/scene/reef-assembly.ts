@@ -1442,12 +1442,15 @@ export const MODULAR_CORAL_VARIATION_LIBRARY: readonly CoralVariationSpec[] = Ob
   },
 ])
 
+export type EncrustingFaceSite = readonly [u: number, v: number, scale?: number]
+
 // Front-facing encrusting patches hug the measured surface. Probe the footprint
 // as well as its center so an overhang or a hole cannot leave a floating mat.
 function sampleEncrustingFaces(
   rockRoot: THREE.Object3D,
   rocks: THREE.Mesh[],
   occupied: readonly THREE.Vector3[],
+  authoredSites?: readonly EncrustingFaceSite[],
 ): { position: THREE.Vector3; orientation: THREE.Quaternion; scale: number }[] {
   const bounds = new THREE.Box3()
   const fromWorld = rockRoot.matrixWorld.clone().invert()
@@ -1470,21 +1473,24 @@ function sampleEncrustingFaces(
     if (normal.z < 0.50 || normal.y < -0.22) return undefined
     return { point: hit.point.applyMatrix4(fromWorld), normal }
   }
-  const locations = [
+  const legacySites: readonly EncrustingFaceSite[] = [
     [0.28, 0.27], [0.44, 0.23], [0.57, 0.24], [0.73, 0.30],
     [0.25, 0.38], [0.38, 0.34], [0.60, 0.37], [0.73, 0.40],
     [0.34, 0.43], [0.48, 0.40], [0.53, 0.50], [0.67, 0.52],
     [0.30, 0.54], [0.45, 0.59], [0.67, 0.62],
     [0.39, 0.65], [0.60, 0.72], [0.49, 0.74],
   ]
-  for (const [u, v] of locations) {
+  for (const [u, v, authoredScale] of authoredSites ?? legacySites) {
     if (patches.length === 5) break
     const x = bounds.min.x + size.x * u
     const y = bounds.min.y + size.y * v
     const center = probe(x, y)
     if (!center || occupied.some(socket => socket.distanceTo(center.point) < 0.093)
       || patches.some(patch => patch.position.distanceTo(center.point) < 0.12)) continue
-    const supported = [[-0.021, 0], [0.021, 0], [0, -0.021], [0, 0.021]].every(([dx, dy]) => {
+    // For the authored mat, bound the footprint from the exported 0.244 ×
+    // 0.174 m base. The legacy scatter keeps its earlier sampling radius.
+    const supportRadius = authoredScale === undefined ? .021 : .158 * authoredScale
+    const supported = [[-supportRadius, 0], [supportRadius, 0], [0, -supportRadius], [0, supportRadius]].every(([dx, dy]) => {
       const edge = probe(x + dx, y + dy)
       return edge && center.normal.dot(edge.normal) > 0.62
         && Math.abs(edge.point.sub(center.point).dot(center.normal)) < 0.014
@@ -1494,7 +1500,7 @@ function sampleEncrustingFaces(
       position: center.point.addScaledVector(center.normal, -0.004),
       orientation: new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), center.normal)
         .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), u * 11)),
-      scale: 0.33 + 0.08 * v,
+      scale: authoredScale ?? (0.33 + 0.08 * v),
     })
   }
   return patches
@@ -1511,7 +1517,7 @@ function buildInstancedCoralScatters(
   mounts: readonly ModularCoralMountEntry[],
   socketNodes: ReadonlyMap<string, THREE.Object3D>,
   foundationMeshes: THREE.Mesh[],
-  options: { paused?: boolean; reducedMotion?: boolean; actinicLevel?: number } | undefined,
+  options: { paused?: boolean; reducedMotion?: boolean; actinicLevel?: number; encrustingFaceSites?: readonly EncrustingFaceSite[] } | undefined,
   materialControllers: Array<ReturnType<typeof applyCoralRawMaskMaterial>>,
   geometryBindings: CoralMaterialBoundBinding[],
 ): THREE.InstancedMesh[] {
@@ -1533,7 +1539,8 @@ function buildInstancedCoralScatters(
   >()
 
   const dummy = new THREE.Object3D()
-  mounts.forEach((mount, idx) => {
+  const companionMounts = options?.encrustingFaceSites ? [] : mounts
+  companionMounts.forEach((mount, idx) => {
     const socketNode = socketNodes.get(mount.socketName)
     if (!socketNode) return
     const seed = (idx + 1) * 2654435761
@@ -1563,15 +1570,18 @@ function buildInstancedCoralScatters(
     scatterGroups.set(scatterAssetId, list)
   })
 
-  const zoanthids = scatterGroups.get('coral-zoanthid-mat')
-  if (zoanthids && foundationMeshes.length > 0) {
+  const matAssetId = 'coral-zoanthid-mat'
+  const zoanthids = scatterGroups.get(matAssetId) ?? []
+  if ((options?.encrustingFaceSites || zoanthids.length > 0) && coralTemplates.has(matAssetId) && foundationMeshes.length > 0) {
     const occupied = [...socketNodes.values()].map(socket => socket.position)
-    for (const patch of sampleEncrustingFaces(rockRoot, foundationMeshes, occupied)) {
+    for (const patch of sampleEncrustingFaces(rockRoot, foundationMeshes, occupied, options?.encrustingFaceSites)) {
       zoanthids.push({
         ...patch, yawRad: 0, tiltXRad: 0, tiltZRad: 0,
-        palette: zoanthids[0]!.palette, rimTint: zoanthids[0]!.rimTint,
+        palette: zoanthids[0]?.palette ?? PALETTE_ZOANTHID_ORANGE_GREEN,
+        rimTint: zoanthids[0]?.rimTint ?? 'cyan',
       })
     }
+    if (zoanthids.length) scatterGroups.set(matAssetId, zoanthids)
   }
 
   for (const [assetId, placements] of scatterGroups.entries()) {
@@ -1606,6 +1616,7 @@ function buildInstancedCoralScatters(
 
       const instanced = new THREE.InstancedMesh(child.geometry, binding.material, placements.length)
       instanced.name = `instanced_${assetId}_${child.name}`
+      instanced.userData.reefPrimitive = { ...reefPrimitive, role }
       instanced.castShadow = true
       instanced.receiveShadow = true
       instanced.customDepthMaterial = binding.depthMaterial
@@ -1658,6 +1669,7 @@ export function assembleCoralsOnRockSockets(
     preserveAuthoredRock?: boolean
     foundationHeightScale?: number
     includeScatter?: boolean
+    encrustingFaceSites?: readonly EncrustingFaceSite[]
   },
 ): {
   mountedCorals: AssembledCoralBinding[]
@@ -1671,7 +1683,7 @@ export function assembleCoralsOnRockSockets(
     if (!(node instanceof THREE.Mesh)) return
     const reefPrim = node.userData?.reefPrimitive ?? node.parent?.userData?.reefPrimitive
     if (reefPrim?.role === 'rock' || node.name.toLowerCase().includes('live_rock')) {
-      if (!preserveAuthoredRock && (node.geometry.getAttribute('position')?.count ?? 0) > 100) {
+      if ((!preserveAuthoredRock || options?.encrustingFaceSites) && (node.geometry.getAttribute('position')?.count ?? 0) > 100) {
         foundationMeshes.push(node)
       }
       if (preserveAuthoredRock) return
@@ -1683,7 +1695,7 @@ export function assembleCoralsOnRockSockets(
     }
   })
 
-  if (foundationMeshes.length > 0) {
+  if (!preserveAuthoredRock && foundationMeshes.length > 0) {
     sculptOrganicRockContour(rockRoot)
   }
 
