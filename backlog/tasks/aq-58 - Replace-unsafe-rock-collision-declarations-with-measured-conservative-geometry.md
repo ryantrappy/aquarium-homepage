@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-05 03:13'
-updated_date: '2026-11-22 03:52'
+updated_date: '2026-11-22 03:59'
 labels:
   - modeling
   - validation
@@ -92,6 +92,8 @@ Extend the existing continuous clip-envelope analyzer with an optional local +Z 
 Correct swept-envelope subdivision to bound endpoint motion rather than fish length. Reproduce an off-midpoint solid-rock obstruction in both sweep directions, then rerun the source-pinned reef, clownfish and blue tang passage fixtures with the corrected query.
 
 Add a shared-budget rigid-body arc sweep for known center translation and shortest-axis rotation. Verify an off-axis rock contact that linear endpoint interpolation misses, and keep unsupported or ambiguous rotations unavailable.
+
+Derive the post-skinning displacement bound from the existing flex producer and shader. Run the pinned analyzer on the mapped swimming assets with reviewed turning caps and the current clean clip reset, then combine those bounds at render scale. Record unsupported sources and whether the combined shapes fit the measured reef; keep live clearance unchanged until that evidence supports it.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -130,6 +132,8 @@ Root fish envelope diagnostic 2026-11-20. Restored the read-only verifier with t
 Root body-clearance review. Added a bounded continuous capsule sweep for linearly moving axis endpoints and a source-pinned whole-clip capsule option in the offline skeletal analyzer. Both reuse the existing triangle/capsule and displacement math. Unresolved padded contact returns indeterminate and work is shared across all slices. The exact raised left reef clears the 0.04 root probe but rejects the full-clip blue tang capsule (half-axis 0.50, radius 0.499369 scene units) on that cave route. The same full-clip bound clears the front-water route. At the left anemone, the measured 0.35 s clownfish pose (half-axis 0.16, radius 0.143547) clears when aligned to the tank depth axis and is blocked crosswise. Its whole-clip bound (radius 0.205815) is blocked even when aligned. The analyzer also bounds the current gramma and cardinalfish clip-only capsules. The active yellow tang export still fails the single-root validation. The certified scope excludes unbounded turning and shader flex. No live collision policy or models changed. Eight focused suites passed 244 tests plus typecheck. AC1 and AC3 remain pending.
 
 Root continuous-sweep review 2026-11-21. Linear subdivision now uses the longest endpoint travel rather than the body's length, with an exact single-capsule sweep for a translating sphere. The rigid API accounts for a translating center plus a fixed-length shortest orientation arc under the shared collision budget. Tests cover off-midpoint travel in both directions and contact on a turn arc missed by linear endpoint chords. The source-pinned left assembly still distinguishes the 0.04 probe from the blue tang clip envelope at the cave, and the tang's clip envelope clears a translating quarter-turn in the front lane. Clownfish and right moray checks also pass. Runtime overlay bounds and use of these queries in live navigation remain open.
+
+Root review 2026-11-21: verified the clean clip reset on all 16 mapped swimmers, and measured render-scale clip, turn and analytic flex envelopes for 15. The yellow tang needs multi-mesh support. The exact wide-left reef reports coral-envelope overlap for the blue tang front quarter-turn and clownfish host approach with the combined radii, so live routing retains its existing probes. Source hashes, radii and reproduction are in docs/asset-evidence/aq58/runtime-fish-envelopes.json and 3d-collision-review.md. All 1,073 tests, typecheck and production build pass. AC1 and AC3 remain open.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

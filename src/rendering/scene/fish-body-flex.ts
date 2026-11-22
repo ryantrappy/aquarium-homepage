@@ -76,6 +76,24 @@ export const BALISTIFORM_FLEX_GAIT: FishFlexGaitParams = Object.freeze({
 
 /** Hard bound on the travelling-wave tail offset, as a fraction of body length. */
 export const MAX_FLEX_TAIL_OFFSET_BL = 0.1
+export const MAX_FLEX_GILL_OFFSET_BL = 0.0042
+export const MAX_FLEX_MOUTH_DROP_BL = 0.0038
+export const FLEX_MOUTH_RETRACTION_RATIO = 0.35
+
+/** Post-skinning displacement bound for uniforms produced by the gait evaluator. */
+export function boundFishFlexDisplacementBL(gait: FishFlexGaitParams): number | undefined {
+  const { tailAmplitudeMaxBL, envelopeA, envelopeP, finRippleAmpBL } = gait
+  if (![tailAmplitudeMaxBL, envelopeA, envelopeP, finRippleAmpBL].every(Number.isFinite)
+    || tailAmplitudeMaxBL < 0 || envelopeA < 0 || envelopeA > 1 || envelopeP <= 0) return undefined
+  const tail = Math.min(tailAmplitudeMaxBL, MAX_FLEX_TAIL_OFFSET_BL)
+  // Envelopes, masks and pulses are at most one. Time smoothing is a convex
+  // interpolation of zero and the current gait targets.
+  return Math.hypot(
+    tail + Math.abs(finRippleAmpBL) + MAX_FLEX_GILL_OFFSET_BL,
+    MAX_FLEX_MOUTH_DROP_BL,
+    FLEX_MOUTH_RETRACTION_RATIO * MAX_FLEX_MOUTH_DROP_BL,
+  )
+}
 
 const TWO_PI = Math.PI * 2
 
@@ -259,7 +277,7 @@ export function evaluateOperculumArticulationBL(
   const respPhase = TWO_PI * values.frequencyHz * flexTimeSeconds - phaseRad
   const pulse = 0.5 - 0.5 * Math.cos(respPhase - Math.PI * 0.5)
   const effort = 0.45 + 0.55 * clamp(values.frequencyHz / 2.2, 0, 1)
-  const gillAmplitudeBL = 0.0042 * effort * values.amplitudeScale
+  const gillAmplitudeBL = MAX_FLEX_GILL_OFFSET_BL * effort * values.amplitudeScale
   return gillAmplitudeBL * gillMask * pulse
 }
 
@@ -287,6 +305,6 @@ export function evaluateMouthArticulationBL(
   const respPhase = TWO_PI * values.frequencyHz * flexTimeSeconds - phaseRad
   const pulse = 0.5 - 0.5 * Math.cos(respPhase)
   const effort = 0.45 + 0.55 * clamp(values.frequencyHz / 2.2, 0, 1)
-  const mouthAmplitudeBL = 0.0038 * effort * values.amplitudeScale
+  const mouthAmplitudeBL = MAX_FLEX_MOUTH_DROP_BL * effort * values.amplitudeScale
   return mouthAmplitudeBL * mouthMask * pulse
 }

@@ -237,3 +237,8 @@
 ### 2026-11-21 — AQ-58 swept fish-body clearance
 *Root reviewed the retained entries. Active scope and saved asset preservation are current. The endpoint and rigid-turn sweep corrections are actioned. Live envelope and route integration remain pending.*
 - Endpoint travel now controls the slice padding, and the rigid helper keeps a fixed-length capsule through its orientation arc. The exact left assembly still blocks the blue tang's clip envelope in the cave and clears a translating turn in front water. The checked-in visuals and runtime probe sizes were preserved.
+
+### 2026-11-21 — AQ-58 combined fish envelope and candidate asset triage
+*Root reviewed retained entries. Active scope, local laptop review and saved asset preservation remain current. The combined fish bound and mounted left-reef queries are actioned. Animation-aware live routing and candidate art acceptance remain pending.*
+- Runtime clip reset passes for all 16 mapped swimmers. Fifteen have offline clip, turn and flex budgets at render scale. The yellow tang spans multiple skinned meshes and is outside the current analyzer. The blue tang front turn and clownfish host approach report coral-envelope overlap with the combined bounds. No live navigation was changed.
+- Candidate triage confirmed the custom coral catalog is in the current reef wiring and the NSA kit is available via the development preview. Invertebrates load through the configured-species path. The porous procedural rock remains on the test scene. Current visual priority is the newly authored corals on the default wide scene.

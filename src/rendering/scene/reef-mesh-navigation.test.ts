@@ -886,6 +886,21 @@ async function loadActualGlb(bytes: Uint8Array) {
     )
     expect(frontTurn.status).toBe('clear')
 
+    const measuredBodies = JSON.parse(readFileSync(new URL(
+      '../../../docs/asset-evidence/aq58/runtime-fish-envelopes.json', import.meta.url), 'utf8')).measurements
+    const blueBody = measuredBodies.find((body: { id: string }) => body.id === 'blue-tang')
+    expect(blueBody).toMatchObject({
+      status: 'bounded', capsuleHalfAxisM: halfAxis, clipRadiusM: radius,
+      sourceSha256: 'de1aaf4fcbc72b82749190e4047d26a226cd2d987bee8ef06f50849aac36fc9e',
+    })
+    const fullFrontTurn = querySweptRigidBodyCapsule(
+      query,
+      { center: p(-.6, 1.65, 1.9), forward: p(1, 0, 0) },
+      { center: p(.5, 1.65, 1.9), forward: p(0, 0, 1) },
+      halfAxis, blueBody.combinedRadiusM, budget,
+    )
+    expect(fullFrontTurn).toMatchObject({ status: 'blocked', reason: 'coral-envelope' })
+
     const clownHalfAxis = .16
     const clownUrl = new URL('../assets/fish/download_testing_copies/clownfish-copy.glb', import.meta.url)
     const clownRadius = await measureClipBodyRadius(clownUrl, fishModelScale('ocellaris-clownfish'), clownHalfAxis)
@@ -903,6 +918,15 @@ async function loadActualGlb(bytes: Uint8Array) {
     expect(querySweptBodyCapsule(residentQuery, approachPose(0, .4), approachPose(0, 0), clownRadius, budget).status).toBe('clear')
     expect(querySweptBodyCapsule(residentQuery, approachPose(Math.PI / 2, .4), approachPose(Math.PI / 2, 0), clownRadius, budget).status).toBe('clear')
     expect(querySweptBodyCapsule(residentQuery, approachPose(0, .4), approachPose(0, 0), clownClipRadius, budget).status).toBe('clear')
+    const clownBody = measuredBodies.find((body: { id: string }) => body.id === 'ocellaris-clownfish')
+    expect(clownBody).toMatchObject({
+      status: 'bounded', capsuleHalfAxisM: clownHalfAxis, clipRadiusM: clownClipRadius,
+      sourceSha256: 'be6e9cbd2b5b6a76d5204f3a140ae7538a0115e6a067dcbabd0dfd1a273db7ac',
+    })
+    const fullHostApproach = querySweptBodyCapsule(
+      residentQuery, approachPose(0, .4), approachPose(0, 0), clownBody.combinedRadiusM, budget,
+    )
+    expect(fullHostApproach).toMatchObject({ status: 'blocked', reason: 'coral-envelope' })
   }, 120_000)
 
   it('clears the exposed moray head at its fixed right-cave mouth across the full assembled right island and sand', async () => {

@@ -25,6 +25,8 @@ AQ-70.6 now uses one warped ridge network with a rotated intensity accent, depth
 
 AQ-58 now bounds linear sweeps by endpoint travel and verifies rigid turns along the actual orientation arc. A source-pinned blue tang clip envelope still hits the left cave wall and clears a translating quarter-turn in front water. The renderer's turning overlay and shader deformation require a combined envelope before live routing uses these checks. [Collision evidence](docs/asset-evidence/aq58/3d-collision-review.md#translating-and-turning-bodies--2026-11-21).
 
+The combined envelope review covers 15 of the 16 mapped swimmers. The current yellow tang uses multiple skinned meshes and needs a different analyzer scope. At runtime scale the blue tang's combined radius is 1.441 and the clownfish's is 0.519 aquarium units. The wide-left fixture cannot establish coral clearance for the respective front turn and host approach. Live planner integration remains pending. [Combined bounds](docs/asset-evidence/aq58/3d-collision-review.md#combined-clip-turning-and-flex-bounds--2026-11-21).
+
 ## Default wide modular reef — 2026-11-21
 
 AQ-94 is Done. The compiled wide homepage loads seven saved NSA rock exports in one 3,956,104-byte shared-atlas GLB by default. The 1440×900 production review shows the taller left pinnacle, lower right island and measured through-arch with 13 mounted corals. The modular right ledge shelters the fixed moray with a clear exposed-head corridor. Narrow screens use the existing reef and load its foundations on demand when resizing from the wide view. Laptop production evidence is under `docs/asset-evidence/aq94/default-laptop-review/`.
