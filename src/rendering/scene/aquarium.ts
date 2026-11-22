@@ -982,7 +982,6 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       // Real caustics on live rock and coral (AQ-14.2 AC #2). Assembly clones
       // the rock/coral materials per island, so each rebuild patches fresh
       // material instances; applyCaustics also guards against double-patching.
-      // Rock gets a broader pattern (fewer, wider webs) than sand/coral.
       // Fish materials are patched in bindGlbToInhabitant, not here.
       reef.traverse(object => {
         if (!(object instanceof THREE.Mesh)) return
@@ -991,7 +990,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
           const isRock = Boolean(mat.userData.liveRockShader)
           const isCoral = Boolean(mat.userData.coralRawMasks)
           if (!isRock && !isCoral) continue
-          applyCaustics(mat, caustics, isRock ? { scaleA: 0.25, scaleB: 0.4 } : undefined)
+          applyCaustics(mat, caustics)
         }
       })
       reef.scale.setScalar(uniformScale)
@@ -1043,8 +1042,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         if (!(node instanceof THREE.Mesh)) return
         for (const material of Array.isArray(node.material) ? node.material : [node.material]) {
           if (material instanceof THREE.MeshStandardMaterial) {
-            const role = node.userData?.reefPrimitive?.role
-            applyCaustics(material, caustics, role === 'rock' ? { scaleA: 0.25, scaleB: 0.4 } : undefined)
+            applyCaustics(material, caustics)
           }
         }
         hitMeshes.push(node)
@@ -1081,7 +1079,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         if (!(node instanceof THREE.Mesh)) return
         for (const material of Array.isArray(node.material) ? node.material : [node.material]) {
           if (material instanceof THREE.MeshStandardMaterial) {
-            applyCaustics(material, caustics, { scaleA: 0.25, scaleB: 0.4 })
+            applyCaustics(material, caustics)
           }
         }
       })

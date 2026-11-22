@@ -229,3 +229,7 @@
 - The default wide layout mounts ten existing zoanthid mats on four exact module faces, with no Blender or asset changes. Early unsupported placements were rejected. Each accepted instance is bounded for mesh routing and included in its foundation's fallback bounds. The staged laptop capture and canyon, goby, clownfish and moray tests retain the earlier routes.
 
 *Root resume review 2026-11-21: retained entries inspected. Review branch verification is actioned. The merged default has returned to the earlier islands and center arch at `92c72a2`; preceding notes on the modular wide default describe the review branch. AQ-101 remains pending photographic and animated-body acceptance.*
+
+### 2026-11-21 — AQ-70.6 shadowed caustics
+*Root reviewed the retained entries. The local/laptop-only scope and model preservation remain current. The caustic shader update is actioned. Fixture and full optical acceptance remain pending.*
+- The current default uses one bent cellular ridge network with a rotated brightness accent, depth filtering, and illumination gating. The render and CPU projection share wave slope and slant. Laptop before/after, two active phases and identical settled Pause frames are recorded under `docs/asset-evidence/aq70-6/shadowed-caustics-laptop/`.

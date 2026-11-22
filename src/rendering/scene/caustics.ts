@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { DEFAULT_AQUARIUM_OPTICS_CONFIG } from './underwater-optics'
+import { CAUSTIC_SAMPLE_WARP, DEFAULT_AQUARIUM_OPTICS_CONFIG } from './underwater-optics'
 import { SURFACE_WAVE_GLSL } from './surface-waves'
 
 /**
@@ -45,8 +45,8 @@ export const CAUSTIC_TEXTURE_SIZE = 256
 
 /** Voronoi cells per tile side in the cellular caustic texture (AQ-70.6):
  * one tile spans ~2.9 m at the default layer-A scale, so a cell is ~0.7 m
- * across; the two scrolling layers at different scales multiply, which
- * breaks the regularity into finer structure. */
+ * across. Shared surface-wave slope bends the ridges, and a rotated
+ * accent field varies their brightness. */
 export const CAUSTIC_VORONOI_CELLS = 4
 /** Voronoi edge width in cell units: F2 - F1 below this reads as a bright
  * ridge. Tuned so the texture is ~8% bright ridge on ~73% dark field. */
@@ -187,7 +187,7 @@ export type ApplyCausticsOptions = {
   scaleA?: number
   /** World-space UV scale (UV per metre) of layer B; default from the optics config. */
   scaleB?: number
-  /** Maximum additive brightness; default from the optics config (0.35). */
+  /** Maximum added direct diffuse; default from the optics config (0.35). */
   maxAdd?: number
   /**
    * Lower edge of the ridge smoothstep; default 0.35. Lowering it widens
@@ -210,14 +210,14 @@ export type ApplyCausticsOptions = {
   skinned?: boolean
 }
 
-const CAUSTIC_CACHE_KEY_SUFFIX = ':caustics-v1'
-const CAUSTIC_SKINNED_CACHE_KEY_SUFFIX = ':caustics-skinned-v1'
+const CAUSTIC_CACHE_KEY_SUFFIX = ':caustics-v2'
+const CAUSTIC_SKINNED_CACHE_KEY_SUFFIX = ':caustics-skinned-v2'
 
 /**
  * Patches a `MeshStandardMaterial` so the caustic texture is sampled in its
  * fragment shader, masked to upward-facing surfaces and faded with depth
  * (the same envelope as `evaluateCausticIntensity`), capped at
- * `uCausticMaxAdd` additive on direct diffuse light.
+ * `uCausticMaxAdd` additive on already-lit direct diffuse.
  *
  * The existing `onBeforeCompile` is preserved (chained) — sand, coral, and
  * live-rock materials all already patch their shaders, and fish flex
@@ -254,93 +254,50 @@ export function applyCaustics(
     Object.assign(shader.uniforms, caustics.uniforms, perMaterialUniforms)
     shader.vertexShader =
       'varying vec3 vCausticWorldPos;\nvarying vec3 vCausticWorldNormal;\n' + shader.vertexShader
-    if (skinned) {
-      // Post-skinning hooks (AQ-70.6): `transformed` is skinned and
-      // flex-displaced by the time `project_vertex` runs, and
-      // `objectNormal` is skinned by `defaultnormal_vertex`.
-      shader.vertexShader = shader.vertexShader.replace(
-        '#include <defaultnormal_vertex>',
-        '#include <defaultnormal_vertex>\nvCausticWorldNormal = normalize(mat3(modelMatrix) * objectNormal);',
-      )
-      shader.vertexShader = shader.vertexShader.replace(
-        '#include <project_vertex>',
-        '#include <project_vertex>\nvCausticWorldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;',
-      )
-    } else {
-      shader.vertexShader = shader.vertexShader.replace(
-        '#include <beginnormal_vertex>',
-        '#include <beginnormal_vertex>\nvCausticWorldNormal = normalize(mat3(modelMatrix) * objectNormal);',
-      )
-      shader.vertexShader = shader.vertexShader.replace(
-        '#include <begin_vertex>',
-        '#include <begin_vertex>\nvCausticWorldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;',
-      )
-    }
+    // Use Three's transformed normal and position so instanced reef
+    // colonies and posed fish sample the field in their displayed locations.
+    shader.vertexShader = shader.vertexShader.replace(
+      '#include <defaultnormal_vertex>',
+      '#include <defaultnormal_vertex>\nvCausticWorldNormal = normalize(transformDirectionByInverseViewMatrix(transformedNormal, viewMatrix));',
+    )
+    shader.vertexShader = shader.vertexShader.replace(
+      '#include <project_vertex>',
+      `#include <project_vertex>
+vec4 causticPosition = vec4(transformed, 1.0);
+#ifdef USE_INSTANCING
+  causticPosition = instanceMatrix * causticPosition;
+#endif
+vCausticWorldPos = (modelMatrix * causticPosition).xyz;`,
+    )
     shader.fragmentShader =
       'uniform sampler2D uCausticMap;\nuniform float uCausticTime;\nuniform vec3 uSunDir;\nuniform float uSurfaceY;\nuniform float uFocusGain;\nuniform float uCausticScaleA;\nuniform float uCausticScaleB;\nuniform float uCausticMaxAdd;\nuniform float uCausticThreshold;\nvarying vec3 vCausticWorldPos;\nvarying vec3 vCausticWorldNormal;\n' +
       SURFACE_WAVE_GLSL +
       shader.fragmentShader
-    // UV scroll mirrors evaluateCausticPatternUV exactly (0.22 Hz layer A,
-    // 0.37 Hz layer B, opposite drift directions). Keep the two in sync.
-    // Sun-slant projection (AQ-70.6 / AQ-96): the UVs are sampled at the
-    // surface point the light passed through, so the dapple on tall rock
-    // and high coral shifts along the light direction and lines up with
-    // the shafts above it. Focus modulation: the shared wave-field focus
-    // at that surface point multiplies the pattern by
-    // (1 + uFocusGain * focus) — bright where the surface converges light,
-    // dim where it diverges — so the sand dapple breathes with the surface
-    // instead of scrolling on an independent clock.
-    // Injection point (AQ-14.2 fix, 2026-11-11): AFTER `#include
-    // <aomap_fragment>`, NOT at `#include <opaque_fragment>`. In three
-    // r187's meshphysical fragment shader, `outgoingLight` is already
-    // formed from `reflectedLight` (`vec3 outgoingLight = totalDiffuse +
-    // totalSpecular + ...`) BEFORE `opaque_fragment` runs, so writing
-    // `reflectedLight.directDiffuse` at the opaque_fragment point is
-    // dead code — it never reaches the pixels. That is why three visual
-    // checks found "no dapple discernible" even though the pattern was
-    // sampled correctly: the caustic chunk ran, then its result was
-    // discarded. `aomap_fragment` sits between `lights_fragment_end`
-    // (where directDiffuse is accumulated) and the outgoingLight sum,
-    // so the dim and the add below actually land. Verified with an
-    // isolated probe (plane + key light): rendering `causticP` directly
-    // shows a strong cellular web, and with this injection point the
-    // same web reaches the lit output.
+    // Use accumulated direct diffuse before outgoingLight is formed.
+    // This lets the projected ridges follow shaded and lit areas.
     shader.fragmentShader = shader.fragmentShader.replace(
       '#include <aomap_fragment>',
       `#include <aomap_fragment>
-// Animated caustic texture (AQ-14.2 AC #2): two world-space layers
-// scrolling in opposite directions, masked to upward faces and faded
-// with depth, capped at uCausticMaxAdd additive on direct diffuse light.
-// The layers combine by MAX, not product: the cellular texture is a
-// mostly-dark field (mean ~0.16), so a product's mean is ~0.027 and the
-// old smoothstep(0.25, 0.85) left only ~2.7% of any surface with any
-// pattern at all (mean additive +0.004) — the "no dapple discernible"
-// visual-check finding. Max keeps the cellular network shape (union of
-// ridges): ~32% of the surface shows pattern, mean additive +0.07 before
-// the upward-normal and depth masks, still restrained under the +0.35 cap.
-float causticDist = (uSurfaceY - vCausticWorldPos.y) / max(uSunDir.y, 0.2);
+float causticDist = max(uSurfaceY - vCausticWorldPos.y, 0.0) / max(uSunDir.y, 0.2);
 vec2 causticSurf = vCausticWorldPos.xz + uSunDir.xz * causticDist;
-vec2 causticWarp = surfaceWaveSlope(causticSurf, uCausticTime) * 1.45;
+vec2 causticWarp = surfaceWaveSlope(causticSurf, uCausticTime) * ${CAUSTIC_SAMPLE_WARP.toFixed(1)};
 vec2 causticUvA = (causticSurf + causticWarp) * uCausticScaleA + vec2(uCausticTime * 0.022, -uCausticTime * 0.0132);
-vec2 causticUvB = (causticSurf - causticWarp * 0.85) * uCausticScaleB + vec2(-uCausticTime * 0.0296, uCausticTime * 0.0185);
-vec2 dispOffset = causticWarp * 0.006;
-float cR = max(texture2D(uCausticMap, causticUvA + dispOffset).r, texture2D(uCausticMap, causticUvB - dispOffset).r);
-float cG = max(texture2D(uCausticMap, causticUvA).r, texture2D(uCausticMap, causticUvB).r);
-float cB = max(texture2D(uCausticMap, causticUvA - dispOffset).r, texture2D(uCausticMap, causticUvB + dispOffset).r);
-vec3 causticRGB = smoothstep(vec3(uCausticThreshold), vec3(0.88), vec3(cR, cG, cB));
-causticRGB = pow(causticRGB, vec3(1.55));
-float causticP = pow(smoothstep(uCausticThreshold, 0.88, cG), 1.6);
-causticRGB.g = causticP;
-float causticMask = max(vCausticWorldNormal.y, 0.0) * (1.0 - 0.35 * clamp((2.8 - vCausticWorldPos.y) / 5.6, 0.0, 1.0));
-// Light redistribution (look-dev 2026-11-11): focusing means bright
-// ridges AND dimmer surroundings — the light in the web came from the
-// field around it.
-// Only redistribute the direct fixture light. Recoloring ambient light
-// here painted the whole sand bed blue between bright polygon outlines.
-reflectedLight.directDiffuse *= 1.0 - 0.14 * (1.0 - cG) * causticMask;
-float focusMod = clamp(1.0 + uFocusGain * surfaceWaveFocus(causticSurf, uCausticTime), 0.0, 1.2);
-vec3 causticLedTint = vec3(0.95, 1.06, 1.18);
-reflectedLight.directDiffuse += diffuseColor.rgb * causticRGB * causticLedTint * (focusMod * causticMask * uCausticMaxAdd * 1.25);`,
+vec2 causticUvB = mat2(0.8, -0.6, 0.6, 0.8) * (causticSurf - causticWarp * 0.85) * uCausticScaleB + vec2(-uCausticTime * 0.0296, uCausticTime * 0.0185);
+float causticDepth = clamp((2.8 - vCausticWorldPos.y) / 5.6, 0.0, 1.0);
+float causticRidge = texture2D(uCausticMap, causticUvA, causticDepth * 0.35).r;
+float causticAccent = texture2D(uCausticMap, causticUvB, causticDepth * 0.35).r;
+float causticPeak = smoothstep(uCausticThreshold, 0.88, causticRidge);
+float waveFocus = surfaceWaveFocus(causticSurf, uCausticTime);
+float focusMod = clamp(0.78 + uFocusGain * waveFocus, 0.28, 1.0);
+// The second layer varies the intensity along the primary ridges without
+// projecting a second grid into the dark areas between them.
+float focusedRidge = causticPeak * (0.66 + 0.34 * causticAccent) * focusMod;
+float causticMask = max(normalize(vCausticWorldNormal).y, 0.0) * (1.0 - 0.35 * causticDepth);
+const vec3 causticLuma = vec3(0.2126, 0.7152, 0.0722);
+float shadowedIrradiance = dot(reflectedLight.directDiffuse, causticLuma) / max(0.02, dot(diffuseColor.rgb, causticLuma));
+float fixtureVisibility = smoothstep(0.04, 0.28, shadowedIrradiance);
+reflectedLight.directDiffuse *= 1.0 - 0.10 * (1.0 - causticPeak) * causticMask;
+reflectedLight.directDiffuse += diffuseColor.rgb * (uCausticMaxAdd * focusedRidge * causticMask * fixtureVisibility);`,
     )
   }
   const cacheKeySuffix = skinned ? CAUSTIC_SKINNED_CACHE_KEY_SUFFIX : CAUSTIC_CACHE_KEY_SUFFIX

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import * as THREE from 'three'
 import {
+  CAUSTIC_SAMPLE_WARP,
   DEFAULT_AQUARIUM_OPTICS_CONFIG,
   LIGHT_SHAFT_BAND_CENTERS,
   LIGHT_SHAFT_SLANT_PER_M,
@@ -28,7 +29,7 @@ import {
   evaluateSuspendedParticlePosition,
   lightShaftBandReach,
 } from './underwater-optics'
-import { evaluateSurfaceFocus, evaluateSurfaceHeight } from './surface-waves'
+import { evaluateSurfaceFocus, evaluateSurfaceHeight, evaluateSurfaceSlope } from './surface-waves'
 
 describe('aquarium-scale underwater optics, restrained caustics, and suspended particles (AQ-39 / AQ-14.2 / AQ-43)', () => {
   it('computes Pope & Fry (1997) spectral transmittance bounded to home-aquarium depth without an artificial blue veil', () => {
@@ -89,16 +90,22 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
 
   it('returns two scrolled caustic-texture UV pairs that freeze at t=0 on pause or reduced-motion', () => {
     const atZero = evaluateCausticPatternUV(1.2, -0.8, 0)
-    expect(atZero.a.u).toBeCloseTo(1.2 * DEFAULT_AQUARIUM_OPTICS_CONFIG.causticTextureScaleA)
-    expect(atZero.a.v).toBeCloseTo(-0.8 * DEFAULT_AQUARIUM_OPTICS_CONFIG.causticTextureScaleA)
-    expect(atZero.b.u).toBeCloseTo(1.2 * DEFAULT_AQUARIUM_OPTICS_CONFIG.causticTextureScaleB)
-    expect(atZero.b.v).toBeCloseTo(-0.8 * DEFAULT_AQUARIUM_OPTICS_CONFIG.causticTextureScaleB)
+    const slope = evaluateSurfaceSlope(1.2, -.8, 0)
+    const warpX = slope.x * CAUSTIC_SAMPLE_WARP
+    const warpZ = slope.z * CAUSTIC_SAMPLE_WARP
+    const accentX = 1.2 - warpX * .85
+    const accentZ = -.8 - warpZ * .85
+    const { causticTextureScaleA, causticTextureScaleB } = DEFAULT_AQUARIUM_OPTICS_CONFIG
+    expect(atZero.a.u).toBeCloseTo((1.2 + warpX) * causticTextureScaleA)
+    expect(atZero.a.v).toBeCloseTo((-.8 + warpZ) * causticTextureScaleA)
+    expect(atZero.b.u).toBeCloseTo((accentX * .8 + accentZ * .6) * causticTextureScaleB)
+    expect(atZero.b.v).toBeCloseTo((-accentX * .6 + accentZ * .8) * causticTextureScaleB)
 
     const active = evaluateCausticPatternUV(1.2, -0.8, 5)
-    // Layers scroll in opposite directions and at different rates
-    expect(active.a.u).toBeGreaterThan(atZero.a.u)
-    expect(active.b.u).toBeLessThan(atZero.b.u)
-    expect(active.a).not.toEqual(active.b)
+    const activeWarp = evaluateSurfaceSlope(1.2, -.8, 5).x * CAUSTIC_SAMPLE_WARP
+    expect(active.a.u).toBeCloseTo((1.2 + activeWarp) * causticTextureScaleA + 5 * .022)
+    expect(active.a).not.toEqual(atZero.a)
+    expect(active.b).not.toEqual(atZero.b)
 
     const paused = evaluateCausticPatternUV(1.2, -0.8, 5, { paused: true })
     expect(paused).toEqual(atZero)
@@ -360,7 +367,8 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
     expect(slanted.surfacePoint.x).toBeCloseTo(SUN_DIRECTION.x * dist, 9)
     expect(slanted.surfacePoint.z).toBeCloseTo(SUN_DIRECTION.z * dist, 9)
     expect(slanted.a.u).toBeCloseTo(
-      slanted.surfacePoint.x * DEFAULT_AQUARIUM_OPTICS_CONFIG.causticTextureScaleA,
+      (slanted.surfacePoint.x + evaluateSurfaceSlope(slanted.surfacePoint.x, slanted.surfacePoint.z, 0).x * CAUSTIC_SAMPLE_WARP)
+        * DEFAULT_AQUARIUM_OPTICS_CONFIG.causticTextureScaleA,
       9,
     )
     // The focus is the shared wave-field focus at the footpoint, not at

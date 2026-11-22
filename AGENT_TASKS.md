@@ -17,6 +17,10 @@ Root verified prior Root-checkpoint facts against the current checkout. The late
 
 The merged default uses the earlier two islands and center arch following `92c72a2`. The modular layout and AQ-101 face-colony work remain available in the local development build at `/?reef=nsa` and on the modular review branch. The wide-default production check below applies to that review branch.
 
+## Caustic lighting — 2026-11-21
+
+AQ-70.6 now uses one warped ridge network with a rotated intensity accent, depth filtering, and an illumination gate derived from shadowed direct diffuse. The current default scene's matched laptop comparison shows visible ridges on lit sand and a quieter floor under the rocks. Two settled frames matched after using Pause. Fixture and full optical acceptance remain open. [Laptop evidence](docs/asset-evidence/aq70-6/shadowed-caustics-laptop/).
+
 ## Default wide modular reef — 2026-11-21
 
 AQ-94 is Done. The compiled wide homepage loads seven saved NSA rock exports in one 3,956,104-byte shared-atlas GLB by default. The 1440×900 production review shows the taller left pinnacle, lower right island and measured through-arch with 13 mounted corals. The modular right ledge shelters the fixed moray with a clear exposed-head corridor. Narrow screens use the existing reef and load its foundations on demand when resizing from the wide view. Laptop production evidence is under `docs/asset-evidence/aq94/default-laptop-review/`.
