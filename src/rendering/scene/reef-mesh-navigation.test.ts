@@ -867,6 +867,19 @@ async function loadActualGlb(bytes: Uint8Array) {
     const apexBounds = new THREE.Box3().setFromObject(apex.root.children[0], true)
     expect(shoulderBounds.min.x).toBeLessThan(apexBounds.min.x - .3)
     expect(shoulderBounds.max.y).toBeLessThan(apexBounds.max.y)
+    const apron = assembled.mountedCorals.find(coral => coral.socketName === 'socket_brain_apron_02')!
+    const fleshy = apron.root.getObjectByName('Reef_Brain_Fleshy_Lobophyllia')!
+    const base = fleshy.getWorldPosition(new THREE.Vector3())
+    const coralBounds = new THREE.Box3().setFromObject(fleshy, true)
+    for (const direction of [new THREE.Vector3(0, -1, 0), new THREE.Vector3(0, 0, -1)]) {
+      const ray = new THREE.Raycaster(base.clone().addScaledVector(direction, -4), direction)
+      const hit = ray.intersectObject(rockMesh, false)[0]
+      const seatingDepth = base.clone().sub(hit.point).dot(direction)
+      expect(seatingDepth).toBeGreaterThan(.06)
+      expect(seatingDepth).toBeLessThan(.18)
+    }
+    const primaryApronBounds = new THREE.Box3().setFromObject(apron.root.children[0], true)
+    expect(coralBounds.max.y).toBeLessThan(primaryApronBounds.max.y)
     const surfaceCoralObstacles = boundedFaceColonies(reef, assembled, 'reef-left')
     const navigation = await createReefMeshNavigation([{
       reef, islandId: 'reef-left', mountedCorals: assembled.mountedCorals, surfaceCoralObstacles,
@@ -890,6 +903,8 @@ async function loadActualGlb(bytes: Uint8Array) {
     const y = 0.02 * placement.foundationHeightScale
     const budget = { ...MESH_NAVIGATION_MOVEMENT_BUDGET }
     const query = navigation.meshNavigation.queryCapsule!
+    const fleshyCenter = coralBounds.getCenter(new THREE.Vector3())
+    expect(query(fleshyCenter, fleshyCenter, 0, budget)).toMatchObject({ status: 'blocked', reason: 'coral-envelope' })
     const shoulderCrown = shoulder.localToWorld(new THREE.Vector3(0, .15, 0))
     expect(query(shoulderCrown, shoulderCrown, 0, budget)).toMatchObject({ status: 'blocked', reason: 'coral-envelope' })
     const face = surfaceCoralObstacles[0].bounds
