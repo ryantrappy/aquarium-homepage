@@ -1,11 +1,11 @@
 ---
 id: AQ-106
 title: Add a Moray Eel
-status: Done
+status: In Progress
 assignee:
   - '@junie'
 created_date: '2026-11-14 20:52'
-updated_date: '2026-11-18 05:05'
+updated_date: '2026-11-22 14:23'
 labels:
   - gemini-research
   - modeling
@@ -138,6 +138,8 @@ Add the supplied snowflake moray eel (*Echidna nebulosa*) as a selectable 17th r
 - Record the actual runtime asset, bounds, animation tracks, thumbnail, hashes, PNG texture format, and a single exact-hash budget exception. Do not convert textures or treat the exception as license approval; creator/source provenance remains a Root review item.
 - Verify profile/catalog/schema, fixed motion, actual right-rock/zoanthid/sand/head-ray geometry, failure and duplicate-service fallbacks, scale, budget, and service-link behavior. Update the cataloged docs and current-scene handoff.
 - Leave the task In Progress until Root reviews the local 1440×900 result, provenance, dependencies, and final acceptance. No 402×874 browser review or deployment.
+
+Address the user's 2026-11-22 review by testing rock backing for the existing right cave with the existing talus export. Verify the back-of-cave sightline is closed and the head clearance and service visibility remain available at 1440×900.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -256,6 +258,8 @@ Root review remains required before Done. No Blender edits, deployment, or visua
 2026-11-15 follow-up: checked the repository for Playwright/Puppeteer and found no usable browser runner or browser interface in this session. Per AC 9 and the existing plan, the 1440×900 visual verification and Root art/provenance/model review remain pending; no browser acceptance is claimed.
 
 2026-11-17 Root fix & 1440x900 visual review: moved SNOWFLAKE_MORAY_CAVE_CENTER_LOCAL from x=-0.04 to x=0.02 so the exposed head capsule clears socket_brain_apron_03 across the full 11-coral right-island assembly; guarded pumpLazyLoads() on loaded and enqueued live services at initialize() completion; updated reef-mesh-navigation.test.ts to assemble all 11 DEFAULT_RIGHT_ISLAND_MOUNTS via GLTFLoader + assembleCoralsOnRockSockets. Verified 98/98 targeted tests, typecheck (17 scripts), production build, and live 1440x900 DPR1 browser review (docs/asset-evidence/aq106/root-review-20261117/).
+
+Root 2026-11-22: reused the saved taIus export to back the legacy right cave behind the partial eel. Exact GLBs verify a formerly open cave ray hits the backing behind the eel and the original exposed head capsule and camera ray stay clear. Settled native 1440×900 overview and inspection frames show the visible head and the dark recess. Browser disconnected before a fresh click-through, so retain open follow-up status. The final 1,073 tests, typecheck and production build passed. See docs/asset-evidence/aq106/cave-backing-20261122/.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

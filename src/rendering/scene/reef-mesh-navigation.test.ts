@@ -12,8 +12,9 @@ import {
   segmentIntersectsInflatedBox,
 } from './reef-mesh-navigation'
 import { DEFAULT_LEFT_ISLAND_MOUNTS, DEFAULT_RIGHT_ISLAND_MOUNTS, WIDE_ISLAND_ENCRUSTING_SITES, MODULAR_CORAL_ASSET_URLS, assembleCoralsOnRockSockets, measuredCoralShaderMargin, instantiateModularReefHabitat, LIVE_ROCK_ISLAND_URLS } from './reef-assembly'
+import { RUBBLE_TALUS_URL } from './reef-nsa'
 import { reefPlacementsForViewport } from './reef-layout'
-import { resolveSnowflakeMorayResidence, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M } from './moray-residence'
+import { createMorayCaveBacking, resolveSnowflakeMorayResidence, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M } from './moray-residence'
 import { DEFAULT_CAMERA_ZOOM_STATE } from './camera-zoom'
 import { createAragoniteSandBed, evaluateAragoniteSandElevation } from './aragonite-sand'
 import { querySweptBodyCapsule, querySweptRigidBodyCapsule } from '../../simulation/swept-body-capsule'
@@ -1013,10 +1014,14 @@ async function loadActualGlb(bytes: Uint8Array) {
     reef.rotation.y = placement.yaw
 
     const surfaceCoralObstacles = boundedFaceColonies(reef, assembled, 'reef-right')
-    const navigation = await createReefMeshNavigation([{
-      reef, islandId: 'reef-right', mountedCorals: assembled.mountedCorals, surfaceCoralObstacles,
-    }])
-    expect(navigation.status).toBe('ready')
+    const talus = await loadActualGlb(readFileSync(new URL(RUBBLE_TALUS_URL)))
+    const backing = createMorayCaveBacking(talus.scene)
+    backing.updateMatrixWorld(true)
+    const navigation = await createReefMeshNavigation([
+      { reef, islandId: 'reef-right', mountedCorals: assembled.mountedCorals, surfaceCoralObstacles },
+      { reef: backing, islandId: 'moray-cave-backing', mountedCorals: [] },
+    ])
+    expect(navigation.status, JSON.stringify(navigation.diagnostics)).toBe('ready')
     if (navigation.status !== 'ready') return
 
     const sand = createAragoniteSandBed({ textureSize: 32 })
@@ -1048,6 +1053,13 @@ async function loadActualGlb(bytes: Uint8Array) {
     try {
       expect(headRay.intersectObject(reef, true)).toHaveLength(0)
       expect(headRay.intersectObject(sand.sandMesh, false)).toHaveLength(0)
+      expect(headRay.intersectObject(backing, true)).toHaveLength(0)
+      const backingSight = new THREE.Raycaster(new THREE.Vector3(3.16, -2.44, 3), new THREE.Vector3(0, 0, -1))
+      const firstBacking = backingSight.intersectObject(backing, true)[0]
+      expect(firstBacking.point.z).toBeLessThan(residence.forebodyAxisStart.z)
+      expect(firstBacking.point.z).toBeGreaterThan(-1.6)
+      const openingHit = backingSight.intersectObject(reef, true)[0]
+      expect(openingHit === undefined || openingHit.distance > firstBacking.distance).toBe(true)
     } finally {
       sand.dispose()
     }

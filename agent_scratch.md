@@ -266,3 +266,8 @@
 ### 2026-11-21 — AQ-70.1 reference and donor audit
 *Root reviewed the retained reference work. The baseline rubric and hybrid recommendation are actioned. Exact fixture/glass coverage and donor disposition are pending.*
 - Corrected the London Aquarium image metadata, replaced the unavailable caustics page, and matched the clownfish donor link to its pinned manifest. The Mandarin donor remains unverified. The runtime sailfin still points to the study copy flagged in the asset notices while an original saved replacement exists.
+
+### 2026-11-22 — fish art feedback and moray cave backing
+*Root reviewed the retained entries. The sailfin replacement exploration is superseded by the user's instruction to retain the downloaded runtime model. The cave backing is actioned. The four other fish refinements remain pending.*
+- The default wide cave reuses a saved talus instance behind the partial eel. Laptop and inspection captures show rock behind the head. The exact-export test checks the former opening and head clearance. The isolated branch preserves concurrent user coral work.
+- The yellow tang's current material has no separate eye material. The chromis and lyretail use an opaque single skinned surface including their fin edges. The watchman goby has a full-body animated export that still needs visual diagnosis. Review the actual render before changing these assets.

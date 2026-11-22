@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import type { Vec3 } from '../../simulation/habitat-navigation'
 import { fishBodyRadiusM, fishModelScale, SNOWFLAKE_MORAY_FOREBODY_BOUNDS, SNOWFLAKE_MORAY_HEAD_BONE_BIND_POSITION } from './fish-scale'
 import type { ReefPlacement } from './reef-layout'
@@ -120,4 +121,25 @@ export function resolveAvailableSnowflakeMorayResidence(
     SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M,
   )) return undefined
   return residence
+}
+
+/** Seat the saved talus inside the rear of the wide legacy right cave. */
+export function createMorayCaveBacking(source: THREE.Object3D): THREE.Object3D {
+  const backing = source.clone(true)
+  backing.name = 'moray-cave-backing'
+  backing.position.set(3.16, -2.79, -1.48)
+  backing.rotation.y = -.08
+  backing.scale.set(3.5, 7.5, 1.2)
+  backing.traverse(node => {
+    if (!(node instanceof THREE.Mesh)) return
+    const cloneMaterial = (material: THREE.Material) => {
+      const clone = material.clone()
+      if (clone instanceof THREE.MeshStandardMaterial) clone.color.multiplyScalar(.38)
+      return clone
+    }
+    node.material = Array.isArray(node.material) ? node.material.map(cloneMaterial) : cloneMaterial(node.material)
+    node.castShadow = true
+    node.receiveShadow = true
+  })
+  return backing
 }

@@ -638,7 +638,7 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     const services = [service('moray-without-cave', 'snowflake-moray-eel')]
     await start(services)
     await vi.waitFor(() => expect(state.sources.some(source => source.getObjectByName('head'))).toBe(true))
-    await vi.waitFor(() => expect(state.reefNavigationIslandIds.at(-1)).toEqual(['reef-0', 'reef-1', 'reef-center-arch']))
+    await vi.waitFor(() => expect(state.reefNavigationIslandIds.at(-1)).toEqual(['reef-0', 'reef-1', 'reef-center-arch', 'moray-cave-backing']))
     await new Promise(resolve => setTimeout(resolve, 0))
 
     expect(state.created.some(fish => fish.id === services[0]!.id)).toBe(false)
@@ -652,7 +652,7 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     state.meshNavigationResult = readyMeshNavigation(['reef-0', 'reef-1'])
     const services = [service('moray-without-model', 'snowflake-moray-eel')]
     await start(services)
-    await vi.waitFor(() => expect(state.reefNavigationIslandIds.at(-1)).toEqual(['reef-0', 'reef-1', 'reef-center-arch']))
+    await vi.waitFor(() => expect(state.reefNavigationIslandIds.at(-1)).toEqual(['reef-0', 'reef-1', 'reef-center-arch', 'moray-cave-backing']))
     await new Promise(resolve => setTimeout(resolve, 0))
 
     expect(state.created.some(fish => fish.id === services[0]!.id)).toBe(false)
@@ -666,7 +666,7 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     const services = [service('duplicate-moray-one', 'snowflake-moray-eel'), service('duplicate-moray-two', 'snowflake-moray-eel')]
     await start(services)
     await vi.waitFor(() => expect(state.sources.some(source => source.getObjectByName('head'))).toBe(true))
-    await vi.waitFor(() => expect(state.reefNavigationIslandIds.at(-1)).toEqual(['reef-0', 'reef-1', 'reef-center-arch']))
+    await vi.waitFor(() => expect(state.reefNavigationIslandIds.at(-1)).toEqual(['reef-0', 'reef-1', 'reef-center-arch', 'moray-cave-backing']))
     await new Promise(resolve => setTimeout(resolve, 0))
 
     expect(state.created.some(fish => services.some(service => service.id === fish.id))).toBe(false)
