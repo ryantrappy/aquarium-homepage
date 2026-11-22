@@ -13,6 +13,10 @@ Downstream: Current implementation and review work
 
 Root verified prior Root-checkpoint facts against the current checkout. The latest user request (2026-11-15) limits this execution to the 18 tasks that were already In Progress at request start; do not start To Do tasks or create new tasks. This request-specific boundary supersedes the older fixed-showcase execution scope below without changing the historical release record or Backlog acceptance criteria.
 
+## Current composition after PR 60 — 2026-11-21
+
+The merged default uses the earlier two islands and center arch following `92c72a2`. The modular layout and AQ-101 face-colony work remain available in the local development build at `/?reef=nsa` and on the modular review branch. The wide-default production check below applies to that review branch.
+
 ## Default wide modular reef — 2026-11-21
 
 AQ-94 is Done. The compiled wide homepage loads seven saved NSA rock exports in one 3,956,104-byte shared-atlas GLB by default. The 1440×900 production review shows the taller left pinnacle, lower right island and measured through-arch with 13 mounted corals. The modular right ledge shelters the fixed moray with a clear exposed-head corridor. Narrow screens use the existing reef and load its foundations on demand when resizing from the wide view. Laptop production evidence is under `docs/asset-evidence/aq94/default-laptop-review/`.
