@@ -27,6 +27,8 @@ AQ-70.6 now uses one warped ridge network with a rotated intensity accent, depth
 
 AQ-70.11 now seats the green flowing torch and gold torch lower and farther into their existing ledges. The matched laptop macros show the crowns and upper skeleton cups above the rock with less of each support stem exposed. The default left formation still spans approximately 80% of the viewport height by visual estimate. The broader crest silhouette and coral coverage across the large bare faces remain open. [Laptop comparison](docs/asset-evidence/aq70-11/torch-seating-20261121/).
 
+The saved corymbose Acropora now broadens the left shoulder below the antler tip. The exact export fixture checks the stem-center seating, crown bounds and coral-envelope query. The native laptop shot retains the previous height. Branch lighting and full photographic acceptance remain open. [Crest comparison](docs/asset-evidence/aq70-11/left-crest-20261121/).
+
 ## Swept fish-body clearance — 2026-11-21
 
 AQ-58 now bounds linear sweeps by endpoint travel and verifies rigid turns along the actual orientation arc. A source-pinned blue tang clip envelope still hits the left cave wall and clears a translating quarter-turn in front water. The renderer's turning overlay and shader deformation require a combined envelope before live routing uses these checks. [Collision evidence](docs/asset-evidence/aq58/3d-collision-review.md#translating-and-turning-bodies--2026-11-21).

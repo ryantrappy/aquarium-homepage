@@ -250,3 +250,7 @@
 ### 2026-11-21 — AQ-101 default wide face colonies
 *Root reviewed retained entries. The active scope, laptop-only verification and model preservation rules are current. Torch seating and wide face-colony placement are actioned. The upper silhouette, final art and animated-body acceptance remain pending.*
 - Ten existing zoanthid mats cover the front faces of the current wide legacy islands. The selected sites passed the assembly footprint check. The exact and fallback queries consume the measured instances. The settled 1440×900 view retains the tall reef and open center, and exact export fixtures retain the cave, front turn, host and moray checks at their documented clearance sizes.
+
+### 2026-11-21 — AQ-70.11 broader left branching crest
+*Root reviewed the retained entries. The active scope, laptop review and saved asset preservation rules are current. The left crest placement is actioned. Its lighting, full coral art and continuous fish clearance remain pending.*
+- The saved corymbose Acropora replaces the smaller left companion under the antler. The stem center sits about 0.231 aquarium units below the exact rendered rock surface, and the crown extends farther left while staying below the existing highest tip. The laptop overview has zero failed assets or captured warnings. Current cave, turn and host fixtures still pass at their tested clearance sizes.

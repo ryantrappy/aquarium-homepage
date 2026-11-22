@@ -854,6 +854,19 @@ async function loadActualGlb(bytes: Uint8Array) {
     reef.scale.setScalar(placement.uniformScale)
     reef.position.copy(placement.position)
     reef.rotation.y = placement.yaw
+    reef.updateMatrixWorld(true)
+    const rockMesh = reef.children.find(node => node instanceof THREE.Mesh)!
+    const apex = assembled.mountedCorals.find(coral => coral.socketName === 'socket_sps_crest_01')!
+    const shoulder = apex.root.getObjectByName('Reef_Acropora_Corymbose')!
+    const shoulderBase = shoulder.getWorldPosition(new THREE.Vector3())
+    const down = new THREE.Raycaster(shoulderBase.clone().add(new THREE.Vector3(0, 3, 0)), new THREE.Vector3(0, -1, 0))
+    const support = down.intersectObject(rockMesh, false)[0]
+    expect(support.point.y - shoulderBase.y).toBeGreaterThan(.1)
+    expect(support.point.y - shoulderBase.y).toBeLessThan(.35)
+    const shoulderBounds = new THREE.Box3().setFromObject(shoulder, true)
+    const apexBounds = new THREE.Box3().setFromObject(apex.root.children[0], true)
+    expect(shoulderBounds.min.x).toBeLessThan(apexBounds.min.x - .3)
+    expect(shoulderBounds.max.y).toBeLessThan(apexBounds.max.y)
     const surfaceCoralObstacles = boundedFaceColonies(reef, assembled, 'reef-left')
     const navigation = await createReefMeshNavigation([{
       reef, islandId: 'reef-left', mountedCorals: assembled.mountedCorals, surfaceCoralObstacles,
@@ -877,6 +890,8 @@ async function loadActualGlb(bytes: Uint8Array) {
     const y = 0.02 * placement.foundationHeightScale
     const budget = { ...MESH_NAVIGATION_MOVEMENT_BUDGET }
     const query = navigation.meshNavigation.queryCapsule!
+    const shoulderCrown = shoulder.localToWorld(new THREE.Vector3(0, .15, 0))
+    expect(query(shoulderCrown, shoulderCrown, 0, budget)).toMatchObject({ status: 'blocked', reason: 'coral-envelope' })
     const face = surfaceCoralObstacles[0].bounds
     const faceCenter = new THREE.Vector3().copy(face.min).lerp(face.max, .5)
     expect(query(faceCenter, faceCenter, 0, budget)).toMatchObject({ status: 'blocked', reason: 'coral-envelope' })
