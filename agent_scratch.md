@@ -262,3 +262,7 @@
 ### 2026-11-21 — AQ-70.11 lower left fleshy coral
 *Root reviewed the retained entries. Local laptop review, active scope and model preservation remain current. The new left apron placement is actioned. Full photographic and animated-body acceptance remain pending.*
 - The saved Lobophyllia now fills the left apron beside the orange coral, with sampled contact from two directions and passing exact cave, host, front-turn and moray fixtures at the documented sizes. The standalone porous-rock study has a useful illustrated surface treatment. It remains in the test scene pending measured foundation and socket fit.
+
+### 2026-11-21 — AQ-70.1 reference and donor audit
+*Root reviewed the retained reference work. The baseline rubric and hybrid recommendation are actioned. Exact fixture/glass coverage and donor disposition are pending.*
+- Corrected the London Aquarium image metadata, replaced the unavailable caustics page, and matched the clownfish donor link to its pinned manifest. The Mandarin donor remains unverified. The runtime sailfin still points to the study copy flagged in the asset notices while an original saved replacement exists.
