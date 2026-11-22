@@ -207,6 +207,33 @@ The browser exposed a loader bug: HTTP `Content-Encoding: gzip` can decode fixtu
 
 Evidence: [laptop detour](detour-laptop.png), [phone cave route](cave-phone.png). Root and an independent reviewer also verified the isolated optional metric swimming adapter: 64 focused tests and typecheck pass, with continuous movement/final-arrival checks, separate metric radius, tank bounds, shared planning budgets, generation invalidation and paused immobility. A clean checkpoint without WIP coral assets passes 254 tests, typecheck and the production build.
 
+## Translating and turning bodies — 2026-11-21
+
+The swept-body query now bounds each slice using endpoint travel. A point at a fixed fraction along a linearly moving axis is displaced by the same fraction of the endpoint displacements, so the greater endpoint travel bounds the entire capsule. A translating sphere uses one exact capsule. The rigid-body query keeps the axis length fixed along a shortest arc, adding center travel and the chord distance of the endpoint from the midpoint pose. An ambiguous half-turn requires an intermediate orientation.
+
+The measured box fixtures cover off-midpoint translation in both directions and a rock reached during a 90-degree turn. At that rock, the straight endpoint chords clear while the rigid turn contacts the solid. A raised turn clears, and ambiguous input returns indeterminate. The same work budget applies across all subdivision queries.
+
+The source-pinned left reef assembly also reran with the corrected query. The basic cave probe clears, the blue tang's continuous swim-clip envelope hits the cave wall, and the same envelope clears a translating quarter-turn in front water. The clownfish approach and right moray head checks pass. These are fixed-path tests with declared capsule shapes. The animated overlay envelope and use of these queries in the live planner remain open.
+
+## Combined clip, turning and flex bounds — 2026-11-21
+
+The runtime map has 16 swimming GLBs. The offline Three.js loader reset check ran 120 advances per mapped model. Each advance matched a clean reference before the next overlay, and zero-delta Pause preserved the current pose. The continuous skinning analyzer matched the exact clip and loaded bone palette and added the per-joint roll, bend and paired fin rotation bounds. Fifteen swimming models meet the supported geometry and animation contract. The yellow tang uses multiple skinned meshes and needs a multi-mesh analysis. Fixed cave and benthic residents use separate pose paths.
+
+The flex budget adds the post-skinning displacement as a radial margin. Each envelope, mask and pulse has magnitude at most one under the current gait producer, and time smoothing is a convex interpolation. The calculation uses the loaded bind-space longitudinal extent and the aquarium's uniform scale. It covers the analytic shader formula for finite inputs. GPU flex precision, fallback artwork and fixed residents remain outside this measurement.
+
+| Fish | Axis half-length | Clip radius | Clip and turn radius | Flex margin | Combined radius |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Blue tang | 0.50 | 0.499 | 1.348 | 0.093 | 1.441 |
+| Ocellaris clownfish | 0.16 | 0.206 | 0.474 | 0.045 | 0.519 |
+
+Values are in aquarium world units. The assembled wide-left fixture reports coral-envelope overlap for the blue tang's translating front quarter-turn and the clownfish's straight approach to its host. Their clip-only radii clear those paths. These larger bounds include independent worst cases across joints, so the overlaps show where the bound cannot establish clearance. They do not locate contact on the fish mesh. Live route and probe sizes remain at their existing values.
+
+The [runtime measurements](runtime-fish-envelopes.json) include asset, producer, reset, analyzer and shader hashes. Reproduce the packet and the fixed-path check with:
+
+```sh
+AQ58_ENVELOPE_REPORT=/tmp/aq58-runtime-envelopes.json npm test -- src/rendering/scene/runtime-fish-envelope.test.ts
+npm test -- src/rendering/scene/reef-mesh-navigation.test.ts -t 'raised laptop assembly'
+```
 ## Remaining acceptance
 
 The deterministic [3D planner](../../../src/simulation/mesh-navigation.ts) and [shared-budget adapter](../../../src/simulation/mesh-habitat.ts) are now implemented and tested. `createMeshClearanceQuery` clamps each query to 4,096 node visits / 8,192 triangle tests while accounting cumulative work. Planner hard ceilings are 16,384 lattice/expanded nodes, 100,000 queries, 2,000,000 node visits and 10,000,000 triangle tests. Only clear points/edges are usable; indeterminate work is not presented as proven disconnection.

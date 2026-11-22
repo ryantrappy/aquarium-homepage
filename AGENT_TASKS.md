@@ -13,6 +13,32 @@ Downstream: Current implementation and review work
 
 Root verified prior Root-checkpoint facts against the current checkout. The latest user request (2026-11-15) limits this execution to the 18 tasks that were already In Progress at request start; do not start To Do tasks or create new tasks. This request-specific boundary supersedes the older fixed-showcase execution scope below without changing the historical release record or Backlog acceptance criteria.
 
+## Current composition after PR 60 — 2026-11-21
+
+The merged default uses the earlier two islands and center arch following `92c72a2`. The modular layout and AQ-101 face-colony work remain available in the local development build at `/?reef=nsa` and on the modular review branch. The wide-default production check below applies to that review branch.
+
+The default wide reef now also mounts five encrusting zoanthid mats on each of its two islands. Individual instance bounds reach the exact query and are contained by the fallback foundation boxes. The current 1440×900 overview and exact-asset cave, host and moray checks pass at their documented clearance sizes. [Wide reef face review](docs/asset-evidence/aq101/wide-face-colonies-20261121/).
+
+## Caustic lighting — 2026-11-21
+
+AQ-70.6 now uses one warped ridge network with a rotated intensity accent, depth filtering, and an illumination gate derived from shadowed direct diffuse. The current default scene's matched laptop comparison shows visible ridges on lit sand and a quieter floor under the rocks. Two settled frames matched after using Pause. Fixture and full optical acceptance remain open. [Laptop evidence](docs/asset-evidence/aq70-6/shadowed-caustics-laptop/).
+
+AQ-71 raises the reef material's indirect light from 0.35 to 0.70 using the existing shared environment map. At the same 1440×900 pose, encoded screen luma increases on both rock faces and the left crest. Sampled sand, cave opening, blue tang and open water pixels match the baseline. [Lighting comparison](docs/asset-evidence/aq71/reef-fill-20261121/).
+
+## Left torch seating — 2026-11-21
+
+AQ-70.11 now seats the green flowing torch and gold torch lower and farther into their existing ledges. The matched laptop macros show the crowns and upper skeleton cups above the rock with less of each support stem exposed. The default left formation still spans approximately 80% of the viewport height by visual estimate. The broader crest silhouette and coral coverage across the large bare faces remain open. [Laptop comparison](docs/asset-evidence/aq70-11/torch-seating-20261121/).
+
+The saved corymbose Acropora now broadens the left shoulder below the antler tip. The exact export fixture checks the stem-center seating, crown bounds and coral-envelope query. The native laptop shot retains the previous height. Branch lighting and full photographic acceptance remain open. [Crest comparison](docs/asset-evidence/aq70-11/left-crest-20261121/).
+
+The left apron now has a green Lobophyllia below the orange Acanthastrea. The first trial contacted the cave clearance envelope. The accepted placement sits higher and away from the passage, and the exact reef retains its prior cave, host and front-water fixtures. [Apron comparison](docs/asset-evidence/aq70-11/left-apron-20261121/).
+
+## Swept fish-body clearance — 2026-11-21
+
+AQ-58 now bounds linear sweeps by endpoint travel and verifies rigid turns along the actual orientation arc. A source-pinned blue tang clip envelope still hits the left cave wall and clears a translating quarter-turn in front water. The renderer's turning overlay and shader deformation require a combined envelope before live routing uses these checks. [Collision evidence](docs/asset-evidence/aq58/3d-collision-review.md#translating-and-turning-bodies--2026-11-21).
+
+The combined envelope review covers 15 of the 16 mapped swimmers. The current yellow tang uses multiple skinned meshes and needs a different analyzer scope. At runtime scale the blue tang's combined radius is 1.441 and the clownfish's is 0.519 aquarium units. The wide-left fixture cannot establish coral clearance for the respective front turn and host approach. Live planner integration remains pending. [Combined bounds](docs/asset-evidence/aq58/3d-collision-review.md#combined-clip-turning-and-flex-bounds--2026-11-21).
+
 ## Default wide modular reef — 2026-11-21
 
 AQ-94 is Done. The compiled wide homepage loads seven saved NSA rock exports in one 3,956,104-byte shared-atlas GLB by default. The 1440×900 production review shows the taller left pinnacle, lower right island and measured through-arch with 13 mounted corals. The modular right ledge shelters the fixed moray with a clear exposed-head corridor. Narrow screens use the existing reef and load its foundations on demand when resizing from the wide view. Laptop production evidence is under `docs/asset-evidence/aq94/default-laptop-review/`.

@@ -545,7 +545,7 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
     scale: 1.28,
     tiltXRad: 0.16,
     tiltZRad: 0.08,
-    offsetM: [0.0, -0.008, 0.0],
+    offsetM: [0.0, -0.052, -0.016],
     paletteOverride: { surfaceMode: 'baked-pbr', baseColor: '#90a75a', tipColor: '#e7e0b2', creviceColor: '#3c4630', regradeStrength: 0.35, roughness: 1, fluorescenceStrength: 0.07 },
     rigidPaletteOverride: { surfaceMode: 'baked-pbr', baseColor: '#b4aa91', tipColor: '#d4cbb6', creviceColor: '#4d4539', regradeStrength: 0.15, roughness: 1, fluorescenceStrength: 0 },
     preserveSkeletonShape: true,
@@ -559,7 +559,7 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
     scale: 1.04,
     tiltXRad: 0.15,
     tiltZRad: -0.05,
-    offsetM: [0.0, -0.008, 0.0],
+    offsetM: [0.0, -0.041, -0.012],
     paletteOverride: {
       surfaceMode: 'baked-pbr',
       baseColor: '#c97834',
@@ -933,21 +933,21 @@ const EXTRA_COMPANION_CLUSTERS_LEFT: ReadonlyArray<{
       fluorescenceStrength: 0.07,
     },
   },
-  // Secondary violet Acropora millepora cluster flanking the outer-left crest
+  // Denser branching shoulder below the tall left antler.
   {
     parentSocket: 'socket_sps_crest_01',
-    coralAssetId: 'reef-acropora-violet-millepora',
-    localOffsetM: [-0.055, -0.022, 0.022],
-    yawRad: -0.52,
+    coralAssetId: 'reef-acropora-corymbose',
+    localOffsetM: [-0.085, -0.052, 0.031],
+    yawRad: 0.12,
     tiltXRad: 0.06,
-    tiltZRad: 0.08,
-    scale: 0.58,
+    tiltZRad: 0.14,
+    scale: 0.89,
     paletteOverride: {
       surfaceMode: 'baked-pbr',
-      baseColor: '#7a52a8',
-      tipColor: '#d4b8f0',
-      creviceColor: '#2d1844',
-      regradeStrength: 0.36,
+      baseColor: '#875e9d',
+      tipColor: '#d8bcf2',
+      creviceColor: '#352342',
+      regradeStrength: 0.62,
       roughness: 1,
       fluorescenceStrength: 0.08,
     },
@@ -971,34 +971,24 @@ const EXTRA_COMPANION_CLUSTERS_LEFT: ReadonlyArray<{
       fluorescenceStrength: 0.12,
     },
   },
-  // Palythoa button cluster creeping along the lower-right Acanthastrea apron
+  // Fleshy Lobophyllia below the inside apron, above the sand.
   {
     parentSocket: 'socket_brain_apron_02',
-    coralAssetId: 'reef-zoanthid-palythoa-cluster',
-    localOffsetM: [0.052, -0.014, 0.018],
-    yawRad: -0.48,
-    tiltXRad: 0.08,
+    coralAssetId: 'reef-brain-fleshy-lobophyllia',
+    localOffsetM: [-0.115, -0.017, 0.045],
+    yawRad: 0.18,
+    tiltXRad: 0.16,
     tiltZRad: -0.04,
-    scale: 0.52,
+    scale: 0.75,
     paletteOverride: {
       surfaceMode: 'baked-pbr',
-      baseColor: '#2ea888',
-      tipColor: '#9cf264',
-      creviceColor: '#163830',
-      regradeStrength: 0.34,
+      baseColor: '#6e884a',
+      tipColor: '#c6dd7b',
+      creviceColor: '#33361e',
+      regradeStrength: 0.65,
       roughness: 1,
       fluorescenceStrength: 0.10,
     },
-    rigidPaletteOverride: {
-      surfaceMode: 'baked-pbr',
-      baseColor: '#6b5e54',
-      tipColor: '#94867a',
-      creviceColor: '#2e2722',
-      regradeStrength: 0.20,
-      roughness: 1,
-      fluorescenceStrength: 0,
-    },
-    preserveSkeletonShape: true,
   },
 ]
 
@@ -1586,6 +1576,21 @@ export const MODULAR_CORAL_VARIATION_LIBRARY: readonly CoralVariationSpec[] = Ob
 
 export type EncrustingFaceSite = readonly [u: number, v: number, scale?: number]
 
+// Wide legacy islands use different faces after the foundation rise.
+export const WIDE_ISLAND_ENCRUSTING_SITES: Readonly<Record<'left' | 'right', readonly EncrustingFaceSite[]>> = {
+  left: [
+    [.55, .48, .40], [.46, .57, .40], [.32, .52, .32], [.28, .24, .32], [.76, .42, .32],
+  ],
+  right: [
+    [.70, .63, .40], [.34, .63, .40], [.64, .38, .32], [.48, .44, .32], [.76, .30, .32],
+  ],
+}
+
+type EncrustingOptions = {
+  encrustingFaceSites?: readonly EncrustingFaceSite[]
+  retainSocketScatter?: boolean
+}
+
 // Front-facing encrusting patches hug the measured surface. Probe the footprint
 // as well as its center so an overhang or a hole cannot leave a floating mat.
 function sampleEncrustingFaces(
@@ -1629,8 +1634,8 @@ function sampleEncrustingFaces(
     const center = probe(x, y)
     if (!center || occupied.some(socket => socket.distanceTo(center.point) < 0.093)
       || patches.some(patch => patch.position.distanceTo(center.point) < 0.12)) continue
-    // For the authored mat, bound the footprint from the exported 0.244 ×
-    // 0.174 m base. The legacy scatter keeps its earlier sampling radius.
+    // Sample around the authored placement using the exported mat footprint.
+    // The automatic scatter keeps its earlier sampling radius.
     const supportRadius = authoredScale === undefined ? .021 : .158 * authoredScale
     const supported = [[-supportRadius, 0], [supportRadius, 0], [0, -supportRadius], [0, supportRadius]].every(([dx, dy]) => {
       const edge = probe(x + dx, y + dy)
@@ -1659,7 +1664,7 @@ function buildInstancedCoralScatters(
   mounts: readonly ModularCoralMountEntry[],
   socketNodes: ReadonlyMap<string, THREE.Object3D>,
   foundationMeshes: THREE.Mesh[],
-  options: { paused?: boolean; reducedMotion?: boolean; actinicLevel?: number; encrustingFaceSites?: readonly EncrustingFaceSite[] } | undefined,
+  options: ({ paused?: boolean; reducedMotion?: boolean; actinicLevel?: number } & EncrustingOptions) | undefined,
   materialControllers: Array<ReturnType<typeof applyCoralRawMaskMaterial>>,
   geometryBindings: CoralMaterialBoundBinding[],
 ): THREE.InstancedMesh[] {
@@ -1681,7 +1686,7 @@ function buildInstancedCoralScatters(
   >()
 
   const dummy = new THREE.Object3D()
-  const companionMounts = options?.encrustingFaceSites ? [] : mounts
+  const companionMounts = options?.encrustingFaceSites && !options.retainSocketScatter ? [] : mounts
   companionMounts.forEach((mount, idx) => {
     const socketNode = socketNodes.get(mount.socketName)
     if (!socketNode) return
@@ -1713,7 +1718,8 @@ function buildInstancedCoralScatters(
   })
 
   const matAssetId = 'coral-zoanthid-mat'
-  const zoanthids = scatterGroups.get(matAssetId) ?? []
+  const faceGroupId = options?.encrustingFaceSites ? 'encrusting-face' : matAssetId
+  const zoanthids = scatterGroups.get(faceGroupId) ?? []
   if ((options?.encrustingFaceSites || zoanthids.length > 0) && coralTemplates.has(matAssetId) && foundationMeshes.length > 0) {
     const occupied = [...socketNodes.values()].map(socket => socket.position)
     for (const patch of sampleEncrustingFaces(rockRoot, foundationMeshes, occupied, options?.encrustingFaceSites)) {
@@ -1723,10 +1729,12 @@ function buildInstancedCoralScatters(
         rimTint: zoanthids[0]?.rimTint ?? 'cyan',
       })
     }
-    if (zoanthids.length) scatterGroups.set(matAssetId, zoanthids)
+    if (zoanthids.length) scatterGroups.set(faceGroupId, zoanthids)
   }
 
-  for (const [assetId, placements] of scatterGroups.entries()) {
+  for (const [groupId, placements] of scatterGroups.entries()) {
+    const isAuthoredFace = groupId === 'encrusting-face'
+    const assetId = isAuthoredFace ? matAssetId : groupId
     const template = coralTemplates.get(assetId)
     if (!template || placements.length === 0) continue
     template.traverse(child => {
@@ -1757,8 +1765,9 @@ function buildInstancedCoralScatters(
       materialControllers.push(binding)
 
       const instanced = new THREE.InstancedMesh(child.geometry, binding.material, placements.length)
-      instanced.name = `instanced_${assetId}_${child.name}`
+      instanced.name = `instanced_${groupId}_${child.name}`
       instanced.userData.reefPrimitive = { ...reefPrimitive, role }
+      if (isAuthoredFace) instanced.userData.encrustingFace = true
       instanced.castShadow = true
       instanced.receiveShadow = true
       instanced.customDepthMaterial = binding.depthMaterial
@@ -1811,8 +1820,7 @@ export function assembleCoralsOnRockSockets(
     preserveAuthoredRock?: boolean
     foundationHeightScale?: number
     includeScatter?: boolean
-    encrustingFaceSites?: readonly EncrustingFaceSite[]
-  },
+  } & EncrustingOptions,
 ): {
   mountedCorals: AssembledCoralBinding[]
   instancedMeshes: THREE.InstancedMesh[]

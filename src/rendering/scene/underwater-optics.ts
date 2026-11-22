@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { evaluateSurfaceFocus, evaluateSurfaceHeight } from './surface-waves'
+import { evaluateSurfaceFocus, evaluateSurfaceHeight, evaluateSurfaceSlope } from './surface-waves'
 
 /**
  * Pure-water absorption coefficients (m^-1) from Pope & Fry (1997) at representative
@@ -418,32 +418,13 @@ export function evaluateCausticIntensity(
   return surfaceMask * (1 + cfg.causticModulationAmplitude * waveInterference)
 }
 
+export const CAUSTIC_SAMPLE_WARP = 2.4
+
 /**
- * Evaluates the two scrolled world-space UV pairs that sample the caustic
- * texture in `caustics.ts` (`AQ-14.2` AC #2). The layers scroll in opposite
- * directions at the existing optics frequencies (0.22 Hz and 0.37 Hz); the
- * 0.10 / 0.06 and 0.08 / 0.05 factors are the UV drift per cycle, so the
- * pattern moves slowly rather than panning across the tank. Freezes at the
- * static t=0 UVs when `paused` or `reducedMotion` is active, exactly like
- * `evaluateCausticIntensity`. The GLSL in `caustics.ts` mirrors these
- * constants; keep the two in sync.
- *
- * With `options.slant` (worldY of the fragment + sun direction), the UVs
- * are projected from the surface point the light actually passed through:
- * `surfacePoint = xz + sunDir.xz * (surfaceY - y) / sunDir.y`, so the
- * dapple on tall rock and high coral shifts along the light direction
- * and lines up with the shafts above it. The return also carries the
- * shared wave-field focus at that surface point (`focus`, in [-1, 1]),
- * which the shader multiplies the pattern by — this is the coupling
- * that makes the dapple breathe with the surface. Without `slant` the
- * legacy vertical projection is returned (UVs from world XZ directly),
- * which is what the existing tests cover.
- *
- * Note on the two clocks: the caustic scroll rates (0.22 / 0.37 Hz) are
- * deliberately NOT equated to the wave field's dispersion frequencies
- * (0.66–1.49 Hz) — equating them would make the dapple scroll visibly
- * too fast. The scroll is the slow envelope; the coupling to the surface
- * is the shared frozen clock plus the focus term, not a shared frequency.
+ * CPU reference for the caustic texture coordinates and shared wave focus.
+ * Samples the light's surface footpoint when given a fragment height.
+ * Wave slope bends the primary ridges, while the counter-scrolling
+ * secondary layer samples a rotated field to vary ridge intensity.
  */
 export function evaluateCausticPatternUV(
   worldX: number,
@@ -476,21 +457,24 @@ export function evaluateCausticPatternUV(
   if (options?.slant) {
     const sunDir = options.slant.sunDir ?? cfg.sunDirection
     const surfaceY = options.slant.surfaceY ?? cfg.surfaceY
-    const dist = (surfaceY - options.slant.worldY) / Math.max(sunDir.y, 0.2)
+    const dist = Math.max(0, surfaceY - options.slant.worldY) / Math.max(sunDir.y, 0.2)
     surfacePoint = {
       x: worldX + sunDir.x * dist,
       z: worldZ + sunDir.z * dist,
     }
   }
   const focus = evaluateSurfaceFocus(surfacePoint.x, surfacePoint.z, effectiveTime)
+  const slope = evaluateSurfaceSlope(surfacePoint.x, surfacePoint.z, effectiveTime)
+  const warp = { x: slope.x * CAUSTIC_SAMPLE_WARP, z: slope.z * CAUSTIC_SAMPLE_WARP }
+  const accent = { x: surfacePoint.x - warp.x * .85, z: surfacePoint.z - warp.z * .85 }
   return {
     a: {
-      u: surfacePoint.x * cfg.causticTextureScaleA + effectiveTime * cfg.causticPrimaryHz * 0.1,
-      v: surfacePoint.z * cfg.causticTextureScaleA - effectiveTime * cfg.causticPrimaryHz * 0.06,
+      u: (surfacePoint.x + warp.x) * cfg.causticTextureScaleA + effectiveTime * cfg.causticPrimaryHz * 0.1,
+      v: (surfacePoint.z + warp.z) * cfg.causticTextureScaleA - effectiveTime * cfg.causticPrimaryHz * 0.06,
     },
     b: {
-      u: surfacePoint.x * cfg.causticTextureScaleB - effectiveTime * cfg.causticSecondaryHz * 0.08,
-      v: surfacePoint.z * cfg.causticTextureScaleB + effectiveTime * cfg.causticSecondaryHz * 0.05,
+      u: (accent.x * .8 + accent.z * .6) * cfg.causticTextureScaleB - effectiveTime * cfg.causticSecondaryHz * 0.08,
+      v: (-accent.x * .6 + accent.z * .8) * cfg.causticTextureScaleB + effectiveTime * cfg.causticSecondaryHz * 0.05,
     },
     surfacePoint,
     focus,

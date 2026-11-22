@@ -5,17 +5,18 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import {
   createMountedCoralFallbackObstacles,
   createRockFallbackObstacles,
+  createSurfaceCoralObstacles,
   createReefMeshNavigation,
   MESH_NAVIGATION_COLLISION_RADIUS_M,
   MESH_NAVIGATION_MOVEMENT_BUDGET,
   segmentIntersectsInflatedBox,
 } from './reef-mesh-navigation'
-import { DEFAULT_LEFT_ISLAND_MOUNTS, DEFAULT_RIGHT_ISLAND_MOUNTS, MODULAR_CORAL_ASSET_URLS, assembleCoralsOnRockSockets, measuredCoralShaderMargin, instantiateModularReefHabitat, LIVE_ROCK_ISLAND_URLS } from './reef-assembly'
+import { DEFAULT_LEFT_ISLAND_MOUNTS, DEFAULT_RIGHT_ISLAND_MOUNTS, WIDE_ISLAND_ENCRUSTING_SITES, MODULAR_CORAL_ASSET_URLS, assembleCoralsOnRockSockets, measuredCoralShaderMargin, instantiateModularReefHabitat, LIVE_ROCK_ISLAND_URLS } from './reef-assembly'
 import { reefPlacementsForViewport } from './reef-layout'
 import { resolveSnowflakeMorayResidence, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M } from './moray-residence'
 import { DEFAULT_CAMERA_ZOOM_STATE } from './camera-zoom'
 import { createAragoniteSandBed, evaluateAragoniteSandElevation } from './aragonite-sand'
-import { querySweptBodyCapsule } from '../../simulation/swept-body-capsule'
+import { querySweptBodyCapsule, querySweptRigidBodyCapsule } from '../../simulation/swept-body-capsule'
 import { createFishClipPlayer } from './fish-animation'
 import { MODEL_SWIM_AXIS_LENGTH, fishModelScale, fishRenderLength } from './fish-scale'
 import { mountedAnemoneHosts } from './anemone-host'
@@ -83,6 +84,70 @@ it('cannot treat a padded body-sweep overlap as proven contact', () => {
   expect(querySweptBodyCapsule(paddingOnly, from, to, .04, MESH_NAVIGATION_MOVEMENT_BUDGET)).toMatchObject({
     status: 'indeterminate', reason: 'body-sweep-resolution',
   })
+})
+
+it.each([.03, 0])('detects off-midpoint tunneling with axis half-length %s', async halfAxis => {
+  const reef = new THREE.Group()
+  const rock = boxRock(.14)
+  rock.position.set(-.65, 0, 0)
+  reef.add(rock)
+  const navigation = await createReefMeshNavigation([{ reef, islandId: 'off-center-sweep', mountedCorals: [] }])
+  expect(navigation.status).toBe('ready')
+  if (navigation.status !== 'ready') return
+  const query = navigation.meshNavigation.queryCapsule!
+  const budget = MESH_NAVIGATION_MOVEMENT_BUDGET
+  const axisAt = (x: number) => ({ tail: p(x, 0, -halfAxis), nose: p(x, 0, halfAxis) })
+  const from = axisAt(-1)
+  const to = axisAt(1)
+  for (const x of [-1, 0, 1]) {
+    const axis = axisAt(x)
+    expect(query(axis.tail, axis.nose, .04, budget).status).toBe('clear')
+  }
+  expect(querySweptBodyCapsule(query, from, to, .04, budget).status).toBe('blocked')
+  expect(querySweptBodyCapsule(query, to, from, .04, budget).status).toBe('blocked')
+})
+
+it('encloses every endpoint of a long translation before returning clear', () => {
+  const calls: { start: P; end: P; radius: number }[] = []
+  const result = querySweptBodyCapsule((start, end, radius) => {
+    calls.push({ start, end, radius })
+    return { status: 'clear', work: { nodeVisits: 1, triangleTests: 1 } }
+  }, { tail: p(-1, 0, -.03), nose: p(-1, 0, .03) },
+  { tail: p(1, 0, -.03), nose: p(1, 0, .03) }, .04, MESH_NAVIGATION_MOVEMENT_BUDGET)
+  expect(result.status).toBe('clear')
+  expect(calls).toHaveLength(1)
+  const [{ start, end, radius }] = calls
+  const checkedAxis = new THREE.Line3(new THREE.Vector3(start.x, start.y, start.z), new THREE.Vector3(end.x, end.y, end.z))
+  for (const x of [-1, 1]) {
+    for (const z of [-.03, .03]) {
+      const endpoint = new THREE.Vector3(x, 0, z)
+      const nearest = checkedAxis.closestPointToPoint(endpoint, true, new THREE.Vector3())
+      expect(nearest.distanceTo(endpoint) + .04).toBeLessThanOrEqual(radius + 1e-12)
+    }
+  }
+})
+
+it('checks the rigid turn arc that the endpoint chords miss', async () => {
+  const reef = new THREE.Group()
+  const rock = boxRock(.10)
+  rock.position.set(.7, 0, .7)
+  reef.add(rock)
+  const navigation = await createReefMeshNavigation([{ reef, islandId: 'rigid-turn', mountedCorals: [] }])
+  expect(navigation.status).toBe('ready')
+  if (navigation.status !== 'ready') return
+  const query = navigation.meshNavigation.queryCapsule!
+  const budget = MESH_NAVIGATION_MOVEMENT_BUDGET
+  const from = { center: p(0, 0, 0), forward: p(0, 0, 1) }
+  const to = { center: p(0, 0, 0), forward: p(1, 0, 0) }
+  const fromAxis = { tail: p(0, 0, -1), nose: p(0, 0, 1) }
+  const toAxis = { tail: p(-1, 0, 0), nose: p(1, 0, 0) }
+  expect(querySweptBodyCapsule(query, fromAxis, toAxis, .04, budget).status).toBe('clear')
+  expect(querySweptRigidBodyCapsule(query, from, to, 1, .04, budget).status).toBe('blocked')
+  expect(querySweptRigidBodyCapsule(query, to, from, 1, .04, budget).status).toBe('blocked')
+  const raised = ({ forward }: typeof from) => ({ center: p(0, .4, 0), forward })
+  expect(querySweptRigidBodyCapsule(query, raised(from), raised(to), 1, .04, budget).status).toBe('clear')
+  expect(querySweptRigidBodyCapsule(query, from, { ...to, forward: p(0, 0, -1) }, 1, .04, budget))
+    .toMatchObject({ status: 'indeterminate', reason: 'ambiguous-body-turn' })
 })
 
 function boxCoral(center: P, size = 0.2): THREE.Group {
@@ -755,6 +820,23 @@ async function loadActualGlb(bytes: Uint8Array) {
     return certificate.activeEnvelope.capsule!.radiusM
   }
 
+  function boundedFaceColonies(reef: THREE.Object3D, assembled: ReturnType<typeof assembleCoralsOnRockSockets>, islandId: string) {
+    const surfaceBatches = assembled.instancedMeshes.filter(batch => batch.userData.encrustingFace)
+    expect(assembled.instancedMeshes.length).toBeGreaterThan(surfaceBatches.length)
+    const colonies = createSurfaceCoralObstacles(surfaceBatches, islandId)
+    expect(colonies).toHaveLength(5)
+    const fallback = createRockFallbackObstacles(reef, islandId, colonies)
+    expect(fallback.status).toBe('ready')
+    if (fallback.status !== 'ready') throw new Error(fallback.reason)
+    const bounds = fallback.obstacles[0].bounds
+    const envelope = new THREE.Box3(new THREE.Vector3().copy(bounds.min), new THREE.Vector3().copy(bounds.max))
+    for (const colony of colonies) {
+      expect(envelope.containsPoint(new THREE.Vector3().copy(colony.bounds.min))).toBe(true)
+      expect(envelope.containsPoint(new THREE.Vector3().copy(colony.bounds.max))).toBe(true)
+    }
+    return colonies
+  }
+
   it('checks fitted fish bodies against the cave and host in the raised laptop assembly', async () => {
     const placement = reefPlacementsForViewport(false).find(item => item.islandKind === 'left')!
     const { scene: reef } = await loadActualGlb(readFileSync(new URL(LIVE_ROCK_ISLAND_URLS.left)))
@@ -765,12 +847,43 @@ async function loadActualGlb(bytes: Uint8Array) {
     }
     const assembled = assembleCoralsOnRockSockets(reef, coralTemplates, DEFAULT_LEFT_ISLAND_MOUNTS, {
       foundationHeightScale: placement.foundationHeightScale,
+      encrustingFaceSites: WIDE_ISLAND_ENCRUSTING_SITES.left,
+      retainSocketScatter: true,
     })
     expect(assembled.mountedCorals).toHaveLength(DEFAULT_LEFT_ISLAND_MOUNTS.length)
     reef.scale.setScalar(placement.uniformScale)
     reef.position.copy(placement.position)
     reef.rotation.y = placement.yaw
-    const navigation = await createReefMeshNavigation([{ reef, islandId: 'reef-left', mountedCorals: assembled.mountedCorals }])
+    reef.updateMatrixWorld(true)
+    const rockMesh = reef.children.find(node => node instanceof THREE.Mesh)!
+    const apex = assembled.mountedCorals.find(coral => coral.socketName === 'socket_sps_crest_01')!
+    const shoulder = apex.root.getObjectByName('Reef_Acropora_Corymbose')!
+    const shoulderBase = shoulder.getWorldPosition(new THREE.Vector3())
+    const down = new THREE.Raycaster(shoulderBase.clone().add(new THREE.Vector3(0, 3, 0)), new THREE.Vector3(0, -1, 0))
+    const support = down.intersectObject(rockMesh, false)[0]
+    expect(support.point.y - shoulderBase.y).toBeGreaterThan(.1)
+    expect(support.point.y - shoulderBase.y).toBeLessThan(.35)
+    const shoulderBounds = new THREE.Box3().setFromObject(shoulder, true)
+    const apexBounds = new THREE.Box3().setFromObject(apex.root.children[0], true)
+    expect(shoulderBounds.min.x).toBeLessThan(apexBounds.min.x - .3)
+    expect(shoulderBounds.max.y).toBeLessThan(apexBounds.max.y)
+    const apron = assembled.mountedCorals.find(coral => coral.socketName === 'socket_brain_apron_02')!
+    const fleshy = apron.root.getObjectByName('Reef_Brain_Fleshy_Lobophyllia')!
+    const base = fleshy.getWorldPosition(new THREE.Vector3())
+    const coralBounds = new THREE.Box3().setFromObject(fleshy, true)
+    for (const direction of [new THREE.Vector3(0, -1, 0), new THREE.Vector3(0, 0, -1)]) {
+      const ray = new THREE.Raycaster(base.clone().addScaledVector(direction, -4), direction)
+      const hit = ray.intersectObject(rockMesh, false)[0]
+      const seatingDepth = base.clone().sub(hit.point).dot(direction)
+      expect(seatingDepth).toBeGreaterThan(.06)
+      expect(seatingDepth).toBeLessThan(.18)
+    }
+    const primaryApronBounds = new THREE.Box3().setFromObject(apron.root.children[0], true)
+    expect(coralBounds.max.y).toBeLessThan(primaryApronBounds.max.y)
+    const surfaceCoralObstacles = boundedFaceColonies(reef, assembled, 'reef-left')
+    const navigation = await createReefMeshNavigation([{
+      reef, islandId: 'reef-left', mountedCorals: assembled.mountedCorals, surfaceCoralObstacles,
+    }])
     expect(navigation.status).toBe('ready')
     if (navigation.status !== 'ready') return
     expect(navigation.diagnostics.islands[0]).toMatchObject({
@@ -790,6 +903,13 @@ async function loadActualGlb(bytes: Uint8Array) {
     const y = 0.02 * placement.foundationHeightScale
     const budget = { ...MESH_NAVIGATION_MOVEMENT_BUDGET }
     const query = navigation.meshNavigation.queryCapsule!
+    const fleshyCenter = coralBounds.getCenter(new THREE.Vector3())
+    expect(query(fleshyCenter, fleshyCenter, 0, budget)).toMatchObject({ status: 'blocked', reason: 'coral-envelope' })
+    const shoulderCrown = shoulder.localToWorld(new THREE.Vector3(0, .15, 0))
+    expect(query(shoulderCrown, shoulderCrown, 0, budget)).toMatchObject({ status: 'blocked', reason: 'coral-envelope' })
+    const face = surfaceCoralObstacles[0].bounds
+    const faceCenter = new THREE.Vector3().copy(face.min).lerp(face.max, .5)
+    expect(query(faceCenter, faceCenter, 0, budget)).toMatchObject({ status: 'blocked', reason: 'coral-envelope' })
     function probeAtX(x: number) {
       const start = reef.localToWorld(new THREE.Vector3(x, y, -0.36))
       const end = reef.localToWorld(new THREE.Vector3(x, y, 0.36))
@@ -814,6 +934,28 @@ async function loadActualGlb(bytes: Uint8Array) {
     const frontPose = (x: number) => ({ tail: p(x - halfAxis, 1.65, 1.9), nose: p(x + halfAxis, 1.65, 1.9) })
     const frontSweep = querySweptBodyCapsule(query, frontPose(-.6), frontPose(.5), radius, budget)
     expect(frontSweep.status).toBe('clear')
+    const frontTurn = querySweptRigidBodyCapsule(
+      query,
+      { center: p(-.6, 1.65, 1.9), forward: p(1, 0, 0) },
+      { center: p(.5, 1.65, 1.9), forward: p(0, 0, 1) },
+      halfAxis, radius, budget,
+    )
+    expect(frontTurn.status).toBe('clear')
+
+    const measuredBodies = JSON.parse(readFileSync(new URL(
+      '../../../docs/asset-evidence/aq58/runtime-fish-envelopes.json', import.meta.url), 'utf8')).measurements
+    const blueBody = measuredBodies.find((body: { id: string }) => body.id === 'blue-tang')
+    expect(blueBody).toMatchObject({
+      status: 'bounded', capsuleHalfAxisM: halfAxis, clipRadiusM: radius,
+      sourceSha256: 'de1aaf4fcbc72b82749190e4047d26a226cd2d987bee8ef06f50849aac36fc9e',
+    })
+    const fullFrontTurn = querySweptRigidBodyCapsule(
+      query,
+      { center: p(-.6, 1.65, 1.9), forward: p(1, 0, 0) },
+      { center: p(.5, 1.65, 1.9), forward: p(0, 0, 1) },
+      halfAxis, blueBody.combinedRadiusM, budget,
+    )
+    expect(fullFrontTurn).toMatchObject({ status: 'blocked', reason: 'coral-envelope' })
 
     const clownHalfAxis = .16
     const clownUrl = new URL('../assets/fish/download_testing_copies/clownfish-copy.glb', import.meta.url)
@@ -832,6 +974,15 @@ async function loadActualGlb(bytes: Uint8Array) {
     expect(querySweptBodyCapsule(residentQuery, approachPose(0, .4), approachPose(0, 0), clownRadius, budget).status).toBe('clear')
     expect(querySweptBodyCapsule(residentQuery, approachPose(Math.PI / 2, .4), approachPose(Math.PI / 2, 0), clownRadius, budget).status).toBe('clear')
     expect(querySweptBodyCapsule(residentQuery, approachPose(0, .4), approachPose(0, 0), clownClipRadius, budget).status).toBe('clear')
+    const clownBody = measuredBodies.find((body: { id: string }) => body.id === 'ocellaris-clownfish')
+    expect(clownBody).toMatchObject({
+      status: 'bounded', capsuleHalfAxisM: clownHalfAxis, clipRadiusM: clownClipRadius,
+      sourceSha256: 'be6e9cbd2b5b6a76d5204f3a140ae7538a0115e6a067dcbabd0dfd1a273db7ac',
+    })
+    const fullHostApproach = querySweptBodyCapsule(
+      residentQuery, approachPose(0, .4), approachPose(0, 0), clownBody.combinedRadiusM, budget,
+    )
+    expect(fullHostApproach).toMatchObject({ status: 'blocked', reason: 'coral-envelope' })
   }, 120_000)
 
   it('clears the exposed moray head at its fixed right-cave mouth across the full assembled right island and sand', async () => {
@@ -845,9 +996,14 @@ async function loadActualGlb(bytes: Uint8Array) {
       coralTemplates.set(mount.coralAssetId, (await loadActualGlb(readFileSync(new URL(coralUrl)))).scene)
     }
 
+    const matUrl = MODULAR_CORAL_ASSET_URLS['coral-zoanthid-mat']
+    coralTemplates.set('coral-zoanthid-mat', (await loadActualGlb(readFileSync(new URL(matUrl)))).scene)
+
     const reef = rockGltf.scene.clone(true)
     const assembled = assembleCoralsOnRockSockets(reef, coralTemplates, DEFAULT_RIGHT_ISLAND_MOUNTS, {
       foundationHeightScale: placement.foundationHeightScale,
+      encrustingFaceSites: WIDE_ISLAND_ENCRUSTING_SITES.right,
+      retainSocketScatter: true,
       paused: false,
       reducedMotion: false,
       actinicLevel: 0.5,
@@ -856,7 +1012,10 @@ async function loadActualGlb(bytes: Uint8Array) {
     reef.position.set(placement.position.x, placement.position.y, placement.position.z)
     reef.rotation.y = placement.yaw
 
-    const navigation = await createReefMeshNavigation([{ reef, islandId: 'reef-right', mountedCorals: assembled.mountedCorals }])
+    const surfaceCoralObstacles = boundedFaceColonies(reef, assembled, 'reef-right')
+    const navigation = await createReefMeshNavigation([{
+      reef, islandId: 'reef-right', mountedCorals: assembled.mountedCorals, surfaceCoralObstacles,
+    }])
     expect(navigation.status).toBe('ready')
     if (navigation.status !== 'ready') return
 

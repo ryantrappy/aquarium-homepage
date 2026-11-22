@@ -1,0 +1,136 @@
+{
+  "pixelSize": [
+    1440,
+    900
+  ],
+  "regions": {
+    "crest": {
+      "rectangleXYWH": [
+        190,
+        135,
+        212,
+        140
+      ],
+      "meanEncodedLuma": [
+        36.0938,
+        42.8663
+      ],
+      "changedPixelFractionFromBaseline": [
+        0.0,
+        0.5343
+      ]
+    },
+    "left face": {
+      "rectangleXYWH": [
+        350,
+        477,
+        97,
+        234
+      ],
+      "meanEncodedLuma": [
+        34.615,
+        46.3037
+      ],
+      "changedPixelFractionFromBaseline": [
+        0.0,
+        0.9971
+      ]
+    },
+    "right face": {
+      "rectangleXYWH": [
+        1110,
+        599,
+        110,
+        125
+      ],
+      "meanEncodedLuma": [
+        29.7752,
+        39.5246
+      ],
+      "changedPixelFractionFromBaseline": [
+        0.0,
+        1.0
+      ]
+    },
+    "arch": {
+      "rectangleXYWH": [
+        701,
+        523,
+        52,
+        25
+      ],
+      "meanEncodedLuma": [
+        13.0616,
+        15.2874
+      ],
+      "changedPixelFractionFromBaseline": [
+        0.0,
+        0.1862
+      ]
+    },
+    "cave": {
+      "rectangleXYWH": [
+        392,
+        788,
+        39,
+        13
+      ],
+      "meanEncodedLuma": [
+        61.9793,
+        61.9793
+      ],
+      "changedPixelFractionFromBaseline": [
+        0.0,
+        0.0
+      ]
+    },
+    "sand": {
+      "rectangleXYWH": [
+        809,
+        839,
+        89,
+        28
+      ],
+      "meanEncodedLuma": [
+        150.8164,
+        150.8164
+      ],
+      "changedPixelFractionFromBaseline": [
+        0.0,
+        0.0
+      ]
+    },
+    "blue tang": {
+      "rectangleXYWH": [
+        1017,
+        183,
+        109,
+        26
+      ],
+      "meanEncodedLuma": [
+        59.3989,
+        59.3989
+      ],
+      "changedPixelFractionFromBaseline": [
+        0.0,
+        0.0
+      ]
+    },
+    "water": {
+      "rectangleXYWH": [
+        708,
+        176,
+        150,
+        102
+      ],
+      "meanEncodedLuma": [
+        33.0149,
+        33.0149
+      ],
+      "changedPixelFractionFromBaseline": [
+        0.0,
+        0.0
+      ]
+    }
+  }
+}

@@ -227,3 +227,42 @@
 ### 2026-11-21 — AQ-101 modular face colonies
 *Root reviewed the retained entries. Active scope, local/laptop review and saved asset preservation are current policy. The ten colony placements are actioned. Final photographic and animated-body acceptance remains pending.*
 - The default wide layout mounts ten existing zoanthid mats on four exact module faces, with no Blender or asset changes. Early unsupported placements were rejected. Each accepted instance is bounded for mesh routing and included in its foundation's fallback bounds. The staged laptop capture and canyon, goby, clownfish and moray tests retain the earlier routes.
+
+*Root resume review 2026-11-21: retained entries inspected. Review branch verification is actioned. The merged default has returned to the earlier islands and center arch at `92c72a2`; preceding notes on the modular wide default describe the review branch. AQ-101 remains pending photographic and animated-body acceptance.*
+
+### 2026-11-21 — AQ-70.6 shadowed caustics
+*Root reviewed the retained entries. The local/laptop-only scope and model preservation remain current. The caustic shader update is actioned. Fixture and full optical acceptance remain pending.*
+- The current default uses one bent cellular ridge network with a rotated brightness accent, depth filtering, and illumination gating. The render and CPU projection share wave slope and slant. Laptop before/after, two active phases and identical settled Pause frames are recorded under `docs/asset-evidence/aq70-6/shadowed-caustics-laptop/`.
+
+### 2026-11-21 — AQ-58 swept fish-body clearance
+*Root reviewed the retained entries. Active scope and saved asset preservation are current. The endpoint and rigid-turn sweep corrections are actioned. Live envelope and route integration remain pending.*
+- Endpoint travel now controls the slice padding, and the rigid helper keeps a fixed-length capsule through its orientation arc. The exact left assembly still blocks the blue tang's clip envelope in the cave and clears a translating turn in front water. The checked-in visuals and runtime probe sizes were preserved.
+
+### 2026-11-21 — AQ-58 combined fish envelope and candidate asset triage
+*Root reviewed retained entries. Active scope, local laptop review and saved asset preservation remain current. The combined fish bound and mounted left-reef queries are actioned. Animation-aware live routing and candidate art acceptance remain pending.*
+- Runtime clip reset passes for all 16 mapped swimmers. Fifteen have offline clip, turn and flex budgets at render scale. The yellow tang spans multiple skinned meshes and is outside the current analyzer. The blue tang front turn and clownfish host approach report coral-envelope overlap with the combined bounds. No live navigation was changed.
+- Candidate triage confirmed the custom coral catalog is in the current reef wiring and the NSA kit is available via the development preview. Invertebrates load through the configured-species path. The porous procedural rock remains on the test scene. Current visual priority is the newly authored corals on the default wide scene.
+
+### 2026-11-21 — AQ-70.11 left torch seating
+*Root reviewed the retained entries. Active scope and saved asset preservation remain current. The two torch placements are actioned. Full archetype art and default reef composition remain pending.*
+- Two existing left-island torch colonies sit deeper in their ledges. Paired 1440×900 macros show less exposed support stem and still-visible crowns. The overview retains approximately 80% left reef height. The dev modular comparison shows a different rock silhouette and remains a separate preview.
+
+### 2026-11-21 — AQ-101 default wide face colonies
+*Root reviewed retained entries. The active scope, laptop-only verification and model preservation rules are current. Torch seating and wide face-colony placement are actioned. The upper silhouette, final art and animated-body acceptance remain pending.*
+- Ten existing zoanthid mats cover the front faces of the current wide legacy islands. The selected sites passed the assembly footprint check. The exact and fallback queries consume the measured instances. The settled 1440×900 view retains the tall reef and open center, and exact export fixtures retain the cave, front turn, host and moray checks at their documented clearance sizes.
+
+### 2026-11-21 — AQ-70.11 broader left branching crest
+*Root reviewed the retained entries. The active scope, laptop review and saved asset preservation rules are current. The left crest placement is actioned. Its lighting, full coral art and continuous fish clearance remain pending.*
+- The saved corymbose Acropora replaces the smaller left companion under the antler. The stem center sits about 0.231 aquarium units below the exact rendered rock surface, and the crown extends farther left while staying below the existing highest tip. The laptop overview has zero failed assets or captured warnings. Current cave, turn and host fixtures still pass at their tested clearance sizes.
+
+### 2026-11-21 — AQ-71 indirect light on the reef faces
+*Root reviewed retained entries. Local laptop review, active scope and asset preservation remain current. The reef indirect-light change is actioned. Full reference fidelity and remaining directed backlog work are pending.*
+- Reef PBR materials now use 0.70 of the shared environment lighting. In identical laptop frames the left face sample rises from 34.62 to 46.30 encoded luma and the right face from 29.78 to 39.52. The sampled blue tang, sand, cave opening and open water retain identical pixels. The after view has zero pending/failed assets or captured warnings/errors.
+
+### 2026-11-21 — AQ-70.11 lower left fleshy coral
+*Root reviewed the retained entries. Local laptop review, active scope and model preservation remain current. The new left apron placement is actioned. Full photographic and animated-body acceptance remain pending.*
+- The saved Lobophyllia now fills the left apron beside the orange coral, with sampled contact from two directions and passing exact cave, host, front-turn and moray fixtures at the documented sizes. The standalone porous-rock study has a useful illustrated surface treatment. It remains in the test scene pending measured foundation and socket fit.
+
+### 2026-11-21 — AQ-70.1 reference and donor audit
+*Root reviewed the retained reference work. The baseline rubric and hybrid recommendation are actioned. Exact fixture/glass coverage and donor disposition are pending.*
+- Corrected the London Aquarium image metadata, replaced the unavailable caustics page, and matched the clownfish donor link to its pinned manifest. The Mandarin donor remains unverified. The runtime sailfin still points to the study copy flagged in the asset notices while an original saved replacement exists.

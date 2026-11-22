@@ -134,20 +134,12 @@ describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
     expect(shader.vertexShader).toContain('vCausticWorldPos')
     expect(shader.vertexShader).toContain('vCausticWorldNormal')
     expect(shader.fragmentShader).toContain('uCausticMap')
-    // Layers combine by max, not product (visual-check fix): a product of
-    // two mostly-dark cellular layers is ~0.027 mean and invisible through
-    // the old smoothstep; max keeps the ridge network visible.
-    expect(shader.fragmentShader).toContain('float cR = max(texture2D(uCausticMap, causticUvA + dispOffset).r')
-    expect(shader.fragmentShader).toContain('float cG = max(texture2D(uCausticMap, causticUvA).r')
-    expect(shader.fragmentShader).toContain('float cB = max(texture2D(uCausticMap, causticUvA - dispOffset).r')
-    // The ridge threshold is a per-material uniform (default 0.35), so
-    // the sand can widen its dapple without raising the +0.35 peak.
-    expect(shader.fragmentShader).toContain('smoothstep(vec3(uCausticThreshold), vec3(0.88), vec3(cR, cG, cB))')
-    expect(shader.fragmentShader).toContain('pow(causticRGB, vec3(1.55))')
-    expect(shader.fragmentShader).toContain('pow(smoothstep(uCausticThreshold, 0.88, cG), 1.6)')
-    expect(shader.fragmentShader).toContain('causticRGB.g = causticP')
-    expect(shader.fragmentShader).toContain('vec3 causticLedTint = vec3(0.95, 1.06, 1.18)')
-    expect(shader.fragmentShader).not.toContain('texture2D(uCausticMap, causticUvA).r * texture2D(uCausticMap, causticUvB).r')
+    expect(shader.fragmentShader).toContain('smoothstep(uCausticThreshold, 0.88, causticRidge)')
+    expect(shader.fragmentShader).toContain('causticPeak * (0.66 + 0.34 * causticAccent) * focusMod')
+    expect(shader.fragmentShader).toContain('mat2(0.8, -0.6, 0.6, 0.8)')
+    expect(shader.fragmentShader).toContain('causticUvA, causticDepth * 0.35')
+    expect(shader.vertexShader).toContain('causticPosition = instanceMatrix * causticPosition')
+    expect(shader.fragmentShader).toContain('normalize(vCausticWorldNormal).y')
     expect(shader.fragmentShader).toContain('causticUvA')
     expect(shader.fragmentShader).toContain('causticUvB')
     expect(shader.fragmentShader).toContain('uCausticMaxAdd')
@@ -182,18 +174,20 @@ describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
     // modulates the pattern by the shared wave-field focus there.
     expect(shader.fragmentShader).toContain('causticSurf')
     expect(shader.fragmentShader).toContain('surfaceWaveFocus(causticSurf, uCausticTime)')
-    expect(shader.fragmentShader).toContain('clamp(1.0 + uFocusGain * surfaceWaveFocus')
+    expect(shader.fragmentShader).toContain('clamp(0.78 + uFocusGain * waveFocus')
     // Light redistribution: the field between ridges is dimmed (the
     // light in the web came from around it), so the dapple reads on
     // bright surfaces instead of clipping away.
-    expect(shader.fragmentShader).toContain('reflectedLight.directDiffuse *= 1.0 - 0.14 * (1.0 - cG) * causticMask')
+    expect(shader.fragmentShader).toContain('dot(reflectedLight.directDiffuse, causticLuma)')
+    expect(shader.fragmentShader).toContain('smoothstep(0.04, 0.28, shadowedIrradiance)')
+    expect(shader.fragmentShader).toContain('uCausticMaxAdd * focusedRidge * causticMask * fixtureVisibility')
     expect(shader.fragmentShader).not.toContain('reflectedLight.indirectDiffuse *=')
     expect(shader.fragmentShader).toContain('surfaceWaveHeight')
     expect(shader.uniforms.uCausticMaxAdd.value).toBeCloseTo(0.35)
     expect(shader.uniforms.uCausticThreshold.value).toBeCloseTo(0.35)
     expect(shader.uniforms.uCausticScaleA.value).toBeCloseTo(0.35)
     expect(shader.uniforms.uCausticScaleB.value).toBeCloseTo(0.55)
-    expect(material.customProgramCacheKey()).toContain(':caustics-v1')
+    expect(material.customProgramCacheKey()).toContain(':caustics-v2')
 
     // A second material shares the same time uniform object
     const other = new THREE.MeshStandardMaterial()
@@ -215,7 +209,7 @@ describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
     expect(shader.uniforms.uCausticThreshold.value).toBeCloseTo(0.22)
     // The peak add is unchanged: the threshold only widens the network.
     expect(shader.uniforms.uCausticMaxAdd.value).toBeCloseTo(0.35)
-    expect(shader.fragmentShader).toContain('smoothstep(vec3(uCausticThreshold), vec3(0.88), vec3(cR, cG, cB))')
+    expect(shader.fragmentShader).toContain('smoothstep(uCausticThreshold, 0.88, causticRidge)')
     caustics.dispose()
   })
 
@@ -229,12 +223,12 @@ describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
     // World position is read after project_vertex (post-skinning and
     // post-flex), and the normal after defaultnormal_vertex (post-skinning);
     // the bind-pose begin_vertex / beginnormal_vertex hooks are not used.
-    expect(shader.vertexShader).toContain('#include <project_vertex>\nvCausticWorldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;')
-    expect(shader.vertexShader).toContain('#include <defaultnormal_vertex>\nvCausticWorldNormal = normalize(mat3(modelMatrix) * objectNormal);')
+    expect(shader.vertexShader).toContain('#include <project_vertex>\nvec4 causticPosition = vec4(transformed, 1.0);')
+    expect(shader.vertexShader).toContain('#include <defaultnormal_vertex>\nvCausticWorldNormal = normalize(transformDirectionByInverseViewMatrix(transformedNormal, viewMatrix));')
     expect(shader.vertexShader).not.toContain('#include <begin_vertex>\nvCausticWorldPos')
     expect(shader.vertexShader).not.toContain('#include <beginnormal_vertex>\nvCausticWorldNormal')
     expect(shader.fragmentShader).toContain('uCausticMap')
-    expect(material.customProgramCacheKey()).toContain(':caustics-skinned-v1')
+    expect(material.customProgramCacheKey()).toContain(':caustics-skinned-v2')
     caustics.dispose()
   })
 

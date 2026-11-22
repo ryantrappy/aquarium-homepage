@@ -1,0 +1,15 @@
+{
+  "base": "cf4d584ea4117d33b8b1bb78c763861ceefe1312",
+  "seed": 2026,
+  "timeSeconds": 1.25,
+  "viewport": {
+    "devicePixelRatio": 1,
+    "height": 900,
+    "width": 1440
+  },
+  "ready": true,
+  "failedAssets": [],
+  "pendingAssetCount": 0,
+  "inhabitantCount": 29,
+  "browserWarningsAndErrors": []
+}

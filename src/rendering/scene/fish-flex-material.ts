@@ -3,6 +3,9 @@ import {
   advanceFishFlexTime,
   evaluateLighthillFlexParams,
   flexPhaseForInstance,
+  FLEX_MOUTH_RETRACTION_RATIO,
+  MAX_FLEX_GILL_OFFSET_BL,
+  MAX_FLEX_MOUTH_DROP_BL,
   type FishFlexGaitParams,
   type FishFlexInput,
   type FishFlexValues,
@@ -359,7 +362,7 @@ function prepareFishFlexVertex(u: FishFlexUniforms): ((position: THREE.Vector3) 
       ? mouthPulse * (1 - smooth(s, .015, .075)) * smooth(yNorm, -.48, -.06) * (1 - smooth(yNorm, -.03, .02)) : 0
     position.x += ((env ? env * Math.sin(phase) : 0) + fin + gill) * enabled
     position.y -= mouth * enabled
-    position.z -= mouth * .35 * enabled
+    position.z -= mouth * FLEX_MOUTH_RETRACTION_RATIO * enabled
   }
 }
 
@@ -411,7 +414,7 @@ const FLEX_VERTEX_DISPLACEMENT = `
 
   transformed.x += (flexWave + flexFin + flexGill) * uFlexEnabled;
   transformed.y -= flexMouth * uFlexEnabled;
-  transformed.z -= flexMouth * 0.35 * uFlexEnabled;
+  transformed.z -= flexMouth * ${FLEX_MOUTH_RETRACTION_RATIO} * uFlexEnabled;
 }
 `
 
@@ -547,14 +550,14 @@ export function bindFishFlexToModel(
         phaseRad +
         ((TWO_PI * values.frequencyHz * flexTimeSeconds - accumulatedWavePhaseRad) % TWO_PI)
       uniforms.uFlexPhase.value = ((targetPhase % TWO_PI) + TWO_PI) % TWO_PI
-      const ampBlend = reducedMotion ? 1 : Math.min(1, stepDt * 6.0)
+      const ampBlend = reducedMotion ? 1 : Math.min(1, Math.max(0, stepDt * 6.0))
       const amplitudeScale = reducedMotion ? 0 : values.amplitudeScale
       const targetTailAmp = values.tailAmplitudeBL * amplitudeScale * bodyLength
       const targetFinAmp = reducedMotion ? 0 : values.finRippleAmpBL * amplitudeScale * bodyLength
       const respEffort =
         0.45 + 0.55 * Math.min(1, Math.max(0, values.frequencyHz / 2.2))
-      const targetGillAmp = reducedMotion ? 0 : 0.0042 * respEffort * amplitudeScale * bodyLength
-      const targetMouthAmp = reducedMotion ? 0 : 0.0038 * respEffort * amplitudeScale * bodyLength
+      const targetGillAmp = reducedMotion ? 0 : MAX_FLEX_GILL_OFFSET_BL * respEffort * amplitudeScale * bodyLength
+      const targetMouthAmp = reducedMotion ? 0 : MAX_FLEX_MOUTH_DROP_BL * respEffort * amplitudeScale * bodyLength
       currentTailAmp += (targetTailAmp - currentTailAmp) * ampBlend
       currentFinAmp += (targetFinAmp - currentFinAmp) * ampBlend
       currentGillAmp += (targetGillAmp - currentGillAmp) * ampBlend

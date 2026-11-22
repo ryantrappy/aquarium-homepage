@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-08 00:30'
-updated_date: '2026-11-15 15:52'
+updated_date: '2026-11-22 04:14'
 labels:
   - photorealism
   - rendering
@@ -56,6 +56,8 @@ The main scene currently lacks a scene.environment PMREM texture, causing MeshSt
 Native A/B at df6227e revealed identical foreground pixels despite changed material property. Root confirmed installed Three r187 WebGLRenderer overwrites envMapIntensity with scene.environmentIntensity when material.envMap is null. Bind the single shared PMREM texture explicitly to each PBR role (fish/reef/sand/backdrop) so declared strengths take effect, preserving no-IBL fallback. Borrowed target ownership must stay with scene; generic asset disposal receives the borrowed texture and skips it while disposing other asset textures. Verify real controller shared bindings/removal/teardown and then repeat native exposure review. No new maps or per-frame PMREM work.
 
 Once explicit strengths took effect, backdrop0 made the rear water too dark relative to the goal reference. Root exposure trial rebalances only the backdrop role to0.65, retaining fish0.55/reef0.35/sand0.2, ACES0.80 and the same LED rig. Validate native two-size exposure with fixed-pose foreground measurements and no clipping; final art and cost remain separate.
+
+Compare reef-only PMREM intensity against the current laptop source. Keep the fixture and other material roles fixed. Verify visible branch detail, cave contrast, and fixed-frame sand/fish samples before choosing a default.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -74,6 +76,8 @@ Root native diagnostic atdf6227e: laptop/phone foreground ROI statistics were ex
 Root native review at69cad24 accepts AC3 two-size exposure. Shared explicit PMREM now effective; fish0.55/reef0.35/sand0.2/backdrop0.65 with existing ACES0.80/LED rig. Evidence docs/asset-evidence/aq71/sand-ibl-20261113/: ready/no failures at1440x900/402x874DPR1, zero final reload console warnings. Fixed foreground encoded mean luminance laptop0.875452->0.718763 and phone0.883600->0.741830, preserves caustic detail. Initial property-only df6227e PNGs byte-identical to6be5dcc diagnostic explains Three override. Exact69cad24 all758tests/66files,45focused/typecheck14scripts/productionbuild pass. Borrowed sharedtexture disposal covered by realcontroller regression. AC4 controlled runtime parity remains open; no FPSdisplay work. No model changes/deployment.
 
 2026-11-15 active-only verification: the existing 2026-11-13 Root laptop/phone review records current exposure acceptance for AC3; focused environment-map and aquarium-lifecycle suites pass 53/53, including shared-material lifecycle and both required viewports. No controlled frame-rate parity evidence exists; frozen captures/incidental timing are explicitly insufficient, and this session has no browser/GPU measurement interface. Keep AC4 and Root DoD open; no implementation or scene values changed.
+
+Root 2026-11-21 matched laptop review: raised only reef material indirect intensity from .35 to .70. Left and right rock samples gained about one-third in mean encoded luma and the branching crest gained visible detail. Sampled sand, cave opening, blue tang and open water are pixel-identical. All 1,073 tests, typecheck and the production build pass. See docs/asset-evidence/aq71/reef-fill-20261121/. This comparison establishes current laptop exposure, with AC4 untouched.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
