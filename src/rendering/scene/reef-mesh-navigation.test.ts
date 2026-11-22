@@ -5,12 +5,13 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import {
   createMountedCoralFallbackObstacles,
   createRockFallbackObstacles,
+  createSurfaceCoralObstacles,
   createReefMeshNavigation,
   MESH_NAVIGATION_COLLISION_RADIUS_M,
   MESH_NAVIGATION_MOVEMENT_BUDGET,
   segmentIntersectsInflatedBox,
 } from './reef-mesh-navigation'
-import { DEFAULT_LEFT_ISLAND_MOUNTS, DEFAULT_RIGHT_ISLAND_MOUNTS, MODULAR_CORAL_ASSET_URLS, assembleCoralsOnRockSockets, measuredCoralShaderMargin, instantiateModularReefHabitat, LIVE_ROCK_ISLAND_URLS } from './reef-assembly'
+import { DEFAULT_LEFT_ISLAND_MOUNTS, DEFAULT_RIGHT_ISLAND_MOUNTS, WIDE_ISLAND_ENCRUSTING_SITES, MODULAR_CORAL_ASSET_URLS, assembleCoralsOnRockSockets, measuredCoralShaderMargin, instantiateModularReefHabitat, LIVE_ROCK_ISLAND_URLS } from './reef-assembly'
 import { reefPlacementsForViewport } from './reef-layout'
 import { resolveSnowflakeMorayResidence, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M } from './moray-residence'
 import { DEFAULT_CAMERA_ZOOM_STATE } from './camera-zoom'
@@ -819,6 +820,23 @@ async function loadActualGlb(bytes: Uint8Array) {
     return certificate.activeEnvelope.capsule!.radiusM
   }
 
+  function boundedFaceColonies(reef: THREE.Object3D, assembled: ReturnType<typeof assembleCoralsOnRockSockets>, islandId: string) {
+    const surfaceBatches = assembled.instancedMeshes.filter(batch => batch.userData.encrustingFace)
+    expect(assembled.instancedMeshes.length).toBeGreaterThan(surfaceBatches.length)
+    const colonies = createSurfaceCoralObstacles(surfaceBatches, islandId)
+    expect(colonies).toHaveLength(5)
+    const fallback = createRockFallbackObstacles(reef, islandId, colonies)
+    expect(fallback.status).toBe('ready')
+    if (fallback.status !== 'ready') throw new Error(fallback.reason)
+    const bounds = fallback.obstacles[0].bounds
+    const envelope = new THREE.Box3(new THREE.Vector3().copy(bounds.min), new THREE.Vector3().copy(bounds.max))
+    for (const colony of colonies) {
+      expect(envelope.containsPoint(new THREE.Vector3().copy(colony.bounds.min))).toBe(true)
+      expect(envelope.containsPoint(new THREE.Vector3().copy(colony.bounds.max))).toBe(true)
+    }
+    return colonies
+  }
+
   it('checks fitted fish bodies against the cave and host in the raised laptop assembly', async () => {
     const placement = reefPlacementsForViewport(false).find(item => item.islandKind === 'left')!
     const { scene: reef } = await loadActualGlb(readFileSync(new URL(LIVE_ROCK_ISLAND_URLS.left)))
@@ -829,12 +847,17 @@ async function loadActualGlb(bytes: Uint8Array) {
     }
     const assembled = assembleCoralsOnRockSockets(reef, coralTemplates, DEFAULT_LEFT_ISLAND_MOUNTS, {
       foundationHeightScale: placement.foundationHeightScale,
+      encrustingFaceSites: WIDE_ISLAND_ENCRUSTING_SITES.left,
+      retainSocketScatter: true,
     })
     expect(assembled.mountedCorals).toHaveLength(DEFAULT_LEFT_ISLAND_MOUNTS.length)
     reef.scale.setScalar(placement.uniformScale)
     reef.position.copy(placement.position)
     reef.rotation.y = placement.yaw
-    const navigation = await createReefMeshNavigation([{ reef, islandId: 'reef-left', mountedCorals: assembled.mountedCorals }])
+    const surfaceCoralObstacles = boundedFaceColonies(reef, assembled, 'reef-left')
+    const navigation = await createReefMeshNavigation([{
+      reef, islandId: 'reef-left', mountedCorals: assembled.mountedCorals, surfaceCoralObstacles,
+    }])
     expect(navigation.status).toBe('ready')
     if (navigation.status !== 'ready') return
     expect(navigation.diagnostics.islands[0]).toMatchObject({
@@ -854,6 +877,9 @@ async function loadActualGlb(bytes: Uint8Array) {
     const y = 0.02 * placement.foundationHeightScale
     const budget = { ...MESH_NAVIGATION_MOVEMENT_BUDGET }
     const query = navigation.meshNavigation.queryCapsule!
+    const face = surfaceCoralObstacles[0].bounds
+    const faceCenter = new THREE.Vector3().copy(face.min).lerp(face.max, .5)
+    expect(query(faceCenter, faceCenter, 0, budget)).toMatchObject({ status: 'blocked', reason: 'coral-envelope' })
     function probeAtX(x: number) {
       const start = reef.localToWorld(new THREE.Vector3(x, y, -0.36))
       const end = reef.localToWorld(new THREE.Vector3(x, y, 0.36))
@@ -940,9 +966,14 @@ async function loadActualGlb(bytes: Uint8Array) {
       coralTemplates.set(mount.coralAssetId, (await loadActualGlb(readFileSync(new URL(coralUrl)))).scene)
     }
 
+    const matUrl = MODULAR_CORAL_ASSET_URLS['coral-zoanthid-mat']
+    coralTemplates.set('coral-zoanthid-mat', (await loadActualGlb(readFileSync(new URL(matUrl)))).scene)
+
     const reef = rockGltf.scene.clone(true)
     const assembled = assembleCoralsOnRockSockets(reef, coralTemplates, DEFAULT_RIGHT_ISLAND_MOUNTS, {
       foundationHeightScale: placement.foundationHeightScale,
+      encrustingFaceSites: WIDE_ISLAND_ENCRUSTING_SITES.right,
+      retainSocketScatter: true,
       paused: false,
       reducedMotion: false,
       actinicLevel: 0.5,
@@ -951,7 +982,10 @@ async function loadActualGlb(bytes: Uint8Array) {
     reef.position.set(placement.position.x, placement.position.y, placement.position.z)
     reef.rotation.y = placement.yaw
 
-    const navigation = await createReefMeshNavigation([{ reef, islandId: 'reef-right', mountedCorals: assembled.mountedCorals }])
+    const surfaceCoralObstacles = boundedFaceColonies(reef, assembled, 'reef-right')
+    const navigation = await createReefMeshNavigation([{
+      reef, islandId: 'reef-right', mountedCorals: assembled.mountedCorals, surfaceCoralObstacles,
+    }])
     expect(navigation.status).toBe('ready')
     if (navigation.status !== 'ready') return
 

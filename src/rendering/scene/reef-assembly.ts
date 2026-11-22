@@ -1586,6 +1586,21 @@ export const MODULAR_CORAL_VARIATION_LIBRARY: readonly CoralVariationSpec[] = Ob
 
 export type EncrustingFaceSite = readonly [u: number, v: number, scale?: number]
 
+// Wide legacy islands use different faces after the foundation rise.
+export const WIDE_ISLAND_ENCRUSTING_SITES: Readonly<Record<'left' | 'right', readonly EncrustingFaceSite[]>> = {
+  left: [
+    [.55, .48, .40], [.46, .57, .40], [.32, .52, .32], [.28, .24, .32], [.76, .42, .32],
+  ],
+  right: [
+    [.70, .63, .40], [.34, .63, .40], [.64, .38, .32], [.48, .44, .32], [.76, .30, .32],
+  ],
+}
+
+type EncrustingOptions = {
+  encrustingFaceSites?: readonly EncrustingFaceSite[]
+  retainSocketScatter?: boolean
+}
+
 // Front-facing encrusting patches hug the measured surface. Probe the footprint
 // as well as its center so an overhang or a hole cannot leave a floating mat.
 function sampleEncrustingFaces(
@@ -1629,8 +1644,8 @@ function sampleEncrustingFaces(
     const center = probe(x, y)
     if (!center || occupied.some(socket => socket.distanceTo(center.point) < 0.093)
       || patches.some(patch => patch.position.distanceTo(center.point) < 0.12)) continue
-    // For the authored mat, bound the footprint from the exported 0.244 ×
-    // 0.174 m base. The legacy scatter keeps its earlier sampling radius.
+    // Sample around the authored placement using the exported mat footprint.
+    // The automatic scatter keeps its earlier sampling radius.
     const supportRadius = authoredScale === undefined ? .021 : .158 * authoredScale
     const supported = [[-supportRadius, 0], [supportRadius, 0], [0, -supportRadius], [0, supportRadius]].every(([dx, dy]) => {
       const edge = probe(x + dx, y + dy)
@@ -1659,7 +1674,7 @@ function buildInstancedCoralScatters(
   mounts: readonly ModularCoralMountEntry[],
   socketNodes: ReadonlyMap<string, THREE.Object3D>,
   foundationMeshes: THREE.Mesh[],
-  options: { paused?: boolean; reducedMotion?: boolean; actinicLevel?: number; encrustingFaceSites?: readonly EncrustingFaceSite[] } | undefined,
+  options: ({ paused?: boolean; reducedMotion?: boolean; actinicLevel?: number } & EncrustingOptions) | undefined,
   materialControllers: Array<ReturnType<typeof applyCoralRawMaskMaterial>>,
   geometryBindings: CoralMaterialBoundBinding[],
 ): THREE.InstancedMesh[] {
@@ -1681,7 +1696,7 @@ function buildInstancedCoralScatters(
   >()
 
   const dummy = new THREE.Object3D()
-  const companionMounts = options?.encrustingFaceSites ? [] : mounts
+  const companionMounts = options?.encrustingFaceSites && !options.retainSocketScatter ? [] : mounts
   companionMounts.forEach((mount, idx) => {
     const socketNode = socketNodes.get(mount.socketName)
     if (!socketNode) return
@@ -1713,7 +1728,8 @@ function buildInstancedCoralScatters(
   })
 
   const matAssetId = 'coral-zoanthid-mat'
-  const zoanthids = scatterGroups.get(matAssetId) ?? []
+  const faceGroupId = options?.encrustingFaceSites ? 'encrusting-face' : matAssetId
+  const zoanthids = scatterGroups.get(faceGroupId) ?? []
   if ((options?.encrustingFaceSites || zoanthids.length > 0) && coralTemplates.has(matAssetId) && foundationMeshes.length > 0) {
     const occupied = [...socketNodes.values()].map(socket => socket.position)
     for (const patch of sampleEncrustingFaces(rockRoot, foundationMeshes, occupied, options?.encrustingFaceSites)) {
@@ -1723,10 +1739,12 @@ function buildInstancedCoralScatters(
         rimTint: zoanthids[0]?.rimTint ?? 'cyan',
       })
     }
-    if (zoanthids.length) scatterGroups.set(matAssetId, zoanthids)
+    if (zoanthids.length) scatterGroups.set(faceGroupId, zoanthids)
   }
 
-  for (const [assetId, placements] of scatterGroups.entries()) {
+  for (const [groupId, placements] of scatterGroups.entries()) {
+    const isAuthoredFace = groupId === 'encrusting-face'
+    const assetId = isAuthoredFace ? matAssetId : groupId
     const template = coralTemplates.get(assetId)
     if (!template || placements.length === 0) continue
     template.traverse(child => {
@@ -1757,8 +1775,9 @@ function buildInstancedCoralScatters(
       materialControllers.push(binding)
 
       const instanced = new THREE.InstancedMesh(child.geometry, binding.material, placements.length)
-      instanced.name = `instanced_${assetId}_${child.name}`
+      instanced.name = `instanced_${groupId}_${child.name}`
       instanced.userData.reefPrimitive = { ...reefPrimitive, role }
+      if (isAuthoredFace) instanced.userData.encrustingFace = true
       instanced.castShadow = true
       instanced.receiveShadow = true
       instanced.customDepthMaterial = binding.depthMaterial
@@ -1811,8 +1830,7 @@ export function assembleCoralsOnRockSockets(
     preserveAuthoredRock?: boolean
     foundationHeightScale?: number
     includeScatter?: boolean
-    encrustingFaceSites?: readonly EncrustingFaceSite[]
-  },
+  } & EncrustingOptions,
 ): {
   mountedCorals: AssembledCoralBinding[]
   instancedMeshes: THREE.InstancedMesh[]

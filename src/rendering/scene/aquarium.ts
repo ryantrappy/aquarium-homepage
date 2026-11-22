@@ -6,6 +6,7 @@ import type { ServiceConfig } from '../../lib/services'
 import { getFishById, isInvertebrateSpecies, SNOWFLAKE_MORAY_EEL_ID } from '../../lib/fish'
 import {
   DEFAULT_LEFT_ISLAND_MOUNTS,
+  WIDE_ISLAND_ENCRUSTING_SITES,
   DEFAULT_RIGHT_ISLAND_MOUNTS,
   LIVE_ROCK_ISLAND_URLS,
   MODULAR_CORAL_ASSET_URLS,
@@ -972,6 +973,8 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       const reef = rockScene.clone(true)
       const assembled = assembleCoralsOnRockSockets(reef, coralTemplates, mounts, {
         foundationHeightScale,
+        encrustingFaceSites: width >= 600 ? WIDE_ISLAND_ENCRUSTING_SITES[islandKind] : undefined,
+        retainSocketScatter: true,
         paused: paused || document.hidden,
         reducedMotion,
         // AQ-70.6 AC #3: coral fluorescence scales with the fixture's
@@ -1000,7 +1003,16 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       reefs.push(reef)
       applyEnvironmentMapIntensity(reef, ENVIRONMENT_MAP_INTENSITY.reef, environmentMap?.texture)
 
-      const fallback = createRockFallbackObstacles(reef, `reef-${i}`)
+      let surfaceCoralObstacles: ReturnType<typeof createSurfaceCoralObstacles>
+      try {
+        surfaceCoralObstacles = createSurfaceCoralObstacles(
+          assembled.instancedMeshes.filter(batch => batch.userData.encrustingFace), `reef-${i}`,
+        )
+      } catch (error) {
+        failReefSetup(`Reef surface coral geometry unavailable: ${String(error)}`)
+        return
+      }
+      const fallback = createRockFallbackObstacles(reef, `reef-${i}`, surfaceCoralObstacles)
       if (fallback.status !== 'ready') {
         // Never keep swimming with incomplete solid geometry, including on
         // resize. Native service links remain available in the failed view.
@@ -1022,7 +1034,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       habitat.obstacles.push(...fallback.obstacles, ...result.obstacles.filter(obstacle => obstacle.id.startsWith(`reef-${i}-coral-base-`)))
       habitat.anchors.push(...result.anchors.filter(anchor => anchor.anchor !== 'hostAnemone'), ...hostAnchors)
       reef.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) })
-      meshIslands.push({ reef, islandId: `reef-${i}`, mountedCorals: assembled.mountedCorals })
+      meshIslands.push({ reef, islandId: `reef-${i}`, mountedCorals: assembled.mountedCorals, surfaceCoralObstacles })
     }
     const authoredReefs = kit ? createNsaReviewReef(kit.scene)
       : width >= 600 && centerArchBase ? [{ reef: createCenterArch(centerArchBase.scene), islandId: 'reef-center-arch', mounts: CENTER_ARCH_MOUNTS }] : []

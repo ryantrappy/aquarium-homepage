@@ -17,6 +17,8 @@ Root verified prior Root-checkpoint facts against the current checkout. The late
 
 The merged default uses the earlier two islands and center arch following `92c72a2`. The modular layout and AQ-101 face-colony work remain available in the local development build at `/?reef=nsa` and on the modular review branch. The wide-default production check below applies to that review branch.
 
+The default wide reef now also mounts five encrusting zoanthid mats on each of its two islands. Individual instance bounds reach the exact query and are contained by the fallback foundation boxes. The current 1440×900 overview and exact-asset cave, host and moray checks pass at their documented clearance sizes. [Wide reef face review](docs/asset-evidence/aq101/wide-face-colonies-20261121/).
+
 ## Caustic lighting — 2026-11-21
 
 AQ-70.6 now uses one warped ridge network with a rotated intensity accent, depth filtering, and an illumination gate derived from shadowed direct diffuse. The current default scene's matched laptop comparison shows visible ridges on lit sand and a quieter floor under the rocks. Two settled frames matched after using Pause. Fixture and full optical acceptance remain open. [Laptop evidence](docs/asset-evidence/aq70-6/shadowed-caustics-laptop/).

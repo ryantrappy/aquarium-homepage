@@ -246,3 +246,7 @@
 ### 2026-11-21 — AQ-70.11 left torch seating
 *Root reviewed the retained entries. Active scope and saved asset preservation remain current. The two torch placements are actioned. Full archetype art and default reef composition remain pending.*
 - Two existing left-island torch colonies sit deeper in their ledges. Paired 1440×900 macros show less exposed support stem and still-visible crowns. The overview retains approximately 80% left reef height. The dev modular comparison shows a different rock silhouette and remains a separate preview.
+
+### 2026-11-21 — AQ-101 default wide face colonies
+*Root reviewed retained entries. The active scope, laptop-only verification and model preservation rules are current. Torch seating and wide face-colony placement are actioned. The upper silhouette, final art and animated-body acceptance remain pending.*
+- Ten existing zoanthid mats cover the front faces of the current wide legacy islands. The selected sites passed the assembly footprint check. The exact and fallback queries consume the measured instances. The settled 1440×900 view retains the tall reef and open center, and exact export fixtures retain the cave, front turn, host and moray checks at their documented clearance sizes.
