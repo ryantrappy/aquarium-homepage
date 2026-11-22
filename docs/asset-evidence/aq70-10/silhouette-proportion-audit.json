@@ -1,0 +1,151 @@
+{
+  "schema": "fish-silhouette-proportion-audit-v1",
+  "backlogTask": "AQ-70.10",
+  "maxAllowedDeviationPct": 8,
+  "species": [
+    {
+      "id": "fish-blue-tang",
+      "speciesId": "blue-tang",
+      "source": "FishBase Paracanthurus hepatus lateral profile & extended dorsal/anal span",
+      "sourceUrl": "https://www.fishbase.se/summary/Paracanthurus-hepatus",
+      "referenceHeightToLength": 0.585,
+      "measuredHeightToLength": 0.591325,
+      "relativeDeviationPct": 1.08
+    },
+    {
+      "id": "fish-royal-gramma",
+      "speciesId": "royal-gramma",
+      "source": "FishBase Gramma loreto & project-original public/fish/royal-gramma.webp silhouette",
+      "sourceUrl": "https://www.fishbase.se/summary/Gramma-loreto",
+      "referenceHeightToLength": 0.4765,
+      "measuredHeightToLength": 0.45918,
+      "relativeDeviationPct": 3.63
+    },
+    {
+      "id": "fish-banggai-cardinalfish",
+      "speciesId": "banggai-cardinalfish",
+      "source": "FishBase Pterapogon kauderni & project-original public/fish/banggai-cardinalfish.webp silhouette",
+      "sourceUrl": "https://www.fishbase.se/summary/Pterapogon-kauderni",
+      "referenceHeightToLength": 0.7005,
+      "measuredHeightToLength": 0.700804,
+      "relativeDeviationPct": 0.04
+    },
+    {
+      "id": "fish-mandarin-dragonet",
+      "speciesId": "mandarin-dragonet",
+      "source": "FishBase Synchiropus splendidus & project-original public/fish/mandarin-dragonet.webp silhouette",
+      "sourceUrl": "https://www.fishbase.se/summary/Synchiropus-splendidus",
+      "referenceHeightToLength": 0.4498,
+      "measuredHeightToLength": 0.447118,
+      "relativeDeviationPct": 0.6
+    },
+    {
+      "id": "fish-blue-green-chromis",
+      "speciesId": "blue-green-chromis",
+      "source": "FishBase Chromis viridis & project-original public/fish/blue-green-chromis.webp silhouette",
+      "sourceUrl": "https://www.fishbase.se/summary/Chromis-viridis",
+      "referenceHeightToLength": 0.4653,
+      "measuredHeightToLength": 0.460074,
+      "relativeDeviationPct": 1.12
+    },
+    {
+      "id": "fish-firefish",
+      "speciesId": "firefish",
+      "source": "FishBase Nemateleotris magnifica & project-original public/fish/firefish.webp silhouette",
+      "sourceUrl": "https://www.fishbase.se/summary/Nemateleotris-magnifica",
+      "referenceHeightToLength": 0.388,
+      "measuredHeightToLength": 0.3793,
+      "relativeDeviationPct": 2.24
+    },
+    {
+      "id": "fish-yellow-watchman-goby",
+      "speciesId": "yellow-watchman-goby",
+      "source": "FishBase Cryptocentrus cinctus & project-original public/fish/yellow-watchman-goby.webp silhouette",
+      "sourceUrl": "https://www.fishbase.se/summary/Cryptocentrus-cinctus",
+      "referenceHeightToLength": 0.3542,
+      "measuredHeightToLength": 0.353882,
+      "relativeDeviationPct": 0.09
+    },
+    {
+      "id": "fish-tailspot-blenny",
+      "speciesId": "tailspot-blenny",
+      "source": "FishBase Ecsenius stigmatura lateral body-depth proportion",
+      "sourceUrl": "https://www.fishbase.se/summary/Ecsenius-stigmatura",
+      "referenceHeightToLength": 0.2564,
+      "measuredHeightToLength": 0.260007,
+      "relativeDeviationPct": 1.41
+    },
+    {
+      "id": "fish-six-line-wrasse",
+      "speciesId": "six-line-wrasse",
+      "source": "FishBase Pseudocheilinus hexataenia & project-original public/fish/six-line-wrasse.webp silhouette",
+      "sourceUrl": "https://www.fishbase.se/summary/Pseudocheilinus-hexataenia",
+      "referenceHeightToLength": 0.3683,
+      "measuredHeightToLength": 0.368777,
+      "relativeDeviationPct": 0.13
+    },
+    {
+      "id": "fish-mccoskers-flasher-wrasse",
+      "speciesId": "mccoskers-flasher-wrasse",
+      "source": "FishBase Paracheilinus mccoskeri & project-original public/fish/mccoskers-flasher-wrasse.webp silhouette",
+      "sourceUrl": "https://www.fishbase.se/summary/Paracheilinus-mccoskeri",
+      "referenceHeightToLength": 0.4699,
+      "measuredHeightToLength": 0.463139,
+      "relativeDeviationPct": 1.44
+    },
+    {
+      "id": "fish-lyretail-anthias",
+      "speciesId": "lyretail-anthias",
+      "source": "FishBase Pseudanthias squamipinnis & project-original public/fish/lyretail-anthias.webp silhouette",
+      "sourceUrl": "https://www.fishbase.se/summary/Pseudanthias-squamipinnis",
+      "referenceHeightToLength": 0.4053,
+      "measuredHeightToLength": 0.399942,
+      "relativeDeviationPct": 1.32
+    },
+    {
+      "id": "fish-flame-angelfish",
+      "speciesId": "flame-angelfish",
+      "source": "FishBase Centropyge loricula & project-original public/fish/flame-angelfish.webp silhouette",
+      "sourceUrl": "https://www.fishbase.se/summary/Centropyge-loricula",
+      "referenceHeightToLength": 0.6386,
+      "measuredHeightToLength": 0.631598,
+      "relativeDeviationPct": 1.1
+    },
+    {
+      "id": "fish-copperband-butterflyfish",
+      "speciesId": "copperband-butterflyfish",
+      "source": "FishBase Chelmon rostratus & project-original public/fish/copperband-butterflyfish.webp silhouette",
+      "sourceUrl": "https://www.fishbase.se/summary/Chelmon-rostratus",
+      "referenceHeightToLength": 0.6604,
+      "measuredHeightToLength": 0.656544,
+      "relativeDeviationPct": 0.58
+    },
+    {
+      "id": "fish-yellow-tang",
+      "speciesId": "yellow-tang",
+      "source": "FishBase Zebrasoma flavescens & project-original public/fish/yellow-tang.webp silhouette",
+      "sourceUrl": "https://www.fishbase.se/summary/Zebrasoma-flavescens",
+      "referenceHeightToLength": 0.6961,
+      "measuredHeightToLength": 0.696075,
+      "relativeDeviationPct": 0
+    },
+    {
+      "id": "fish-ocellaris-clownfish",
+      "speciesId": "ocellaris-clownfish",
+      "source": "FishBase Amphiprion ocellaris & project-original public/fish/ocellaris-clownfish.webp silhouette",
+      "sourceUrl": "https://www.fishbase.se/summary/Amphiprion-ocellaris",
+      "referenceHeightToLength": 0.4996,
+      "measuredHeightToLength": 0.499597,
+      "relativeDeviationPct": 0
+    },
+    {
+      "id": "fish-desjardins-sailfin-tang",
+      "speciesId": "desjardins-sailfin-tang",
+      "source": "FishBase Zebrasoma desjardinii extended dorsal/anal sailfin lateral profile",
+      "sourceUrl": "https://www.fishbase.se/summary/Zebrasoma-desjardinii",
+      "referenceHeightToLength": 0.7,
+      "measuredHeightToLength": 0.699619,
+      "relativeDeviationPct": 0.05
+    }
+  ]
+}

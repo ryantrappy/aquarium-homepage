@@ -130,7 +130,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .service-form { display: grid; grid-template-columns: 1fr 1fr; gap: 11px 13px; padding: 20px 0 17px; border-bottom: 1px solid var(--line); }
 .service-form h3 { grid-column: 1 / -1; margin: 0 0 1px; color: #dfefe4; font-family: var(--font-ui); font-size: 16px; letter-spacing: -.02em; }
 .service-form label, .import-form label { display: flex; flex-direction: column; gap: 6px; color: #a7c6bc; font-size: 10px; }
-.service-form label:first-of-type, .service-form label:nth-of-type(2) { grid-column: span 1; }
+.service-form label.display-only-toggle { grid-column: 1 / -1; flex-direction: row; align-items: center; gap: 9px; min-height: 36px; color: #e8f4ec; font-size: 12px; cursor: pointer; }
+.service-form .display-only-toggle input[type="checkbox"] { width: 18px; height: 18px; flex: 0 0 auto; padding: 0; accent-color: var(--seafoam); }
+.service-form label:not(.display-only-toggle) { grid-column: span 1; }
 .fish-picker { grid-column: 1 / -1; min-width: 0; margin: 0; padding: 0; border: 0; }
 .fish-picker legend { margin-bottom: 7px; color: #a7c6bc; font-size: 10px; }
 .fish-picker-selected { min-height: 62px; display: flex; align-items: center; gap: 12px; margin-bottom: 9px; padding: 7px 10px; border: 1px solid rgba(151,206,177,.3); border-radius: 7px; background: rgba(42,91,76,.2); }
@@ -149,6 +151,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .fish-picker-option strong { overflow: hidden; color: #edf6ee; font-size: 10px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .fish-picker-option em { overflow: hidden; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
 .fish-picker-option small { color: #e5b6a1; font-size: 8px; line-height: 1.2; }
+.fish-picker-selected .fish-picker-count { color: var(--seafoam); font-size: 9px; font-weight: 600; line-height: 1.2; }
+.fish-picker-option small.fish-picker-count { color: var(--seafoam); font-size: 8px; font-weight: 600; }
 .fish-picker:disabled .fish-picker-option { opacity: .5; cursor: not-allowed; }
 .service-form input, .service-form select, .import-form textarea { width: 100%; min-width: 0; height: 44px; padding: 0 10px; border: 1px solid rgba(199,231,208,.17); border-radius: 6px; color: #eaf4ed; background: #102f35; font-size: 12px; }
 .service-form .fish-picker-option input[type="radio"] { position: absolute; width: 1px; height: 1px; margin: 0; padding: 0; border: 0; opacity: 0; }
@@ -327,6 +331,38 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   border-radius: 50%;
   background: #4ade80;
   box-shadow: 0 0 6px rgba(74, 222, 128, .75);
+}
+.fish-status-dot.is-unlinked {
+  background: transparent;
+  border: 1.5px solid #93c5be;
+  box-shadow: none;
+}
+.no-link-badge {
+  color: #9ec4bc !important;
+  border-color: rgba(158, 196, 188, .32) !important;
+}
+.service-link.is-unlinked {
+  cursor: default;
+}
+.service-link.is-unlinked:hover {
+  background: rgba(101, 174, 154, .04);
+}
+.service-open.is-unlinked,
+.managed-open.is-unlinked {
+  color: #749892;
+  cursor: default;
+  text-decoration: none !important;
+}
+.fish-inspect-unlinked {
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px dashed rgba(199, 231, 208, .28);
+  border-radius: 7px;
+  color: #a8c7c0;
+  background: rgba(11, 38, 44, .45);
+  font-size: 11px;
 }
 /* Fish inspect card (AQ-100 AC #2/#3): compact glassmorphic overlay shown
  * when a service fish is focused via click or Services selection. */

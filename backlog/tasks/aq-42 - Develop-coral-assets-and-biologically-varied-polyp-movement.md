@@ -1,13 +1,13 @@
 ---
 id: AQ-42
 title: Develop coral assets and biologically varied polyp movement
-status: To Do
+status: In Progress
 assignee:
   - '@gemini'
   - '@root'
   - '@Luna'
 created_date: '2026-11-03 12:34'
-updated_date: '2026-11-12 05:50'
+updated_date: '2026-11-21 18:49'
 labels: []
 dependencies:
   - AQ-14.3
@@ -35,8 +35,8 @@ The reference distinguishes hard branching SPS structure from soft LPS tissue an
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Create or source licensed, visually credible coral assets with distinct rigid skeleton and soft tissue where appropriate, recording provenance.
-- [ ] #2 Give soft tissue varied flow-driven motion while preserving rigid structures and integrating with the aquarium pause and reduced-motion controls.
+- [x] #1 Create or source licensed, visually credible coral assets with distinct rigid skeleton and soft tissue where appropriate, recording provenance.
+- [x] #2 Give soft tissue varied flow-driven motion while preserving rigid structures and integrating with the aquarium pause and reduced-motion controls.
 - [ ] #3 Review believable appearance, habitat occlusion and responsive performance at both target viewports.
 <!-- AC:END -->
 
@@ -65,6 +65,8 @@ The reference distinguishes hard branching SPS structure from soft LPS tissue an
 Cross-reference the AQ-40 bounded 30k PixForge normal bake in comment #15. This does not close AQ-42; selected-Three proof, masks/contract and requested biological/visual criteria remain pending.
 
 Root reviewed bounded culling handoff2026-11-06 UTC: final4source pins0c218745/84f71140/93db5d62/60371f9b accepted with independent14tests and Root14tests. Frozen default44files/408tests, typecheck and production build pass. Initial full run hit2existing5s exact-rock fixture timeouts under contention;30fixture tests pass in1.01s and unchangeddefaultfull408suite passes at rest. No timeouts/assertions weakened. Portable audit: node docs/asset-evidence/aq42/audit-coral-bounds.mjs /tmp/aq42-coral-bounds-audit.json; pinsall8GLBs/11primitives/111135vertices and reproduces22.897–58.166mm local sphere additions atA=.014. Report: docs/asset-evidence/aq42/displacement-bounds-review.json and coral-bounds-audit.json. Actual GLSL tail is byte-identical to d6767c2; only CPU reference parity changed. Visual assets remain untouched. Broad task ownership includes Gemini for visual work; Luna handled only the reviewed renderer slice. All parent ACs remainopen for actual art/flow/scene acceptance.
+
+2026-11-21 Custom Multi-Archetype Coral Library & Flow/Pause/Reduced-Motion Verification (AQ-42 AC #1, AC #2): Authored and contract-verified 23 zsh original custom Blender coral colonies in src/rendering/assets/corals/custom-colonies/ across all 6 archetypes with explicit dual-primitive coral-soft (COLOR_0 R linear flexibility height 0..1, G tip/fluorescence mask, B polyp phase, A contact AO) and coral-rigid (R=0) separation, packed .blend workfiles, override GLBs, and recorded SHA-256 provenance in src/rendering/assets/corals/custom-colonies/manifest.json and src/rendering/proof/ASSET_NOTICES.md. Verified flow-driven soft-tissue sway, pinned rigid skeletons, and pause/reduced-motion freeze via src/rendering/scene/coral-material.test.ts, src/rendering/assets/custom-torch-colony.test.ts, and src/rendering/assets/custom-coral-colony.test.ts. AC #3 remains open for Root two-viewport visual/performance review.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

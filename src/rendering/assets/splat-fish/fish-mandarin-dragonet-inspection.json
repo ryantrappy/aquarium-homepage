@@ -8,7 +8,7 @@
       "upAxis": "+Y",
       "origin": "local",
       "dimensionsM": [
-        0.33427,
+        0.336482,
         0.894236,
         2
       ],
@@ -41,12 +41,12 @@
   },
   "boundsM": {
     "min": [
-      -0.167135,
+      -0.168241,
       -0.450777,
       -1
     ],
     "max": [
-      0.167135,
+      0.168241,
       0.443459,
       1
     ]
@@ -55,15 +55,15 @@
     {
       "id": "mandarin_dragonet_body",
       "role": "fish",
-      "vertexCount": 4750,
+      "vertexCount": 4870,
       "boundsM": {
         "min": [
-          -0.167135,
+          -0.168241,
           -0.450777,
           -1
         ],
         "max": [
-          0.167135,
+          0.168241,
           0.443459,
           1
         ]
@@ -76,5 +76,12 @@
     }
   ],
   "sockets": [],
-  "collisionParts": []
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Synchiropus splendidus & project-original public/fish/mandarin-dragonet.webp silhouette",
+    "sourceUrl": "https://www.fishbase.se/summary/Synchiropus-splendidus",
+    "referenceHeightToLength": 0.4498,
+    "measuredHeightToLength": 0.447118,
+    "relativeDeviationPct": 0.6
+  }
 }

@@ -10,6 +10,22 @@ export type ReefFish = {
 
 export const SNOWFLAKE_MORAY_EEL_ID = 'snowflake-moray-eel'
 
+export const INVERTEBRATE_SPECIES_IDS = [
+  'banded-trochus-snail',
+  'scarlet-reef-hermit-crab',
+  'emerald-mithrax-crab',
+  'scarlet-skunk-cleaner-shrimp',
+] as const
+
+export type InvertebrateSpeciesId = typeof INVERTEBRATE_SPECIES_IDS[number]
+
+const INVERTEBRATE_SPECIES_SET: ReadonlySet<string> = new Set(INVERTEBRATE_SPECIES_IDS)
+
+/** Returns true when `id` identifies a substrate clean-up-crew invertebrate species (`AQ-109`). */
+export function isInvertebrateSpecies(id: string): id is InvertebrateSpeciesId {
+  return INVERTEBRATE_SPECIES_SET.has(id)
+}
+
 export const REEF_FISH: ReefFish[] = [
   {
     id: 'ocellaris-clownfish',
@@ -130,6 +146,34 @@ export const REEF_FISH: ReefFish[] = [
     habitat: 'Solitary reef-dweller that shelters among rock and coral crevices.',
     thumbnail: '/fish/snowflake-moray-eel.webp',
     uniqueService: true,
+  },
+  {
+    id: 'banded-trochus-snail',
+    commonName: 'Banded trochus snail',
+    scientificName: 'Trochus histrio',
+    habitat: 'Algae-grazing reef snail gliding over live rock and aragonite sand.',
+    thumbnail: '/fish/banded-trochus-snail.webp',
+  },
+  {
+    id: 'scarlet-reef-hermit-crab',
+    commonName: 'Scarlet reef hermit crab',
+    scientificName: 'Paguristes cadenati',
+    habitat: 'Reef hermit crab scavenging detritus and algae across sand and rubble.',
+    thumbnail: '/fish/scarlet-reef-hermit-crab.webp',
+  },
+  {
+    id: 'emerald-mithrax-crab',
+    commonName: 'Emerald mithrax crab',
+    scientificName: 'Mithraculus sculptus',
+    habitat: 'Herbivorous reef clinging crab foraging along live rock ledges and sand edges.',
+    thumbnail: '/fish/emerald-mithrax-crab.webp',
+  },
+  {
+    id: 'scarlet-skunk-cleaner-shrimp',
+    commonName: 'Scarlet skunk cleaner shrimp',
+    scientificName: 'Lysmata amboinensis',
+    habitat: 'Cleaner shrimp perched near reef crevices and sandy overhangs.',
+    thumbnail: '/fish/scarlet-skunk-cleaner-shrimp.webp',
   },
 ]
 

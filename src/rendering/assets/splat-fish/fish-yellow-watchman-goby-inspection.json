@@ -8,7 +8,7 @@
       "upAxis": "+Y",
       "origin": "local",
       "dimensionsM": [
-        0.293486,
+        0.294178,
         0.707764,
         2
       ],
@@ -41,12 +41,12 @@
   },
   "boundsM": {
     "min": [
-      -0.146743,
+      -0.147089,
       -0.353847,
       -1
     ],
     "max": [
-      0.146743,
+      0.147089,
       0.353917,
       1
     ]
@@ -55,15 +55,15 @@
     {
       "id": "yellow_watchman_goby_body",
       "role": "fish",
-      "vertexCount": 5299,
+      "vertexCount": 5385,
       "boundsM": {
         "min": [
-          -0.146743,
+          -0.147089,
           -0.353847,
           -1
         ],
         "max": [
-          0.146743,
+          0.147089,
           0.353917,
           1
         ]
@@ -76,5 +76,12 @@
     }
   ],
   "sockets": [],
-  "collisionParts": []
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Cryptocentrus cinctus & project-original public/fish/yellow-watchman-goby.webp silhouette",
+    "sourceUrl": "https://www.fishbase.se/summary/Cryptocentrus-cinctus",
+    "referenceHeightToLength": 0.3542,
+    "measuredHeightToLength": 0.353882,
+    "relativeDeviationPct": 0.09
+  }
 }

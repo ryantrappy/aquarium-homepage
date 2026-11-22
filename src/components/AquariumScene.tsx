@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type MouseEvent, type RefObject } from 'react'
-import type { ServiceConfig } from '../lib/services'
+import { hasServiceUrl, type ServiceConfig } from '../lib/services'
 import { getFishById } from '../lib/fish'
 import { FishFigure } from './FishFigure'
 import type { AquariumController, SceneStatus } from '../rendering/scene/aquarium'
@@ -115,7 +115,8 @@ export function AquariumScene({
   function nativeTarget(event: MouseEvent<HTMLAnchorElement>, service: ServiceConfig) {
     // Every new action resolves its own target. A previous native context menu
     // may have borrowed this overlapping rectangle for a different fish.
-    event.currentTarget.href = service.url
+    if (hasServiceUrl(service)) event.currentTarget.href = service.url
+    else event.currentTarget.removeAttribute('href')
     const keyboard = event.type === 'contextmenu' ? event.clientX === 0 && event.clientY === 0 : event.detail === 0
     const keyboardOrLabel = keyboard || (event.target instanceof Element && Boolean(event.target.closest('.fish-name')))
     let selected = service
@@ -132,6 +133,11 @@ export function AquariumScene({
       }
     }
     const clickedAnchor = event.currentTarget
+    if (!hasServiceUrl(selected)) {
+      event.preventDefault()
+      clickedAnchor.removeAttribute('href')
+      return selected
+    }
     if (selected.id !== service.id) {
       // An overlapping rectangle may belong to another fish. Let this same
       // native click open the visible fish's actual URL, retaining modifiers
@@ -175,9 +181,10 @@ export function AquariumScene({
         {services.map(service => {
           const species = getFishById(service.fishId)
           if (!species) return null
-          return <a key={service.id} data-service-id={service.id} className="aquarium-fish-link" href={service.url} target="_blank" rel="noreferrer" aria-label={`Open ${service.name} in a new tab`} title={`${service.name} · ${species.commonName}`} onClick={event => activate(event, service)} onAuxClick={event => { if (event.button === 1) activate(event, service) }} onContextMenu={event => { nativeTarget(event, service) }}>
+          const linked = hasServiceUrl(service)
+          return <a key={service.id} data-service-id={service.id} className={`aquarium-fish-link${linked ? '' : ' is-unlinked'}`} href={linked ? service.url : undefined} target={linked ? '_blank' : undefined} rel={linked ? 'noreferrer' : undefined} aria-label={linked ? `Open ${service.name} in a new tab` : `Inspect ${service.name} (${species.commonName}, no link)`} title={linked ? `${service.name} · ${species.commonName}` : `${service.name} · ${species.commonName} · no link`} onClick={event => activate(event, service)} onAuxClick={event => { if (event.button === 1) activate(event, service) }} onContextMenu={event => { nativeTarget(event, service) }}>
             <FishFigure fish={species} />
-            <span className="fish-name"><i className="fish-status-dot" aria-hidden="true" /><span>{service.name}</span>{service.isExample && <small>example</small>}</span>
+            <span className="fish-name"><i className={`fish-status-dot${linked ? '' : ' is-unlinked'}`} aria-hidden="true" /><span>{service.name}</span>{!linked && <small className="no-link-badge">no link</small>}{service.isExample && <small>example</small>}</span>
             <span className="fish-link-tooltip" aria-hidden="true">{service.name}</span>
           </a>
         })}
@@ -193,11 +200,15 @@ export function AquariumScene({
       {status === 'ready' && focusedService && focusedSpecies && (
         <aside className="fish-inspect-card" aria-label={`Inspecting ${focusedService.name}`}>
           <div className="fish-inspect-details">
-            <span className="fish-inspect-title"><i className="fish-status-dot" aria-hidden="true" /><span>{focusedService.name}</span></span>
+            <span className="fish-inspect-title"><i className={`fish-status-dot${hasServiceUrl(focusedService) ? '' : ' is-unlinked'}`} aria-hidden="true" /><span>{focusedService.name}</span>{!hasServiceUrl(focusedService) && <small className="no-link-badge">no link</small>}</span>
             <span className="fish-inspect-species">{focusedSpecies.commonName}</span>
           </div>
           <div className="fish-inspect-actions">
-            <a className="fish-inspect-launch" href={focusedService.url} target="_blank" rel="noreferrer">Open {focusedService.name}</a>
+            {hasServiceUrl(focusedService) ? (
+              <a className="fish-inspect-launch" href={focusedService.url} target="_blank" rel="noreferrer">Open {focusedService.name}</a>
+            ) : (
+              <span className="fish-inspect-unlinked">No link associated</span>
+            )}
             <button className="fish-inspect-reset" type="button" onClick={resetPanoramaView}>Reset view</button>
           </div>
         </aside>

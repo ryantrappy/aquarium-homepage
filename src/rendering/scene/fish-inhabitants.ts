@@ -1,4 +1,4 @@
-import type { ServiceConfig } from '../../lib/services'
+import { hasServiceUrl, type ServiceConfig } from '../../lib/services'
 import { getFishById } from '../../lib/fish'
 
 export type FishLinkInhabitant = {
@@ -14,10 +14,17 @@ export function refreshFishLink(item: FishLinkInhabitant, service: ServiceConfig
   item.service = service; item.anchor = anchor
   if (!anchor) return
   const species = getFishById(service.fishId)
+  const linked = hasServiceUrl(service)
   const suffix = item.artworkUnavailable ? ' · thumbnail unavailable' : item.fallback ? ' · artwork preview' : ''
-  anchor.href = service.url
-  anchor.title = `${service.name} · ${species?.commonName ?? 'reef fish'}${suffix}`
-  anchor.setAttribute('aria-label', `Open ${service.name} in a new tab${item.artworkUnavailable ? '; fish thumbnail unavailable' : ''}`)
+  if (linked) anchor.href = service.url
+  else anchor.removeAttribute('href')
+  anchor.title = `${service.name} · ${species?.commonName ?? 'reef fish'}${linked ? '' : ' · no link'}${suffix}`
+  anchor.setAttribute(
+    'aria-label',
+    linked
+      ? `Open ${service.name} in a new tab${item.artworkUnavailable ? '; fish thumbnail unavailable' : ''}`
+      : `Inspect ${service.name} (${species?.commonName ?? 'reef fish'}, no link)${item.artworkUnavailable ? '; fish thumbnail unavailable' : ''}`,
+  )
   if (item.artworkUnavailable) anchor.dataset.artworkError = 'true'
   else anchor.removeAttribute('data-artwork-error')
 }

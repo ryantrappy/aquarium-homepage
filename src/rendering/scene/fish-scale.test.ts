@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import * as THREE from 'three'
 import { describe, expect, it } from 'vitest'
-import { REEF_FISH as fishData } from '../../lib/fish'
+import { isInvertebrateSpecies, REEF_FISH as fishData } from '../../lib/fish'
 import {
   FISH_BIOLOGICAL_REFERENCE_LENGTH_INCHES, FISH_RENDER_LENGTH_INCHES, MIN_FISH_CLEARANCE, MODEL_SWIM_AXIS_LENGTH, SNOWFLAKE_MORAY_FOREBODY_BOUNDS, SNOWFLAKE_MORAY_HEAD_BONE_BIND_POSITION, SPRITE_ARTWORK_LENGTH_FRACTION, SPRITE_PLANE_WIDTH, TANK_UNITS_PER_INCH,
   fishBodyRadiusM, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale,
@@ -28,6 +28,10 @@ const runtimeModels: Record<string, string> = {
   'copperband-butterflyfish': 'src/rendering/assets/splat-fish/copperband-butterflyfish.glb',
   'desjardins-sailfin-tang': 'src/rendering/assets/fish/download_testing_copies/zebrasoma_desjardinii-copy.glb',
   'snowflake-moray-eel': 'src/rendering/assets/fish/snowflake-moray-eel.glb',
+  'banded-trochus-snail': 'src/rendering/assets/invertebrates/invertebrate-banded-trochus-snail.glb',
+  'scarlet-reef-hermit-crab': 'src/rendering/assets/invertebrates/invertebrate-scarlet-reef-hermit-crab.glb',
+  'emerald-mithrax-crab': 'src/rendering/assets/invertebrates/invertebrate-emerald-mithrax-crab.glb',
+  'scarlet-skunk-cleaner-shrimp': 'src/rendering/assets/invertebrates/invertebrate-scarlet-skunk-cleaner-shrimp.glb',
 }
 
 type GltfJson = {
@@ -105,7 +109,7 @@ function parseReferenceRows() {
     if (!id || cells.length < 6) continue
     const maxCell = cells[3]
     const maximum = maxCell.match(/^\[([^\]]+)\]/)?.[1] ?? maxCell
-    const fishBaseUrl = maxCell.match(/\]\((https:\/\/www\.fishbase\.se\/summary\/[^)]+)\)/)?.[1] ?? ''
+    const fishBaseUrl = maxCell.match(/\]\((https:\/\/www\.(?:fishbase|sealifebase)\.se\/summary\/[^)]+)\)/)?.[1] ?? ''
     rows.set(id, { typical: cells[2], maximum, fishBaseUrl, renderLengthInches: Number(cells[4]) })
   }
   return rows
@@ -124,7 +128,8 @@ describe('true relative fish sizing', () => {
     expect(rows.size).toBe(fishData.length)
     for (const fish of fishData) {
       const speciesSlug = fish.scientificName.trim().replace(/\s+/g, '-')
-      expect(rows.get(fish.id)?.fishBaseUrl, fish.id).toBe(`https://www.fishbase.se/summary/${speciesSlug}`)
+      const domain = isInvertebrateSpecies(fish.id) ? 'sealifebase.se' : 'fishbase.se'
+      expect(rows.get(fish.id)?.fishBaseUrl, fish.id).toBe(`https://www.${domain}/summary/${speciesSlug}`)
     }
 
     const anthias = rows.get('lyretail-anthias')!
@@ -175,10 +180,12 @@ describe('true relative fish sizing', () => {
     const provenance = JSON.parse(readFileSync(resolve(root, 'docs/fish-art-provenance.json'), 'utf8')) as {
       known_imagegen_webp_canonicals: { species_id: string; alpha_visible_width_fraction: number }[]
       new_generated_png_candidates: { species_id: string; alpha_visible_width_fraction: number }[]
+      original_blender_studio_thumbnails: { species_id: string; alpha_visible_width_fraction: number }[]
     }
     const recordedFractions = new Map([
       ...provenance.known_imagegen_webp_canonicals,
       ...provenance.new_generated_png_candidates,
+      ...provenance.original_blender_studio_thumbnails,
     ].map(item => [item.species_id, item.alpha_visible_width_fraction]))
     for (const fish of spriteEligibleFish) {
       expect(SPRITE_ARTWORK_LENGTH_FRACTION[fish.id], fish.id).toBeGreaterThan(0)

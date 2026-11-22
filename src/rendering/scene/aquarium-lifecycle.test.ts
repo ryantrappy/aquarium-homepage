@@ -11,6 +11,8 @@ import { refreshFishLink } from './fish-inhabitants'
 import { createAquarium, type AquariumController, type SceneStatus } from './aquarium'
 import { ENVIRONMENT_MAP_INTENSITY } from './environment-map'
 import { CENTER_ARCH_MOUNTS } from './reef-arch'
+import { NSA_ROCK_URLS } from './reef-nsa'
+import { stepSwimmingSchool } from './motion'
 import { projectFishBodyBounds } from './fish-link-projection'
 import * as labelLayout from './fish-label-layout'
 import * as glassEnclosure from './glass-enclosure'
@@ -22,6 +24,7 @@ const state = vi.hoisted(() => ({
   textures: [] as { texture: import('three').Texture; load?: () => void; error?: (error: unknown) => void }[],
   deferFishLoads: false, failFishLoads: false, pendingFishLoadReleases: [] as Array<() => void>, resizeCallback: undefined as undefined | (() => void),
   deferMeshNavigation: false, pendingMeshNavigationReleases: [] as Array<() => void>, meshNavigationResult: undefined as unknown,
+  deferLegacyReef: false, releaseLegacyReef: undefined as (() => void) | undefined, reefLoads: [] as string[],
   reefFallbackIslandIds: [] as string[], reefNavigationIslandIds: [] as string[][],
   reefNavigationCoralSockets: [] as string[][],
   reefAssemblyCalls: [] as Array<{ reefName: string; mounts: readonly unknown[]; options: unknown }>,
@@ -52,6 +55,20 @@ vi.mock('three/addons/loaders/GLTFLoader.js', async () => {
   return { GLTFLoader: class {
     async loadAsync(url: string) {
       const root = new T.Group()
+      if (url.includes('reef-nsa-kit.glb')) {
+        state.reefLoads.push('nsa')
+        for (const name of Object.keys(NSA_ROCK_URLS)) {
+          const mesh = new T.Mesh(new T.BoxGeometry(.2, .2, .2), new T.MeshStandardMaterial())
+          mesh.name = name
+          mesh.userData.reefPrimitive = { role: 'rock' }
+          root.add(mesh)
+        }
+        return { scene: root, animations: [] }
+      }
+      if (url === 'left-rock') {
+        state.reefLoads.push('legacy')
+        if (state.deferLegacyReef) await new Promise<void>(resolve => { state.releaseLegacyReef = resolve })
+      }
       if (url.includes('reef-center-arch.glb')) {
         const addRock = (name: string, size: [number, number, number], position: [number, number, number]) => {
           const mesh = new T.Mesh(new T.BoxGeometry(...size), new T.MeshStandardMaterial())
@@ -63,6 +80,13 @@ vi.mock('three/addons/loaders/GLTFLoader.js', async () => {
         addRock('arch-leg-left', [0.35, 1.8, 0.5], [-0.8, -0.1, 0])
         addRock('arch-leg-right', [0.35, 1.8, 0.5], [0.8, -0.1, 0])
         addRock('arch-cap', [1.95, 0.35, 0.5], [0, 0.925, 0])
+        return { scene: root, animations: [] }
+      }
+      if (url.includes('reef-nsa-rubble-talus.glb')) {
+        const mesh = new T.Mesh(new T.BoxGeometry(0.39, 0.094, 0.27), new T.MeshStandardMaterial())
+        mesh.name = 'rubble-talus-apron'
+        mesh.userData.reefPrimitive = { role: 'rock' }
+        root.add(mesh)
         return { scene: root, animations: [] }
       }
       if (url.includes('left-rock') || url.includes('right-rock') || url === 'coral') return { scene: root, animations: [] }
@@ -143,7 +167,7 @@ vi.mock('./reef-assembly', async importOriginal => {
         ? state.archMountedCoralBindings
         : state.mountedCoralBindings
       state.reefAssemblyCalls.push({ reefName: reef.name, mounts, options })
-      return { update() {}, mountedCorals }
+      return { update() {}, mountedCorals, instancedMeshes: [] }
     },
     instantiateModularReefHabitat: () => ({ obstacles: [], anchors: [] }),
   }
@@ -194,7 +218,7 @@ vi.mock('./environment-map', async importOriginal => {
 })
 vi.mock('./motion', async importOriginal => {
   const real = await importOriginal<typeof import('./motion')>()
-  return { ...real, createSwimmingFish: (...args: Parameters<typeof real.createSwimmingFish>) => {
+  return { ...real, stepSwimmingSchool: vi.fn(real.stepSwimmingSchool), createSwimmingFish: (...args: Parameters<typeof real.createSwimmingFish>) => {
     if (args[0] === state.throwCreateForId) { state.beforeCreateFailure?.(); throw Error('Fixture extension setup failed') }
     const fish = real.createSwimmingFish(args[0], args[1] === 'artwork-fixture' ? 'ocellaris-clownfish' : args[1], ...args.slice(2) as [typeof args[2], typeof args[3], typeof args[4]])
     vi.spyOn(fish.extensions, 'dispose'); state.created.push(fish); return fish
@@ -270,6 +294,7 @@ beforeEach(() => {
   state.created = []; state.players = []; state.sources = []; state.textures = []; state.blockedSpawn = false; state.throwCreateForId = ''; state.beforeCreateFailure = undefined
   state.deferFishLoads = false; state.failFishLoads = false; state.pendingFishLoadReleases = []; state.resizeCallback = undefined
   state.deferMeshNavigation = false; state.pendingMeshNavigationReleases = []; state.meshNavigationResult = undefined
+  state.deferLegacyReef = false; state.releaseLegacyReef = undefined; state.reefLoads = []
   state.reefFallbackIslandIds = []; state.reefNavigationIslandIds = []
   state.reefNavigationCoralSockets = []; state.reefAssemblyCalls = []; state.coralFallbackCalls = []
   state.rockFallbackUnavailable = false
@@ -279,6 +304,7 @@ beforeEach(() => {
   state.fakeEnvironmentMap = undefined
   state.standardFishMaterials = false
   state.forceLabelExposure = false
+  vi.mocked(stepSwimmingSchool).mockClear()
   vi.stubGlobal('devicePixelRatio', 1)
   vi.stubGlobal('ResizeObserver', class { constructor(callback: () => void) { state.resizeCallback = callback } observe() {} disconnect() {} })
   vi.spyOn(document, 'hidden', 'get').mockImplementation(() => documentHidden)
@@ -297,6 +323,7 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     state.forceLabelExposure = true
     const services = [service('caption')]
     await start(services)
+    await window.__AQUARIUM_LOOKDEV__!.ready()
     const anchor = overlay.querySelector<HTMLAnchorElement>('a')!, caption = anchor.querySelector<HTMLElement>('.fish-name')!
     Object.defineProperties(caption, { offsetWidth: { value: 140 }, offsetHeight: { value: 27 } })
     const motion = state.created.find(item => item.id === 'caption')!
@@ -397,6 +424,7 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
   })
 
   it('registers the center arch in desktop collision setup and omits it from the narrow scene', async () => {
+    window.history.replaceState({}, '', '/?reef=legacy')
     const coralRoot = new THREE.Group()
     const coralGeometry = new THREE.SphereGeometry(0.16, 8, 6)
     coralGeometry.computeBoundingSphere()
@@ -409,6 +437,7 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     }]
     await start([service('center-arch-link')])
     expect(state.renderer!.scene!.getObjectByName('reef-center-arch')).toBeDefined()
+    expect(state.renderer!.scene!.getObjectByName('reef-nsa-rubble-talus-grounding')?.children).toHaveLength(6)
     expect(state.reefFallbackIslandIds).toContain('reef-center-arch')
     expect(state.reefNavigationIslandIds.at(-1)).toContain('reef-center-arch')
     const archAssembly = state.reefAssemblyCalls.find(call => call.reefName === 'reef-center-arch')!
@@ -426,13 +455,73 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     state.resizeCallback?.()
 
     expect(state.renderer!.scene!.getObjectByName('reef-center-arch')).toBeUndefined()
+    expect(state.renderer!.scene!.getObjectByName('reef-nsa-rubble-talus-grounding')?.children).toHaveLength(2)
     expect(state.reefFallbackIslandIds.slice(state.reefFallbackIslandIds.indexOf('reef-center-arch') + 1)).not.toContain('reef-center-arch')
     expect(state.reefNavigationIslandIds.at(-1)).not.toContain('reef-center-arch')
     expect(state.reefNavigationCoralSockets.at(-1)).not.toContain(CENTER_ARCH_MOUNTS[0]!.socketName)
   })
 
+  it('feeds modular destinations into the live simulation only after collision is ready', async () => {
+    window.history.replaceState({}, '', '/?reef=nsa')
+    state.deferMeshNavigation = true
+    const goby = service('modular-goby', 'yellow-watchman-goby')
+    await start([goby])
+    expect(state.reefNavigationIslandIds.at(-1)).toContain('reef-nsa-high-arch-span')
+    advance()
+    const stepped = vi.mocked(stepSwimmingSchool)
+    expect(stepped).toHaveBeenCalled()
+    const before = stepped.mock.lastCall![1].anchors.map(({ id }) => id)
+    expect(before).not.toContain('nsa-buttress-sand-sandBurrowEntrance')
+
+    state.meshNavigationResult = readyMeshNavigation(state.reefNavigationIslandIds.at(-1)!)
+    state.pendingMeshNavigationReleases.shift()!()
+    await vi.waitFor(() => {
+      expect(stepped.mock.lastCall![1].anchors).toContainEqual(
+        expect.objectContaining({ id: 'nsa-buttress-sand-sandBurrowEntrance' }),
+      )
+    })
+    state.renderer!.loop?.(100)
+    expect(stepped.mock.lastCall![0]).toContainEqual(expect.objectContaining({ id: goby.id }))
+    expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(goby.url + '/')
+  })
+
+  it('loads the default legacy reef once and toggles wide/narrow islands cleanly across resizes while paused', async () => {
+    const services = [service('resize-link')]
+    const resizeTo = (width: number) => {
+      Object.defineProperty(host, 'clientWidth', { configurable: true, value: width })
+      state.resizeCallback?.()
+    }
+    state.deferLegacyReef = true
+    anchors(services)
+    controller = createAquarium(host.querySelector('canvas')!, overlay, services, false, status)
+    await vi.waitFor(() => expect(state.reefLoads).toEqual(['legacy']))
+    expect(status).not.toHaveBeenCalledWith('ready')
+
+    state.releaseLegacyReef!()
+    await vi.waitFor(() => expect(status).toHaveBeenLastCalledWith('ready'))
+
+    const scene = state.renderer!.scene!
+    expect(scene.getObjectByName('reef-center-arch')).toBeDefined()
+    expect(scene.getObjectByName('reef-nsa-high-arch-span')).toBeUndefined()
+
+    controller.update(services, true)
+    resizeTo(402)
+    resizeTo(420)
+    expect(state.reefLoads).toEqual(['legacy'])
+    expect(state.reefNavigationIslandIds.at(-1)).toEqual(['reef-0'])
+    expect(scene.getObjectByName('reef-center-arch')).toBeUndefined()
+    expect(state.renderer!.loop).toBeNull()
+    expect(overlay.querySelector<HTMLAnchorElement>('a')?.href).toBe(services[0]!.url + '/')
+
+    resizeTo(1440)
+    expect(scene.getObjectByName('reef-center-arch')).toBeDefined()
+    expect(state.reefLoads).toEqual(['legacy'])
+    controller.update(services, false)
+    expect(state.renderer!.loop).not.toBeNull()
+  })
+
   it('fails closed if an arch-mounted coral has no measurable fallback bounds after resize', async () => {
-    window.history.replaceState({}, '', '/?lookdev=1&seed=94')
+    window.history.replaceState({}, '', '/?lookdev=1&seed=94&reef=legacy')
     const services = [service('arch-coral-link')]
     await start(services)
     const bridge = window.__AQUARIUM_LOOKDEV__!
@@ -508,6 +597,7 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
   })
 
   it('keeps the supplied moray in the right cave and focuses its authored head bone', async () => {
+    window.history.replaceState({}, '', '/?reef=legacy')
     state.meshNavigationResult = readyMeshNavigation(['reef-0', 'reef-1'])
     const services = [service('moray-service', 'snowflake-moray-eel')]
     await start(services)
@@ -543,6 +633,7 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
   })
 
   it('keeps the moray service link when the right-cave collider is unavailable', async () => {
+    window.history.replaceState({}, '', '/?reef=legacy')
     state.meshNavigationResult = readyMeshNavigation(['reef-0'])
     const services = [service('moray-without-cave', 'snowflake-moray-eel')]
     await start(services)
@@ -556,6 +647,7 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
   })
 
   it('keeps the moray service link when its supplied model fails to load', async () => {
+    window.history.replaceState({}, '', '/?reef=legacy')
     state.failFishLoads = true
     state.meshNavigationResult = readyMeshNavigation(['reef-0', 'reef-1'])
     const services = [service('moray-without-model', 'snowflake-moray-eel')]
@@ -569,6 +661,7 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
   })
 
   it('fails closed without duplicating a moray when invalid input assigns it to multiple services', async () => {
+    window.history.replaceState({}, '', '/?reef=legacy')
     state.meshNavigationResult = readyMeshNavigation(['reef-0', 'reef-1'])
     const services = [service('duplicate-moray-one', 'snowflake-moray-eel'), service('duplicate-moray-two', 'snowflake-moray-eel')]
     await start(services)

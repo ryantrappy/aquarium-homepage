@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import * as THREE from 'three'
 import { expect, it } from 'vitest'
-import { mountedAnemoneHosts } from './anemone-host'
+import { isHostAnemoneCoralAsset, mountedAnemoneHosts } from './anemone-host'
 import { AQUARIUM_WATER_BOUNDS, assembleCoralsOnRockSockets, DEFAULT_LEFT_ISLAND_MOUNTS, DEFAULT_RIGHT_ISLAND_MOUNTS, instantiateModularReefHabitat, LIVE_ROCK_ISLAND_URLS, MODULAR_CORAL_ASSET_URLS, snapshotMountedCoralOrigins } from './reef-assembly'
 import { overviewHalfWidthAtDepth } from './camera-zoom'
 import { reefPlacementsForViewport } from './reef-layout'
@@ -65,8 +65,17 @@ it.each([[false,'left'],[true,'left'],[false,'right']] as const)('keeps actual m
   const hosts = mountedAnemoneHosts(assembly.mountedCorals, 'reef-0')
   expect(hosts).toHaveLength(1)
   const host = hosts[0]
-  const crown = assembly.mountedCorals.find(c=>c.coralAssetId==='coral-anemone-bta')!.root.getObjectByName('Anemone_Tentacle_Crown')!
-  expect(new THREE.Box3().setFromObject(crown).containsPoint(new THREE.Vector3(host.position.x, host.position.y, host.position.z))).toBe(true)
+  const hostBinding = assembly.mountedCorals.find(c => isHostAnemoneCoralAsset(c.coralAssetId))!
+  let crown: THREE.Object3D | undefined = hostBinding.root.getObjectByName('Anemone_Tentacle_Crown')
+  if (!crown) {
+    hostBinding.root.traverse(node => {
+      if (crown || !(node instanceof THREE.Mesh)) return
+      const primitive = node.userData.reefPrimitive ?? node.parent?.userData.reefPrimitive
+      if (primitive?.id === 'anemone_tentacle_crown') crown = node
+    })
+  }
+  expect(crown).toBeDefined()
+  expect(new THREE.Box3().setFromObject(crown!).containsPoint(new THREE.Vector3(host.position.x, host.position.y, host.position.z))).toBe(true)
   const nav = await createReefMeshNavigation([{ reef, islandId: 'reef-0', mountedCorals: assembly.mountedCorals }])
   expect(nav.status, JSON.stringify(nav)).toBe('ready'); if (nav.status !== 'ready') return
   const config = nav.meshNavigation, resident = config.queryCapsuleForSpecies?.['ocellaris-clownfish']!

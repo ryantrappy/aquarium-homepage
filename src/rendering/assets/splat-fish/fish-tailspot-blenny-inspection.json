@@ -55,7 +55,7 @@
     {
       "id": "tailspot_blenny_body",
       "role": "fish",
-      "vertexCount": 5669,
+      "vertexCount": 5749,
       "boundsM": {
         "min": [
           -0.135548,
@@ -76,5 +76,12 @@
     }
   ],
   "sockets": [],
-  "collisionParts": []
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Ecsenius stigmatura lateral body-depth proportion",
+    "sourceUrl": "https://www.fishbase.se/summary/Ecsenius-stigmatura",
+    "referenceHeightToLength": 0.2564,
+    "measuredHeightToLength": 0.260007,
+    "relativeDeviationPct": 1.41
+  }
 }

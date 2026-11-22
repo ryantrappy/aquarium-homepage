@@ -42,6 +42,10 @@ FishBase maxima rechecked 2026-11-05 (AQ-60). Summary-page content was directly 
 | `copperband-butterflyfish` | 6–7 / 15–18 | [7.9 / 20 TL](https://www.fishbase.se/summary/Chelmon-rostratus) | 6.5 | ~2.2× |
 | `desjardins-sailfin-tang` | 12–14 / 30–35 | [15.7 / 40 TL](https://www.fishbase.se/summary/Zebrasoma-desjardinii) | 12 | 4.0× |
 | `snowflake-moray-eel` | 24 / 61 (AQ-106 project reference, not a typical-size claim) | [39.4 / 100 cm TL male/unsexed (Ref. 48635); common length 19.7 / 50 cm TL male/unsexed (Ref. 3258)](https://www.fishbase.se/summary/Echidna-nebulosa) | 9 | 3.0× |
+| `banded-trochus-snail` | Unverified project staging target | [SeaLifeBase summary](https://www.sealifebase.se/summary/Trochus-histrio) | 1.75 | ~0.6× |
+| `scarlet-reef-hermit-crab` | Unverified project staging target | [SeaLifeBase summary](https://www.sealifebase.se/summary/Paguristes-cadenati) | 2 | ~0.7× |
+| `emerald-mithrax-crab` | Unverified project staging target | [SeaLifeBase summary](https://www.sealifebase.se/summary/Mithraculus-sculptus) | 2 | ~0.7× |
+| `scarlet-skunk-cleaner-shrimp` | Unverified project staging target | [SeaLifeBase summary](https://www.sealifebase.se/summary/Lysmata-amboinensis) | 3.25 | ~1.1× |
 
 TL = total length; SL = standard length (FishBase reports the yellow watchman goby maximum as SL, so its total length is somewhat longer). Lyretail rendering uses the project-selected 2.5 in target (6.35 cm), below the FishBase female maximum; this is a render choice, not a claim of typical adult size. The other numbers in the unverified typical-estimate column are retained as draft estimates pending row-specific husbandry sources. The sailfin row was added 2026-11-09 (Ryan's sailfin decision): its FishBase maximum (40.0 cm TL) and common length (32.0 cm TL) were verified that day, and its 12 in render target follows the established pattern of sitting below the maximum (yellow tang 6.5 vs 7.9, blue tang 9 vs 12.2) while staying inside the typical adult range — the largest fish in the tank, about 1.85× the yellow tang.
 

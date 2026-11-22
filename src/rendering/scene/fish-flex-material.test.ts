@@ -7,9 +7,12 @@ import {
 } from './fish-body-flex'
 import {
   bindFishFlexToModel,
+  classifyFishMaterialPartRole,
   evaluateFishFlexVertex,
   patchFishFlexShader,
+  SPECIES_OPTICAL_PROFILES,
   updateFishFlex,
+  upgradeFishMaterialForPhotorealism,
   type FishFlexUniforms,
 } from './fish-flex-material'
 import { SPECIES_LOCOMOTION_SIGNATURES } from './species-locomotion-extensions'
@@ -194,5 +197,48 @@ describe('fish flex material (AQ-12 / AQ-49 / AQ-74)', () => {
 
     binding.dispose()
     expect(values.frequencyHz).toBeGreaterThan(0)
+  })
+
+  it('classifies fish part names and upgrades materials to MeshPhysicalMaterial with wet clearcoat, species iridescence, and graceful map fallback (AQ-70.8 / AQ-72)', () => {
+    expect(classifyFishMaterialPartRole('blue_tang_body', 'FishMaterial')).toBe('body')
+    expect(classifyFishMaterialPartRole('dorsal_fin_mesh', 'fin_mat')).toBe('fin')
+    expect(classifyFishMaterialPartRole('pectoral_L_fin', '')).toBe('fin')
+    expect(classifyFishMaterialPartRole('cornea_dome', 'eye_gloss')).toBe('eye')
+
+    // Missing optional maps (no normalMap, no roughnessMap) should fall back cleanly
+    const bareSource = new THREE.MeshStandardMaterial({ color: '#2266dd', roughness: 0.4, metalness: 0.05 })
+    const chromisBody = upgradeFishMaterialForPhotorealism(bareSource, 'blue-green-chromis', 'body')
+    expect(chromisBody).toBeInstanceOf(THREE.MeshPhysicalMaterial)
+    expect(chromisBody.ior).toBeCloseTo(1.35, 5)
+    expect(chromisBody.clearcoat).toBeCloseTo(SPECIES_OPTICAL_PROFILES['blue-green-chromis'].clearcoat, 5)
+    expect(chromisBody.iridescence).toBeCloseTo(0.48, 5)
+    expect(chromisBody.iridescenceIOR).toBeCloseTo(1.83, 5)
+    expect(chromisBody.clearcoatRoughnessMap).toBeNull()
+    expect(chromisBody.clearcoatNormalMap).toBeNull()
+
+    // Present optional maps (roughnessMap + normalMap) wire into clearcoat roughness & micro-normal
+    const texRough = new THREE.Texture()
+    const texNorm = new THREE.Texture()
+    const texturedSource = new THREE.MeshStandardMaterial({
+      color: '#ffaa00',
+      roughnessMap: texRough,
+      normalMap: texNorm,
+    })
+    const clownBody = upgradeFishMaterialForPhotorealism(texturedSource, 'ocellaris-clownfish', 'body')
+    expect(clownBody.clearcoatRoughnessMap).toBe(texRough)
+    expect(clownBody.clearcoatNormalMap).toBe(texNorm)
+    expect(clownBody.iridescence).toBeLessThan(chromisBody.iridescence)
+
+    // Fin role configures DoubleSide and backlit fin sheen
+    const finMat = upgradeFishMaterialForPhotorealism(bareSource, 'lyretail-anthias', 'fin')
+    expect(finMat.side).toBe(THREE.DoubleSide)
+    expect(finMat.sheen).toBeGreaterThanOrEqual(0.42)
+    expect(finMat.clearcoat).toBeCloseTo(0.24, 5)
+
+    // Eye/cornea role configures ultra-low roughness and high clearcoat pin-sharp highlight
+    const eyeMat = upgradeFishMaterialForPhotorealism(bareSource, 'blue-tang', 'eye')
+    expect(eyeMat.roughness).toBeLessThanOrEqual(0.04)
+    expect(eyeMat.clearcoat).toBeGreaterThanOrEqual(0.9)
+    expect(eyeMat.clearcoatRoughness).toBeLessThanOrEqual(0.04)
   })
 })

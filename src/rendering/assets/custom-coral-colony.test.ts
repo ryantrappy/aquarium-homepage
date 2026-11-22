@@ -43,6 +43,66 @@ const coralCases = [
     socketName: 'socket_brain_apron_01',
     archetype: 'mounded-lps',
   },
+  {
+    id: 'reef-acropora-tabular-plate',
+    mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+    socketName: 'socket_sps_crest_04',
+    archetype: 'branching-sps',
+  },
+  {
+    id: 'reef-montipora-tier-shelf',
+    mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+    socketName: 'socket_plate_ledge_04',
+    archetype: 'plating-sps',
+  },
+  {
+    id: 'reef-brain-fleshy-lobophyllia',
+    mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+    socketName: 'socket_brain_apron_04',
+    archetype: 'mounded-lps',
+  },
+  {
+    id: 'reef-acropora-staghorn-thicket',
+    mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
+    socketName: 'socket_sps_crest_03',
+    archetype: 'branching-sps',
+  },
+  {
+    id: 'reef-acanthastrea-lordhowensis',
+    mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
+    socketName: 'socket_brain_apron_02',
+    archetype: 'mounded-lps',
+  },
+  {
+    id: 'reef-acropora-violet-millepora',
+    mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
+    socketName: 'socket_sps_crest_02',
+    archetype: 'branching-sps',
+  },
+  {
+    id: 'reef-montipora-undata-cap',
+    mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
+    socketName: 'socket_plate_ledge_02',
+    archetype: 'plating-sps',
+  },
+  {
+    id: 'reef-stylophora-magenta-club',
+    mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+    socketName: 'socket_sps_crest_06',
+    archetype: 'branching-sps',
+  },
+  {
+    id: 'reef-montipora-sunset-shelf',
+    mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+    socketName: 'socket_plate_ledge_03',
+    archetype: 'plating-sps',
+  },
+  {
+    id: 'reef-favia-war-coral',
+    mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+    socketName: 'socket_brain_apron_03',
+    archetype: 'mounded-lps',
+  },
 ] as const
 
 type GlbDocument = {

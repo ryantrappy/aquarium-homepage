@@ -47,6 +47,14 @@ const socket = z.object({
   }).strict(),
 }).strict()
 
+const silhouetteReference = z.object({
+  source: z.string().min(1),
+  sourceUrl: z.url(),
+  referenceHeightToLength: positive,
+  measuredHeightToLength: positive,
+  relativeDeviationPct: finite.min(0).max(8),
+}).strict()
+
 /** Offline inspection data, not a GPU loader and not a proof of visual quality. */
 export const assetInspectionSchema = z.object({
   extras: z.object({ reefAsset: z.object({
@@ -61,6 +69,7 @@ export const assetInspectionSchema = z.object({
   collisionParts: z.array(z.object({
     id: identifier, sourceMesh: identifier, boundsM: bounds, evidence,
   }).strict()).max(32),
+  silhouetteReference: silhouetteReference.optional(),
 }).strict()
 
 export type AssetInspection = z.infer<typeof assetInspectionSchema>

@@ -21,6 +21,153 @@
         0.5718747545033693,
         0.21577372401952744
       ]
+    },
+    {
+      "id": "reef-nsa-bommie-mound",
+      "kind": "rock",
+      "path": "src/rendering/assets/corals/custom-rocks/reef-nsa-bommie-mound.glb",
+      "inspection": "src/rendering/assets/corals/custom-rocks/reef-nsa-bommie-mound-inspection.json",
+      "socketReport": "src/rendering/assets/corals/custom-rocks/reef-nsa-bommie-mound-socket-report.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-nsa-bommie-mound.blend",
+      "nativeSha256": "08d0a4d7d5ca090323ade89fd971052a35e21beccd57826d3bc2fc30bd825bad",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-nsa-bommie-mound.glb",
+      "overrideSha256": "78829b391f661345cba79c030498827ae1ea4ab107754376761c815efbfb0816",
+      "generatorPath": "src/rendering/modeling/build_reef_nsa_bommie_mound.py",
+      "generatorSha256": "99c05caf6f234f74512a5863dc1fa7c9224c64b6923205f26460adabb69df6d8",
+      "sha256": "4476510117764b56809d48d6662d428b02a7363b5dd6b0a0afdb362aa0ec5b28",
+      "bytes": 1645744,
+      "triangles": 14606,
+      "dimensionsM": [
+        0.6290834546089172,
+        0.3813404440879822,
+        0.372970849275589
+      ]
+    },
+    {
+      "id": "reef-nsa-cantilever-shelf",
+      "kind": "rock",
+      "path": "src/rendering/assets/corals/custom-rocks/reef-nsa-cantilever-shelf.glb",
+      "inspection": "src/rendering/assets/corals/custom-rocks/reef-nsa-cantilever-shelf-inspection.json",
+      "socketReport": "src/rendering/assets/corals/custom-rocks/reef-nsa-cantilever-shelf-socket-report.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-nsa-cantilever-shelf.blend",
+      "nativeSha256": "681213ddd4b5c12372e40c4ca3e870e0defc7d97238f450dc5382ce6768c6a69",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-nsa-cantilever-shelf.glb",
+      "overrideSha256": "c9e1d4c4e805fda187da6b4213cd2314e3a30f116a3d214b53616fb7004ef26f",
+      "generatorPath": "src/rendering/modeling/build_reef_nsa_cantilever_shelf.py",
+      "generatorSha256": "a5336dbd999b7cd4fde3ffceaea9191fa40c91d05f5efb05e193ac1b7f0c6989",
+      "sha256": "ef2c25ef8d35cac18b666ba852e43260746da3722999fb7393a7ba0c392fdbcf",
+      "bytes": 1546096,
+      "triangles": 11524,
+      "dimensionsM": [
+        0.7109382748603821,
+        0.27047327160835266,
+        0.35874131321907043
+      ]
+    },
+    {
+      "id": "reef-nsa-cave-buttress",
+      "kind": "rock",
+      "path": "src/rendering/assets/corals/custom-rocks/reef-nsa-cave-buttress.glb",
+      "inspection": "src/rendering/assets/corals/custom-rocks/reef-nsa-cave-buttress-inspection.json",
+      "socketReport": "src/rendering/assets/corals/custom-rocks/reef-nsa-cave-buttress-socket-report.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-nsa-cave-buttress.blend",
+      "nativeSha256": "2836fa1d5362409edeca19ad9e403cc122055974046389c5cbf705b18748cb9d",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-nsa-cave-buttress.glb",
+      "overrideSha256": "f5cc446a1bbaa18d50ec7031ba3ea92735de56c65477671cd7e598f1bfaadeae",
+      "generatorPath": "src/rendering/modeling/build_reef_nsa_cave_buttress.py",
+      "generatorSha256": "eab51377c8c0ef8868b387c56c77b55571808114f46197b7d99eac672f658f94",
+      "sha256": "12fef74ef42a2d933fb5705f98cd9f4c7af0f07d4742fcea5f1c97a801405f05",
+      "bytes": 1771648,
+      "triangles": 19458,
+      "dimensionsM": [
+        0.8377487659454346,
+        0.5091182589530945,
+        0.34905529022216797
+      ]
+    },
+    {
+      "id": "reef-nsa-encrusting-ledge",
+      "kind": "rock",
+      "path": "src/rendering/assets/corals/custom-rocks/reef-nsa-encrusting-ledge.glb",
+      "inspection": "src/rendering/assets/corals/custom-rocks/reef-nsa-encrusting-ledge-inspection.json",
+      "socketReport": "src/rendering/assets/corals/custom-rocks/reef-nsa-encrusting-ledge-socket-report.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-nsa-encrusting-ledge.blend",
+      "nativeSha256": "af3615fd827e2f348f26c7d7be57f412c64b8a6180f579d96a06b118cd5f533f",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-nsa-encrusting-ledge.glb",
+      "overrideSha256": "8a6d52cb931dc2ddf647c77c865f50ed6aba11f9b1dd7583a334f2e825a533ae",
+      "generatorPath": "src/rendering/modeling/build_reef_nsa_encrusting_ledge.py",
+      "generatorSha256": "e5ad0bb1f4f26ec68f4068c9ef689fb795b93e948958b575262bf38ad6282423",
+      "sha256": "fb4cc72d82bc784ea4ceb7030fda934c237ca9b531840235518484092a7b88a2",
+      "bytes": 1513116,
+      "triangles": 10564,
+      "dimensionsM": [
+        0.6907906532287598,
+        0.24859072268009186,
+        0.3701947331428528
+      ]
+    },
+    {
+      "id": "reef-nsa-high-arch-span",
+      "kind": "rock",
+      "path": "src/rendering/assets/corals/custom-rocks/reef-nsa-high-arch-span.glb",
+      "inspection": "src/rendering/assets/corals/custom-rocks/reef-nsa-high-arch-span-inspection.json",
+      "socketReport": "src/rendering/assets/corals/custom-rocks/reef-nsa-high-arch-span-socket-report.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-nsa-high-arch-span.blend",
+      "nativeSha256": "9fec6a96be1ad1d5c5ead650a18b499941c8a907b2f6de4b5d558c31f8e0e1b1",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-nsa-high-arch-span.glb",
+      "overrideSha256": "4f08f4db5ca828737648b20f89e8d7d8b642794b5d97fc40ce4c8ffed1171b2f",
+      "generatorPath": "src/rendering/modeling/build_reef_nsa_high_arch_span.py",
+      "generatorSha256": "be97fb32f21ce2ced89dd12d75e6b1ac189b32b0e0ce1a64dee94a651243036e",
+      "sha256": "fc8b0a50a32e9e6ac6f590e6d70c5477c9a5bb26abbc447862e2c95539eb2851",
+      "bytes": 1735588,
+      "triangles": 18578,
+      "dimensionsM": [
+        0.8789870142936707,
+        0.6393469572067261,
+        0.39205604791641235
+      ]
+    },
+    {
+      "id": "reef-nsa-pinnacle-spire",
+      "kind": "rock",
+      "path": "src/rendering/assets/corals/custom-rocks/reef-nsa-pinnacle-spire.glb",
+      "inspection": "src/rendering/assets/corals/custom-rocks/reef-nsa-pinnacle-spire-inspection.json",
+      "socketReport": "src/rendering/assets/corals/custom-rocks/reef-nsa-pinnacle-spire-socket-report.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-nsa-pinnacle-spire.blend",
+      "nativeSha256": "c729b9e002fc8e912d6a0c0fc623c0cba4b60aa607b709d86e69ecab90fa7a0e",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-nsa-pinnacle-spire.glb",
+      "overrideSha256": "a032f21f2c805169cc36ab238742fef0ed49e135f818fc56a31c433ec6326673",
+      "generatorPath": "src/rendering/modeling/build_reef_nsa_pinnacle_spire.py",
+      "generatorSha256": "e12318de29763480d6574a0233fc7ca7abfca2c20d476c6604e5411801079db1",
+      "sha256": "5e2cb431c2f0bc8f023e6dee360d7f480e89a2ee0d3a5c8d9054ad5585899681",
+      "bytes": 1617840,
+      "triangles": 14526,
+      "dimensionsM": [
+        0.673585832118988,
+        0.7157297134399414,
+        0.37018704414367676
+      ]
+    },
+    {
+      "id": "reef-nsa-rubble-talus",
+      "kind": "rock",
+      "path": "src/rendering/assets/corals/custom-rocks/reef-nsa-rubble-talus.glb",
+      "inspection": "src/rendering/assets/corals/custom-rocks/reef-nsa-rubble-talus-inspection.json",
+      "socketReport": "src/rendering/assets/corals/custom-rocks/reef-nsa-rubble-talus-socket-report.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-nsa-rubble-talus.blend",
+      "nativeSha256": "133d307df2a9d012ef4b3f88b1c93d846fc8b228c41eaa72f78d242036e7f59a",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-nsa-rubble-talus.glb",
+      "overrideSha256": "d586e3a28c32f12cec0a56d857e14ae3313718561c0c988fb9743dacc1d62936",
+      "generatorPath": "src/rendering/modeling/build_reef_nsa_rubble_talus.py",
+      "generatorSha256": "58cd25a247a506308470b52df2691a12e8ab97c453ed7bf1ec5ad33c6287f9a0",
+      "sha256": "869bb47edf1f2514332bb8c2cb56dc025d4653e653570ef80a38beca7cc7598b",
+      "bytes": 1420888,
+      "triangles": 7210,
+      "dimensionsM": [
+        0.4060978591442108,
+        0.09168773144483566,
+        0.29362887144088745
+      ]
     }
   ]
 }

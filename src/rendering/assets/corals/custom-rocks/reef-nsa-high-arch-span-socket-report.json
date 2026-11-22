@@ -1,0 +1,242 @@
+{
+  "schema": "socket-support-inspection-v1",
+  "assetId": "reef-nsa-high-arch-span",
+  "sourceSha256": "fc8b0a50a32e9e6ac6f590e6d70c5477c9a5bb26abbc447862e2c95539eb2851",
+  "method": {
+    "contactToleranceM": 0.002,
+    "upNormalVectorTolerance": 0.002,
+    "footprintSampleSpacingM": 0.005,
+    "footprintSampleCount": 194,
+    "footprintNormalMaxAngleDeg": 30,
+    "clearanceEnvelope": {
+      "shape": "oriented-cylinder",
+      "radiusM": "requested reefSocket.clearanceRadiusM",
+      "heightM": "same as radius",
+      "baseOffsetM": 0.002
+    },
+    "limitations": [
+      "Socket local/world basis must remain unit-scale and orthogonal; footprint and clearance radii are interpreted in exported asset meters.",
+      "Contact normal uses the geometric normal of the nearest triangle; at shared-vertex ties it is facet-sensitive and may select one of several incident faces.",
+      "Footprint support is a finite radial sample lattice at the reported spacing, not a continuous disk certificate.",
+      "Clearance checks only intersection with an oriented rock-space cylinder; it does not prove whole-colony fit, fish passage or biological suitability.",
+      "Only the default glTF scene and embedded, uncompressed TRIANGLES geometry are inspected."
+    ]
+  },
+  "supportedSockets": [
+    {
+      "name": "socket_plate_ledge_23",
+      "role": "coral-mount",
+      "parentMesh": "reef_nsa_high_arch_span",
+      "archetype": "plating-sps",
+      "positionM": [
+        0.16794447600841522,
+        0.24721448123455048,
+        0.12056130170822144
+      ],
+      "normal": [
+        0.06378114928375538,
+        0.9979389079031643,
+        0.0070640702914888135
+      ],
+      "rotation": [
+        0.003533856960116382,
+        -1.0802023389583022e-12,
+        -0.031907029602543366,
+        0.9994845938367074
+      ],
+      "footprintRadiusM": 0.024,
+      "clearanceRadiusM": 0.042,
+      "support": {
+        "pointM": [
+          0.16794447539743748,
+          0.24721447167501012,
+          0.1205613016405527
+        ],
+        "normal": [
+          0.06378114928375538,
+          0.9979389079031643,
+          0.0070640702914888135
+        ],
+        "supportedRadiusM": 0.024,
+        "freeRadiusM": 0.042,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "fc8b0a50a32e9e6ac6f590e6d70c5477c9a5bb26abbc447862e2c95539eb2851",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-nsa-high-arch-span-socket-report.json"
+        }
+      }
+    },
+    {
+      "name": "socket_sps_crest_22",
+      "role": "coral-mount",
+      "parentMesh": "reef_nsa_high_arch_span",
+      "archetype": "branching-sps",
+      "positionM": [
+        -0.020876415073871613,
+        0.5281911492347717,
+        0.023289043456315994
+      ],
+      "normal": [
+        0.00856397410316953,
+        0.9935678937133356,
+        0.11291367910756335
+      ],
+      "rotation": [
+        0.056547846438800876,
+        1.7783891404036925e-12,
+        -0.00428889084895067,
+        0.9983906782810122
+      ],
+      "footprintRadiusM": 0.024,
+      "clearanceRadiusM": 0.042,
+      "support": {
+        "pointM": [
+          -0.02087641507635285,
+          0.528191148946906,
+          0.023289043423601597
+        ],
+        "normal": [
+          0.00856397410316953,
+          0.9935678937133356,
+          0.11291367910756335
+        ],
+        "supportedRadiusM": 0.024,
+        "freeRadiusM": 0.042,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "fc8b0a50a32e9e6ac6f590e6d70c5477c9a5bb26abbc447862e2c95539eb2851",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-nsa-high-arch-span-socket-report.json"
+        }
+      }
+    }
+  ],
+  "measurements": [
+    {
+      "nodeIndex": 0,
+      "name": "socket_plate_ledge_23",
+      "supported": true,
+      "data": {
+        "sourceNode": 0,
+        "socketToSurfaceDistanceM": 9.579284139842733e-9,
+        "measuredPointM": [
+          0.16794447539743748,
+          0.24721447167501012,
+          0.1205613016405527
+        ],
+        "measuredSurfaceNormal": [
+          0.06378114928375538,
+          0.9979389079031643,
+          0.0070640702914888135
+        ],
+        "nearestTriangleIndex": 11348,
+        "upNormalVectorDifference": 1.982241478355162e-8,
+        "footprintSampleSpacingM": 0.005,
+        "originalIntent": {
+          "role": "coral-mount",
+          "parentMesh": "reef_nsa_high_arch_span",
+          "archetype": "plating-sps",
+          "footprintRadiusM": 0.024,
+          "clearanceRadiusM": 0.042
+        },
+        "rawSocketTransform": {
+          "translation": [
+            0.16794447600841522,
+            0.24721448123455048,
+            0.12056130170822144
+          ],
+          "rotation": [
+            0.0035338569432497025,
+            0,
+            -0.03190702944993973,
+            0.9994845986366272
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "worldSocketUp": [
+          0.06378116904566006,
+          0.9979389066338556,
+          0.007064071176986818
+        ],
+        "footprintSamples": 97,
+        "footprintFailedSamples": 0,
+        "footprintMaxSlopeDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": 0.042,
+          "heightM": 0.042,
+          "baseOffsetM": 0.002,
+          "blockerTriangleCount": 0,
+          "blockers": []
+        }
+      }
+    },
+    {
+      "nodeIndex": 1,
+      "name": "socket_sps_crest_22",
+      "supported": true,
+      "data": {
+        "sourceNode": 1,
+        "socketToSurfaceDistanceM": 2.897293004691386e-10,
+        "measuredPointM": [
+          -0.02087641507635285,
+          0.528191148946906,
+          0.023289043423601597
+        ],
+        "measuredSurfaceNormal": [
+          0.00856397410316953,
+          0.9935678937133356,
+          0.11291367910756335
+        ],
+        "nearestTriangleIndex": 1394,
+        "upNormalVectorDifference": 7.201929203310137e-9,
+        "footprintSampleSpacingM": 0.005,
+        "originalIntent": {
+          "role": "coral-mount",
+          "parentMesh": "reef_nsa_high_arch_span",
+          "archetype": "branching-sps",
+          "footprintRadiusM": 0.024,
+          "clearanceRadiusM": 0.042
+        },
+        "rawSocketTransform": {
+          "translation": [
+            -0.020876415073871613,
+            0.5281911492347717,
+            0.023289043456315994
+          ],
+          "rotation": [
+            0.056547846645116806,
+            0,
+            -0.004288890864700079,
+            0.9983906745910645
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        "worldSocketUp": [
+          0.008563977287715302,
+          0.9935678929568391,
+          0.1129136855227146
+        ],
+        "footprintSamples": 97,
+        "footprintFailedSamples": 0,
+        "footprintMaxSlopeDeg": 30,
+        "clearanceEnvelope": {
+          "shape": "oriented-cylinder",
+          "radiusM": 0.042,
+          "heightM": 0.042,
+          "baseOffsetM": 0.002,
+          "blockerTriangleCount": 0,
+          "blockers": []
+        }
+      }
+    }
+  ],
+  "rejectedSockets": []
+}

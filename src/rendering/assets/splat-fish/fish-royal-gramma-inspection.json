@@ -8,7 +8,7 @@
       "upAxis": "+Y",
       "origin": "local",
       "dimensionsM": [
-        0.293486,
+        0.302188,
         0.91836,
         2
       ],
@@ -41,12 +41,12 @@
   },
   "boundsM": {
     "min": [
-      -0.146743,
+      -0.151094,
       -0.450951,
       -1
     ],
     "max": [
-      0.146743,
+      0.151094,
       0.467409,
       1
     ]
@@ -55,15 +55,15 @@
     {
       "id": "royal_gramma_body",
       "role": "fish",
-      "vertexCount": 5336,
+      "vertexCount": 5434,
       "boundsM": {
         "min": [
-          -0.146743,
+          -0.151094,
           -0.450951,
           -1
         ],
         "max": [
-          0.146743,
+          0.151094,
           0.467409,
           1
         ]
@@ -76,5 +76,12 @@
     }
   ],
   "sockets": [],
-  "collisionParts": []
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Gramma loreto & project-original public/fish/royal-gramma.webp silhouette",
+    "sourceUrl": "https://www.fishbase.se/summary/Gramma-loreto",
+    "referenceHeightToLength": 0.4765,
+    "measuredHeightToLength": 0.45918,
+    "relativeDeviationPct": 3.63
+  }
 }

@@ -3,7 +3,7 @@ import { mountedAnemoneHosts } from './anemone-host'
 import { GLTFLoader, type GLTF } from 'three/addons/loaders/GLTFLoader.js'
 import { clone } from 'three/addons/utils/SkeletonUtils.js'
 import type { ServiceConfig } from '../../lib/services'
-import { getFishById, SNOWFLAKE_MORAY_EEL_ID } from '../../lib/fish'
+import { getFishById, isInvertebrateSpecies, SNOWFLAKE_MORAY_EEL_ID } from '../../lib/fish'
 import {
   DEFAULT_LEFT_ISLAND_MOUNTS,
   DEFAULT_RIGHT_ISLAND_MOUNTS,
@@ -36,17 +36,19 @@ import {
 } from './underwater-optics'
 import { SURFACE_WAVE_GLSL } from './surface-waves'
 import { RaymarchedShaftPass, SHAFT_BEAM_GLSL } from './light-shafts'
-import { createAragoniteSandBed, getRockFootprintsForViewport } from './aragonite-sand'
+import { createAragoniteSandBed, evaluateAragoniteSandTilt, evaluateAragoniteSandWorldY, getRockFootprintsForViewport, INVERTEBRATE_MAX_SAND_Z } from './aragonite-sand'
 import { reefPlacementsForViewport } from './reef-layout'
-import { hasReadyRightIslandCollider, resolveAvailableSnowflakeMorayResidence, resolveSnowflakeMorayResidence, SNOWFLAKE_MORAY_CAVE_COLLISION_RADIUS_M, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M, type MorayResidence } from './moray-residence'
+import { hasReadyRightIslandCollider, resolveAvailableSnowflakeMorayResidence, resolveNsaMorayResidence, SNOWFLAKE_MORAY_CAVE_COLLISION_RADIUS_M, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M, type MorayResidence } from './moray-residence'
 import { CENTER_ARCH_URL, CENTER_ARCH_MOUNTS, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
+import { NSA_ENCRUSTING_FACE_SITES, NSA_KIT_URL, NSA_SUBSTRATE_CONTACTS, RUBBLE_TALUS_URL, createNsaReviewReef, createRubbleTalusGroundingAprons, disposeRubbleTalusMaterials } from './reef-nsa'
+import { createNsaHabitatAnchors } from './reef-nsa-habitat'
 import { createGlassEnclosure, glassEnclosureLayout } from './glass-enclosure'
 import { createWaterSurface } from './water-surface'
 import { WaterRadianceProbeManager } from './water-radiance-probe'
 import { estimateCaptionRect, resolveLabelDeconflicts, type LabelRect } from './fish-label-layout'
 import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
 import { meshQueryForSpecies, createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
-import { createReefMeshNavigation, createRockFallbackObstacles, createMountedCoralFallbackObstacles, MESH_NAVIGATION_COLLISION_RADIUS_M, type ReefMeshIslandInput } from './reef-mesh-navigation'
+import { createReefMeshNavigation, createRockFallbackObstacles, createMountedCoralFallbackObstacles, createSurfaceCoralObstacles, MESH_NAVIGATION_COLLISION_RADIUS_M, type ReefMeshIslandInput } from './reef-mesh-navigation'
 import { applyFishTurningRigOverlay, bindFishTurningRig, evaluateSpriteTurnScaleX, type FishTurningRig } from './fish-turning'
 import { SPRITE_PLANE_WIDTH, fishBodyRadiusM, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale } from './fish-scale'
 import { canRunFishSceneLoop, evaluateTieredVerticalDepthRange, findSafeFishHeading, findSafeFishSpawn, fishSceneStatus, fishSpawnPreference, fishSpawnSlotsForServices, isSafeFishPosition } from './fish-spawn'
@@ -118,10 +120,16 @@ const modelUrls: Record<string, string> = {
   'flame-angelfish': new URL('../assets/splat-fish/flame-angelfish.glb', import.meta.url).href,
   'copperband-butterflyfish': new URL('../assets/splat-fish/copperband-butterflyfish.glb', import.meta.url).href,
   [SNOWFLAKE_MORAY_EEL_ID]: new URL('../assets/fish/snowflake-moray-eel.glb', import.meta.url).href,
+  'banded-trochus-snail': new URL('../assets/invertebrates/invertebrate-banded-trochus-snail.glb', import.meta.url).href,
+  'scarlet-reef-hermit-crab': new URL('../assets/invertebrates/invertebrate-scarlet-reef-hermit-crab.glb', import.meta.url).href,
+  'emerald-mithrax-crab': new URL('../assets/invertebrates/invertebrate-emerald-mithrax-crab.glb', import.meta.url).href,
+  'scarlet-skunk-cleaner-shrimp': new URL('../assets/invertebrates/invertebrate-scarlet-skunk-cleaner-shrimp.glb', import.meta.url).href,
 }
 export type SceneStatus = 'loading' | 'ready' | 'failed'
 export type AquariumController = { update(services: ServiceConfig[], paused: boolean, configurationReady?: boolean): void; activate(id: string): void; serviceAt(x: number, y: number): string | undefined; canActivate(id: string, x?: number, y?: number): boolean; dispose(): void; zoomIn(): boolean; zoomOut(): boolean; zoomToFocalArea(id: FocalAreaId): boolean; resetZoom(): boolean; isZoomed(): boolean; getCameraZoom(): CameraZoomState; focusServiceFish?(id: string): boolean; getFocusedServiceId?(): string | undefined }
 declare global { interface Window { __AQUARIUM_LOOKDEV__?: LookDevBridge } }
+type ReefLayout = 'nsa' | 'legacy'
+
 type Inhabitant = { service: ServiceConfig; root: THREE.Group; motion: SwimmingFish; clipPlayer?: FishClipPlayer; turningRig?: FishTurningRig; flex?: FishFlexBinding; anchor?: HTMLAnchorElement; visible: boolean; fallback: boolean; releasedFocus: boolean; artwork?: THREE.Mesh; artworkUnavailable?: boolean; schoolmate: boolean; lod: FishLod; lodModel?: THREE.Object3D; headBone?: THREE.Bone }
 
 function hasAuthoredSnowflakeMorayModel(model?: GLTF): boolean {
@@ -148,6 +156,11 @@ function disposeTree(root: THREE.Object3D, borrowedEnvironment?: THREE.Texture) 
 
 export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, initialServices: ServiceConfig[], initialPaused: boolean, status: (status: SceneStatus) => void, focusFallback: () => HTMLElement | null = () => null, fishExtensions: FishExtensionConfig = EMPTY_FISH_EXTENSIONS, onFrameRate?: (sample: FrameRateSample | null) => void, initialConfigurationReady = true): AquariumController {
   const lookDevConfig = import.meta.env.DEV ? resolveLookDevConfig(window.location.search, true) : undefined
+  const reefOverride = import.meta.env.DEV ? new URLSearchParams(window.location.search).get('reef') : null
+  function reefLayoutForWidth(_width: number): ReefLayout {
+    if (reefOverride === 'nsa' || reefOverride === 'legacy') return reefOverride
+    return 'legacy'
+  }
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' })
   renderer.setPixelRatio(lookDevConfig ? 1 : Math.min(devicePixelRatio, 1.5))
   renderer.outputColorSpace = THREE.SRGBColorSpace
@@ -269,7 +282,8 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   // as floating. AQ-70.6: the sand's own caustic ridge network was removed;
   // the shared cellular caustic chunk is applied here instead, so the sand
   // shows the same caustic system as the rock, coral, and fish.
-  const sandBed = createAragoniteSandBed({ narrow: false })
+  let contactFootprints: typeof NSA_SUBSTRATE_CONTACTS | undefined
+  const sandBed = createAragoniteSandBed()
   applyEnvironmentMapIntensity(sandBed.group, ENVIRONMENT_MAP_INTENSITY.sand, environmentMap?.texture)
   const sand = sandBed.sandMesh
   // Surface-driven lighting (AQ-96 / AQ-70.6): the sand threshold is
@@ -512,7 +526,16 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
   const abort = new AbortController(), loader = new GLTFLoader(), modelBases = new Map<string, GLTF>(), coralTemplates = new Map<string, THREE.Object3D>(), reefs: THREE.Object3D[] = []
   let rockIslandLeftBase: GLTF | undefined, rockIslandRightBase: GLTF | undefined
   let centerArchBase: GLTF | undefined
-  let centerArchPlacement: THREE.Object3D | undefined
+  let nsaKitBase: GLTF | undefined
+  let activeReefLayout: ReefLayout | undefined
+  let pendingReefLayout: ReefLayout | undefined
+  let failedReefLayout: ReefLayout | undefined
+  const reefLayoutLoads = new Map<ReefLayout, Promise<void>>()
+  const readyReefLayouts = new Set<ReefLayout>()
+  const sceneAssetLoads = new Map<string, Promise<GLTF>>()
+  const authoredReefPlacements: THREE.Object3D[] = []
+  let rubbleTalusBase: GLTF | undefined
+  let rubbleTalusPlacement: THREE.Object3D | undefined
   let reefControllers: Array<ReturnType<typeof assembleCoralsOnRockSockets>> = []
   let coralElapsedSec = 0
   const reducedMotionQuery = typeof window !== 'undefined' && typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-reduced-motion: reduce)') : null
@@ -652,6 +675,33 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     cameraZoomCurrent = { ...cameraZoomDesired }
     applyCameraZoom()
   }
+  function applyInhabitantRootTransform(item: Inhabitant, presentationYaw?: number) {
+    const pose = item.motion
+    const yaw = presentationYaw ?? pose.yaw
+    if (isInvertebrateSpecies(item.service.fishId)) {
+      const narrow = width < 600
+      const clampedSandZ = Math.min(pose.position.z, INVERTEBRATE_MAX_SAND_Z)
+      const sandY = evaluateAragoniteSandWorldY(pose.position.x, clampedSandZ, narrow, contactFootprints)
+      item.root.position.set(pose.position.x, sandY, clampedSandZ)
+      if (item.fallback) {
+        item.root.rotation.set(0, 0, 0)
+        item.root.scale.x = presentationYaw !== undefined ? 1 : evaluateSpriteTurnScaleX(yaw)
+      } else {
+        const tilt = evaluateAragoniteSandTilt(pose.position.x, clampedSandZ, yaw, narrow, contactFootprints)
+        item.root.rotation.set(tilt.pitch, yaw, tilt.roll, 'YXZ')
+      }
+      return
+    }
+    item.root.position.set(pose.position.x, pose.position.y, pose.position.z)
+    if (item.fallback) {
+      item.root.rotation.set(0, 0, 0)
+      item.root.scale.x = presentationYaw !== undefined ? 1 : evaluateSpriteTurnScaleX(yaw)
+    } else if (item.service.fishId === SNOWFLAKE_MORAY_EEL_ID || presentationYaw !== undefined) {
+      item.root.rotation.set(0, yaw, 0, 'YXZ')
+    } else {
+      item.root.rotation.set(pose.pitch, yaw, pose.bank, 'YXZ')
+    }
+  }
   function applyLookDevPresentation() {
     if (!lookDevConfig) return
     for (const item of [...fish, ...schoolmates]) {
@@ -659,16 +709,14 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       item.motion.pitch = 0
       item.motion.bank = 0
       item.motion.speed = 0
-      item.root.position.set(item.motion.position.x, item.motion.position.y, item.motion.position.z)
-      if (item.fallback) item.root.scale.x = 1
-      else if (item.service.fishId === SNOWFLAKE_MORAY_EEL_ID) item.root.rotation.set(0, item.motion.yaw, 0, 'YXZ')
-      else item.root.rotation.set(0, Math.PI / 2, 0, 'YXZ')
+      applyInhabitantRootTransform(item, item.motion.yaw)
       item.root.updateMatrix()
       item.root.updateMatrixWorld()
     }
   }
   function settleLookDevReadiness() {
     if (!lookDevConfig || lookDevReady || lookDevContextLost || lookDevFailure || disposed) return
+    if (pendingReefLayout && activeReefLayout !== reefLayoutForWidth(width)) return
     if (!lookDevConfigurationReady) return
     if (document.hidden) return
     if (spawnUnavailable) {
@@ -770,6 +818,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     return nearestHit(x, y)?.object.userData.serviceId as string | undefined
   }
   function fishLinkPoint(item: Inhabitant): THREE.Vector3 {
+    if (isInvertebrateSpecies(item.service.fishId)) {
+      return item.root.position.clone()
+    }
     return item.headBone ? item.headBone.getWorldPosition(new THREE.Vector3()) : item.root.position
   }
   function updateVisibility(item: Inhabitant) {
@@ -803,21 +854,32 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     }
     return visible
   }
+  function currentMorayResidence(): MorayResidence | undefined {
+    const mesh = habitat.meshNavigation
+    const query = mesh?.queryCapsule
+    if (!query || !hasAuthoredSnowflakeMorayModel(modelBases.get(SNOWFLAKE_MORAY_EEL_ID))) return undefined
+    const isClear = (start: MorayResidence['headAxisStart'], end: MorayResidence['headAxisEnd'], radius: number) =>
+      query(start, end, radius, { ...mesh.movementBudget }).status === 'clear'
+    if (activeReefLayout === 'nsa') {
+      const residence = resolveNsaMorayResidence(width < 600, readyMeshIslandIds)
+      if (residence && isClear(residence.headAxisStart, residence.headAxisEnd, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M)) return residence
+      return undefined
+    }
+    const placements = reefPlacementsForViewport(width < 600)
+    return resolveAvailableSnowflakeMorayResidence(placements, hasReadyRightIslandCollider(placements, readyMeshIslandIds), isClear)
+  }
   function isSafeCurrentInhabitantPosition(item: Inhabitant): boolean {
     if (item.service.fishId === SNOWFLAKE_MORAY_EEL_ID) {
-      const placements = reefPlacementsForViewport(width < 600)
-      if (!hasReadyRightIslandCollider(placements, readyMeshIslandIds)) return false
-      const residence = resolveSnowflakeMorayResidence(placements)
-      const mesh = habitat.meshNavigation
-      if (!residence || !mesh?.queryCapsule) return false
+      const residence = currentMorayResidence()
+      if (!residence) return false
       const p = item.motion.position
-      if (Math.hypot(p.x - residence.position.x, p.y - residence.position.y, p.z - residence.position.z) > 1e-4) return false
-      return mesh.queryCapsule(residence.headAxisStart, residence.headAxisEnd, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M, { ...mesh.movementBudget }).status === 'clear'
+      return Math.hypot(p.x - residence.position.x, p.y - residence.position.y, p.z - residence.position.z) <= 1e-4
     }
     if (habitat.meshNavigation?.queryCapsule) {
       const r = MESH_NAVIGATION_COLLISION_RADIUS_M
       const { min, max } = habitat.bounds
       const p = item.motion.position
+      if (isInvertebrateSpecies(item.service.fishId) && p.z > INVERTEBRATE_MAX_SAND_Z) return false
       if (!isSafeFishPosition(p, r, habitat.bounds, [], habitat.maxAbsXAtDepth)) return false
       if (
         p.x < min.x + r || p.x > max.x - r ||
@@ -831,6 +893,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
           ...habitat.meshNavigation.movementBudget,
         }).status === 'clear'
       )
+    }
+    if (isInvertebrateSpecies(item.service.fishId) && item.motion.position.z > INVERTEBRATE_MAX_SAND_Z) {
+      return false
     }
     return isSafeFishPosition(
       item.motion.position,
@@ -860,16 +925,18 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     habitat.meshNavigation = undefined
     readyMeshIslandIds = new Set()
     particleBuffersDirty = true
-    if (centerArchPlacement) { disposeCenterArchMaterials(centerArchPlacement); centerArchPlacement = undefined }
+    authoredReefPlacements.splice(0).forEach(disposeCenterArchMaterials)
+    if (rubbleTalusPlacement) { disposeRubbleTalusMaterials(rubbleTalusPlacement); rubbleTalusPlacement = undefined }
     reefs.forEach(reef => { scene.remove(reef) }); reefs.length = 0; hitMeshes.length = 0; reefMeshes.length = 0; fishMeshes.length = 0
     reefControllers = []; habitat.obstacles = []; habitat.anchors = []
-    if (!rockIslandLeftBase || !rockIslandRightBase || coralTemplates.size === 0) {
+    const kit = activeReefLayout === 'nsa' ? nsaKitBase : undefined
+    if ((!kit && (!rockIslandLeftBase || !rockIslandRightBase)) || coralTemplates.size === 0) {
       meshNavigationSettledGeneration = generation
       settleLookDevReadiness()
       return
     }
     const reducedMotion = Boolean(reducedMotionQuery?.matches)
-    const placements = reefPlacementsForViewport(width < 600).map(placement => ({
+    const placements = (kit ? [] : reefPlacementsForViewport(width < 600)).map(placement => ({
       ...placement,
       rockScene: placement.islandKind === 'left' ? rockIslandLeftBase!.scene : rockIslandRightBase!.scene,
       mounts: placement.islandKind === 'left' ? DEFAULT_LEFT_ISLAND_MOUNTS : DEFAULT_RIGHT_ISLAND_MOUNTS,
@@ -958,18 +1025,21 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       reef.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) })
       meshIslands.push({ reef, islandId: `reef-${i}`, mountedCorals: assembled.mountedCorals })
     }
-    if (width >= 600 && centerArchBase) {
-      const arch = createCenterArch(centerArchBase.scene)
-      centerArchPlacement = arch
-      const archController = assembleCoralsOnRockSockets(arch, coralTemplates, CENTER_ARCH_MOUNTS, {
+    const authoredReefs = kit ? createNsaReviewReef(kit.scene)
+      : width >= 600 && centerArchBase ? [{ reef: createCenterArch(centerArchBase.scene), islandId: 'reef-center-arch', mounts: CENTER_ARCH_MOUNTS }] : []
+    for (const { reef, islandId, mounts } of authoredReefs) {
+      authoredReefPlacements.push(reef)
+      const encrustingFaceSites = kit ? NSA_ENCRUSTING_FACE_SITES[islandId] : undefined
+      const controller = assembleCoralsOnRockSockets(reef, coralTemplates, mounts, {
         paused: paused || document.hidden,
         reducedMotion,
         actinicLevel: evaluateFluorescenceActinicFactor(optics.fixtureWhiteBalance),
         preserveAuthoredRock: true,
-        includeScatter: false,
+        includeScatter: Boolean(encrustingFaceSites),
+        encrustingFaceSites,
       })
-      reefControllers.push(archController)
-      arch.traverse(node => {
+      reefControllers.push(controller)
+      reef.traverse(node => {
         if (!(node instanceof THREE.Mesh)) return
         for (const material of Array.isArray(node.material) ? node.material : [node.material]) {
           if (material instanceof THREE.MeshStandardMaterial) {
@@ -979,22 +1049,45 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         }
         hitMeshes.push(node)
       })
-      scene.add(arch)
-      reefs.push(arch)
-      applyEnvironmentMapIntensity(arch, ENVIRONMENT_MAP_INTENSITY.reef, environmentMap?.texture)
-      const fallback = createRockFallbackObstacles(arch, 'reef-center-arch')
+      scene.add(reef)
+      reefs.push(reef)
+      applyEnvironmentMapIntensity(reef, ENVIRONMENT_MAP_INTENSITY.reef, environmentMap?.texture)
+      let surfaceCoralObstacles: ReturnType<typeof createSurfaceCoralObstacles>
+      try {
+        habitat.anchors.push(...mountedAnemoneHosts(controller.mountedCorals, islandId))
+        surfaceCoralObstacles = createSurfaceCoralObstacles(controller.instancedMeshes, islandId)
+      } catch (error) {
+        failReefSetup(`Reef module ${islandId} habitat geometry unavailable: ${String(error)}`)
+        return
+      }
+      const fallback = createRockFallbackObstacles(reef, islandId, surfaceCoralObstacles)
       if (fallback.status !== 'ready') {
-        failReefSetup(`Arch collision geometry unavailable: ${fallback.reason}`)
+        failReefSetup(`Reef module ${islandId} collision geometry unavailable: ${fallback.reason}`)
         return
       }
-      habitat.obstacles.push(...fallback.obstacles)
-      const coralFallback = createMountedCoralFallbackObstacles(archController.mountedCorals, 'reef-center-arch')
+      const coralFallback = createMountedCoralFallbackObstacles(controller.mountedCorals, islandId)
       if (coralFallback.status !== 'ready') {
-        failReefSetup(`Arch coral bounds unavailable: ${coralFallback.reason}`)
+        failReefSetup(`Reef module ${islandId} coral bounds unavailable: ${coralFallback.reason}`)
         return
       }
-      habitat.obstacles.push(...coralFallback.obstacles)
-      meshIslands.push({ reef: arch, islandId: 'reef-center-arch', mountedCorals: archController.mountedCorals })
+      habitat.obstacles.push(...fallback.obstacles, ...coralFallback.obstacles)
+      meshIslands.push({ reef, islandId, mountedCorals: controller.mountedCorals, surfaceCoralObstacles })
+    }
+    const rubbleSource = kit ? kit.scene.getObjectByName('reef-nsa-rubble-talus') : rubbleTalusBase?.scene
+    if (rubbleSource) {
+      const rubble = createRubbleTalusGroundingAprons(rubbleSource, width < 600, Boolean(kit))
+      rubbleTalusPlacement = rubble
+      rubble.traverse(node => {
+        if (!(node instanceof THREE.Mesh)) return
+        for (const material of Array.isArray(node.material) ? node.material : [node.material]) {
+          if (material instanceof THREE.MeshStandardMaterial) {
+            applyCaustics(material, caustics, { scaleA: 0.25, scaleB: 0.4 })
+          }
+        }
+      })
+      scene.add(rubble)
+      reefs.push(rubble)
+      applyEnvironmentMapIntensity(rubble, ENVIRONMENT_MAP_INTENSITY.reef, environmentMap?.texture)
     }
     hitMeshes.push(sand)
     // Mesh routing builds after first paint (~1 s per island on the main
@@ -1005,6 +1098,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       if (result.status === 'ready') {
         habitat.meshNavigation = result.meshNavigation
         readyMeshIslandIds = new Set(result.diagnostics.islands.map(island => island.islandId))
+        if (kit && result.meshNavigation.queryCapsule) {
+          habitat.anchors.push(...createNsaHabitatAnchors(meshIslands, habitat.bounds, habitat.maxAbsXAtDepth, result.meshNavigation.queryCapsule))
+        }
         // Relocate any fish or schoolmate that drifted into a coral envelope
         // during the brief AABB window before the async mesh collider resolved.
         const meshCheck = (candidate: SwimmingFish['position']) =>
@@ -1026,22 +1122,31 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         }
         for (const item of allInhabitants) {
           if (isSafeCurrentInhabitantPosition(item)) continue
+          const relocationBounds = isInvertebrateSpecies(item.service.fishId)
+            ? {
+                min: habitat.bounds.min,
+                max: {
+                  ...habitat.bounds.max,
+                  z: Math.min(habitat.bounds.max.z, INVERTEBRATE_MAX_SAND_Z + item.motion.clearance),
+                },
+              }
+            : habitat.bounds
           const relocated = findSafeFishSpawn(
             item.motion.position,
-            habitat.bounds,
+            relocationBounds,
             habitat.obstacles,
             item.motion.clearance,
             occupiedForRelocation,
             meshCheck,
             fishBodyRadiusM(item.service.fishId),
-            evaluateTieredVerticalDepthRange(item.service.fishId, habitat.bounds, item.motion.clearance)?.worldYRange,
+            evaluateTieredVerticalDepthRange(item.service.fishId, relocationBounds, item.motion.clearance)?.worldYRange,
             habitat.maxAbsXAtDepth,
           )
           if (relocated) {
             item.motion.position = relocated
             item.motion.route = []
             item.motion.speed = 0
-            item.root.position.set(relocated.x, relocated.y, relocated.z)
+            applyInhabitantRootTransform(item)
             occupiedForRelocation.push({ position: relocated, clearance: item.motion.clearance, bodyRadiusM: fishBodyRadiusM(item.service.fishId) })
           }
         }
@@ -1109,7 +1214,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
           ? (clip.duration > 0 ? lookDevTimeSeconds % clip.duration : 0)
           : (seedForId(item.service.id) % 1500) / 1000
         item.clipPlayer = createFishClipPlayer(model, clip, initialClipTime)
-        if (!caveResident) {
+        if (!caveResident && !isInvertebrateSpecies(item.service.fishId)) {
           item.turningRig = bindFishTurningRig(model, item.service.fishId)
           try {
             const flexSeed = lookDevConfig ? `${lookDevConfig.seed}:${item.service.id}` : item.service.id
@@ -1227,7 +1332,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     try {
       if (base) bindGlbToInhabitant(item, base)
       else if (!caveResident) item.artwork = buildSprite(item)
-      root.position.set(motion.position.x, motion.position.y, motion.position.z)
+      applyInhabitantRootTransform(item)
       // Schoolmates are never pickable (AQ-41 AC #4 / AQ-13): only service
       // fish get a serviceId on their meshes, so picking can never resolve a
       // click or a focus target to a schoolmate. Their meshes still join
@@ -1301,17 +1406,8 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     const current = new Map(fish.map(item => [item.service.id, item]))
     const configuredServices = services.filter(service => getFishById(service.fishId))
     const morayServiceCount = configuredServices.filter(service => service.fishId === SNOWFLAKE_MORAY_EEL_ID).length
-    const morayRequested = morayServiceCount > 0
     const meshNavigation = habitat.meshNavigation
-    const morayPlacements = reefPlacementsForViewport(width < 600)
-    const morayResidence = morayRequested && morayServiceCount === 1 ? resolveAvailableSnowflakeMorayResidence(
-      morayPlacements,
-      hasAuthoredSnowflakeMorayModel(modelBases.get(SNOWFLAKE_MORAY_EEL_ID))
-        && hasReadyRightIslandCollider(morayPlacements, readyMeshIslandIds),
-      meshNavigation?.queryCapsule
-        ? (start, end, radius) => meshNavigation.queryCapsule!(start, end, radius, { ...meshNavigation.movementBudget }).status === 'clear'
-        : undefined,
-    ) : undefined
+    const morayResidence = morayServiceCount === 1 ? currentMorayResidence() : undefined
     const nextServices = configuredServices.filter(service => service.fishId !== SNOWFLAKE_MORAY_EEL_ID || Boolean(morayResidence))
     const spawnOrderKey = (id: string) => lookDevConfig ? `${lookDevConfig.seed}:${id}` : id
     const horizontalSlots = fishSpawnSlotsForServices(nextServices)
@@ -1355,7 +1451,16 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       const preferredPosition = preference && foregroundCruiser
         ? { ...preference.position, z: habitat.bounds.max.z - clearance - (service.fishId === 'blue-tang' ? 0.65 : 0.25) }
         : preference?.position
-      const position = preference && preferredPosition && findSafeFishSpawn(preferredPosition, habitat.bounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(service.fishId), evaluateTieredVerticalDepthRange(service.fishId, habitat.bounds, clearance)?.worldYRange, habitat.maxAbsXAtDepth)
+      const spawnWaterBounds = isInvertebrateSpecies(service.fishId)
+        ? {
+            min: habitat.bounds.min,
+            max: {
+              ...habitat.bounds.max,
+              z: Math.min(habitat.bounds.max.z, INVERTEBRATE_MAX_SAND_Z + clearance),
+            },
+          }
+        : habitat.bounds
+      const position = preference && preferredPosition && findSafeFishSpawn(preferredPosition, spawnWaterBounds, habitat.obstacles, clearance, occupied, meshSpawnCheck, fishBodyRadiusM(service.fishId), evaluateTieredVerticalDepthRange(service.fishId, spawnWaterBounds, clearance)?.worldYRange, habitat.maxAbsXAtDepth)
       if (!position || !preference) {
         // Keep existing instances intact during the truthful full-native fallback.
         // A later fitting configuration can reuse their exact poses and clocks.
@@ -1392,6 +1497,21 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     camera.updateMatrixWorld(true)
     const bodies = new Map<Inhabitant, LabelRect>()
     for (const item of [...fish, ...schoolmates]) {
+      if (isInvertebrateSpecies(item.service.fishId) && !item.fallback) {
+        const linkPt = fishLinkPoint(item)
+        const invBounds = projectFishLinkBounds(
+          linkPt,
+          camera,
+          width,
+          height,
+          fishRenderLength(item.service.fishId),
+          projected,
+        )
+        if (invBounds) {
+          bodies.set(item, invBounds)
+          continue
+        }
+      }
       const body = projectFishBodyBounds(item.root, camera, width, height, projected, item.flex?.vertexDeformerFor)
       if (body) bodies.set(item, body)
     }
@@ -1626,9 +1746,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       })
     }
     for (const item of [...fish, ...schoolmates]) {
-      const pose = item.motion; item.root.position.set(pose.position.x, pose.position.y, pose.position.z)
-      if (item.fallback) { item.root.rotation.set(0, 0, 0); item.root.scale.x = evaluateSpriteTurnScaleX(pose.yaw) }
-      else { item.root.rotation.set(pose.pitch, pose.yaw, pose.bank, 'YXZ') }
+      applyInhabitantRootTransform(item)
       item.root.updateMatrix()
       item.root.updateMatrixWorld()
     }
@@ -1798,6 +1916,29 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       const bufferSize = renderer.getDrawingBufferSize(new THREE.Vector2())
       shaftPass.setSize(bufferSize.x, bufferSize.y)
     }
+    const wantedLayout = reefLayoutForWidth(width)
+    const layoutChanged = loaded && activeReefLayout !== wantedLayout && readyReefLayouts.has(wantedLayout)
+    if (loaded && activeReefLayout !== wantedLayout && !layoutChanged && failedReefLayout !== wantedLayout) {
+      // Keep the current habitat valid until the alternate geometry is ready.
+      // Multiple observer callbacks share the request, including when the user
+      // resizes back and forth before an asset has finished loading.
+      if (pendingReefLayout !== wantedLayout) {
+        pendingReefLayout = wantedLayout
+        void ensureReefLayout(wantedLayout).then(() => {
+          pendingReefLayout = undefined
+          if (reefLayoutForWidth(width) === wantedLayout) resize()
+        }).catch(error => {
+          pendingReefLayout = undefined
+          failedReefLayout = wantedLayout
+          console.warn('Aquarium could not load the alternate reef layout', error)
+          if (reefLayoutForWidth(width) === wantedLayout) resize()
+        })
+      }
+      if (!spawnUnavailable) render(0, true)
+      return
+    }
+    if (layoutChanged) activeReefLayout = wantedLayout
+    if (activeReefLayout === wantedLayout) failedReefLayout = undefined
     // The nearest fish depth controls the safe horizontal envelope, so depth
     // changes cannot send an otherwise in-bounds fish beyond the view edge.
     // AQ-62: the envelope is measured from the overview camera distance,
@@ -1819,10 +1960,13 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     let rebuildSucceeded: boolean | undefined
     // AQ-73: the sand bed follows the single-/dual-island layout with the
     // habitat; setLayout is a no-op when the layout already matches.
-    if (newNarrow !== narrow) sandBed.setLayout(newNarrow)
-    const habitatLayoutChanged = narrow !== newNarrow
+    syncSandLayout(newNarrow)
+    const habitatLayoutChanged = narrow !== newNarrow || layoutChanged
     if (loaded && (habitatLayoutChanged || (spawnUnavailable && sizeChanged) || [...fish, ...schoolmates].some(item => !isSafeCurrentInhabitantPosition(item)))) {
-      narrow = newNarrow; rebuildHabitat(); rebuildSucceeded = rebuildFish()
+      narrow = newNarrow
+      rebuildHabitat()
+      if (failed) return
+      rebuildSucceeded = rebuildFish()
       if (habitatLayoutChanged) captureWaterRadianceForHabitatLayout()
       if (rebuildSucceeded !== undefined) status(fishSceneStatus(!rebuildSucceeded))
     }
@@ -2072,21 +2216,50 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       })
     }
   }
-  async function initialize() {
-    const load = async (url: string) => {
-      const lookDevKey = `scene:${url}`
-      beginLookDevAsset(lookDevKey)
-      try {
-        const model = await loader.loadAsync(url)
-        if (disposed || failed) disposeTree(model.scene, environmentMap?.texture)
-        else loadedAssets.add(model)
-        finishLookDevAsset(lookDevKey)
-        return model
-      } catch (error) {
-        finishLookDevAsset(lookDevKey, true)
-        throw error
+  function loadSceneAsset(url: string): Promise<GLTF> {
+    const started = sceneAssetLoads.get(url)
+    if (started) return started
+    const lookDevKey = `scene:${url}`
+    beginLookDevAsset(lookDevKey)
+    const request = loader.loadAsync(url).then(model => {
+      if (disposed || failed) disposeTree(model.scene, environmentMap?.texture)
+      else loadedAssets.add(model)
+      finishLookDevAsset(lookDevKey)
+      return model
+    }).catch(error => {
+      sceneAssetLoads.delete(url)
+      finishLookDevAsset(lookDevKey, true)
+      throw error
+    })
+    sceneAssetLoads.set(url, request)
+    return request
+  }
+  function ensureReefLayout(layout: ReefLayout): Promise<void> {
+    const started = reefLayoutLoads.get(layout)
+    if (started) return started
+    const request = (async () => {
+      if (layout === 'nsa') nsaKitBase = await loadSceneAsset(NSA_KIT_URL)
+      else {
+        [rockIslandLeftBase, rockIslandRightBase, centerArchBase, rubbleTalusBase] = await Promise.all([
+          loadSceneAsset(LIVE_ROCK_ISLAND_URLS.left),
+          loadSceneAsset(LIVE_ROCK_ISLAND_URLS.right),
+          loadSceneAsset(CENTER_ARCH_URL),
+          loadSceneAsset(RUBBLE_TALUS_URL),
+        ])
       }
-    }
+      readyReefLayouts.add(layout)
+    })().catch(error => {
+      reefLayoutLoads.delete(layout)
+      throw error
+    })
+    reefLayoutLoads.set(layout, request)
+    return request
+  }
+  function syncSandLayout(narrow: boolean) {
+    contactFootprints = activeReefLayout === 'nsa' ? NSA_SUBSTRATE_CONTACTS : undefined
+    sandBed.setLayout(narrow, { contactFootprints })
+  }
+  async function initialize() {
     const coralIds = Object.keys(MODULAR_CORAL_ASSET_URLS)
     // Lazy loading (AQ-76 AC #2): Phase 0 blocks first paint on the rocks,
     // corals, and the first 3 configured species only. The remaining
@@ -2094,20 +2267,24 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     // no configured service never load at all.
     const configuredFishIds = [...new Set(services.map(service => service.fishId))]
     const phase0Ids = phase0SpeciesIds(configuredFishIds)
-    const [rockLeft, rockRight, rockArch, ...restModels] = await Promise.all([
-      load(LIVE_ROCK_ISLAND_URLS.left),
-      load(LIVE_ROCK_ISLAND_URLS.right),
-      load(CENTER_ARCH_URL),
-      ...coralIds.map(id => load(MODULAR_CORAL_ASSET_URLS[id])),
+    const [, ...restModels] = await Promise.all([
+      ensureReefLayout(reefLayoutForWidth(width)),
+      ...coralIds.map(id => loadSceneAsset(MODULAR_CORAL_ASSET_URLS[id])),
       ...phase0Ids.map(id => loadFishModel(id)),
     ])
+    while (!disposed && !failed) {
+      const desired = reefLayoutForWidth(width)
+      if (readyReefLayouts.has(desired)) { activeReefLayout = desired; break }
+      await ensureReefLayout(desired)
+    }
     if (disposed || failed) return
-    rockIslandLeftBase = rockLeft
-    rockIslandRightBase = rockRight
-    centerArchBase = rockArch
     coralIds.forEach((id, i) => coralTemplates.set(id, restModels[i]!.scene))
     phase0Ids.forEach((id, i) => { const model = restModels[coralIds.length + i]; if (model) modelBases.set(id, model) })
-    loaded = true; narrow = width < 600; rebuildHabitat()
+    loaded = true
+    narrow = width < 600
+    syncSandLayout(narrow)
+    rebuildHabitat()
+    if (failed) return
     const initialSpawnSucceeded = rebuildFish() === true
     captureWaterRadianceForHabitatLayout()
     status(fishSceneStatus(!initialSpawnSucceeded))
@@ -2181,7 +2358,8 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       if (disposed) return; disposed = true; abort.abort(); observer.disconnect(); renderer.setAnimationLoop(null); lazyQueue = []
       rejectLookDevWaiters(new Error('Aquarium was disposed before look-dev capture readiness.'))
       glassEnclosure.dispose()
-      if (centerArchPlacement) { disposeCenterArchMaterials(centerArchPlacement); centerArchPlacement = undefined }
+      authoredReefPlacements.splice(0).forEach(disposeCenterArchMaterials)
+      if (rubbleTalusPlacement) { disposeRubbleTalusMaterials(rubbleTalusPlacement); rubbleTalusPlacement = undefined }
       if (import.meta.env.DEV && lookDevBridge && window.__AQUARIUM_LOOKDEV__ === lookDevBridge) delete window.__AQUARIUM_LOOKDEV__
       removeFish(); waterRadianceProbe.dispose(); loadedAssets.forEach(model => disposeTree(model.scene, environmentMap?.texture)); loadedAssets.clear(); sandBed.dispose(); rear.geometry.dispose(); rear.material.dispose(); hazePlane.geometry.dispose(); hazeMaterial.dispose(); shaftPlane.geometry.dispose(); shaftMaterial.dispose(); waterSurfaceController.dispose(); shaftPass?.dispose(); shaftPass = null; foregroundParticleGeometry.dispose(); foregroundParticleMaterial.dispose(); backgroundParticleGeometry.dispose(); backgroundParticleMaterial.dispose(); bubbleGeometry.dispose(); bubbleMaterial.dispose(); caustics.dispose(); environmentMap?.dispose(); renderer.dispose(); renderer.forceContextLoss()
     },

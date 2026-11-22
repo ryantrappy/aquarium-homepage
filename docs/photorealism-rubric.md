@@ -5,11 +5,19 @@ Category: Research
 Status: Active
 Authority: Informational
 Backlog: AQ-70.1
-Owner: @Luna
-Updated: 2026-11-09
+Owner: @gemini
+Updated: 2026-11-21
 Upstream: docs/requirements.md, docs/photorealism-reference.md, backlog/tasks/aq-70.1 - Research-a-photoreal-reef-tank-reference-set-and-define-a-measurable-realism-rubric.md
 Downstream: docs/baked-lighting-spike.md, docs/photorealism-budgets.md
 -->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Research / Realism Rubric
+> - **Status**: Active
+> - **Authority**: Informational
+> - **Backlog Reference**: `AQ-70.1`
+> - **Summary**: Defines observable visual pass/fail criteria across fish, coral, rock, sand, water/glass, lighting, and composition, repeatable histogram and caustic spatial-frequency measurement methods (`scripts/measure-capture-histograms.mjs`), and the scored baseline gap table.
 
 "Realistic" was repeatedly self-asserted by authoring notes while the render
 looked cartoonish. This rubric is the objective target every later look-dev
@@ -48,20 +56,29 @@ means saturation > 0.6. Hue is reported in six buckets (red, yellow, green,
 cyan, blue, magenta). All numeric targets below are whole-frame unless a
 criterion says "region".
 
-**Measurement limit:** this script measures still-image color statistics; it
-does not calculate caustic spatial frequency, contrast, or animation speed.
-No numeric caustic-frequency target or repeatable caustic measurement method
-is established here. The caustic-network criterion W-2 therefore remains a
-visual review item, and the task's caustic-frequency research target remains
-open.
+**Caustic spatial frequency & local contrast measurement (`computeCausticSpatialMetrics`).**
+`scripts/measure-capture-histograms.mjs` computes a local box-smoothed luminance
+baseline (`R = max(3, round(16 / sampleStep))`) along horizontal scanlines and
+evaluates the high-pass residual `hp(x, y) = L(x, y) - L_local(x, y)`:
+- `caustics.localRmsContrast`: root-mean-square amplitude of `hp(x, y)` across
+  the measured region (measures local caustic ridge intensity modulation
+  independent of macro lighting gradients).
+- `caustics.cyclesPer1000Px` and `caustics.meanCellSpacingPx`: upward
+  zero-crossing spatial frequency of `hp(x, y)` with a noise-floor hysteresis
+  threshold `max(0.004, 0.35 * localRmsContrast)`.
+- Calibrated on the project goal visual (`docs/more-realistic-reef-guide.png`
+  sand bed crop `--crop 520,440,560,160`): `40.01 cycles/1000px` (`25.0 px`
+  mean ridge spacing) and `localRmsContrast = 0.0864`.
 
-**Calibration (measured 2026-11-09 with the script).** Two public-domain
-references from `docs/photorealism-reference.md`:
+**Calibration (measured with `scripts/measure-capture-histograms.mjs`).** Two
+public-domain references from `docs/photorealism-reference.md` plus the primary
+goal visual (`docs/more-realistic-reef-guide.png`):
 
-| Reference | Luminance mean / p10 / p50 / p90 | Saturation mean / p50 / p90 | > 0.6 | > 0.8 |
-|---|---|---|---|---|
-| Berlin reef tank, front-on (ref 18) | 0.34 / 0.11 / 0.28 / 0.65 | 0.33 / 0.31 / 0.56 | 7.8% | 1.8% |
-| Clownfish in anemone (ref 1) | 0.55 / 0.25 / 0.55 / 0.82 | 0.41 / 0.35 / 0.81 | 20.8% | 10.1% |
+| Reference | Luminance mean / p10 / p50 / p90 | Saturation mean / p50 / p90 | > 0.6 | > 0.8 | Caustics (freq / contrast) |
+|---|---|---|---|---|---|
+| Berlin reef tank, front-on (ref 18) | 0.34 / 0.11 / 0.28 / 0.65 | 0.33 / 0.31 / 0.56 | 7.8% | 1.8% | — (even display light) |
+| Clownfish in anemone (ref 1) | 0.55 / 0.25 / 0.55 / 0.82 | 0.41 / 0.35 / 0.81 | 20.8% | 10.1% | — (macro subject) |
+| Goal visual sand bed (`more-realistic-reef-guide.png` `--crop 520,440,560,160`) | 0.389 / 0.123 / 0.330 / 0.723 | 0.485 / 0.471 / 0.816 | 31.4% | 11.0% | `40.01 cycles/1000px` (`25.0 px`), RMS `0.0864` |
 
 Read the two rows together: a real reef-tank frame is *moderately*
 saturated overall (mean ~0.33, under 8% highly saturated) even though its
@@ -90,6 +107,7 @@ not the whole frame):
 | Live rock | 0.10 – 0.35 | Carbonate beige/tan with patchy coralline pink/purple; the baseline's indigo/violet rock reads ~0.5+ in the blue/magenta buckets. |
 | Coral tissue (one colony) | 0.20 – 0.55 | Muted tissue with localized bright tips/polyps; a colony averaging > 0.55 is a pastel. |
 | Fish body (one fish, side-on) | species-dependent; ≤ 0.60 | Blue tang royal blue and yellow tang yellow are legitimately saturated; the check is that the *pattern edges are soft* and the *fins are translucent* (visual criteria F-3/F-4), not that the body is desaturated. |
+| Caustic-lit sand bed (`--crop 360,640,720,220` at `1440×900`) | `15.0 – 48.0 cycles/1000px` (`21 – 67 px` spacing), `localRmsContrast 0.035 – 0.150` | Goal visual sand crop measures `40.01 cycles/1000px` (`25.0 px` spacing) and `localRmsContrast 0.0864`. Values `< 12 cycles/1000px` read as broad sine bands; `> 55 cycles/1000px` read as high-frequency static/noise. |
 
 ## 3. Visual pass/fail criteria
 
@@ -159,18 +177,19 @@ not the whole frame):
 
 ## 4. Baseline gap table (AQ-70.1 AC#3)
 
-Scores the 2026-11-05 user screenshot against every rubric item, from the
-Root baseline audit recorded in the AQ-70.1 task file. **The screenshot file
-itself (`docs/asset-evidence/photorealism/baseline-2026-11-05-user-screenshot.jpg`)
-is missing from the repo at the current tip** — it was never committed, so
-its histogram numbers could not be measured for this table; the scores below
-are the audit's findings, not a reproducible current screenshot review. The
-file must be re-saved into the repo before anyone independently re-scores the
-image or claims measured baseline values. The existing table records
-qualitative fails for the audited items; exposure and whole-frame numeric
-targets remain unmeasured. (If the file cannot be recovered, the next visual
-check's captures become the new baseline and this table is re-scored from
-them.)
+Scores the initial 2026-11-05 qualitative baseline audit AND the committed
+deterministic `AQ-70.2` baseline captures (`docs/asset-evidence/aq70-2/baseline-before/laptop-full-scene-run1.png`
+at `1440×900` and `phone-full-scene-run1.png` at `402×874`) measured with
+`node scripts/measure-capture-histograms.mjs`:
+
+- **Measured `AQ-70.2` deterministic laptop baseline (`laptop-full-scene-run1.png`, `1440×900`)**:
+  - `luminance`: mean `0.231` (Fail: `< 0.25`), `p10 = 0.050` (Fail: `< 0.08` shadow floor), `p50 = 0.120`, `p90 = 0.676` (Pass: `<= 0.85`).
+  - `saturation`: mean `0.623` (Fail: `> 0.45`), `p50 = 0.795`, `p90 = 0.866`, `> 0.6 = 64.9%` (Fail: `> 15%`), `> 0.8 = 48.5%` (Fail: `> 5%`).
+  - `hue`: `cyan = 89.3%` (Fail: `> 60%` single-bucket cap), `blue = 3.6%`, `red = 2.4%`, `magenta = 2.1%`, `yellow = 1.6%`, `green = 1.1%`.
+  - `caustics`: whole-frame `17.20 cycles/1000px` (`58.1 px` spacing, `localRmsContrast = 0.0671`); sand crop (`--crop 360,640,720,220`) `39.85 cycles/1000px` (`25.1 px` spacing, `localRmsContrast = 0.0936`).
+- **Measured `AQ-70.2` deterministic phone baseline (`phone-full-scene-run1.png`, `402×874`)**:
+  - `luminance`: mean `0.241` (Fail: `< 0.25`), `p10 = 0.062` (Fail: `< 0.08`), `p50 = 0.128`, `p90 = 0.685`.
+  - `saturation`: mean `0.623` (Fail: `> 0.45`), `> 0.6 = 62.6%` (Fail: `> 15%`), `> 0.8 = 49.8%` (Fail: `> 5%`), `hue cyan = 86.2%` (Fail: `> 60%`).
 
 | Item | Baseline score | Mapped task(s) |
 |---|---|---|
@@ -204,11 +223,11 @@ them.)
 | W-6 glass | Fail — no glass, no decision | AQ-80 (decision), AQ-39 |
 | W-7 background | Fail — solid #183654 + drawn sunbeams | AQ-70.4, AQ-86 |
 | L-1 fixture | Fail — no actinic/white balance | AQ-70.6 |
-| L-2 exposure | Unmeasured — re-measure once the screenshot is recovered | AQ-70.1 (this rubric) |
+| L-2 exposure | Fail — `AQ-70.2` baseline `p10 = 0.050 < 0.08` (crushed shadow floor) and `mean = 0.231 < 0.25` (laptop `1440×900`) | AQ-70.4, AQ-71, AQ-70.6 |
 | L-3 composition | Fail — diorama, empty upper water | AQ-70.13 |
 | L-4 labels | Fail — game-HUD pills | AQ-70.14 |
 | L-5 no veils | Pass — no fog/veil/vignette/blur was used | — (keep it passing) |
-| §2 numeric targets | Unmeasured — screenshot missing from the repo | AQ-70.1 (this rubric) |
+| §2 numeric targets | Fail — `AQ-70.2` baseline saturation mean `0.623 > 0.45`, `>0.6 = 64.9% > 15%`, `>0.8 = 48.5% > 5%`, `cyan = 89.3% > 60%` | AQ-88, AQ-70.4, AQ-70.6, AQ-70.11, AQ-70.12 |
 
 Every failing item already has an owning task — that is the point of the
 table: it is a scoring sheet, not a source of new tasks. The only items

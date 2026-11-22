@@ -1,0 +1,37 @@
+{
+  "blender_version": "5.2.3 LTS",
+  "engine": "CYCLES",
+  "view_transform": "Filmic",
+  "look": "Very High Contrast",
+  "adaptive_settings": [
+    "SubsurfModifier.use_adaptive_subdivision=True"
+  ],
+  "material_name": "Procedural Coral Rock",
+  "displacement_method": "BOTH",
+  "node_names": [
+    "Material Output",
+    "Principled BSDF",
+    "Texture Coordinate",
+    "Noise_Pores_15",
+    "Mix_LinearLight_Distortion",
+    "Voronoi_Pores",
+    "ColorRamp_Voronoi_Pores",
+    "Noise_Macro_2",
+    "ColorRamp_Macro_Mask",
+    "Mix_Displacement_Mask",
+    "Displacement_Coral",
+    "Bump_Voronoi_Pores",
+    "Bump_Surface_Noise",
+    "ColorRamp_Roughness",
+    "Noise_BaseColor_8",
+    "ColorRamp_BaseColor"
+  ],
+  "base_mesh_vertices": 642,
+  "base_mesh_polygons": 1280,
+  "exported_glb_vertices": 15362,
+  "exported_glb_polygons": 15360,
+  "blend_path": "/Users/ryantrapp/Desktop/Code/aquarium-homepage/public/test-assets/procedural-coral-rock.blend",
+  "cycles_render_path": "/Users/ryantrapp/Desktop/Code/aquarium-homepage/public/test-assets/procedural-coral-rock-cycles.png",
+  "glb_path": "/Users/ryantrapp/Desktop/Code/aquarium-homepage/public/test-assets/procedural-coral-rock.glb",
+  "glb_bytes": 3496352
+}

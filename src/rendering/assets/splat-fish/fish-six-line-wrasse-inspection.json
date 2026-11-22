@@ -8,7 +8,7 @@
       "upAxis": "+Y",
       "origin": "local",
       "dimensionsM": [
-        0.278296,
+        0.2866,
         0.737555,
         2
       ],
@@ -41,12 +41,12 @@
   },
   "boundsM": {
     "min": [
-      -0.139148,
+      -0.1433,
       -0.368869,
       -1
     ],
     "max": [
-      0.139148,
+      0.1433,
       0.368686,
       1
     ]
@@ -55,15 +55,15 @@
     {
       "id": "six_line_wrasse_body",
       "role": "fish",
-      "vertexCount": 6159,
+      "vertexCount": 6265,
       "boundsM": {
         "min": [
-          -0.139148,
+          -0.1433,
           -0.368869,
           -1
         ],
         "max": [
-          0.139148,
+          0.1433,
           0.368686,
           1
         ]
@@ -76,5 +76,12 @@
     }
   ],
   "sockets": [],
-  "collisionParts": []
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Pseudocheilinus hexataenia & project-original public/fish/six-line-wrasse.webp silhouette",
+    "sourceUrl": "https://www.fishbase.se/summary/Pseudocheilinus-hexataenia",
+    "referenceHeightToLength": 0.3683,
+    "measuredHeightToLength": 0.368777,
+    "relativeDeviationPct": 0.13
+  }
 }

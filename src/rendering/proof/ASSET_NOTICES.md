@@ -191,3 +191,80 @@ rubric, variant, support and rendering-budget requirements remain open.
   `socket_brain_apron_01`, `socket_soft_mat_01`). Canonical `corals/` assets
   remain preserved; full rubric, two-variant, physical scale, and budget
   acceptance remain open for Root review.
+
+- **`AQ-70.11` Right-Island variant colonies (`reef-acropora-tabular-plate`, `reef-montipora-tier-shelf`, `reef-brain-fleshy-lobophyllia`, `reef-zoanthid-palythoa-cluster`)**:
+  - Original **$0** procedural 3D geometry and baked PBR texture maps authored from scratch in Blender (`build_reef_acropora_tabular_plate.py`, `build_reef_montipora_tier_shelf.py`, `build_reef_brain_fleshy_lobophyllia.py`, `build_reef_zoanthid_palythoa_cluster.py`; packed sources under `src/rendering/assets/splat-fish/blend/`).
+  - Synced into `src/rendering/assets/corals/custom-colonies/`:
+    - `reef-acropora-tabular-plate.glb`: `24,821` triangles, `2,382,948` bytes (`branching-sps`, `socket_sps_crest_04`)
+    - `reef-montipora-tier-shelf.glb`: `21,324` triangles, `1,607,356` bytes (`plating-sps`, `socket_plate_ledge_04`)
+    - `reef-brain-fleshy-lobophyllia.glb`: `24,000` triangles, `2,218,308` bytes (`mounded-lps`, `socket_brain_apron_04`)
+    - `reef-zoanthid-palythoa-cluster.glb`: `27,812` triangles, `1,751,772` bytes (`zoanthid-mat`, `socket_soft_mat_02`)
+  - **`AQ-70.11` Host-Anemone two-variant BTA batch (`reef-anemone-rose-bta`, `reef-anemone-sunburst-bta`)**:
+    - Original **$0** procedural 3D geometry and baked PBR texture maps authored from scratch in Blender (`build_reef_anemone_rose_bta.py`, `build_reef_anemone_sunburst_bta.py`; packed sources under `src/rendering/assets/splat-fish/blend/`).
+    - `reef-anemone-rose-bta.glb`: `26,192` triangles, `1,679,172` bytes (`host-anemone`, `socket_anemone_crevice_01` on Left Island)
+    - `reef-anemone-sunburst-bta.glb`: `27,120` triangles, `1,742,476` bytes (`host-anemone` Variant #2 mounted at `socket_lps_mid_05` on Right Island)
+  - **`AQ-70.11` LPS & SPS 4-colony upgrade batch (`reef-euphyllia-gold-torch`, `reef-euphyllia-branching-frogspawn`, `reef-acropora-staghorn-thicket`, `reef-acanthastrea-lordhowensis`)**:
+    - Original **$0** procedural 3D geometry and baked PBR texture maps authored from scratch in Blender (`build_reef_euphyllia_gold_torch.py`, `build_reef_euphyllia_branching_frogspawn.py`, `build_reef_acropora_staghorn_thicket.py`, `build_reef_acanthastrea_lordhowensis.py`; packed sources under `src/rendering/assets/splat-fish/blend/`).
+    - `reef-euphyllia-gold-torch.glb`: `25,604` triangles, `1,610,836` bytes (`tentaculate-lps`, `socket_lps_mid_02`)
+    - `reef-euphyllia-branching-frogspawn.glb`: `24,822` triangles, `1,672,372` bytes (`tentaculate-lps`, `socket_lps_mid_04`)
+    - `reef-acropora-staghorn-thicket.glb`: `19,648` triangles, `1,841,052` bytes (`branching-sps`, `socket_sps_crest_03`)
+    - `reef-acanthastrea-lordhowensis.glb`: `20,480` triangles, `1,503,816` bytes (`mounded-lps`, `socket_brain_apron_02`)
+  - **`AQ-70.11` Final 6-colony socket-completion batch (`23/23` primary mounts custom Blender assets)**:
+    - Original **$0** procedural 3D geometry and procedural/baked PBR texture maps authored from scratch in Blender (`build_reef_acropora_violet_millepora.py`, `build_reef_stylophora_magenta_club.py`, `build_reef_montipora_undata_cap.py`, `build_reef_montipora_sunset_shelf.py`, `build_reef_goniopora_flowerpot_lps.py`, `build_reef_favia_war_coral.py`; packed sources under `src/rendering/assets/splat-fish/blend/`).
+    - `reef-acropora-violet-millepora.glb`: `25,096` triangles, `2,272,348` bytes (`branching-sps`, `socket_sps_crest_02`)
+    - `reef-stylophora-magenta-club.glb`: `16,184` triangles, `1,764,308` bytes (`branching-sps`, `socket_sps_crest_06`)
+    - `reef-montipora-undata-cap.glb`: `15,120` triangles, `1,555,064` bytes (`plating-sps`, `socket_plate_ledge_02`)
+    - `reef-montipora-sunset-shelf.glb`: `14,236` triangles, `1,462,592` bytes (`plating-sps`, `socket_plate_ledge_03`)
+    - `reef-goniopora-flowerpot-lps.glb`: `20,536` triangles, `1,660,916` bytes (`tentaculate-lps`, `socket_lps_mid_06`)
+    - `reef-favia-war-coral.glb`: `20,480` triangles, `1,500,424` bytes (`mounded-lps`, `socket_brain_apron_03`)
+  - Canonical `corals/` assets remain preserved; look-dev captures, physical scale/rubric evaluation, and Root approval remain pending.
+
+## Clean-up-crew reef invertebrates (Trochus snail, scarlet hermit crab, emerald crab, cleaner shrimp) — `AQ-109` (Phase 1)
+
+- Original **$0** rigged and animated 3D invertebrate geometry and `512×512` procedural PBR texture maps (BaseColor, Normal, packed ORM) authored from scratch in Blender (`invertebrate_common.py`, `build_invertebrate_banded_trochus_snail.py`, `build_invertebrate_scarlet_reef_hermit_crab.py`, `build_invertebrate_emerald_mithrax_crab.py`, `build_invertebrate_scarlet_skunk_cleaner_shrimp.py`). Packed sources and textures live under `src/rendering/assets/splat-fish/blend/` and overrides under `src/rendering/assets/splat-fish/overrides/`; `blue_crab.blend` and existing canonical `fish/`, `corals/`, and `splat-fish/` catalogs remain untouched.
+- Synced into `src/rendering/assets/invertebrates/` with `600×400` studio Cycles transparent WebP thumbnails in `public/fish/`:
+  - `invertebrate-banded-trochus-snail.glb`: `8,268` triangles, `1,126,348` bytes, `9` joints, clip `trochus_snail_glide`, thumbnail `public/fish/banded-trochus-snail.webp`
+  - `invertebrate-scarlet-reef-hermit-crab.glb`: `7,104` triangles, `1,067,576` bytes, `12` joints, clip `hermit_crab_scurry`, thumbnail `public/fish/scarlet-reef-hermit-crab.webp`
+  - `invertebrate-emerald-mithrax-crab.glb`: `4,192` triangles, `1,035,928` bytes, `13` joints, clip `emerald_crab_forage`, thumbnail `public/fish/emerald-mithrax-crab.webp`
+  - `invertebrate-scarlet-skunk-cleaner-shrimp.glb`: `3,880` triangles, `511,932` bytes, `13` joints, clip `cleaner_shrimp_rock`, thumbnail `public/fish/scarlet-skunk-cleaner-shrimp.webp`
+- Runtime species/locomotion/UI integration (`AQ-109` Phase 2) and Root visual review remain pending.
+
+## Negative Space Aquascape (NSA) modular live-rock library — `AQ-94`
+
+- Original **$0** procedural calcium-carbonate live-rock geometry and shared `2048×2048` 4-quadrant PBR trim sheet (`textures/reef-nsa-trim-2048-{albedo,normal,orm}.jpg`) authored from scratch in Blender (`reef_nsa_trim_sheet.py`, `build_reef_nsa_*.py`; packed sources in `src/rendering/assets/splat-fish/blend/` and overrides in `src/rendering/assets/splat-fish/overrides/`). Canonical `corals/`, `corals/manifest.json`, `splat-fish/manifest.json`, and `reef-center-arch.glb` remain untouched.
+- Synced into `src/rendering/assets/corals/custom-rocks/` (`manifest.json`, `8` modules total including `reef-center-arch`), each grounded flush at `boundsM.min[1] = 0`, `aoSource: 'texture'`, zero rejected sockets, and byte-identical embedded `2048×2048` JPEG textures:
+  - `reef-nsa-pinnacle-spire.glb`: `14,526` triangles, `1,617,840` bytes (`0.6736 × 0.7157 × 0.3702` m; sockets `socket_plate_ledge_21`, `socket_sps_crest_21`)
+  - `reef-nsa-cantilever-shelf.glb`: `11,524` triangles, `1,546,096` bytes (`0.7109 × 0.2705 × 0.3587` m; sockets `socket_lps_mid_21`, `socket_plate_ledge_22`)
+  - `reef-nsa-cave-buttress.glb`: `19,458` triangles, `1,771,648` bytes (`0.8377 × 0.5091 × 0.3491` m; socket `socket_lps_mid_22`)
+  - `reef-nsa-bommie-mound.glb`: `14,606` triangles, `1,645,744` bytes (`0.6291 × 0.3813 × 0.3730` m; sockets `socket_brain_apron_21`, `socket_soft_mat_21`)
+  - `reef-nsa-rubble-talus.glb`: `7,210` triangles, `1,420,888` bytes (`0.4061 × 0.0917 × 0.2936` m; substrate rubble apron, `0` sockets)
+  - `reef-nsa-high-arch-span.glb`: `18,578` triangles, `1,735,588` bytes (`0.8790 × 0.6393 × 0.3921` m; sockets `socket_sps_crest_22`, `socket_plate_ledge_23`)
+  - `reef-nsa-encrusting-ledge.glb`: `10,564` triangles, `1,513,116` bytes (`0.6908 × 0.2486 × 0.3702` m; sockets `socket_brain_apron_22`, `socket_soft_mat_22`)
+- Runtime pinnacle-canyon full-scape composition and Root visual/budget acceptance remain pending.
+
+## Sculpted fish eye/gill/mouth anatomy & `512×512` biological PBR maps — `AQ-91` (Batches 1–3; all 11 remaining `splat-fish` species complete)
+
+- Original **$0** 3D anatomical head sculpts (convex glossy cornea dome + orbital socket rim, curved operculum gill cover + recessed gill slit, species-matched buccal mouth lips/cleft) and `512×512` 24-bit RGB PNG PBR maps (BaseColor, biological Normal with scales/lateral line/fin rays/head anatomy, packed ORM with `0.035` cornea roughness) authored in Blender 5.2.3 LTS (`fish_head_sculpt_common.py`, `build_fish_*.py`; packed sources in `src/rendering/assets/splat-fish/blend/` and overrides in `src/rendering/assets/splat-fish/overrides/`). `blue-green-chromis.glb` (`AQ-107`) and `learned-shape-guide.json` remain untouched via `sync-blender-override.mjs --fish-overrides`.
+- Batch 1 synced in `src/rendering/assets/splat-fish/`:
+  - `flame-angelfish.glb`: `11,664` triangles, `999,592` bytes (`0.953` MiB)
+  - `copperband-butterflyfish.glb`: `10,306` triangles, `966,924` bytes (`0.922` MiB)
+  - `banggai-cardinalfish.glb`: `7,076` triangles, `886,908` bytes (`0.846` MiB)
+- Batch 2 synced in `src/rendering/assets/splat-fish/`:
+  - `royal-gramma.glb`: `10,484` triangles, `925,256` bytes (`0.882` MiB)
+  - `firefish.glb`: `8,403` triangles, `788,460` bytes (`0.752` MiB)
+  - `lyretail-anthias.glb`: `9,739` triangles, `840,420` bytes (`0.801` MiB)
+  - `six-line-wrasse.glb`: `12,107` triangles, `963,144` bytes (`0.919` MiB)
+- Batch 3 synced in `src/rendering/assets/splat-fish/`:
+  - `mccoskers-flasher-wrasse.glb`: `9,639` triangles, `937,420` bytes (`0.894` MiB)
+  - `mandarin-dragonet.glb`: `9,279` triangles, `1,026,052` bytes (`0.979` MiB)
+  - `yellow-watchman-goby.glb`: `10,405` triangles, `886,676` bytes (`0.846` MiB)
+  - `tailspot-blenny.glb`: `11,140` triangles, `936,936` bytes (`0.894` MiB)
+- All `11/11` previously un-modeled `splat-fish` species (`12/13` overridden total alongside `blue-tang` + preserved `AQ-107` `blue-green-chromis`) are sculpted and synced; Root visual/native review remains pending.
+
+## Standalone Blender starter & license-safe sailfin tang overrides — `AQ-91` / `AQ-70.9`
+
+- Original **$0** watertight 3D sculpted, 8-joint rigged, animated, and `512×512` 24-bit RGB PNG PBR-textured (`BaseColor`, biological `Normal`, packed `ORM` with `0.035` cornea roughness) overrides authored from scratch in Blender 5.2.3 LTS (`fish_from_reference_common.py`, `build_fish_{yellow_tang,ocellaris_clownfish,desjardins_sailfin_tang}.py`; packed sources in `src/rendering/assets/splat-fish/blend/` and overrides in `src/rendering/assets/splat-fish/overrides/`):
+  - `overrides/yellow-tang.glb`: `12,800` triangles, `773,664` bytes (`0.738` MiB), SHA-256 `6e3060cf377e80ec26a2a5b7c53db8856924df8ebf33695f22f927aaa44ad592`, clip `yellow_tang_labriform_swim` (reconstructed from project-original `public/fish/yellow-tang.webp`)
+  - `overrides/ocellaris-clownfish.glb`: `12,580` triangles, `819,648` bytes (`0.782` MiB), SHA-256 `173d767ebdd241b6983c05b0e527af1176fe2f3c5cdccabfcb0af164ec791ef3`, clip `clownfish_subcarangiform_swim` (reconstructed from project-original `public/fish/ocellaris-clownfish.webp`)
+  - `overrides/desjardins-sailfin-tang.glb`: `13,184` triangles, `940,252` bytes (`0.897` MiB), SHA-256 `5ffd16a9396767fc6a77263eaddd8e0316eb4e7a495761b232311a59bd09ca1e`, clip `zebrasoma_labriform_swim` (100% original procedural Zebrasoma desjardinii artwork synthesized in `build_fish_desjardins_sailfin_tang.py`, delivered as a license-clean replacement candidate for the `CC-BY-NC-4.0`-flagged `download_testing_copies/zebrasoma_desjardinii-copy.glb`)
+- Delivered alongside existing `candidate-real-{tang,clown}.glb`, `download_testing_copies/*`, `blue-green-chromis.glb`, `learned-shape-guide.json`, and active runtime `modelUrls` untouched; runtime promotion awaits Root visual review (`AQ-70.9` / `AQ-79`).

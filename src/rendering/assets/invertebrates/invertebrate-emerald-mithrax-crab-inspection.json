@@ -1,0 +1,91 @@
+{
+  "extras": {
+    "reefInvertebrate": {
+      "schema": "reef-invertebrate-v1",
+      "id": "invertebrate-emerald-mithrax-crab",
+      "speciesId": "emerald-mithrax-crab",
+      "kind": "invertebrate",
+      "units": "meter",
+      "upAxis": "+Y",
+      "forwardAxis": "+Z",
+      "origin": "substrate-grounded",
+      "dimensionsM": [
+        0.057077351957559586,
+        0.015502924099564552,
+        0.04461662843823433
+      ],
+      "jointCount": 13,
+      "jointNames": [
+        "root",
+        "antenna_L",
+        "antenna_R",
+        "claw_L",
+        "claw_R",
+        "leg_L1",
+        "leg_L2",
+        "leg_L3",
+        "leg_L4",
+        "leg_R1",
+        "leg_R2",
+        "leg_R3",
+        "leg_R4"
+      ],
+      "animationClips": [
+        "emerald_crab_forage"
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "316b5cec131b75098d029613d4959e83757a14b8617af32edc573355d0e9655f",
+        "recipe": "Blender --background --python src/rendering/modeling/build_invertebrate_emerald_mithrax_crab.py; node scripts/sync-blender-override.mjs --invertebrate invertebrate-emerald-mithrax-crab --learn-guide",
+        "attribution": "Original rigged and animated 3D reef invertebrate (emerald-mithrax-crab) with procedural 512x512 BaseColor/Normal/ORM PBR textures; zero external donor assets."
+      }
+    }
+  },
+  "boundsM": {
+    "min": [
+      -0.028538675978779793,
+      0,
+      -0.019755497574806213
+    ],
+    "max": [
+      0.028538675978779793,
+      0.015502924099564552,
+      0.024861130863428116
+    ]
+  },
+  "triangles": 4192,
+  "bytes": 1035928,
+  "primitives": [
+    {
+      "id": "invertebrate_emerald_mithrax_crab_0",
+      "role": "invertebrate",
+      "vertexCount": 2386,
+      "triangles": 4192,
+      "aoSource": "texture"
+    }
+  ],
+  "textures": [
+    {
+      "name": "invertebrate-emerald-mithrax-crab-normal",
+      "mimeType": "image/png",
+      "widthPx": 512,
+      "heightPx": 512,
+      "bytes": 413061
+    },
+    {
+      "name": "invertebrate-emerald-mithrax-crab-orm",
+      "mimeType": "image/png",
+      "widthPx": 512,
+      "heightPx": 512,
+      "bytes": 264127
+    },
+    {
+      "name": "invertebrate-emerald-mithrax-crab-albedo",
+      "mimeType": "image/png",
+      "widthPx": 512,
+      "heightPx": 512,
+      "bytes": 182513
+    }
+  ]
+}

@@ -8,7 +8,7 @@
       "upAxis": "+Y",
       "origin": "local",
       "dimensionsM": [
-        0.275092,
+        0.286816,
         1.401608,
         2
       ],
@@ -41,12 +41,12 @@
   },
   "boundsM": {
     "min": [
-      -0.137546,
+      -0.143408,
       -0.70205,
       -1
     ],
     "max": [
-      0.137546,
+      0.143408,
       0.699558,
       1
     ]
@@ -55,15 +55,15 @@
     {
       "id": "banggai_cardinalfish_body",
       "role": "fish",
-      "vertexCount": 3657,
+      "vertexCount": 3807,
       "boundsM": {
         "min": [
-          -0.137546,
+          -0.143408,
           -0.70205,
           -1
         ],
         "max": [
-          0.137546,
+          0.143408,
           0.699558,
           1
         ]
@@ -76,5 +76,12 @@
     }
   ],
   "sockets": [],
-  "collisionParts": []
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Pterapogon kauderni & project-original public/fish/banggai-cardinalfish.webp silhouette",
+    "sourceUrl": "https://www.fishbase.se/summary/Pterapogon-kauderni",
+    "referenceHeightToLength": 0.7005,
+    "measuredHeightToLength": 0.700804,
+    "relativeDeviationPct": 0.04
+  }
 }

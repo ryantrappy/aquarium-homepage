@@ -22,6 +22,35 @@ export type MorayResidence = Readonly<{
   headAxisEnd: Vec3
 }>
 
+function residenceFromRootPose(position: Vec3, yaw: number): MorayResidence {
+  const scale = fishModelScale('snowflake-moray-eel')
+  const c = Math.cos(yaw), s = Math.sin(yaw)
+  const modelPoint = (point: Vec3): Vec3 => ({
+    x: position.x + (point.x * c + point.z * s) * scale,
+    y: position.y + point.y * scale,
+    z: position.z + (-point.x * s + point.z * c) * scale,
+  })
+  const { min, max } = SNOWFLAKE_MORAY_FOREBODY_BOUNDS
+  const axisX = (min.x + max.x) / 2, axisY = (min.y + max.y) / 2
+  const forebodyAxisEnd = modelPoint({ x: axisX, y: axisY, z: max.z })
+  const headPosition = modelPoint(SNOWFLAKE_MORAY_HEAD_BONE_BIND_POSITION)
+  return Object.freeze({
+    position, yaw,
+    bodyCenter: modelPoint({ x: axisX, y: axisY, z: (min.z + max.z) / 2 }),
+    forebodyAxisStart: modelPoint({ x: axisX, y: axisY, z: min.z }),
+    forebodyAxisEnd,
+    headPosition,
+    headAxisStart: headPosition,
+    headAxisEnd: forebodyAxisEnd,
+  })
+}
+
+/** Measured shelter between the right ledge and bommie in the modular layout. */
+export function resolveNsaMorayResidence(narrow: boolean, readyIslandIds: ReadonlySet<string>): MorayResidence | undefined {
+  if (narrow || !readyIslandIds.has('reef-nsa-encrusting-ledge') || !readyIslandIds.has('reef-nsa-bommie-mound')) return undefined
+  return residenceFromRootPose({ x: 2.14, y: -2.41, z: -.33 }, -.72)
+}
+
 /** Runtime reef collider IDs are derived from the exact layout index. */
 export function hasReadyRightIslandCollider(placements: readonly ReefPlacement[], readyIslandIds: ReadonlySet<string>): boolean {
   const rightIndex = placements.findIndex(placement => placement.islandKind === 'right')
@@ -74,22 +103,7 @@ export function resolveSnowflakeMorayResidence(placements: readonly ReefPlacemen
     y: caveCenter.y - modelCenter.y * scale / placement.uniformScale,
     z: caveCenter.z - modelCenter.z * scale / placement.uniformScale,
   }
-  const modelPoint = (point: Vec3): Vec3 => islandLocalToWorld(placement, {
-    x: rootLocal.x + point.x * scale / placement.uniformScale,
-    y: rootLocal.y + point.y * scale / placement.uniformScale,
-    z: rootLocal.z + point.z * scale / placement.uniformScale,
-  })
-
-  return Object.freeze({
-    position: islandLocalToWorld(placement, rootLocal),
-    yaw: placement.yaw,
-    bodyCenter: islandLocalToWorld(placement, caveCenter),
-    forebodyAxisStart: modelPoint({ x: modelCenter.x, y: modelCenter.y, z: SNOWFLAKE_MORAY_FOREBODY_BOUNDS.min.z }),
-    forebodyAxisEnd: modelPoint({ x: modelCenter.x, y: modelCenter.y, z: SNOWFLAKE_MORAY_FOREBODY_BOUNDS.max.z }),
-    headPosition: modelPoint(SNOWFLAKE_MORAY_HEAD_BONE_BIND_POSITION),
-    headAxisStart: modelPoint(SNOWFLAKE_MORAY_HEAD_BONE_BIND_POSITION),
-    headAxisEnd: modelPoint({ x: modelCenter.x, y: modelCenter.y, z: SNOWFLAKE_MORAY_FOREBODY_BOUNDS.max.z }),
-  })
+  return residenceFromRootPose(islandLocalToWorld(placement, rootLocal), placement.yaw)
 }
 
 /** Fail closed until the authored model, right-cave collider, and exposed-head corridor are ready. */

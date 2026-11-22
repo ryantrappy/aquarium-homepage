@@ -5,11 +5,19 @@ Category: Research
 Status: Active
 Authority: Informational
 Backlog: AQ-70.7
-Owner: @Luna
-Updated: 2026-11-09
+Owner: @gemini
+Updated: 2026-11-21
 Upstream: docs/photorealism-rubric.md, docs/photorealism-reference.md, docs/rendering.md, docs/photorealism-budgets.md
 Downstream: backlog/tasks/aq-70.7 - Spike-baked-path-traced-lighting-or-a-pre-rendered-reef-plate-for-the-static-aquascape.md
 -->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Research Spike / Feasibility Study
+> - **Status**: Active
+> - **Authority**: Informational
+> - **Backlog Reference**: `AQ-70.7`
+> - **Summary**: Evaluates a hybrid offline Cycles path-traced lightmap + real-time Three.js r187 rendering architecture for static reef live rock and stony coral skeletons combined with dynamic fish, swaying soft corals, and caustics.
 
 ## 1. Question and input
 
@@ -45,11 +53,13 @@ fish navigate against. The hybrid below keeps the reef fully 3D.
 
 | Piece | Status | Evidence |
 |---|---|---|
-| Cycles baking (diffuse GI + AO) | Proven, commodity | Blender Cycles "Bake" with a second UV map; Blender 4.2.0 verified headless in this environment (`blender --background --python-expr` works). The task text says "Blender 5" — that version does not exist yet; use 4.2 now and re-check when 5.x ships. |
-| Second UV set through glTF | Supported end to end | glTF 2.0 allows TEXCOORD_0/TEXCOORD_1; the Blender exporter writes every UV map; three.js GLTFLoader creates `uv` and `uv1` attributes. No custom extension is needed for the UVs themselves. |
-| Lightmap texture in three.js | Supported | `MeshStandardMaterial.lightMap` + `lightMapIntensity`; route the texture to the second UV set (`texture.channel = 1`, i.e. the `uv1` attribute, in three.js r152+ — pin the exact API against r187 in the pilot). |
-| KTX2 delivery | Already the repo rule | AQ-70.3 budgets require KTX2 for textures (frozen 29-id grandfather list); a lightmap ships as KTX2 UASTC like any other map, so no new pipeline is needed. |
-| Socket / contract preservation | Preserved | Baking changes textures, not geometry: socket positions, the AQ-42/AQ-52/AQ-53 contracts, the manifest hashes, and the AQ-58 collision bounds are untouched. A bake that moved a vertex would fail the socket-report freshness test — that is the guard. |
+| Cycles baking (diffuse GI + AO) | Proven, commodity | Blender Cycles "Bake" with a second UV map; **Blender 5.2.3 LTS** (`hash e13b728c6880`) verified headless and via live Blender MCP in this environment (`/Applications/Blender.app/Contents/MacOS/Blender --background --threads 4`). |
+| Second UV set through glTF | Supported end to end | glTF 2.0 allows `TEXCOORD_0`/`TEXCOORD_1`; verified directly in Blender 5.2.3 LTS (`io_scene_gltf2`) that a mesh with two UV layers (`TrimAtlas_UV`, `Lightmap_UV`) exports `{"POSITION": 0, "NORMAL": 1, "TEXCOORD_0": 2, "TEXCOORD_1": 3}`, which Three.js r187 `GLTFLoader` loads as `geometry.attributes.uv` and `geometry.attributes.uv1`. |
+| Shared trim sheet + per-island lightmap (`AQ-94`) | Directly compatible | The 7 `AQ-94` modular NSA rock pieces (`reef-nsa-*`) use `TEXCOORD_0` to index into the shared `2048×2048` 4-quadrant coralline trim sheet (`reef-nsa-trim-2048-{albedo,normal,orm}.jpg`). Adding a non-overlapping `TEXCOORD_1` (`Lightmap_UV`) per rock module allows each assembled formation to receive unique path-traced GI/AO while keeping the single shared `2048×2048` trim atlas on `TEXCOORD_0`. |
+| Rigid skeleton vs. soft polyp crown split (`AQ-70.11`) | Directly compatible | The 23 custom coral colonies (`src/rendering/assets/corals/custom-colonies/`) and `reef-assembly.ts` (`preserveSkeletonShape`, `rigidPaletteOverride`) already separate calcified stony bases (`COLOR_0.r == 0`, static bake candidates) from swaying tentacle/polyp crowns (`COLOR_0.r > 0`, real-time shader-displaced). |
+| Lightmap texture in three.js | Supported | `MeshStandardMaterial.lightMap` + `lightMapIntensity`; route the texture to the second UV set (`lightMap.channel = 1`, binding `uv1` in Three.js r187). |
+| KTX2 delivery | Already the repo rule | AQ-70.3 budgets require KTX2 for non-grandfathered runtime textures; a lightmap ships as KTX2 UASTC (or BC7 transcode) and is accounted for in `src/rendering/assets/budgets.ts`. |
+| Socket / contract preservation | Preserved | Baking adds `TEXCOORD_1` and lightmap textures without altering vertex positions (`POSITION`) or child socket empties (`reefSocket`), so `AQ-42`/`AQ-52`/`AQ-53` contracts, socket-report freshness tests, and `AQ-58` BVH collision meshes remain 100% invariant. |
 
 ### Fidelity — what baking actually buys
 

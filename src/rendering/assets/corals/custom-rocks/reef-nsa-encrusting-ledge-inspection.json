@@ -1,0 +1,167 @@
+{
+  "extras": {
+    "reefAsset": {
+      "schema": "reef-asset-v1",
+      "id": "reef-nsa-encrusting-ledge",
+      "kind": "rock",
+      "units": "meter",
+      "upAxis": "+Y",
+      "origin": "local",
+      "dimensionsM": [
+        0.6907906532287598,
+        0.24859072268009186,
+        0.3701947331428528
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "8a6d52cb931dc2ddf647c77c865f50ed6aba11f9b1dd7583a334f2e825a533ae",
+        "recipe": "Blender background --python src/rendering/modeling/build_reef_nsa_encrusting_ledge.py; node scripts/sync-blender-override.mjs --reef reef-nsa-encrusting-ledge --learn-guide",
+        "attribution": "Original custom procedural limestone arch and embedded textures; no imported visual assets."
+      }
+    }
+  },
+  "rootTransform": {
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "boundsM": {
+    "min": [
+      -0.3453953266143799,
+      0,
+      -0.1850973665714264
+    ],
+    "max": [
+      0.3453953266143799,
+      0.24859072268009186,
+      0.1850973665714264
+    ]
+  },
+  "primitives": [
+    {
+      "id": "reef_nsa_encrusting_ledge",
+      "role": "rock",
+      "vertexCount": 7221,
+      "boundsM": {
+        "min": [
+          -0.3453953266143799,
+          0,
+          -0.1850973665714264
+        ],
+        "max": [
+          0.3453953266143799,
+          0.24859072268009186,
+          0.1850973665714264
+        ]
+      },
+      "material": {
+        "vertexColors": false,
+        "vertexAlpha": false,
+        "aoSource": "texture"
+      }
+    }
+  ],
+  "sockets": [
+    {
+      "name": "socket_brain_apron_22",
+      "role": "coral-mount",
+      "parentMesh": "reef_nsa_encrusting_ledge",
+      "archetype": "mounded-lps",
+      "positionM": [
+        -0.1877124309539795,
+        0.15937279164791107,
+        0.04664347320795059
+      ],
+      "normal": [
+        -0.016265948055358862,
+        0.9998208073651237,
+        0.00968359920757073
+      ],
+      "rotation": [
+        0.004842019171838446,
+        7.537579297608201e-12,
+        0.008133341405237792,
+        0.9999552008004785
+      ],
+      "footprintRadiusM": 0.024,
+      "clearanceRadiusM": 0.042,
+      "support": {
+        "pointM": [
+          -0.18771243078901004,
+          0.15937278150771447,
+          0.046643473109739396
+        ],
+        "normal": [
+          -0.016265948055358862,
+          0.9998208073651237,
+          0.00968359920757073
+        ],
+        "supportedRadiusM": 0.024,
+        "freeRadiusM": 0.042,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "fb4cc72d82bc784ea4ceb7030fda934c237ca9b531840235518484092a7b88a2",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-nsa-encrusting-ledge-socket-report.json"
+        }
+      }
+    },
+    {
+      "name": "socket_soft_mat_22",
+      "role": "coral-mount",
+      "parentMesh": "reef_nsa_encrusting_ledge",
+      "archetype": "zoanthid-mat",
+      "positionM": [
+        0.19522309303283691,
+        0.19344459474086761,
+        0.03248484432697296
+      ],
+      "normal": [
+        -0.06474752514758056,
+        0.9945770147833124,
+        -0.08138992352851729
+      ],
+      "rotation": [
+        -0.040750246710001374,
+        -1.4025799989173228e-11,
+        0.032417744570083326,
+        0.9986433333428221
+      ],
+      "footprintRadiusM": 0.024,
+      "clearanceRadiusM": 0.042,
+      "support": {
+        "pointM": [
+          0.19522309364191884,
+          0.19344458538485182,
+          0.03248484509261041
+        ],
+        "normal": [
+          -0.06474752514758056,
+          0.9945770147833124,
+          -0.08138992352851729
+        ],
+        "supportedRadiusM": 0.024,
+        "freeRadiusM": 0.042,
+        "evidence": {
+          "method": "surface-probes-v1",
+          "geometrySha256": "fb4cc72d82bc784ea4ceb7030fda934c237ca9b531840235518484092a7b88a2",
+          "report": "src/rendering/assets/corals/custom-rocks/reef-nsa-encrusting-ledge-socket-report.json"
+        }
+      }
+    }
+  ],
+  "collisionParts": []
+}

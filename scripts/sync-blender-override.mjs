@@ -24,6 +24,7 @@
  */
 
 import { execFileSync } from 'node:child_process'
+import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -120,8 +121,9 @@ export function parseGlbGeometry(glbBuffer) {
  * Extracts a normalized 3D anatomical shape guide from a manually sculpted .glb in overrides/.
  */
 export function extractShapeGuideFromOverride(speciesId, overrideGlbPath) {
-  if (typeof speciesId === 'string' && speciesId.startsWith('reef-')) {
-    throw new Error(`Cannot extract a fish shape guide from reef override "${speciesId}".`)
+  if (typeof speciesId === 'string' && (speciesId.startsWith('reef-') || speciesId.startsWith('invertebrate-'))) {
+    const kind = speciesId.startsWith('reef-') ? 'reef' : 'invertebrate'
+    throw new Error(`Cannot extract a fish shape guide from ${kind} override "${speciesId}".`)
   }
   const glbBuf = fs.readFileSync(overrideGlbPath)
   const { positions, joints, weights } = parseGlbGeometry(glbBuf)
@@ -235,7 +237,11 @@ export function extractShapeGuideFromOverride(speciesId, overrideGlbPath) {
 
 export function fishOverrideFiles(files) {
   return files
-    .filter(file => file.endsWith('.glb') && !path.basename(file).startsWith('reef-'))
+    .filter(
+      file => file.endsWith('.glb')
+        && !path.basename(file).startsWith('reef-')
+        && !path.basename(file).startsWith('invertebrate-'),
+    )
     .sort()
 }
 
@@ -414,6 +420,258 @@ async function main() {
     const { syncReefOverride, parseReefSyncArgs } = await import('./sync-reef-override.mjs')
     const id = parseReefSyncArgs(args)
     syncReefOverride(REPO_ROOT, id)
+    return
+  }
+  // Invertebrates are not fish: dispatch before documentation, guide learning or builds.
+  if (args.includes('--invertebrate')) {
+    const { syncInvertebrateOverride, parseInvertebrateSyncArgs } = await import('./sync-invertebrate-override.mjs')
+    const id = parseInvertebrateSyncArgs(args)
+    syncInvertebrateOverride(REPO_ROOT, id)
+    return
+  }
+  // Safe fish override rebuild: applies overrides/*.glb without altering learned-shape-guide.json or AQ-107 blue-green-chromis.
+  if (args.includes('--fish-overrides')) {
+    const chromisGlbPath = path.join(ASSETS_DIR, 'blue-green-chromis.glb')
+    const chromisInspectionPath = path.join(ASSETS_DIR, 'fish-blue-green-chromis-inspection.json')
+    const manifestPath = path.join(ASSETS_DIR, 'manifest.json')
+    const chromisGlbBackup = fs.existsSync(chromisGlbPath) ? fs.readFileSync(chromisGlbPath) : null
+    const chromisInspectionBackup = fs.existsSync(chromisInspectionPath) ? fs.readFileSync(chromisInspectionPath) : null
+    const oldManifest = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manifestPath, 'utf8')) : null
+    const oldChromisEntry = oldManifest?.assets?.find(item => item.id === 'fish-blue-green-chromis') ?? null
+
+    execFileSync(process.execPath, ['--experimental-strip-types', BUILD_SCRIPT_PATH], {
+      cwd: REPO_ROOT,
+      stdio: 'inherit',
+    })
+
+    if (chromisGlbBackup) fs.writeFileSync(chromisGlbPath, chromisGlbBackup)
+    if (chromisInspectionBackup) fs.writeFileSync(chromisInspectionPath, chromisInspectionBackup)
+    if (oldChromisEntry && fs.existsSync(manifestPath)) {
+      const rebuiltManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+      rebuiltManifest.assets = rebuiltManifest.assets.map(item =>
+        item.id === 'fish-blue-green-chromis' ? oldChromisEntry : item,
+      )
+      fs.writeFileSync(manifestPath, JSON.stringify(rebuiltManifest, null, 2) + '\n')
+    }
+
+    const silhouetteRefs = {
+      'blue-tang': {
+        source: 'FishBase Paracanthurus hepatus lateral profile & extended dorsal/anal span',
+        sourceUrl: 'https://www.fishbase.se/summary/Paracanthurus-hepatus',
+        referenceHeightToLength: 0.585,
+      },
+      'royal-gramma': {
+        source: 'FishBase Gramma loreto & project-original public/fish/royal-gramma.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Gramma-loreto',
+        referenceHeightToLength: 0.4765,
+      },
+      'banggai-cardinalfish': {
+        source: 'FishBase Pterapogon kauderni & project-original public/fish/banggai-cardinalfish.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Pterapogon-kauderni',
+        referenceHeightToLength: 0.7005,
+      },
+      'mandarin-dragonet': {
+        source: 'FishBase Synchiropus splendidus & project-original public/fish/mandarin-dragonet.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Synchiropus-splendidus',
+        referenceHeightToLength: 0.4498,
+      },
+      'blue-green-chromis': {
+        source: 'FishBase Chromis viridis & project-original public/fish/blue-green-chromis.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Chromis-viridis',
+        referenceHeightToLength: 0.4653,
+      },
+      'firefish': {
+        source: 'FishBase Nemateleotris magnifica & project-original public/fish/firefish.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Nemateleotris-magnifica',
+        referenceHeightToLength: 0.388,
+      },
+      'yellow-watchman-goby': {
+        source: 'FishBase Cryptocentrus cinctus & project-original public/fish/yellow-watchman-goby.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Cryptocentrus-cinctus',
+        referenceHeightToLength: 0.3542,
+      },
+      'tailspot-blenny': {
+        source: 'FishBase Ecsenius stigmatura lateral body-depth proportion',
+        sourceUrl: 'https://www.fishbase.se/summary/Ecsenius-stigmatura',
+        referenceHeightToLength: 0.2564,
+      },
+      'six-line-wrasse': {
+        source: 'FishBase Pseudocheilinus hexataenia & project-original public/fish/six-line-wrasse.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Pseudocheilinus-hexataenia',
+        referenceHeightToLength: 0.3683,
+      },
+      'mccoskers-flasher-wrasse': {
+        source: 'FishBase Paracheilinus mccoskeri & project-original public/fish/mccoskers-flasher-wrasse.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Paracheilinus-mccoskeri',
+        referenceHeightToLength: 0.4699,
+      },
+      'lyretail-anthias': {
+        source: 'FishBase Pseudanthias squamipinnis & project-original public/fish/lyretail-anthias.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Pseudanthias-squamipinnis',
+        referenceHeightToLength: 0.4053,
+      },
+      'flame-angelfish': {
+        source: 'FishBase Centropyge loricula & project-original public/fish/flame-angelfish.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Centropyge-loricula',
+        referenceHeightToLength: 0.6386,
+      },
+      'copperband-butterflyfish': {
+        source: 'FishBase Chelmon rostratus & project-original public/fish/copperband-butterflyfish.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Chelmon-rostratus',
+        referenceHeightToLength: 0.6604,
+      },
+    }
+
+    const auditEntries = []
+    for (const [speciesId, refSpec] of Object.entries(silhouetteRefs)) {
+      const inspPath = path.join(ASSETS_DIR, `fish-${speciesId}-inspection.json`)
+      if (!fs.existsSync(inspPath)) continue
+      const report = JSON.parse(fs.readFileSync(inspPath, 'utf8'))
+      const dims = report.extras.reefAsset.dimensionsM
+      const measuredHeightToLength = Number((dims[1] / dims[2]).toFixed(6))
+      const relativeDeviationPct = Number(
+        ((Math.abs(measuredHeightToLength - refSpec.referenceHeightToLength) / refSpec.referenceHeightToLength) * 100).toFixed(2),
+      )
+      const silhouetteRecord = {
+        source: refSpec.source,
+        sourceUrl: refSpec.sourceUrl,
+        referenceHeightToLength: refSpec.referenceHeightToLength,
+        measuredHeightToLength,
+        relativeDeviationPct,
+      }
+      if (speciesId !== 'blue-green-chromis') {
+        report.silhouetteReference = silhouetteRecord
+        fs.writeFileSync(inspPath, JSON.stringify(report, null, 2) + '\n')
+      }
+      auditEntries.push({
+        id: `fish-${speciesId}`,
+        speciesId,
+        ...silhouetteRecord,
+      })
+    }
+
+    const standaloneOverrideSpecs = [
+      {
+        speciesId: 'yellow-tang',
+        recipe: 'blender --background --python src/rendering/modeling/build_starter_fish_overrides.py',
+        attribution:
+          'Original photorealistic 3D rigged and animated fish asset (Zebrasoma flavescens (Yellow Tang)) reconstructed from project-original public/fish/yellow-tang.webp with embedded PBR textures.',
+        source: 'FishBase Zebrasoma flavescens & project-original public/fish/yellow-tang.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Zebrasoma-flavescens',
+        referenceHeightToLength: 0.6961,
+      },
+      {
+        speciesId: 'ocellaris-clownfish',
+        recipe: 'blender --background --python src/rendering/modeling/build_starter_fish_overrides.py',
+        attribution:
+          'Original photorealistic 3D rigged and animated fish asset (Amphiprion ocellaris (Ocellaris Clownfish)) reconstructed from project-original public/fish/ocellaris-clownfish.webp with embedded PBR textures.',
+        source: 'FishBase Amphiprion ocellaris & project-original public/fish/ocellaris-clownfish.webp silhouette',
+        sourceUrl: 'https://www.fishbase.se/summary/Amphiprion-ocellaris',
+        referenceHeightToLength: 0.4996,
+      },
+      {
+        speciesId: 'desjardins-sailfin-tang',
+        recipe: 'blender --background --python src/rendering/modeling/build_starter_fish_overrides.py',
+        attribution:
+          'Original photorealistic 3D rigged and animated fish asset (Zebrasoma desjardinii (Desjardin\'s Sailfin Tang)) procedurally synthesized in Blender with embedded PBR textures.',
+        source: 'FishBase Zebrasoma desjardinii extended dorsal/anal sailfin lateral profile',
+        sourceUrl: 'https://www.fishbase.se/summary/Zebrasoma-desjardinii',
+        referenceHeightToLength: 0.7,
+      },
+    ]
+
+    for (const spec of standaloneOverrideSpecs) {
+      const overrideGlbPath = path.join(OVERRIDES_DIR, `${spec.speciesId}.glb`)
+      if (!fs.existsSync(overrideGlbPath)) continue
+      const glbBuf = fs.readFileSync(overrideGlbPath)
+      const sha256 = crypto.createHash('sha256').update(glbBuf).digest('hex')
+      const jsonLen = glbBuf.readUInt32LE(12)
+      const doc = JSON.parse(glbBuf.subarray(20, 20 + jsonLen).toString('utf8'))
+      const prim = doc.meshes?.[0]?.primitives?.[0]
+      const posAcc = doc.accessors[prim.attributes.POSITION]
+      const min = posAcc.min.map(v => Number(v.toFixed(6)))
+      const max = posAcc.max.map(v => Number(v.toFixed(6)))
+      const dims = [
+        Number((max[0] - min[0]).toFixed(6)),
+        Number((max[1] - min[1]).toFixed(6)),
+        Number((max[2] - min[2]).toFixed(6)),
+      ]
+      const measuredHeightToLength = Number((dims[1] / dims[2]).toFixed(6))
+      const relativeDeviationPct = Number(
+        ((Math.abs(measuredHeightToLength - spec.referenceHeightToLength) / spec.referenceHeightToLength) * 100).toFixed(2),
+      )
+      const silhouetteRecord = {
+        source: spec.source,
+        sourceUrl: spec.sourceUrl,
+        referenceHeightToLength: spec.referenceHeightToLength,
+        measuredHeightToLength,
+        relativeDeviationPct,
+      }
+      const overrideReport = {
+        extras: {
+          reefAsset: {
+            schema: 'reef-asset-v1',
+            id: `fish-${spec.speciesId}`,
+            kind: 'fish',
+            units: 'meter',
+            upAxis: '+Y',
+            origin: 'local',
+            dimensionsM: dims,
+            provenance: {
+              license: 'original',
+              creator: 'Aquarium project',
+              sourceSha256: sha256,
+              recipe: spec.recipe,
+              attribution: spec.attribution,
+            },
+          },
+        },
+        rootTransform: {
+          translation: [0, 0, 0],
+          rotation: [0, 0, 0, 1],
+          scale: [1, 1, 1],
+        },
+        boundsM: { min, max },
+        primitives: [
+          {
+            id: `${spec.speciesId.replace(/-/g, '_')}_body`,
+            role: 'fish',
+            vertexCount: posAcc.count,
+            boundsM: { min, max },
+            material: {
+              vertexColors: false,
+              vertexAlpha: false,
+              aoSource: 'texture',
+            },
+          },
+        ],
+        sockets: [],
+        collisionParts: [],
+        silhouetteReference: silhouetteRecord,
+      }
+      fs.writeFileSync(
+        path.join(OVERRIDES_DIR, `fish-${spec.speciesId}-inspection.json`),
+        JSON.stringify(overrideReport, null, 2) + '\n',
+      )
+      auditEntries.push({
+        id: `fish-${spec.speciesId}`,
+        speciesId: spec.speciesId,
+        ...silhouetteRecord,
+      })
+    }
+
+    const auditDir = path.join(REPO_ROOT, 'docs/asset-evidence/aq70-10')
+    fs.mkdirSync(auditDir, { recursive: true })
+    fs.writeFileSync(
+      path.join(auditDir, 'silhouette-proportion-audit.json'),
+      JSON.stringify({
+        schema: 'fish-silhouette-proportion-audit-v1',
+        backlogTask: 'AQ-70.10',
+        maxAllowedDeviationPct: 8,
+        species: auditEntries,
+      }, null, 2) + '\n',
+    )
+    console.log('Synced fish overrides; preserved AQ-107 blue-green-chromis and learned-shape-guide.json.')
     return
   }
   ensureDocumentationAndRules()

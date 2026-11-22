@@ -8,7 +8,7 @@
       "upAxis": "+Y",
       "origin": "local",
       "dimensionsM": [
-        0.282292,
+        0.286712,
         0.799884,
         2
       ],
@@ -41,12 +41,12 @@
   },
   "boundsM": {
     "min": [
-      -0.141146,
+      -0.143356,
       -0.39913,
       -1
     ],
     "max": [
-      0.141146,
+      0.143356,
       0.400754,
       1
     ]
@@ -55,15 +55,15 @@
     {
       "id": "lyretail_anthias_body",
       "role": "fish",
-      "vertexCount": 4971,
+      "vertexCount": 5077,
       "boundsM": {
         "min": [
-          -0.141146,
+          -0.143356,
           -0.39913,
           -1
         ],
         "max": [
-          0.141146,
+          0.143356,
           0.400754,
           1
         ]
@@ -76,5 +76,12 @@
     }
   ],
   "sockets": [],
-  "collisionParts": []
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Pseudanthias squamipinnis & project-original public/fish/lyretail-anthias.webp silhouette",
+    "sourceUrl": "https://www.fishbase.se/summary/Pseudanthias-squamipinnis",
+    "referenceHeightToLength": 0.4053,
+    "measuredHeightToLength": 0.399942,
+    "relativeDeviationPct": 1.32
+  }
 }

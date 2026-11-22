@@ -135,6 +135,47 @@ describe('ServiceManager fish picker', () => {
     expect(view.querySelector('.fish-picker-selected strong')?.textContent).toBe('Firefish')
     expect(view.querySelector<HTMLInputElement>('input[type="radio"][value="firefish"]')?.checked).toBe(true)
   })
+
+  it('exposes all four reef clean-up-crew invertebrate species as selectable service options', async () => {
+    const view = await renderManager(props())
+    for (const [id, commonName] of [
+      ['banded-trochus-snail', 'Banded trochus snail'],
+      ['scarlet-reef-hermit-crab', 'Scarlet reef hermit crab'],
+      ['emerald-mithrax-crab', 'Emerald mithrax crab'],
+      ['scarlet-skunk-cleaner-shrimp', 'Scarlet skunk cleaner shrimp'],
+    ] as const) {
+      const radio = view.querySelector<HTMLInputElement>(`input[type="radio"][value="${id}"]`)
+      expect(radio, id).toBeTruthy()
+      await act(async () => { radio!.click() })
+      expect(radio!.checked, id).toBe(true)
+      expect(view.querySelector('.fish-picker-selected strong')?.textContent).toBe(commonName)
+    }
+  })
+
+  it('shows how many of each species are already in the tank on picker options and selected preview', async () => {
+    const view = await renderManager(props({
+      services: [
+        { id: 's1', name: 'A', url: 'https://a.test', fishId: 'yellow-tang', isExample: false },
+        { id: 's2', name: 'B', url: '', fishId: 'yellow-tang', isExample: false },
+        { id: 's3', name: 'C', url: 'https://c.test', fishId: 'blue-tang', isExample: false },
+      ],
+    }))
+
+    const yellowOption = view.querySelector<HTMLInputElement>('input[type="radio"][value="yellow-tang"]')!.closest('label')!
+    const blueOption = view.querySelector<HTMLInputElement>('input[type="radio"][value="blue-tang"]')!.closest('label')!
+    const flameOption = view.querySelector<HTMLInputElement>('input[type="radio"][value="flame-angelfish"]')!.closest('label')!
+
+    expect(yellowOption.querySelector('.fish-picker-count')?.textContent).toBe('2 in tank')
+    expect(blueOption.querySelector('.fish-picker-count')?.textContent).toBe('1 in tank')
+    expect(flameOption.querySelector('.fish-picker-count')).toBeNull()
+
+    // Default selected is ocellaris-clownfish (0 in tank)
+    expect(view.querySelector('.fish-picker-selected .fish-picker-count')?.textContent).toBe('None in tank')
+    await act(async () => {
+      yellowOption.querySelector<HTMLInputElement>('input[type="radio"]')!.click()
+    })
+    expect(view.querySelector('.fish-picker-selected .fish-picker-count')?.textContent).toBe('2 in tank')
+  })
 })
 
 describe('ServiceManager async persistence', () => {
@@ -215,11 +256,78 @@ describe('ServiceManager async persistence', () => {
     expect(onAdd).toHaveBeenCalledWith({ name: 'Docs', url: 'https://www.wikipedia.org', fishId: REEF_FISH[0].id })
     expect(url.value).toBe('https://')
   })
+
+  it('allows adding a display fish with no URL (either blank or untouched https://) and shows a no-link badge in the list', async () => {
+    const onAdd = vi.fn<(draft: ServiceDraft) => Promise<void>>().mockResolvedValue(undefined)
+    const unlinkedFish: ServiceConfig = {
+      id: 'display-sailfin',
+      name: 'Sailfin',
+      url: '',
+      fishId: 'desjardins-sailfin-tang',
+      isExample: false,
+    }
+    const view = await renderManager(props({ services: [unlinkedFish], onAdd }))
+    expect(view.querySelector('.managed-service.is-unlinked .no-link-badge')?.textContent).toBe('no link')
+    expect(view.querySelector('.managed-service.is-unlinked')?.textContent).toContain('No link · Display fish')
+    expect(view.querySelector('a.managed-open')).toBeNull()
+
+    const name = view.querySelector<HTMLInputElement>('input[placeholder="e.g. Home Assistant"]')!
+    // Leaving the prefilled 'https://' untouched normalizes to '' (no link)
+    await act(async () => {
+      changeTextInput(name, 'Reef Cruiser')
+      view.querySelector<HTMLInputElement>('input[type="radio"][value="desjardins-sailfin-tang"]')!.click()
+    })
+    await submitForm(view.querySelector('form.service-form')!)
+    expect(onAdd).toHaveBeenCalledWith({
+      name: 'Reef Cruiser',
+      url: '',
+      fishId: 'desjardins-sailfin-tang',
+    })
+  })
+
+  it('supports the display-only fish checkbox with optional name and hides the URL input', async () => {
+    const onAdd = vi.fn<(draft: ServiceDraft) => Promise<void>>().mockResolvedValue(undefined)
+    const view = await renderManager(props({ onAdd }))
+    const toggle = view.querySelector<HTMLInputElement>('.display-only-toggle input[type="checkbox"]')!
+    expect(toggle.checked).toBe(false)
+    expect(view.querySelector('input[type="url"]')).not.toBeNull()
+
+    await act(async () => { toggle.click() })
+    expect(toggle.checked).toBe(true)
+    expect(view.querySelector('input[type="url"]')).toBeNull()
+
+    const nameInput = view.querySelector<HTMLInputElement>('form.service-form input:not([type="checkbox"]):not([type="radio"])')!
+    expect(nameInput.required).toBe(false)
+
+    await act(async () => {
+      view.querySelector<HTMLInputElement>('input[type="radio"][value="desjardins-sailfin-tang"]')!.click()
+    })
+    await submitForm(view.querySelector('form.service-form')!)
+    expect(onAdd).toHaveBeenCalledWith({
+      name: 'Desjardins’ sailfin tang',
+      url: '',
+      fishId: 'desjardins-sailfin-tang',
+    })
+    expect(toggle.checked).toBe(false)
+
+    await act(async () => { toggle.click() })
+    const customNameInput = view.querySelector<HTMLInputElement>('form.service-form input:not([type="checkbox"]):not([type="radio"])')!
+    await act(async () => {
+      changeTextInput(customNameInput, 'Tank Mascot')
+      view.querySelector<HTMLInputElement>('input[type="radio"][value="flame-angelfish"]')!.click()
+    })
+    await submitForm(view.querySelector('form.service-form')!)
+    expect(onAdd).toHaveBeenCalledWith({
+      name: 'Tank Mascot',
+      url: '',
+      fishId: 'flame-angelfish',
+    })
+  })
 })
 
 describe('ServiceManager FPS counter toggle (AQ-83 AC #1)', () => {
   function fpsToggle(view: HTMLDivElement) {
-    return view.querySelector<HTMLInputElement>('input[type="checkbox"]')
+    return view.querySelector<HTMLInputElement>('.debug-setting input[type="checkbox"]')
   }
 
   it('shows the toggle unchecked by default', async () => {

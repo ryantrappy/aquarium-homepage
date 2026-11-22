@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react'
 import { ZodError } from 'zod'
 import { REEF_FISH, getFishById } from '../lib/fish'
-import type { ServiceConfig, ServiceDraft } from '../lib/services'
+import { hasServiceUrl, type ServiceConfig, type ServiceDraft } from '../lib/services'
 import { CloseIcon } from './Icons'
 import assetCreditsUrl from '../rendering/proof/ASSET_NOTICES.md?url'
 import {
@@ -78,6 +78,7 @@ export function ServiceManager({
 }: ServiceManagerProps) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [draft, setDraft] = useState<ServiceDraft>(blankDraft)
+  const [displayOnly, setDisplayOnly] = useState(false)
   const [formError, setFormError] = useState('')
   const [notice, setNotice] = useState('')
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
@@ -119,10 +120,12 @@ export function ServiceManager({
   function focusNameInput() { scheduleFocus(() => nameInput.current) }
   function focusFormError() { scheduleFocus(() => formErrorRef.current) }
 
-  function resetForm() { setEditingId(null); setDraft(blankDraft); setFormError('') }
+  function resetForm() { setEditingId(null); setDraft(blankDraft); setDisplayOnly(false); setFormError('') }
   function beginEdit(service: ServiceConfig) {
+    const unlinked = !hasServiceUrl(service)
     setEditingId(service.id)
-    setDraft({ name: service.name, url: service.url, fishId: service.fishId })
+    setDisplayOnly(unlinked)
+    setDraft({ name: service.name, url: unlinked ? '' : service.url, fishId: service.fishId })
     setFormError('')
     focusNameInput()
   }
@@ -133,8 +136,21 @@ export function ServiceManager({
     let succeeded = false
     setBusy('save')
     try {
-      if (editingId) await onUpdate(editingId, draft)
-      else await onAdd(draft)
+      const chosenFish = getFishById(draft.fishId) ?? REEF_FISH[0]
+      const normalizedUrl = draft.url.trim()
+      const normalizedDraft: ServiceDraft = displayOnly
+        ? {
+            ...draft,
+            name: draft.name.trim() || chosenFish.commonName,
+            url: '',
+          }
+        : {
+            ...draft,
+            name: draft.name.trim(),
+            url: normalizedUrl === 'https://' || normalizedUrl === 'http://' ? '' : normalizedUrl,
+          }
+      if (editingId) await onUpdate(editingId, normalizedDraft)
+      else await onAdd(normalizedDraft)
       resetForm()
       succeeded = true
       setNotice(wasEditing ? 'Service updated.' : 'Service added.')
@@ -211,6 +227,11 @@ export function ServiceManager({
 
   const formDisabled = Boolean(loadError) || busy !== null
   const selectedFish = getFishById(draft.fishId) ?? REEF_FISH[0]
+  const speciesCounts = new Map<string, number>()
+  for (const service of services) {
+    speciesCounts.set(service.fishId, (speciesCounts.get(service.fishId) ?? 0) + 1)
+  }
+  const selectedCount = speciesCounts.get(selectedFish.id) ?? 0
 
   return (
     <dialog ref={dialogRef} className="service-manager-dialog" aria-labelledby="manager-title" onCancel={(event) => { event.preventDefault(); onClose() }} onClick={(event) => { if (event.target === event.currentTarget) onClose() }}>
@@ -224,10 +245,11 @@ export function ServiceManager({
         <div className="manager-list">
           {services.map((service) => {
             const fish = getFishById(service.fishId)
-            return <article className="managed-service" key={service.id}>
+            const linked = hasServiceUrl(service)
+            return <article className={`managed-service${linked ? '' : ' is-unlinked'}`} key={service.id}>
               <span className={`managed-fish managed-${service.fishId}`}><img src={fish?.thumbnail} alt="" /></span>
-              <div className="managed-details"><strong>{service.name}{service.isExample && <small>example</small>}</strong><span>{service.url}</span><em>{fish?.commonName}</em></div>
-              <div className="row-actions"><a className="managed-open" href={service.url} target="_blank" rel="noreferrer" aria-label={`Open ${service.name} in a new tab`}>Open</a><button type="button" onClick={() => beginEdit(service)} disabled={formDisabled} aria-label={`Edit ${service.name}`}>Edit</button><button ref={(element) => { if (element) removeButtonRefs.current.set(service.id, element); else removeButtonRefs.current.delete(service.id) }} type="button" className="remove-action" onClick={() => setConfirmDelete(service.id)} disabled={formDisabled} aria-label={`Remove ${service.name}`}>Remove</button></div>
+              <div className="managed-details"><strong>{service.name}{!linked && <small className="no-link-badge">no link</small>}{service.isExample && <small>example</small>}</strong><span>{linked ? service.url : 'No link · Display fish'}</span><em>{fish?.commonName}</em></div>
+              <div className="row-actions">{linked ? <a className="managed-open" href={service.url} target="_blank" rel="noreferrer" aria-label={`Open ${service.name} in a new tab`}>Open</a> : <span className="managed-open is-unlinked" aria-label={`${service.name} has no link`}>No link</span>}<button type="button" onClick={() => beginEdit(service)} disabled={formDisabled} aria-label={`Edit ${service.name}`}>Edit</button><button ref={(element) => { if (element) removeButtonRefs.current.set(service.id, element); else removeButtonRefs.current.delete(service.id) }} type="button" className="remove-action" onClick={() => setConfirmDelete(service.id)} disabled={formDisabled} aria-label={`Remove ${service.name}`}>Remove</button></div>
               {confirmDelete === service.id && <div className="delete-confirm"><span>Remove {service.name}?</span><button type="button" onClick={() => { void removeService(service.id) }} disabled={busy !== null}>{busy === 'delete' ? 'Removing…' : 'Remove'}</button><button type="button" onClick={() => { setConfirmDelete(null); scheduleFocus(() => removeButtonRefs.current.get(service.id) ?? null) }} disabled={busy !== null}>Keep</button></div>}
             </article>
           })}
@@ -237,8 +259,25 @@ export function ServiceManager({
           <h3>{editingId ? 'Edit service' : 'Add a service'}</h3>
           {notice && <p className="manager-notice" role="status" aria-live="polite">{notice}</p>}
           {formError && <p ref={formErrorRef} className="form-error" role="alert" aria-live="assertive" tabIndex={-1}>{formError}</p>}
-          <label>Service name<input ref={nameInput} value={draft.name} onChange={(e) => { setDraft({ ...draft, name: e.target.value }); setFormError('') }} maxLength={80} placeholder="e.g. Home Assistant" required disabled={formDisabled} /></label>
-          <label>Web address<input type="url" value={draft.url} onChange={(e) => { setDraft({ ...draft, url: e.target.value }); setFormError('') }} placeholder="https://example.com" required disabled={formDisabled} /></label>
+          <label className="display-only-toggle">
+            <input
+              type="checkbox"
+              checked={displayOnly}
+              disabled={formDisabled}
+              onChange={(event) => {
+                const next = event.target.checked
+                setDisplayOnly(next)
+                setDraft((prev) => ({
+                  ...prev,
+                  url: next ? '' : prev.url.trim() ? prev.url : 'https://',
+                }))
+                setFormError('')
+              }}
+            />
+            <span>Display-only fish (no link)</span>
+          </label>
+          <label>{displayOnly ? 'Display name (optional)' : 'Service name'}<input ref={nameInput} value={draft.name} onChange={(e) => { setDraft({ ...draft, name: e.target.value }); setFormError('') }} maxLength={80} placeholder={displayOnly ? selectedFish.commonName : 'e.g. Home Assistant'} required={!displayOnly} disabled={formDisabled} /></label>
+          {!displayOnly && <label>Web address (optional — leave blank for display fish)<input type="url" value={draft.url} onChange={(e) => { setDraft({ ...draft, url: e.target.value }); setFormError('') }} placeholder="https://example.com or leave blank" disabled={formDisabled} /></label>}
           <fieldset className="fish-picker" disabled={formDisabled}>
             <legend>Choose a fish</legend>
             <div className="fish-picker-selected" aria-live="polite">
@@ -251,10 +290,11 @@ export function ServiceManager({
                 }}
                 onLoad={(event) => { event.currentTarget.hidden = false }}
               />
-              <span><strong>{selectedFish.commonName}</strong><em>{selectedFish.scientificName}</em></span>
+              <span><strong>{selectedFish.commonName}</strong><em>{selectedFish.scientificName}</em><small className="fish-picker-count">{selectedCount > 0 ? `${selectedCount} in tank` : 'None in tank'}</small></span>
             </div>
             <div className="fish-picker-options">
               {REEF_FISH.map((fish) => {
+                const count = speciesCounts.get(fish.id) ?? 0
                 const assignedElsewhere = Boolean(fish.uniqueService && services.some(service => service.id !== editingId && service.fishId === fish.id))
                 return <label className={`fish-picker-option${draft.fishId === fish.id ? ' is-selected' : ''}${assignedElsewhere ? ' is-unavailable' : ''}`} key={fish.id}>
                 <input type="radio" name="service-fish" value={fish.id} checked={draft.fishId === fish.id} required disabled={assignedElsewhere} onChange={() => { setDraft({ ...draft, fishId: fish.id }); setFormError('') }} />
@@ -267,7 +307,7 @@ export function ServiceManager({
                   }}
                   onLoad={(event) => { event.currentTarget.hidden = false }}
                 />
-                <span><strong>{fish.commonName}</strong><em>{fish.scientificName}</em>{assignedElsewhere && <small>Already assigned to another service</small>}</span>
+                <span><strong>{fish.commonName}</strong><em>{fish.scientificName}</em>{count > 0 && <small className="fish-picker-count">{count} in tank</small>}{assignedElsewhere && <small>Already assigned to another service</small>}</span>
               </label>})}
             </div>
           </fieldset>

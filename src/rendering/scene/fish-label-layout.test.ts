@@ -149,6 +149,15 @@ for (const viewport of VIEWPORTS) describe(`${viewport.width}x${viewport.height}
     }
     expect(visibleCount).toBeGreaterThan(16)
   })
+  it('keeps side-placed bottom-edge captions stable without left/right oscillation under floating-point jitter', () => {
+    for (let step = 0; step < 30; step++) {
+      const jitter = (step % 2 === 0 ? 1e-13 : -1e-13) * (step + 1)
+      const item = placement('crawler', { x: 240 + jitter, y: viewport.height - 54, width: 44, height: 44 }, 1, 88, 28)
+      const result = resolveLabelDeconflicts([item], viewport)[0]
+      expect(result.faded).toBe(false)
+      expect(result.dx).toBeLessThan(0)
+    }
+  })
 })
 
 describe('determinism and conservative invalid input handling', () => {

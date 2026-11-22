@@ -15,7 +15,9 @@ describe('service configuration', () => {
     ])
   })
 
-  it('accepts absolute http and https URLs and rejects unsafe schemes and credentials', () => {
+  it('accepts absolute http and https URLs, allows blank URLs for link-less display fish, and rejects unsafe schemes and credentials', () => {
+    expect(serviceUrlSchema.safeParse('').success).toBe(true)
+    expect(serviceUrlSchema.safeParse('   ').success).toBe(true)
     expect(serviceUrlSchema.safeParse('https://aquarium.example/reef').success).toBe(true)
     expect(serviceUrlSchema.safeParse('http://trappserv.er:8080').success).toBe(true)
     expect(serviceUrlSchema.safeParse('javascript:alert(1)').success).toBe(false)

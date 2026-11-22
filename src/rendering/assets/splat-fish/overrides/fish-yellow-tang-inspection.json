@@ -1,0 +1,87 @@
+{
+  "extras": {
+    "reefAsset": {
+      "schema": "reef-asset-v1",
+      "id": "fish-yellow-tang",
+      "kind": "fish",
+      "units": "meter",
+      "upAxis": "+Y",
+      "origin": "local",
+      "dimensionsM": [
+        0.328836,
+        1.39215,
+        2
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "6e3060cf377e80ec26a2a5b7c53db8856924df8ebf33695f22f927aaa44ad592",
+        "recipe": "blender --background --python src/rendering/modeling/build_starter_fish_overrides.py",
+        "attribution": "Original photorealistic 3D rigged and animated fish asset (Zebrasoma flavescens (Yellow Tang)) reconstructed from project-original public/fish/yellow-tang.webp with embedded PBR textures."
+      }
+    }
+  },
+  "rootTransform": {
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "boundsM": {
+    "min": [
+      -0.164418,
+      -0.696075,
+      -1
+    ],
+    "max": [
+      0.164418,
+      0.696075,
+      1
+    ]
+  },
+  "primitives": [
+    {
+      "id": "yellow_tang_body",
+      "role": "fish",
+      "vertexCount": 6404,
+      "boundsM": {
+        "min": [
+          -0.164418,
+          -0.696075,
+          -1
+        ],
+        "max": [
+          0.164418,
+          0.696075,
+          1
+        ]
+      },
+      "material": {
+        "vertexColors": false,
+        "vertexAlpha": false,
+        "aoSource": "texture"
+      }
+    }
+  ],
+  "sockets": [],
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Zebrasoma flavescens & project-original public/fish/yellow-tang.webp silhouette",
+    "sourceUrl": "https://www.fishbase.se/summary/Zebrasoma-flavescens",
+    "referenceHeightToLength": 0.6961,
+    "measuredHeightToLength": 0.696075,
+    "relativeDeviationPct": 0
+  }
+}

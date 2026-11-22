@@ -119,6 +119,15 @@ describe('Lighthill travelling-wave body flex (AQ-12 / AQ-49)', () => {
     }
     expect(SPECIES_LOCOMOTION_SIGNATURES['snowflake-moray-eel'].gait.tailAmplitudeCruiseBL).toBe(0)
     expect(SPECIES_LOCOMOTION_SIGNATURES['snowflake-moray-eel'].gait.tailAmplitudeMaxBL).toBe(0)
+    for (const id of [
+      'banded-trochus-snail',
+      'scarlet-reef-hermit-crab',
+      'emerald-mithrax-crab',
+      'scarlet-skunk-cleaner-shrimp',
+    ] as const) {
+      expect(SPECIES_LOCOMOTION_SIGNATURES[id].gait.tailAmplitudeCruiseBL, id).toBe(0)
+      expect(SPECIES_LOCOMOTION_SIGNATURES[id].gait.tailAmplitudeMaxBL, id).toBe(0)
+    }
     expect(BALISTIFORM_FLEX_GAIT.gaitMode).toBe('balistiform')
     expect(BALISTIFORM_FLEX_GAIT.tailAmplitudeCruiseBL).toBe(0)
     expect(Object.values(SPECIES_LOCOMOTION_SIGNATURES).some(s => s.gait === BALISTIFORM_FLEX_GAIT)).toBe(false)

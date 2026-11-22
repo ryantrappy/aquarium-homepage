@@ -5,6 +5,8 @@ import {
   createAragoniteSandBed,
   createAragoniteSandPbrTextures,
   evaluateAragoniteSandElevation,
+  evaluateAragoniteSandTilt,
+  evaluateAragoniteSandWorldY,
   evaluateRockBaseContactFactor,
   getRockFootprintsForViewport,
 } from './aragonite-sand'
@@ -183,8 +185,11 @@ describe('photoreal aragonite sand bed (AQ-70.12)', () => {
     expect(shader.fragmentShader).not.toContain('vec3(0.16, 0.17, 0.34)')
     expect(shader.fragmentShader).toContain('warmDetritus')
     expect(shader.fragmentShader).toContain('rockContactAo')
-    expect(shader.fragmentShader).toContain('1.0 - 0.55 * (1.0 - smoothstep(0.55, 1.55, rLeft))')
-    expect(shader.fragmentShader).toContain('1.0 - 0.52 * (1.0 - smoothstep(0.55, 1.55, rRight))')
+    expect(shader.fragmentShader).toContain('float strength = i == 0 ? 0.55 : 0.52')
+    expect(shader.fragmentShader).toContain('1.0 - strength * (1.0 - smoothstep(0.55, 1.55, radius))')
+    expect(shader.uniforms.uContactCount.value).toBe(2)
+    bed.setLayout(true)
+    expect(shader.uniforms.uContactCount.value).toBe(1)
     // The macro luminance modulation survives mipmapping at overview distance (visual-check fix)
     expect(shader.fragmentShader).toContain('0.90 + 0.20 * sandMacroBlend')
 
@@ -354,5 +359,47 @@ describe('photoreal aragonite sand bed (AQ-70.12)', () => {
     bed.setLayout(false)
     assertBounded(false)
     bed.dispose()
+  })
+
+  it('evaluates world-space sand floor height and bounded ripple slope tilt for substrate dwellers (AQ-109)', () => {
+    for (const narrow of [false, true]) {
+      const enclosure = glassEnclosureLayout(narrow, 2.6)
+      for (const [x, z] of [
+        [0, 0],
+        [0.5, 0.4],
+      ] as const) {
+        expect(evaluateAragoniteSandWorldY(x, z, narrow)).toBeCloseTo(
+          enclosure.bottomY + evaluateAragoniteSandElevation(x, z, narrow),
+          6,
+        )
+      }
+
+      const backClamped = evaluateAragoniteSandWorldY(0, -10, narrow)
+      const frontClamped = evaluateAragoniteSandWorldY(0, 10, narrow)
+      expect(Number.isFinite(backClamped)).toBe(true)
+      expect(Number.isFinite(frontClamped)).toBe(true)
+      expect(backClamped).toBe(evaluateAragoniteSandWorldY(0, -25, narrow))
+      expect(frontClamped).toBe(evaluateAragoniteSandWorldY(0, 25, narrow))
+      expect(backClamped).toBeGreaterThanOrEqual(enclosure.bottomY - 0.1)
+      expect(frontClamped).toBeGreaterThanOrEqual(enclosure.bottomY - 0.1)
+      expect(backClamped).toBeCloseTo(
+        enclosure.bottomY + evaluateAragoniteSandElevation(0, enclosure.backZ, narrow),
+        1,
+      )
+      expect(frontClamped).toBeCloseTo(
+        enclosure.bottomY + evaluateAragoniteSandElevation(0, enclosure.frontZ, narrow),
+        1,
+      )
+    }
+
+    const yaw = 0.65
+    const tilt = evaluateAragoniteSandTilt(0, 0, yaw, false)
+    const reversedTilt = evaluateAragoniteSandTilt(0, 0, yaw + Math.PI, false)
+    expect(Number.isFinite(tilt.pitch)).toBe(true)
+    expect(Number.isFinite(tilt.roll)).toBe(true)
+    expect(Math.abs(tilt.pitch)).toBeLessThanOrEqual(0.22)
+    expect(Math.abs(tilt.roll)).toBeLessThanOrEqual(0.22)
+    expect(reversedTilt.pitch).toBeCloseTo(-tilt.pitch, 6)
+    expect(reversedTilt.roll).toBeCloseTo(-tilt.roll, 6)
   })
 })

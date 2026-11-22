@@ -47,6 +47,10 @@ describe('self-contained procedural 3D reef fish assets (src/rendering/assets/sp
       expect(contractRes.valid, `${entry.id} contract issues: ${JSON.stringify('issues' in contractRes ? contractRes.issues : [])}`).toBe(true)
       expect(report.extras.reefAsset.provenance.license).toBe('original')
       expect(report.extras.reefAsset.provenance.sourceSha256).toBe(expectedGeneratorSha)
+      if (entry.id !== 'fish-blue-green-chromis') {
+        expect(report.silhouetteReference, `${entry.id} silhouetteReference`).toBeDefined()
+        expect(report.silhouetteReference.relativeDeviationPct, `${entry.id} silhouette deviation %`).toBeLessThanOrEqual(8)
+      }
 
       // Parse GLB JSON and verify in-band extras + zero unreferenced accessors or bufferViews
       const doc = parseGlbJson(glbBytes)

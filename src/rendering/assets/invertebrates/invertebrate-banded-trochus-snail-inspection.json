@@ -1,0 +1,87 @@
+{
+  "extras": {
+    "reefInvertebrate": {
+      "schema": "reef-invertebrate-v1",
+      "id": "invertebrate-banded-trochus-snail",
+      "speciesId": "banded-trochus-snail",
+      "kind": "invertebrate",
+      "units": "meter",
+      "upAxis": "+Y",
+      "forwardAxis": "+Z",
+      "origin": "substrate-grounded",
+      "dimensionsM": [
+        0.03294825088232756,
+        0.03125296160578728,
+        0.05141880363225937
+      ],
+      "jointCount": 9,
+      "jointNames": [
+        "root",
+        "foot_mid",
+        "foot_rear",
+        "head",
+        "tentacle_L",
+        "tentacle_L_tip",
+        "tentacle_R",
+        "tentacle_R_tip",
+        "shell"
+      ],
+      "animationClips": [
+        "trochus_snail_glide"
+      ],
+      "provenance": {
+        "license": "original",
+        "creator": "Aquarium project",
+        "sourceSha256": "2430a0c6a4b22d0f6249b3e81c78766d93226252b2f701c6d9f955819d1b3821",
+        "recipe": "Blender --background --python src/rendering/modeling/build_invertebrate_banded_trochus_snail.py; node scripts/sync-blender-override.mjs --invertebrate invertebrate-banded-trochus-snail --learn-guide",
+        "attribution": "Original rigged and animated 3D reef invertebrate (banded-trochus-snail) with procedural 512x512 BaseColor/Normal/ORM PBR textures; zero external donor assets."
+      }
+    }
+  },
+  "boundsM": {
+    "min": [
+      -0.015331183560192585,
+      0,
+      -0.020314164459705353
+    ],
+    "max": [
+      0.01761706732213497,
+      0.03125296160578728,
+      0.031104639172554016
+    ]
+  },
+  "triangles": 8268,
+  "bytes": 1126348,
+  "primitives": [
+    {
+      "id": "invertebrate_banded_trochus_snail_0",
+      "role": "invertebrate",
+      "vertexCount": 4441,
+      "triangles": 8268,
+      "aoSource": "texture"
+    }
+  ],
+  "textures": [
+    {
+      "name": "invertebrate-banded-trochus-snail-normal",
+      "mimeType": "image/png",
+      "widthPx": 512,
+      "heightPx": 512,
+      "bytes": 306004
+    },
+    {
+      "name": "invertebrate-banded-trochus-snail-orm",
+      "mimeType": "image/png",
+      "widthPx": 512,
+      "heightPx": 512,
+      "bytes": 159449
+    },
+    {
+      "name": "invertebrate-banded-trochus-snail-albedo",
+      "mimeType": "image/png",
+      "widthPx": 512,
+      "heightPx": 512,
+      "bytes": 360357
+    }
+  ]
+}

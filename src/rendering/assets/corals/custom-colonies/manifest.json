@@ -2,6 +2,26 @@
   "schema": "custom-coral-colonies-v1",
   "assets": [
     {
+      "id": "reef-acanthastrea-lordhowensis",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-acanthastrea-lordhowensis.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-acanthastrea-lordhowensis-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-acanthastrea-lordhowensis.blend",
+      "nativeSha256": "a93b56f59baf33bc86ad6e6a38c01fc8b58acea19cdefb76525d55dfe8becdef",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-acanthastrea-lordhowensis.glb",
+      "overrideSha256": "4da007750c00170432e3bdb67b66c715ca130a60c6196aa8ec11973c349e4c86",
+      "generatorPath": "src/rendering/modeling/build_reef_acanthastrea_lordhowensis.py",
+      "generatorSha256": "46b3f0266fd537b40a0ae3f35deeb37490e0368fc445c31d3827e637efa521ee",
+      "sha256": "8c6441490b2b0d48244b201da42b94d75e02a51cc6c22b79267084da04b851cd",
+      "bytes": 1503816,
+      "triangles": 20480,
+      "dimensionsM": [
+        0.19670168310403824,
+        0.06885217176750302,
+        0.1789558008313179
+      ]
+    },
+    {
       "id": "reef-acropora-antler",
       "kind": "coral",
       "path": "src/rendering/assets/corals/custom-colonies/reef-acropora-antler.glb",
@@ -39,6 +59,126 @@
         0.2127610370516777,
         0.21796300646383315,
         0.1956302523612976
+      ]
+    },
+    {
+      "id": "reef-acropora-staghorn-thicket",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-acropora-staghorn-thicket.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-acropora-staghorn-thicket-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-acropora-staghorn-thicket.blend",
+      "nativeSha256": "90ecf04dfbb15bb9cbf3b3ebeaa7a292711d7696d9e67642ca3b07e1e4c9e968",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-acropora-staghorn-thicket.glb",
+      "overrideSha256": "ac1dc3f245755c47c23673121e870484c9900216c30476005f24005e3f398a69",
+      "generatorPath": "src/rendering/modeling/build_reef_acropora_staghorn_thicket.py",
+      "generatorSha256": "fa9fc0e718e20880e6d3d2e72d830bc37ea64228181912d80062ab59a8406d54",
+      "sha256": "1e31bcc45e64967c73a8ec809c0fab50fb8c90c446d4f50c9660cb910d5e3ac7",
+      "bytes": 1841052,
+      "triangles": 19648,
+      "dimensionsM": [
+        0.16600000113248825,
+        0.16629454493522644,
+        0.17012756317853928
+      ]
+    },
+    {
+      "id": "reef-acropora-tabular-plate",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-acropora-tabular-plate.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-acropora-tabular-plate-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-acropora-tabular-plate.blend",
+      "nativeSha256": "bef1a3c1cf8e26468146ad12bc040bc1c603a442a269d605c6102286a7ab8cb6",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-acropora-tabular-plate.glb",
+      "overrideSha256": "4bbe2eb7d7dfb048503d89eced35a7c81baa0194cbc764c2e618a43a133f7638",
+      "generatorPath": "src/rendering/modeling/build_reef_acropora_tabular_plate.py",
+      "generatorSha256": "830d87a65c3965df0c59940ca201e72e5a2deeb04d6b09cedc9e6323b346c944",
+      "sha256": "e8bd44f1c39479aa197a3d86a32404f0947026b29e9e8970487b6eddbe2edf6e",
+      "bytes": 2382948,
+      "triangles": 24821,
+      "dimensionsM": [
+        0.19889168441295624,
+        0.13272069376762374,
+        0.14784590154886246
+      ]
+    },
+    {
+      "id": "reef-acropora-violet-millepora",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-acropora-violet-millepora.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-acropora-violet-millepora-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-acropora-violet-millepora.blend",
+      "nativeSha256": "cd0d4a52fd949910432b226cc5ff997adef33e775705fd5c313b66308e5e7d11",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-acropora-violet-millepora.glb",
+      "overrideSha256": "fc4cfe901dc7c4c9caaee1a19e83b7b7d364fb786392a3ffb5a0987633c16544",
+      "generatorPath": "src/rendering/modeling/build_reef_acropora_violet_millepora.py",
+      "generatorSha256": "9d3301e71168a42d7c23ad7d0c62fa5bae09591d27c332893b37b291ce63e85a",
+      "sha256": "819ca148e4e6b046197859c70c5208a132aef2aa73ce472201fee794e16557ff",
+      "bytes": 2272348,
+      "triangles": 25096,
+      "dimensionsM": [
+        0.18701064586639404,
+        0.1459050178527832,
+        0.13788044452667236
+      ]
+    },
+    {
+      "id": "reef-anemone-rose-bta",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-anemone-rose-bta.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-anemone-rose-bta-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-anemone-rose-bta.blend",
+      "nativeSha256": "d2ff4a6346773abd00c4187475fdec63c4db3ffbbb6d3f36a3b050c6f1c5002a",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-anemone-rose-bta.glb",
+      "overrideSha256": "bb4a0bc276eeab76cda9ccf71f895ce285e97f2acb8f3181174891a7701b029d",
+      "generatorPath": "src/rendering/modeling/build_reef_anemone_rose_bta.py",
+      "generatorSha256": "9c278e1d18e13d20d79f111539b38351c6f2742e090ef80b390d48aede65e80f",
+      "sha256": "feadb2ad98f7d4bb7d8694fb2e021ea45574fb66a766760ec364ea05e4b1ab13",
+      "bytes": 1679172,
+      "triangles": 26192,
+      "dimensionsM": [
+        0.2893517017364502,
+        0.15650993026793003,
+        0.2770743817090988
+      ]
+    },
+    {
+      "id": "reef-anemone-sunburst-bta",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-anemone-sunburst-bta.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-anemone-sunburst-bta-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-anemone-sunburst-bta.blend",
+      "nativeSha256": "00108b3907426b36d46b9c589a75ef58040853bdfe4892879f6934a59ad81441",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-anemone-sunburst-bta.glb",
+      "overrideSha256": "ab07e27241586288f560377002f523c72d7d72675b75e81dd87d84a92001d390",
+      "generatorPath": "src/rendering/modeling/build_reef_anemone_sunburst_bta.py",
+      "generatorSha256": "a0ec0324f8637f722414bae32f0cda8f9cfff7110c5212243fa58e93c52822d6",
+      "sha256": "5adf4bc5e02ee529fd6b7578f683b1051d8892b0f99b8cf5934e6c1a7683938b",
+      "bytes": 1742476,
+      "triangles": 27120,
+      "dimensionsM": [
+        0.2356734350323677,
+        0.1344121340662241,
+        0.2397284358739853
+      ]
+    },
+    {
+      "id": "reef-brain-fleshy-lobophyllia",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-brain-fleshy-lobophyllia.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-brain-fleshy-lobophyllia-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-brain-fleshy-lobophyllia.blend",
+      "nativeSha256": "52e842ef55547228295138e4d787038dfdec4edd08f3802666ec9cf82b2fc159",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-brain-fleshy-lobophyllia.glb",
+      "overrideSha256": "ea18eb0dad9e9128958c849aace5655af7a78bbed9fd4b6b4890aefc4c8ec5f3",
+      "generatorPath": "src/rendering/modeling/build_reef_brain_fleshy_lobophyllia.py",
+      "generatorSha256": "12b5f1b89310120f6b9ad95ea432c1f3ffee79755fd9ea33733c2983ca5bcf9b",
+      "sha256": "d25fee552a2ff93fbfa3142014471c53068abfbcfade0e553e019d319adfb1dd",
+      "bytes": 2218308,
+      "triangles": 24000,
+      "dimensionsM": [
+        0.19965334981679916,
+        0.07802503010407236,
+        0.16694114357233047
       ]
     },
     {
@@ -82,6 +222,26 @@
       ]
     },
     {
+      "id": "reef-euphyllia-branching-frogspawn",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-euphyllia-branching-frogspawn.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-euphyllia-branching-frogspawn-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-euphyllia-branching-frogspawn.blend",
+      "nativeSha256": "c64669423b75a0890936f933205e7341a6c3c90ec96b24656491d9a526e22320",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-euphyllia-branching-frogspawn.glb",
+      "overrideSha256": "ae1bfca822c4c18def7adcc7c7b185fed871c73e3c5472576f4a5d8695e4a21a",
+      "generatorPath": "src/rendering/modeling/build_reef_euphyllia_branching_frogspawn.py",
+      "generatorSha256": "c888817e86816625c458e304e79f606bbf2bfdbd8e69f8898da75181b4264d9d",
+      "sha256": "34acef8934f71d3817e272752bb840a9600ae0cd904e79ae05c460372c1a212f",
+      "bytes": 1672372,
+      "triangles": 24822,
+      "dimensionsM": [
+        0.1899999976158142,
+        0.12067002803087234,
+        0.15604279935359955
+      ]
+    },
+    {
       "id": "reef-euphyllia-flowing-torch",
       "kind": "coral",
       "path": "src/rendering/assets/corals/custom-colonies/reef-euphyllia-flowing-torch.glb",
@@ -99,6 +259,126 @@
         0.22957362234592438,
         0.1770000010728836,
         0.2094828113913536
+      ]
+    },
+    {
+      "id": "reef-euphyllia-gold-torch",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-euphyllia-gold-torch.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-euphyllia-gold-torch-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-euphyllia-gold-torch.blend",
+      "nativeSha256": "c2e1d794542dd78010deb064da5e24e1a6785e7884ca578e94c885ab8d0628ba",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-euphyllia-gold-torch.glb",
+      "overrideSha256": "bcb42e84cb9b0256189ee96e0084ded89c458980cf4ff5ad739048cf4871159e",
+      "generatorPath": "src/rendering/modeling/build_reef_euphyllia_gold_torch.py",
+      "generatorSha256": "a0513de842a7bc549d68d3e3381059238c5c69dcaaac08e301c355610d44df44",
+      "sha256": "a5c70bd045c91effee48558c16bf5bb73f887b2bdf569bda225340db89696df5",
+      "bytes": 1610836,
+      "triangles": 25604,
+      "dimensionsM": [
+        0.17507385462522507,
+        0.14218656718730927,
+        0.16742952913045883
+      ]
+    },
+    {
+      "id": "reef-favia-war-coral",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-favia-war-coral.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-favia-war-coral-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-favia-war-coral.blend",
+      "nativeSha256": "61d78953ebd0aae560044e7d089d55c47400744a66504959b4ec2423fd151fd0",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-favia-war-coral.glb",
+      "overrideSha256": "ed060a39656d6d9849d114de58b9bcd8c4396126406d046fdb0451c41e6a3a30",
+      "generatorPath": "src/rendering/modeling/build_reef_favia_war_coral.py",
+      "generatorSha256": "cf0d41375ca476a30023f4af7147be57877e7174c748ca38ea2c5bc209ffa74d",
+      "sha256": "1e5bef2634317c4f60ca483bc942757303e67014ce0e2f1aed7b322a3d28b896",
+      "bytes": 1500424,
+      "triangles": 20480,
+      "dimensionsM": [
+        0.18201393634080887,
+        0.06206637481227517,
+        0.16682364791631699
+      ]
+    },
+    {
+      "id": "reef-goniopora-flowerpot-lps",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-goniopora-flowerpot-lps.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-goniopora-flowerpot-lps-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-goniopora-flowerpot-lps.blend",
+      "nativeSha256": "7b6cdcc823d1bd53b78c3f162a416d2f3c9bb92939b1b622036ce137628613f5",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-goniopora-flowerpot-lps.glb",
+      "overrideSha256": "ebd27fdb5676f253c17a7ab5253d036c0c111e2c966635aea00b18003a93345f",
+      "generatorPath": "src/rendering/modeling/build_reef_goniopora_flowerpot_lps.py",
+      "generatorSha256": "680f2adad30f305ad6be3479fdeb635ba11e85b004f27ec40f8bd402d311f0d6",
+      "sha256": "1f966ed924136cc6d6dfba22d01ac87d69660f50f4cfa8c9ce33de8256fc521c",
+      "bytes": 1660916,
+      "triangles": 20536,
+      "dimensionsM": [
+        0.16598662734031677,
+        0.08179963380098343,
+        0.1520322561264038
+      ]
+    },
+    {
+      "id": "reef-montipora-sunset-shelf",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-montipora-sunset-shelf.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-montipora-sunset-shelf-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-montipora-sunset-shelf.blend",
+      "nativeSha256": "2ff44fdbba097e59beb441a7fe8e21e254fbca0c426b7745ca7c5f2976eddfb0",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-montipora-sunset-shelf.glb",
+      "overrideSha256": "fc5fe28339aa16366bafaf83b0d8e2d08f96a6fc893a3b664aa95ba7f8a66e1f",
+      "generatorPath": "src/rendering/modeling/build_reef_montipora_sunset_shelf.py",
+      "generatorSha256": "82133242f950aef3063684cae2ba016ca91ef028946cdc44884ab33f73e02529",
+      "sha256": "eee37d5b615046654ce25f4aeeeb1f66a5dad26404789f91fd655a4162301eb5",
+      "bytes": 1462592,
+      "triangles": 14236,
+      "dimensionsM": [
+        0.20999999344348907,
+        0.06142980605363846,
+        0.20868279039859772
+      ]
+    },
+    {
+      "id": "reef-montipora-tier-shelf",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-montipora-tier-shelf.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-montipora-tier-shelf-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-montipora-tier-shelf.blend",
+      "nativeSha256": "20a9e3aead3b733d203bdc7dfdc4f0577782916df48c4994ac9f944acfdd3937",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-montipora-tier-shelf.glb",
+      "overrideSha256": "899a0f439ee474b9ac85864dc4f3b4c6293865b58576ac98696cc1b59fb29fb5",
+      "generatorPath": "src/rendering/modeling/build_reef_montipora_tier_shelf.py",
+      "generatorSha256": "71350b23247966e0ba493266681b0ea29ca1ed61d9762733d239da23f76ac9d7",
+      "sha256": "fcd4f910d16c7d31e7816bce6c7ff14a92e5e9a9846f4c3b50f0796e30459615",
+      "bytes": 1607356,
+      "triangles": 21324,
+      "dimensionsM": [
+        0.20516597479581833,
+        0.06377899683138821,
+        0.15616708993911743
+      ]
+    },
+    {
+      "id": "reef-montipora-undata-cap",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-montipora-undata-cap.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-montipora-undata-cap-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-montipora-undata-cap.blend",
+      "nativeSha256": "c9f95988ea6609b40fc291666a45c020f8823c480eb6237738af75a256cd1c64",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-montipora-undata-cap.glb",
+      "overrideSha256": "c04628677d6b6578f486396d7278d63840785e04717b4c943aa27592bf384d40",
+      "generatorPath": "src/rendering/modeling/build_reef_montipora_undata_cap.py",
+      "generatorSha256": "e3c5cd604ae2b5d0da5070bd4af0df80319e68c82a88d1ffb181957ca74cd707",
+      "sha256": "2a7ed01052263a4ac9c0a07f54b3edf1a4fbb8a282dd0e2c1b22a127dd1eb423",
+      "bytes": 1555064,
+      "triangles": 15120,
+      "dimensionsM": [
+        0.19478482007980347,
+        0.07729534059762955,
+        0.18152840435504913
       ]
     },
     {
@@ -122,6 +402,26 @@
       ]
     },
     {
+      "id": "reef-stylophora-magenta-club",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-stylophora-magenta-club.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-stylophora-magenta-club-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-stylophora-magenta-club.blend",
+      "nativeSha256": "99c65ec8693e8a305a454ed001703e913a9e75386d40e1963626e65bcdcc5b07",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-stylophora-magenta-club.glb",
+      "overrideSha256": "fa1191fe30af4b58c41be1b3071404373666c5b08bf1a165d59116975c8377cc",
+      "generatorPath": "src/rendering/modeling/build_reef_stylophora_magenta_club.py",
+      "generatorSha256": "e79810309876dfebe823c180014dd71c61504051316081a9ed1d11f914953775",
+      "sha256": "07721de8ca8454a46f353c8885e3834174ca8486e6986afa3c537cde6e779ebd",
+      "bytes": 1764308,
+      "triangles": 16184,
+      "dimensionsM": [
+        0.16599999368190765,
+        0.17599564790725708,
+        0.1541581004858017
+      ]
+    },
+    {
       "id": "reef-zoanthid-colonial-mat",
       "kind": "coral",
       "path": "src/rendering/assets/corals/custom-colonies/reef-zoanthid-colonial-mat.glb",
@@ -139,6 +439,26 @@
         0.16650984436273575,
         0.04515176638960838,
         0.1631818190217018
+      ]
+    },
+    {
+      "id": "reef-zoanthid-palythoa-cluster",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-zoanthid-palythoa-cluster.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-zoanthid-palythoa-cluster-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-zoanthid-palythoa-cluster.blend",
+      "nativeSha256": "e8506928345b4c1923544682d6a5fdb405b6789c4b2815aa06edc01c7efcf8d5",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-zoanthid-palythoa-cluster.glb",
+      "overrideSha256": "8f1312672c3880131d938054e45ea967abad5a0d0f84c4011be8c192f0732c69",
+      "generatorPath": "src/rendering/modeling/build_reef_zoanthid_palythoa_cluster.py",
+      "generatorSha256": "cad0e7e3f724c590ef3c770c52836f0d2257c3ce28fb4f36403cc06a02074f99",
+      "sha256": "6ab73c0fc5fa1bbfb75b25a91d825e7185621508f8c52303e9021d552ae8da04",
+      "bytes": 1751772,
+      "triangles": 27812,
+      "dimensionsM": [
+        0.18534687161445618,
+        0.046984922140836716,
+        0.15885020792484283
       ]
     }
   ]

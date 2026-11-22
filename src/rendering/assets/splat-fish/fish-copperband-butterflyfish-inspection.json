@@ -55,7 +55,7 @@
     {
       "id": "copperband_butterflyfish_body",
       "role": "fish",
-      "vertexCount": 5242,
+      "vertexCount": 5368,
       "boundsM": {
         "min": [
           -0.126351,
@@ -76,5 +76,12 @@
     }
   ],
   "sockets": [],
-  "collisionParts": []
+  "collisionParts": [],
+  "silhouetteReference": {
+    "source": "FishBase Chelmon rostratus & project-original public/fish/copperband-butterflyfish.webp silhouette",
+    "sourceUrl": "https://www.fishbase.se/summary/Chelmon-rostratus",
+    "referenceHeightToLength": 0.6604,
+    "measuredHeightToLength": 0.656544,
+    "relativeDeviationPct": 0.58
+  }
 }

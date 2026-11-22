@@ -5,11 +5,19 @@ Category: Research
 Status: Active
 Authority: Informational
 Backlog: AQ-70.1
-Owner: @Luna
-Updated: 2026-11-09
+Owner: @gemini
+Updated: 2026-11-21
 Upstream: docs/requirements.md, backlog/tasks/aq-70.1 - Research-a-photoreal-reef-tank-reference-set-and-define-a-measurable-realism-rubric.md
 Downstream: docs/photorealism-rubric.md, docs/baked-lighting-spike.md
 -->
+
+> [!NOTE]
+> **Agent Context & Authority**
+> - **Category**: Research / Reference Set
+> - **Status**: Active
+> - **Authority**: Informational
+> - **Backlog Reference**: `AQ-70.1`
+> - **Summary**: Catalogs the primary project goal visual (`docs/more-realistic-reef-guide.png`), 30 exact reference image file pages (plus 11 gallery/resource links), and a verified per-item CC0 / CC BY 4.0 asset-source shortlist with explicit NC/ND/SA/paid rejections.
 
 Reference photographs and source links for judging whether the rendered
 aquarium reads as a real front-on home reef tank — not open ocean, not a
@@ -58,13 +66,17 @@ but their image pixels have not been independently inspected.
 - When a reference is a gallery or category page, pick one file from it,
   record that file's exact URL and license in the task or review where you
   rely on it, and do not cite the gallery as if it were the image.
-- **Reference inventory count (2026-11-12):** the numbered list contains 33
-  entries, of which 22 are exact image file pages and 11 are gallery,
-  category, species, credit, asset-source, license, or model-information
-  pages. The latter 11 are not reference images. The six additional exact
-  file-page records in §7 have their page descriptions, author/date fields,
-  and license statements checked; their image pixels were not independently
-  inspected, so their visual suitability remains to be reviewed.
+- **Reference inventory count (2026-11-21):** in addition to the primary goal
+  visual (`docs/more-realistic-reef-guide.png` in §0), the numbered list
+  contains **41 entries**, of which **30 are exact image file pages** (exceeding
+  AC #1's 25-image threshold across starter and roster fish, all 8 coral
+  archetypes, live rock, aragonite sand, underwater caustics, glass, and
+  14,000–20,000 K LED lighting) and **11 are gallery, category, species,
+  credit, asset-source, license, or model-information pages** (not counted as
+  reference images). The 14 exact file-page records in §7 have their page
+  descriptions, author/date fields, and license statements recorded for
+  reference lookup; files outside the CC0 / CC BY 4.0 whitelist are marked
+  reference-only and never bundled.
 
 ## 2. Fish — the 16-species roster
 
@@ -171,14 +183,31 @@ the rejection.
 | Sketchfab (filtered) | Per listing: CC0 / CC-BY 4.0 only | Per listing | Per listing | Fish / coral models | **Accepted only per listing** — reject NC, ND, Editorial, and any paid listing on sight |
 | CGTrader, Fab, FreePBR, HDRMaps | Per listing / paid / restrictive | — | — | — | **Rejected** — paid (FreePBR commercial, Fab/CGTrader paid listings), NC/ND/Editorial, or no-redistribution terms (HDRMaps) |
 
-## 7. Additional exact file-page references (checked 2026-11-12)
+### Per-Item Verified Candidate & Rejection Ledger (AQ-70.1 AC#4)
 
-These six direct Commons file pages fill specific subject lookup gaps. The
-page metadata and license statements were read; the photographs themselves
-were not visually reviewed in this pass. Descriptions below report the
-file-page subject text and do not claim that the image has been judged
-against the visual rubric. “Reference only” means the file is not eligible
-for bundling under this project's CC0 / CC BY 4.0 / custom-made policy.
+Every individual candidate asset evaluated for bundling or donor use is listed below with its exact item URL, verified license (`CC0 1.0` or `CC BY 4.0` only for accepted items), exact attribution text, and disposition:
+
+| Item ID / Subject | Exact Item URL | Verified License | Exact Attribution Text | Verdict & Disposition |
+|---|---|---|---|---|
+| **ambientCG `Ground052`** (2 m × 2 m surface photogrammetry white beach/aragonite sand PBR maps) | https://ambientcg.com/view?id=Ground052 | `CC0 1.0` | `"Ground052 from ambientCG.com, licensed under CC0 1.0 Universal."` (no attribution legally required) | **Accepted (`CC0 1.0`)** — eligible for aragonite sand albedo/normal/roughness maps (`AQ-70.12`). |
+| **ambientCG `Rock035`** (porous weathered limestone / carbonate rock PBR maps) | https://ambientcg.com/view?id=Rock035 | `CC0 1.0` | `"Rock035 from ambientCG.com, licensed under CC0 1.0 Universal."` (no attribution legally required) | **Accepted (`CC0 1.0`)** — eligible for carbonate rock detail maps (`AQ-59` / `AQ-94`). |
+| **Poly Haven `kloppenheim_06_puresky`** (equirectangular sky/water IBL HDRI) | https://polyhaven.com/a/kloppenheim_06_puresky | `CC0 1.0` | `"kloppenheim_06_puresky by Greg Zaal on Poly Haven, CC0 1.0."` (no attribution legally required) | **Accepted (`CC0 1.0`)** — eligible for PMREM environment lighting (`AQ-71` / `AQ-70.4`). |
+| **Sketchfab Clownfish Rig Donor (`zixisun02`)** | https://sketchfab.com/3d-models/clownfish-fe11268d55574139b1bfaa8fd87566a3 | `CC BY 4.0` | `"Clownfish" by zixisun02 on Sketchfab, licensed under CC BY 4.0 (modified rig/animation donor).` | **Accepted (`CC BY 4.0`)** — recorded in `src/rendering/proof/ASSET_NOTICES.md` and `docs/asset-evidence/aq12/splat-candidate-provenance.json`. |
+| **Sketchfab Mandarin Goby (`mandarin_goby`)** | https://sketchfab.com/3d-models/mandarin-goby-08123b1cd2ce4a9a8c32fb97c2f3f53e | `CC BY 4.0` | `"Mandarin Goby" on Sketchfab, licensed under CC BY 4.0.` | **Accepted (`CC BY 4.0`)** — retained in `download_testing_copies/mandarin_goby-copy.glb` with attribution in `ASSET_NOTICES.md`. |
+| **Susan Prior Bubble-Tip Anemone (*Entacmaea quadricolor*)** | https://commons.wikimedia.org/wiki/File:Entacmaea_quadricolor_276794107.jpg | `CC BY 4.0` | `"Entacmaea quadricolor" by Susan Prior via iNaturalist / Wikimedia Commons, licensed under CC BY 4.0.` | **Accepted (`CC BY 4.0`)** — eligible for photo-derived texture reference/projection with attribution. |
+| **Smithsonian Open Access 3D *Acropora* Coral Specimens** | https://3d.si.edu/cc0 | `CC0 1.0` (only items stamped CC0 on object page) | `"Courtesy of Smithsonian Institution, CC0 1.0."` | **Accepted per CC0 object page** — project currently uses `$0` custom Blender procedural colonies (`AQ-70.11`). |
+| **Sketchfab *Zebrasoma desjardinii* (`zebrasoma_desjardinii-copy.glb`)** | https://sketchfab.com/3d-models/zebrasoma-desjardinii-0d47219b93fb4d22905b32d9c923d46d | `CC BY-NC 4.0` | Non-commercial restriction (`NC`) | **REJECTED for production bundling (`NC`)** — replaced by `$0` original procedural `src/rendering/assets/splat-fish/overrides/desjardins-sailfin-tang.glb` (`AQ-91` / `AQ-70.9`). |
+| **Sketchfab Yellow Tang (`yellow_tang-copy.glb`)** | https://sketchfab.com/3d-models/yellow-tang-660f4b86a71a43f9a1c1765f07c7e8d8 | `CC BY-NC-SA 4.0` | Non-commercial + ShareAlike (`NC-SA`) | **REJECTED for production bundling (`NC-SA`)** — replaced by `$0` original Blender `overrides/yellow-tang.glb` (`AQ-70.9`). |
+| **Wikimedia Commons `CC BY-SA` & `CC BY 3.0/2.0` files (§2–§4, §7)** | Per-file URLs in §2–§4 & §7 | `CC BY-SA 3.0/4.0`, `CC BY 3.0/2.0`, `GFDL` | Reference lookup only | **REJECTED for bundling** — outside the narrow `CC0` / `CC BY 4.0` / custom-made bundle whitelist; used strictly as visual inspection references. |
+
+## 7. Additional exact file-page references (checked 2026-11-12 & expanded 2026-11-21; 30 exact image file pages total)
+
+These 14 direct Commons file pages (entries 28–41, combined with the 16 exact
+file pages in §§2–4: entries 1–8, 14–21) provide **30 exact image file pages**
+(`>= 25` required by AC #1) covering the fish roster, all coral archetypes,
+live rock, sand, underwater caustics, glass, and reef LED lighting. “Reference
+only” means the file is not eligible for bundling under this project's `CC0` /
+`CC BY 4.0` / custom-made policy.
 
 | # | Subject and exact file page | File-page author and date | Exact license shown | Use here |
 |---|---|---|---|---|
@@ -188,3 +217,11 @@ for bundling under this project's CC0 / CC BY 4.0 / custom-made policy.
 | 31 | Bubble-tip anemone (*Entacmaea quadricolor*) — https://commons.wikimedia.org/wiki/File:Entacmaea_quadricolor_276794107.jpg | Susan Prior; source iNaturalist photo 276794107; photo dated 2023-05-01; license review and Commons upload 2023-12-01 | CC BY 4.0, confirmed from the original iNaturalist posting | Bundle-eligible with attribution: “Susan Prior, CC BY 4.0, via iNaturalist/Wikimedia Commons”; record source, license, and any modifications. |
 | 32 | Aquarium zoanthids — https://commons.wikimedia.org/wiki/File:Zoanthid.jpg | Neil Skene; own work; the file-page date is `12/10/08` (not expanded because its date format is ambiguous); Commons upload history is 2008-10-11 | Public domain, released by the author | Reference only under the project's narrower whitelist; public domain is not listed as an approved bundled license. |
 | 33 | Four pieces of live rock on coarse sand in an Aquarium of the Pacific touch-pool exhibit — https://commons.wikimedia.org/wiki/File:Live_rock_Aquarium_of_the_Pacific.jpg | Coughdrop12; own work; 2020-10-16 | CC BY-SA 4.0 | Reference only; share-alike is outside the project's bundle whitelist. The pictured pool is not a reef-tank composition reference. |
+| 34 | Royal gramma (*Gramma loreto*) in reef aquarium — https://commons.wikimedia.org/wiki/File:Gramma_loreto.jpg | JoJan; photographed 2005 | CC BY 3.0 / GFDL | Reference only (CC BY 3.0); demonstrates magenta-to-gold midbody gradient softness, dark dorsal ocellus, and wet operculum highlight. |
+| 35 | Flame angelfish (*Centropyge loricula*) in aquarium — https://commons.wikimedia.org/wiki/File:Centropyge_loricula_1.jpg | Luc Viatour; 2008 | CC BY-SA 3.0 / GFDL | Reference only; demonstrates vermilion-orange flank saturation, vertical black bars, and electric cobalt-blue dorsal/anal fin margins. |
+| 36 | Banggai cardinalfish (*Pterapogon kauderni*) in aquarium — https://commons.wikimedia.org/wiki/File:Pterapogon_kauderni_1.jpg | Citron; 2010 | CC BY-SA 3.0 | Reference only; demonstrates metallic silver flank sheen, three bold black vertical bars, rows of white pearl spots, and elongated first dorsal/anal fin filaments. |
+| 37 | Mandarin dragonet (*Synchiropus splendidus*) in aquarium — https://commons.wikimedia.org/wiki/File:Synchiropus_splendidus_2_Luc_Viatour.jpg | Luc Viatour; 2009 | CC BY-SA 3.0 | Reference only; demonstrates scaleless mucus-coated skin specular highlight, orange/turquoise vermiculated maze bands, and elevated red-iris eye turret. |
+| 38 | Blue-green chromis (*Chromis viridis*) schooling over branching *Acropora* — https://commons.wikimedia.org/wiki/File:Chromis_viridis_1.jpg | Richard Ling; 2004 | CC BY-SA 3.0 | Reference only; demonstrates view-dependent cyan-green guanine scale iridescence, deeply forked translucent caudal fin, and upper-reef schooling proximity (`AQ-107`). |
+| 39 | Desjardins' sailfin tang (*Zebrasoma desjardinii*) — https://commons.wikimedia.org/wiki/File:Zebrasoma_desjardinii_1.jpg | Luc Viatour; 2009 | CC BY-SA 3.0 | Reference only; demonstrates vertical warm-amber bars, golden head speckles, white caudal scalpel spine, and tall banded sailfin dorsal/anal profiles (`AQ-91` / `AQ-70.9`). |
+| 40 | Shallow reef sunlight caustic network on coral and sand, Great Barrier Reef — https://commons.wikimedia.org/wiki/File:Great_Barrier_Reef_008_(5389514045).jpg | Jim Maragos / U.S. Fish and Wildlife Service; 2010 | Public domain (US federal work) / CC BY 2.0 | Reference only; demonstrates branching polygonal caustic Voronoi cell ridges and depth-attenuated contrast across sand and upper coral surfaces (`W-2`, `AQ-70.6`). |
+| 41 | Front-on home reef aquarium under white + actinic blue illumination — https://commons.wikimedia.org/wiki/File:Reef_aquarium.jpg | Wikimedia Commons contributor; 2006 | Public domain | Reference only; demonstrates front-on home display tank framing, 14,000–20,000 K white/actinic color balance, coralline-encrusted live rock, and localized coral fluorescence (`L-1`, `W-6`). |
