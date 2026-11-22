@@ -21,6 +21,10 @@ The merged default uses the earlier two islands and center arch following `92c72
 
 AQ-70.6 now uses one warped ridge network with a rotated intensity accent, depth filtering, and an illumination gate derived from shadowed direct diffuse. The current default scene's matched laptop comparison shows visible ridges on lit sand and a quieter floor under the rocks. Two settled frames matched after using Pause. Fixture and full optical acceptance remain open. [Laptop evidence](docs/asset-evidence/aq70-6/shadowed-caustics-laptop/).
 
+## Left torch seating — 2026-11-21
+
+AQ-70.11 now seats the green flowing torch and gold torch lower and farther into their existing ledges. The matched laptop macros show the crowns and upper skeleton cups above the rock with less of each support stem exposed. The default left formation still spans approximately 80% of the viewport height by visual estimate. The broader crest silhouette and coral coverage across the large bare faces remain open. [Laptop comparison](docs/asset-evidence/aq70-11/torch-seating-20261121/).
+
 ## Swept fish-body clearance — 2026-11-21
 
 AQ-58 now bounds linear sweeps by endpoint travel and verifies rigid turns along the actual orientation arc. A source-pinned blue tang clip envelope still hits the left cave wall and clears a translating quarter-turn in front water. The renderer's turning overlay and shader deformation require a combined envelope before live routing uses these checks. [Collision evidence](docs/asset-evidence/aq58/3d-collision-review.md#translating-and-turning-bodies--2026-11-21).

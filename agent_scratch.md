@@ -242,3 +242,7 @@
 *Root reviewed retained entries. Active scope, local laptop review and saved asset preservation remain current. The combined fish bound and mounted left-reef queries are actioned. Animation-aware live routing and candidate art acceptance remain pending.*
 - Runtime clip reset passes for all 16 mapped swimmers. Fifteen have offline clip, turn and flex budgets at render scale. The yellow tang spans multiple skinned meshes and is outside the current analyzer. The blue tang front turn and clownfish host approach report coral-envelope overlap with the combined bounds. No live navigation was changed.
 - Candidate triage confirmed the custom coral catalog is in the current reef wiring and the NSA kit is available via the development preview. Invertebrates load through the configured-species path. The porous procedural rock remains on the test scene. Current visual priority is the newly authored corals on the default wide scene.
+
+### 2026-11-21 — AQ-70.11 left torch seating
+*Root reviewed the retained entries. Active scope and saved asset preservation remain current. The two torch placements are actioned. Full archetype art and default reef composition remain pending.*
+- Two existing left-island torch colonies sit deeper in their ledges. Paired 1440×900 macros show less exposed support stem and still-visible crowns. The overview retains approximately 80% left reef height. The dev modular comparison shows a different rock silhouette and remains a separate preview.

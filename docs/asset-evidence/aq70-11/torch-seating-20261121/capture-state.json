@@ -1,0 +1,50 @@
+{
+  "beforeOverview": {
+    "commit": "42dee4ae8524984c23a644a14543f2b86650b3f6",
+    "ready": true,
+    "failed": [],
+    "pending": 0,
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 900,
+      "width": 1440
+    },
+    "inhabitants": 29
+  },
+  "beforeMacro": {
+    "commit": "42dee4ae8524984c23a644a14543f2b86650b3f6",
+    "ready": true,
+    "failed": [],
+    "pending": 0,
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 900,
+      "width": 1440
+    },
+    "inhabitants": 29
+  },
+  "afterOverview": {
+    "commit": "42dee4ae8524984c23a644a14543f2b86650b3f6",
+    "ready": true,
+    "failed": [],
+    "pending": 0,
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 900,
+      "width": 1440
+    },
+    "inhabitants": 29
+  },
+  "afterMacro": {
+    "commit": "42dee4ae8524984c23a644a14543f2b86650b3f6",
+    "ready": true,
+    "failed": [],
+    "pending": 0,
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 900,
+      "width": 1440
+    },
+    "inhabitants": 29
+  }
+}

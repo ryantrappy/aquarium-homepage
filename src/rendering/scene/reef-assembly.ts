@@ -545,7 +545,7 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
     scale: 1.28,
     tiltXRad: 0.16,
     tiltZRad: 0.08,
-    offsetM: [0.0, -0.008, 0.0],
+    offsetM: [0.0, -0.052, -0.016],
     paletteOverride: { surfaceMode: 'baked-pbr', baseColor: '#90a75a', tipColor: '#e7e0b2', creviceColor: '#3c4630', regradeStrength: 0.35, roughness: 1, fluorescenceStrength: 0.07 },
     rigidPaletteOverride: { surfaceMode: 'baked-pbr', baseColor: '#b4aa91', tipColor: '#d4cbb6', creviceColor: '#4d4539', regradeStrength: 0.15, roughness: 1, fluorescenceStrength: 0 },
     preserveSkeletonShape: true,
@@ -559,7 +559,7 @@ export const DEFAULT_LEFT_ISLAND_MOUNTS: readonly ModularCoralMountEntry[] = [
     scale: 1.04,
     tiltXRad: 0.15,
     tiltZRad: -0.05,
-    offsetM: [0.0, -0.008, 0.0],
+    offsetM: [0.0, -0.041, -0.012],
     paletteOverride: {
       surfaceMode: 'baked-pbr',
       baseColor: '#c97834',
