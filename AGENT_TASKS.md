@@ -23,6 +23,8 @@ The default wide reef now also mounts five encrusting zoanthid mats on each of i
 
 AQ-70.6 now uses one warped ridge network with a rotated intensity accent, depth filtering, and an illumination gate derived from shadowed direct diffuse. The current default scene's matched laptop comparison shows visible ridges on lit sand and a quieter floor under the rocks. Two settled frames matched after using Pause. Fixture and full optical acceptance remain open. [Laptop evidence](docs/asset-evidence/aq70-6/shadowed-caustics-laptop/).
 
+AQ-71 raises the reef material's indirect light from 0.35 to 0.70 using the existing shared environment map. At the same 1440×900 pose, encoded screen luma increases on both rock faces and the left crest. Sampled sand, cave opening, blue tang and open water pixels match the baseline. [Lighting comparison](docs/asset-evidence/aq71/reef-fill-20261121/).
+
 ## Left torch seating — 2026-11-21
 
 AQ-70.11 now seats the green flowing torch and gold torch lower and farther into their existing ledges. The matched laptop macros show the crowns and upper skeleton cups above the rock with less of each support stem exposed. The default left formation still spans approximately 80% of the viewport height by visual estimate. The broader crest silhouette and coral coverage across the large bare faces remain open. [Laptop comparison](docs/asset-evidence/aq70-11/torch-seating-20261121/).

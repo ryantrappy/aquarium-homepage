@@ -254,3 +254,7 @@
 ### 2026-11-21 — AQ-70.11 broader left branching crest
 *Root reviewed the retained entries. The active scope, laptop review and saved asset preservation rules are current. The left crest placement is actioned. Its lighting, full coral art and continuous fish clearance remain pending.*
 - The saved corymbose Acropora replaces the smaller left companion under the antler. The stem center sits about 0.231 aquarium units below the exact rendered rock surface, and the crown extends farther left while staying below the existing highest tip. The laptop overview has zero failed assets or captured warnings. Current cave, turn and host fixtures still pass at their tested clearance sizes.
+
+### 2026-11-21 — AQ-71 indirect light on the reef faces
+*Root reviewed retained entries. Local laptop review, active scope and asset preservation remain current. The reef indirect-light change is actioned. Full reference fidelity and remaining directed backlog work are pending.*
+- Reef PBR materials now use 0.70 of the shared environment lighting. In identical laptop frames the left face sample rises from 34.62 to 46.30 encoded luma and the right face from 29.78 to 39.52. The sampled blue tang, sand, cave opening and open water retain identical pixels. The after view has zero pending/failed assets or captured warnings/errors.
