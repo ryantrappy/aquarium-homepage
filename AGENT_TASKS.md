@@ -21,6 +21,10 @@ The merged default uses the earlier two islands and center arch following `92c72
 
 AQ-70.6 now uses one warped ridge network with a rotated intensity accent, depth filtering, and an illumination gate derived from shadowed direct diffuse. The current default scene's matched laptop comparison shows visible ridges on lit sand and a quieter floor under the rocks. Two settled frames matched after using Pause. Fixture and full optical acceptance remain open. [Laptop evidence](docs/asset-evidence/aq70-6/shadowed-caustics-laptop/).
 
+## Swept fish-body clearance — 2026-11-21
+
+AQ-58 now bounds linear sweeps by endpoint travel and verifies rigid turns along the actual orientation arc. A source-pinned blue tang clip envelope still hits the left cave wall and clears a translating quarter-turn in front water. The renderer's turning overlay and shader deformation require a combined envelope before live routing uses these checks. [Collision evidence](docs/asset-evidence/aq58/3d-collision-review.md#translating-and-turning-bodies--2026-11-21).
+
 ## Default wide modular reef — 2026-11-21
 
 AQ-94 is Done. The compiled wide homepage loads seven saved NSA rock exports in one 3,956,104-byte shared-atlas GLB by default. The 1440×900 production review shows the taller left pinnacle, lower right island and measured through-arch with 13 mounted corals. The modular right ledge shelters the fixed moray with a clear exposed-head corridor. Narrow screens use the existing reef and load its foundations on demand when resizing from the wide view. Laptop production evidence is under `docs/asset-evidence/aq94/default-laptop-review/`.

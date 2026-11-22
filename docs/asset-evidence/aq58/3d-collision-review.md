@@ -207,6 +207,14 @@ The browser exposed a loader bug: HTTP `Content-Encoding: gzip` can decode fixtu
 
 Evidence: [laptop detour](detour-laptop.png), [phone cave route](cave-phone.png). Root and an independent reviewer also verified the isolated optional metric swimming adapter: 64 focused tests and typecheck pass, with continuous movement/final-arrival checks, separate metric radius, tank bounds, shared planning budgets, generation invalidation and paused immobility. A clean checkpoint without WIP coral assets passes 254 tests, typecheck and the production build.
 
+## Translating and turning bodies — 2026-11-21
+
+The swept-body query now bounds each slice using endpoint travel. A point at a fixed fraction along a linearly moving axis is displaced by the same fraction of the endpoint displacements, so the greater endpoint travel bounds the entire capsule. A translating sphere uses one exact capsule. The rigid-body query keeps the axis length fixed along a shortest arc, adding center travel and the chord distance of the endpoint from the midpoint pose. An ambiguous half-turn requires an intermediate orientation.
+
+The measured box fixtures cover off-midpoint translation in both directions and a rock reached during a 90-degree turn. At that rock, the straight endpoint chords clear while the rigid turn contacts the solid. A raised turn clears, and ambiguous input returns indeterminate. The same work budget applies across all subdivision queries.
+
+The source-pinned left reef assembly also reran with the corrected query. The basic cave probe clears, the blue tang's continuous swim-clip envelope hits the cave wall, and the same envelope clears a translating quarter-turn in front water. The clownfish approach and right moray head checks pass. These are fixed-path tests with declared capsule shapes. The animated overlay envelope and use of these queries in the live planner remain open.
+
 ## Remaining acceptance
 
 The deterministic [3D planner](../../../src/simulation/mesh-navigation.ts) and [shared-budget adapter](../../../src/simulation/mesh-habitat.ts) are now implemented and tested. `createMeshClearanceQuery` clamps each query to 4,096 node visits / 8,192 triangle tests while accounting cumulative work. Planner hard ceilings are 16,384 lattice/expanded nodes, 100,000 queries, 2,000,000 node visits and 10,000,000 triangle tests. Only clear points/edges are usable; indeterminate work is not presented as proven disconnection.

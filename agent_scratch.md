@@ -233,3 +233,7 @@
 ### 2026-11-21 — AQ-70.6 shadowed caustics
 *Root reviewed the retained entries. The local/laptop-only scope and model preservation remain current. The caustic shader update is actioned. Fixture and full optical acceptance remain pending.*
 - The current default uses one bent cellular ridge network with a rotated brightness accent, depth filtering, and illumination gating. The render and CPU projection share wave slope and slant. Laptop before/after, two active phases and identical settled Pause frames are recorded under `docs/asset-evidence/aq70-6/shadowed-caustics-laptop/`.
+
+### 2026-11-21 — AQ-58 swept fish-body clearance
+*Root reviewed the retained entries. Active scope and saved asset preservation are current. The endpoint and rigid-turn sweep corrections are actioned. Live envelope and route integration remain pending.*
+- Endpoint travel now controls the slice padding, and the rigid helper keeps a fixed-length capsule through its orientation arc. The exact left assembly still blocks the blue tang's clip envelope in the cave and clears a translating turn in front water. The checked-in visuals and runtime probe sizes were preserved.

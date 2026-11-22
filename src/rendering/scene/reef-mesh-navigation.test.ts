@@ -15,7 +15,7 @@ import { reefPlacementsForViewport } from './reef-layout'
 import { resolveSnowflakeMorayResidence, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M } from './moray-residence'
 import { DEFAULT_CAMERA_ZOOM_STATE } from './camera-zoom'
 import { createAragoniteSandBed, evaluateAragoniteSandElevation } from './aragonite-sand'
-import { querySweptBodyCapsule } from '../../simulation/swept-body-capsule'
+import { querySweptBodyCapsule, querySweptRigidBodyCapsule } from '../../simulation/swept-body-capsule'
 import { createFishClipPlayer } from './fish-animation'
 import { MODEL_SWIM_AXIS_LENGTH, fishModelScale, fishRenderLength } from './fish-scale'
 import { mountedAnemoneHosts } from './anemone-host'
@@ -83,6 +83,70 @@ it('cannot treat a padded body-sweep overlap as proven contact', () => {
   expect(querySweptBodyCapsule(paddingOnly, from, to, .04, MESH_NAVIGATION_MOVEMENT_BUDGET)).toMatchObject({
     status: 'indeterminate', reason: 'body-sweep-resolution',
   })
+})
+
+it.each([.03, 0])('detects off-midpoint tunneling with axis half-length %s', async halfAxis => {
+  const reef = new THREE.Group()
+  const rock = boxRock(.14)
+  rock.position.set(-.65, 0, 0)
+  reef.add(rock)
+  const navigation = await createReefMeshNavigation([{ reef, islandId: 'off-center-sweep', mountedCorals: [] }])
+  expect(navigation.status).toBe('ready')
+  if (navigation.status !== 'ready') return
+  const query = navigation.meshNavigation.queryCapsule!
+  const budget = MESH_NAVIGATION_MOVEMENT_BUDGET
+  const axisAt = (x: number) => ({ tail: p(x, 0, -halfAxis), nose: p(x, 0, halfAxis) })
+  const from = axisAt(-1)
+  const to = axisAt(1)
+  for (const x of [-1, 0, 1]) {
+    const axis = axisAt(x)
+    expect(query(axis.tail, axis.nose, .04, budget).status).toBe('clear')
+  }
+  expect(querySweptBodyCapsule(query, from, to, .04, budget).status).toBe('blocked')
+  expect(querySweptBodyCapsule(query, to, from, .04, budget).status).toBe('blocked')
+})
+
+it('encloses every endpoint of a long translation before returning clear', () => {
+  const calls: { start: P; end: P; radius: number }[] = []
+  const result = querySweptBodyCapsule((start, end, radius) => {
+    calls.push({ start, end, radius })
+    return { status: 'clear', work: { nodeVisits: 1, triangleTests: 1 } }
+  }, { tail: p(-1, 0, -.03), nose: p(-1, 0, .03) },
+  { tail: p(1, 0, -.03), nose: p(1, 0, .03) }, .04, MESH_NAVIGATION_MOVEMENT_BUDGET)
+  expect(result.status).toBe('clear')
+  expect(calls).toHaveLength(1)
+  const [{ start, end, radius }] = calls
+  const checkedAxis = new THREE.Line3(new THREE.Vector3(start.x, start.y, start.z), new THREE.Vector3(end.x, end.y, end.z))
+  for (const x of [-1, 1]) {
+    for (const z of [-.03, .03]) {
+      const endpoint = new THREE.Vector3(x, 0, z)
+      const nearest = checkedAxis.closestPointToPoint(endpoint, true, new THREE.Vector3())
+      expect(nearest.distanceTo(endpoint) + .04).toBeLessThanOrEqual(radius + 1e-12)
+    }
+  }
+})
+
+it('checks the rigid turn arc that the endpoint chords miss', async () => {
+  const reef = new THREE.Group()
+  const rock = boxRock(.10)
+  rock.position.set(.7, 0, .7)
+  reef.add(rock)
+  const navigation = await createReefMeshNavigation([{ reef, islandId: 'rigid-turn', mountedCorals: [] }])
+  expect(navigation.status).toBe('ready')
+  if (navigation.status !== 'ready') return
+  const query = navigation.meshNavigation.queryCapsule!
+  const budget = MESH_NAVIGATION_MOVEMENT_BUDGET
+  const from = { center: p(0, 0, 0), forward: p(0, 0, 1) }
+  const to = { center: p(0, 0, 0), forward: p(1, 0, 0) }
+  const fromAxis = { tail: p(0, 0, -1), nose: p(0, 0, 1) }
+  const toAxis = { tail: p(-1, 0, 0), nose: p(1, 0, 0) }
+  expect(querySweptBodyCapsule(query, fromAxis, toAxis, .04, budget).status).toBe('clear')
+  expect(querySweptRigidBodyCapsule(query, from, to, 1, .04, budget).status).toBe('blocked')
+  expect(querySweptRigidBodyCapsule(query, to, from, 1, .04, budget).status).toBe('blocked')
+  const raised = ({ forward }: typeof from) => ({ center: p(0, .4, 0), forward })
+  expect(querySweptRigidBodyCapsule(query, raised(from), raised(to), 1, .04, budget).status).toBe('clear')
+  expect(querySweptRigidBodyCapsule(query, from, { ...to, forward: p(0, 0, -1) }, 1, .04, budget))
+    .toMatchObject({ status: 'indeterminate', reason: 'ambiguous-body-turn' })
 })
 
 function boxCoral(center: P, size = 0.2): THREE.Group {
@@ -814,6 +878,13 @@ async function loadActualGlb(bytes: Uint8Array) {
     const frontPose = (x: number) => ({ tail: p(x - halfAxis, 1.65, 1.9), nose: p(x + halfAxis, 1.65, 1.9) })
     const frontSweep = querySweptBodyCapsule(query, frontPose(-.6), frontPose(.5), radius, budget)
     expect(frontSweep.status).toBe('clear')
+    const frontTurn = querySweptRigidBodyCapsule(
+      query,
+      { center: p(-.6, 1.65, 1.9), forward: p(1, 0, 0) },
+      { center: p(.5, 1.65, 1.9), forward: p(0, 0, 1) },
+      halfAxis, radius, budget,
+    )
+    expect(frontTurn.status).toBe('clear')
 
     const clownHalfAxis = .16
     const clownUrl = new URL('../assets/fish/download_testing_copies/clownfish-copy.glb', import.meta.url)
