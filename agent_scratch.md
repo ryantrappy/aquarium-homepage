@@ -295,3 +295,7 @@
 ### 2026-11-27 — AQ-70.11 companion colony promotion
 *Root reviewed the retained entries. The four new coral packages and default placement review are actioned. Full archetype and reference composition acceptance remain pending.*
 - The fifteen companion colonies fill upper and side ledges with one Xenia seated lower on the left apron. The accepted frame keeps roughly 80% reef height, the center arch, and the native moray service click. Right apron trials that obstructed the moray were rejected.
+
+### 2026-11-27 — AQ-70.13 lower right reef
+*Root reviewed the retained entries. The right-height and cave checks are actioned. Broader material, composition and user acceptance remain pending.*
+- The current wide layout lowers the right crest and retains the higher left focal point. The accepted height passes the five-mat footprint and eel clearance checks. The deeper trials dropped a mat or missed the existing sand-clearance gate.

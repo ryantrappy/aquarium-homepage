@@ -85,6 +85,10 @@ The current donor yellow tang keeps its texture and geometry. Its mapped iris no
 
 The goby uses its original maps and rig with a softer species-specific surface. Its brightest changed pixels are visibly less glossy at laptop scale. Blue spotting and fin silhouette fidelity remain open, along with the separate chromis and lyretail contour issues. [Goby comparison](docs/asset-evidence/aq70-8/watchman-goby-20261127/).
 
+## Lower right reef — 2026-11-27
+
+The right foundation height factor is 2.9. A matched laptop capture shows more open water above the right crest and retains the tall left silhouette. The exact right-island fixture still seats five face mats and clears the moray head. The native service click passed. [Height comparison](docs/asset-evidence/aq70-13/lower-right-20261127/).
+
 ## Coral companions on the default reef — 2026-11-27
 
 The two islands now mount the four supplied companion exports in 15 locations. The installed models include their packed Blender sources, texture maps and overrides. One Xenia moved to the outside of the lower left apron. The settled laptop view retains about 80% reef height and an open center arch. The exact left and right fixtures retain cave and host checks, including the moray head. [Coral comparison](docs/asset-evidence/aq70-11/companion-colonies-20261127/).

@@ -50,7 +50,7 @@ describe('shared reef layout', () => {
   it('assigns vertical-only foundation raises without changing horizontal footprint scaling', () => {
     expect(reefPlacementsForViewport(false).map(placement => [placement.islandKind, placement.foundationHeightScale])).toEqual([
       ['left', 2.0],
-      ['right', 3.1],
+      ['right', 2.9],
     ])
     expect(reefPlacementsForViewport(true).map(placement => [placement.islandKind, placement.foundationHeightScale])).toEqual([
       ['left', 2.8],

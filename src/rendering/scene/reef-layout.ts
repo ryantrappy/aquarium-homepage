@@ -12,7 +12,7 @@ export type ReefPlacement = Readonly<{
 // substrate contact. Uniform scaling preserves the supplied model shapes.
 const LAPTOP_REEF: readonly ReefPlacement[] = Object.freeze([
   { islandKind: 'left', position: { x: -2.5, y: -2.7, z: -1.35 }, uniformScale: 6.0, foundationHeightScale: 2.0, yaw: 0.08 },
-  { islandKind: 'right', position: { x: 3.1, y: -2.7, z: -1.2 }, uniformScale: 5.0, foundationHeightScale: 3.1, yaw: -0.1 },
+  { islandKind: 'right', position: { x: 3.1, y: -2.7, z: -1.2 }, uniformScale: 5.0, foundationHeightScale: 2.9, yaw: -0.1 },
 ])
 const PHONE_REEF: readonly ReefPlacement[] = Object.freeze([
   { islandKind: 'left', position: { x: -0.15, y: -2.7, z: -1.35 }, uniformScale: 4.6, foundationHeightScale: 2.8, yaw: 0.06 },
