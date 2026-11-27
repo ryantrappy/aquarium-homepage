@@ -78,6 +78,20 @@ const YELLOW_TANG_CORNEA = `
 #endif
 `
 
+// The two normalized, unified meshes taper to thin membranes above and below
+// the trunk. Use rest coordinates so the light response moves with the fin.
+const FIN_REST_POSITION = 'varying vec3 vFishFinRestPosition;\n'
+const FIN_DIFFUSE_LIGHTING = `
+  float membrane = 1.0 - smoothstep(0.013, 0.040, abs(vFishFinRestPosition.x));
+  float outsideTrunk = smoothstep(0.17, 0.285, abs(vFishFinRestPosition.y));
+  float behindHead = 1.0 - smoothstep(0.52, 0.67, vFishFinRestPosition.z);
+  // Diffuse light scattered through thin tissue softens the abrupt change in
+  // reflected light as the two sides of a fin turn past the fixture.
+  vec3 finDiffuse = diffuseColor.rgb * vec3(0.50, 0.56, 0.64);
+  outgoingLight = mix(outgoingLight, finDiffuse, membrane * outsideTrunk * behindHead * 0.78);
+  #include <opaque_fragment>
+`
+
 export type FishMaterialPartRole = 'body' | 'fin' | 'eye'
 
 export type SpeciesOpticalProfile = Readonly<{
@@ -527,11 +541,24 @@ export function bindFishFlexToModel(
       const cloned = upgradeFishMaterialForPhotorealism(material, speciesId, partRole)
       const hasTangEyeAtlas = speciesId === 'yellow-tang'
         && mesh.name === 'Cube003_Material001_0' && material.name === 'Material.001' && material.map !== null
-      cloned.customProgramCacheKey = () => hasTangEyeAtlas ? `${FLEX_PROGRAM_CACHE_KEY}:yellow-tang-cornea` : FLEX_PROGRAM_CACHE_KEY
+      const hasUnifiedFinMembranes = (speciesId === 'lyretail-anthias' || speciesId === 'blue-green-chromis')
+        && material.name === `${speciesId}_Mat`
+      let programKey = FLEX_PROGRAM_CACHE_KEY
+      if (hasTangEyeAtlas) programKey += ':yellow-tang-cornea'
+      if (hasUnifiedFinMembranes) programKey += ':fin-diffuse'
+      cloned.customProgramCacheKey = () => programKey
       cloned.onBeforeCompile = shader => {
         patchFishFlexShader(shader, uniforms)
         if (hasTangEyeAtlas) {
           shader.fragmentShader = shader.fragmentShader.replace('#include <lights_physical_fragment>', YELLOW_TANG_CORNEA)
+        }
+        if (hasUnifiedFinMembranes) {
+          shader.vertexShader = FIN_REST_POSITION + shader.vertexShader.replace(
+            '#include <begin_vertex>', '#include <begin_vertex>\nvFishFinRestPosition = position;',
+          )
+          shader.fragmentShader = FIN_REST_POSITION + shader.fragmentShader.replace(
+            '#include <opaque_fragment>', FIN_DIFFUSE_LIGHTING,
+          )
         }
       }
       records.push({ mesh, originalMaterial, clonedMaterial: cloned })

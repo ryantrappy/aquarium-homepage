@@ -131,6 +131,32 @@ describe('fish flex material (AQ-12 / AQ-49 / AQ-74)', () => {
   })
 
   it.each([
+    ['blue-green-chromis', 'blue-green-chromis_Mat', true],
+    ['lyretail-anthias', 'lyretail-anthias_Mat', true],
+    ['lyretail-anthias', 'replacement-body', false],
+    ['blue-tang', 'blue-tang_Mat', false],
+  ] as const)('scopes membrane shading to calibrated meshes (%s, %s)', (species, name, hasFinShading) => {
+    const { root, mesh, material } = makeSkinnedFish()
+    material.name = name
+    const binding = bindFishFlexToModel(root, species, 1)!
+    const shader = {
+      vertexShader: THREE.ShaderLib.physical.vertexShader,
+      fragmentShader: THREE.ShaderLib.physical.fragmentShader,
+      uniforms: {},
+    }
+    const activeMaterial = mesh.material as THREE.MeshPhysicalMaterial
+    activeMaterial.onBeforeCompile(shader as never, undefined as never)
+
+    expect(activeMaterial.customProgramCacheKey()).toBe(hasFinShading ? 'fish-flex-v1:fin-diffuse' : 'fish-flex-v1')
+    expect(shader.vertexShader.includes('vFishFinRestPosition = position;')).toBe(hasFinShading)
+    expect(shader.fragmentShader.includes('outgoingLight = mix(outgoingLight, finDiffuse')).toBe(hasFinShading)
+    expect(shader.fragmentShader).toContain('#include <opaque_fragment>')
+    binding.dispose()
+    material.dispose()
+    mesh.geometry.dispose()
+  })
+
+  it.each([
     ['yellow-tang', 'Cube003_Material001_0', true, true],
     ['yellow-tang', 'Cube003_Material001_0', false, false],
     ['yellow-tang', 'pectoral_fin', true, false],

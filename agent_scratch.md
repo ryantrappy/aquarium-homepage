@@ -283,3 +283,7 @@
 ### 2026-11-27 — AQ-106 cave interaction closeout
 *Root reviewed the retained entries. The laptop-only review and model preservation instructions are current. The moray shelter and service click are actioned. Fish edge refinement remains pending.*
 - The exact eel export retains its hash and the head remains visible at 1440×900. A real pointer click on the exposed head opened the inspect card and triggered the configured native new-tab request.
+
+### 2026-11-27 — AQ-70.8 schooling fish fin lighting
+*Root reviewed the retained entries. Local laptop review and model persistence remain current policy. The chromis and lyretail fin shading improvement is actioned. Fin geometry and remaining goby detail are pending.*
+- The two unified materials use a continuous diffuse contribution across thin fin membranes. Matched laptop captures show a smaller dorsal brightness step on both species. The existing exports and animations supply the same silhouettes.

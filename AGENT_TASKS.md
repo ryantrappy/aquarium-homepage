@@ -85,6 +85,10 @@ The current donor yellow tang keeps its texture and geometry. Its mapped iris no
 
 The goby uses its original maps and rig with a softer species-specific surface. Its brightest changed pixels are visibly less glossy at laptop scale. Blue spotting and fin silhouette fidelity remain open, along with the separate chromis and lyretail contour issues. [Goby comparison](docs/asset-evidence/aq70-8/watchman-goby-20261127/).
 
+## Schooling fish fin lighting — 2026-11-27
+
+The current lyretail and chromis materials now blend diffuse light across thin dorsal and anal membranes. The matched laptop views show a smaller brightness step at the dorsal band. Both fish retain their current GLBs, clips and maps. Lyretail's residual transition, fin anatomy and full roster acceptance remain open. [Fin comparison](docs/asset-evidence/aq70-8/schooling-fin-light-20261127/).
+
 ## AQ-106 cave backing and head click — 2026-11-27
 
 The user kept the downloaded sailfin and prioritized the eel shelter, yellow tang eye, chromis and lyretail edges, and watchman goby art. The wide legacy cave now has a backing using the saved talus behind the eel's truncated rear. The default and inspection views show the eel against the recess. The exact scene fixture blocks the cave-center sightline and retains clear water around the head. The laptop review confirmed that clicking the visible head opens its inspect card and requests the configured URL in a new tab. AQ-106 is Done. [Cave review](docs/asset-evidence/aq106/cave-backing-20261122/).
