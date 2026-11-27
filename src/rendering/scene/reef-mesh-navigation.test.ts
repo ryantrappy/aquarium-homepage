@@ -857,6 +857,19 @@ async function loadActualGlb(bytes: Uint8Array) {
     reef.rotation.y = placement.yaw
     reef.updateMatrixWorld(true)
     const rockMesh = reef.children.find(node => node instanceof THREE.Mesh)!
+    const xenia = assembled.mountedCorals.find(coral => coral.socketName === 'socket_brain_apron_01')!
+      .root.getObjectByName('Reef_Xenia_Pulsing_Plume')!
+    const xeniaBase = xenia.getWorldPosition(new THREE.Vector3())
+    const xeniaFrontRay = new THREE.Raycaster(
+      xeniaBase.clone().add(new THREE.Vector3(0, 0, 1)),
+      new THREE.Vector3(0, 0, -1),
+      0,
+      1,
+    )
+    const xeniaSupport = xeniaFrontRay.intersectObject(rockMesh, false)[0]
+    expect(xeniaSupport).toBeDefined()
+    expect(1 - xeniaSupport.distance).toBeGreaterThan(.05)
+    expect(1 - xeniaSupport.distance).toBeLessThan(.23)
     const apex = assembled.mountedCorals.find(coral => coral.socketName === 'socket_sps_crest_01')!
     const shoulder = apex.root.getObjectByName('Reef_Acropora_Corymbose')!
     const shoulderBase = shoulder.getWorldPosition(new THREE.Vector3())
@@ -990,15 +1003,9 @@ async function loadActualGlb(bytes: Uint8Array) {
     const placement = reefPlacementsForViewport(false).find(item => item.islandKind === 'right')!
     const rockGltf = await loadActualGlb(readFileSync(new URL(LIVE_ROCK_ISLAND_URLS.right)))
     const coralTemplates = new Map<string, THREE.Object3D>()
-    for (const mount of DEFAULT_RIGHT_ISLAND_MOUNTS) {
-      if (coralTemplates.has(mount.coralAssetId)) continue
-      const coralUrl = MODULAR_CORAL_ASSET_URLS[mount.coralAssetId]
-      if (!coralUrl) throw new Error(`No runtime coral URL registered for ${mount.coralAssetId}.`)
-      coralTemplates.set(mount.coralAssetId, (await loadActualGlb(readFileSync(new URL(coralUrl)))).scene)
+    for (const [id, url] of Object.entries(MODULAR_CORAL_ASSET_URLS)) {
+      coralTemplates.set(id, (await loadActualGlb(readFileSync(new URL(url)))).scene)
     }
-
-    const matUrl = MODULAR_CORAL_ASSET_URLS['coral-zoanthid-mat']
-    coralTemplates.set('coral-zoanthid-mat', (await loadActualGlb(readFileSync(new URL(matUrl)))).scene)
 
     const reef = rockGltf.scene.clone(true)
     const assembled = assembleCoralsOnRockSockets(reef, coralTemplates, DEFAULT_RIGHT_ISLAND_MOUNTS, {

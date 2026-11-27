@@ -217,6 +217,12 @@ rubric, variant, support and rendering-budget requirements remain open.
     - `reef-montipora-sunset-shelf.glb`: `14,236` triangles, `1,462,592` bytes (`plating-sps`, `socket_plate_ledge_03`)
     - `reef-goniopora-flowerpot-lps.glb`: `20,536` triangles, `1,660,916` bytes (`tentaculate-lps`, `socket_lps_mid_06`)
     - `reef-favia-war-coral.glb`: `20,480` triangles, `1,500,424` bytes (`mounded-lps`, `socket_brain_apron_03`)
+  - **`AQ-70.11` Broad-coverage filler & carpet coral batch (`reef-seriatopora-pink-birdsnest`, `reef-pocillopora-cauliflower-bush`, `reef-sinularia-finger-leather`, `reef-xenia-pulsing-plume`)**:
+    - Original **$0** procedural 3D geometry and packed `512×512` / `256×256` PBR texture maps authored from scratch in Blender 5.2.3 LTS (`build_reef_seriatopora_pink_birdsnest.py`, `build_reef_pocillopora_cauliflower_bush.py`, `build_reef_sinularia_finger_leather.py`, `build_reef_xenia_pulsing_plume.py`; packed sources under `src/rendering/assets/splat-fish/blend/` and overrides under `src/rendering/assets/splat-fish/overrides/`).
+    - `reef-seriatopora-pink-birdsnest.glb`: `7,428` triangles, `683,772` bytes (`coral-rigid`)
+    - `reef-pocillopora-cauliflower-bush.glb`: `6,720` triangles, `526,136` bytes (`coral-rigid`)
+    - `reef-sinularia-finger-leather.glb`: `9,536` triangles, `822,888` bytes (`coral-soft` + `coral-rigid`)
+    - `reef-xenia-pulsing-plume.glb`: `14,304` triangles, `1,094,672` bytes (`coral-soft` + `coral-rigid`)
   - Canonical `corals/` assets remain preserved; look-dev captures, physical scale/rubric evaluation, and Root approval remain pending.
 
 ## Clean-up-crew reef invertebrates (Trochus snail, scarlet hermit crab, emerald crab, cleaner shrimp) — `AQ-109` (Phase 1)

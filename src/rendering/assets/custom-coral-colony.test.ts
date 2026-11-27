@@ -10,6 +10,7 @@ import {
   DEFAULT_LEFT_ISLAND_MOUNTS,
   DEFAULT_RIGHT_ISLAND_MOUNTS,
   MODULAR_CORAL_ASSET_URLS,
+  type ModularCoralMountEntry,
 } from '../scene/reef-assembly'
 // The installer is plain .mjs without a declaration file.
 // @ts-expect-error Test the actual source-bound custom colony packager.
@@ -18,7 +19,14 @@ import { syncCoralOverride } from '../../../scripts/sync-coral-override.mjs'
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
 const registryDir = 'src/rendering/assets/corals/custom-colonies'
 const registryPath = `${registryDir}/manifest.json`
-const coralCases = [
+type RigidCoralCase = {
+  id: string
+  mounts: readonly ModularCoralMountEntry[]
+  socketName: string
+  archetype: ModularCoralMountEntry['archetype']
+  defaultMounted?: boolean
+}
+const coralCases: readonly RigidCoralCase[] = [
   {
     id: 'reef-acropora-antler',
     mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
@@ -103,7 +111,21 @@ const coralCases = [
     socketName: 'socket_brain_apron_03',
     archetype: 'mounded-lps',
   },
-] as const
+  {
+    id: 'reef-seriatopora-pink-birdsnest',
+    mounts: DEFAULT_LEFT_ISLAND_MOUNTS,
+    socketName: 'socket_lps_mid_01',
+    archetype: 'branching-sps',
+    defaultMounted: false,
+  },
+  {
+    id: 'reef-pocillopora-cauliflower-bush',
+    mounts: DEFAULT_RIGHT_ISLAND_MOUNTS,
+    socketName: 'socket_lps_mid_06',
+    archetype: 'branching-sps',
+    defaultMounted: false,
+  },
+]
 
 type GlbDocument = {
   scene?: number
@@ -195,17 +217,19 @@ function channelSummary(values: readonly number[], channel: number) {
   }
 }
 
-describe.each(coralCases)('$id custom rigid coral colony package', ({ id, mounts, socketName, archetype }) => {
+describe.each(coralCases)('$id custom rigid coral colony package', ({ id, mounts, socketName, archetype, defaultMounted }) => {
   it('keeps source identities, mask contract, geometry and embedded PBR package in sync', () => {
     const registry = JSON.parse(fs.readFileSync(path.join(repoRoot, registryPath), 'utf8'))
     expect(registry.schema).toBe('custom-coral-colonies-v1')
     const entry = registry.assets.find((asset: { id: string }) => asset.id === id)
     expect(entry).toBeDefined()
     if (!entry) return
-    const primaryMount = sourceBoundPrimaryMount(id, socketName, mounts)
-    expect(primaryMount).toMatchObject({ coralAssetId: id, archetype })
-    expect(primaryMount?.socketName).toBe(socketName)
-    expect(primaryMount.paletteOverride?.surfaceMode).toBe('baked-pbr')
+    if (defaultMounted !== false) {
+      const primaryMount = sourceBoundPrimaryMount(id, socketName, mounts)
+      expect(primaryMount).toMatchObject({ coralAssetId: id, archetype })
+      expect(primaryMount?.socketName).toBe(socketName)
+      expect(primaryMount.paletteOverride?.surfaceMode).toBe('baked-pbr')
+    }
     const runtimePath = registeredRuntimePath(id)
     expect(path.relative(repoRoot, runtimePath)).toBe(entry.path)
 

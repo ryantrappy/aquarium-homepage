@@ -291,3 +291,7 @@
 ### 2026-11-27 — AQ-70.11 new coral candidate intake
 *Root reviewed the retained entries. The four new custom coral packages and existing legacy placement wiring are confirmed. Native composition review and promotion remain pending.*
 - Pocillopora, Seriatopora, Sinularia and Xenia have matching saved sources, overrides and packaged exports. The isolated desktop snapshot passes 154 focused checks and the right-cave fixture with all runtime coral templates. Eight left and seven right companion placements use existing parent sockets.
+
+### 2026-11-27 — AQ-70.11 companion colony promotion
+*Root reviewed the retained entries. The four new coral packages and default placement review are actioned. Full archetype and reference composition acceptance remain pending.*
+- The fifteen companion colonies fill upper and side ledges with one Xenia seated lower on the left apron. The accepted frame keeps roughly 80% reef height, the center arch, and the native moray service click. Right apron trials that obstructed the moray were rejected.

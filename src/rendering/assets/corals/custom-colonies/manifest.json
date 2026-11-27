@@ -402,6 +402,66 @@
       ]
     },
     {
+      "id": "reef-pocillopora-cauliflower-bush",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-pocillopora-cauliflower-bush.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-pocillopora-cauliflower-bush-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-pocillopora-cauliflower-bush.blend",
+      "nativeSha256": "f740827968d5a769397c8632848fb911b2c65e8e43c9505c969820f9b807ed98",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-pocillopora-cauliflower-bush.glb",
+      "overrideSha256": "dce5f5d148625a042c8bd449e479af00cae4ad65346ee41b449fd9ee3779a2b1",
+      "generatorPath": "src/rendering/modeling/build_reef_pocillopora_cauliflower_bush.py",
+      "generatorSha256": "991fa8a06f2952dd02d865b305419bf27a3e9b143e7d5a39e286be2eb0fa03d6",
+      "sha256": "0b4ec964ae632853d3a3fc3df8b5bb6cd48200228bdbcabd2a9e07813624fb89",
+      "bytes": 526136,
+      "triangles": 6720,
+      "dimensionsM": [
+        0.30560915172100067,
+        0.20942026376724243,
+        0.2670905739068985
+      ]
+    },
+    {
+      "id": "reef-seriatopora-pink-birdsnest",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-seriatopora-pink-birdsnest.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-seriatopora-pink-birdsnest-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-seriatopora-pink-birdsnest.blend",
+      "nativeSha256": "e7b9764d3432703b3fb9c37c864ce248111afbafda98e433e407b0cefe4df14d",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-seriatopora-pink-birdsnest.glb",
+      "overrideSha256": "eeb8e79102a7dc07d5ccd440b3ae8d4c4909e61cd35e1bd32e263d50206ce730",
+      "generatorPath": "src/rendering/modeling/build_reef_seriatopora_pink_birdsnest.py",
+      "generatorSha256": "16b3459d906ef8ffb3cf688b241b0aaf13384b4e1baed6b5600a020f9e17f34b",
+      "sha256": "9a8544f893ac4ec7fbdfb0220b51313a9df4cb509771948e9d8228ad3e0bb45c",
+      "bytes": 683772,
+      "triangles": 7428,
+      "dimensionsM": [
+        0.3202208876609802,
+        0.20680919289588928,
+        0.2964986711740494
+      ]
+    },
+    {
+      "id": "reef-sinularia-finger-leather",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-sinularia-finger-leather.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-sinularia-finger-leather-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-sinularia-finger-leather.blend",
+      "nativeSha256": "fa78e284ccce404c736423496bd74da34c616246d44e0f7f63f0d645a5eda744",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-sinularia-finger-leather.glb",
+      "overrideSha256": "a9a5893b6bcfa7acdb43246f7e3e48ee32a1e3e95125d6bdcdfab40a9dd628bc",
+      "generatorPath": "src/rendering/modeling/build_reef_sinularia_finger_leather.py",
+      "generatorSha256": "9e45e59dfc414fa5a49087a6fee330b0e40acb0062bcf27b6c3e7f1ac1293f1a",
+      "sha256": "7f68b98f566f993f8941a41a885e86be83e948fa8e09932f3cdd29daba09ec9a",
+      "bytes": 822888,
+      "triangles": 9536,
+      "dimensionsM": [
+        0.2949628531932831,
+        0.20998281240463257,
+        0.268038846552372
+      ]
+    },
+    {
       "id": "reef-stylophora-magenta-club",
       "kind": "coral",
       "path": "src/rendering/assets/corals/custom-colonies/reef-stylophora-magenta-club.glb",
@@ -419,6 +479,26 @@
         0.16599999368190765,
         0.17599564790725708,
         0.1541581004858017
+      ]
+    },
+    {
+      "id": "reef-xenia-pulsing-plume",
+      "kind": "coral",
+      "path": "src/rendering/assets/corals/custom-colonies/reef-xenia-pulsing-plume.glb",
+      "inspection": "src/rendering/assets/corals/custom-colonies/reef-xenia-pulsing-plume-inspection.json",
+      "nativePath": "src/rendering/assets/splat-fish/blend/reef-xenia-pulsing-plume.blend",
+      "nativeSha256": "90557d76fd6e145fc297e03eb65393ab1e244e1eb06853efe3d9b5cf7b7a306c",
+      "overridePath": "src/rendering/assets/splat-fish/overrides/reef-xenia-pulsing-plume.glb",
+      "overrideSha256": "6d364398004f8e7267eedd620eed1074f01f7d19bd9fb9f3701e56c69283bedc",
+      "generatorPath": "src/rendering/modeling/build_reef_xenia_pulsing_plume.py",
+      "generatorSha256": "492752143620e48ee251e6b1def871a719e8bbb9af92320b7fa0143c6a39e6e7",
+      "sha256": "5b668ae68be2463a410d8a3850cb5997fc156f5decf7a9ff1f1ffd1c92d189c5",
+      "bytes": 1094672,
+      "triangles": 14304,
+      "dimensionsM": [
+        0.361650675535202,
+        0.2017502784729004,
+        0.3392268866300583
       ]
     },
     {
