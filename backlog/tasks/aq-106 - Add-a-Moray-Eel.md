@@ -1,11 +1,11 @@
 ---
 id: AQ-106
 title: Add a Moray Eel
-status: In Progress
+status: Done
 assignee:
   - '@junie'
 created_date: '2026-11-14 20:52'
-updated_date: '2026-11-22 14:23'
+updated_date: '2026-11-27 14:55'
 labels:
   - gemini-research
   - modeling
@@ -260,6 +260,8 @@ Root review remains required before Done. No Blender edits, deployment, or visua
 2026-11-17 Root fix & 1440x900 visual review: moved SNOWFLAKE_MORAY_CAVE_CENTER_LOCAL from x=-0.04 to x=0.02 so the exposed head capsule clears socket_brain_apron_03 across the full 11-coral right-island assembly; guarded pumpLazyLoads() on loaded and enqueued live services at initialize() completion; updated reef-mesh-navigation.test.ts to assemble all 11 DEFAULT_RIGHT_ISLAND_MOUNTS via GLTFLoader + assembleCoralsOnRockSockets. Verified 98/98 targeted tests, typecheck (17 scripts), production build, and live 1440x900 DPR1 browser review (docs/asset-evidence/aq106/root-review-20261117/).
 
 Root 2026-11-22: reused the saved taIus export to back the legacy right cave behind the partial eel. Exact GLBs verify a formerly open cave ray hits the backing behind the eel and the original exposed head capsule and camera ray stay clear. Settled native 1440×900 overview and inspection frames show the visible head and the dark recess. Browser disconnected before a fresh click-through, so retain open follow-up status. The final 1,073 tests, typecheck and production build passed. See docs/asset-evidence/aq106/cave-backing-20261122/.
+
+Root 2026-11-27: confirmed the backed right cave at 1440×900 DPR 1 with zero failed assets and one configured eel. A primary pointer click on the exposed head opened its inspect card and generated a native Page.windowOpen event for the configured example URL with userGesture true and target _blank. The supplied GLB retained its pinned SHA-256. Full tests, typecheck and production build passed. Evidence: docs/asset-evidence/aq106/cave-backing-20261122/.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
@@ -293,4 +295,6 @@ Junie verified AC 1–8 and the AQ-106-specific lifecycle, asset, scale, budget,
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Integrated the supplied partial snowflake moray eel (Echidna nebulosa) as a single-service right-cave resident at island-local { x: 0.02, y: 0.02, z: 0.18 }, clearing all 11 mounted right-island corals, rock collider, sand bed, and default camera ray while preserving the supplied GLB and PNG maps byte-for-byte under a hash-scoped budget exception. Verified via unit/integration suites, typecheck, production build, and 1440x900 browser review.
+
+Added saved talus behind the partial body to close the legacy cave sightline. Verified exact exported geometry clearance and native new-tab activation by clicking the exposed head at 1440×900.
 <!-- SECTION:FINAL_SUMMARY:END -->

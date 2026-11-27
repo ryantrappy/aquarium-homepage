@@ -6,7 +6,7 @@ Status: Active
 Authority: Binding Checkpoint; Backlog controls acceptance
 Backlog: AQ-44, AQ-49, AQ-54, AQ-59, AQ-70.2, AQ-70.13, AQ-74, AQ-86, AQ-104, AQ-105, AQ-106
 Owner: @root
-Updated: 2026-11-20
+Updated: 2026-11-27
 Upstream: AGENTS.md, agent_scratch.md, docs/requirements.md
 Downstream: Current implementation and review work
 -->
@@ -85,9 +85,9 @@ The current donor yellow tang keeps its texture and geometry. Its mapped iris no
 
 The goby uses its original maps and rig with a softer species-specific surface. Its brightest changed pixels are visibly less glossy at laptop scale. Blue spotting and fin silhouette fidelity remain open, along with the separate chromis and lyretail contour issues. [Goby comparison](docs/asset-evidence/aq70-8/watchman-goby-20261127/).
 
-## AQ-106 cave backing review — 2026-11-22
+## AQ-106 cave backing and head click — 2026-11-27
 
-The user kept the downloaded sailfin and prioritized the eel shelter, yellow tang eye, chromis and lyretail edges, and watchman goby art. The wide legacy cave now has a backing using the saved talus behind the eel's truncated rear. The default and inspection views show the eel against the recess. The exact scene fixture blocks the cave-center sightline and retains clear water around the head. [Cave review](docs/asset-evidence/aq106/cave-backing-20261122/).
+The user kept the downloaded sailfin and prioritized the eel shelter, yellow tang eye, chromis and lyretail edges, and watchman goby art. The wide legacy cave now has a backing using the saved talus behind the eel's truncated rear. The default and inspection views show the eel against the recess. The exact scene fixture blocks the cave-center sightline and retains clear water around the head. The laptop review confirmed that clicking the visible head opens its inspect card and requests the configured URL in a new tab. AQ-106 is Done. [Cave review](docs/asset-evidence/aq106/cave-backing-20261122/).
 
 ## AQ-106 completed — 2026-11-17
 

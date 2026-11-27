@@ -2,11 +2,11 @@
 
 <!-- AGENT_DOC_METADATA
 Category: Evidence / Visual Integration
-Status: Active
+Status: Complete
 Authority: Evidentiary
 Backlog: AQ-106
 Owner: @root
-Updated: 2026-11-22
+Updated: 2026-11-27
 Upstream: AGENTS.md, docs/requirements.md
 Downstream: src/rendering/scene/moray-residence.ts, src/rendering/scene/aquarium.ts, src/rendering/scene/reef-mesh-navigation.test.ts
 -->
@@ -21,3 +21,7 @@ The exact-export test traces one previously open sightline through the legacy ca
 Both captures use 1440×900 CSS pixels at DPR 1, look-dev seed 2026 and time 1.25. The local test config uses a single example moray service. The preview used base `4d56fbf` plus the backing change, and readiness reported no failed assets. Click-through verification was interrupted by the browser connection. The geometry and controller checks cover head visibility and service availability.
 
 The already-saved talus GLB has SHA-256 `869bb47edf1f2514332bb8c2cb56dc025d4653e653570ef80a38beca7cc7598b`. The supplied eel GLB has SHA-256 `810e641d69159d4b97db42cc48e7392e1861381777984721368ed5d18a450d5d`. Both exports are preserved.
+
+## Head click review — 2026-11-27
+
+At 1440×900 CSS pixels and DPR 1, the backed right cave showed the eel’s exposed head and no open-water sightline through the recess. The configured moray settled with zero unresolved fish or failed assets. A primary pointer click at CSS coordinates (701, 429) opened the inspect card for the Snowflake moray eel and triggered a native browser new-tab request for the example service URL. The observed browser event reported `windowName: "_blank"`, `userGesture: true`, and `url: "https://example.com/moray"`. The supplied eel GLB retained the hash above. [Head-click screenshot](head-click.png).
