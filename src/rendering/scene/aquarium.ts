@@ -318,7 +318,7 @@ float hNorm = clamp((vRearWorldPos.y + 2.8) / 5.6, 0.0, 1.0);
 // Deep abyssal navy at base -> rich reef sapphire mid-water -> deep royal cobalt below top LEDs
 // Calibrated in linear space so directional lights do not wash the backdrop pale.
 vec3 cBottom = vec3(0.002, 0.008, 0.026);
-vec3 cMid = vec3(0.006, 0.024, 0.072);
+vec3 cMid = vec3(0.008, 0.047, 0.109);
 vec3 cTop = vec3(0.015, 0.056, 0.145);
 vec3 waterCol = mix(cBottom, cMid, smoothstep(0.0, 0.56, hNorm));
 waterCol = mix(waterCol, cTop, smoothstep(0.50, 1.0, hNorm));

@@ -315,3 +315,7 @@
 ### 2026-11-27 — AQ-102 current enclosure review
 *Root reviewed the retained entries. Current laptop containment and the pointer and frozen-motion checks are actioned. Distinct reflected coral content remains pending.*
 - The native control isolates real side-wall reflection from the clear panes. The matched frames retain a pixel-identical center strip. Both stopped states are byte-identical, and a mouse click through the glass opens the moray service.
+
+### 2026-11-27 — AQ-71 reef and rear-water lighting
+*Root reviewed the retained entries. The current scene lighting iteration is actioned. The broader photographic comparison remains pending.*
+- The current environment map brightens the shaded rock faces and the mid-water gradient has a stronger blue. Matched laptop samples verify the change and retain identical foreground sand pixels.

@@ -41,11 +41,11 @@ export const AQUARIUM_ENVIRONMENT_PANEL_COLORS = {
 export const ENVIRONMENT_MAP_INTENSITY = {
   fish: 0.55,
   // Lift shadowed branches and vertical rock faces with indirect light.
-  reef: 0.70,
+  reef: 0.96,
   sand: 0.2,
   waterSurface: 0.9,
   // Preserve the graded blue rear water after explicit binding makes this role effective.
-  backdrop: 0.65,
+  backdrop: 0.90,
 } as const
 
 function gradientColorAt(t: number, out: THREE.Color): THREE.Color {

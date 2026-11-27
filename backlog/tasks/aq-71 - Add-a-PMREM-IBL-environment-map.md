@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-08 00:30'
-updated_date: '2026-11-22 04:14'
+updated_date: '2026-11-27 23:40'
 labels:
   - photorealism
   - rendering
@@ -20,6 +20,7 @@ references:
   - AQ-70.4
 documentation:
   - docs/rendering.md
+  - docs/asset-evidence/aq71/reef-fill-20261121/README.md
 priority: '2'
 type: feature
 ordinal: 71
@@ -58,6 +59,10 @@ Native A/B at df6227e revealed identical foreground pixels despite changed mater
 Once explicit strengths took effect, backdrop0 made the rear water too dark relative to the goal reference. Root exposure trial rebalances only the backdrop role to0.65, retaining fish0.55/reef0.35/sand0.2, ACES0.80 and the same LED rig. Validate native two-size exposure with fixed-pose foreground measurements and no clipping; final art and cost remain separate.
 
 Compare reef-only PMREM intensity against the current laptop source. Keep the fixture and other material roles fixed. Verify visible branch detail, cave contrast, and fixed-frame sand/fish samples before choosing a default.
+
+Compare stronger indirect lighting on the reef at 1440×900. Check the lower shaded rock faces, tissue readability and the rest of the scene in matched captures.
+
+Compare a brighter mid-water gradient beneath the existing surface color. Retain the surface transition and lower sand gradient.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -78,6 +83,8 @@ Root native review at69cad24 accepts AC3 two-size exposure. Shared explicit PMRE
 2026-11-15 active-only verification: the existing 2026-11-13 Root laptop/phone review records current exposure acceptance for AC3; focused environment-map and aquarium-lifecycle suites pass 53/53, including shared-material lifecycle and both required viewports. No controlled frame-rate parity evidence exists; frozen captures/incidental timing are explicitly insufficient, and this session has no browser/GPU measurement interface. Keep AC4 and Root DoD open; no implementation or scene values changed.
 
 Root 2026-11-21 matched laptop review: raised only reef material indirect intensity from .35 to .70. Left and right rock samples gained about one-third in mean encoded luma and the branching crest gained visible detail. Sampled sand, cave opening, blue tang and open water are pixel-identical. All 1,073 tests, typecheck and the production build pass. See docs/asset-evidence/aq71/reef-fill-20261121/. This comparison establishes current laptop exposure, with AC4 untouched.
+
+Root 2026-11-27: stronger existing environment lighting (reef 0.96 / rear 0.90) and a lifted blue midpoint brighten the shaded rock faces and water. Matched 1440×900 samples rise on both rock faces and midwater, with byte-identical sampled foreground sand. Both phases had 12 inhabitants and no failed assets or browser warnings/errors. All 1,100 tests, typecheck and production build passed. Full reference comparison remains open.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
