@@ -287,3 +287,7 @@
 ### 2026-11-27 — AQ-70.8 schooling fish fin lighting
 *Root reviewed the retained entries. Local laptop review and model persistence remain current policy. The chromis and lyretail fin shading improvement is actioned. Fin geometry and remaining goby detail are pending.*
 - The two unified materials use a continuous diffuse contribution across thin fin membranes. Matched laptop captures show a smaller dorsal brightness step on both species. The existing exports and animations supply the same silhouettes.
+
+### 2026-11-27 — AQ-70.11 new coral candidate intake
+*Root reviewed the retained entries. The four new custom coral packages and existing legacy placement wiring are confirmed. Native composition review and promotion remain pending.*
+- Pocillopora, Seriatopora, Sinularia and Xenia have matching saved sources, overrides and packaged exports. The isolated desktop snapshot passes 154 focused checks and the right-cave fixture with all runtime coral templates. Eight left and seven right companion placements use existing parent sockets.
