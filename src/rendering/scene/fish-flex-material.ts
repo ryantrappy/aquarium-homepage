@@ -86,6 +86,7 @@ export type SpeciesOpticalProfile = Readonly<{
   iridescenceThicknessRange: readonly [number, number]
   clearcoat: number
   clearcoatRoughness: number
+  baseRoughnessScale?: number
   sheen: number
   sheenColorHex: number
 }>
@@ -228,12 +229,13 @@ export const SPECIES_OPTICAL_PROFILES: Readonly<Record<string, SpeciesOpticalPro
     sheenColorHex: 0xffe2c4,
   },
   'yellow-watchman-goby': {
-    iridescence: 0.1,
+    iridescence: 0.07,
     iridescenceIOR: 1.83,
     iridescenceThicknessRange: [180, 295],
-    clearcoat: 0.36,
-    clearcoatRoughness: 0.12,
-    sheen: 0.2,
+    clearcoat: 0.16,
+    clearcoatRoughness: 0.34,
+    baseRoughnessScale: 1.55,
+    sheen: 0.12,
     sheenColorHex: 0xfff2c0,
   },
   'tailspot-blenny': {
@@ -330,6 +332,7 @@ export function upgradeFishMaterialForPhotorealism(
   // Default 'body' role (including unified single-primitive <species>_body meshes where
   // packed ORM green channel encodes 0.035 cornea gloss, ~0.26 flank scale mucus, and ~0.38 fin membranes):
   physical.ior = 1.35
+  physical.roughness *= profile.baseRoughnessScale ?? 1
   physical.clearcoat = profile.clearcoat
   physical.clearcoatRoughness = profile.clearcoatRoughness
   if (source.roughnessMap) {

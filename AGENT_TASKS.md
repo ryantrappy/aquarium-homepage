@@ -81,6 +81,10 @@ The user clarified that “complete the whole backlog” means complete only tas
 
 The current donor yellow tang keeps its texture and geometry. Its mapped iris now has a localized cornea reflection. On the matched laptop macros, all pixel changes greater than one level are within the eye region. Chromis and lyretail edges and watchman goby visual review remain pending. [Eye comparison](docs/asset-evidence/aq70-8/yellow-tang-eye-20261127/).
 
+## Watchman goby surface — 2026-11-27
+
+The goby uses its original maps and rig with a softer species-specific surface. Its brightest changed pixels are visibly less glossy at laptop scale. Blue spotting and fin silhouette fidelity remain open, along with the separate chromis and lyretail contour issues. [Goby comparison](docs/asset-evidence/aq70-8/watchman-goby-20261127/).
+
 ## AQ-106 cave backing review — 2026-11-22
 
 The user kept the downloaded sailfin and prioritized the eel shelter, yellow tang eye, chromis and lyretail edges, and watchman goby art. The wide legacy cave now has a backing using the saved talus behind the eel's truncated rear. The default and inspection views show the eel against the recess. The exact scene fixture blocks the cave-center sightline and retains clear water around the head. [Cave review](docs/asset-evidence/aq106/cave-backing-20261122/).

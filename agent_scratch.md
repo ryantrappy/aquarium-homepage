@@ -275,3 +275,7 @@
 ### 2026-11-27 — AQ-70.8 yellow tang eye review
 *Root reviewed the retained entries. The original sailfin selection, laptop review and model preservation policies are current. The moray backing and yellow tang eye shader are actioned. The chromis and lyretail edges, goby art and full model review remain pending.*
 - The existing yellow tang body atlas now receives a localized cornea reflection. Matched native laptop macros confirm that differences greater than one level stay within the eye sample. Work continued in a fresh checkout of the pushed branch because parts of the desktop workspace were unavailable on read.
+
+### 2026-11-27 — AQ-70.8 watchman goby surface
+*Root reviewed retained entries. Laptop-only review, the downloaded sailfin selection, and model preservation remain current. The goby surface adjustment is actioned. Goby detail plus chromis and lyretail outlines are pending.*
+- The actual three-fish browser review showed dark or abrupt fin contours on the two schooling species and glossy monochrome highlights on the goby. The goby highlight was reduced with the same texture and GLB. The marks and shape in the underlying goby export need a separate art pass.
