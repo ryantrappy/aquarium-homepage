@@ -85,6 +85,10 @@ The current donor yellow tang keeps its texture and geometry. Its mapped iris no
 
 The goby uses its original maps and rig with a softer species-specific surface and clearer cheek and dorsal spots. The spot treatment uses the existing atlas pigment. The sampled tail remains pixel-identical at 1440×900. Fin silhouette fidelity and broader fish art acceptance remain open. [Goby comparison](docs/asset-evidence/aq70-8/watchman-goby-20261127/).
 
+## AQ-102 current glass review — 2026-11-27
+
+The current tank view shows the corner seams and bottom glass lip. Reflection-only differences stay outside the sampled center strip, and the settled frames match during Pause and system reduced motion. A real click through the glass opens the moray inspect card and launches its service. Distinct coral silhouettes in the side mirrors remain open. [Glass review](docs/asset-evidence/aq102/current-enclosure-20261127/).
+
 ## AQ-103 water interface complete — 2026-11-27
 
 The exact current production water and glass modules passed the 1440×900 overview, bounded meniscus, and transmitted-key diagnostic. The current unit suites verify layout, shader branches and lifecycle. AQ-103 is Done. [Water interface review](docs/asset-evidence/aq103/root-review-20261115/README.md#current-source-review--2026-11-27).

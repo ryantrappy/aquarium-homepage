@@ -311,3 +311,7 @@
 ### 2026-11-27 — AQ-103 water interface closeout
 *Root reviewed the retained entries. AQ-103 water interface evidence is current and actioned. Overall lighting and reference fidelity remain pending.*
 - The current 1440×900 reef and production-module diagnostics confirm the bounded meniscus, continuous waves and fixture transmission. New source hashes and browser captures supersede the older source pins for current acceptance.
+
+### 2026-11-27 — AQ-102 current enclosure review
+*Root reviewed the retained entries. Current laptop containment and the pointer and frozen-motion checks are actioned. Distinct reflected coral content remains pending.*
+- The native control isolates real side-wall reflection from the clear panes. The matched frames retain a pixel-identical center strip. Both stopped states are byte-identical, and a mouse click through the glass opens the moray service.
