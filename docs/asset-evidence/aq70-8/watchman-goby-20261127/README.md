@@ -20,3 +20,11 @@ The brightest encoded luma among changed fish pixels falls from 250.00 to 232.71
 - [Capture state](capture.json)
 
 The paired captures use 1440×900 CSS pixels at DPR 1, seed 2026 and time 1.25. The after view used base `dc59fe2` plus the material changes in `fish-flex-material.ts`, SHA-256 `c9bbd7290561a69b8cd770ec3d6b4f12e7d05ea2554ef453655fee25f80940ff`. The unchanged runtime goby GLB SHA-256 is `b825b3da057c1a39234756b85a69c7b877d5e4c264e3f26fa38f587bdbedfd5e`.
+
+## Watchman goby markings
+
+The cooler spots in the current atlas were difficult to distinguish against the surrounding yellow at in-tank scale. The associated material now enhances cool pigment within the mapped cheek, flank and dorsal region. The yellow tail and underside retain their original material response. The current GLB and animation still have the hash above.
+
+The matched macro frames use the current review reef, 1440×900 CSS pixels at DPR 1, seed 2026 and times 1.25 and 3.00. At time 1.25, 470 pixels changed by more than one RGB level, all within the goby crop. The largest channel change was 30 levels. The sampled tail rectangle matched exactly in both comparisons. The pose checks reported no asset failures or console warnings or errors. Fin anatomy and broader material acceptance remain open.
+
+- [Matched goby spot comparison](spot-comparison.png)

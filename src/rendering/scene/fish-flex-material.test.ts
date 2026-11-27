@@ -157,6 +157,32 @@ describe('fish flex material (AQ-12 / AQ-49 / AQ-74)', () => {
   })
 
   it.each([
+    ['yellow-watchman-goby', 'yellow-watchman-goby_Mat', true, true],
+    ['yellow-watchman-goby', 'yellow-watchman-goby_Mat', false, false],
+    ['yellow-watchman-goby', 'replacement-body', true, false],
+    ['blue-green-chromis', 'yellow-watchman-goby_Mat', true, false],
+  ] as const)('scopes spot shading to the mapped goby body (%s, %s, map=%s)', (species, name, mapped, hasSpots) => {
+    const { root, mesh, material } = makeSkinnedFish()
+    material.name = name
+    if (mapped) material.map = new THREE.Texture()
+    const binding = bindFishFlexToModel(root, species, 1)!
+    const shader = {
+      vertexShader: THREE.ShaderLib.physical.vertexShader,
+      fragmentShader: THREE.ShaderLib.physical.fragmentShader,
+      uniforms: {},
+    }
+    const activeMaterial = mesh.material as THREE.MeshPhysicalMaterial
+    activeMaterial.onBeforeCompile(shader as never, undefined as never)
+    expect(activeMaterial.customProgramCacheKey()).toBe(hasSpots ? 'fish-flex-v1:watchman-spots' : 'fish-flex-v1')
+    expect(shader.fragmentShader.includes('float gobySpot')).toBe(hasSpots)
+    expect(shader.fragmentShader).toContain('#include <map_fragment>')
+    binding.dispose()
+    material.map?.dispose()
+    material.dispose()
+    mesh.geometry.dispose()
+  })
+
+  it.each([
     ['yellow-tang', 'Cube003_Material001_0', true, true],
     ['yellow-tang', 'Cube003_Material001_0', false, false],
     ['yellow-tang', 'pectoral_fin', true, false],

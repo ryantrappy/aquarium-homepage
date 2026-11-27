@@ -83,7 +83,7 @@ The current donor yellow tang keeps its texture and geometry. Its mapped iris no
 
 ## Watchman goby surface — 2026-11-27
 
-The goby uses its original maps and rig with a softer species-specific surface. Its brightest changed pixels are visibly less glossy at laptop scale. Blue spotting and fin silhouette fidelity remain open, along with the separate chromis and lyretail contour issues. [Goby comparison](docs/asset-evidence/aq70-8/watchman-goby-20261127/).
+The goby uses its original maps and rig with a softer species-specific surface and clearer cheek and dorsal spots. The spot treatment uses the existing atlas pigment. The sampled tail remains pixel-identical at 1440×900. Fin silhouette fidelity and broader fish art acceptance remain open. [Goby comparison](docs/asset-evidence/aq70-8/watchman-goby-20261127/).
 
 ## Foreground sand caustics — 2026-11-27
 

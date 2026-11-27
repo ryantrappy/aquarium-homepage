@@ -78,6 +78,20 @@ const YELLOW_TANG_CORNEA = `
 #endif
 `
 
+// The goby atlas already contains the spots. Restore their cool pigment
+// contrast under the blue reef light while leaving the yellow flank alone.
+const WATCHMAN_GOBY_SPOTS = `
+#include <map_fragment>
+#ifdef USE_MAP
+  vec3 gobyPigment = diffuseColor.rgb;
+  float bluePigment = gobyPigment.b / max(gobyPigment.r, 0.08);
+  // The atlas places pale tail rays and the underside outside the spotted field.
+  float spottedField = smoothstep(0.24, 0.34, vMapUv.x) * (1.0 - smoothstep(0.54, 0.65, vMapUv.y));
+  float gobySpot = smoothstep(0.075, 0.29, bluePigment) * smoothstep(0.08, 0.22, gobyPigment.g) * spottedField;
+  diffuseColor.rgb *= mix(vec3(1.0), vec3(0.53, 0.99, 1.38), gobySpot);
+#endif
+`
+
 // The two normalized, unified meshes taper to thin membranes above and below
 // the trunk. Use rest coordinates so the light response moves with the fin.
 const FIN_REST_POSITION = 'varying vec3 vFishFinRestPosition;\n'
@@ -543,14 +557,20 @@ export function bindFishFlexToModel(
         && mesh.name === 'Cube003_Material001_0' && material.name === 'Material.001' && material.map !== null
       const hasUnifiedFinMembranes = (speciesId === 'lyretail-anthias' || speciesId === 'blue-green-chromis')
         && material.name === `${speciesId}_Mat`
+      const hasGobySpotAtlas = speciesId === 'yellow-watchman-goby'
+        && material.name === 'yellow-watchman-goby_Mat' && material.map !== null
       let programKey = FLEX_PROGRAM_CACHE_KEY
       if (hasTangEyeAtlas) programKey += ':yellow-tang-cornea'
+      if (hasGobySpotAtlas) programKey += ':watchman-spots'
       if (hasUnifiedFinMembranes) programKey += ':fin-diffuse'
       cloned.customProgramCacheKey = () => programKey
       cloned.onBeforeCompile = shader => {
         patchFishFlexShader(shader, uniforms)
         if (hasTangEyeAtlas) {
           shader.fragmentShader = shader.fragmentShader.replace('#include <lights_physical_fragment>', YELLOW_TANG_CORNEA)
+        }
+        if (hasGobySpotAtlas) {
+          shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', WATCHMAN_GOBY_SPOTS)
         }
         if (hasUnifiedFinMembranes) {
           shader.vertexShader = FIN_REST_POSITION + shader.vertexShader.replace(
