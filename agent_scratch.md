@@ -319,3 +319,7 @@
 ### 2026-11-27 — AQ-71 reef and rear-water lighting
 *Root reviewed the retained entries. The current scene lighting iteration is actioned. The broader photographic comparison remains pending.*
 - The current environment map brightens the shaded rock faces and the mid-water gradient has a stronger blue. Matched laptop samples verify the change and retain identical foreground sand pixels.
+
+### 2026-11-27 — AQ-88 Xenia tissue palettes
+*Root reviewed the retained entries. The current four-colony palette adjustment is actioned. Full coral rubric and task acceptance remain pending.*
+- The companion Xenia uses rose, mauve and peach tissue grades. The matched laptop comparison shows clearer color separation paired with the authored polyp detail. Existing exports and mounts supply the geometry.

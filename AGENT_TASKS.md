@@ -85,6 +85,10 @@ The current donor yellow tang keeps its texture and geometry. Its mapped iris no
 
 The goby uses its original maps and rig with a softer species-specific surface and clearer cheek and dorsal spots. The spot treatment uses the existing atlas pigment. The sampled tail remains pixel-identical at 1440×900. Fin silhouette fidelity and broader fish art acceptance remain open. [Goby comparison](docs/asset-evidence/aq70-8/watchman-goby-20261127/).
 
+## Xenia tissue colors — 2026-11-27
+
+Four Xenia companions use warmer rose, mauve and peach tissue grades. The matched laptop frames show clearer separation between adjacent colonies, with the baked maps and mounts preserved. [Polyp comparison](docs/asset-evidence/aq88/xenia-20261127/).
+
 ## Reef and rear-water lighting — 2026-11-27
 
 The existing environment map gives the reef faces stronger fill and the backdrop a brighter mid-water blue. Matched laptop samples show brighter left and right rock faces and a pixel-identical sand sample. [Lighting comparison](docs/asset-evidence/aq71/reef-fill-20261121/README.md#current-reef-lighting--2026-11-27).

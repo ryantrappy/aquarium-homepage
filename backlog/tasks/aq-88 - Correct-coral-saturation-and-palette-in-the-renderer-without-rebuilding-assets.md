@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Luna'
 created_date: '2026-11-08'
-updated_date: '2026-11-15 16:06'
+updated_date: '2026-11-27 23:42'
 labels:
   - modeling
   - photorealism
@@ -20,6 +20,7 @@ references:
   - AQ-70.11
 documentation:
   - docs/rendering.md
+  - docs/asset-evidence/aq88/xenia-20261127/README.md
 priority: '2'
 type: feature
 ordinal: 95000
@@ -49,6 +50,8 @@ Interim, code-only coral colour correction: adjust coral material saturation / g
 
 <!-- SECTION:PLAN:BEGIN -->
 1. Correct the CPU reference evaluator to match GLSL saturation extrapolation above 1 without changing runtime shader behavior or unrelated clamped blends. 2. Add an independent expected-value regression at saturation factor 1.18, covering exact channel results and the GLSL upper highlight ceiling with no extra lower clamp. 3. Run the focused coral material tests and scoped TypeScript check; leave visual and frame-time acceptance pending Root evidence.
+
+Compare warmer and more varied tissue palettes for the four pale Xenia companions at 1440×900. Preserve their baked polyp detail, attachment, and existing fluorescence mask.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -59,4 +62,6 @@ Interim, code-only coral colour correction: adjust coral material saturation / g
 Root reviewed Luna saturation-reference fix: runtime GLSL remains unchanged; CPU helper had clamped1.18 to1, so its old tests understated grading. Explicit extrapolation and independent numeric expected-value regression now match GLSL upper highlight clamp. Luna reports12 focused tests and typecheck14scripts pass; Root reviewing assembly regressions. This is a verified functional handoff only, not AC1/4 art/performance acceptance; AQ70.11 remains the full tissue/polyp art fix.
 
 2026-11-15 review: verified AC #2/#3 only. `npm test -- src/rendering/scene/coral-material.test.ts src/rendering/assets/contract.test.ts src/rendering/assets/manifest-checker.test.ts --maxWorkers=1` passes 28/28; current working tree has no coral asset, socket, or manifest changes. Coral material assertions cover the AQ-88 saturation/pale-tip/highlight grade and confirm fluorescence remains mask-driven with no blanket emissive term. AC #1 and #4 remain open pending 1440x900/402x874 Root look-dev and frame-time evidence; no visual acceptance is claimed.
+
+Root 2026-11-27: reviewed four warmer Xenia tissue palette overrides at 1440×900. The native right-crown comparison shows better color separation with readable polyp details. The change is limited to baked-PBR tissue colors and grade strengths. Saved GLBs, masks, attachments, and rigid material values remain identical. Luna verified 131 tests in five suites; typecheck and production build passed. Broader AQ-88 appearance and AQ-70.11 model acceptance remain open.
 <!-- SECTION:NOTES:END -->
