@@ -85,6 +85,10 @@ The current donor yellow tang keeps its texture and geometry. Its mapped iris no
 
 The goby uses its original maps and rig with a softer species-specific surface and clearer cheek and dorsal spots. The spot treatment uses the existing atlas pigment. The sampled tail remains pixel-identical at 1440×900. Fin silhouette fidelity and broader fish art acceptance remain open. [Goby comparison](docs/asset-evidence/aq70-8/watchman-goby-20261127/).
 
+## AQ-103 water interface complete — 2026-11-27
+
+The exact current production water and glass modules passed the 1440×900 overview, bounded meniscus, and transmitted-key diagnostic. The current unit suites verify layout, shader branches and lifecycle. AQ-103 is Done. [Water interface review](docs/asset-evidence/aq103/root-review-20261115/README.md#current-source-review--2026-11-27).
+
 ## Foreground sand caustics — 2026-11-27
 
 The aragonite bed receives brighter caustic ridges with the existing pattern and shadow gate. The laptop comparison shows the brighter ridges over open foreground sand. Sampled rock, open water and shade beneath the right ledge are pixel-identical. [Sand comparison](docs/asset-evidence/aq70-6/shadowed-caustics-laptop/README.md#sand-ridge-brightness--2026-11-27).

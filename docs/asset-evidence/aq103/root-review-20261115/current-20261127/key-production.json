@@ -1,0 +1,189 @@
+{
+  "fixture": "AQ103 isolated interface proof; not production look acceptance",
+  "activeFrame": "key-aligned",
+  "cameraPosition": [
+    -0.10847310940225414,
+    3.4970422788416284,
+    -0.41581358604197427
+  ],
+  "cameraTarget": [
+    0,
+    4.4,
+    0
+  ],
+  "cameraFovDegrees": 30,
+  "viewport": {
+    "width": 1440,
+    "height": 900,
+    "dpr": 1
+  },
+  "sampledWaterPlaneRays": [
+    {
+      "ndc": [
+        0,
+        -0.8
+      ],
+      "worldPoint": [
+        0.0667,
+        4.4,
+        0.2558
+      ],
+      "rayDirection": [
+        0.1538365488914793,
+        0.7928305246116443,
+        0.5897067707506709
+      ],
+      "flatPlaneNoV": 0.7928,
+      "inBounds": true
+    },
+    {
+      "ndc": [
+        0,
+        -0.4
+      ],
+      "worldPoint": [
+        0.0316,
+        4.4,
+        0.121
+      ],
+      "rayDirection": [
+        0.13214533540552365,
+        0.8520196567367205,
+        0.5065571190545075
+      ],
+      "flatPlaneNoV": 0.852,
+      "inBounds": true
+    },
+    {
+      "ndc": [
+        0,
+        0
+      ],
+      "worldPoint": [
+        0,
+        4.4,
+        0
+      ],
+      "rayDirection": [
+        0.10847310940225408,
+        0.902957721158372,
+        0.4158135860419742
+      ],
+      "flatPlaneNoV": 0.903,
+      "inBounds": true
+    },
+    {
+      "ndc": [
+        0,
+        0.4
+      ],
+      "worldPoint": [
+        -0.0285,
+        4.4,
+        -0.1093
+      ],
+      "rayDirection": [
+        0.08356543440009807,
+        0.9436115942372164,
+        0.32033416520037616
+      ],
+      "flatPlaneNoV": 0.9436,
+      "inBounds": true
+    },
+    {
+      "ndc": [
+        0,
+        0.8
+      ],
+      "worldPoint": [
+        -0.0544,
+        4.4,
+        -0.2084
+      ],
+      "rayDirection": [
+        0.058290786657910224,
+        0.9729713092121919,
+        0.22344801552198942
+      ],
+      "flatPlaneNoV": 0.973,
+      "inBounds": true
+    }
+  ],
+  "inBoundsRayCount": 5,
+  "inBoundsFlatPlaneNoVRange": [
+    0.7928,
+    0.973
+  ],
+  "shaderTransition": {
+    "lowerNoV": 0.53,
+    "upperNoV": 0.76,
+    "note": "Facet normals change local NoV; ray-direction NoV is diagnostic only."
+  },
+  "diagnosticKeyDirectionReversed": false,
+  "effectiveKeyDirection": [
+    0.14463080892056857,
+    0.8195745838832219,
+    0.5544181008621795
+  ],
+  "productionSunDirection": [
+    0.144631,
+    0.819575,
+    0.554418
+  ],
+  "waterToAirEta": 1.3333333,
+  "centerFlatNormalRefraction": {
+    "valid": true,
+    "direction": [
+      0.144631,
+      0.819575,
+      0.554418
+    ],
+    "actualSunDirection": [
+      0.144631,
+      0.819575,
+      0.554418
+    ],
+    "sunAlignment": 1,
+    "angleErrorDegrees": 0
+  },
+  "keyAlignedCameraConstruction": {
+    "incidentDirection": [
+      0.108473,
+      0.902958,
+      0.415814
+    ],
+    "centerNormalRefractionAngleErrorDegrees": 0
+  },
+  "productionGlassVisible": false,
+  "disabledProductionGlassObjects": [
+    "LeftGlassReflection",
+    "LeftClearGlass",
+    "GlassCornerSeam",
+    "GlassCornerSeam",
+    "RightGlassReflection",
+    "RightClearGlass",
+    "GlassCornerSeam",
+    "GlassCornerSeam",
+    "FrontClearGlass",
+    "BottomGlassLip",
+    "BackClearGlass",
+    "BottomGlassLip"
+  ],
+  "diagnosticBoundsOutline": {
+    "visible": true,
+    "halfWidth": 6,
+    "frontZ": 2.84,
+    "backZ": -5.48
+  },
+  "layoutBounds": {
+    "halfWidth": 6,
+    "frontZ": 2.84,
+    "backZ": -5.48,
+    "bottomY": -2.8,
+    "surfaceY": 4.4
+  },
+  "surfaceMesh": "AquariumWaterSurface",
+  "clock": "frozen at t=0",
+  "shaderReady": true,
+  "frameLimit": "Water-only diagnostic: flat-water Snell refraction aims at actual production SUN_DIRECTION; wave facets can alter alignment. Production glass is hidden and bounds are outlined."
+}

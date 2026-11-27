@@ -307,3 +307,7 @@
 ### 2026-11-27 — AQ-70.8 watchman goby markings
 *Root reviewed the retained entries. The watchman pigment change is actioned. Goby fin anatomy, the remaining lyretail refinement and broader material acceptance remain pending.*
 - Current atlas colors supply the spot treatment. The matched laptop views make the goby cheek and dorsal markings clearer, with identical sampled tail pixels and the same saved GLB.
+
+### 2026-11-27 — AQ-103 water interface closeout
+*Root reviewed the retained entries. AQ-103 water interface evidence is current and actioned. Overall lighting and reference fidelity remain pending.*
+- The current 1440×900 reef and production-module diagnostics confirm the bounded meniscus, continuous waves and fixture transmission. New source hashes and browser captures supersede the older source pins for current acceptance.

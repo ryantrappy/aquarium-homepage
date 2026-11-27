@@ -6,7 +6,7 @@ Status: Active
 Authority: Evidentiary
 Backlog: AQ-103
 Owner: @root
-Updated: 2026-11-15
+Updated: 2026-11-27
 Upstream: AGENTS.md, docs/requirements.md, docs/rendering.md, docs/more-realistic-reef-guide.png
 Downstream: src/rendering/scene/water-surface.ts, src/rendering/scene/water-radiance-probe.ts
 -->
@@ -38,3 +38,17 @@ Capture excludes water, fish/schoolmates, glass reflectors, haze/shafts and part
 [Focused review](root-focused-tests.log): 74 tests across water, probe, optics and actual-controller lifecycle suites pass. Geometry/layout updates, frozen pause/reduced-motion/hidden clock, non-interactive raycast, failure and disposal remain covered. [Combined source](root-full-tests.log): 934 tests / 78 files pass at f03b551, including the separately reviewed AQ-87 spawn repair. [Typecheck and 17 script checks](root-typecheck.log) and [production build](root-build.log) pass. Build/dev infrastructure uses private cache and Nitro build directories for final verification; no deployment or host configuration changes occurred. Source hashes are in [pins](source-pins.json); the current water files match the private proof byte-for-byte. Concurrent AQ-106 work is excluded from this acceptance.
 
 Native viewport handling was checked against both DOM dimensions/DPR and image dimensions. Convenience JPEGs taken before the viewport was correctly applied, and transient CDP screenshot failures, were not accepted as target-view evidence. Final overview and meniscus JPEGs are 1440×900; key PNGs use the same explicit CSS clip. Committed logs trim trailing whitespace/blank EOF lines only; raw output is retained under `/tmp`. User instruction stops additional phone checks; existing two-layout unit tests remain, without a claim of new phone visual verification.
+
+## Current-source review — 2026-11-27
+
+The current default reef shows continuous capillary facets with restrained color in the grazing rear strip. The rear fade blends into the blue backdrop and the side fades stay inside the glass. In the diagnostic camera, the thin meniscus is visible with the production glass and the front edge at Z=2.84. The targeted camera provides a direct view of the meniscus outside the framing of the full-reef overview.
+
+The same diagnostic camera and frozen clock were used for the two lighting captures. Reversing the key in the fixture reduced mean encoded luma from 102.894 to 10.017 in the 600×450 pixel rectangle starting at (720, 200). The control was restored afterward. This measures display output from the transmission branch. The normal reef overview uses seed 2026 and time 1.25. The overview and diagnostics ran at 1440×900 CSS pixels and DPR 1 with no browser warnings or errors. The overview resolved 12 inhabitants and reported no failed assets.
+
+- [Current reef](current-20261127/full-reef.png)
+- [Front meniscus](current-20261127/front-meniscus.png) and [fixture state](current-20261127/front-meniscus.json)
+- [Production key](current-20261127/key-production.png) and [fixture state](current-20261127/key-production.json)
+- [Reversed diagnostic key](current-20261127/key-reversed.png) and [fixture state](current-20261127/key-reversed.json)
+- [Current source pins](current-20261127/source-pins.json)
+
+The five focused water, radiance, glass, optics and lifecycle suites passed all 91 tests. The same source passed all 1,100 tests, typecheck and the production build in the preceding milestone. AQ-103 is Done. Overall fixture brightness and wider reef appearance remain under their own tasks.

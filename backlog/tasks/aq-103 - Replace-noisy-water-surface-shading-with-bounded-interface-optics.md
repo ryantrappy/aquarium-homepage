@@ -1,11 +1,11 @@
 ---
 id: AQ-103
 title: Replace noisy water-surface shading with bounded interface optics
-status: In Progress
+status: Done
 assignee:
   - '@junie'
 created_date: '2026-11-13 05:41'
-updated_date: '2026-11-21 01:28'
+updated_date: '2026-11-27 23:32'
 labels:
   - rendering
   - optics
@@ -17,6 +17,7 @@ references:
 documentation:
   - docs/requirements.md
   - docs/rendering.md
+  - docs/asset-evidence/aq103/root-review-20261115/README.md
 type: bug
 ordinal: 140000
 ---
@@ -30,8 +31,8 @@ The water-surface plane in aquarium.ts reads as stretched static due to cellular
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [x] #1 The water plane remains horizontal at the configured surfaceY and its geometry and shader bounds match the current glass front/rear/half-width in narrow and desktop layouts, including responsive layout changes.
-- [ ] #2 The cellular-dot and high-frequency stripe surface pattern is replaced by continuous canonical wave/capillary facets, a softened Snell-window/TIR transition, restrained rear grazing-angle coral reflection, and overhead-fixture transmission.
-- [ ] #3 Surface alpha blends into the rear background, fades at sides, and shows a thin meniscus inside the front-glass boundary without extending beyond the enclosure.
+- [x] #2 The cellular-dot and high-frequency stripe surface pattern is replaced by continuous canonical wave/capillary facets, a softened Snell-window/TIR transition, restrained rear grazing-angle coral reflection, and overhead-fixture transmission.
+- [x] #3 Surface alpha blends into the rear background, fades at sides, and shows a thin meniscus inside the front-glass boundary without extending beyond the enclosure.
 - [x] #4 Shared animation time still freezes for pause/reduced-motion/hidden states, and non-interactive raycast and resource disposal behavior are preserved.
 - [x] #5 Requirements and active rendering documentation describe the revised interface; AQ-39’s conflicting older interface proposal is explicitly superseded for this focused surface work.
 - [x] #6 Focused tests cover both enclosure layouts, shader structure, time/uniform behavior, and disposal; typecheck/build pass, with visual checks at 402×874 and 1440×900 when a usable browser is available.
@@ -91,6 +92,8 @@ Latest user steering: discontinue phone checks and assume phone behavior; priori
 2026-11-15 Junie iteration: added assertions requiring the meniscus color and alpha to use clippedFrontMeniscus = frontMeniscus * frontClip, with frontClip reaching zero at uFrontZ. Against the original shader expressions, 8/9 water-surface tests passed and the new shader contract test failed; after applying the shared clip to tint and alpha, all 9/9 water-surface tests pass. `npm run typecheck` (including 17 script syntax checks), `npm run build`, and `git diff --check` pass; build reports the existing >500 kB aquarium chunk advisory. No browser visual review was available; AC #2/#3 remain open and no criteria were checked.
 
 Root verified the 1440×900 DPR 1 overview at seed 2026/time 1.25. Tempering captured coral saturation affected the upper reflected strip (mean RGB absolute differences 1.11/0.45/1.52 out of 255 in the interior upper 100 px vs <0.001 below y=120 in the sampled center). The shader now ramps in fixture transmission from the water-to-air critical cosine and evaluates the signed meniscus distance by multiplication before clipping. Browser ready, no failed assets or warnings/errors. Capture docs/asset-evidence/aq103/critical-angle-review/laptop.png includes unrelated concurrent sand/glass work. The overview does not expose the front meniscus or transmission window, so the remaining AC2/3 art gates stay open.
+
+Root 2026-11-27 re-verified the current production shader, probe, glass and waves with pinned source hashes. Native 1440×900 overview confirms bounded facets and reflection. The actual water and glass diagnostic shows the bounded front meniscus, with a controlled key reversal reducing display luma from 102.894 to 10.017 in the same region. All 91 focused tests and the preceding same-source 1,100-test, typecheck and production build checks passed.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
@@ -132,3 +135,9 @@ created: 2026-11-14 21:03
 Root laptop native review ce884aea/private1cd8612 rendered successfully at1440x900DPR1 after fixing a shader-template-comment parse error from first snapshot886ae9e/private dd79845. Capture /tmp/aq103-ray-review-20261114/native/ray-laptop-1cd8612.png remains too regular: rounded blue scallop/chip pattern with soft contrast, not goal thin broken reflected ripples/color. No AC2/3/Done accepted.66focused tests/typecheck16scripts pass but do not prove visual acceptance. Phase-warp derivative trial now exists and a one-time actual-static-reef cube radiance source is being integrated; no new shader sharedcommit/push yet. Owned native tab closed and metricoverride cleared; proof1cd8612/session78196 still serves rejected ray-palette trial. Initial console dynamic-import errors retained historically, not claimed clean.
 ---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+The current water plane renders continuous wave facets, bounded grazing reflection and overhead-light transmission inside the glass. The 1440×900 native review and isolated front-glass diagnostic verify edge fades and the thin meniscus. Layout, lifecycle, and shader checks passed.
+<!-- SECTION:FINAL_SUMMARY:END -->

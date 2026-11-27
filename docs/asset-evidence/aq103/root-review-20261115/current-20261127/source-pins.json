@@ -1,0 +1,10 @@
+{
+  "commit": "3fedf49e56f92f568e4e83e215e573f57b36730b",
+  "sources": {
+    "src/rendering/scene/water-surface.ts": "bfcbb52e9e7085b67b8e79a36bc8ceda54f752bed88434929bd3c1a1d4985475",
+    "src/rendering/scene/water-radiance-probe.ts": "9e4293c4c1824b871de0cdc43001fddcf56e87f806f9dae3b343458069ed404f",
+    "src/rendering/scene/glass-enclosure.ts": "423847510141aece7b0e5e9be9b287a2c507537f059951ad086b7bcf2a79f7f2",
+    "src/rendering/scene/underwater-optics.ts": "6baaf87a16731c2bafe26da17e5964aeee3dee470cc4f1366675d90e96f03276",
+    "src/rendering/scene/surface-waves.ts": "b67a5469d1286bd4a84c988f7d730742a0f54278cbe9e06ef7490b3899fc3770"
+  }
+}
