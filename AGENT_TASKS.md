@@ -77,6 +77,10 @@ AQ-59 records a preliminary review of the procedural porous rock study. Direct i
 
 The user clarified that “complete the whole backlog” means complete only tasks already marked In Progress, and “do not start anything new” excludes To Do tasks and newly created tasks. The 18-task execution set at clarification is AQ-58, AQ-59, AQ-71, AQ-82, AQ-86, AQ-87, AQ-88, AQ-76, AQ-106, AQ-70.1, AQ-70.6, AQ-70.11, AQ-70.12, AQ-70.13, AQ-94, AQ-101, AQ-102, and AQ-103. Root review remains required; no acceptance criteria may be weakened to close a task. Preserve user/concurrent work, verify visually only at 1440×900, and do not deploy.
 
+## Yellow tang eye material — 2026-11-27
+
+The current donor yellow tang keeps its texture and geometry. Its mapped iris now has a localized cornea reflection. On the matched laptop macros, all pixel changes greater than one level are within the eye region. Chromis and lyretail edges and watchman goby visual review remain pending. [Eye comparison](docs/asset-evidence/aq70-8/yellow-tang-eye-20261127/).
+
 ## AQ-106 cave backing review — 2026-11-22
 
 The user kept the downloaded sailfin and prioritized the eel shelter, yellow tang eye, chromis and lyretail edges, and watchman goby art. The wide legacy cave now has a backing using the saved talus behind the eel's truncated rear. The default and inspection views show the eel against the recess. The exact scene fixture blocks the cave-center sightline and retains clear water around the head. [Cave review](docs/asset-evidence/aq106/cave-backing-20261122/).

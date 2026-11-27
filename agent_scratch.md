@@ -271,3 +271,7 @@
 *Root reviewed the retained entries. The sailfin replacement exploration is superseded by the user's instruction to retain the downloaded runtime model. The cave backing is actioned. The four other fish refinements remain pending.*
 - The default wide cave reuses a saved talus instance behind the partial eel. Laptop and inspection captures show rock behind the head. The exact-export test checks the former opening and head clearance. The isolated branch preserves concurrent user coral work.
 - The yellow tang's current material has no separate eye material. The chromis and lyretail use an opaque single skinned surface including their fin edges. The watchman goby has a full-body animated export that still needs visual diagnosis. Review the actual render before changing these assets.
+
+### 2026-11-27 — AQ-70.8 yellow tang eye review
+*Root reviewed the retained entries. The original sailfin selection, laptop review and model preservation policies are current. The moray backing and yellow tang eye shader are actioned. The chromis and lyretail edges, goby art and full model review remain pending.*
+- The existing yellow tang body atlas now receives a localized cornea reflection. Matched native laptop macros confirm that differences greater than one level stay within the eye sample. Work continued in a fresh checkout of the pushed branch because parts of the desktop workspace were unavailable on read.

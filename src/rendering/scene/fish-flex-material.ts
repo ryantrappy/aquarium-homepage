@@ -65,6 +65,19 @@ export type FishFlexBinding = Readonly<{
 
 const FLEX_PROGRAM_CACHE_KEY = 'fish-flex-v1'
 
+// The runtime yellow tang donor maps both eyes to the same atlas island.
+// These coordinates describe its photographed iris and cornea footprint.
+const YELLOW_TANG_CORNEA = `
+#include <lights_physical_fragment>
+#if defined( USE_MAP ) && defined( USE_CLEARCOAT )
+  vec2 eyeUV = ( vMapUv - vec2( 0.206, 0.579 ) ) / vec2( 0.039, 0.042 );
+  float cornea = 1.0 - smoothstep( 0.55, 1.0, length( eyeUV ) );
+  material.roughness = mix( material.roughness, 0.24, cornea );
+  material.clearcoat = mix( material.clearcoat, 0.82, cornea );
+  material.clearcoatRoughness = mix( material.clearcoatRoughness, 0.06, cornea );
+#endif
+`
+
 export type FishMaterialPartRole = 'body' | 'fin' | 'eye'
 
 export type SpeciesOpticalProfile = Readonly<{
@@ -509,9 +522,14 @@ export function bindFishFlexToModel(
       didUpgradeAny = true
       const partRole = classifyFishMaterialPartRole(mesh.name, material.name)
       const cloned = upgradeFishMaterialForPhotorealism(material, speciesId, partRole)
-      cloned.customProgramCacheKey = () => FLEX_PROGRAM_CACHE_KEY
+      const hasTangEyeAtlas = speciesId === 'yellow-tang'
+        && mesh.name === 'Cube003_Material001_0' && material.name === 'Material.001' && material.map !== null
+      cloned.customProgramCacheKey = () => hasTangEyeAtlas ? `${FLEX_PROGRAM_CACHE_KEY}:yellow-tang-cornea` : FLEX_PROGRAM_CACHE_KEY
       cloned.onBeforeCompile = shader => {
         patchFishFlexShader(shader, uniforms)
+        if (hasTangEyeAtlas) {
+          shader.fragmentShader = shader.fragmentShader.replace('#include <lights_physical_fragment>', YELLOW_TANG_CORNEA)
+        }
       }
       records.push({ mesh, originalMaterial, clonedMaterial: cloned })
       return cloned

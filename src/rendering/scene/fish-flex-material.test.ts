@@ -130,6 +130,33 @@ describe('fish flex material (AQ-12 / AQ-49 / AQ-74)', () => {
     expect(mesh.material).toBe(material)
   })
 
+  it.each([
+    ['yellow-tang', 'Cube003_Material001_0', true, true],
+    ['yellow-tang', 'Cube003_Material001_0', false, false],
+    ['yellow-tang', 'pectoral_fin', true, false],
+    ['blue-tang', 'Cube003_Material001_0', true, false],
+  ] as const)('scopes the atlas cornea to the mapped yellow tang body (%s, %s, map=%s)', (species, name, mapped, hasCornea) => {
+    const { root, mesh, material } = makeSkinnedFish()
+    mesh.name = name
+    material.name = 'Material.001'
+    if (mapped) material.map = new THREE.Texture()
+    const binding = bindFishFlexToModel(root, species, 1)!
+    const shader = {
+      vertexShader: THREE.ShaderLib.physical.vertexShader,
+      fragmentShader: THREE.ShaderLib.physical.fragmentShader,
+      uniforms: {},
+    }
+    const activeMaterial = mesh.material as THREE.MeshPhysicalMaterial
+    activeMaterial.onBeforeCompile(shader as never, undefined as never)
+    expect(activeMaterial.customProgramCacheKey()).toBe(hasCornea ? 'fish-flex-v1:yellow-tang-cornea' : 'fish-flex-v1')
+    expect(shader.fragmentShader.includes('float cornea')).toBe(hasCornea)
+    expect(shader.vertexShader).toContain('flexS')
+    binding.dispose()
+    material.map?.dispose()
+    material.dispose()
+    mesh.geometry.dispose()
+  })
+
   it('returns undefined for a model with no skinned mesh or an unknown species', () => {
     const plain = new THREE.Group()
     plain.add(new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial()))
