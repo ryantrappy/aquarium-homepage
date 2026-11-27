@@ -6,7 +6,7 @@ Status: Reviewed
 Authority: Scoped verification
 Backlog: AQ-70.6
 Owner: @root
-Updated: 2026-11-21
+Updated: 2026-11-27
 Upstream: ../../../rendering.md
 Downstream: Caustic appearance and fixture review
 -->
@@ -21,3 +21,11 @@ One warped cellular field defines the ridges. A second rotated sample varies the
 In the open sand rectangle from X 560–784 and Y 835–880, 2,216 of 10,350 pixels changed by at least five luma levels between the two revised phases. The actual Pause control produced two byte-identical settled frames. The first immediate frame approached the paused state while browser controls were settling. Fixture defaults, full material review, and hidden-page behavior remain open.
 
 All 1,068 tests in 83 files, typecheck, and the production build passed.
+
+## Sand ridge brightness — 2026-11-27
+
+A sand-specific additive light cap of 0.60 gives the lit ridges more contrast against the aragonite. The shared clock, footprint, depth attenuation and fixture shadow gate remain in use. Other surfaces retain the 0.35 cap.
+
+The matched desktop comparison uses the lower right reef, 1440×900 CSS pixels, DPR 1, seed 2026 and time 1.25. In the open sand rectangle x=690–909 and y=843–880, 1,027 of 8,360 pixels changed by more than one encoded luma level and the largest change was seven levels. A shaded sample below the right ledge, a reef-face area and an open-water area were pixel-identical. A capture at time 2.50 showed the moving pattern. Both accepted captures resolved 12 inhabitants with no failed assets or browser warnings and errors.
+
+- [Matched sand comparison](sand-gain-comparison.png)

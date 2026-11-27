@@ -299,3 +299,7 @@
 ### 2026-11-27 — AQ-70.13 lower right reef
 *Root reviewed the retained entries. The right-height and cave checks are actioned. Broader material, composition and user acceptance remain pending.*
 - The current wide layout lowers the right crest and retains the higher left focal point. The accepted height passes the five-mat footprint and eel clearance checks. The deeper trials dropped a mat or missed the existing sand-clearance gate.
+
+### 2026-11-27 — AQ-70.6 aragonite caustics
+*Root reviewed the retained entries. The sand lighting change is actioned. Full fixture and hidden-page acceptance remain pending.*
+- The aragonite uses a higher local gain through the existing ridge texture and shadow gate. Matched 1440×900 captures increase contrast across a sample of foreground sand while retaining the sampled shaded ledge, rock and open-water pixels.

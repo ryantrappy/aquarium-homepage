@@ -287,12 +287,11 @@ export function createAquarium(canvas: HTMLCanvasElement, overlay: HTMLElement, 
   const sandBed = createAragoniteSandBed()
   applyEnvironmentMapIntensity(sandBed.group, ENVIRONMENT_MAP_INTENSITY.sand, environmentMap?.texture)
   const sand = sandBed.sandMesh
-  // Surface-driven lighting (AQ-96 / AQ-70.6): the sand threshold is
-  // re-tuned from the 0.22 visual-check workaround back toward the 0.35
-  // default (now `causticSandThreshold: 0.30` in the optics config) now
-  // that the wave-field focus term does the work of making the dapple
-  // strong — same +0.35 cap, same texture, no brighter peak.
-  applyCaustics(sand.material as THREE.MeshStandardMaterial, caustics, { threshold: optics.causticSandThreshold })
+  // Reinforce the lit ridges on pale aragonite with the same projection and shadow gate.
+  applyCaustics(sand.material as THREE.MeshStandardMaterial, caustics, {
+    threshold: optics.causticSandThreshold,
+    maxAdd: optics.causticSandMaxAdd,
+  })
   scene.add(sandBed.group)
 
   // Layered Reef-Tank Backdrop (AQ-14.6 & AQ-39): eliminates the flat paint-bucket wall & sharp horizon line

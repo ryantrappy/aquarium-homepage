@@ -213,6 +213,23 @@ describe('cellular caustic texture (AQ-70.6 AC #1)', () => {
     caustics.dispose()
   })
 
+  it('keeps the brighter sand gain local while sharing the caustic clock', () => {
+    const caustics = createCaustics()
+    const sand = new THREE.MeshStandardMaterial()
+    const rock = new THREE.MeshStandardMaterial()
+    applyCaustics(sand, caustics, { maxAdd: 0.60, threshold: 0.3 })
+    applyCaustics(rock, caustics)
+    const sandShader = mockShader()
+    const rockShader = mockShader()
+    sand.onBeforeCompile(sandShader, {} as THREE.WebGLRenderer)
+    rock.onBeforeCompile(rockShader, {} as THREE.WebGLRenderer)
+    expect(sandShader.uniforms.uCausticMaxAdd.value).toBe(0.60)
+    expect(rockShader.uniforms.uCausticMaxAdd.value).toBe(0.35)
+    expect(sandShader.uniforms.uCausticTime).toBe(rockShader.uniforms.uCausticTime)
+    expect(sandShader.fragmentShader).toContain('focusedRidge * causticMask * fixtureVisibility')
+    caustics.dispose()
+  })
+
   it('patches skinned fish materials post-skinning, so the pattern stays fixed in world space (AQ-70.6 AC #1)', () => {
     const caustics = createCaustics()
     const material = new THREE.MeshStandardMaterial()

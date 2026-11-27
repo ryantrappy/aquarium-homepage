@@ -82,11 +82,9 @@ export type AquariumOpticsConfig = Readonly<{
    * `1 + surfaceFocusGain * focus`, so the sand dapple breathes with
    * the surface instead of scrolling on an independent clock. */
   surfaceFocusGain: number
-  /** Ridge smoothstep threshold for the sand caustic layer (AQ-70.12):
-   * re-tuned from the 0.22 visual-check workaround back toward the
-   * 0.35 default now that the focus term does the work; the +0.35 cap
-   * (causticMaxAdd) is untouched. */
+  /** Ridge threshold and additive light cap for the aragonite bed. */
   causticSandThreshold: number
+  causticSandMaxAdd: number
   /** Raymarched shaft pass (AQ-98, High tier only): steps per pixel
    * along the view ray at `shaftRenderScale` resolution. */
   shaftRaymarchSteps: number
@@ -181,6 +179,7 @@ export const DEFAULT_AQUARIUM_OPTICS_CONFIG: AquariumOpticsConfig = Object.freez
   sunDirection: SUN_DIRECTION,
   surfaceFocusGain: 0.6,
   causticSandThreshold: 0.3,
+  causticSandMaxAdd: 0.60,
   shaftRaymarchSteps: 14,
   shaftRaymarchAlpha: 0.28,
   shaftRenderScale: 0.5,

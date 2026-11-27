@@ -85,6 +85,10 @@ The current donor yellow tang keeps its texture and geometry. Its mapped iris no
 
 The goby uses its original maps and rig with a softer species-specific surface. Its brightest changed pixels are visibly less glossy at laptop scale. Blue spotting and fin silhouette fidelity remain open, along with the separate chromis and lyretail contour issues. [Goby comparison](docs/asset-evidence/aq70-8/watchman-goby-20261127/).
 
+## Foreground sand caustics — 2026-11-27
+
+The aragonite bed receives brighter caustic ridges with the existing pattern and shadow gate. The laptop comparison shows the brighter ridges over open foreground sand. Sampled rock, open water and shade beneath the right ledge are pixel-identical. [Sand comparison](docs/asset-evidence/aq70-6/shadowed-caustics-laptop/README.md#sand-ridge-brightness--2026-11-27).
+
 ## Lower right reef — 2026-11-27
 
 The right foundation height factor is 2.9. A matched laptop capture shows more open water above the right crest and retains the tall left silhouette. The exact right-island fixture still seats five face mats and clears the moray head. The native service click passed. [Height comparison](docs/asset-evidence/aq70-13/lower-right-20261127/).

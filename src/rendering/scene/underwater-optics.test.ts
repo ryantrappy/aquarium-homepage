@@ -348,6 +348,7 @@ describe('aquarium-scale underwater optics, restrained caustics, and suspended p
     expect(cfg.sunDirection.y).toBeGreaterThan(0.8)
     expect(cfg.surfaceFocusGain).toBe(0.6)
     expect(cfg.causticSandThreshold).toBe(0.3)
+    expect(cfg.causticSandMaxAdd).toBe(0.60)
     expect(cfg.causticMaxAdd).toBe(0.35)
     expect(cfg.shaftRaymarchSteps).toBe(14)
     expect(cfg.shaftRaymarchAlpha).toBe(0.28)
