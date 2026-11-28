@@ -77,6 +77,10 @@ AQ-59 records a preliminary review of the procedural porous rock study. Direct i
 
 The user clarified that “complete the whole backlog” means complete only tasks already marked In Progress, and “do not start anything new” excludes To Do tasks and newly created tasks. The 18-task execution set at clarification is AQ-58, AQ-59, AQ-71, AQ-82, AQ-86, AQ-87, AQ-88, AQ-76, AQ-106, AQ-70.1, AQ-70.6, AQ-70.11, AQ-70.12, AQ-70.13, AQ-94, AQ-101, AQ-102, and AQ-103. Root review remains required; no acceptance criteria may be weakened to close a task. Preserve user/concurrent work, verify visually only at 1440×900, and do not deploy.
 
+## Tailspot blenny perch — 2026-11-27
+
+The default assembly publishes blenny perches after the rendered rock supports a small footprint and the assembled collider clears an approach. The laptop arch shoulder is visible from the overview and the current full-reef fixture reads a head-up hold after a short approach. The live laptop preview loads the blenny and its service link. Arrival from ordinary front water and full animated clearance remain open under AQ-82.
+
 ## Yellow tang eye material — 2026-11-27
 
 The current donor yellow tang keeps its texture and geometry. Its mapped iris now has a localized cornea reflection. On the matched laptop macros, all pixel changes greater than one level are within the eye region. Chromis and lyretail edges and watchman goby visual review remain pending. [Eye comparison](docs/asset-evidence/aq70-8/yellow-tang-eye-20261127/).

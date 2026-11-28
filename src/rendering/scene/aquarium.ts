@@ -40,7 +40,7 @@ import { RaymarchedShaftPass, SHAFT_BEAM_GLSL } from './light-shafts'
 import { createAragoniteSandBed, evaluateAragoniteSandTilt, evaluateAragoniteSandWorldY, getRockFootprintsForViewport, INVERTEBRATE_MAX_SAND_Z } from './aragonite-sand'
 import { reefPlacementsForViewport } from './reef-layout'
 import { createMorayCaveBacking, hasReadyRightIslandCollider, resolveAvailableSnowflakeMorayResidence, resolveNsaMorayResidence, SNOWFLAKE_MORAY_CAVE_COLLISION_RADIUS_M, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M, type MorayResidence } from './moray-residence'
-import { CENTER_ARCH_URL, CENTER_ARCH_MOUNTS, CENTER_ARCH_FACE_SITES, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
+import { CENTER_ARCH_URL, CENTER_ARCH_MOUNTS, CENTER_ARCH_FACE_SITES, centerArchPerchHints, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
 import { NSA_ENCRUSTING_FACE_SITES, NSA_KIT_URL, NSA_SUBSTRATE_CONTACTS, RUBBLE_TALUS_URL, createNsaReviewReef, createRubbleTalusGroundingAprons, disposeRubbleTalusMaterials } from './reef-nsa'
 import { createNsaHabitatAnchors } from './reef-nsa-habitat'
 import { createGlassEnclosure, glassEnclosureLayout } from './glass-enclosure'
@@ -49,7 +49,7 @@ import { WaterRadianceProbeManager } from './water-radiance-probe'
 import { estimateCaptionRect, resolveLabelDeconflicts, type LabelRect } from './fish-label-layout'
 import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
 import { meshQueryForSpecies, createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
-import { createReefMeshNavigation, createRockFallbackObstacles, createMountedCoralFallbackObstacles, createSurfaceCoralObstacles, MESH_NAVIGATION_COLLISION_RADIUS_M, type ReefMeshIslandInput } from './reef-mesh-navigation'
+import { createReefMeshNavigation, createRockFallbackObstacles, createMountedCoralFallbackObstacles, createSurfaceCoralObstacles, measureRockPerches, MESH_NAVIGATION_COLLISION_RADIUS_M, type ReefMeshIslandInput } from './reef-mesh-navigation'
 import { applyFishTurningRigOverlay, bindFishTurningRig, evaluateSpriteTurnScaleX, type FishTurningRig } from './fish-turning'
 import { SPRITE_PLANE_WIDTH, fishBodyRadiusM, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale } from './fish-scale'
 import { canRunFishSceneLoop, evaluateTieredVerticalDepthRange, findSafeFishHeading, findSafeFishSpawn, fishSceneStatus, fishSpawnPreference, fishSpawnSlotsForServices, isSafeFishPosition } from './fish-spawn'
@@ -967,6 +967,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     })
     bubbleGeometry.setDrawRange(0, bubbleEmitters.length * bubblesPerStream)
     const meshIslands: ReefMeshIslandInput[] = []
+    const rockPerchHints = new Map<THREE.Object3D, WaterHabitat['anchors']>()
     for (const [i, placement] of placements.entries()) {
       const { islandKind, rockScene, mounts, position, uniformScale, foundationHeightScale, yaw } = placement
       const reef = rockScene.clone(true)
@@ -1031,7 +1032,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
       // Keep the calcified coral bases; historical hand-authored rock bands
       // are replaced by bounds of the same current meshes used for rendering.
       habitat.obstacles.push(...fallback.obstacles, ...result.obstacles.filter(obstacle => obstacle.id.startsWith(`reef-${i}-coral-base-`)))
-      habitat.anchors.push(...result.anchors.filter(anchor => anchor.anchor !== 'hostAnemone'), ...hostAnchors)
+      // The historical ledges only seed the measured perch search.
+      rockPerchHints.set(reef, result.anchors.filter(anchor => anchor.anchor === 'rockPerch'))
+      habitat.anchors.push(...result.anchors.filter(anchor => anchor.anchor !== 'hostAnemone' && anchor.anchor !== 'rockPerch'), ...hostAnchors)
       reef.traverse(object => { if (object instanceof THREE.Mesh) hitMeshes.push(object) })
       meshIslands.push({ reef, islandId: `reef-${i}`, mountedCorals: assembled.mountedCorals, surfaceCoralObstacles })
     }
@@ -1085,6 +1088,7 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
         return
       }
       habitat.obstacles.push(...fallback.obstacles, ...coralFallback.obstacles)
+      if (islandId === 'reef-center-arch') rockPerchHints.set(reef, centerArchPerchHints(reef))
       meshIslands.push({ reef, islandId, mountedCorals: controller.mountedCorals, surfaceCoralObstacles })
     }
     const rubbleSource = kit ? kit.scene.getObjectByName('reef-nsa-rubble-talus') : rubbleTalusBase?.scene
@@ -1110,11 +1114,16 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     createReefMeshNavigation(meshIslands).then(result => {
       if (disposed || generation !== meshNavigationGeneration) return
       if (result.status === 'ready') {
+        const query = result.meshNavigation.queryCapsule
+        if (query) {
+          const { bounds, maxAbsXAtDepth } = habitat
+          const anchors = kit
+            ? createNsaHabitatAnchors(meshIslands, bounds, maxAbsXAtDepth, query)
+            : Array.from(rockPerchHints).flatMap(([reef, hints]) => measureRockPerches(reef, hints, bounds, maxAbsXAtDepth, query))
+          habitat.anchors.push(...anchors)
+        }
         habitat.meshNavigation = result.meshNavigation
         readyMeshIslandIds = new Set(result.diagnostics.islands.map(island => island.islandId))
-        if (kit && result.meshNavigation.queryCapsule) {
-          habitat.anchors.push(...createNsaHabitatAnchors(meshIslands, habitat.bounds, habitat.maxAbsXAtDepth, result.meshNavigation.queryCapsule))
-        }
         // Relocate any fish or schoolmate that drifted into a coral envelope
         // during the brief AABB window before the async mesh collider resolved.
         const meshCheck = (candidate: SwimmingFish['position']) =>

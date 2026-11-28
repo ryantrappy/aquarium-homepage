@@ -327,3 +327,8 @@
 ### 2026-11-27 — AQ-101 center arch shoulder
 *Root reviewed the retained entries. The measured arch placement is actioned. Full photographic and animated-body acceptance remain pending.*
 - The existing zoanthid mat seats on the front-right shoulder. Both navigation paths include its bounds, and the exact probe still clears the central swim-through.
+
+
+### 2026-11-27 — AQ-82 tailspot blenny ledge
+*Root reviewed the retained entries. The measured arch shoulder and short-route fixture are actioned. Ordinary front-spawn arrival, portrait perch availability and full animated body clearance remain pending.*
+- The live wide preview loaded the configured blenny and its native service link. The assembled-reef test verifies supporting arch rock, a clear sightline, and a head-up hold after a short collision-checked approach. A longer simulation from front water fell short of the perch within the test window.

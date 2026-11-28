@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import type { HabitatAnchorLocation } from '../../simulation/habitat-navigation'
 import type { EncrustingFaceSite, ModularCoralMountEntry } from './reef-assembly'
 
 export const CENTER_ARCH_URL = new URL('../assets/corals/custom-rocks/reef-center-arch.glb', import.meta.url).href
@@ -92,6 +93,20 @@ export const CENTER_ARCH_MOUNTS: readonly ModularCoralMountEntry[] = Object.free
     },
   },
 ])
+
+/** Hints on exposed shoulders of the arch, in the saved export's space. */
+export function centerArchPerchHints(arch: THREE.Object3D): HabitatAnchorLocation[] {
+  return [
+    { name: 'center-shoulder', site: new THREE.Vector3(.052, .53, 0) },
+    { name: 'left-shoulder', site: new THREE.Vector3(-.377, .43, .016) },
+    { name: 'right-shoulder', site: new THREE.Vector3(.36, .36, .016) },
+  ].map(({ name, site }) => ({
+    id: `reef-center-arch-${name}-rockPerch`,
+    anchor: 'rockPerch',
+    compatibleSpecies: ['tailspot-blenny'],
+    position: arch.localToWorld(site),
+  }))
+}
 
 /** Additive background bridge. Phone retains the taller single-island composition.
  * Preserve the authored carbonate maps and geometry; the older foundation sculpt

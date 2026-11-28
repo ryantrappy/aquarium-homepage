@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-08T20:07:00Z'
-updated_date: '2026-11-15 15:54'
+updated_date: '2026-11-28 05:15'
 labels:
   - behavior
   - navigation
@@ -61,6 +61,8 @@ Separate rigid calcified collision cores (live rock and stony coral bases/stalks
 Root current-source alignment: existing typed coral interactions are implemented, but habitat generation still uses canonical socket coordinates even though runtime mounts now use different reef-full-model exports. Derive a copied island-local socket-position map from actual assembled rock nodes, pass it explicitly to habitat derivation, and use it for coral-base bounds and socket anchors. Preserve canonical defaults for historical/offline callers; an explicit runtime map must not fall back to stale coordinates for missing entries. Keep species compatibility, conservative clearance, placement and navigation contracts. Validate nested/transformed socket extraction, updated runtime nodes, missing/duplicate/nonfinite handling, actual GLB-backed differences and focused controller/reef tests. Full animated clearance/permeability art gates stay open.
 
 Refined current-source approach: copy origins from AssembledCoralBinding.root.position after actual mount offsets, rather than independently reconstructing socket node transforms. Mounted roots are direct children of the reef and are the renderer truth, so nested socket transforms or future authored changes cannot make habitat disagree with the placement actually used. New optional mounted-origins input is explicit and fail-closed for missing/duplicate/nonfinite mounted entries, with no stale canonical fallback; historical callers that omit it retain canonical defaults. Preserve front stand-off/lifts/species profiles and use offsets exactly once. Validate mount-origin maps are copied, transformed parent does not double-apply, and actual runtime GLB socket differences flow through to anchors/rigid-base origins. Nested export anatomy itself is not newly certified by this alignment.
+
+Trace the legacy rock-perch targets against the current rendered foundations and coral envelopes. Publish a measured approach only where a real supporting ledge and a collision-checked path are available.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -73,4 +75,6 @@ Luna bounded implementation/Root integration: snapshotMountedCoralOrigins copies
 Root final exact-source6be5dcc handoff: all755tests/66files,75focusedtests/4files, typecheck14scripts and productionbuild pass. Native1440x900/402x874DPR1 ready snapshots/PNGs under docs/asset-evidence/aq82/current-origins-20261113/ retain11inhabitants and8phone native targets>=44px, allwithinviewport; recovered phone browser log has zero captured warnings/errors. Laptop capture preceded browser-session disconnect; recovered phone capture uses sameexact6be5dcc source. Input socket delta audit is explicitly not sampled runtime anchor poses. Main map alignment/offset/transform/failure behavior reviewed, but fullAC2includes measuredislandfeatures andAC3/4/5requirevisiblepermeability/nesting/animatedclearance, which remainopen. Existing front stand-off/lifts/clamps retained. No model/Blender edits or asset promotion by Root.
 
 2026-11-15 active-only verification: confirmed existing Root/Luna mounted-origin implementation is present and wired from actual AssembledCoralBinding.root.position into instantiateModularReefHabitat; explicit runtime origin maps reject missing/duplicate/nonfinite entries and do not fall back to canonical reports. Focused reef-assembly, reef-mesh-navigation, habitat-anchor-interactions, motion, and aquarium-lifecycle suites pass 158/158, covering runtime GLB offset propagation, base bounds, typed anchors, compatibility, motion, safe positions and both requested viewport fixtures. Existing Root evidence is source-pinned to 6be5dcc; it still leaves full coral permeability/nesting, measured island features, animated clearance, visual acceptance and AC5 service-link/picking gates open. No implementation or model changes made; keep Root review and all open criteria pending.
+
+Root verified handoff: the default layout treats the old rockPerch coordinates as search hints. The runtime publishes a tailspot-blenny perch only after raycasts find a supporting rock footprint and the assembled rock/coral capsule query clears an approach. The saved center arch provides a camera-visible shoulder in the 1440×900 layout. The live preview loaded the configured blenny and link without browser warnings. The full reef fixture verifies a head-up hold from local approach water with clear swept probe movement. A separate long run from the front-water spawn did not hold at the arch within its test window. The portrait layout, full animated body contact, general coral interactions and remaining acceptance criteria stay open.
 <!-- SECTION:NOTES:END -->

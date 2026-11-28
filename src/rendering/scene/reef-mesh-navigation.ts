@@ -29,9 +29,10 @@ import type {
   MeshNavigationBudget,
   MeshNavigationWorkBudget,
 } from '../../simulation/mesh-navigation'
-import type { SolidObstacleVolume } from '../../simulation/habitat-navigation'
+import type { AxisAlignedBox, HabitatAnchorLocation, MaxAbsXAtDepth, SolidObstacleVolume } from '../../simulation/habitat-navigation'
 import type { MeshNavigationConfig } from './motion'
 import { isHostAnemoneCoralAsset } from './anemone-host'
+import { evaluateTieredVerticalDepthRange, isSafeFishPosition } from './fish-spawn'
 import { measuredCoralShaderMargin, type AssembledCoralBinding } from './reef-assembly'
 
 /** Lattice spacing for mesh route planning (m). The fixed water bounds give
@@ -112,6 +113,67 @@ function isRockMesh(node: THREE.Object3D): node is THREE.Mesh {
   if (!(node instanceof THREE.Mesh)) return false
   const reefPrim = node.userData?.reefPrimitive ?? node.parent?.userData?.reefPrimitive
   return reefPrim?.role === 'rock' || node.name.toLowerCase().includes('live_rock')
+}
+
+/** Fit the legacy blenny perch hints to exposed, upward-facing rock. */
+export function measureRockPerches(
+  reef: THREE.Object3D,
+  hints: readonly HabitatAnchorLocation[],
+  bounds: AxisAlignedBox,
+  maxAbsXAtDepth: MaxAbsXAtDepth | undefined,
+  query: CapsuleClearanceQuery,
+): HabitatAnchorLocation[] {
+  if (!hints.length) return []
+  const band = evaluateTieredVerticalDepthRange('tailspot-blenny', bounds)?.worldYRange
+  if (!band) return []
+  const rocks: THREE.Mesh[] = []
+  reef.updateWorldMatrix(true, true)
+  reef.traverse(node => { if (isRockMesh(node)) rocks.push(node) })
+  const ray = new THREE.Raycaster()
+  const down = new THREE.Vector3(0, -1, 0)
+  const origin = new THREE.Vector3()
+  const normalMatrix = new THREE.Matrix3()
+  const normal = new THREE.Vector3()
+  const radius = MESH_NAVIGATION_COLLISION_RADIUS_M
+  const inWater = (point: Vec3) => isSafeFishPosition(point, radius, bounds, [], maxAbsXAtDepth)
+
+  function surface(x: number, z: number) {
+    ray.set(origin.set(x, bounds.max.y, z), down)
+    const hit = ray.intersectObjects(rocks, false)[0]
+    if (!hit?.face) return undefined
+    normal.copy(hit.face.normal).applyNormalMatrix(normalMatrix.getNormalMatrix(hit.object.matrixWorld))
+    return normal.y >= .55 ? hit.point.y : undefined
+  }
+
+  // Sample the authored neighborhood, preferring the forward side of the rock.
+  const nearby = [[0, 0], [0, .16], [-.16, 0], [.16, 0], [0, -.16],
+    [0, .32], [-.24, .24], [.24, .24], [-.32, 0], [.32, 0], [0, -.32]]
+  const footprintOffsets = [[-.06, 0], [.06, 0], [0, -.06], [0, .06]]
+  const perches: HabitatAnchorLocation[] = []
+  for (const hint of hints) {
+    const { x, y, z } = hint.position
+    for (const [dx, dz] of nearby) {
+      const px = x + dx, pz = z + dz
+      const ledgeY = surface(px, pz)
+      if (ledgeY === undefined || Math.abs(ledgeY - y) > .8) continue
+      const supported = footprintOffsets.every(([ox, oz]) => {
+        const height = surface(px + ox, pz + oz)
+        return height !== undefined && Math.abs(height - ledgeY) <= .055
+      })
+      if (!supported) continue
+      const position = { x: px, y: ledgeY + .09, z: pz }
+      if (position.y < band[0] || position.y > band[1] || !inWater(position)) continue
+      const approaches = [
+        { x: px, y: position.y + .22, z: pz + .32 },
+        { x: px, y: position.y + .22, z: pz },
+      ]
+      if (!approaches.some(approach => inWater(approach)
+        && query(approach, position, radius, MESH_NAVIGATION_MOVEMENT_BUDGET).status === 'clear')) continue
+      perches.push({ ...hint, position })
+      break
+    }
+  }
+  return perches
 }
 
 function finiteVec3(value: unknown): value is Vec3 {
