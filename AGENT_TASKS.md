@@ -79,7 +79,7 @@ The user clarified that “complete the whole backlog” means complete only tas
 
 ## Tailspot blenny perch — 2026-11-27
 
-The default assembly publishes blenny perches after the rendered rock supports a small footprint and the assembled collider clears an approach. The laptop arch shoulder is visible from the overview and the current full-reef fixture reads a head-up hold after a short approach. The live laptop preview loads the blenny and its service link. Arrival from ordinary front water and full animated clearance remain open under AQ-82.
+The default assembly publishes blenny perches after the rendered rock supports a small footprint and the assembled collider clears an approach. The laptop fixture confirms a head-up hold after swimming from the normal spawn. The live fish stayed on the arch shoulder and a pointer click opened its inspect card and the example service. Portrait perch availability and full animated clearance remain open under AQ-82. [Perch review](docs/asset-evidence/aq82/blenny-perch-20261127/).
 
 ## Yellow tang eye material — 2026-11-27
 

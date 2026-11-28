@@ -48,7 +48,7 @@ import { createWaterSurface } from './water-surface'
 import { WaterRadianceProbeManager } from './water-radiance-probe'
 import { estimateCaptionRect, resolveLabelDeconflicts, type LabelRect } from './fish-label-layout'
 import { ENVIRONMENT_MAP_INTENSITY, applyEnvironmentMapIntensity, createAquariumEnvironmentMap } from './environment-map'
-import { meshQueryForSpecies, createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
+import { meshQueryForSpecies, isWithinFishMeshWater, createSwimmingFish, seedForId, startleFish, stepSwimmingSchool, type SwimmingFish, type WaterHabitat } from './motion'
 import { createReefMeshNavigation, createRockFallbackObstacles, createMountedCoralFallbackObstacles, createSurfaceCoralObstacles, measureRockPerches, MESH_NAVIGATION_COLLISION_RADIUS_M, type ReefMeshIslandInput } from './reef-mesh-navigation'
 import { applyFishTurningRigOverlay, bindFishTurningRig, evaluateSpriteTurnScaleX, type FishTurningRig } from './fish-turning'
 import { SPRITE_PLANE_WIDTH, fishBodyRadiusM, fishClearanceRadius, fishModelScale, fishRenderLength, fishSpriteScale } from './fish-scale'
@@ -877,17 +877,8 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     }
     if (habitat.meshNavigation?.queryCapsule) {
       const r = MESH_NAVIGATION_COLLISION_RADIUS_M
-      const { min, max } = habitat.bounds
       const p = item.motion.position
-      if (isInvertebrateSpecies(item.service.fishId) && p.z > INVERTEBRATE_MAX_SAND_Z) return false
-      if (!isSafeFishPosition(p, r, habitat.bounds, [], habitat.maxAbsXAtDepth)) return false
-      if (
-        p.x < min.x + r || p.x > max.x - r ||
-        p.y < min.y + r || p.y > max.y - r ||
-        p.z < min.z + r || p.z > max.z - r
-      ) {
-        return false
-      }
+      if (!isWithinFishMeshWater(item.motion, habitat, p)) return false
       return (
         meshQueryForSpecies(habitat.meshNavigation, item.service.fishId)!(p, p, r, {
           ...habitat.meshNavigation.movementBudget,

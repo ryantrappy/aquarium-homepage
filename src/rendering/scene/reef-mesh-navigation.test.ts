@@ -17,13 +17,15 @@ import { CENTER_ARCH_FACE_SITES, CENTER_ARCH_MOUNTS, CENTER_ARCH_URL, centerArch
 import { RUBBLE_TALUS_URL } from './reef-nsa'
 import { reefPlacementsForViewport } from './reef-layout'
 import { createMorayCaveBacking, resolveSnowflakeMorayResidence, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M } from './moray-residence'
-import { DEFAULT_CAMERA_ZOOM_STATE } from './camera-zoom'
+import { DEFAULT_CAMERA_ZOOM_STATE, overviewHalfWidthAtDepth } from './camera-zoom'
 import { createAragoniteSandBed, evaluateAragoniteSandElevation } from './aragonite-sand'
 import { querySweptBodyCapsule, querySweptRigidBodyCapsule } from '../../simulation/swept-body-capsule'
 import { createFishClipPlayer } from './fish-animation'
-import { MODEL_SWIM_AXIS_LENGTH, fishModelScale, fishRenderLength } from './fish-scale'
+import { MODEL_SWIM_AXIS_LENGTH, fishClearanceRadius, fishModelScale, fishRenderLength } from './fish-scale'
 import { mountedAnemoneHosts } from './anemone-host'
 import { createSwimmingFish, stepSwimmingFish } from './motion'
+import { evaluateTieredVerticalDepthRange, findSafeFishHeading, findSafeFishSpawn, fishSpawnPreference, fishSpawnSlotsForServices } from './fish-spawn'
+import type { SolidObstacleVolume } from '../../simulation/habitat-navigation'
 import { analyzeFishClipEnvelope } from '../assets/fish-clip-envelope'
 
 type P = { x: number; y: number; z: number }
@@ -1119,8 +1121,16 @@ async function loadActualGlb(bytes: Uint8Array) {
       reef.scale.setScalar(placement.uniformScale)
       reef.position.copy(placement.position)
       reef.rotation.y = placement.yaw
-      const patches = createSurfaceCoralObstacles(mounted.instancedMeshes, id)
-      return { reef, islandId: id, mountedCorals: mounted.mountedCorals, surfaceCoralObstacles: patches }
+      const patches = boundedFaceColonies(reef, mounted, id)
+      const rock = createRockFallbackObstacles(reef, id, patches)
+      if (rock.status !== 'ready') throw new Error(rock.reason)
+      const { anchors, obstacles } = instantiateModularReefHabitat(kind, placement.uniformScale, placement.position,
+        id, placement.yaw)
+      return {
+        reef, islandId: id, mountedCorals: mounted.mountedCorals, surfaceCoralObstacles: patches,
+        perchHints: anchors.filter(anchor => anchor.anchor === 'rockPerch'),
+        fallbackObstacles: [...rock.obstacles, ...obstacles.filter(obstacle => obstacle.id.startsWith(`${id}-coral-base-`))],
+      }
     }))
     const talus = await loadActualGlb(readFileSync(new URL(RUBBLE_TALUS_URL)))
     const backing = createMorayCaveBacking(talus.scene)
@@ -1131,9 +1141,11 @@ async function loadActualGlb(bytes: Uint8Array) {
     if (collision.status !== 'ready') return
 
     const query = collision.meshNavigation.queryCapsule!
-    const water = { min: p(-4, -2.25, -4.6), max: p(4, 2.8, 2.8) }
+    const halfWidth = overviewHalfWidthAtDepth(1440 / 900, -1.35)
+    const maxAbsXAtDepth = (z: number) => Math.min(halfWidth, overviewHalfWidthAtDepth(1440 / 900, z))
+    const water = { min: p(-halfWidth, -2.25, -4.6), max: p(halfWidth, 2.8, 2.8) }
     const hints = centerArchPerchHints(arch)
-    const perches = measureRockPerches(arch, hints, water, undefined, query)
+    const perches = measureRockPerches(arch, hints, water, maxAbsXAtDepth, query)
     const mainPerch = perches.find(perch => perch.id === 'reef-center-arch-center-shoulder-rockPerch')
     expect(mainPerch).toBeDefined()
     const camera = new THREE.Vector3(0, .15, 9)
@@ -1147,22 +1159,54 @@ async function loadActualGlb(bytes: Uint8Array) {
       expect(query(position, position, MESH_NAVIGATION_COLLISION_RADIUS_M, MESH_NAVIGATION_MOVEMENT_BUDGET).status).toBe('clear')
     }
     expect(measureRockPerches(arch, hints, water, () => 0, query)).toEqual([])
-    const target = mainPerch!.position
-    const fish = createSwimmingFish('aq82-blenny-perch', 'tailspot-blenny', p(target.x, target.y + .22, target.z + .32), .5, undefined,
-      { collisionRadiusM: MESH_NAVIGATION_COLLISION_RADIUS_M, initialYaw: Math.PI })
-    const habitat = { bounds: water, obstacles: [], anchors: perches, meshNavigation: collision.meshNavigation }
-    const withinHold = () => Math.hypot(fish.position.x - target.x, fish.position.y - target.y, fish.position.z - target.z) < .04
-    expect(withinHold()).toBe(false)
-    let heldFrames = 0
-    for (let n = 0; n < 360; n++) {
+    const backingBounds = createRockFallbackObstacles(backing, 'moray-cave-backing')
+    const archCoralBounds = createMountedCoralFallbackObstacles(assembly.mountedCorals, islandId)
+    if (backingBounds.status !== 'ready') throw new Error(backingBounds.reason)
+    if (archCoralBounds.status !== 'ready') throw new Error(archCoralBounds.reason)
+    const obstacles: SolidObstacleVolume[] = [
+      ...foundations.flatMap(island => island.fallbackObstacles),
+      ...fallback.obstacles, ...archCoralBounds.obstacles, ...backingBounds.obstacles,
+    ]
+    const anchors = [
+      ...foundations.flatMap(({ reef, perchHints }) => measureRockPerches(reef, perchHints, water, maxAbsXAtDepth, query)),
+      ...perches,
+    ]
+    const service = { id: 'blenny-review', fishId: 'tailspot-blenny' }
+    const clearance = fishClearanceRadius(service.fishId)
+    const slot = fishSpawnSlotsForServices([
+      { id: 'archive', fishId: 'snowflake-moray-eel' },
+      { id: 'google', fishId: 'blue-green-chromis' },
+      { id: 'github', fishId: 'yellow-watchman-goby' },
+      { id: 'wikipedia', fishId: 'lyretail-anthias' },
+      service,
+    ]).get(service.id)
+    const preference = fishSpawnPreference(service.id, service.fishId, water, clearance, slot, maxAbsXAtDepth)!
+    const range = evaluateTieredVerticalDepthRange(service.fishId, water, clearance)?.worldYRange
+    const spawn = findSafeFishSpawn(preference.position, water, obstacles, clearance, [], undefined, undefined, range, maxAbsXAtDepth)!
+    const initialYaw = findSafeFishHeading(spawn, preference.yaw, water, obstacles, clearance, maxAbsXAtDepth)
+    expect(initialYaw).toBeDefined()
+    expect(spawn.z).toBeGreaterThan(1)
+    const fish = createSwimmingFish(service.id, service.fishId, spawn, clearance, undefined,
+      { collisionRadiusM: MESH_NAVIGATION_COLLISION_RADIUS_M, initialYaw })
+    const habitat = { bounds: water, maxAbsXAtDepth, obstacles, anchors, meshNavigation: collision.meshNavigation }
+    const settledPose = () => anchors.some(({ position }) => Math.hypot(
+      fish.position.x - position.x, fish.position.y - position.y - .02, fish.position.z - position.z) < .02)
+      && fish.pitch > .08 && fish.behavior.navigationOutcome === 'arrived' && fish.waypoint >= fish.route.length
+    const simFrames = 40 * 30
+    const stableFrames = 6 * 30
+    let settledYaw: number | undefined
+    for (let n = 0; n < simFrames; n++) {
       const previous = { ...fish.position }
       stepSwimmingFish(fish, habitat, 1 / 30)
       expect(query(previous, fish.position, MESH_NAVIGATION_COLLISION_RADIUS_M, MESH_NAVIGATION_MOVEMENT_BUDGET).status).toBe('clear')
-      if (withinHold() && fish.pitch > .08 && fish.behavior.targetAnchor === 'rockPerch') heldFrames++
+      if (n >= simFrames - stableFrames) {
+        expect(settledPose(), `perch pose at frame ${n}`).toBe(true)
+        settledYaw ??= fish.yaw
+        expect(fish.yaw).toBeCloseTo(settledYaw)
+      }
     }
-    expect(heldFrames).toBeGreaterThan(60)
     const budget = { ...MESH_NAVIGATION_MOVEMENT_BUDGET }
     const center = new THREE.Vector3().copy(min).lerp(max, 0.5)
     expect(query(center, center, 0, budget)).toMatchObject({ status: 'blocked', reason: 'coral-envelope' })
-  })
+  }, 20_000)
 })

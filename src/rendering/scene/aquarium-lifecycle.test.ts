@@ -12,7 +12,7 @@ import { createAquarium, type AquariumController, type SceneStatus } from './aqu
 import { ENVIRONMENT_MAP_INTENSITY } from './environment-map'
 import { CENTER_ARCH_FACE_SITES, CENTER_ARCH_MOUNTS } from './reef-arch'
 import { NSA_ROCK_URLS } from './reef-nsa'
-import { stepSwimmingSchool } from './motion'
+import { isWithinFishMeshWater, stepSwimmingSchool } from './motion'
 import { projectFishBodyBounds } from './fish-link-projection'
 import * as labelLayout from './fish-label-layout'
 import * as glassEnclosure from './glass-enclosure'
@@ -1116,6 +1116,24 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     expect((await readyPromise).ready).toBe(true)
     expect(bridge.state().pendingAssetCount).toBe(0)
     expect(bridge.state().unresolvedFishIds).toEqual([])
+  })
+
+  it('keeps the blenny inside its lateral clearance when mesh routing activates', async () => {
+    state.deferMeshNavigation = true
+    const blenny = service('blenny-near-glass', 'tailspot-blenny')
+    await start([blenny])
+    advance()
+    const motion = state.created.find(fish => fish.id === blenny.id)!
+    const habitat = vi.mocked(stepSwimmingSchool).mock.lastCall![1]
+    const edgePose = { x: -4.20, y: -.69, z: 1.24 }
+    motion.position = edgePose
+    expect(isWithinFishMeshWater(motion, habitat, edgePose)).toBe(false)
+
+    state.meshNavigationResult = readyMeshNavigation(state.reefNavigationIslandIds.at(-1)!)
+    state.pendingMeshNavigationReleases.shift()!()
+    await vi.waitFor(() => expect(isWithinFishMeshWater(motion, habitat, motion.position)).toBe(true))
+    expect(state.created.filter(fish => fish.id === blenny.id)).toEqual([motion])
+    expect(overlay.querySelector<HTMLAnchorElement>(`a[data-service-id="${blenny.id}"]`)?.href).toBe(`${blenny.url}/`)
   })
 
   it('waits for current mesh navigation before resolving readiness and freezes the post-relocation pose', async () => {

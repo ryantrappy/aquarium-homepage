@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@root'
 created_date: '2026-11-08T20:07:00Z'
-updated_date: '2026-11-28 05:15'
+updated_date: '2026-11-28 05:23'
 labels:
   - behavior
   - navigation
@@ -77,4 +77,6 @@ Root final exact-source6be5dcc handoff: all755tests/66files,75focusedtests/4file
 2026-11-15 active-only verification: confirmed existing Root/Luna mounted-origin implementation is present and wired from actual AssembledCoralBinding.root.position into instantiateModularReefHabitat; explicit runtime origin maps reject missing/duplicate/nonfinite entries and do not fall back to canonical reports. Focused reef-assembly, reef-mesh-navigation, habitat-anchor-interactions, motion, and aquarium-lifecycle suites pass 158/158, covering runtime GLB offset propagation, base bounds, typed anchors, compatibility, motion, safe positions and both requested viewport fixtures. Existing Root evidence is source-pinned to 6be5dcc; it still leaves full coral permeability/nesting, measured island features, animated clearance, visual acceptance and AC5 service-link/picking gates open. No implementation or model changes made; keep Root review and all open criteria pending.
 
 Root verified handoff: the default layout treats the old rockPerch coordinates as search hints. The runtime publishes a tailspot-blenny perch only after raycasts find a supporting rock footprint and the assembled rock/coral capsule query clears an approach. The saved center arch provides a camera-visible shoulder in the 1440×900 layout. The live preview loaded the configured blenny and link without browser warnings. The full reef fixture verifies a head-up hold from local approach water with clear swept probe movement. A separate long run from the front-water spawn did not hold at the arch within its test window. The portrait layout, full animated body contact, general coral interactions and remaining acceptance criteria stay open.
+
+Root verified the wide default blenny from the normal spawn. The fish retains its current ledge route across idle/swim, uses its authored dart-speed limit during travel, and ends the approach within 0.10 m only when final motion clears. The existing fish is relocated on mesh activation if its planner-side lateral margin fails. Current full-reef integration verifies every segment with the 0.04 m runtime probe and a stable head-up hold. At 1440×900 the live blenny held the arch shoulder and a body click opened its inspect card and example service. Evidence in docs/asset-evidence/aq82/blenny-perch-20261127. Portrait perches, animated-body clearance and the broader coral interactions remain open.
 <!-- SECTION:NOTES:END -->

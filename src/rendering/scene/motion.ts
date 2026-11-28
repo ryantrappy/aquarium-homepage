@@ -159,6 +159,7 @@ export function anchorApproachClearanceM(fish: SwimmingFish): number {
 }
 /** A fish within this distance of a compatible anchor counts as "at" it. */
 export const ANCHOR_HOLD_RADIUS_M = 0.8
+const ROCK_PERCH_SETTLE_RADIUS_M = 0.10
 /** How often a fish holding at an anchor re-checks that it should stay. */
 export const ANCHOR_HOLD_REFRESH_SECONDS = 0.25
 
@@ -580,7 +581,7 @@ function reportMeshNavigationFailure(fish: SwimmingFish, request: NonNullable<Re
   fish.behavior = reportNavigationOutcome(fish.behavior, request.generation, request.anchor, outcome)
   fish.targetWait = .7
 }
-function insideMeshWater(fish: SwimmingFish, habitat: WaterHabitat, point: Vec3): boolean {
+export function isWithinFishMeshWater(fish: SwimmingFish, habitat: WaterHabitat, point: Vec3): boolean {
   const radiusM = fish.collisionRadiusM!
   if (isInvertebrateSpecies(fish.speciesId) && point.z > INVERTEBRATE_MAX_SAND_Z) return false
   return isWithinDepthAwareWaterBounds(point, habitat.bounds, radiusM, habitat.maxAbsXAtDepth, lateralClearanceForFish(fish, habitat, radiusM))
@@ -645,6 +646,19 @@ function planMesh(fish: SwimmingFish, habitat: WaterHabitat) {
     return
   }
 
+  if (request?.anchor === 'rockPerch' && fish.startleSeconds <= 0) {
+    const perch = nearestCompatibleAnchor(fish, habitat, request.anchor)
+    if (perch && distance(fish.position, perch.position) <= ROCK_PERCH_SETTLE_RADIUS_M
+      && movementSafety(fish, habitat, perch.position) === 'clear') {
+      fish.routeGeneration = request.generation
+      fish.behavior = reportNavigationOutcome(fish.behavior, request.generation, request.anchor, 'arrived')
+      fish.navigationAnchor = undefined
+      fish.route = []
+      fish.targetWait = ANCHOR_HOLD_REFRESH_SECONDS
+      return
+    }
+  }
+
   const radiusM = fish.collisionRadiusM!, planBudget = newPlanBudget(mesh)
   const lateralClearanceRadius = lateralClearanceForFish(fish, habitat, radiusM)
   if (request && fish.routeGeneration !== request.generation && fish.startleSeconds <= 0) {
@@ -654,7 +668,7 @@ function planMesh(fish: SwimmingFish, habitat: WaterHabitat) {
       ? orderHabitatAnchorsForRequest(request, habitat.bounds, habitat.anchors.filter(location => location.anchor === request.anchor
         && (!location.compatibleSpecies || location.compatibleSpecies.includes(profile.speciesId))
         && isAnchorDepthAllowed(location, range)
-        && insideMeshWater(fish, habitat, location.position)))
+        && isWithinFishMeshWater(fish, habitat, location.position)))
       : []
     let failure: 'blocked' | 'unavailable' = candidates.length ? 'blocked' : 'unavailable'
     for (const candidate of candidates) {
@@ -801,7 +815,7 @@ function movementSafety(fish: SwimmingFish, habitat: WaterHabitat, target: Vec3,
   if (!validMeshNavigation(fish, habitat)) return 'unavailable'
   const start = { ...fish.position }, end = { ...target }, radiusM = fish.collisionRadiusM!
   // The mesh oracle checks rock geometry; the glass boundary remains a separate constraint.
-  if (!insideMeshWater(fish, habitat, start) || !insideMeshWater(fish, habitat, end)) return 'blocked'
+  if (!isWithinFishMeshWater(fish, habitat, start) || !isWithinFishMeshWater(fish, habitat, end)) return 'blocked'
   const query = meshQueryForSpecies(habitat.meshNavigation, fish.speciesId)
   const queryBudget = { ...habitat.meshNavigation.movementBudget }
   try {
@@ -982,7 +996,7 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
     if (fish.navigationAnchor) fish.behavior = reportNavigationOutcome(fish.behavior, fish.routeGeneration, fish.navigationAnchor, 'unavailable')
     fish.route = []; fish.speed = 0; fish.targetWait = .7; fish.navigationAnchor = undefined
   }
-  if (habitat.meshNavigation !== undefined && validMeshNavigation(fish, habitat) && !insideMeshWater(fish, habitat, fish.position)) {
+  if (habitat.meshNavigation !== undefined && validMeshNavigation(fish, habitat) && !isWithinFishMeshWater(fish, habitat, fish.position)) {
     if (fish.navigationAnchor) fish.behavior = reportNavigationOutcome(fish.behavior, fish.routeGeneration, fish.navigationAnchor, 'blocked')
     fish.route = []; fish.speed = 0; fish.targetWait = .7; fish.navigationAnchor = undefined
   }
@@ -1020,6 +1034,15 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   }
   const request = getNavigationRequest(fish.behavior)
   const urgentTransition = fish.behavior.state === 'retreat' || fish.behavior.state === 'burst'
+  // The blenny uses the same ledge in idle and swim. Keep its route if the
+  // destination still belongs to the current reef after a layout change.
+  if (!urgentTransition && habitat.meshNavigation && fish.startleSeconds <= 0 && request?.anchor === 'rockPerch'
+    && fish.navigationAnchor === request.anchor && fish.routeGeneration !== request.generation && hasActiveRoute
+    && habitat.anchors.some(anchor => anchor.anchor === request.anchor
+      && isSpeciesCompatibleWithAnchor(fish.speciesId, anchor)
+      && distance(anchor.position, fish.route[fish.route.length - 1]) < 1e-6)) {
+    fish.routeGeneration = request.generation
+  }
   const pendingAnchorPreempt = Boolean(
     fish.startleSeconds <= 0
     && fish.behavior.navigationGeneration !== fish.routeGeneration
@@ -1065,6 +1088,14 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   // modes, so passing a waypoint early can only cut a corner the fish could
   // already cut via the lookahead fillet, never an obstacle.
   const isFinalWaypoint = fish.waypoint + 1 >= fish.route.length
+  if (habitat.meshNavigation && isFinalWaypoint && fish.navigationAnchor === 'rockPerch'
+    && rawRemaining <= ROCK_PERCH_SETTLE_RADIUS_M
+    && movementSafety(fish, habitat, rawTarget, effectiveClearance) === 'clear') {
+    // Finish the swim here. Station keeping covers the last few centimeters
+    // while the blenny slows and lifts its head.
+    completeRouteWaypoint(fish)
+    return
+  }
   const horizontalRemaining = Math.hypot(rawDx, rawDz)
   const waypointAbeam = horizontalRemaining > 0.4 * rawRemaining
     && (rawDx * Math.sin(fish.yaw) + rawDz * Math.cos(fish.yaw)) / Math.max(horizontalRemaining, 1e-9) < 0.7
@@ -1146,9 +1177,17 @@ function integrateSwimmingFish(fish: SwimmingFish, habitat: WaterHabitat, dt: nu
   // the schoolmates' cruise speed (blended 25%, capped at +20% of its own
   // cruise) instead of being dragged sideways to catch up.
   const schoolCruise = schooling?.cruiseSpeed
-  const effectiveCruise = schoolCruise !== undefined && Number.isFinite(schoolCruise)
+  let effectiveCruise = schoolCruise !== undefined && Number.isFinite(schoolCruise)
     ? cruise * 0.75 + Math.min(Math.max(0, schoolCruise), cruise * 1.2) * 0.25
     : cruise
+  if (habitat.meshNavigation && fish.speciesId === 'tailspot-blenny' && fish.navigationAnchor === 'rockPerch') {
+    // Use the blenny's dart speed to travel, then slow down at the ledge.
+    const perchDistance = distance(fish.position, fish.route[fish.route.length - 1])
+    const travelMix = clamp((perchDistance - .2) / .5, 0, 1)
+    const dartSpeed = profile.locomotion.speedTankWidthsPerSecond[1] * (habitat.bounds.max.x - habitat.bounds.min.x)
+    effectiveCruise += (dartSpeed - effectiveCruise) * travelMix
+    multiplier = Math.max(multiplier, (profile.states.swim?.speedMultiplier ?? 1) * travelMix)
+  }
   const effort = fish.startleSeconds > 0 ? 2.8 : multiplier
   const turnSpeedFactor = evaluateTurnSpeedFactor(delta, fish.startleSeconds, fish.turnKinematics.maneuverStage)
   const arrivalSlowdown = isFinalWaypoint ? Math.min(1, rawRemaining / 0.18) : 1.0

@@ -332,3 +332,8 @@
 ### 2026-11-27 — AQ-82 tailspot blenny ledge
 *Root reviewed the retained entries. The measured arch shoulder and short-route fixture are actioned. Ordinary front-spawn arrival, portrait perch availability and full animated body clearance remain pending.*
 - The live wide preview loaded the configured blenny and its native service link. The assembled-reef test verifies supporting arch rock, a clear sightline, and a head-up hold after a short collision-checked approach. A longer simulation from front water fell short of the perch within the test window.
+
+
+### 2026-11-27 — AQ-82 ordinary blenny arrival
+*Root reviewed the retained entries. Ordinary wide front-spawn arrival and perched service picking are actioned. Portrait perch availability and full animated body clearance remain pending.*
+- The blenny carries its route across idle and swim, settles without circling, and uses the same lateral clearance at mesh activation and during navigation. The wide full-reef simulation and live laptop click passed.
