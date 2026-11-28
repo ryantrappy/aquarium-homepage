@@ -323,3 +323,7 @@
 ### 2026-11-27 — AQ-88 Xenia tissue palettes
 *Root reviewed the retained entries. The current four-colony palette adjustment is actioned. Full coral rubric and task acceptance remain pending.*
 - The companion Xenia uses rose, mauve and peach tissue grades. The matched laptop comparison shows clearer color separation paired with the authored polyp detail. Existing exports and mounts supply the geometry.
+
+### 2026-11-27 — AQ-101 center arch shoulder
+*Root reviewed the retained entries. The measured arch placement is actioned. Full photographic and animated-body acceptance remain pending.*
+- The existing zoanthid mat seats on the front-right shoulder. Both navigation paths include its bounds, and the exact probe still clears the central swim-through.

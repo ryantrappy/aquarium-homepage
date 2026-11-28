@@ -10,7 +10,7 @@ import type { FishClipPlayer } from './fish-animation'
 import { refreshFishLink } from './fish-inhabitants'
 import { createAquarium, type AquariumController, type SceneStatus } from './aquarium'
 import { ENVIRONMENT_MAP_INTENSITY } from './environment-map'
-import { CENTER_ARCH_MOUNTS } from './reef-arch'
+import { CENTER_ARCH_FACE_SITES, CENTER_ARCH_MOUNTS } from './reef-arch'
 import { NSA_ROCK_URLS } from './reef-nsa'
 import { stepSwimmingSchool } from './motion'
 import { projectFishBodyBounds } from './fish-link-projection'
@@ -442,7 +442,11 @@ describe('actual aquarium controller inhabitant lifecycle without WebGL', () => 
     expect(state.reefNavigationIslandIds.at(-1)).toContain('reef-center-arch')
     const archAssembly = state.reefAssemblyCalls.find(call => call.reefName === 'reef-center-arch')!
     expect(archAssembly.mounts).toEqual(CENTER_ARCH_MOUNTS)
-    expect(archAssembly.options).toMatchObject({ preserveAuthoredRock: true, includeScatter: false })
+    expect(archAssembly.options).toMatchObject({
+      preserveAuthoredRock: true,
+      includeScatter: true,
+      encrustingFaceSites: CENTER_ARCH_FACE_SITES,
+    })
     expect(state.coralFallbackCalls).toContainEqual({
       islandId: 'reef-center-arch',
       sockets: [CENTER_ARCH_MOUNTS[0]!.socketName],

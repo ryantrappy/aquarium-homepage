@@ -12,6 +12,7 @@ import {
   segmentIntersectsInflatedBox,
 } from './reef-mesh-navigation'
 import { DEFAULT_LEFT_ISLAND_MOUNTS, DEFAULT_RIGHT_ISLAND_MOUNTS, WIDE_ISLAND_ENCRUSTING_SITES, MODULAR_CORAL_ASSET_URLS, assembleCoralsOnRockSockets, measuredCoralShaderMargin, instantiateModularReefHabitat, LIVE_ROCK_ISLAND_URLS } from './reef-assembly'
+import { CENTER_ARCH_FACE_SITES, CENTER_ARCH_MOUNTS, CENTER_ARCH_URL, createCenterArch } from './reef-arch'
 import { RUBBLE_TALUS_URL } from './reef-nsa'
 import { reefPlacementsForViewport } from './reef-layout'
 import { createMorayCaveBacking, resolveSnowflakeMorayResidence, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M } from './moray-residence'
@@ -1071,4 +1072,39 @@ async function loadActualGlb(bytes: Uint8Array) {
       sand.dispose()
     }
   }, 120_000)
+
+  it('seats an encrusting mat on the current arch while retaining the clear center passage', async () => {
+    const { scene } = await loadActualGlb(readFileSync(new URL(CENTER_ARCH_URL)))
+    const arch = createCenterArch(scene)
+    const templates = new Map<string, THREE.Object3D>()
+    for (const id of ['coral-zoanthid-mat', ...CENTER_ARCH_MOUNTS.map(mount => mount.coralAssetId)]) {
+      templates.set(id, (await loadActualGlb(readFileSync(new URL(MODULAR_CORAL_ASSET_URLS[id]!)))).scene)
+    }
+    const islandId = 'reef-center-arch'
+    const assembly = assembleCoralsOnRockSockets(arch, templates, CENTER_ARCH_MOUNTS, {
+      preserveAuthoredRock: true,
+      encrustingFaceSites: CENTER_ARCH_FACE_SITES,
+    })
+    const surfaceCoralObstacles = createSurfaceCoralObstacles(assembly.instancedMeshes, islandId)
+    expect(surfaceCoralObstacles).toHaveLength(1)
+    const fallback = createRockFallbackObstacles(arch, islandId, surfaceCoralObstacles)
+    expect(fallback.status).toBe('ready')
+    if (fallback.status !== 'ready') throw new Error(fallback.reason)
+    const { min, max } = surfaceCoralObstacles[0].bounds
+    const rockBounds = fallback.obstacles[0].bounds
+    const envelope = new THREE.Box3(new THREE.Vector3().copy(rockBounds.min), new THREE.Vector3().copy(rockBounds.max))
+    expect(envelope.containsPoint(new THREE.Vector3().copy(min))).toBe(true)
+    expect(envelope.containsPoint(new THREE.Vector3().copy(max))).toBe(true)
+    const collision = await createReefMeshNavigation([{ reef: arch, islandId, mountedCorals: assembly.mountedCorals, surfaceCoralObstacles }])
+    expect(collision.status).toBe('ready')
+    if (collision.status !== 'ready') return
+
+    const start = arch.localToWorld(new THREE.Vector3(0, 0.1, -0.18))
+    const end = arch.localToWorld(new THREE.Vector3(0, 0.1, 0.18))
+    const query = collision.meshNavigation.queryCapsule!
+    const budget = { ...MESH_NAVIGATION_MOVEMENT_BUDGET }
+    expect(query(start, end, MESH_NAVIGATION_COLLISION_RADIUS_M, budget).status).toBe('clear')
+    const center = new THREE.Vector3().copy(min).lerp(max, 0.5)
+    expect(query(center, center, 0, budget)).toMatchObject({ status: 'blocked', reason: 'coral-envelope' })
+  })
 })

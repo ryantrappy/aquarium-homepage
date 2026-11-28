@@ -40,7 +40,7 @@ import { RaymarchedShaftPass, SHAFT_BEAM_GLSL } from './light-shafts'
 import { createAragoniteSandBed, evaluateAragoniteSandTilt, evaluateAragoniteSandWorldY, getRockFootprintsForViewport, INVERTEBRATE_MAX_SAND_Z } from './aragonite-sand'
 import { reefPlacementsForViewport } from './reef-layout'
 import { createMorayCaveBacking, hasReadyRightIslandCollider, resolveAvailableSnowflakeMorayResidence, resolveNsaMorayResidence, SNOWFLAKE_MORAY_CAVE_COLLISION_RADIUS_M, SNOWFLAKE_MORAY_HEAD_COLLISION_RADIUS_M, type MorayResidence } from './moray-residence'
-import { CENTER_ARCH_URL, CENTER_ARCH_MOUNTS, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
+import { CENTER_ARCH_URL, CENTER_ARCH_MOUNTS, CENTER_ARCH_FACE_SITES, createCenterArch, disposeCenterArchMaterials } from './reef-arch'
 import { NSA_ENCRUSTING_FACE_SITES, NSA_KIT_URL, NSA_SUBSTRATE_CONTACTS, RUBBLE_TALUS_URL, createNsaReviewReef, createRubbleTalusGroundingAprons, disposeRubbleTalusMaterials } from './reef-nsa'
 import { createNsaHabitatAnchors } from './reef-nsa-habitat'
 import { createGlassEnclosure, glassEnclosureLayout } from './glass-enclosure'
@@ -1042,7 +1042,9 @@ ${LIGHT_SHAFT_BAND_CENTERS.map((center) => {
     })
     for (const { reef, islandId, mounts } of authoredReefs) {
       authoredReefPlacements.push(reef)
-      const encrustingFaceSites = kit ? NSA_ENCRUSTING_FACE_SITES[islandId] : undefined
+      const encrustingFaceSites = kit
+        ? NSA_ENCRUSTING_FACE_SITES[islandId]
+        : islandId === 'reef-center-arch' ? CENTER_ARCH_FACE_SITES : undefined
       const controller = assembleCoralsOnRockSockets(reef, coralTemplates, mounts, {
         paused: paused || document.hidden,
         reducedMotion,

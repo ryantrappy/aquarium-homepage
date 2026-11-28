@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-11 05:17'
-updated_date: '2026-11-22 04:08'
+updated_date: '2026-11-28 05:05'
 labels:
   - modeling
   - blender
@@ -23,6 +23,7 @@ references:
   - AQ-96
 documentation:
   - docs/rendering.md
+  - docs/asset-evidence/aq101/wide-face-colonies-20261121/README.md
 priority: high
 type: feature
 ordinal: 107000
@@ -59,6 +60,8 @@ Fill exposed front faces with small groups of existing encrusting polyps. Locate
 Bring measured encrusting colonies into the default modular wide reef. Reuse the existing instanced polyp batch and authored rock textures. Review exposed pinnacle and arch faces at laptop size and retain measured canyon and resident clearances.
 
 Use the existing footprint-tested face placement on the current legacy islands in the wide default. Keep socket companion scatter and transfer the authored face patch bounds to both mesh and fallback navigation. Review actual mounted paths and the settled 1440×900 scene.
+
+Fit a shallow encrusting zoanthid mat to the visible center-arch cap using the real exported surface sampler. Verify attachment, center passage clearance, and the laptop overview.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -71,4 +74,6 @@ Root review 2026-11-20. Added shallow zoanthid mats to exposed rock faces on bot
 Root modular face colony review 2026-11-21. Ten instanced zoanthid mats now populate the default wide reef, seated on actual supported left pinnacle, buttress, center arch and right ledge faces. The test checks the actual kit, validates the fallback obstacle list, and retains the canyon, burrow, clownfish and moray geometry checks. Each mat uses a displacement-padded instance bound in exact routing; the fallback includes it in its foundation box to retain the existing obstacle volume budget. The 1440x900 DPR 1 staged capture is ready with 15 inhabitants, no failed assets and zero browser warnings/errors. Evidence docs/asset-evidence/aq101/modular-face-colonies/. Saved assets are reused. Final photographic and animated-body/label acceptance remain open.
 
 Root 2026-11-21 wide default review: the current two islands each carry five footprint-tested instances of the saved zoanthid mat. The same instance transforms and shader margin reach the exact mesh query and foundation fallback. Actual-export fixtures verify counts, fallback containment, coral blocking, baseline cave/approach paths and the moray head. The settled 1440×900 capture has 29 inhabitants, zero pending/failed assets and no browser warnings/errors. All 1,073 tests, typecheck and production build passed. Evidence in docs/asset-evidence/aq101/wide-face-colonies-20261121/. Photographic and whole-body lane acceptance remain open.
+
+Root 2026-11-27: added one existing orange-green zoanthid mat on the supported front-right shoulder of the default center arch. Exact exports verify support, exact and fallback collision bounds, and the open center passage at the scene probe radius. The full laptop comparison resolved 12 inhabitants with no failures or browser warnings/errors. All 1,101 tests, typecheck, manifest verification and build passed. Full formation art and animated-body acceptance remain open.
 <!-- SECTION:NOTES:END -->

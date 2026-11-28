@@ -1,8 +1,11 @@
 import * as THREE from 'three'
-import type { ModularCoralMountEntry } from './reef-assembly'
+import type { EncrustingFaceSite, ModularCoralMountEntry } from './reef-assembly'
 
 export const CENTER_ARCH_URL = new URL('../assets/corals/custom-rocks/reef-center-arch.glb', import.meta.url).href
 export const CENTER_ARCH_PLACEMENT = Object.freeze({ x: 0.2, y: -2.73, z: -3.0, scale: 5.2 })
+// Shallow mat on the front shoulder above the swim-through.
+export const CENTER_ARCH_FACE_SITES: readonly EncrustingFaceSite[] = [[0.65, 0.70, 0.30]]
+
 export const CENTER_ARCH_MOUNTS: readonly ModularCoralMountEntry[] = Object.freeze([
   {
     socketName: 'socket_soft_mat_11',
