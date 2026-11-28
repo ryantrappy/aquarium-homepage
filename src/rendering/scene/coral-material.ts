@@ -564,7 +564,7 @@ export function applyLiveRockMaterial(
   material.aoMap = null
   material.color.set('#ffffff')
 
-  const cacheKey = 'live-rock-3d-aragonite-v2'
+  const cacheKey = 'live-rock-3d-aragonite-v3'
   material.customProgramCacheKey = () => cacheKey
   material.onBeforeCompile = shader => {
     shader.vertexShader =
@@ -625,7 +625,9 @@ float rockRidged3D(vec3 p) {
     n = n * n * w;
     w = clamp(n * 1.45, 0.2, 1.0);
     v += a * n;
-    p = p * 2.12 + vec3(13.7, -19.3, 27.1);
+    // Rotate the octave lattice so crags do not share grid-aligned edges.
+    p = mat3(0.80, 0.36, -0.48, -0.60, 0.48, -0.64, 0.0, 0.80, 0.60)
+      * p * 2.12 + vec3(13.7, -19.3, 27.1);
     a *= 0.5;
   }
   return v / 0.96;
@@ -644,6 +646,7 @@ vec3 warp = vec3(
 ) * 0.020;
 vec3 wPos = rPos + warp;
 
+float weathering = smoothstep(0.22, 0.76, rockNoise3D(wPos * 7.0 + vec3(10.8, 6.1, -6.4)));
 float cragRidge = rockRidged3D(wPos * 18.0);
 float medCrag = rockRidged3D(wPos * 44.0);
 float finePores = rockNoise3D(rPos * 115.0);
@@ -672,15 +675,17 @@ vec3 cCorMargin = vec3(0.40, 0.21, 0.24);
 
 vec3 carbColor = mix(cPoreDeep, cCarbShaded, smoothstep(0.10, 0.48, rockCavityAo));
 carbColor = mix(carbColor, cCarbSunlit, smoothstep(0.38, 0.78, rockCavityAo * (0.52 + 0.48 * cragRidge)));
-float ridgeHighlight = smoothstep(0.54, 0.84, cragRidge * 0.60 + medCrag * 0.40) * smoothstep(0.44, 0.82, rockCavityAo) * smoothstep(0.0, 0.75, rNorm.y);
+float ridgeHighlight = smoothstep(0.54, 0.84, cragRidge * 0.60 + medCrag * 0.40)
+  * smoothstep(0.27, 0.72, rockCavityAo) * (0.25 + 0.75 * smoothstep(0.0, 0.75, rNorm.y));
 carbColor = mix(carbColor, vec3(0.28, 0.24, 0.17), ridgeHighlight * 0.52);
+carbColor *= mix(0.78, 1.25, weathering);
 
 // Deep underside & lower-apron shadow patina
 float oliveMask = (1.0 - smoothstep(0.04, 0.22, vRockWorldPos.y)) * smoothstep(0.25, 0.75, medCrag) * 0.45;
 carbColor = mix(carbColor, cOliveFilm, oliveMask);
 
 float upwardExp = smoothstep(-0.08, 0.62, rNorm.y);
-float corPatchField = rockNoise3D(wPos * 24.0 + vec3(4.2)) * 0.52 + medCrag * 0.48 + 0.12 * upwardExp;
+float corPatchField = rockNoise3D(wPos * 13.0 + vec3(4.2)) * 0.58 + medCrag * 0.42 + 0.12 * upwardExp;
 float corMask = smoothstep(0.48, 0.74, corPatchField) * (0.38 + 0.62 * upwardExp) * smoothstep(0.16, 0.58, rockCavityAo);
 
 vec3 corColor = mix(cCorDeep, cCorMagenta, smoothstep(0.26, 0.64, medCrag));
@@ -724,19 +729,26 @@ roughnessFactor = mix(0.90, 0.65, corMask * 0.85);
 // Reuse the exact height field already sampled for color. A view-space
 // surface gradient avoids sixteen redundant noise-octave evaluations.
 // Unparametrized bump mapping, as in Three.js perturbNormalArb/Mikkelsen.
-float rockHeight = medCrag * 0.52 + finePores * 0.23 - poreOpen * 0.25;
+// Fine grains stay in the albedo. Broader relief drives the lighting normals
+// so a screen-space derivative quad cannot emboss each speck as a square.
+float rockHeight = cragRidge * 0.30 + medCrag * 0.28 + holeField * 0.24 - poreOpen * 0.18;
 vec3 rockSigmaX = dFdx(-vViewPosition);
 vec3 rockSigmaY = dFdy(-vViewPosition);
 vec3 rockR1 = cross(rockSigmaY, normal);
 vec3 rockR2 = cross(normal, rockSigmaX);
 float rockDet = dot(rockSigmaX, rockR1) * faceDirection;
 vec3 rockSurfaceGradient = sign(rockDet) * (dFdx(rockHeight) * rockR1 + dFdy(rockHeight) * rockR2);
-if (abs(rockDet) > 1e-10) normal = normalize(abs(rockDet) * normal - rockSurfaceGradient * 0.05);
+if (abs(rockDet) > 1e-10) {
+  vec3 rockSlope = rockSurfaceGradient * (0.018 / abs(rockDet));
+  // Limit perturbation at grazing angles where the projected area shrinks.
+  rockSlope *= 0.42 / max(0.42, length(rockSlope));
+  normal = normalize(normal - rockSlope);
+}
 `,
     )
   }
 
-  material.userData.liveRockShader = 'live-rock-3d-aragonite-v2'
+  material.userData.liveRockShader = cacheKey
   material.needsUpdate = true
   return material
 }

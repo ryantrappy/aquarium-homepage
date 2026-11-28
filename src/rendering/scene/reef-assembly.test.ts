@@ -197,7 +197,7 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
 
     const leftRockMesh = leftRock.getObjectByName('Live_Rock_Island') as THREE.Mesh
     expect(leftRockMesh.material).not.toBe(originalLeftRockMaterial)
-    expect((leftRockMesh.material as THREE.MeshStandardMaterial).userData.liveRockShader).toBe('live-rock-3d-aragonite-v2')
+    expect((leftRockMesh.material as THREE.MeshStandardMaterial).userData.liveRockShader).toBe('live-rock-3d-aragonite-v3')
     expect((leftRockMesh.material as THREE.MeshStandardMaterial).map).toBeNull()
 
     for (const mounted of [...leftAssembly.mountedCorals, ...rightAssembly.mountedCorals]) {
@@ -395,7 +395,7 @@ describe('modular coral socket assembly on live-rock foundations (AQ-14.4)', () 
     expect(assembly.instancedMeshes).toEqual([])
     expect(rockRoot.children.some(child => child instanceof THREE.InstancedMesh)).toBe(false)
     const rockMesh = rockRoot.getObjectByName('Live_Rock_Island') as THREE.Mesh
-    expect((rockMesh.material as THREE.MeshStandardMaterial).userData.liveRockShader).toBe('live-rock-3d-aragonite-v2')
+    expect((rockMesh.material as THREE.MeshStandardMaterial).userData.liveRockShader).toBe('live-rock-3d-aragonite-v3')
   })
 
   it('keeps the custom baked-PBR primary palette separate from its legacy violet scatter palette', () => {

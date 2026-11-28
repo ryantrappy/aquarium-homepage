@@ -329,7 +329,7 @@ describe('coral-raw-masks-v1 material and shader adapter (AQ-53 / AQ-42)', () =>
     applyLiveRockMaterial(rockMat)
     expect(rockMat.map).toBeNull()
     expect(rockMat.normalMap).toBeNull()
-    expect(rockMat.userData.liveRockShader).toBe('live-rock-3d-aragonite-v2')
+    expect(rockMat.userData.liveRockShader).toBe('live-rock-3d-aragonite-v3')
 
     const mockShader: THREE.WebGLProgramParametersWithUniforms = {
       uniforms: {},
@@ -340,6 +340,8 @@ describe('coral-raw-masks-v1 material and shader adapter (AQ-53 / AQ-42)', () =>
     expect(mockShader.vertexShader).toContain('transformNormalByInverseViewMatrix(transformedNormal, viewMatrix)')
     expect(mockShader.fragmentShader).toContain('exp(-plaqueDistance * plaqueDistance)')
     expect(mockShader.fragmentShader).toContain('finalRockColor')
+    expect(mockShader.fragmentShader).toContain('rockSlope *= 0.42 / max(0.42, length(rockSlope))')
+    expect(mockShader.fragmentShader).toMatch(/float rockHeight = (?![^;]*finePores)[^;]*;/)
     expect(mockShader.fragmentShader).toContain('roughnessFactor = mix(0.90, 0.65, corMask * 0.85);')
 
     const upwardCrest = evaluateLiveRockSurfaceSample({ x: 0.12, y: 0.34, z: -0.08 }, { x: 0, y: 1, z: 0 })

@@ -77,6 +77,10 @@ AQ-59 records a preliminary review of the procedural porous rock study. Direct i
 
 The user clarified that “complete the whole backlog” means complete only tasks already marked In Progress, and “do not start anything new” excludes To Do tasks and newly created tasks. The 18-task execution set at clarification is AQ-58, AQ-59, AQ-71, AQ-82, AQ-86, AQ-87, AQ-88, AQ-76, AQ-106, AQ-70.1, AQ-70.6, AQ-70.11, AQ-70.12, AQ-70.13, AQ-94, AQ-101, AQ-102, and AQ-103. Root review remains required; no acceptance criteria may be weakened to close a task. Preserve user/concurrent work, verify visually only at 1440×900, and do not deploy.
 
+## Reef rock finish — 2026-11-27
+
+The two default foundations now use larger-scale lighting relief and keep the fine grain in their color layer. The 1440×900 comparison shows less square embossing and visible carbonate pores on both walls. Sampled open water and sand remain pixel-identical. Exported rock shape and broader art acceptance remain open under AQ-59. [Rock comparison](docs/asset-evidence/aq59/rock-surface-20261127/).
+
 ## Tailspot blenny perch — 2026-11-27
 
 The default assembly publishes blenny perches after the rendered rock supports a small footprint and the assembled collider clears an approach. The laptop fixture confirms a head-up hold after swimming from the normal spawn. The live fish stayed on the arch shoulder and a pointer click opened its inspect card and the example service. Portrait perch availability and full animated clearance remain open under AQ-82. [Perch review](docs/asset-evidence/aq82/blenny-perch-20261127/).

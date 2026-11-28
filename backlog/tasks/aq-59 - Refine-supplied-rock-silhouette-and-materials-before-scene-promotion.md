@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@gemini'
 created_date: '2026-11-05 03:13'
-updated_date: '2026-11-21 01:35'
+updated_date: '2026-11-28 05:28'
 labels:
   - modeling
 dependencies: []
@@ -49,6 +49,8 @@ Root renderer-only refinement 2026-11-12: keep Gemini geometry, Blender sources,
 Root GPU-cost refinement2026-11-12: native callback/draw diagnostics suggest graphics/presentation cost, while the rock normal shader redundantly reevaluates the same four-octave3D field at four offsets per fragment. Reuse its existing height signal and derive the surface gradient with screen-space derivatives in the view-space tangent frame. Preserve substrate/pore/color fields and geometry; verify actual WebGL compile, macro detail and both native frame-time cases before accepting.
 
 Review the porous-rock study geometry and maps. Improve the existing in-tank rock shading using world-space surface normals, shallow pore highlights, and stable coralline rim math. Compare fixed laptop look-dev frames. Keep geometry, sockets and cave clearances intact.
+
+Compare matched 1440×900 overview captures with a reduced procedural normal strength to isolate the repeated square texture on the two deployed foundations. Preserve silhouette, mounts and collision. Tune stone-scale color and roughness only where the comparison shows remaining flatness.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -92,6 +94,8 @@ The study generator ends after rendering Cycles and saving the native file. It d
 Corrected study figures from direct GLB inspection: 92,160 indices produce 30,720 triangles; 15,902 POSITION vertices. The sidecar count of 15,360 is polygons, not triangles. The study GLB SHA-256 is 1967aee06bd40aa6f5d4d409568fe062641af19c62442a41d916abedfcc4afc8. Generator Cycles material uses render-time displacement, while GLB uses baked base color, normal and roughness maps with no glTF displacement extension. Its independently exported relief is uncalibrated.
 
 Root asset audit 2026-11-20. The rock study environment named felsen_labyrinth_1k.hdr is 512×256 Radiance RGBE, SHA-256 9cd39f9fcaef7b03bcaf3fc5794da378260f45217680fd04c14006ae8d549dc8. The study generator synthesizes sky, ground and sun pixels locally and packs the result into its Blender World. No runtime caller was found. The name does not establish an external photo source. Retain the generated HDR as study evidence and keep the aquarium’s existing generated PMREM. The study rock still needs mounting, contact and cave-clearance evidence before promotion.
+
+Root verified the current runtime rock finish in matched 1440×900 DPR 1 captures. A bump-only comparison isolated the square pattern to strong fine-grain normal perturbation. The final shading retains grain in color, rotates the ridge octaves, limits grazing-angle normal slopes, and varies weathering at broader stone scales. Left and right wall crops have lower neighboring-pixel luma contrast while pores remain visible. Sampled open water and lit sand are pixel-identical. Exact assembly and mesh navigation fixtures pass. Evidence in docs/asset-evidence/aq59/rock-surface-20261127. No Blender or export edits. AQ-59 remains In Progress for exported shape, art and remaining geometry criteria.
 <!-- SECTION:NOTES:END -->
 
 ## Comments

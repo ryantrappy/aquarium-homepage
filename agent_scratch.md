@@ -337,3 +337,8 @@
 ### 2026-11-27 — AQ-82 ordinary blenny arrival
 *Root reviewed the retained entries. Ordinary wide front-spawn arrival and perched service picking are actioned. Portrait perch availability and full animated body clearance remain pending.*
 - The blenny carries its route across idle and swim, settles without circling, and uses the same lateral clearance at mesh activation and during navigation. The wide full-reef simulation and live laptop click passed.
+
+
+### 2026-11-27 — AQ-59 reef rock finish
+*Root reviewed the retained entries. The default foundation shader refinement is actioned. Exported shape and broader art acceptance remain pending.*
+- The matched laptop crop isolates the square pattern to fine bump lighting. The wider relief, shallower normal perturbation and weathered color reduce the grid while retaining visible pores on both foundations.
